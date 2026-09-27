@@ -74,6 +74,29 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Gerbang rantai pasok — AUDIT.md §18.9 langkah 3.
+      #
+      # Ambang blokir 'high'. Per 16 Agu 2026 repo punya 4 kerentanan
+      # 'moderate' yang hanya bisa ditutup lewat kenaikan versi mayor
+      # (react-router, exceljs, uuid); memasang ambang di 'moderate' hari ini
+      # membuat CI merah tanpa jalan keluar yang aman, dan gerbang yang selalu
+      # merah cepat dimatikan orang. Keempatnya tercatat sebagai risiko yang
+      # ditanggung di §18.7 item #77 — bukan disembunyikan.
+      #
+      # Naikkan ambangnya ke 'moderate' begitu #77 tuntas.
+      - name: Gerbang Rantai Pasok (npm audit)
+        run: npm run audit:deps
+
+      - name: Hasilkan SBOM (CycloneDX)
+        run: npm run sbom
+
+      - name: Unggah SBOM sebagai artefak
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-cyclonedx
+          path: sbom.cyclonedx.json
+          retention-days: 90
+
   # 2. Tahap Artifact Creation
   build-and-push:
     name: Artefak Build (Docker)

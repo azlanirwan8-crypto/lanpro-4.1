@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import Swal from "sweetalert2";
 import "./sweetalert.css";
 
@@ -63,22 +64,19 @@ const velzonPopupConfig = {
   backdrop: true,
 };
 
-export const confirmDeleteAlert = async (
-  title: string = "Apakah Anda Yakin?",
-  text: string = "Data ini akan dihapus secara permanen dan tidak dapat dikembalikan!"
-): Promise<boolean> => {
+export const confirmDeleteAlert = async (title?: string, text?: string): Promise<boolean> => {
   const result = await Swal.fire({
     ...velzonPopupConfig,
     html: buildVelzonHtml(
       VELZON_ICONS.delete,
       "primary:#f7b84b,secondary:#f06548",
       100,
-      title,
-      text
+      title ?? i18n.t("alerts.confirmTitle"),
+      text ?? i18n.t("alerts.confirmText")
     ),
     showCancelButton: true,
-    confirmButtonText: "Ya, Hapus!",
-    cancelButtonText: "Batal",
+    confirmButtonText: i18n.t("alerts.yesDelete"),
+    cancelButtonText: i18n.t("alerts.cancel"),
     customClass: {
       ...velzonPopupConfig.customClass,
       confirmButton: `${VELZON_BTN.primary} me-2 mb-1`,
@@ -91,21 +89,75 @@ export const confirmDeleteAlert = async (
   return result.isConfirmed;
 };
 
-export const showSuccessAlert = (
-  title: string = "Berhasil!",
-  text: string = "Data berhasil dihapus."
-) => {
+export type OpsiTutupSprint = "backlog" | "next" | "leave";
+
+/**
+ * #313 — dialog tutup sprint: backlog / sprint berikutnya / biarkan.
+ * Mengembalikan null bila dibatalkan.
+ */
+export const confirmCompleteSprintAlert = async (
+  title: string,
+  text: string,
+  opsiSprintBerikutnya?: { id: string; name: string } | null
+): Promise<OpsiTutupSprint | null> => {
+  const punyaNext = !!opsiSprintBerikutnya;
+  const result = await Swal.fire({
+    ...velzonPopupConfig,
+    title,
+    html: `
+      <p class="velzon-swal-text mx-4 mb-3">${text}</p>
+      <div class="text-left mx-4 space-y-2" style="text-align:left">
+        <label class="flex items-start gap-2 cursor-pointer">
+          <input type="radio" name="tutup-sprint" value="backlog" checked />
+          <span>${i18n.t("alerts.sprintUndoneToBacklog")}</span>
+        </label>
+        <label class="flex items-start gap-2 cursor-pointer ${punyaNext ? "" : "opacity-50"}">
+          <input type="radio" name="tutup-sprint" value="next" ${punyaNext ? "" : "disabled"} />
+          <span>${
+            punyaNext
+              ? i18n.t("alerts.sprintUndoneToNext", { name: opsiSprintBerikutnya!.name })
+              : i18n.t("alerts.sprintNoNext")
+          }</span>
+        </label>
+        <label class="flex items-start gap-2 cursor-pointer">
+          <input type="radio" name="tutup-sprint" value="leave" />
+          <span>${i18n.t("alerts.sprintUndoneLeave")}</span>
+        </label>
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: i18n.t("alerts.yesCompleteSprint"),
+    cancelButtonText: i18n.t("alerts.cancel"),
+    customClass: {
+      ...velzonPopupConfig.customClass,
+      confirmButton: `${VELZON_BTN.primary} me-2 mb-1`,
+      cancelButton: `${VELZON_BTN.danger} mb-1`,
+    },
+    focusConfirm: false,
+    preConfirm: () => {
+      const picked = document.querySelector(
+        'input[name="tutup-sprint"]:checked'
+      ) as HTMLInputElement | null;
+      return (picked?.value as OpsiTutupSprint) || "backlog";
+    },
+  });
+
+  if (!result.isConfirmed) return null;
+  return (result.value as OpsiTutupSprint) || "backlog";
+};
+
+export const showSuccessAlert = (title?: string, text?: string) => {
   Swal.fire({
     ...velzonPopupConfig,
     html: buildVelzonHtml(
       VELZON_ICONS.success,
       "primary:#0ab39c,secondary:#405189",
       120,
-      title,
-      text
+      title ?? i18n.t("alerts.successTitle"),
+      text ?? i18n.t("alerts.successDefault")
     ),
     showConfirmButton: true,
-    confirmButtonText: "Tutup",
+    confirmButtonText: i18n.t("alerts.close"),
     customClass: {
       ...velzonPopupConfig.customClass,
       confirmButton: `${VELZON_BTN.primary} mb-1`,
@@ -125,7 +177,7 @@ export const showSuccessAlert = (
  * berbeda dari dua lainnya.
  */
 export const showErrorAlert = (
-  title: string = "Terjadi Kesalahan",
+  title: string = i18n.t("alerts.errorTitle2"),
   text: string = "",
   severity: "error" | "warning" = "error"
 ) => {
@@ -133,7 +185,7 @@ export const showErrorAlert = (
     ...velzonPopupConfig,
     html: buildVelzonHtmlGalat(96, title, text),
     showConfirmButton: true,
-    confirmButtonText: "Tutup",
+    confirmButtonText: i18n.t("alerts.close"),
     customClass: {
       ...velzonPopupConfig.customClass,
       popup: `velzon-swal-popup velzon-swal-${severity}`,

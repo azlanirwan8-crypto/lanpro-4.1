@@ -26,10 +26,12 @@ export interface QATestCase {
   evidenceUrl?: string;
   evidenceType?: "image" | "video" | "file";
   evidenceName?: string;
-  linkedBugKey?: string; 
-  assignedTo?: string; 
-  priority?: "High" | "Medium" | "Low" | "Critical"; 
-  tags?: string[]; 
+  linkedBugKey?: string;
+  /** #463 — id Tasks; linkedBugKey tetap untuk tampilan */
+  linkedTaskId?: string | null;
+  assignedTo?: string;
+  priority?: "High" | "Medium" | "Low" | "Critical";
+  tags?: string[];
   comments?: QAComment[];
   commentsList?: QAComment[];
   evidences?: QAEvidence[];

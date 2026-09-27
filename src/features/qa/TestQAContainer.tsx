@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { safeLocalStorage } from "../../lib/safeStorage";
 import React, { useState, useEffect, useRef } from "react";
 import { ShieldAlert } from "lucide-react";
@@ -17,6 +18,8 @@ import {
   createTaskFromQA,
 } from "./services/qa.service";
 import { hasPermission } from "../../lib/permissions";
+import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
+import { useMobileAction } from "../../contexts/MobileActionContext";
 import { QAComment, QATestCase, QATestSuite, TestQAPanelProps } from "./types";
 import { QATopBar } from "./components/QATopBar";
 import { QASuiteSidebar } from "./components/QASuiteSidebar";
@@ -34,18 +37,18 @@ export function TestQAPanel({
   user,
   initialStatusFilter,
 }: TestQAPanelProps) {
+  const { t } = useTranslation();
   if (!selectedProject) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-6 bg-surface dark:bg-slate-900 rounded-md border border-border-subtle dark:border-slate-800 shadow-soft max-w-lg mx-auto mt-12">
-        <div className="p-4 bg-indigo-50 text-indigo-600 rounded-full mb-4 animate-bounce">
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-6 bg-surface rounded-md border border-border-subtle shadow-soft max-w-lg mx-auto mt-12">
+        <div className="p-4 bg-primary/10 text-primary rounded-full mb-4 animate-bounce">
           <ShieldAlert className="w-8 h-8" />
         </div>
         <h3 className="text-xl font-medium text-content-strong">
-          Silakan Pilih Proyek Terlebih Dahulu
+          {t("qa.pleasePickAProjectFirst")}
         </h3>
         <p className="text-sm text-content-muted mt-2 leading-relaxed">
-          Modul QA Testing membutuhkan konteks proyek aktif untuk mengunggah skrip pengujian,
-          mengelola status eksekusi, serta menghubungkannya dengan Bug Ticket.
+          {t("qa.theQaTestingModuleNeeds")}
         </p>
       </div>
     );
@@ -59,6 +62,9 @@ export function TestQAPanel({
     "ALL" | "Passed" | "Failed" | "Blocked" | "Retest" | "Pending"
   >(initialStatusFilter || "ALL");
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [casesPage, setCasesPage] = useState(1);
+  const [casesTotal, setCasesTotal] = useState(0);
+  const casesPerPage = 20;
   const [selectedCaseIds, setSelectedCaseIds] = useState<string[]>([]);
 
   const [activeSuitePicDropdownId, setActiveSuitePicDropdownId] = useState<string | null>(null);
@@ -102,9 +108,6 @@ export function TestQAPanel({
   );
   const [caseEditAssignedTo, setCaseEditAssignedTo] = useState("");
 
-  const [suiteToDelete, setSuiteToDelete] = useState<QATestSuite | null>(null);
-  const [caseToDelete, setCaseToDelete] = useState<QATestCase | null>(null);
-
   const [selectedTestCase, setSelectedTestCase] = useState<QATestCase | null>(null);
   const [drawerNewComment, setDrawerNewComment] = useState("");
   const [drawerActiveTab, setDrawerActiveTab] = useState<"details" | "history">("details");
@@ -145,42 +148,33 @@ export function TestQAPanel({
   const canDelete =
     isAdminRole || hasPermission(currentUserRole, "qaTesting", "delete", false, user?.permissions);
 
-  // Load Data
+  const { registerAction, unregisterAction } = useMobileAction();
+
+  useEffect(() => {
+    if (canCreate) {
+      registerAction({
+        id: "qa-add-testcase",
+        label: t("qa.addNewTestCase") || "Buat Test Case Baru",
+        onClick: () => setIsAddCaseOpen(true),
+        canCreate: canCreate,
+      });
+    } else {
+      unregisterAction("qa-add-testcase");
+    }
+    return () => unregisterAction("qa-add-testcase");
+  }, [canCreate, registerAction, unregisterAction, t]);
+
+  // Load suites (tanpa seluruh cases) + cases halaman aktif suite (#318)
   const loadSuitesFromBackend = async () => {
     try {
       const suitesRes = await fetchSuites(selectedProject.id);
-      const casesRes = await fetchCases(selectedProject.id);
-
-      if (suitesRes.ok && casesRes.ok) {
+      if (suitesRes.ok) {
         const suitesData = await suitesRes.json();
-        const casesData = await casesRes.json();
-
-        if (suitesData.status === "success" && casesData.status === "success") {
-          const dbCases = casesData.data || [];
-          const mergedSuites: QATestSuite[] = (suitesData.data || []).map((suite: any) => {
-            const suiteCases = dbCases.filter(
-              (tc: any) => tc.suiteId === suite.id || tc.modulId === suite.id
-            );
-            return {
-              ...suite,
-              cases: suiteCases.map((tc: any) => ({
-                ...tc,
-                status: tc.status && tc.status !== "untested" ? tc.status : "Pending",
-                expectedResult: tc.expected || tc.expectedResult || "",
-                title: tc.judul || tc.title || "",
-                steps: typeof tc.steps === "string" ? JSON.parse(tc.steps) : tc.steps || [],
-                priority: tc.prioritas || tc.priority || "Medium",
-                assignedTo: tc.assignedTo || undefined,
-                commentsList:
-                  typeof tc.commentsList === "string"
-                    ? JSON.parse(tc.commentsList)
-                    : tc.commentsList || [],
-                evidences:
-                  typeof tc.evidences === "string" ? JSON.parse(tc.evidences) : tc.evidences || [],
-              })),
-            };
-          });
-
+        if (suitesData.status === "success") {
+          const mergedSuites: QATestSuite[] = (suitesData.data || []).map((suite: any) => ({
+            ...suite,
+            cases: suite.cases || [],
+          }));
           setSuites(mergedSuites);
           if (mergedSuites.length > 0 && !selectedSuiteId) {
             setSelectedSuiteId(mergedSuites[0].id);
@@ -192,11 +186,54 @@ export function TestQAPanel({
     }
   };
 
+  const mapCaseRow = (tc: any): QATestCase => ({
+    ...tc,
+    status: tc.status && tc.status !== "untested" ? tc.status : "Pending",
+    expectedResult: tc.expected || tc.expectedResult || "",
+    title: tc.judul || tc.title || "",
+    steps: typeof tc.steps === "string" ? JSON.parse(tc.steps) : tc.steps || [],
+    priority: tc.prioritas || tc.priority || "Medium",
+    assignedTo: tc.assignedTo || undefined,
+    commentsList:
+      typeof tc.commentsList === "string" ? JSON.parse(tc.commentsList) : tc.commentsList || [],
+    evidences: typeof tc.evidences === "string" ? JSON.parse(tc.evidences) : tc.evidences || [],
+  });
+
+  const loadCasesForActiveSuite = async (suiteId: string) => {
+    if (!selectedProject?.id || !suiteId) return;
+    try {
+      const casesRes = await fetchCases(selectedProject.id, {
+        page: casesPage,
+        limit: casesPerPage,
+        search: searchTerm,
+        suiteId,
+      });
+      if (!casesRes.ok) return;
+      const casesData = await casesRes.json();
+      if (casesData.status !== "success") return;
+      const dbCases = (casesData.data || []).map(mapCaseRow);
+      setCasesTotal(casesData.meta?.total ?? dbCases.length);
+      setSuites((prev) => prev.map((s) => (s.id === suiteId ? { ...s, cases: dbCases } : s)));
+    } catch (e) {
+      console.warn("Failed to load QA cases page:", e);
+    }
+  };
+
   useEffect(() => {
     if (selectedProject?.id) {
       loadSuitesFromBackend();
     }
   }, [selectedProject?.id]);
+
+  useEffect(() => {
+    setCasesPage(1);
+  }, [selectedSuiteId, searchTerm, statusFilter]);
+
+  useEffect(() => {
+    if (selectedSuiteId) {
+      void loadCasesForActiveSuite(selectedSuiteId);
+    }
+  }, [selectedProject?.id, selectedSuiteId, casesPage, searchTerm]);
 
   // Save state helper
   const saveSuitesToStorage = (updatedSuites: QATestSuite[]) => {
@@ -218,14 +255,14 @@ export function TestQAPanel({
 
   const handleForceUnlock = () => {
     acquireLockForCurrentUser();
-    toast.success("Force Unlock berhasil! Anda memegang kontrol pengujian.");
+    toast.success(t("toast.forceUnlockOk"));
   };
 
   const releaseLockManually = () => {
     const lockKey = `lanpro_qa_lock_${selectedSuiteId}`;
     safeLocalStorage.removeItem(lockKey);
     setLockState({ lockedBy: null, userName: null, lockedAt: null });
-    toast.info("Lock dilepaskan.");
+    toast.info(t("toast.lockReleased"));
   };
 
   // Status Change Handler
@@ -241,7 +278,7 @@ export function TestQAPanel({
 
     try {
       await updateCaseStatus(selectedProject.id, caseId, { status: newStatus });
-      toast.success(`Status berhasil diubah menjadi ${newStatus}`);
+      toast.success(t("toast.qaStatusChanged", { status: newStatus }));
     } catch (e: any) {
       console.warn("Status update fallback:", e.message);
     }
@@ -256,7 +293,7 @@ export function TestQAPanel({
     saveSuitesToStorage(updatedSuites);
     const targetSuite = updatedSuites.find((s) => s.id === suiteId);
     if (targetSuite) {
-      toast.success("PIC Modul berhasil diperbarui.");
+      toast.success(t("toast.picModuleUpdated"));
       try {
         await updateSuite(selectedProject.id, suiteId, targetSuite);
       } catch (err) {
@@ -280,7 +317,7 @@ export function TestQAPanel({
     const targetSuite = updatedSuites.find((s) => s.id === suiteId);
     const targetCase = targetSuite?.cases.find((c) => c.id === caseId);
     if (targetCase) {
-      toast.success("PIC Task berhasil diperbarui.");
+      toast.success(t("toast.picTaskUpdated"));
       try {
         await updateCase(selectedProject.id, caseId, targetCase);
       } catch (err) {
@@ -315,7 +352,7 @@ export function TestQAPanel({
       ),
     }));
     saveSuitesToStorage(updatedSuites);
-    toast.success(`Berhasil menetapkan PIC ke ${selectedCaseIds.length} task sekaligus.`);
+    toast.success(t("toast.picBulkAssigned", { count: selectedCaseIds.length }));
     setSelectedCaseIds([]);
   };
 
@@ -330,19 +367,42 @@ export function TestQAPanel({
       ),
     }));
     saveSuitesToStorage(updatedSuites);
-    toast.success(`Berhasil mengubah status ${selectedCaseIds.length} task ke ${newStatus}.`);
+    toast.success(t("toast.qaStatusBulk", { count: selectedCaseIds.length, status: newStatus }));
     setSelectedCaseIds([]);
   };
 
   const handleBulkDeleteCases = async () => {
     if (selectedCaseIds.length === 0) return;
+    const isConfirmed = await confirmDeleteAlert(
+      t("alerts.confirmTitle"),
+      `${selectedCaseIds.length} test case terpilih akan dihapus secara permanen dan tidak dapat dikembalikan!`
+    );
+    if (!isConfirmed) return;
+
+    // #444 — sebelumnya hanya localStorage; server tetap punya baris.
+    const gagal: string[] = [];
+    for (const caseId of selectedCaseIds) {
+      try {
+        const res = await deleteCase(selectedProject.id, caseId);
+        if (!res.ok) gagal.push(caseId);
+      } catch {
+        gagal.push(caseId);
+      }
+    }
+
     const updatedSuites = suites.map((suite) => ({
       ...suite,
-      cases: suite.cases.filter((c) => !selectedCaseIds.includes(c.id)),
+      cases: suite.cases.filter((c) => !selectedCaseIds.includes(c.id) || gagal.includes(c.id)),
     }));
     saveSuitesToStorage(updatedSuites);
-    toast.success(`Berhasil menghapus ${selectedCaseIds.length} task sekaligus.`);
     setSelectedCaseIds([]);
+    if (gagal.length === 0) {
+      showSuccessAlert("Berhasil!", `${selectedCaseIds.length} test case berhasil dihapus.`);
+    } else {
+      toast.error(
+        `${selectedCaseIds.length - gagal.length} terhapus, ${gagal.length} gagal di server.`
+      );
+    }
   };
 
   // Add Suite Handler
@@ -369,7 +429,7 @@ export function TestQAPanel({
 
     try {
       await createSuite(selectedProject.id, newSuite);
-      toast.success("Dokumen skrip berhasil ditambahkan.");
+      toast.success(t("toast.scriptDocAdded"));
     } catch (err) {
       console.warn("Failed to add suite:", err);
     }
@@ -412,7 +472,7 @@ export function TestQAPanel({
     setNewCaseSteps("");
     setNewCaseExpected("");
     setIsAddCaseOpen(false);
-    toast.success("Test case berhasil ditambahkan.");
+    toast.success(t("toast.testCaseAdded"));
   };
 
   // Bulk Upload Handler
@@ -430,12 +490,12 @@ export function TestQAPanel({
     try {
       const response = await bulkUploadCases(formData);
       if (response.ok) {
-        toast.success("Bulk upload berhasil.");
+        toast.success(t("toast.bulkUploadOk"));
         setIsAddCaseOpen(false);
         loadSuitesFromBackend();
       }
     } catch (err) {
-      toast.error("Gagal bulk upload file.");
+      toast.error(t("toast.bulkUploadFailed"));
     }
   };
 
@@ -452,7 +512,7 @@ export function TestQAPanel({
 
     try {
       await updateSuite(selectedProject.id, suiteToEdit.id, updatedSuite);
-      toast.success("Suite berhasil diperbarui.");
+      toast.success(t("toast.suiteUpdated"));
     } catch (err) {
       console.warn("Failed to update suite:", err);
     }
@@ -479,7 +539,7 @@ export function TestQAPanel({
 
     try {
       await updateCase(selectedProject.id, caseToEditInfo.id, updatedTc);
-      toast.success("Test case berhasil diperbarui.");
+      toast.success(t("toast.testCaseUpdated"));
     } catch (err) {
       console.warn("Failed to update case:", err);
     }
@@ -487,30 +547,44 @@ export function TestQAPanel({
   };
 
   // Delete Handlers
-  const handleDeleteSuite = async (id: string) => {
-    const updated = suites.filter((s) => s.id !== id);
+  const handleDeleteSuite = async (suite: QATestSuite) => {
+    const isConfirmed = await confirmDeleteAlert(
+      t("alerts.confirmTitle"),
+      t("alerts.deleteSuiteText", { name: suite.name })
+    );
+    if (!isConfirmed) return;
+
+    const updated = suites.filter((s) => s.id !== suite.id);
     saveSuitesToStorage(updated);
-    if (selectedSuiteId === id) setSelectedSuiteId(updated[0]?.id || "");
+    if (selectedSuiteId === suite.id) setSelectedSuiteId(updated[0]?.id || "");
 
     try {
-      await deleteSuite(selectedProject.id, id);
-    } catch (e) {}
-    toast.success("Test suite dihapus.");
-    setSuiteToDelete(null);
+      await deleteSuite(selectedProject.id, suite.id);
+      showSuccessAlert(t("alerts.successTitle"), t("alerts.suiteDeleted"));
+    } catch (e: any) {
+      toast.error(e?.message || "Gagal menghapus test suite.");
+    }
   };
 
-  const handleDeleteTestCase = async (id: string) => {
+  const handleDeleteTestCase = async (tc: QATestCase) => {
+    const isConfirmed = await confirmDeleteAlert(
+      t("alerts.confirmTitle"),
+      t("alerts.deleteCaseText", { title: tc.title })
+    );
+    if (!isConfirmed) return;
+
     const updatedSuites = suites.map((suite) => ({
       ...suite,
-      cases: suite.cases.filter((c) => c.id !== id),
+      cases: suite.cases.filter((c) => c.id !== tc.id),
     }));
     saveSuitesToStorage(updatedSuites);
 
     try {
-      await deleteCase(selectedProject.id, id);
-    } catch (e) {}
-    toast.success("Test case dihapus.");
-    setCaseToDelete(null);
+      await deleteCase(selectedProject.id, tc.id);
+      showSuccessAlert(t("alerts.successTitle"), t("alerts.caseDeleted"));
+    } catch (e: any) {
+      toast.error(e?.message || "Gagal menghapus test case.");
+    }
   };
 
   // Bug Ticket Creation Handler
@@ -542,18 +616,33 @@ export function TestQAPanel({
 
       if (response && response.status === "success") {
         const createdKey = response.data.key || `BUG-${Date.now()}`;
+        const createdTaskId = response.data.id || response.data.taskId || null;
+        try {
+          await updateCase(selectedProject.id, bugModalTestCase.id, {
+            linkedBugKey: createdKey,
+            linkedTaskId: createdTaskId,
+          });
+        } catch (_) {
+          /* taut lokal tetap; server bisa diulang */
+        }
         const updatedSuites = suites.map((s) => ({
           ...s,
           cases: s.cases.map((c) =>
-            c.id === bugModalTestCase.id ? { ...c, linkedBugKey: createdKey } : c
+            c.id === bugModalTestCase.id
+              ? {
+                  ...c,
+                  linkedBugKey: createdKey,
+                  linkedTaskId: createdTaskId,
+                }
+              : c
           ),
         }));
         saveSuitesToStorage(updatedSuites);
-        toast.success(`Tiket bug ${createdKey} berhasil dibuat.`);
+        toast.success(t("toast.bugTicketCreated", { kunci: createdKey }));
         setIsCreateBugModalOpen(false);
       }
     } catch (err: any) {
-      toast.error("Gagal membuat tiket bug.");
+      toast.error(t("toast.bugTicketFailed"));
     } finally {
       setIsSubmittingBug(false);
     }
@@ -581,7 +670,7 @@ export function TestQAPanel({
     }));
     saveSuitesToStorage(updatedSuites);
     setDrawerNewComment("");
-    toast.success("Komentar ditambahkan.");
+    toast.success(t("toast.commentAdded"));
   };
 
   const handleEvidenceUploadFromDrawer = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -604,7 +693,7 @@ export function TestQAPanel({
       cases: s.cases.map((c) => (c.id === selectedTestCase.id ? updatedCase : c)),
     }));
     saveSuitesToStorage(updatedSuites);
-    toast.success("Bukti pengujian diupload.");
+    toast.success(t("toast.evidenceUploaded"));
   };
 
   const handleRemoveSpecificEvidenceFromDrawer = (evidenceId: string) => {
@@ -618,7 +707,7 @@ export function TestQAPanel({
       cases: s.cases.map((c) => (c.id === selectedTestCase.id ? updatedCase : c)),
     }));
     saveSuitesToStorage(updatedSuites);
-    toast.info("Bukti pengujian dihapus.");
+    toast.info(t("toast.evidenceDeleted"));
   };
 
   const fetchExecutionHistory = async (caseId: string) => {
@@ -628,6 +717,8 @@ export function TestQAPanel({
       if (res.ok) {
         const data = await res.json();
         setExecutionLogs(data.data || []);
+      } else {
+        setExecutionLogs([]);
       }
     } catch (e) {
       setExecutionLogs([]);
@@ -646,7 +737,7 @@ export function TestQAPanel({
     a.href = url;
     a.download = `QA_Report_${activeSuite.name}.txt`;
     a.click();
-    toast.success("Report exported.");
+    toast.success(t("toast.reportExported"));
   };
 
   const handleMigrateSuitePhase = async () => {
@@ -662,11 +753,11 @@ export function TestQAPanel({
     };
     saveSuitesToStorage([newSuite, ...suites]);
     setSelectedSuiteId(newSuite.id);
-    toast.success(`Modul dimigrasikan ke ${nextPhase}`);
+    toast.success(t("toast.moduleMigrated", { fase: nextPhase }));
   };
 
   const handleGenerateWithAi = () => {
-    toast.info("AI Test Case Generator disimulasikan.");
+    toast.info(t("toast.aiGeneratorSimulated"));
   };
 
   const activeSuiteObj = suites.find((s) => s.id === selectedSuiteId);
@@ -675,80 +766,85 @@ export function TestQAPanel({
     activeSuiteObj?.cases.filter((c) => statusFilter === "ALL" || c.status === statusFilter) || [];
 
   return (
-    <div className="w-full space-y-3.5 select-none" id="qa_module_container">
+    <div
+      className="flex-1 flex flex-col min-h-0 bg-surface-muted select-none"
+      id="qa_module_container"
+    >
       {/* Topbar Lock Indicator & Integrated Velzon Page Title */}
-      <QATopBar
-        lockState={lockState}
-        remainingTime={remainingTime}
-        currentUserUid={currentUserUid}
-        currentUserRole={currentUserRole}
-        handleForceUnlock={handleForceUnlock}
-        releaseLockManually={releaseLockManually}
-      />
+      <QATopBar />
 
       {/* OPTIMIZED RESPONSIVE GRID (3 : 9 RATIO) - 75% WIDTH FOR TABLE */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-start">
-        <QASuiteSidebar
-          suitesForFilter={suitesForFilter}
-          selectedSuiteId={selectedSuiteId}
-          setSelectedSuiteId={setSelectedSuiteId}
-          phaseFilter={phaseFilter}
-          setPhaseFilter={setPhaseFilter}
-          setIsAddSuiteOpen={setIsAddSuiteOpen}
-          setSuiteToEdit={setSuiteToEdit}
-          setSuiteEditName={setSuiteEditName}
-          setSuiteEditAssignedTo={setSuiteEditAssignedTo}
-          setSuiteToDelete={setSuiteToDelete}
-          activeSuitePicDropdownId={activeSuitePicDropdownId}
-          setActiveSuitePicDropdownId={setActiveSuitePicDropdownId}
-          handleUpdateSuitePic={handleUpdateSuitePic}
-          projectMembers={projectMembers}
-          canCreate={canCreate}
-          canUpdate={canUpdate}
-          canDelete={canDelete}
-        />
+      <div className="flex-1 overflow-auto px-3 md:px-5 pt-3 md:pt-4 pb-3 md:pb-5 custom-scrollbar">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-start">
+          <QASuiteSidebar
+            suitesForFilter={suitesForFilter}
+            selectedSuiteId={selectedSuiteId}
+            setSelectedSuiteId={setSelectedSuiteId}
+            phaseFilter={phaseFilter}
+            setPhaseFilter={setPhaseFilter}
+            setIsAddSuiteOpen={setIsAddSuiteOpen}
+            setSuiteToEdit={setSuiteToEdit}
+            setSuiteEditName={setSuiteEditName}
+            setSuiteEditAssignedTo={setSuiteEditAssignedTo}
+            handleDeleteSuite={handleDeleteSuite}
+            activeSuitePicDropdownId={activeSuitePicDropdownId}
+            setActiveSuitePicDropdownId={setActiveSuitePicDropdownId}
+            handleUpdateSuitePic={handleUpdateSuitePic}
+            projectMembers={projectMembers}
+            canCreate={canCreate}
+            canUpdate={canUpdate}
+            canDelete={canDelete}
+          />
 
-        <QATestCaseTable
-          activeSuite={activeSuiteObj}
-          filteredCases={filteredCases}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          projectMembers={projectMembers}
-          currentUserUid={currentUserUid}
-          currentUserRole={currentUserRole}
-          lockState={lockState}
-          isGeneratingAi={isGeneratingAi}
-          handleGenerateWithAi={handleGenerateWithAi}
-          handleExportQAReport={handleExportQAReport}
-          handleMigrateSuitePhase={handleMigrateSuitePhase}
-          setIsAddCaseOpen={setIsAddCaseOpen}
-          setActiveAddTab={setActiveAddTab}
-          handleStatusChange={handleStatusChange}
-          activeCasePicDropdownId={activeCasePicDropdownId}
-          setActiveCasePicDropdownId={setActiveCasePicDropdownId}
-          handleUpdateCasePic={handleUpdateCasePic}
-          setCaseToEditInfo={setCaseToEditInfo}
-          setCaseEditTitle={setCaseEditTitle}
-          setCaseEditSteps={setCaseEditSteps}
-          setCaseEditExpected={setCaseEditExpected}
-          setCaseEditPriority={setCaseEditPriority}
-          setCaseEditAssignedTo={setCaseEditAssignedTo}
-          setCaseToDelete={setCaseToDelete}
-          handleOpenCreateBugModal={handleOpenCreateBugModal}
-          setSelectedTestCase={setSelectedTestCase}
-          canCreate={canCreate}
-          canUpdate={canUpdate}
-          canDelete={canDelete}
-          isAdminRole={isAdminRole}
-          selectedCaseIds={selectedCaseIds}
-          handleToggleSelectAll={handleToggleSelectAll}
-          handleToggleSelectCase={handleToggleSelectCase}
-          handleBulkAssignPic={handleBulkAssignPic}
-          handleBulkChangeStatus={handleBulkChangeStatus}
-          handleBulkDeleteCases={handleBulkDeleteCases}
-        />
+          <QATestCaseTable
+            activeSuite={activeSuiteObj}
+            filteredCases={filteredCases}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            projectMembers={projectMembers}
+            currentUserUid={currentUserUid}
+            currentUserRole={currentUserRole}
+            lockState={lockState}
+            remainingTime={remainingTime}
+            handleForceUnlock={handleForceUnlock}
+            releaseLockManually={releaseLockManually}
+            isGeneratingAi={isGeneratingAi}
+            handleGenerateWithAi={handleGenerateWithAi}
+            handleExportQAReport={handleExportQAReport}
+            handleMigrateSuitePhase={handleMigrateSuitePhase}
+            setIsAddCaseOpen={setIsAddCaseOpen}
+            setActiveAddTab={setActiveAddTab}
+            handleStatusChange={handleStatusChange}
+            activeCasePicDropdownId={activeCasePicDropdownId}
+            setActiveCasePicDropdownId={setActiveCasePicDropdownId}
+            handleUpdateCasePic={handleUpdateCasePic}
+            setCaseToEditInfo={setCaseToEditInfo}
+            setCaseEditTitle={setCaseEditTitle}
+            setCaseEditSteps={setCaseEditSteps}
+            setCaseEditExpected={setCaseEditExpected}
+            setCaseEditPriority={setCaseEditPriority}
+            setCaseEditAssignedTo={setCaseEditAssignedTo}
+            handleDeleteTestCase={handleDeleteTestCase}
+            handleOpenCreateBugModal={handleOpenCreateBugModal}
+            setSelectedTestCase={setSelectedTestCase}
+            canCreate={canCreate}
+            canUpdate={canUpdate}
+            canDelete={canDelete}
+            isAdminRole={isAdminRole}
+            selectedCaseIds={selectedCaseIds}
+            handleToggleSelectAll={handleToggleSelectAll}
+            handleToggleSelectCase={handleToggleSelectCase}
+            handleBulkAssignPic={handleBulkAssignPic}
+            handleBulkChangeStatus={handleBulkChangeStatus}
+            handleBulkDeleteCases={handleBulkDeleteCases}
+            casesPage={casesPage}
+            setCasesPage={setCasesPage}
+            casesTotal={casesTotal}
+            casesPerPage={casesPerPage}
+          />
+        </div>
       </div>
 
       {/* Side Drawer Detail */}
@@ -819,12 +915,6 @@ export function TestQAPanel({
         caseEditAssignedTo={caseEditAssignedTo}
         setCaseEditAssignedTo={setCaseEditAssignedTo}
         submitEditTestCaseInfo={submitEditTestCaseInfo}
-        suiteToDelete={suiteToDelete}
-        setSuiteToDelete={setSuiteToDelete}
-        handleDeleteSuite={handleDeleteSuite}
-        caseToDelete={caseToDelete}
-        setCaseToDelete={setCaseToDelete}
-        handleDeleteTestCase={handleDeleteTestCase}
         isCreateBugModalOpen={isCreateBugModalOpen}
         setIsCreateBugModalOpen={setIsCreateBugModalOpen}
         bugModalTestCase={bugModalTestCase}

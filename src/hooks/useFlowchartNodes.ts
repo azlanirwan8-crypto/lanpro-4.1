@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -28,29 +29,25 @@ export function useFlowchartNodes() {
 
   // Add new node to canvas
   const addNode = (node: FlowNode) => {
-    setNodes(prev => [...prev, node]);
+    setNodes((prev) => [...prev, node]);
   };
 
   // Update node properties
   const updateNode = (nodeId: string, updates: Partial<FlowNode>) => {
-    setNodes(prev =>
-      prev.map(n => n.id === nodeId ? { ...n, ...updates } : n)
-    );
+    setNodes((prev) => prev.map((n) => (n.id === nodeId ? { ...n, ...updates } : n)));
   };
 
   // Delete single node (and its connected edges)
   const deleteNode = (nodeId: string) => {
-    setNodes(prev => prev.filter(n => n.id !== nodeId));
-    setEdges(prev => prev.filter(e => e.fromNodeId !== nodeId && e.toNodeId !== nodeId));
+    setNodes((prev) => prev.filter((n) => n.id !== nodeId));
+    setEdges((prev) => prev.filter((e) => e.fromNodeId !== nodeId && e.toNodeId !== nodeId));
   };
 
   // Delete multiple nodes
   const deleteNodes = (nodeIds: string[]) => {
     const idSet = new Set(nodeIds);
-    setNodes(prev => prev.filter(n => !idSet.has(n.id)));
-    setEdges(prev =>
-      prev.filter(e => !idSet.has(e.fromNodeId) && !idSet.has(e.toNodeId))
-    );
+    setNodes((prev) => prev.filter((n) => !idSet.has(n.id)));
+    setEdges((prev) => prev.filter((e) => !idSet.has(e.fromNodeId) && !idSet.has(e.toNodeId)));
   };
 
   // Update node position (for dragging)
@@ -74,46 +71,53 @@ export function useFlowchartNodes() {
   };
 
   // Update node style properties
-  const updateNodeStyle = (nodeId: string, style: {
-    fontSize?: number;
-    fontStyle?: "sans" | "serif" | "mono";
-    align?: "left" | "center" | "right";
-    borderStyle?: "solid" | "dashed" | "none";
-    strokeWidth?: number;
-  }) => {
+  const updateNodeStyle = (
+    nodeId: string,
+    style: {
+      fontSize?: number;
+      fontStyle?: "sans" | "serif" | "mono";
+      align?: "left" | "center" | "right";
+      borderStyle?: "solid" | "dashed" | "none";
+      strokeWidth?: number;
+    }
+  ) => {
     updateNode(nodeId, style);
   };
 
   // Copy nodes with offset
-  const copyNodes = (nodeIds: string[], offsetX: number = 100, offsetY: number = 100): FlowNode[] => {
-    const nodesToCopy = nodes.filter(n => nodeIds.includes(n.id));
-    return nodesToCopy.map(n => ({
+  const copyNodes = (
+    nodeIds: string[],
+    offsetX: number = 100,
+    offsetY: number = 100
+  ): FlowNode[] => {
+    const nodesToCopy = nodes.filter((n) => nodeIds.includes(n.id));
+    return nodesToCopy.map((n) => ({
       ...n,
       id: `${n.id}-copy-${Date.now()}`,
       x: n.x + offsetX,
-      y: n.y + offsetY
+      y: n.y + offsetY,
     }));
   };
 
   // Paste copied nodes
   const pasteNodes = (nodesToPaste: FlowNode[]) => {
-    const newNodes = nodesToPaste.map(n => ({
+    const newNodes = nodesToPaste.map((n) => ({
       ...n,
-      id: `${n.id}-${Math.random().toString(36).substr(2, 9)}`
+      id: `${n.id}-${Math.random().toString(36).substr(2, 9)}`,
     }));
-    setNodes(prev => [...prev, ...newNodes]);
+    setNodes((prev) => [...prev, ...newNodes]);
     return newNodes;
   };
 
   // Get node by ID
   const getNode = (nodeId: string): FlowNode | undefined => {
-    return nodes.find(n => n.id === nodeId);
+    return nodes.find((n) => n.id === nodeId);
   };
 
   // Get nodes by IDs
   const getNodes = (nodeIds: string[]): FlowNode[] => {
     const idSet = new Set(nodeIds);
-    return nodes.filter(n => idSet.has(n.id));
+    return nodes.filter((n) => idSet.has(n.id));
   };
 
   // --- EDGE OPERATIONS ---
@@ -121,51 +125,47 @@ export function useFlowchartNodes() {
   // Add edge between nodes
   const addEdge = (edge: FlowEdge) => {
     // Check if edge already exists
-    if (edges.some(e => e.fromNodeId === edge.fromNodeId && e.toNodeId === edge.toNodeId)) {
-      toast.warning("Koneksi sudah ada antara dua node ini!");
+    if (edges.some((e) => e.fromNodeId === edge.fromNodeId && e.toNodeId === edge.toNodeId)) {
+      toast.warning(i18n.t("toast.connectionExistsNodes"));
       return false;
     }
-    setEdges(prev => [...prev, edge]);
+    setEdges((prev) => [...prev, edge]);
     return true;
   };
 
   // Update edge label
   const updateEdgeLabel = (edgeId: string, label: string) => {
-    setEdges(prev =>
-      prev.map(e => e.id === edgeId ? { ...e, label } : e)
-    );
+    setEdges((prev) => prev.map((e) => (e.id === edgeId ? { ...e, label } : e)));
   };
 
   // Delete edge
   const deleteEdge = (edgeId: string) => {
-    setEdges(prev => prev.filter(e => e.id !== edgeId));
+    setEdges((prev) => prev.filter((e) => e.id !== edgeId));
   };
 
   // Delete edges connected to node
   const deleteNodeEdges = (nodeId: string) => {
-    setEdges(prev =>
-      prev.filter(e => e.fromNodeId !== nodeId && e.toNodeId !== nodeId)
-    );
+    setEdges((prev) => prev.filter((e) => e.fromNodeId !== nodeId && e.toNodeId !== nodeId));
   };
 
   // Get edges connected to node
   const getNodeEdges = (nodeId: string): FlowEdge[] => {
-    return edges.filter(e => e.fromNodeId === nodeId || e.toNodeId === nodeId);
+    return edges.filter((e) => e.fromNodeId === nodeId || e.toNodeId === nodeId);
   };
 
   // Get edge by ID
   const getEdge = (edgeId: string): FlowEdge | undefined => {
-    return edges.find(e => e.id === edgeId);
+    return edges.find((e) => e.id === edgeId);
   };
 
   // Get incoming edges for node
   const getIncomingEdges = (nodeId: string): FlowEdge[] => {
-    return edges.filter(e => e.toNodeId === nodeId);
+    return edges.filter((e) => e.toNodeId === nodeId);
   };
 
   // Get outgoing edges from node
   const getOutgoingEdges = (nodeId: string): FlowEdge[] => {
-    return edges.filter(e => e.fromNodeId === nodeId);
+    return edges.filter((e) => e.fromNodeId === nodeId);
   };
 
   // --- BATCH OPERATIONS ---
@@ -185,7 +185,7 @@ export function useFlowchartNodes() {
   // Get canvas content
   const getContent = () => ({
     nodes: JSON.parse(JSON.stringify(nodes)),
-    edges: JSON.parse(JSON.stringify(edges))
+    edges: JSON.parse(JSON.stringify(edges)),
   });
 
   // Get node count
@@ -195,11 +195,11 @@ export function useFlowchartNodes() {
   const getEdgeCount = (): number => edges.length;
 
   // Check if node exists
-  const nodeExists = (nodeId: string): boolean => nodes.some(n => n.id === nodeId);
+  const nodeExists = (nodeId: string): boolean => nodes.some((n) => n.id === nodeId);
 
   // Check if edge exists
   const edgeExists = (fromNodeId: string, toNodeId: string): boolean => {
-    return edges.some(e => e.fromNodeId === fromNodeId && e.toNodeId === toNodeId);
+    return edges.some((e) => e.fromNodeId === fromNodeId && e.toNodeId === toNodeId);
   };
 
   return {
@@ -241,6 +241,6 @@ export function useFlowchartNodes() {
     getNodeCount,
     getEdgeCount,
     nodeExists,
-    edgeExists
+    edgeExists,
   };
 }

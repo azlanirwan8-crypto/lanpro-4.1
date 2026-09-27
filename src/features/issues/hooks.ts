@@ -1,11 +1,23 @@
-import { useMemo, useState } from "react";
+import i18n from "../../i18n";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Task } from "../../types";
 import { IssueListViewProps } from "./types";
 import { toast } from "sonner";
 import { createTask } from "./services/issues.service";
+import { useAppStore } from "../../store/useAppStore";
+import { suppressTaskDataRefresh } from "../../lib/taskRefreshControl";
+import {
+  DEFAULT_ISSUE_FILTER_SNAPSHOT,
+  isIssueOverdue,
+  loadSessionFilters,
+  saveSessionFilters,
+  type IssueFilterSnapshot,
+} from "./lib/issueFilterSnapshot";
 
 export const useIssueList = (props: IssueListViewProps) => {
   const { tasks, roots, selectedProject, user, masterData, userRole } = props;
+  const setTasks = useAppStore((s) => s.setTasks);
+  const projectId = selectedProject?.id || "";
 
   // UI state
   const [listFilterStatus, setListFilterStatus] = useState("All");
@@ -21,32 +33,34 @@ export const useIssueList = (props: IssueListViewProps) => {
   const [listFilterDateType, setListFilterDateType] = useState("dueDate");
   const [listFilterStartDate, setListFilterStartDate] = useState("");
   const [listFilterEndDate, setListFilterEndDate] = useState("");
+  const [listFilterOverdue, setListFilterOverdue] = useState(false);
 
   const [issueSearch, setIssueSearch] = useState("");
   const [listPage, setListPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set());
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
+  const sessionHydratedRef = useRef<string | null>(null);
 
   // Columns state
   const [issueTableColumns, setIssueTableColumns] = useState([
-    { id: "work", label: "WORK", width: 450, visible: true },
-    { id: "assignee", label: "ASSIGNEE", width: 150, visible: true },
-    { id: "reporter", label: "REPORTER", width: 150, visible: true },
-    { id: "priority", label: "PRIORITY", width: 120, visible: true },
-    { id: "status", label: "STATUS", width: 130, visible: true },
-    { id: "progress", label: "PROGRESS", width: 130, visible: true },
-    { id: "storyPoints", label: "STORY POINTS", width: 100, visible: true },
-    { id: "sprint", label: "SPRINT", width: 130, visible: true },
-    { id: "labels", label: "LABELS", width: 160, visible: false },
-    { id: "resolution", label: "RESOLUTION", width: 120, visible: true },
-    { id: "category", label: "CATEGORY", width: 120, visible: true },
-    { id: "startDate", label: "START DATE", width: 120, visible: true },
-    { id: "endDate", label: "END DATE", width: 120, visible: true },
-    { id: "release", label: "RELEASE", width: 120, visible: true },
-    { id: "dueDate", label: "DUE DATE", width: 120, visible: true },
-    { id: "updated", label: "UPDATED", width: 120, visible: true },
-    { id: "created", label: "CREATED", width: 120, visible: true },
+    { id: "work", label: "issueColumns.work", width: 450, visible: true },
+    { id: "assignee", label: "issueColumns.assignee", width: 150, visible: true },
+    { id: "reporter", label: "issueColumns.reporter", width: 150, visible: true },
+    { id: "priority", label: "issueColumns.priority", width: 120, visible: true },
+    { id: "status", label: "issueColumns.status", width: 130, visible: true },
+    { id: "progress", label: "issueColumns.progress", width: 130, visible: true },
+    { id: "storyPoints", label: "issueColumns.storyPoints", width: 100, visible: true },
+    { id: "sprint", label: "issueColumns.sprint", width: 130, visible: true },
+    { id: "labels", label: "issueColumns.labels", width: 160, visible: false },
+    { id: "resolution", label: "issueColumns.resolution", width: 120, visible: true },
+    { id: "category", label: "issueColumns.category", width: 120, visible: true },
+    { id: "startDate", label: "issueColumns.startDate", width: 120, visible: true },
+    { id: "endDate", label: "issueColumns.endDate", width: 120, visible: true },
+    { id: "release", label: "issueColumns.release", width: 120, visible: true },
+    { id: "dueDate", label: "issueColumns.dueDate", width: 120, visible: true },
+    { id: "updated", label: "issueColumns.updated", width: 120, visible: true },
+    { id: "created", label: "issueColumns.created", width: 120, visible: true },
   ]);
   const [isConfigureColumnsOpen, setIsConfigureColumnsOpen] = useState(false);
 
@@ -63,6 +77,82 @@ export const useIssueList = (props: IssueListViewProps) => {
   const [inlineAddRelease, setInlineAddRelease] = useState("");
   const [isInlineTypeOpen, setIsInlineTypeOpen] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const createInFlightRef = useRef(false);
+
+  const applyFilterSnapshot = (snap: IssueFilterSnapshot) => {
+    setIssueSearch(snap.search || "");
+    setListFilterStatus(snap.status || "All");
+    setListFilterPriority(snap.priority || "All");
+    setListFilterAssignee(snap.assignee || "All");
+    setListFilterCategory(snap.category || "All");
+    setListFilterSprint(snap.sprint || "All");
+    setListFilterLabel(snap.label || "All");
+    setListFilterEnvironment(snap.environment || "All");
+    setListFilterProjectRisk(snap.projectRisk || "All");
+    setListFilterRelease(snap.release || "All");
+    setListFilterResolution(snap.resolution || "All");
+    setListFilterDateType(snap.dateType || "dueDate");
+    setListFilterStartDate(snap.startDate || "");
+    setListFilterEndDate(snap.endDate || "");
+    setListFilterOverdue(Boolean(snap.overdue));
+    setListPage(1);
+  };
+
+  const currentFilterSnapshot = useMemo(
+    (): IssueFilterSnapshot => ({
+      search: issueSearch,
+      status: listFilterStatus,
+      priority: listFilterPriority,
+      assignee: listFilterAssignee,
+      category: listFilterCategory,
+      sprint: listFilterSprint,
+      label: listFilterLabel,
+      environment: listFilterEnvironment,
+      projectRisk: listFilterProjectRisk,
+      release: listFilterRelease,
+      resolution: listFilterResolution,
+      dateType: listFilterDateType,
+      startDate: listFilterStartDate,
+      endDate: listFilterEndDate,
+      overdue: listFilterOverdue,
+    }),
+    [
+      issueSearch,
+      listFilterStatus,
+      listFilterPriority,
+      listFilterAssignee,
+      listFilterCategory,
+      listFilterSprint,
+      listFilterLabel,
+      listFilterEnvironment,
+      listFilterProjectRisk,
+      listFilterRelease,
+      listFilterResolution,
+      listFilterDateType,
+      listFilterStartDate,
+      listFilterEndDate,
+      listFilterOverdue,
+    ]
+  );
+
+  // #468 — pulihkan filter sesi per proyek
+  useEffect(() => {
+    if (!projectId) return;
+    if (sessionHydratedRef.current === projectId) return;
+    sessionHydratedRef.current = projectId;
+    const saved = loadSessionFilters(projectId);
+    if (saved) applyFilterSnapshot(saved);
+    else applyFilterSnapshot(DEFAULT_ISSUE_FILTER_SNAPSHOT);
+  }, [projectId]);
+
+  // #468 — persist sesi (debounce)
+  useEffect(() => {
+    if (!projectId || sessionHydratedRef.current !== projectId) return;
+    const timer = setTimeout(() => {
+      saveSessionFilters(projectId, currentFilterSnapshot);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [projectId, currentFilterSnapshot]);
 
   const currentUserId =
     props.currentUserProfile?.uid ||
@@ -85,6 +175,7 @@ export const useIssueList = (props: IssueListViewProps) => {
 
   const rawTasks = Array.isArray(tasks) ? tasks : [];
   const isAdminOrManager = ["admin", "manager", "head"].includes(userRole || "");
+  const mArr = Array.isArray(masterData) ? masterData : [];
 
   const tArr = useMemo(() => {
     return rawTasks;
@@ -99,7 +190,6 @@ export const useIssueList = (props: IssueListViewProps) => {
     const query = issueSearch.toLowerCase().trim();
 
     return rootList.filter((root: Task) => {
-      // Direct helper to determine if an individual task matches filters & search query
       const matchesFiltersAndSearch = (t: Task) => {
         const matchesS =
           !query ||
@@ -112,12 +202,13 @@ export const useIssueList = (props: IssueListViewProps) => {
           return false;
         if (listFilterPriority && listFilterPriority !== "All" && t.priority !== listFilterPriority)
           return false;
-        if (
-          listFilterAssignee &&
-          listFilterAssignee !== "All" &&
-          t.assigneeId !== listFilterAssignee
-        )
-          return false;
+        if (listFilterAssignee && listFilterAssignee !== "All") {
+          if (listFilterAssignee === "unassigned") {
+            if (t.assigneeId) return false;
+          } else if (t.assigneeId !== listFilterAssignee) {
+            return false;
+          }
+        }
         if (listFilterCategory && listFilterCategory !== "All" && t.category !== listFilterCategory)
           return false;
         if (listFilterSprint && listFilterSprint !== "All") {
@@ -125,7 +216,6 @@ export const useIssueList = (props: IssueListViewProps) => {
           if (listFilterSprint !== "Backlog" && t.sprintId !== listFilterSprint) return false;
         }
 
-        // Custom field / Attribute filtering
         if (
           listFilterEnvironment &&
           listFilterEnvironment !== "All" &&
@@ -147,13 +237,13 @@ export const useIssueList = (props: IssueListViewProps) => {
         )
           return false;
 
-        // Label filtering
         if (listFilterLabel && listFilterLabel !== "All") {
           if (!t.labels || !Array.isArray(t.labels) || !t.labels.includes(listFilterLabel))
             return false;
         }
 
-        // Date Range filtering
+        if (listFilterOverdue && !isIssueOverdue(t, mArr)) return false;
+
         if (listFilterStartDate || listFilterEndDate) {
           const col = listFilterDateType;
           const checkDateValue = (columnKey: string, taskItem: Task): boolean => {
@@ -188,15 +278,11 @@ export const useIssueList = (props: IssueListViewProps) => {
         return true;
       };
 
-      // Does the root task itself match?
       const rootMatches = matchesFiltersAndSearch(root);
-
-      // Do any of its subtasks match? (direct subtasks or nested)
       const subtasks = tArr.filter((c) => c.parentId === root.id);
       const childMatches = subtasks.some((child) => matchesFiltersAndSearch(child));
 
       if (childMatches && query) {
-        // Auto expand this root task so matching subtasks are instantly visible
         setExpandedTasks((prev) => {
           if (prev.has(root.id)) return prev;
           const next = new Set(prev);
@@ -224,6 +310,8 @@ export const useIssueList = (props: IssueListViewProps) => {
     listFilterDateType,
     listFilterStartDate,
     listFilterEndDate,
+    listFilterOverdue,
+    mArr,
   ]);
 
   const handleToggleSelectAll = () => {
@@ -249,11 +337,11 @@ export const useIssueList = (props: IssueListViewProps) => {
   };
 
   const handleInlineAdd = async (parentId: string | null = null, customTitle?: string) => {
-    if (isCreating) return;
+    if (createInFlightRef.current) return;
     const activeUid = user?.uid;
     const titleToUse = customTitle !== undefined ? customTitle : inlineAddTitle;
     if (!selectedProject || !titleToUse.trim() || !activeUid) {
-      if (selectedProject && !titleToUse.trim()) toast.error("Judul tugas tidak boleh kosong");
+      if (selectedProject && !titleToUse.trim()) toast.error(i18n.t("toast.bulkTitleEmpty"));
       setInlineAddingTaskId(null);
       if (customTitle === undefined) {
         setInlineAddTitle("");
@@ -261,13 +349,44 @@ export const useIssueList = (props: IssueListViewProps) => {
       return;
     }
 
+    createInFlightRef.current = true;
     setIsCreating(true);
     const effectiveUserId = user?.uid || "guest";
+    const tempId = `temp-${crypto.randomUUID()}`;
+    const placeholder: Task = {
+      id: tempId,
+      projectId: selectedProject.id,
+      title: titleToUse,
+      status: inlineAddStatus || "To Do",
+      type: inlineAddType.toLowerCase() as Task["type"],
+      parentId: parentId || undefined,
+      priority: inlineAddPriority || "Medium",
+      assigneeId: inlineAddAssigneeId || undefined,
+      reporterId: inlineAddReporterId || activeUid,
+      key: "…",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (parentId && !expandedTasks.has(parentId)) {
+      setExpandedTasks((prev) => {
+        const next = new Set(prev);
+        next.add(parentId);
+        return next;
+      });
+    }
+
+    setTasks((prev) => [placeholder, ...prev.filter((t) => t.id !== tempId)]);
+
+    suppressTaskDataRefresh(8000);
+
+    const taskType = inlineAddType.toLowerCase();
+
     try {
-      await createTask(selectedProject.id, effectiveUserId, {
+      const response = await createTask(selectedProject.id, effectiveUserId, {
         title: titleToUse,
         status: inlineAddStatus || "To Do",
-        type: inlineAddType.toLowerCase(),
+        type: taskType,
         parentId: parentId,
         priority: inlineAddPriority || "Medium",
         release: inlineAddRelease || "",
@@ -276,6 +395,18 @@ export const useIssueList = (props: IssueListViewProps) => {
         category: inlineAddCategory || null,
         dueDate: inlineAddDueDate || null,
       });
+
+      if (response.status !== "success" || !response.data) {
+        throw new Error(response.message || "Create failed");
+      }
+
+      const created = response.data as Task;
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === tempId ? { ...created, parentId: parentId || created.parentId } : t
+        )
+      );
+      toast.success(i18n.t("toast.taskAdded"));
 
       if (customTitle === undefined) {
         setInlineAddTitle("");
@@ -289,24 +420,12 @@ export const useIssueList = (props: IssueListViewProps) => {
       setInlineAddDueDate("");
       setInlineAddRelease("");
       setInlineAddingTaskId(null);
-      // Automatically expand parent if it was not
-      if (parentId && !expandedTasks.has(parentId)) {
-        setExpandedTasks((prev) => {
-          const next = new Set(prev);
-          next.add(parentId);
-          return next;
-        });
-      }
-      toast.success("Berhasil menambahkan tugas baru");
-
-      // OPTIMISTIC UPDATE / RE-FETCH DATA
-      if (props.fetchTasks) {
-        props.fetchTasks();
-      }
     } catch (error) {
+      setTasks((prev) => prev.filter((t) => t.id !== tempId));
       console.error(error);
-      toast.error("Gagal menambahkan subtask");
+      toast.error(i18n.t("toast.subtaskAddFailed"));
     } finally {
+      createInFlightRef.current = false;
       setIsCreating(false);
     }
   };
@@ -355,6 +474,10 @@ export const useIssueList = (props: IssueListViewProps) => {
     setListFilterStartDate,
     listFilterEndDate,
     setListFilterEndDate,
+    listFilterOverdue,
+    setListFilterOverdue,
+    currentFilterSnapshot,
+    applyFilterSnapshot,
     issueSearch,
     setIssueSearch,
     listPage,
@@ -396,5 +519,7 @@ export const useIssueList = (props: IssueListViewProps) => {
     handleInlineAdd,
     handleReorderColumns,
     handleColumnResize,
+    validIdentifiers,
+    isAdminOrManager,
   };
 };

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
@@ -15,10 +16,12 @@ import {
   type DiscussionPointComment,
   type UserProfile,
   type AppRole,
+  type PeranEfektif,
   type UserPermissions,
   type MasterData,
 } from "../../types";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
+import { LanproDatePicker } from "../../components/ui/LanproDatePicker";
 import { UserAvatar } from "../../components/ui/UserAvatar";
 import { AiMeetingCompanion } from "./AiMeetingCompanion";
 import { cn } from "../../lib/utils";
@@ -40,12 +43,18 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { hasPermission } from "../../lib/permissions";
+import {
+  suppressDiscussionPointsRefresh,
+  shouldSuppressDiscussionPointsRefresh,
+} from "../../lib/taskRefreshControl";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
+import { DiscussionPointMobileCardView } from "./components/DiscussionPointMobileCardView";
+import { useMobileAction } from "../../contexts/MobileActionContext";
 
 interface DiscussionPointsTableProps {
   projectId: string;
   meetingId: string;
-  userRole: AppRole;
+  userRole: PeranEfektif;
   currentUser: UserProfile | null;
   permissions?: Partial<UserPermissions>;
   projectMembers?: UserProfile[];
@@ -61,8 +70,9 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
   projectMembers = [],
   masterData = [],
 }) => {
+  const { t } = useTranslation();
   const [points, setPoints] = useState<DiscussionPoint[]>([]);
-  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>(projectMembers);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<DiscussionPoint>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -77,21 +87,11 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPoints, setTotalPoints] = useState(0);
   const itemsPerPage = 5;
 
-  const filteredPoints = points.filter(
-    (p) =>
-      (p.concern || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.keterangan || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.fitur || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.assignTo || "").toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const totalPages = Math.ceil(filteredPoints.length / itemsPerPage) || 1;
-  const paginatedPoints = filteredPoints.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const paginatedPoints = points;
+  const totalPages = Math.max(1, Math.ceil(totalPoints / itemsPerPage) || 1);
 
   const handleToggleStatus = async (point: DiscussionPoint) => {
     if (!point.id) return;
@@ -106,19 +106,30 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
         currentUser?.uid
       );
       showSuccessAlert(
-        "Berhasil!",
-        `Status diubah menjadi ${nextStatus === "completed" ? "DONE" : "PENDING"}`
+        t("alerts.successTitle"),
+        t("alerts.statusChanged", {
+          status:
+            nextStatus === "completed" ? t("discussion.statusDone") : t("discussion.statusPending"),
+        })
       );
     } catch (e: any) {
-      toast.error("Gagal mengubah status: " + e.message);
+      toast.error(t("toast.statusChangeFailed") + e.message);
       fetchPoints();
     }
   };
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, meetingId, projectId]);
+
+  useEffect(() => {
     fetchPoints();
-    fetchUsers();
-  }, [meetingId, projectId]);
+    if (projectMembers.length > 0) {
+      setUsers(projectMembers);
+    } else {
+      fetchUsers();
+    }
+  }, [meetingId, projectId, projectMembers, currentPage, searchQuery]);
 
   useEffect(() => {
     let socket: any;
@@ -133,6 +144,9 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
     if (socket) {
       socket.on("data_changed", (event: any) => {
+        if (shouldSuppressDiscussionPointsRefresh()) return;
+        // #322 — abaikan event proyek lain
+        if (event?.projectId && projectId && event.projectId !== projectId) return;
         if (event.path?.includes("/discussionPoints") || event.path?.includes("/meetings")) {
           fetchPoints();
         }
@@ -157,45 +171,89 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
   const canAdd = hasPermission(userRole, "meetingNotes", "create", false, permissions);
 
+  const { registerAction, unregisterAction } = useMobileAction();
+
+  useEffect(() => {
+    if (canAdd) {
+      registerAction({
+        id: "meeting-detail-add-point",
+        label: t("discussion.addPoint") || "Tambah Titik Diskusi",
+        onClick: () => {
+          const candidates = [
+            "quick-add-concern",
+            "quick-add-concern-desktop",
+            "quick-add-section",
+          ];
+          const el = candidates
+            .map((id) => document.getElementById(id))
+            .find((node) => node && (node as HTMLElement).offsetParent !== null);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+            if ("focus" in el && typeof (el as HTMLElement).focus === "function") {
+              (el as HTMLElement).focus();
+            }
+          }
+        },
+        canCreate: canAdd,
+      });
+    } else {
+      unregisterAction("meeting-detail-add-point");
+    }
+    return () => unregisterAction("meeting-detail-add-point");
+  }, [canAdd, registerAction, unregisterAction, t]);
+
   // Handle Live Inline Quick Add
   const handleLiveQuickAdd = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!currentUser) {
-      toast.error("Silakan login terlebih dahulu.");
+      toast.error(t("toast.pleaseLoginFirst"));
       return;
     }
     if (!canAdd) {
-      toast.error("Anda tidak memiliki izin untuk menambah poin diskusi.");
+      toast.error(t("toast.noPermAddPoint"));
       return;
     }
     if (!quickConcern.trim()) {
-      toast.error("Concern / Topic wajib diisi.");
+      toast.error(t("toast.concernRequired"));
       return;
     }
+    if (isSaving) return;
 
     setIsSaving(true);
-    try {
-      const payload: any = {
-        concern: quickConcern.trim(),
-        keterangan: quickCatatan.trim(),
-        assignTo: quickAssignTo === "Unassigned" ? "" : quickAssignTo,
-        fitur: quickFitur || "",
-        targetDate: quickTargetDate || "",
-        status: "pending",
-        authorId: currentUser.uid,
-      };
+    const tempId = `temp-dp-${crypto.randomUUID()}`;
+    const payload: any = {
+      concern: quickConcern.trim(),
+      keterangan: quickCatatan.trim(),
+      assignTo: quickAssignTo === "Unassigned" ? "" : quickAssignTo,
+      fitur: quickFitur || "",
+      targetDate: quickTargetDate || "",
+      status: "pending",
+      authorId: currentUser.uid,
+    };
 
-      await createDiscussionPoint(projectId, meetingId, payload, currentUser.uid);
-      showSuccessAlert("Berhasil!", "Poin diskusi berhasil ditambahkan!");
-      setQuickConcern("");
-      setQuickCatatan("");
-      setQuickAssignTo("Unassigned");
-      setQuickFitur("");
-      setQuickTargetDate("");
-      fetchPoints();
+    const placeholder: DiscussionPoint = {
+      id: tempId,
+      meetingId,
+      ...payload,
+      createdAt: new Date().toISOString(),
+    };
+
+    suppressDiscussionPointsRefresh(8000);
+    setPoints((prev) => [placeholder, ...prev]);
+    setQuickConcern("");
+    setQuickCatatan("");
+    setQuickAssignTo("Unassigned");
+    setQuickFitur("");
+    setQuickTargetDate("");
+    toast.success(t("alerts.pointAdded"));
+
+    try {
+      const realId = await createDiscussionPoint(projectId, meetingId, payload, currentUser.uid);
+      setPoints((prev) => prev.map((p) => (p.id === tempId ? { ...p, id: realId } : p)));
     } catch (error: any) {
+      setPoints((prev) => prev.filter((p) => p.id !== tempId));
       console.error("Error saving point:", error);
-      toast.error("Gagal menambah poin: " + error.message);
+      toast.error(t("toast.pointAddFailed") + error.message);
     } finally {
       setIsSaving(false);
     }
@@ -204,7 +262,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
   const startEdit = (point: DiscussionPoint) => {
     const isOwner = point.authorId === (currentUser?.uid || "");
     if (!hasPermission(userRole, "meetingNotes", "update", isOwner, permissions)) {
-      toast.error("Anda tidak memiliki izin untuk mengedit poin ini.");
+      toast.error(t("toast.noPermEditPoint"));
       return;
     }
     setEditingId(point.id!);
@@ -241,7 +299,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
   const handleSendThreadComment = async () => {
     if (!activeThreadPoint?.id) return;
     if (!newCommentText.trim()) {
-      toast.error("Tulis balasan atau komentar terlebih dahulu.");
+      toast.error(t("toast.writeReplyFirst"));
       return;
     }
 
@@ -263,12 +321,19 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
         currentUser?.uid || (currentUser as any)?.id
       );
 
-      showSuccessAlert("Berhasil!", "Balasan berhasil dikirim!");
+      // Popup "Balasan berhasil dikirim!" DIHAPUS atas keputusan pemilik proyek
+      // 16 Agu 2026. Balasannya langsung muncul di daftar tepat di bawah kotak
+      // ketik, jadi dialog modal yang harus ditutup manual hanya menambah satu
+      // klik untuk memberi tahu hal yang sudah terlihat sendiri.
+      //
+      // Konfirmasi tetap ada untuk aksi yang HASILNYA TIDAK LANGSUNG TERLIHAT —
+      // menghapus poin, menyimpan perubahan, impor AI. Bedanya di situ, bukan
+      // pada berhasil atau tidaknya.
       setNewCommentText("");
       const updated = await fetchCommentsForPoint(activeThreadPoint.id);
       setThreadComments(updated);
     } catch (e: any) {
-      toast.error("Gagal mengirim balasan: " + e.message);
+      toast.error(t("toast.replySendFailed") + e.message);
     } finally {
       setIsSendingComment(false);
     }
@@ -276,8 +341,14 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
   const fetchPoints = async () => {
     try {
-      const fetchedPoints = await getDiscussionPoints(projectId, meetingId, currentUser?.uid);
+      const result = await getDiscussionPoints(projectId, meetingId, currentUser?.uid, {
+        page: currentPage,
+        limit: itemsPerPage,
+        search: searchQuery,
+      });
+      const fetchedPoints = result.data as DiscussionPoint[];
       setPoints(fetchedPoints);
+      setTotalPoints(result.meta?.total ?? fetchedPoints.length);
       fetchedPoints.forEach((p: DiscussionPoint) => {
         if (p.id) fetchCommentsForPoint(p.id);
       });
@@ -288,17 +359,20 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
   const handleDelete = async (pointId: string) => {
     const isConfirmed = await confirmDeleteAlert(
-      "Apakah Anda Yakin?",
+      t("alerts.confirmTitle"),
       "Data poin diskusi ini akan dihapus secara permanen!"
     );
     if (!isConfirmed) return;
 
     setIsSaving(true);
+    suppressDiscussionPointsRefresh(8000);
+    setPoints((prev) => prev.filter((p) => p.id !== pointId));
+    toast.success(t("alerts.pointDeleted"));
+
     try {
       await deleteDiscussionPoint(projectId, meetingId, pointId, currentUser?.uid);
-      showSuccessAlert("Berhasil!", "Poin diskusi berhasil dihapus.");
-      fetchPoints();
     } catch (error: any) {
+      fetchPoints();
       toast.error(error.message || "Failed to delete point.");
     } finally {
       setIsSaving(false);
@@ -312,23 +386,27 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
     const isOwner = point.authorId === (currentUser?.uid || "");
     if (!hasPermission(userRole, "meetingNotes", "update", isOwner, permissions)) {
-      toast.error("Anda tidak memiliki izin untuk mengedit poin ini.");
+      toast.error(t("toast.noPermEditPoint"));
       return;
     }
 
     if (!editForm.concern?.trim()) {
-      toast.error("Concern / Topic cannot be empty.");
+      toast.error(t("toast.concernEmpty"));
       return;
     }
 
     setIsSaving(true);
+    const snapshot = { ...editForm };
+    suppressDiscussionPointsRefresh(8000);
+    setPoints((prev) => prev.map((p) => (p.id === editingId ? { ...p, ...snapshot } : p)));
+    setEditingId(null);
+    setEditForm({});
+    toast.success(t("alerts.pointSaved"));
+
     try {
-      await updateDiscussionPoint(projectId, meetingId, editingId, editForm, currentUser?.uid);
-      showSuccessAlert("Berhasil!", "Perubahan poin diskusi berhasil disimpan.");
-      setEditingId(null);
-      setEditForm({});
-      fetchPoints();
+      await updateDiscussionPoint(projectId, meetingId, editingId, snapshot, currentUser?.uid);
     } catch (error: any) {
+      fetchPoints();
       toast.error(error.message || "Failed to save changes.");
     } finally {
       setIsSaving(false);
@@ -341,36 +419,36 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
   }));
 
   return (
-    <div className="bg-surface flex flex-col font-sans text-left">
-      {/* Header Bar Clean Title */}
-      <div className="px-5 py-4 border-b border-border-subtle/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-surface-sunken/40">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-primary shadow-2xs">
+    <div className="bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden flex-1 flex flex-col min-h-0 font-sans text-left">
+      {/* Header Bar — #369: AI icon-only di HP */}
+      <div className="px-3 sm:px-5 py-3 border-b border-border-subtle/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface-sunken/40 shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-2xs shrink-0">
             <MessageSquare className="w-4 h-4" />
           </div>
-          <div>
-            <h3 className="text-sm font-medium text-content-strong tracking-tight">
-              Poin Diskusi & Keputusan
+          <div className="min-w-0">
+            <h3 className="text-sm font-medium text-content-strong tracking-tight truncate">
+              {t("discussion.heading2")}
             </h3>
-            <p className="text-xs sm:text-[10px] text-content-muted font-medium uppercase tracking-wider">
-              Discussion points & action items
+            <p className="text-xs font-normal text-content-subtle hidden sm:block">
+              {t("discussion.subheading")}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
           {!showAiAssistant && (
-            <div className="relative flex-1 sm:w-64">
+            <div className="relative flex-1 min-w-0 sm:w-64 sm:flex-none">
               <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Cari poin diskusi..."
+                placeholder={t("discussion.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full pl-9 pr-3 py-2 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-medium text-content-strong outline-none shadow-2xs"
+                className="w-full min-w-0 pl-9 pr-3 py-2 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs"
               />
             </div>
           )}
@@ -378,19 +456,22 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
           <button
             onClick={() => setShowAiAssistant(!showAiAssistant)}
             className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-all border shadow-2xs cursor-pointer shrink-0",
+              "inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-md text-xs font-normal transition-all border shadow-2xs cursor-pointer shrink-0",
               showAiAssistant
-                ? "bg-surface-muted hover:bg-slate-200 text-content-body border-slate-300"
-                : "bg-indigo-50 hover:bg-indigo-100/80 text-primary border-indigo-100"
+                ? "bg-surface-muted hover:bg-surface-strong text-content-body border-border-subtle"
+                : "bg-primary/10 hover:bg-primary/15 text-primary border-primary/20"
             )}
+            title={showAiAssistant ? t("discussion.closeAiAssistant") : t("discussion.aiAssistant")}
           >
             {showAiAssistant ? (
               <>
-                <ArrowLeft className="w-3.5 h-3.5" /> Tutup Asisten AI
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{t("discussion.closeAiAssistant")}</span>
               </>
             ) : (
               <>
-                <Sparkles className="w-3.5 h-3.5 text-primary" /> ✨ AI Meeting Assistant
+                <Sparkles className="w-3.5 h-3.5 text-primary" />
+                <span className="hidden sm:inline">{t("discussion.aiAssistant")}</span>
               </>
             )}
           </button>
@@ -399,19 +480,19 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
       {/* Edit Modal Popup (When clicking edit icon on a row) */}
       {editingId !== null && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200">
-          <div className="bg-surface rounded-lg w-full max-w-2xl shadow-xl border border-border-subtle animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 bg-overlay/40 backdrop-blur-xs flex items-center justify-center p-4 z-[9999]">
+          <div className="bg-surface rounded-lg w-full max-w-2xl shadow-xl border border-border-subtle flex flex-col max-h-[90vh] overflow-hidden">
             <div className="px-5 py-4 border-b border-border-faint flex items-center justify-between bg-surface-sunken/50 shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-md bg-indigo-50 flex items-center justify-center border border-indigo-100 text-primary">
+                <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center border border-primary/20 text-primary">
                   <Edit2 className="w-4 h-4" />
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-content-strong tracking-tight">
-                    Edit Poin Diskusi
+                    {t("discussion.editPoint")}
                   </h3>
-                  <p className="text-xs sm:text-[11px] text-content-muted font-medium">
-                    Ubah detail, catatan, atau penanggung jawab
+                  <p className="text-xs text-content-muted font-normal">
+                    {t("discussion.editPointHint")}
                   </p>
                 </div>
               </div>
@@ -429,11 +510,11 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
             <div className="p-5 overflow-y-auto flex-1 space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider">
-                  Concern / Topic *
+                <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-normal">
+                  {t("discussion.concernTopic")} *
                 </label>
                 <textarea
-                  className="w-full px-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 min-h-[80px] shadow-2xs"
+                  className="w-full px-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs font-normal text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 min-h-[80px] shadow-2xs"
                   value={editForm.concern || ""}
                   onChange={(e) => setEditForm({ ...editForm, concern: e.target.value })}
                 />
@@ -441,23 +522,23 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider">
-                    Catatan / Keterangan
+                  <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-normal">
+                    {t("discussion.notesLabel")}
                   </label>
                   <input
                     type="text"
-                    className="w-full px-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 shadow-2xs"
+                    className="w-full px-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs font-normal text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 shadow-2xs"
                     value={editForm.keterangan || ""}
                     onChange={(e) => setEditForm({ ...editForm, keterangan: e.target.value })}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider">
-                    Tindakan Lanjut
+                  <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-normal">
+                    {t("discussion.followUp")}
                   </label>
                   <input
                     type="text"
-                    className="w-full px-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 shadow-2xs"
+                    className="w-full px-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs font-normal text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 shadow-2xs"
                     value={editForm.tindakanLanjut || ""}
                     onChange={(e) => setEditForm({ ...editForm, tindakanLanjut: e.target.value })}
                   />
@@ -466,13 +547,13 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider">
-                    PIC (Assigned To)
+                  <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-normal">
+                    {t("discussion.picAssignedTo")}
                   </label>
                   <StyledDropdown
                     value={editForm.assignTo || "Unassigned"}
                     onChange={(val) => setEditForm({ ...editForm, assignTo: val })}
-                    options={[{ id: "Unassigned", label: "Unassigned" }, ...userOptions]}
+                    options={[{ id: "Unassigned", label: t("newTask.unassigned") }, ...userOptions]}
                     members={projectMembers}
                     type="member"
                     masterData={masterData}
@@ -480,8 +561,8 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider">
-                    Fitur
+                  <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-normal">
+                    {t("discussion.feature")}
                   </label>
                   <StyledDropdown
                     value={editForm.fitur || ""}
@@ -495,14 +576,13 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider">
-                    Target Date
+                  <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-normal">
+                    {t("discussion.targetDate")}
                   </label>
-                  <input
-                    type="date"
+                  <LanproDatePicker
                     value={editForm.targetDate || ""}
-                    onChange={(e) => setEditForm({ ...editForm, targetDate: e.target.value })}
-                    className="w-full h-9 px-3 bg-surface border border-border-subtle text-xs font-medium text-content-body rounded-md outline-none shadow-2xs"
+                    onChange={(val) => setEditForm({ ...editForm, targetDate: val })}
+                    buttonClassName="w-full h-9 px-3 bg-surface border border-border-subtle text-xs text-left font-medium text-content-body rounded-md shadow-2xs"
                   />
                 </div>
               </div>
@@ -517,15 +597,15 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                 }}
                 className="px-4 py-2 text-xs font-medium text-content-secondary hover:bg-surface-muted rounded-md border border-border-subtle bg-surface transition-all cursor-pointer shadow-2xs"
               >
-                Batal
+                {t("discussion.cancel")}
               </button>
               <button
                 type="button"
                 onClick={saveEdit}
                 disabled={isSaving}
-                className="px-5 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active text-white rounded-md text-xs font-medium shadow-xs disabled:opacity-50 cursor-pointer"
+                className="px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs disabled:opacity-50 cursor-pointer"
               >
-                {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
+                {isSaving ? t("common.saving") : t("common.saveChanges2")}
               </button>
             </div>
           </div>
@@ -534,7 +614,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
       {/* AREA KONTEN UTAMA (AI ASSISTANT VS DISCUSSION TABLE) */}
       {showAiAssistant ? (
-        <div className="p-4 sm:p-5 w-full animate-in fade-in duration-200">
+        <div className="pt-4 pb-2 w-full">
           <AiMeetingCompanion
             projectId={projectId}
             meeting={{ id: meetingId, title: "Meeting Discussion" } as any}
@@ -543,137 +623,259 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             onPointsImported={() => {
               setShowAiAssistant(false);
               fetchPoints();
-              showSuccessAlert("Berhasil!", "Poin diskusi AI berhasil diimpor!");
+              showSuccessAlert(t("alerts.successTitle"), t("alerts.pointImported"));
             }}
           />
         </div>
       ) : (
-        <div className="space-y-4">
-          {/* STREAMLINED LIVE EDITABLE DATA TABLE */}
-          <div className="bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden">
-            <div className="overflow-x-auto">
-              <ResponsiveTable className="w-full border-collapse text-left text-xs">
-                <thead>
-                  <tr className="bg-primary/5 border-b border-primary/15 text-xs sm:text-[11px] font-medium uppercase tracking-wider text-primary">
-                    <th className="py-3 px-4 w-12 text-center">No</th>
-                    <th className="py-3 px-4 min-w-[220px]">Concern</th>
-                    <th className="py-3 px-4 min-w-[200px]">Catatan / Keterangan</th>
-                    <th className="py-3 px-4 min-w-[150px]">Context / Tags</th>
-                    <th className="py-3 px-4 min-w-[140px]">PIC</th>
-                    <th className="py-3 px-4 min-w-[130px]">Target Date</th>
-                    <th className="py-3 px-4 w-24 text-center">Thread</th>
-                    <th className="py-3 px-4 w-28 text-center">Status</th>
-                    <th className="py-3 px-4 w-24 text-center">Action</th>
+        <div className="flex-1 flex flex-col min-h-0">
+          {/* Mobile Card List View (< 640px) */}
+          <div className="sm:hidden flex-1 overflow-y-auto p-4 space-y-3">
+            {canAdd && (
+              <div
+                id="quick-add-section"
+                className="rounded-xl border border-primary/25 bg-primary-surface/5 p-3 space-y-2.5 shadow-2xs"
+              >
+                <div className="text-[11px] font-medium text-content-strong">
+                  {t("discussion.addPoint") || "Tambah Titik Diskusi"}
+                </div>
+                <input
+                  id="quick-add-concern"
+                  type="text"
+                  placeholder={t("discussion.newConcernPlaceholder")}
+                  value={quickConcern}
+                  onChange={(e) => setQuickConcern(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleLiveQuickAdd();
+                  }}
+                  className="w-full min-w-0 px-3 py-2.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs placeholder:text-content-subtle"
+                />
+                <input
+                  type="text"
+                  placeholder={t("discussion.notesPlaceholder")}
+                  value={quickCatatan}
+                  onChange={(e) => setQuickCatatan(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleLiveQuickAdd();
+                  }}
+                  className="w-full min-w-0 px-3 py-2.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-body outline-none placeholder:text-content-subtle shadow-2xs"
+                />
+                <div className="grid grid-cols-1 gap-2 min-w-0">
+                  <StyledDropdown
+                    value={quickFitur}
+                    onChange={(val) => setQuickFitur(val)}
+                    options={masterData
+                      .filter((m) => m.type?.toLowerCase() === "fitur")
+                      .map((m) => ({ id: m.label, label: m.label }))}
+                    className="text-xs w-full min-w-0"
+                  />
+                  <StyledDropdown
+                    value={quickAssignTo}
+                    onChange={(val) => setQuickAssignTo(val)}
+                    options={[
+                      { id: "Unassigned", label: t("newTask.unassigned") },
+                      ...projectMembers.map((m) => ({
+                        id: m.uid || m.id || "",
+                        label: m.displayName || m.username || m.name || "",
+                      })),
+                    ]}
+                    className="text-xs w-full min-w-0"
+                  />
+                  <input
+                    type="date"
+                    value={quickTargetDate}
+                    onChange={(e) => setQuickTargetDate(e.target.value)}
+                    className="w-full min-w-0 px-3 py-2.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-body outline-none shadow-2xs"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleLiveQuickAdd()}
+                  disabled={isSaving || !quickConcern.trim()}
+                  className="w-full min-h-11 px-3 py-2.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-40 text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>{t("discussion.add")}</span>
+                </button>
+              </div>
+            )}
+            {paginatedPoints.length === 0 ? (
+              <div className="text-center py-12 text-content-subtle">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-2 text-primary shadow-2xs">
+                  <MessageSquare className="w-5 h-5" />
+                </div>
+                <p className="font-normal text-content-strong text-xs">
+                  {t("meetings.emptyTitle")}
+                </p>
+                <p className="text-[11px] text-content-subtle mt-0.5">{t("meetings.emptyHint")}</p>
+              </div>
+            ) : (
+              <DiscussionPointMobileCardView
+                points={paginatedPoints}
+                projectMembers={projectMembers}
+                masterData={masterData}
+                commentsMap={commentsMap}
+                onOpenThread={(point) => handleOpenThreadDrawer(point)}
+                onEditPoint={(point) => startEdit(point)}
+                onDeletePoint={(id) => handleDelete(id)}
+                onToggleStatus={(point) => handleToggleStatus(point)}
+                canEdit={(point) =>
+                  hasPermission(
+                    userRole,
+                    "meetingNotes",
+                    "update",
+                    point.authorId === (currentUser?.uid || ""),
+                    permissions
+                  )
+                }
+                canDelete={(point) =>
+                  hasPermission(
+                    userRole,
+                    "meetingNotes",
+                    "delete",
+                    point.authorId === (currentUser?.uid || ""),
+                    permissions
+                  )
+                }
+                canToggleStatus={canAdd}
+                currentUserId={currentUser?.uid}
+              />
+            )}
+          </div>
+
+          {/* Desktop Table Container (>= 640px) */}
+          <div className="hidden sm:block overflow-x-auto flex-1">
+            <ResponsiveTable className="w-full border-collapse text-left text-xs">
+              <thead>
+                <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs font-normal text-content-subtle whitespace-nowrap">
+                  <th className="py-3 px-4 w-12 text-center">{t("discussion.thNo")}</th>
+                  <th className="py-3 px-4 min-w-[220px]">{t("discussion.thConcern")}</th>
+                  <th className="py-3 px-4 min-w-[200px]">{t("discussion.thNotes")}</th>
+                  <th className="py-3 px-4 min-w-[150px]">{t("discussion.thContextTags")}</th>
+                  <th className="py-3 px-4 min-w-[140px]">{t("discussion.thPic")}</th>
+                  <th className="py-3 px-4 min-w-[130px]">{t("discussion.thTargetDate")}</th>
+                  <th className="py-3 px-4 w-24 text-center">{t("discussion.thThread")}</th>
+                  <th className="py-3 px-4 w-28 text-center">{t("discussion.status")}</th>
+                  <th className="py-3 px-4 w-24 text-center">{t("discussion.action")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border-faint text-content-body">
+                {paginatedPoints.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="text-center py-12 text-content-subtle">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-2 text-primary shadow-2xs">
+                        <MessageSquare className="w-5 h-5" />
+                      </div>
+                      <p className="font-normal text-content-strong text-xs">
+                        {t("meetings.emptyTitle")}
+                      </p>
+                      <p className="text-[11px] text-content-subtle mt-0.5">
+                        {t("meetings.emptyHint")}
+                      </p>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-border-faint text-content-body">
-                  {paginatedPoints.map((p, idx) => {
-                    const isOwner = p.authorId === (currentUser?.uid || "");
+                ) : (
+                  paginatedPoints.map((p, index) => {
                     const isCompleted = p.status === "completed";
-                    const assigneeName =
-                      projectMembers.find((m) => (m.uid || m.id) === (p.assignTo || p.assignee_id))
-                        ?.displayName ||
-                      projectMembers.find((m) => (m.uid || m.id) === (p.assignTo || p.assignee_id))
-                        ?.username ||
-                      p.assignTo ||
-                      "Unassigned";
+                    const srNo = (currentPage - 1) * itemsPerPage + index + 1;
+                    const assigneeUser = projectMembers.find(
+                      (m) => (m.uid || m.id) === (p.assignTo || p.assignee_id)
+                    );
+                    const assigneeName = assigneeUser
+                      ? assigneeUser.displayName || assigneeUser.username
+                      : p.assignTo || t("newTask.unassigned");
+                    const isOwner = p.authorId === (currentUser?.uid || "");
 
                     return (
-                      <tr key={p.id} className="hover:bg-surface-sunken/70 transition-colors group">
-                        <td className="py-3 px-4 text-center text-content-subtle font-medium text-xs align-middle">
-                          {String((currentPage - 1) * itemsPerPage + idx + 1).padStart(2, "0")}
+                      <tr
+                        key={p.id || index}
+                        className={`hover:bg-surface-sunken/60 transition-colors group ${
+                          isCompleted ? "opacity-75" : ""
+                        }`}
+                      >
+                        {/* No. */}
+                        <td className="py-3 px-4 text-center text-content-subtle font-normal align-middle">
+                          {String(srNo).padStart(2, "0")}
                         </td>
 
-                        {/* Concern */}
+                        {/* Concern (Topic) */}
                         <td className="py-3 px-4 align-middle">
-                          <div
-                            className={`font-medium text-content text-xs leading-snug ${isCompleted ? "line-through text-content-subtle" : ""}`}
-                          >
+                          <div className="font-normal text-content-strong leading-snug">
                             {p.concern}
                           </div>
                           {(p.tindakanLanjut || p.next_action) && (
-                            <div className="text-primary text-xs sm:text-[11px] font-medium flex items-center gap-1 mt-1 pt-1 border-t border-border-faint">
-                              <span className="uppercase text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-medium">
-                                Next:
-                              </span>
+                            <div className="text-[11px] text-primary font-normal mt-0.5 flex items-center gap-1">
+                              <span className="text-content-subtle font-normal">
+                                {t("discussion.next")}
+                              </span>{" "}
                               {p.tindakanLanjut || p.next_action}
                             </div>
                           )}
                         </td>
 
-                        {/* Catatan / Keterangan */}
+                        {/* Notes / Keterangan */}
+                        <td className="py-3 px-4 align-middle text-content-body font-normal">
+                          <div className="line-clamp-2 max-w-sm">
+                            {p.keterangan || p.comment || "-"}
+                          </div>
+                        </td>
+
+                        {/* Context / Fitur Tag */}
                         <td className="py-3 px-4 align-middle">
-                          <div className="text-content-secondary text-xs font-normal leading-relaxed">
-                            {p.keterangan || p.comment || (
-                              <span className="text-slate-300 italic">No notes</span>
+                          <div className="flex flex-wrap gap-1 items-center">
+                            {p.fitur ? (
+                              <span className="px-2 py-0.5 rounded-md text-[10px] leading-none font-normal bg-primary/10 text-primary border border-primary/20">
+                                {(() => {
+                                  const meta = masterData.find(
+                                    (m) =>
+                                      m.type === "fitur" &&
+                                      (m.label?.toLowerCase() === p.fitur?.toLowerCase() ||
+                                        m.id === p.fitur)
+                                  );
+                                  return meta?.label || p.fitur;
+                                })()}
+                              </span>
+                            ) : (
+                              <span className="text-content-subtle italic text-[11px]">-</span>
                             )}
                           </div>
                         </td>
 
-                        {/* Context / Tags */}
-                        <td className="py-3 px-4 align-middle">
-                          <div className="flex flex-wrap gap-1">
-                            {p.fitur && (
-                              <span className="px-2 py-0.5 bg-indigo-50 text-primary border border-indigo-100 rounded-md text-xs sm:text-[10px] font-medium">
-                                {p.fitur}
-                              </span>
-                            )}
-                            {p.system && (
-                              <span className="px-2 py-0.5 bg-purple-50 text-purple-700 border border-purple-100/80 rounded-md text-xs sm:text-[10px] font-medium">
-                                {p.system}
-                              </span>
-                            )}
-                            {p.surrounding && (
-                              <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100/80 rounded-md text-xs sm:text-[10px] font-medium">
-                                {p.surrounding}
-                              </span>
-                            )}
-                            {!p.fitur && !p.system && !p.surrounding && (
-                              <span className="text-slate-300 text-xs sm:text-[11px] italic">
-                                No tags
-                              </span>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* PIC */}
-                        <td className="py-3 px-4 align-middle">
-                          <div className="text-xs font-medium text-content-strong">
-                            {assigneeName}
+                        {/* PIC (Assignee) */}
+                        <td className="py-3 px-4 align-middle text-content-body font-normal">
+                          <div className="flex items-center gap-1.5">
+                            <span className="truncate max-w-[120px]">{assigneeName}</span>
                           </div>
                         </td>
 
                         {/* Target Date */}
-                        <td className="py-3 px-4 align-middle">
-                          {p.targetDate || p.target_date ? (
-                            <div className="flex items-center gap-1 text-xs text-content-secondary font-medium">
-                              <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />
-                              <span>{p.targetDate || p.target_date}</span>
+                        <td className="py-3 px-4 align-middle text-content-muted font-normal whitespace-nowrap">
+                          {p.targetDate ? (
+                            <div className="flex items-center gap-1 text-[11px]">
+                              <Calendar className="w-3.5 h-3.5 text-content-subtle" />
+                              <span>{p.targetDate}</span>
                             </div>
                           ) : (
-                            <span className="text-slate-300 text-xs italic">-</span>
+                            <span className="text-content-subtle italic text-[11px]">-</span>
                           )}
                         </td>
 
-                        {/* Thread Icon Button */}
+                        {/* Thread Comments */}
                         <td className="py-3 px-4 text-center align-middle">
                           {(() => {
-                            const commentsList = p.id ? commentsMap[p.id] || [] : [];
-                            const count = commentsList.length;
-
+                            const count = (p.id && commentsMap[p.id]?.length) || 0;
                             return (
                               <button
-                                type="button"
                                 onClick={() => handleOpenThreadDrawer(p)}
-                                className={`inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer border shadow-2xs active:scale-95 ${
+                                className={`inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs font-normal transition-all cursor-pointer border shadow-2xs active:scale-95 ${
                                   count > 0
-                                    ? "bg-indigo-50 hover:bg-indigo-100 text-primary border-indigo-200/80"
+                                    ? "bg-primary/10 hover:bg-primary/15 text-primary border-primary/20"
                                     : "bg-surface-sunken hover:bg-surface-muted text-content-subtle border-border-subtle/60"
                                 }`}
-                                title="Buka Thread Komentar & Balasan"
+                                title={t("discussion.openThread")}
                               >
                                 <MessageSquare
-                                  className={`w-3.5 h-3.5 ${count > 0 ? "text-primary fill-indigo-100" : "text-content-subtle"}`}
+                                  className={`w-3.5 h-3.5 ${count > 0 ? "text-primary fill-primary/20" : "text-content-subtle"}`}
                                 />
                                 <span>{count}</span>
                               </button>
@@ -687,17 +889,17 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                             type="button"
                             onClick={() => handleToggleStatus(p)}
                             className="cursor-pointer transition-all active:scale-95 inline-block"
-                            title="Klik untuk ubah status PENDING / DONE"
+                            title={t("discussion.toggleStatus")}
                           >
                             {isCompleted ? (
-                              <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs hover:bg-emerald-100">
+                              <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 shadow-2xs hover:bg-emerald-500/15">
                                 <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                                DONE
+                                {t("discussion.statusDone")}
                               </span>
                             ) : (
-                              <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs hover:bg-amber-100">
+                              <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-amber-500/10 text-amber-700 border border-amber-500/30 shadow-2xs hover:bg-amber-500/15">
                                 <Clock className="w-3 h-3 text-amber-600" />
-                                PENDING
+                                {t("discussion.statusPending")}
                               </span>
                             )}
                           </button>
@@ -715,8 +917,8 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                             ) && (
                               <button
                                 onClick={() => startEdit(p)}
-                                className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-50 rounded-md transition-all cursor-pointer"
-                                title="Edit"
+                                className="p-1.5 text-content-muted hover:text-primary hover:bg-primary/10 rounded-md transition-all cursor-pointer"
+                                title={t("discussion.editRow")}
                               >
                                 <Edit2 className="w-4 h-4" />
                               </button>
@@ -730,8 +932,8 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                             ) && (
                               <button
                                 onClick={() => handleDelete(p.id!)}
-                                className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all cursor-pointer"
-                                title="Hapus"
+                                className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
+                                title={t("discussion.deleteRow")}
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -740,140 +942,140 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                         </td>
                       </tr>
                     );
-                  })}
+                  })
+                )}
 
-                  {/* LIVE QUICK ADD INLINE ROW (Separate columns matching headers) */}
-                  {canAdd && (
-                    <tr className="bg-indigo-50/20 hover:bg-indigo-50/40 transition-colors">
-                      <td className="py-2.5 px-4 text-center text-indigo-400 text-xs align-middle font-medium">
-                        +
-                      </td>
+                {/* LIVE QUICK ADD INLINE ROW (Separate columns matching headers) */}
+                {canAdd && (
+                  <tr className="bg-primary/10 hover:bg-primary/10 transition-colors">
+                    <td className="py-2.5 px-4 text-center text-primary text-xs align-middle font-normal">
+                      +
+                    </td>
 
-                      {/* Concern */}
-                      <td className="py-2.5 px-4 align-middle">
-                        <input
-                          type="text"
-                          placeholder="Ketik concern baru..."
-                          value={quickConcern}
-                          onChange={(e) => setQuickConcern(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") handleLiveQuickAdd();
-                          }}
-                          className="w-full px-3 py-1.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-medium text-content-strong outline-none shadow-2xs placeholder:text-content-subtle"
-                        />
-                      </td>
+                    {/* Concern */}
+                    <td className="py-2.5 px-4 align-middle">
+                      <input
+                        id="quick-add-concern-desktop"
+                        type="text"
+                        placeholder={t("discussion.newConcernPlaceholder")}
+                        value={quickConcern}
+                        onChange={(e) => setQuickConcern(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleLiveQuickAdd();
+                        }}
+                        className="w-full px-3 py-1.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs placeholder:text-content-subtle"
+                      />
+                    </td>
 
-                      {/* Catatan / Keterangan */}
-                      <td className="py-2.5 px-4 align-middle">
-                        <input
-                          type="text"
-                          placeholder="Catatan / Keterangan..."
-                          value={quickCatatan}
-                          onChange={(e) => setQuickCatatan(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") handleLiveQuickAdd();
-                          }}
-                          className="w-full px-3 py-1.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-body outline-none placeholder:text-content-subtle shadow-2xs"
-                        />
-                      </td>
+                    {/* Catatan / Keterangan */}
+                    <td className="py-2.5 px-4 align-middle">
+                      <input
+                        type="text"
+                        placeholder={t("discussion.notesPlaceholder")}
+                        value={quickCatatan}
+                        onChange={(e) => setQuickCatatan(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleLiveQuickAdd();
+                        }}
+                        className="w-full px-3 py-1.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-body outline-none placeholder:text-content-subtle shadow-2xs"
+                      />
+                    </td>
 
-                      {/* Context / Tags */}
-                      <td className="py-2.5 px-4 align-middle">
-                        <StyledDropdown
-                          value={quickFitur}
-                          onChange={(val) => setQuickFitur(val)}
-                          options={masterData
-                            .filter((m) => m.type?.toLowerCase() === "fitur")
-                            .map((m) => ({
-                              id: m.label,
-                              label: m.label,
-                              color: m.color,
-                              icon: m.icon,
-                            }))}
-                          type="fitur"
-                          masterData={masterData}
-                          buttonClassName="w-full h-8 px-2.5 bg-surface border border-border-subtle text-xs text-left text-content-body rounded-md font-medium shadow-2xs"
-                        />
-                      </td>
+                    {/* Context / Tags */}
+                    <td className="py-2.5 px-4 align-middle">
+                      <StyledDropdown
+                        value={quickFitur}
+                        onChange={(val) => setQuickFitur(val)}
+                        options={masterData
+                          .filter((m) => m.type?.toLowerCase() === "fitur")
+                          .map((m) => ({ id: m.label, label: m.label }))}
+                        className="text-xs"
+                      />
+                    </td>
 
-                      {/* PIC */}
-                      <td className="py-2.5 px-4 align-middle">
-                        <StyledDropdown
-                          value={quickAssignTo}
-                          onChange={(val) => setQuickAssignTo(val)}
-                          options={[{ id: "Unassigned", label: "Assign PIC" }, ...userOptions]}
-                          members={projectMembers}
-                          type="member"
-                          masterData={masterData}
-                          buttonClassName="w-full h-8 px-2.5 bg-surface border border-border-subtle text-xs text-left text-content-body rounded-md font-medium shadow-2xs"
-                        />
-                      </td>
+                    {/* PIC */}
+                    <td className="py-2.5 px-4 align-middle">
+                      <StyledDropdown
+                        value={quickAssignTo}
+                        onChange={(val) => setQuickAssignTo(val)}
+                        options={[
+                          { id: "Unassigned", label: t("newTask.unassigned") },
+                          ...projectMembers.map((m) => ({
+                            id: m.uid || m.id || "",
+                            label: m.displayName || m.username || m.name || "",
+                          })),
+                        ]}
+                        className="text-xs"
+                      />
+                    </td>
 
-                      {/* Target Date */}
-                      <td className="py-2.5 px-4 align-middle">
-                        <input
-                          type="date"
-                          value={quickTargetDate}
-                          onChange={(e) => setQuickTargetDate(e.target.value)}
-                          className="w-full h-8 px-2 bg-surface border border-border-subtle text-xs font-medium text-content-body rounded-md outline-none shadow-2xs"
-                        />
-                      </td>
+                    {/* Target Date */}
+                    <td className="py-2.5 px-4 align-middle">
+                      <input
+                        type="date"
+                        value={quickTargetDate}
+                        onChange={(e) => setQuickTargetDate(e.target.value)}
+                        className="w-full px-2 py-1 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-body outline-none shadow-2xs"
+                      />
+                    </td>
 
-                      {/* Thread */}
-                      <td className="py-2.5 px-4 text-center align-middle text-slate-300 text-xs">
-                        -
-                      </td>
+                    {/* Thread Placeholder */}
+                    <td className="py-2.5 px-4 text-center align-middle text-content-subtle text-xs">
+                      -
+                    </td>
 
-                      {/* Status */}
-                      <td className="py-2.5 px-4 text-center align-middle">
-                        <span className="px-2.5 py-1 rounded-md text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200/80">
-                          PENDING
-                        </span>
-                      </td>
+                    {/* Status */}
+                    <td className="py-2.5 px-4 text-center align-middle">
+                      <span className="px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-amber-500/10 text-amber-700 border border-amber-500/30">
+                        {t("discussion.statusPending")}
+                      </span>
+                    </td>
 
-                      {/* Action */}
-                      <td className="py-2.5 px-4 text-center align-middle">
-                        <button
-                          type="button"
-                          onClick={() => handleLiveQuickAdd()}
-                          disabled={isSaving || !quickConcern.trim()}
-                          className="px-3 py-1.5 bg-primary hover:bg-primary-hover active:bg-primary-active disabled:opacity-40 text-white rounded-md text-xs font-medium shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 mx-auto"
-                          title="Tambah Poin"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>Add</span>
-                        </button>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </ResponsiveTable>
-            </div>
+                    {/* Action */}
+                    <td className="py-2.5 px-4 text-center align-middle">
+                      <button
+                        type="button"
+                        onClick={() => handleLiveQuickAdd()}
+                        disabled={isSaving || !quickConcern.trim()}
+                        className="px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-40 text-content-inverse rounded-md text-xs font-normal shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 mx-auto"
+                        title={t("discussion.addPoint")}
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>{t("discussion.add")}</span>
+                      </button>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </ResponsiveTable>
           </div>
 
           {/* Pagination Footer */}
-          <div className="px-6 py-3.5 bg-surface-sunken/60 border-t border-border-subtle flex items-center justify-between text-xs  text-content-secondary">
+          <div className="px-5 py-3 bg-surface-sunken/40 border-t border-border-subtle flex items-center justify-between text-[11px] text-content-subtle font-normal shrink-0">
             <div>
-              Menampilkan {paginatedPoints.length} dari {filteredPoints.length} poin (Total:{" "}
-              {points.length})
+              {t("discussion.showingPoints", {
+                shown: paginatedPoints.length,
+                filtered: totalPoints,
+                total: totalPoints,
+              })}
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1.5 bg-surface border border-border-subtle rounded-lg text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs cursor-pointer"
+                className="px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs cursor-pointer text-xs font-normal"
               >
-                <ChevronLeft className="w-3.5 h-3.5" /> Prev
+                <ChevronLeft className="w-3.5 h-3.5" /> {t("discussion.prev")}
               </button>
-              <span className="px-3 py-1  bg-surface border border-border-subtle rounded-lg text-indigo-600 shadow-2xs">
-                {currentPage} of {totalPages}
+              <span className="px-3 py-1 bg-surface border border-border-subtle rounded-md text-primary shadow-2xs text-xs font-normal">
+                {currentPage} {t("common.of")} {totalPages}
               </span>
               <button
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage >= totalPages}
-                className="px-3 py-1.5 bg-surface border border-border-subtle rounded-lg text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs cursor-pointer"
+                className="px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs cursor-pointer text-xs font-normal"
               >
-                Next <ChevronRight className="w-3.5 h-3.5" />
+                {t("discussion.nextPage")} <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -882,17 +1084,17 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
       {/* THREAD DISCUSSIONS SLIDE-OVER SHEET */}
       {activeThreadPoint && (
-        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-[9999] flex justify-end animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs z-[9999] flex justify-end">
           <div className="absolute inset-0" onClick={() => setActiveThreadPoint(null)} />
-          <div className="relative bg-surface w-full max-w-lg h-full shadow-2xl border-l border-border-subtle flex flex-col animate-in slide-in-from-right duration-250 text-left">
+          <div className="relative bg-surface w-full max-w-lg h-full shadow-2xl border-l border-border-subtle flex flex-col text-left">
             <div className="p-5 border-b border-border-faint flex items-center justify-between bg-surface-sunken/80 shrink-0">
               <div className="flex items-center gap-3 pr-4">
-                <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center border border-indigo-200 shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center border border-primary/20 shrink-0">
                   <MessageSquare className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-indigo-600 block">
-                    Thread Discussions
+                  <span className="text-xs sm:text-[10px] font-normal uppercase tracking-normal text-primary block">
+                    {t("discussion.threadDiscussions")}
                   </span>
                   <h3 className="text-sm font-medium text-content truncate">
                     {activeThreadPoint.concern}
@@ -901,8 +1103,8 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               </div>
               <button
                 onClick={() => setActiveThreadPoint(null)}
-                className="p-2 text-content-subtle hover:text-content-body hover:bg-slate-200/60 rounded-xl transition-colors cursor-pointer shrink-0"
-                title="Tutup Thread"
+                className="p-2 text-content-subtle hover:text-content-body hover:bg-surface-strong/60 rounded-xl transition-colors cursor-pointer shrink-0"
+                title={t("discussion.closeThread")}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -911,13 +1113,12 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             <div className="flex-1 p-5 overflow-y-auto flex flex-col gap-4 bg-surface-sunken/30">
               {threadComments.length === 0 ? (
                 <div className="text-center py-16 px-4">
-                  <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto mb-3 text-indigo-400">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-3 text-primary">
                     <MessageSquare className="w-6 h-6" />
                   </div>
-                  <h4 className="text-xs  text-content-body">Belum Ada Balasan Komentar</h4>
-                  <p className="text-xs sm:text-[11px] text-content-subtle  mt-1 leading-normal">
-                    Jadilah yang pertama memberikan balasan atau instruksi tambahan untuk PIC topik
-                    ini!
+                  <h4 className="text-xs text-content-body">{t("discussion.noReplies")}</h4>
+                  <p className="text-xs sm:text-[11px] text-content-subtle mt-1 leading-normal">
+                    {t("discussion.noRepliesHint")}
                   </p>
                 </div>
               ) : (
@@ -974,7 +1175,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                           className={cn(
                             "px-3.5 py-2 rounded-2xl relative shadow-soft group",
                             isMine
-                              ? "bg-indigo-600 text-white rounded-br-sm"
+                              ? "bg-primary-surface text-content-inverse rounded-br-sm"
                               : "bg-surface text-content-strong border border-border-subtle rounded-bl-sm"
                           )}
                         >
@@ -984,7 +1185,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                           <span
                             className={cn(
                               "absolute bottom-1 right-3 text-xs sm:text-[11px] sm:text-[9px]  tracking-tight",
-                              isMine ? "text-indigo-200" : "text-content-subtle"
+                              isMine ? "text-content-inverse/80" : "text-content-subtle"
                             )}
                           >
                             {new Date(commentDate).toLocaleTimeString("id-ID", {
@@ -1004,7 +1205,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               <div className="flex items-center gap-2 bg-surface-muted rounded-full px-4 py-2">
                 <input
                   type="text"
-                  placeholder="Tulis balasan atau instruksi untuk PIC..."
+                  placeholder={t("discussion.replyPlaceholder")}
                   value={newCommentText}
                   onChange={(e) => setNewCommentText(e.target.value)}
                   onKeyDown={(e) => {
@@ -1012,13 +1213,13 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                       handleSendThreadComment();
                     }
                   }}
-                  className="w-full bg-transparent border-0 focus:ring-0 outline-none text-xs font-medium text-content-strong placeholder:text-content-subtle py-1"
+                  className="w-full bg-transparent border-0 focus:ring-0 outline-none text-xs font-normal text-content-strong placeholder:text-content-subtle py-1"
                 />
                 <button
                   onClick={handleSendThreadComment}
                   disabled={isSendingComment || !newCommentText.trim()}
-                  className="p-2 text-indigo-600 hover:text-indigo-700 disabled:opacity-40 cursor-pointer rounded-full transition-colors shrink-0"
-                  title="Kirim Balasan"
+                  className="p-2 text-primary hover:text-primary-hover disabled:opacity-40 cursor-pointer rounded-full transition-colors shrink-0"
+                  title={t("discussion.sendReply")}
                 >
                   <Send className="w-4 h-4" />
                 </button>

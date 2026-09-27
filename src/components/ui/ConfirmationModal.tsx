@@ -1,7 +1,10 @@
+import i18n from "../../i18n";
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { Portal } from "./Portal";
+import { AnimatedLogoutIcon } from "./AnimatedLogoutIcon";
 
 declare global {
   namespace React.JSX {
@@ -11,6 +14,8 @@ declare global {
           src?: string;
           trigger?: string;
           colors?: string;
+          stroke?: string | number;
+          state?: string;
           style?: React.CSSProperties;
         },
         HTMLElement
@@ -19,7 +24,17 @@ declare global {
   }
   namespace JSX {
     interface IntrinsicElements {
-      "lord-icon": any;
+      "lord-icon": React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement> & {
+          src?: string;
+          trigger?: string;
+          colors?: string;
+          stroke?: string | number;
+          state?: string;
+          style?: React.CSSProperties;
+        },
+        HTMLElement
+      >;
     }
   }
 }
@@ -36,6 +51,9 @@ interface ConfirmationModalProps {
   isLoading?: boolean;
   isAlert?: boolean;
   closeOnBackdropClick?: boolean;
+  iconSrc?: string;
+  iconColors?: string;
+  customIcon?: React.ReactNode;
 }
 
 export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -44,13 +62,17 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onConfirm,
   title,
   message,
-  confirmText = "Ya, Hapus!",
-  cancelText = "Batal",
+  confirmText,
+  cancelText,
   variant = "danger",
   isLoading = false,
   isAlert = false,
   closeOnBackdropClick = true,
+  iconSrc,
+  iconColors,
+  customIcon,
 }) => {
+  const { t } = useTranslation();
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -62,69 +84,85 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     }
   }, [isOpen]);
 
-  const isDeleteAction =
-    variant === "danger" ||
-    title.toLowerCase().includes("hapus") ||
-    title.toLowerCase().includes("delete") ||
-    title.toLowerCase().includes("remove");
+  const isLogoutAction =
+    title.toLowerCase().includes("logout") ||
+    title.toLowerCase().includes("keluar") ||
+    title.toLowerCase().includes("sign out") ||
+    title.toLowerCase().includes("signout");
+
+  const isCelebration =
+    variant === "info" ||
+    isAlert ||
+    title.toLowerCase().includes("sukses") ||
+    title.toLowerCase().includes("berhasil") ||
+    title.toLowerCase().includes("selamat");
+
+  const resolvedIconSrc =
+    iconSrc ||
+    (isCelebration
+      ? "https://cdn.lordicon.com/lupuorrc.json"
+      : "https://cdn.lordicon.com/gsqxdxog.json");
+
+  const resolvedIconColors =
+    iconColors ||
+    (isCelebration ? "primary:#0ab39c,secondary:#405189" : "primary:#f7b84b,secondary:#f06548");
 
   return (
     <AnimatePresence>
       {isOpen && (
         <Portal>
-          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          {/* #373 — HP bottom sheet; md+ centered */}
+          <div className="fixed inset-0 z-[110] flex items-end md:items-center justify-center p-0 md:p-4">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={closeOnBackdropClick ? onClose : undefined}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs"
+              className="absolute inset-0 bg-overlay/60 backdrop-blur-xs"
             />
 
             {/* Velzon SweetAlert Modal Window */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              initial={{ opacity: 0, scale: 0.95, y: 40 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              exit={{ opacity: 0, scale: 0.95, y: 40 }}
               transition={{ type: "spring", duration: 0.3 }}
-              className="relative bg-surface dark:bg-slate-900 rounded-md shadow-2xl w-full max-w-sm border border-border-subtle/80 dark:border-slate-800 z-10 p-6 sm:p-8 text-center flex flex-col items-center"
+              className="relative bg-surface rounded-t-2xl md:rounded-md shadow-2xl w-full max-w-sm border border-border-subtle/80 z-10 p-6 sm:p-8 text-center flex flex-col items-center pb-[max(1.5rem,env(safe-area-inset-bottom))] md:pb-8"
             >
+              <div className="md:hidden w-10 h-1 rounded-full bg-surface-marker mb-3" aria-hidden />
               {/* Top Right Close X Button */}
               <button
                 onClick={onClose}
-                className="absolute top-3.5 right-3.5 text-[#878a99] hover:text-[#495057] dark:hover:text-slate-200 transition-colors p-1 rounded cursor-pointer"
-                aria-label="Tutup"
+                className="absolute top-3.5 right-3.5 text-content-muted hover:text-content-body transition-colors min-h-11 min-w-11 inline-flex items-center justify-center rounded cursor-pointer"
+                aria-label={t("ui.close")}
               >
                 <X className="w-4 h-4" />
               </button>
 
-              {/* Center Velzon Animated LordIcon */}
+              {/* Center Animated Icon */}
               <div className="w-24 h-24 mx-auto mb-1 flex items-center justify-center">
-                {isDeleteAction ? (
-                  <lord-icon
-                    src="https://cdn.lordicon.com/gsqxdxog.json"
-                    trigger="loop"
-                    colors="primary:#f7b84b,secondary:#f06548"
-                    style={{ width: "90px", height: "90px" }}
-                  />
+                {customIcon ? (
+                  customIcon
+                ) : isLogoutAction ? (
+                  <AnimatedLogoutIcon size={90} />
                 ) : (
                   <lord-icon
-                    src="https://cdn.lordicon.com/lupuorrc.json"
+                    src={resolvedIconSrc}
                     trigger="loop"
-                    colors="primary:#0ab39c,secondary:#405189"
+                    colors={resolvedIconColors}
                     style={{ width: "90px", height: "90px" }}
                   />
                 )}
               </div>
 
               {/* Title */}
-              <h3 className="text-[1.21875rem] font-semibold text-[#495057] dark:text-[#e9ecef] mb-2 leading-[1.4] tracking-tight text-center">
-                {title || "Apakah Anda Yakin?"}
+              <h3 className="text-[1.21875rem] font-semibold text-content-body mb-2 leading-[1.4] tracking-tight text-center">
+                {title || t("alerts.areYouSure", "Apakah Anda Yakin?")}
               </h3>
 
               {/* Message */}
-              <p className="text-[0.9375rem] text-[#878a99] dark:text-[#adb5bd] mb-6 max-w-xs mx-auto leading-relaxed text-center">
+              <p className="text-[0.9375rem] text-content-muted mb-6 max-w-xs mx-auto leading-relaxed text-center">
                 {message}
               </p>
 
@@ -134,7 +172,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                   type="button"
                   disabled={isLoading}
                   onClick={onConfirm}
-                  className="min-w-[5rem] px-4 py-2 bg-primary hover:bg-[#364574] text-white font-normal rounded text-[0.8125rem] shadow-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  className="min-w-[5rem] px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-normal rounded text-[0.8125rem] shadow-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5"
                 >
                   {isLoading && (
                     <svg
@@ -158,7 +196,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                       ></path>
                     </svg>
                   )}
-                  {confirmText}
+                  {confirmText || t("common.yesDeleteBang")}
                 </button>
 
                 {!isAlert && (
@@ -167,9 +205,9 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                     type="button"
                     disabled={isLoading}
                     onClick={onClose}
-                    className="min-w-[5rem] px-4 py-2 bg-danger hover:bg-[#d95a40] text-white font-normal rounded text-[0.8125rem] shadow-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                    className="min-w-[5rem] px-4 py-2 bg-danger-surface hover:bg-danger-hover text-content-inverse font-normal rounded text-[0.8125rem] shadow-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
                   >
-                    {cancelText}
+                    {cancelText || t("common.cancel")}
                   </button>
                 )}
               </div>

@@ -3,7 +3,17 @@ import { create } from "zustand";
 import { Project, Task, Sprint, ActivityLog, MasterData, UserProfile } from "../types";
 import { CacheManager } from "../lib/cache";
 
-export type AppRole = "admin" | "manager" | "member" | "viewer";
+/**
+ * Peran — DEFINISINYA ADA DI SATU TEMPAT: `src/types/roles.ts`.
+ *
+ * Berkas ini dulu mendeklarasikan `AppRole` versinya SENDIRI dengan isi yang
+ * berbeda dari `src/types/user.ts`: ia memuat `member` tetapi tidak memuat
+ * `head` maupun `user`. Dua tipe bernama sama dengan isi berbeda, dan tidak ada
+ * satu pun berkas yang meng-import versi ini — ia mati sejak lahir.
+ *
+ * Diganti re-export supaya tidak ada lagi tempat kedua yang bisa menyimpang.
+ */
+export type { AppRole } from "../types/user";
 
 type SetStateAction<S> = S | ((prevState: S) => S);
 
@@ -24,6 +34,7 @@ export type AppView =
   | "activity"
   | "sprints"
   | "users"
+  | "userSessions"
   | "meetingNotes"
   | "backup"
   | "planning"
@@ -31,7 +42,6 @@ export type AppView =
   | "connect"
   | "dbExplorer"
   | "wiki"
-  | "notebooklm"
   | "flowchart"
   | "auditLog"
   | "qa"
@@ -130,7 +140,7 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => {
       const nextVal = typeof tasks === "function" ? (tasks as any)(state.tasks) : tasks;
       if (state.selectedProject) {
-        CacheManager.save(`tasks_${state.selectedProject.id}`, nextVal);
+        CacheManager.saveDebounced(`tasks_${state.selectedProject.id}`, nextVal);
       }
       return { tasks: nextVal };
     }),
@@ -139,7 +149,7 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => {
       const nextTasks = state.tasks.map((t) => (t.id === taskId ? { ...t, ...updatedTask } : t));
       if (state.selectedProject) {
-        CacheManager.save(`tasks_${state.selectedProject.id}`, nextTasks);
+        CacheManager.saveDebounced(`tasks_${state.selectedProject.id}`, nextTasks);
       }
       return { tasks: nextTasks };
     }),

@@ -17,19 +17,19 @@ export const SprintBanner: React.FC<SprintBannerProps> = ({
   sprintProgress,
 }) => {
   return (
-    <div className="w-full h-auto bg-gradient-to-r from-indigo-600 via-indigo-600 to-purple-700 rounded-xl p-6 md:p-8 text-white relative overflow-hidden shadow-soft-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-6 select-none">
+    <div className="w-full h-auto bg-gradient-to-r from-indigo-600 via-indigo-600 to-purple-700 rounded-xl p-6 md:p-8 text-content-inverse relative overflow-hidden shadow-soft-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-6 select-none">
       {/* Background subtle geometric patterns */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent opacity-40 animate-pulse pointer-events-none"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-content-inverse/10 via-transparent to-transparent opacity-40 animate-pulse pointer-events-none"></div>
 
       <div className="space-y-4 relative z-10 flex-1">
         <div className="flex items-center gap-2">
           <Zap className="w-4 h-4 text-amber-300 animate-pulse" />
-          <span className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-indigo-100 bg-surface/10 px-2.5 py-1 rounded-full border border-white/10">
+          <span className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-indigo-100 bg-surface/10 px-2.5 py-1 rounded-full border border-content-inverse/10">
             CURRENT SPRINT: {activeSprint ? activeSprint.name.toUpperCase() : "NONE"}
           </span>
         </div>
 
-        <h3 className="text-xl md:text-2xl font-medium tracking-tight max-w-2xl text-white leading-normal">
+        <h3 className="text-xl md:text-2xl font-medium tracking-tight max-w-2xl text-content-inverse leading-normal">
           "
           {activeSprint
             ? activeSprint.goal || "Selesaikan target sprint tepat waktu."
@@ -37,7 +37,7 @@ export const SprintBanner: React.FC<SprintBannerProps> = ({
           "
         </h3>
 
-        <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-indigo-100 pt-1">
+        <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-content-inverse-muted pt-1">
           <div className="flex items-center gap-1.5 font-medium">
             <Calendar className="w-4 h-4 text-indigo-200" />
             <span>
@@ -59,9 +59,9 @@ export const SprintBanner: React.FC<SprintBannerProps> = ({
       </div>
 
       {/* Progress Radial Gauge */}
-      <div className="relative z-10 shrink-0 self-center md:self-auto flex items-center justify-center p-1 bg-surface/5 backdrop-blur-md rounded-xl border border-white/10 shadow-soft-lg w-28 h-28">
+      <div className="relative z-10 shrink-0 self-center md:self-auto flex items-center justify-center p-1 bg-content-inverse/5 backdrop-blur-md rounded-xl border border-content-inverse/10 shadow-soft-lg w-28 h-28">
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-medium text-white">{sprintProgress}%</span>
+          <span className="text-2xl font-medium text-content-inverse">{sprintProgress}%</span>
           <span className="text-xs sm:text-[10px] font-medium tracking-widest text-indigo-200 uppercase leading-none mt-0.5">
             SPRINT PROGRESS
           </span>
@@ -69,14 +69,14 @@ export const SprintBanner: React.FC<SprintBannerProps> = ({
 
         <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
           <path
-            className="text-white/20"
+            className="text-content-inverse/20"
             d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
             fill="none"
             stroke="currentColor"
             strokeWidth="3.5"
           />
           <path
-            className="text-white"
+            className="text-content-inverse"
             strokeDasharray={`${sprintProgress}, 100`}
             d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
             fill="none"

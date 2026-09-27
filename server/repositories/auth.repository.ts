@@ -1,0 +1,366 @@
+import db from "../../src/lib/db";
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
+
+/**
+ * #347 — masa berlaku baris TokenBlacklist: pakai `exp` JWT bila ada,
+ * else 2 jam (sama dengan `generateToken`).
+ * Kolom tabel (pg-migrate): id SERIAL, token VARCHAR(512), "expiresAt", "createdAt".
+ */
+export function expiresAtDariJwt(token: string): Date {
+  try {
+    const decoded = jwt.decode(token) as { exp?: number } | null;
+    if (decoded?.exp && Number.isFinite(decoded.exp)) {
+      return new Date(decoded.exp * 1000);
+    }
+  } catch {
+    // token sampah — fallback di bawah
+  }
+  return new Date(Date.now() + 2 * 60 * 60 * 1000);
+}
+
+export class AuthRepository {
+  async findUserRoleById(id: string): Promise<string | null> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query("SELECT role FROM Users WHERE id = ? OR uid = ?", [
+        id,
+        id,
+      ]);
+      return rows.length > 0 ? String(rows[0].role || "").toLowerCase() : null;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async findUserByIdOrUid(idOrUid: string): Promise<any | null> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query("SELECT * FROM Users WHERE id = ? OR uid = ?", [
+        idOrUid,
+        idOrUid,
+      ]);
+      return rows && rows.length > 0 ? rows[0] : null;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async findSessionData(
+    userId: string
+  ): Promise<{ currentSessionToken?: string; lastSeen?: string } | null> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        "SELECT currentSessionToken, lastSeen FROM Users WHERE id = ?",
+        [userId]
+      );
+      return rows && rows.length > 0 ? rows[0] : null;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async updateSessionToken(userId: string, token: string, lastSeen: string): Promise<boolean> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        "UPDATE Users SET currentSessionToken = ?, lastSeen = ? WHERE id = ? RETURNING id",
+        [token, lastSeen, userId]
+      );
+      return Array.isArray(rows) && rows.length > 0;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async clearSessionToken(userId: string): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      await connection.query("UPDATE Users SET currentSessionToken = NULL WHERE id = ?", [userId]);
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * #347 — catat JWT yang dicabut (logout / reset kata sandi) ke TokenBlacklist.
+   * Identifier dikutip sesuai pg-migrate (`"TokenBlacklist"`, `"expiresAt"`).
+   * Token dipotong ke 512 agar cocok VARCHAR(512); pencarian memakai potongan yang sama.
+   */
+  async addToTokenBlacklist(token: string, expiresAt?: Date): Promise<void> {
+    if (!token) return;
+    const safeToken = String(token).slice(0, 512);
+    const expiry = expiresAt ?? expiresAtDariJwt(token);
+    const connection = await db.getConnection();
+    try {
+      await connection.query(`INSERT INTO "TokenBlacklist" (token, "expiresAt") VALUES (?, ?)`, [
+        safeToken,
+        expiry,
+      ]);
+    } finally {
+      connection.release();
+    }
+  }
+
+  /** #347 — true bila token ada di denylist dan belum lewat "expiresAt". */
+  async isTokenBlacklisted(token: string): Promise<boolean> {
+    if (!token) return false;
+    const safeToken = String(token).slice(0, 512);
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        `SELECT 1 AS hit FROM "TokenBlacklist"
+          WHERE token = ? AND "expiresAt" > NOW()
+          LIMIT 1`,
+        [safeToken]
+      );
+      return Array.isArray(rows) && rows.length > 0;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async logForceLogout(userId: string): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      await connection.query(
+        `INSERT INTO AuditLogs (id, userId, projectId, actionType, entityName, entityId, oldValues, newValues)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          crypto.randomUUID(),
+          userId,
+          null,
+          "FORCE_LOGOUT",
+          "Authentication",
+          userId,
+          null,
+          JSON.stringify({ action: "User initiated force logout from another device" }),
+        ]
+      );
+    } finally {
+      connection.release();
+    }
+  }
+
+  async checkUserExistsByUsername(username: string): Promise<boolean> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query("SELECT id FROM Users WHERE username = ?", [
+        username,
+      ]);
+      return rows && rows.length > 0;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async checkUserExistsByEmail(email: string): Promise<boolean> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query("SELECT id FROM Users WHERE email = ?", [email]);
+      return rows && rows.length > 0;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async registerUser(user: {
+    uid: string;
+    username: string;
+    fullName: string;
+    email: string;
+    displayName: string;
+    role: string;
+    status: string;
+    passwordHash: string;
+    department?: string | null;
+    position?: string | null;
+    permissions?: any;
+    phone?: string | null;
+  }): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      await connection.query(
+        `INSERT INTO Users (id, uid, username, nama_lengkap, email, displayName, photoURL, role, status, passwordHash, department, position, permissions, phone) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          user.uid,
+          user.uid,
+          user.username,
+          user.fullName,
+          user.email,
+          user.displayName,
+          null,
+          user.role,
+          user.status,
+          user.passwordHash,
+          user.department || null,
+          user.position || null,
+          user.permissions
+            ? typeof user.permissions === "string"
+              ? user.permissions
+              : JSON.stringify(user.permissions)
+            : null,
+          user.phone || null,
+        ]
+      );
+    } finally {
+      connection.release();
+    }
+  }
+
+  async findUserByEmail(email: string): Promise<any | null> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        'SELECT * FROM "Users" WHERE LOWER(email) = LOWER(?)',
+        [email.trim()]
+      );
+      return rows && rows.length > 0 ? rows[0] : null;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async updateUserPassword(userId: string, passwordHash: string): Promise<boolean> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        `UPDATE "Users"
+            SET "passwordHash" = ?,
+                "tempPasswordExpiresAt" = NULL, "mustChangePassword" = false
+          WHERE id = ? OR uid = ? RETURNING id`,
+        [passwordHash, userId, userId]
+      );
+      return Array.isArray(rows) && rows.length > 0;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * Menetapkan kata sandi SEMENTARA beserta masa berlakunya (#296).
+   *
+   * Dipisahkan dari `updateUserPassword` dengan sengaja: yang itu dipakai saat
+   * pengguna menetapkan kata sandi tetap, dan justru harus MENGOSONGKAN kedua
+   * kolom ini. Menggabungkan keduanya ke satu fungsi berparameter akan membuat
+   * pemanggil yang lupa mengoper parameter diam-diam memperpanjang masa
+   * berlaku kata sandi sementara -- kegagalan yang tidak akan terlihat sampai
+   * ada yang memakai kata sandi lama berbulan-bulan kemudian.
+   */
+  async setTemporaryPassword(
+    userId: string,
+    passwordHash: string,
+    expiresAt: Date
+  ): Promise<boolean> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        `UPDATE "Users"
+            SET "passwordHash" = ?,
+                "tempPasswordExpiresAt" = ?, "mustChangePassword" = true
+          WHERE id = ? OR uid = ? RETURNING id`,
+        [passwordHash, expiresAt, userId, userId]
+      );
+      return Array.isArray(rows) && rows.length > 0;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async recordSessionLogin(sessionData: {
+    id: string;
+    userId: string;
+    ipAddress?: string | null;
+    userAgent?: string | null;
+    browser?: string | null;
+    os?: string | null;
+    device?: string | null;
+    city?: string | null;
+    country?: string | null;
+    location?: string | null;
+    token?: string | null;
+  }): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      const safeId = String(sessionData.id).slice(0, 250);
+      const safeUserId = String(sessionData.userId).slice(0, 250);
+      const safeIpAddress = sessionData.ipAddress
+        ? String(sessionData.ipAddress).slice(0, 250)
+        : null;
+      const safeUserAgent = sessionData.userAgent ? String(sessionData.userAgent) : null;
+      const safeBrowser = sessionData.browser ? String(sessionData.browser) : null;
+      const safeOs = sessionData.os ? String(sessionData.os) : null;
+      const safeDevice = sessionData.device ? String(sessionData.device) : null;
+      const safeCity = sessionData.city ? String(sessionData.city).slice(0, 250) : null;
+      const safeCountry = sessionData.country ? String(sessionData.country).slice(0, 250) : null;
+      const safeLocation = sessionData.location ? String(sessionData.location) : null;
+      const safeToken = sessionData.token ? String(sessionData.token) : null;
+
+      // Tandai sesi aktif sebelumnya sebagai FORCE_LOGOUT jika ada
+      await connection.query(
+        `UPDATE "UserSessions" 
+         SET status = 'FORCE_LOGOUT', "logoutAt" = NOW(), "updatedAt" = NOW() 
+         WHERE "userId" = ? AND status = 'ACTIVE'`,
+        [safeUserId]
+      );
+
+      await connection.query(
+        `INSERT INTO "UserSessions" 
+         (id, "userId", "ipAddress", "userAgent", browser, os, device, city, country, location, "loginAt", "lastActiveAt", status, token, "createdAt", "updatedAt")
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), 'ACTIVE', ?, NOW(), NOW())`,
+        [
+          safeId,
+          safeUserId,
+          safeIpAddress,
+          safeUserAgent,
+          safeBrowser,
+          safeOs,
+          safeDevice,
+          safeCity,
+          safeCountry,
+          safeLocation,
+          safeToken,
+        ]
+      );
+    } catch (e) {
+      console.error("Gagal mencatat UserSession login:", e);
+    } finally {
+      connection.release();
+    }
+  }
+
+  async recordSessionLogout(userId: string, token?: string | null): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      let updated = false;
+      if (token) {
+        const [res]: any = await connection.query(
+          `UPDATE "UserSessions" 
+           SET status = 'LOGGED_OUT', "logoutAt" = NOW(), "updatedAt" = NOW() 
+           WHERE "userId" = ? AND token = ?`,
+          [userId, token]
+        );
+        if (res?.affectedRows > 0 || res?.rowCount > 0) {
+          updated = true;
+        }
+      }
+
+      if (!updated) {
+        await connection.query(
+          `UPDATE "UserSessions" 
+           SET status = 'LOGGED_OUT', "logoutAt" = NOW(), "updatedAt" = NOW() 
+           WHERE "userId" = ? AND status = 'ACTIVE'`,
+          [userId]
+        );
+      }
+    } catch (e) {
+      console.error("Gagal mencatat UserSession logout:", e);
+    } finally {
+      connection.release();
+    }
+  }
+}
+
+export const authRepository = new AuthRepository();

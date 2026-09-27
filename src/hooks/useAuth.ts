@@ -1,9 +1,17 @@
+import i18n from "../i18n";
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import type { AppView } from "../store/useAppStore";
 import { showErrorAlert } from "../lib/sweetalert";
-import { UserProfile, AppRole } from "../types";
-import { apiRequest, ApiError, setAuthToken, clearAuthToken, getAuthToken } from "../lib/api";
+import { UserProfile, AppRole, PeranEfektif } from "../types";
+import {
+  apiRequest,
+  ApiError,
+  setAuthToken,
+  clearAuthToken,
+  getAuthToken,
+  ambilSelisihJamMs,
+} from "../lib/api";
 import { safeLocalStorage, safeSessionStorage } from "../lib/safeStorage";
 
 // Browser session ID for collision detection
@@ -32,7 +40,12 @@ interface UseAuthReturn {
   isAuthLoading: boolean;
   loginStatusText: string;
   setLoginStatusText: (text: string) => void;
-  effectiveRole: AppRole;
+  /**
+   * Peran yang BERLAKU saat ini — bisa berasal dari `Users.role` (lingkup
+   * SYSTEM) atau dari `ProjectMembers.role` (lingkup PROJECT), tergantung
+   * apakah pengguna sedang berada di dalam proyek. Lihat `PeranEfektif`.
+   */
+  effectiveRole: PeranEfektif;
   handleLogout: (silent?: boolean) => Promise<void>;
   handleLogoutRequest: () => void;
   handleManualLogin: (
@@ -76,7 +89,7 @@ export function useAuth(
 ): UseAuthReturn {
   const handleAuthApiResponse = (status: number, data: any) => {
     if (status === 429) {
-      toast.error("Terlalu banyak percobaan. Silakan tunggu beberapa menit.");
+      toast.error(i18n.t("toast.tooManyAttempts"));
     } else if (status === 401) {
       toast.error(data?.message || "Username atau password salah.");
     } else {
@@ -95,32 +108,23 @@ export function useAuth(
   const [activeSessionData, setActiveSessionData] = useState<any>(null);
   const [pendingLoginCredentials, setPendingLoginCredentials] = useState<any>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
-  const [loginStatusText, setLoginStatusText] = useState<string>("Authenticating...");
+  const [loginStatusText, setLoginStatusText] = useState<string>("Mengautentikasi...");
 
   // Effective role calculation
   const user: any = currentUser;
   const effectiveRole = useMemo(() => {
-    const usernameLower = (
-      currentUser?.username ||
-      currentUserProfile?.username ||
-      user?.username ||
-      ""
-    )
-      .toLowerCase()
-      .trim();
     const roleLower = (userRole || currentUser?.role || currentUserProfile?.role || "")
       .toLowerCase()
       .trim();
 
-    if (
-      usernameLower === "admin" ||
-      roleLower === "admin" ||
-      roleLower === "administrator" ||
-      roleLower === "superadmin"
-    )
+    // `usernameLower === "admin"` DICABUT (#91): ia memberi hak Administrator
+    // berdasarkan NAMA, bukan peran. Siapa pun yang berhasil mendaftar dengan
+    // username `admin` mendapat seluruh antarmuka admin, apa pun peran
+    // sebenarnya di database. Identitas bukan otorisasi.
+    if (roleLower === "admin" || roleLower === "administrator" || roleLower === "superadmin")
       return "admin";
 
-    return (userRole || "user") as AppRole;
+    return (userRole || "user") as PeranEfektif;
   }, [
     userRole,
     currentUser?.uid,
@@ -135,7 +139,7 @@ export function useAuth(
     try {
       const data = await apiRequest("/api/users");
       if (data.status === "success") {
-        setAllUsers(data.data as UserProfile[]);
+        setAllUsers?.(data.data as UserProfile[]);
       }
     } catch (error) {
       console.warn("Silent failure fetching all users:", error);
@@ -144,8 +148,7 @@ export function useAuth(
 
   // Logout handler
   const handleLogout = async (silent = false) => {
-    const wasLoggedIn =
-      isLoggedIn || !!currentUser || !!safeLocalStorage.getItem("lanpro_jwt_token");
+    const wasLoggedIn = isLoggedIn || !!currentUser || !!getAuthToken();
     const activeUserId = currentUser?.id || currentUser?.uid;
 
     if (activeUserId) {
@@ -184,7 +187,7 @@ export function useAuth(
     setAuthView("login");
 
     if (wasLoggedIn && !silent) {
-      toast.success("Logged out successfully");
+      toast.success(i18n.t("toast.loggedOut"));
     }
 
     // Hard check to ensure we are back at login if state doesn't trigger immediately
@@ -199,11 +202,11 @@ export function useAuth(
   const handleLogoutRequest = () => {
     setConfirmAction?.({
       isOpen: true,
-      title: "Logout Akun",
-      message: "Apakah Anda yakin ingin keluar dari LanPro? Sesi Anda akan diakhiri.",
+      title: i18n.t("logoutConfirm.title"),
+      message: i18n.t("logoutConfirm.message"),
       variant: "warning",
-      confirmText: "Ya, Keluar",
-      cancelText: "Batal",
+      confirmText: i18n.t("logoutConfirm.confirm"),
+      cancelText: i18n.t("logoutConfirm.cancel"),
       onConfirm: async () => {
         await handleLogout(false);
       },
@@ -218,38 +221,30 @@ export function useAuth(
     force: boolean = false
   ) => {
     if (!username || !password) {
-      toast.error("Username/Email dan Password wajib diisi.");
+      toast.error(i18n.t("toast.credentialsRequired"));
       return;
     }
     if (isAuthLoading && !force) return;
 
     try {
       setIsAuthLoading(true);
-      setLoginStatusText("Authenticating...");
+      setLoginStatusText("Mengautentikasi...");
 
-      // Special Hardcoded Admin bypass
-      if (username === "admin" && (password === "admin" || password === "admin123")) {
-        const adminData = {
-          uid: "admin-fixed-id",
-          username: "admin",
-          status: "approved",
-          role: "admin",
-          displayName: "Admin Manager",
-        };
-
-        try {
-          await apiRequest("/api/auth/register", {
-            method: "POST",
-            body: { ...adminData, password: password, id: "admin-fixed-id" },
-          });
-        } catch (e) {}
-
-        if (remember) {
-          safeLocalStorage.setItem("isAdminMode", "true");
-        } else {
-          safeSessionStorage.setItem("isAdminMode", "true");
-        }
-      }
+      // #91 — DI SINI DULU ADA PINTU BELAKANG:
+      //
+      //   if (username === "admin" && (password === "admin" || password === "admin123"))
+      //
+      // Ia mendaftarkan akun ber-`role: "admin"` dengan id tetap
+      // `admin-fixed-id`, lalu menandai `isAdminMode` di penyimpanan peramban.
+      // Kredensialnya tertulis di berkas ini, artinya ada di bundel yang
+      // dikirim ke SETIAP pengunjung — siapa pun yang membuka devtools
+      // membacanya.
+      //
+      // Ia tidak menembus autentikasi server (alurnya tetap lanjut ke
+      // /api/auth/login), tetapi ia MENANAM akun beperan admin, dan sesudah
+      // #91 sisi server pun peran itu tidak lagi bisa diminta dari body.
+      //
+      // Akun admin dibuat lewat panel admin oleh admin yang sudah masuk.
 
       // MySQL login with session collision check
       const endpoint = force ? "/api/auth/force-logout" : "/api/auth/login";
@@ -265,7 +260,7 @@ export function useAuth(
       }
 
       if (data.token) {
-        setAuthToken(data.token);
+        setAuthToken(data.token, remember);
       }
 
       const userData = data.user as UserProfile;
@@ -314,12 +309,6 @@ export function useAuth(
         console.warn("Failed to prefetch data:", e);
       }
 
-      // Security delay for browser password managers
-      if (!force) {
-        setLoginStatusText("Memverifikasi keamanan sesi...");
-        await new Promise((resolve) => setTimeout(resolve, 800));
-      }
-
       setIsAuthLoading(false);
       setIsLoggedIn(true);
       setUserRole(userData.role);
@@ -337,7 +326,18 @@ export function useAuth(
         safeLocalStorage.removeItem("rememberUser");
       }
 
-      toast.success(`Selamat datang kembali, ${userData?.displayName || username}`);
+      toast.success(i18n.t("toast.welcomeBack", { nama: userData?.displayName || username }));
+
+      // Jam perangkat yang menyimpang jauh membuat token terlihat kedaluwarsa
+      // sejak lahir di mata peramban — korbannya sesi yang putus tiba-tiba.
+      const selisihMs = ambilSelisihJamMs();
+      if (Math.abs(selisihMs) >= 5 * 60 * 1000) {
+        const jam = Math.round((Math.abs(selisihMs) / 3600000) * 10) / 10;
+        toast.warning(
+          i18n.t(selisihMs < 0 ? "toast.deviceClockAhead" : "toast.deviceClockBehind", { jam }),
+          { duration: 9000 }
+        );
+      }
     } catch (e: any) {
       if (e instanceof ApiError && e.status === 409) {
         console.warn("Session collision detected");
@@ -350,9 +350,25 @@ export function useAuth(
 
       setIsAuthLoading(false);
       const errStatus = e.status || 500;
+      // Item #150 — dahulukan KODE dari server; pencocokan kata hanya cadangan.
+      //
+      // Versi lama HANYA mencocokkan substring berbahasa Indonesia
+      // ("terblokir", "belum aktif", "salah"). Begitu pesan servernya
+      // diterjemahkan — atau sekadar diubah kata-katanya — percabangan ini
+      // patah tanpa satu pun tanda: galat yang wajar akan tercatat sebagai
+      // galat tak terduga.
+      const kodeGalat: string = e?.data?.code || "";
+      const KODE_WAJAR = [
+        "auth.badCredentials",
+        "auth.wrongPassword",
+        "auth.blocked",
+        "auth.blockedFive",
+        "auth.dbError",
+      ];
       const isExpectedAuthError =
         errStatus === 429 ||
         errStatus === 403 ||
+        KODE_WAJAR.includes(kodeGalat) ||
         (e.message &&
           (e.message.includes("belum aktif") ||
             e.message.includes("belum di aktifkan") ||
@@ -391,7 +407,7 @@ export function useAuth(
 
         const isRejected = cleanMsg.toLowerCase().includes("ditolak");
         showErrorAlert(
-          isRejected ? "Pendaftaran Ditolak" : "Akses Ditolak",
+          isRejected ? i18n.t("auth.registrationRejected") : i18n.t("auth.accessDenied"),
           cleanMsg,
           isRejected ? "error" : "warning"
         );
@@ -412,7 +428,7 @@ export function useAuth(
         (e.message.toLowerCase().includes("gagal terhubung") ||
           e.message.toLowerCase().includes("failed to fetch"))
       ) {
-        toast.error("Gagal terhubung ke server. Silakan periksa koneksi Anda dan coba lagi.");
+        toast.error(i18n.t("toast.serverUnreachable"));
       } else {
         handleAuthApiResponse(errStatus, { message: e.message || "Terjadi kesalahan saat login." });
       }

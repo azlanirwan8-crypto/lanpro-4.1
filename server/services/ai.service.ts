@@ -11,8 +11,11 @@ export async function generateContentWithFallback(ai: any, params: any) {
   if (!fallbackModels.includes("gemini-3.5-flash")) {
     fallbackModels.push("gemini-3.5-flash");
   }
-  if (!fallbackModels.includes("gemini-2.5-flash")) {
-    fallbackModels.push("gemini-2.5-flash");
+  // "gemini-2.5-flash" dan "gemini-2.0-flash" dihapus 27 Sep: keduanya 404
+  // "no longer available to new users" terhadap kunci baru (terukur), jadi
+  // urutan cadangan selalu mati di langkah terakhir.
+  if (!fallbackModels.includes("gemini-3.8-flash")) {
+    fallbackModels.push("gemini-3.8-flash");
   }
 
   let lastError: any = null;
@@ -88,6 +91,9 @@ export async function generateContentWithFallback(ai: any, params: any) {
     }
   }
 
-  console.error(`[GEMINI] All fallback models failed. Final error:`, lastError?.message || lastError);
+  console.error(
+    `[GEMINI] All fallback models failed. Final error:`,
+    lastError?.message || lastError
+  );
   throw lastError;
 }

@@ -1,22 +1,35 @@
-import { toast } from 'sonner';
-import { useMemo, useState } from 'react';
-import { KanbanBoardProps } from '../types';
-import { TERMINAL_STATUSES } from '../../../lib/constants';
-import { updateTask, resolveUserId } from '../services/kanban.service';
+import i18n from "../../../i18n";
+import { toast } from "sonner";
+import { useMemo, useState } from "react";
+import { KanbanBoardProps } from "../types";
+import { statusSelesai } from "../../../lib/statusSelesai";
+import { resolveStatusWriteValue } from "../../../lib/statusKolom";
+import { updateTask, resolveUserId } from "../services/kanban.service";
+import { suppressTaskDataRefresh } from "../../../lib/taskRefreshControl";
 
-const checkTaskBlockers = (tasks: any[], taskId: string, targetStatus: string) => {
-  const isTerminalStatus = targetStatus.toLowerCase().includes('done') || targetStatus.toLowerCase().includes('completed');
-  if (!isTerminalStatus) return true;
+const checkTaskBlockers = (
+  tasks: any[],
+  taskId: string,
+  targetStatus: string,
+  masterData: any[]
+) => {
+  if (!statusSelesai(targetStatus, masterData)) return true;
 
-  const task = tasks.find(t => t.id === taskId);
+  const task = tasks.find((t) => t.id === taskId);
   if (!task || !task.linkedTasks) return true;
 
-  const blockers = task.linkedTasks.filter((l: any) => l.relationType === 'is_blocked_by');
-  
+  const blockers = task.linkedTasks.filter((l: any) => l.relationType === "is_blocked_by");
+
   for (const blocker of blockers) {
-    const blockingTask = tasks.find(t => t.id === blocker.targetTaskId);
-    if (blockingTask && !blockingTask.status.toLowerCase().includes('done') && !blockingTask.status.toLowerCase().includes('completed')) {
-      toast.error(`Tidak dapat menyelesaikan ${task.key}: tugas ini terblokir oleh ${blockingTask.key} (${blockingTask.status}).`);
+    const blockingTask = tasks.find((t) => t.id === blocker.targetTaskId);
+    if (blockingTask && !statusSelesai(blockingTask.status, masterData)) {
+      toast.error(
+        i18n.t("toast.cannotCompleteBlocked", {
+          kunci: task.key,
+          pemblokir: blockingTask.key,
+          status: blockingTask.status,
+        })
+      );
       return false;
     }
   }
@@ -27,56 +40,62 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
   const { masterData, tasks, projectMembers, userRole, user, selectedProject } = props;
   const [shakingTaskId, setShakingTaskId] = useState<string | null>(null);
 
-  const mArr = useMemo(() => Array.isArray(masterData) ? masterData : [], [masterData]);
-  const tArr = useMemo(() => Array.isArray(tasks) ? tasks : [], [tasks]);
-  const pArr = useMemo(() => Array.isArray(projectMembers) ? projectMembers : [], [projectMembers]);
+  const mArr = useMemo(() => (Array.isArray(masterData) ? masterData : []), [masterData]);
+  const tArr = useMemo(() => (Array.isArray(tasks) ? tasks : []), [tasks]);
+  const pArr = useMemo(
+    () => (Array.isArray(projectMembers) ? projectMembers : []),
+    [projectMembers]
+  );
 
-  const boardStatuses = useMemo(() => 
-    mArr.filter(d => d.type === 'status').sort((a,b) => (a.order||0) - (b.order||0)),
+  const boardStatuses = useMemo(
+    () => mArr.filter((d) => d.type === "status").sort((a, b) => (a.order || 0) - (b.order || 0)),
     [mArr]
   );
 
-  const epics = useMemo(() => 
-    tArr.filter(t => (t.type || '').toLowerCase() === 'epic'),
-    [tArr]
-  );
+  const epics = useMemo(() => tArr.filter((t) => (t.type || "").toLowerCase() === "epic"), [tArr]);
 
   const standaloneTasks = useMemo(() => {
-    const epicIds = new Set(epics.map(e => e.id));
-    return tArr.filter(t => (t.type || '').toLowerCase() !== 'epic' && (!t.parentId || epicIds.has(t.parentId)));
+    const epicIds = new Set(epics.map((e) => e.id));
+    return tArr.filter(
+      (t) => (t.type || "").toLowerCase() !== "epic" && (!t.parentId || !epicIds.has(t.parentId))
+    );
   }, [tArr, epics]);
 
-  
   const groupedTasks = useMemo(() => {
-    const epicIds = new Set(epics.map(e => e.id));
+    const epicIds = new Set(epics.map((e) => e.id));
+    const statusMaster = mArr.filter((d) => d.type === "status");
     const groups: Record<string, typeof tArr> = {};
-    
-    tArr.forEach(task => {
-      const isEpic = (task.type || '').toLowerCase() === 'epic';
-      const isSubtask = task.parentId && !epicIds.has(task.parentId); // Assuming subtasks point to non-epic tasks
-      
+
+    tArr.forEach((task) => {
+      const isEpic = (task.type || "").toLowerCase() === "epic";
+      const isSubtask = task.parentId && !epicIds.has(task.parentId);
+
       if (isEpic || isSubtask) return;
-      
-      let laneKey = 'standalone';
-      if (groupBy === 'epic') {
-         const hasEpicParent = task.parentId && epicIds.has(task.parentId);
-         laneKey = hasEpicParent ? task.parentId : 'standalone';
-      } else if (groupBy === 'assignee') {
-         const rawAid = task.assigneeId;
-         const aid = typeof rawAid === 'object' ? (rawAid?.uid || rawAid?.id) : rawAid;
-         laneKey = (aid && aid !== 'null' && aid !== 'undefined' && aid !== 'none') ? String(aid) : 'unassigned';
+
+      let laneKey = "standalone";
+      if (groupBy === "epic") {
+        const hasEpicParent = task.parentId && epicIds.has(task.parentId);
+        laneKey = hasEpicParent ? task.parentId : "standalone";
+      } else if (groupBy === "assignee") {
+        const rawAid = task.assigneeId;
+        const aid = typeof rawAid === "object" ? rawAid?.uid || rawAid?.id : rawAid;
+        laneKey =
+          aid && aid !== "null" && aid !== "undefined" && aid !== "none"
+            ? String(aid)
+            : "unassigned";
       }
-      
-      const key = `${laneKey}:${task.status}`;
-            
+
+      // #459 — samakan kunci dengan code MasterData (case-insensitive), bukan raw task.status
+      const statusKey = resolveStatusWriteValue(String(task.status ?? ""), statusMaster);
+      const key = `${laneKey}:${statusKey}`;
+
       if (!groups[key]) {
         groups[key] = [];
       }
       groups[key].push(task);
     });
     return groups;
-  }, [tArr, epics, groupBy]);
-
+  }, [tArr, epics, groupBy, mArr]);
 
   const handleDragEndBoard = async (result: any) => {
     if (!result.destination || !selectedProject) return;
@@ -87,76 +106,87 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
       return;
     }
 
-    const taskToMove = tArr.find(t => t.id === draggableId);
-    
-    const parts = destination.droppableId.split(':');
-    const newStatus = parts.length > 1 ? parts[1] : destination.droppableId;
+    const taskToMove = tArr.find((t) => t.id === draggableId);
 
-    // Check for unfinished subtasks when moving to DONE / UAT / Completed
-    const isTerminalStatus = (status: string) => {
-      if (!status) return false;
-      const s = status.toLowerCase().trim();
-      return s.includes('done') || s.includes('completed') || s.includes('uat') || s.includes('closed') || s.includes('finish') || TERMINAL_STATUSES.includes(s);
-    };
+    const parts = destination.droppableId.split(":");
+    const rawStatus = parts.length > 1 ? parts.slice(1).join(":") : destination.droppableId;
+    // #382 — tulis code bila MasterData punya; tetap terima label warisan di droppableId
+    const newStatus = resolveStatusWriteValue(
+      rawStatus,
+      (mArr || []).filter((m: any) => m.type === "status")
+    );
 
-    if (taskToMove && isTerminalStatus(newStatus)) {
-      const inlineUnfinished = (taskToMove.subtasks || []).filter((st: any) => !isTerminalStatus(st.status));
-      const childUnfinished = tArr.filter((t: any) => t.parentId === taskToMove.id && !isTerminalStatus(t.status));
+    if (taskToMove && statusSelesai(newStatus, mArr)) {
+      const inlineUnfinished = (taskToMove.subtasks || []).filter(
+        (st: any) => !statusSelesai(st.status, mArr)
+      );
+      const childUnfinished = tArr.filter(
+        (t: any) => t.parentId === taskToMove.id && !statusSelesai(t.status, mArr)
+      );
 
       if (inlineUnfinished.length > 0 || childUnfinished.length > 0) {
         setShakingTaskId(draggableId);
         setTimeout(() => setShakingTaskId(null), 800);
-        toast.error("Subtask Dependency Blocker: Kartu tidak dapat dipindahkan ke 'DONE' / 'UAT' karena masih memiliki subtask yang belum 100% selesai.", {
+        toast.error(i18n.t("toast.subtaskBlocker"), {
           duration: 5000,
         });
-        if (props.refreshTasks) props.refreshTasks(); // Revert position
+        if (props.refreshTasks) props.refreshTasks();
         return;
       }
     }
 
-    // Check for blocking dependencies
     if (taskToMove && taskToMove.linkedTasks) {
-      const blockers = taskToMove.linkedTasks.filter((l: any) => l.relationType === 'is_blocked_by');
+      const blockers = taskToMove.linkedTasks.filter(
+        (l: any) => l.relationType === "is_blocked_by"
+      );
       for (const blocker of blockers) {
-        const blockingTask = tArr.find(t => t.id === blocker.targetTaskId);
-        if (blockingTask && blockingTask.status !== 'Done' && blockingTask.status !== 'Completed') {
-          toast.error(`Tidak dapat memindahkan ${taskToMove.title}: tugas ini terblokir oleh ${blockingTask.title}.`);
+        const blockingTask = tArr.find((t) => t.id === blocker.targetTaskId);
+        if (blockingTask && !statusSelesai(blockingTask.status, mArr)) {
+          toast.error(
+            i18n.t("toast.cannotMoveBlocked", {
+              judul: taskToMove.title,
+              pemblokir: blockingTask.title,
+            })
+          );
           return;
         }
       }
     }
-    
-    if (taskToMove && !['admin', 'manager'].includes(userRole)) {
-      const parentEpic = taskToMove.parentId ? tArr.find(t => t.id === taskToMove.parentId && (t.type || '').toLowerCase() === 'epic') : null;
+
+    if (taskToMove && !["admin", "manager"].includes(userRole)) {
+      const parentEpic = taskToMove.parentId
+        ? tArr.find((t) => t.id === taskToMove.parentId && (t.type || "").toLowerCase() === "epic")
+        : null;
       const isEpicReporter = parentEpic && parentEpic.reporterId === user?.uid;
 
       if (
-        taskToMove.assigneeId !== user?.uid && 
+        taskToMove.assigneeId !== user?.uid &&
         taskToMove.reporterId !== user?.uid &&
         !isEpicReporter
       ) {
-        toast.error('Akses Ditolak: Anda hanya dapat memindahkan tugas yang ditugaskan kepada Anda, yang Anda buat, atau tugas di dalam Epic yang Anda buat.');
+        toast.error(i18n.t("toast.moveAccessDenied"));
         return;
       }
     }
 
-    
     const destLaneId = parts.length > 1 ? parts[0] : null;
 
-    if (!checkTaskBlockers(tArr, draggableId, newStatus)) return;
+    if (!checkTaskBlockers(tArr, draggableId, newStatus, mArr)) return;
 
     if (props.setTasks && taskToMove) {
-      const newTasks = tArr.map(t => {
+      suppressTaskDataRefresh(8000);
+      const newTasks = tArr.map((t) => {
         if (t.id === draggableId) {
-           const updated = { ...t, status: newStatus };
-           if (destLaneId) {
-             if (groupBy === 'epic') {
-               updated.parentId = (destLaneId === 'unparented' || destLaneId === 'standalone') ? null : destLaneId;
-             } else if (groupBy === 'assignee') {
-               updated.assigneeId = (destLaneId === 'unassigned') ? null : destLaneId;
-             }
-           }
-           return updated;
+          const updated = { ...t, status: newStatus };
+          if (destLaneId) {
+            if (groupBy === "epic") {
+              updated.parentId =
+                destLaneId === "unparented" || destLaneId === "standalone" ? null : destLaneId;
+            } else if (groupBy === "assignee") {
+              updated.assigneeId = destLaneId === "unassigned" ? null : destLaneId;
+            }
+          }
+          return updated;
         }
         return t;
       });
@@ -166,28 +196,25 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
     try {
       const updates: any = {
         status: newStatus,
-        version: taskToMove.version
+        version: taskToMove.version,
       };
-      
+
       if (destLaneId) {
-        if (groupBy === 'epic') {
-          updates.parentId = (destLaneId === 'unparented' || destLaneId === 'standalone') ? null : destLaneId;
-        } else if (groupBy === 'assignee') {
-          updates.assigneeId = (destLaneId === 'unassigned') ? null : destLaneId;
+        if (groupBy === "epic") {
+          updates.parentId =
+            destLaneId === "unparented" || destLaneId === "standalone" ? null : destLaneId;
+        } else if (groupBy === "assignee") {
+          updates.assigneeId = destLaneId === "unassigned" ? null : destLaneId;
         }
       }
 
-
+      suppressTaskDataRefresh(8000);
       await updateTask(selectedProject.id, draggableId, resolveUserId(user), updates);
-
-      if (props.refreshTasks) {
-        props.refreshTasks();
-      }
     } catch (e: any) {
       console.error("Failed to update task status", e);
       toast.error(e.message || "Gagal memindahkan task.");
       if (props.refreshTasks) {
-         props.refreshTasks(); // Revert on failure
+        props.refreshTasks();
       }
     }
   };
@@ -201,6 +228,6 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
     standaloneTasks,
     groupedTasks,
     handleDragEndBoard,
-    shakingTaskId
+    shakingTaskId,
   };
 };

@@ -1,67 +1,42 @@
 import express from "express";
-import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 import multer from "multer";
-import db from "../../src/lib/db";
 import { authenticateJWT, verifyGlobalAdmin } from "../middleware/auth";
 import { hashPassword, verifyPassword } from "../helpers/hash";
 import jwt from "jsonwebtoken";
 import { getJwtSecret } from "../middleware/auth";
 import { validateFileBuffer } from "../../src/lib/fileSecurity";
 import { simpanBerkas, hapusBerkas } from "../services/storage.service";
+import {
+  sanitizeAvatarValue,
+  extractStoredFilename,
+  AVATAR_ALLOWED_EXT,
+} from "../helpers/avatarValue";
+import { validasiBody, validasiQuery } from "../middleware/validate";
+import { listSearchQuerySchema } from "../schemas/pagination.schema";
+import { respondWithProjectList } from "../lib/listResponse";
+import { updateUserSchema, updateProfileSchema } from "../schemas/user.schema";
+import { AuthenticatedRequest } from "../types/express";
+import { userRepository } from "../repositories/user.repository";
+import { matchesCaller } from "../services/task.service";
+import { createAuditLog } from "../services/audit.service";
+import {
+  kirimEmailAktivasiAkun,
+  kirimEmailPenolakanAkun,
+  kirimEmailLatarBelakang,
+} from "../services/email.service";
+export { sanitizeAvatarValue };
 
-const AVATAR_ALLOWED_EXT = new Set(["png", "jpg", "jpeg", "webp", "gif"]);
-
-/**
- * Menyaring nilai avatar yang boleh masuk ke kolom Users.
- *
- * Endpoint PUT /api/users/:id sebelumnya menulis apa pun yang dikirim klien ke
- * kolom avatar tanpa pemeriksaan. Akibatnya di produksi ditemukan satu akun
- * yang avatarnya berisi URL DOKUMEN lengkap dengan presigned token:
- *
- *   /uploads/ERD_PMB_...jpg?token=7acd39a8...&uid=1
- *
- * Dua hal salah sekaligus di sana: berkasnya bukan gambar avatar, dan token
- * akses ikut tersimpan permanen di baris pengguna — padahal token itu milik
- * uid=1, bukan pemilik akunnya.
- *
- * Hanya jalur yang dihasilkan endpoint unggah avatar yang diterima, yaitu
- * `/uploads/avatar-<sesuatu>.<ext>` tanpa query string. Nilai lain ditolak
- * menjadi null sehingga UI jatuh ke inisial nama, bukan ke gambar yang salah.
- */
-export function sanitizeAvatarValue(nilai: unknown): string | null {
-  if (nilai === null || nilai === undefined) return null;
-  if (typeof nilai !== "string") return null;
-  const v = nilai.trim();
-  if (v === "") return null;
-
-  // Tolak query string: di situlah presigned token menumpang.
-  if (v.includes("?") || v.includes("#")) return null;
-  // Tolak URL absolut dan protokol apa pun (termasuk data: dan javascript:).
-  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(v) || v.startsWith("//")) return null;
-  // Tolak upaya keluar direktori.
-  if (v.includes("..")) return null;
-
-  const cocok = /^\/uploads\/(avatar-[A-Za-z0-9._-]+)\.([A-Za-z0-9]+)$/.exec(v);
-  if (!cocok) return null;
-  if (!AVATAR_ALLOWED_EXT.has(cocok[2].toLowerCase())) return null;
-  return v;
-}
-
-/**
- * Menghapus berkas avatar lama saat pengguna menggantinya.
- *
- * Tanpa ini setiap penggantian meninggalkan berkas yatim permanen di uploads/.
- * Kegagalan penghapusan sengaja tidak dilempar: gagal membersihkan berkas lama
- * tidak boleh menggagalkan pembaruan avatar yang sudah tersimpan di database.
- */
+// Item #210 — dulu memakai `sanitizeAvatarValue` (yang sengaja menolak URL
+// absolut untuk validasi INPUT PENGGUNA), jadi begitu STORAGE_DRIVER=s3
+// aktif dan `simpanBerkas()` mengembalikan URL absolut, fungsi ini berhenti
+// menghapus apa pun — berkas lama menumpuk selamanya di bucket. Lihat
+// `extractStoredFilename()` di avatarValue.ts untuk penjelasan lengkap.
 function hapusAvatarLama(urlLama: unknown, urlBaru: string): void {
-  const lama = sanitizeAvatarValue(urlLama);
-  if (!lama || lama === urlBaru) return;
-  const namaBerkas = path.basename(lama);
-  // Dialihkan ke lapisan penyimpanan agar penghapusan bekerja pada disk lokal
-  // MAUPUN object storage. Kegagalan sudah ditangani di dalam sana.
+  if (urlLama === urlBaru) return;
+  const namaBerkas = extractStoredFilename(urlLama);
+  if (!namaBerkas) return;
   void hapusBerkas(namaBerkas);
 }
 
@@ -80,15 +55,38 @@ const isRedisConnected = false;
 const pubClient: any = null;
 const globalPresence = new Map<string, any>();
 
-const query = async (sql: string, params?: any[]) => {
-  const connection = await db.getConnection();
-  try {
-    const [rows] = await connection.query(sql, params);
-    return rows;
-  } finally {
-    connection.release();
-  }
-};
+/**
+ * #301(a) — Mengembalikan `true` bila `s` berarti "akun sudah aktif/disetujui".
+ *
+ * Ada DUA ejaan yang hidup berdampingan di basis data ini dan KEDUANYA sah:
+ * - `"approved"` — yang dikirim UI sejak awal (dropdown `UserDetailView.tsx`)
+ * - `"active"`   — ejaan lama yang masih tersimpan di baris-baris database lama
+ *
+ * `middleware/auth.ts:102` sudah lama menerima keduanya, tapi kondisi email
+ * aktivasi dulu hanya mengenal `"active"` — itulah sebabnya email itu tidak
+ * pernah terkirim sekali pun sejak fiturnya dibangun di #261.
+ *
+ * Perbandingan ini sengaja CASE-INSENSITIVE karena nilai di database tidak
+ * punya jaminan huruf besar/kecil yang seragam.
+ */
+function statusBerartiAktif(s: unknown): boolean {
+  if (!s) return false;
+  const lower = String(s).toLowerCase().trim();
+  return lower === "active" || lower === "approved";
+}
+
+/**
+ * Apakah sebuah nilai status berarti akun DITOLAK atau DINONAKTIFKAN (#301(b)).
+ *
+ * Berdiri sendiri, bukan sekadar kebalikan `statusBerartiAktif()`: `pending`
+ * juga bukan aktif, tetapi ia menunggu keputusan — bukan hasil keputusan.
+ * Menyamakan keduanya akan mengirimi setiap pendaftar baru email penolakan
+ * pada detik ia mendaftar.
+ */
+function statusBerartiDitolak(s: unknown): boolean {
+  if (!s) return false;
+  return String(s).toLowerCase().trim() === "rejected";
+}
 
 const router = express.Router();
 
@@ -102,55 +100,31 @@ router.post("/api/users/heartbeat", async (req, res) => {
     const decoded = jwt.verify(token, getJwtSecret()) as any;
     const userId = decoded.id;
 
-    const connection = await db.getConnection();
-    await connection.query("UPDATE Users SET lastSeen = ? WHERE id = ?", [
-      new Date().toISOString(),
-      userId,
-    ]);
-    connection.release();
+    await userRepository.updateLastSeen(userId, new Date().toISOString());
     res.json({ status: "success" });
   } catch (e) {
-    // Ignore errors for heartbeat
-    res.json({ status: "error", message: "Silent error" });
+    res.json({ status: "error", code: "srv.silent_error", message: "Silent error" });
   }
 });
 
 // Resilient Presence Ping API (Fallback for Vercel Serverless)
-router.post("/api/presence/ping", authenticateJWT, async (req: any, res) => {
-  let connection;
+router.post("/api/presence/ping", authenticateJWT, async (req: AuthenticatedRequest, res) => {
   try {
-    const userId = req.user.id || req.user.uid;
+    const userId = req.user?.id || req.user?.uid;
     const nowStr = new Date().toISOString();
-    connection = await db.getConnection();
 
-    // Update lastSeen in database
-    await connection.query("UPDATE Users SET lastSeen = ? WHERE id = ? OR uid = ?", [
-      nowStr,
-      userId,
-      userId,
-    ]);
+    if (userId) {
+      await userRepository.updateLastSeen(userId, nowStr);
+    }
 
-    // Query all users to get their latest lastSeen and presence status
-    const [rows]: any = await connection.query(
-      "SELECT id, uid, username, nama_lengkap, email, displayName, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, role, status, lastSeen, department, position, permissions, phone FROM Users"
-    );
-
-    // Process database rows, parsing permissions if needed
-    const processedUsers = rows.map((u: any) => {
-      try {
-        if (u.permissions && typeof u.permissions === "string")
-          u.permissions = JSON.parse(u.permissions);
-      } catch (e) {}
-      return u;
-    });
+    const processedUsers = await userRepository.findAll();
 
     const currentUserProfile = processedUsers.find((u: any) => {
       const uId = u.uid || u.id;
-      return uId && uId.toString() === userId.toString();
+      return uId && userId && uId.toString() === userId.toString();
     });
 
-    // Write to Redis if connected
-    if (currentUserProfile && isRedisConnected) {
+    if (currentUserProfile && isRedisConnected && userId) {
       try {
         await pubClient.set(`presence:user:${userId}`, JSON.stringify(currentUserProfile), {
           EX: 30,
@@ -160,7 +134,6 @@ router.post("/api/presence/ping", authenticateJWT, async (req: any, res) => {
       }
     }
 
-    // Reconcile active users: try Redis first, fallback to DB
     let activeUsers: any[] = [];
     if (isRedisConnected) {
       try {
@@ -180,16 +153,14 @@ router.post("/api/presence/ping", authenticateJWT, async (req: any, res) => {
       }
     }
 
-    // If Redis has no active keys or is disconnected, fallback to database lastSeen within 30s
     if (activeUsers.length === 0) {
       activeUsers = processedUsers.filter((u: any) => {
         if (!u.lastSeen) return false;
         const lastSeenTime = new Date(u.lastSeen).getTime();
-        return Date.now() - lastSeenTime < 30000; // 30 seconds TTL
+        return Date.now() - lastSeenTime < 30000;
       });
     }
 
-    // Sync into globalPresence (for socket clients on this instance)
     activeUsers.forEach((u: any) => {
       const uid = u.uid || u.id;
       if (uid) {
@@ -205,12 +176,10 @@ router.post("/api/presence/ping", authenticateJWT, async (req: any, res) => {
   } catch (error: any) {
     console.error("Presence Ping Error:", error);
     res.status(500).json({ status: "error", message: error.message });
-  } finally {
-    if (connection) connection.release();
   }
 });
 
-// Resilient Presence Sync API (Redis cache for fast reconciliation across serverless instances)
+// Resilient Presence Sync API
 router.get("/api/presence/sync", authenticateJWT, async (req: any, res) => {
   try {
     let onlineUsers: any[] = [];
@@ -235,28 +204,13 @@ router.get("/api/presence/sync", authenticateJWT, async (req: any, res) => {
       }
     }
 
-    // If Redis has no keys or is not connected, fallback to database lastSeen within 30s
     if (onlineUsers.length === 0) {
-      const connection = await db.getConnection();
-      try {
-        const [rows]: any = await connection.query(
-          "SELECT id, uid, username, nama_lengkap, email, displayName, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, role, status, lastSeen, department, position, permissions, phone FROM Users"
-        );
-        const processedUsers = rows.map((u: any) => {
-          try {
-            if (u.permissions && typeof u.permissions === "string")
-              u.permissions = JSON.parse(u.permissions);
-          } catch (e) {}
-          return u;
-        });
-        onlineUsers = processedUsers.filter((u: any) => {
-          if (!u.lastSeen) return false;
-          const lastSeenTime = new Date(u.lastSeen).getTime();
-          return Date.now() - lastSeenTime < 30000;
-        });
-      } finally {
-        connection.release();
-      }
+      const processedUsers = await userRepository.findAll();
+      onlineUsers = processedUsers.filter((u: any) => {
+        if (!u.lastSeen) return false;
+        const lastSeenTime = new Date(u.lastSeen).getTime();
+        return Date.now() - lastSeenTime < 30000;
+      });
     }
 
     res.json({
@@ -270,48 +224,66 @@ router.get("/api/presence/sync", authenticateJWT, async (req: any, res) => {
 });
 
 // Users API
-
-router.get("/api/users", async (req, res) => {
+router.get("/api/users", validasiQuery(listSearchQuerySchema), async (req: any, res) => {
   try {
-    const rows = await query(
-      "SELECT id, uid, username, nama_lengkap, email, displayName, role, status, permissions, phone, department, position, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, createdAt, lastSeen FROM Users"
+    const search = req.query.search as string | undefined;
+    const isAdmin = req.user?.role === "admin";
+    await respondWithProjectList(
+      res,
+      req.query as Record<string, unknown>,
+      () => (isAdmin ? userRepository.findAll() : userRepository.findAllRingkas()),
+      (pagination) =>
+        isAdmin
+          ? userRepository.findAllPaged(pagination, search)
+          : userRepository.findAllRingkasPaged(pagination, search)
     );
-    res.json({ status: "success", data: rows });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/users error:", error);
-    res
-      .status(500)
-      .json({ status: "error", message: "Terjadi kesalahan internal server: " + error.message });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server_3",
+      message: "Terjadi kesalahan internal server: " + error.message,
+    });
   }
 });
 
-router.get("/api/users/:id", async (req, res) => {
+router.get("/api/users/:id", async (req: any, res) => {
   try {
     const { id } = req.params;
-    const connection = await db.getConnection();
-    const [rows] = await connection.query(
-      "SELECT id, uid, username, nama_lengkap, email, displayName, role, status, permissions, phone, department, position, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, createdAt, lastSeen FROM Users WHERE id = ? OR uid = ?",
-      [id, id]
-    );
-    connection.release();
-    if ((rows as any[]).length > 0) {
-      const user = (rows as any[])[0];
-      try {
-        if (user.permissions) user.permissions = JSON.parse(user.permissions);
-      } catch (e) {}
+
+    // Item #243 — `email`, `phone`, dan `permissions` hanya untuk Global Admin
+    // dan untuk pemilik akunnya sendiri. Pemeriksaan perannya SAMA PERSIS
+    // dengan `GET /api/users` di atas (`req.user.role === "admin"`, diisi
+    // `authenticateJWT` dari JWT yang ditandatangani) supaya tidak lahir
+    // kosakata otorisasi kedua di repo ini.
+    //
+    // Bedanya dengan endpoint daftar cuma satu: di sini ada pemanggil yang
+    // BUKAN admin tetapi tetap berhak atas isi penuh — dirinya sendiri, yang
+    // memang perlu membaca email dan nomornya di halaman profil.
+    // `matchesCaller` dipakai karena `:id` boleh berupa `id` MAUPUN `uid`,
+    // persis seperti `findByIdOrUid()` yang melayaninya.
+    const bolehPenuh = req.user?.role === "admin" || matchesCaller(req.user, id);
+    const user = bolehPenuh
+      ? await userRepository.findByIdOrUid(id)
+      : await userRepository.findByIdOrUidRingkas(id);
+    if (user) {
       res.json({ status: "success", data: user });
     } else {
-      res.status(404).json({ status: "error", message: "User not found" });
+      res
+        .status(404)
+        .json({ status: "error", code: "srv.user_not_found", message: "User not found" });
     }
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/users/:id error:", error);
-    res
-      .status(500)
-      .json({ status: "error", message: "Terjadi kesalahan internal server: " + error.message });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server_3",
+      message: "Terjadi kesalahan internal server: " + error.message,
+    });
   }
 });
 
-// 🖼️ UPLOAD AVATAR ENDPOINT: POST /api/users/:id/avatar
+// UPLOAD AVATAR ENDPOINT: POST /api/users/:id/avatar
 router.post(
   "/api/users/:id/avatar",
   authenticateJWT,
@@ -321,13 +293,12 @@ router.post(
       const { id } = req.params;
       const currentUserId = req.user?.id || req.user?.uid;
       const currentUserRole = String(req.user?.role || req.user?.system_role || "").toLowerCase();
-      const isAdmin = ["sadm", "admn", "admin", "system admin", "super admin"].includes(
-        currentUserRole
-      );
+      const isAdmin = currentUserRole === "admin";
 
       if (!isAdmin && String(id) !== String(currentUserId)) {
         return res.status(403).json({
           status: "error",
+          code: "srv.akses_ditolak_anda_hanya_5",
           message: "Akses ditolak: Anda hanya dapat memperbarui foto profil Anda sendiri.",
         });
       }
@@ -336,13 +307,11 @@ router.post(
       if (!file) {
         return res.status(400).json({
           status: "error",
+          code: "srv.file_gambar_avatar_wajib",
           message: "File gambar avatar wajib disertakan.",
         });
       }
 
-      // Magic-byte + extension validation (same pipeline as file.routes.ts) — avatars
-      // are served publicly without auth, so this is the only gate against a
-      // malicious file (e.g. SVG with embedded <script>) being planted here.
       const fileBuffer = fs.readFileSync(file.path);
       const validation = validateFileBuffer(fileBuffer, file.originalname);
       const ext = path.extname(file.originalname).toLowerCase().replace(".", "");
@@ -350,53 +319,28 @@ router.post(
         if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
         return res.status(400).json({
           status: "error",
+          code: "srv.foto_profil_harus_berupa",
           message: "Foto profil harus berupa gambar (PNG, JPG, WEBP, atau GIF).",
         });
       }
 
       const safeFilename = `avatar-${id}-${Date.now()}.${ext}`;
-
-      // Ditulis lewat lapisan penyimpanan, bukan langsung ke disk. Pada driver
-      // lokal perilakunya sama seperti sebelumnya; pada driver s3 berkas masuk
-      // ke object storage sehingga BERTAHAN antar deploy.
       const avatarUrl = await simpanBerkas(safeFilename, fileBuffer, file.mimetype);
+      // Item #211 — dicatat sementara untuk diagnosis: pemilik proyek
+      // melaporkan berkas TERLIHAT ADA di bucket R2 tapi TIDAK tampil di
+      // halaman. Log ini menampilkan URL persis yang dikembalikan
+      // simpanBerkas(), supaya bisa dibandingkan dengan URL publik bucket
+      // sungguhan tanpa pemilik proyek perlu buka DevTools browser.
+      console.log(`[UPLOAD] Avatar disimpan untuk user ${id}: ${avatarUrl}`);
 
-      // Berkas sementara dari multer dibersihkan apa pun drivernya.
       try {
         if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
-      } catch {
-        /* diabaikan */
-      }
+      } catch {}
 
-      const connection = await db.getConnection();
-
-      // Ambil avatar lama SEBELUM ditimpa, supaya berkasnya bisa dibersihkan.
-      const [barisLama]: any = await connection.query(
-        "SELECT avatar_url, photoURL, avatarUrl FROM Users WHERE id = ? OR uid = ?",
-        [id, id]
-      );
-      const avatarLama =
-        barisLama?.[0]?.avatar_url || barisLama?.[0]?.photoURL || barisLama?.[0]?.avatarUrl;
-
-      await connection.query(
-        "UPDATE Users SET avatar_url = ?, photoURL = ?, avatarUrl = ? WHERE id = ? OR uid = ?",
-        [avatarUrl, avatarUrl, avatarUrl, id, id]
-      );
-
-      // Dibersihkan SETELAH database diperbarui: bila penulisan gagal, berkas
-      // lama harus tetap utuh agar avatar pengguna tidak hilang.
+      const avatarLama = await userRepository.getAvatar(id);
+      const updatedUser = await userRepository.updateAvatar(id, avatarUrl);
       hapusAvatarLama(avatarLama, avatarUrl);
 
-      const [rows]: any = await connection.query(
-        "SELECT id, uid, username, nama_lengkap, email, displayName, role, status, permissions, phone, department, position, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, createdAt, lastSeen FROM Users WHERE id = ? OR uid = ?",
-        [id, id]
-      );
-      connection.release();
-
-      const updatedUser =
-        rows && rows[0] ? rows[0] : { id, avatar_url: avatarUrl, photoURL: avatarUrl };
-
-      // Socket.IO broadcast
       const io = req.app.get("io") || (req as any).io;
       if (io) {
         io.emit("data_changed", { path: `/api/users/${id}`, method: "PUT" });
@@ -406,241 +350,533 @@ router.post(
 
       return res.json({
         status: "success",
+        code: "srv.foto_profil_berhasil_diperbarui",
         message: "Foto profil berhasil diperbarui",
         avatar_url: avatarUrl,
         data: {
           id: id,
           avatar_url: avatarUrl,
           photoURL: avatarUrl,
-          user: updatedUser,
+          user: updatedUser || { id, avatar_url: avatarUrl, photoURL: avatarUrl },
         },
       });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: POST /api/users/:id/avatar error:", error);
       return res.status(500).json({
         status: "error",
+        code: "srv.gagal_memperbarui_foto_profil",
         message: "Gagal memperbarui foto profil: " + error.message,
       });
     }
   }
 );
 
-router.put("/api/users/:id", authenticateJWT, async (req: any, res) => {
-  try {
-    const { id } = req.params;
-    const currentUserId = req.user?.id || req.user?.uid;
-    const currentUserRole = String(req.user?.role || req.user?.system_role || "").toLowerCase();
-    const isAdmin =
-      ["sadm", "admn", "admin", "system admin", "super admin"].includes(currentUserRole) ||
-      ["SADM", "ADMN"].includes(req.user?.role);
+// Item #208 — UPLOAD COVER ENDPOINT: POST /api/users/:id/cover
+//
+// Sebelumnya cover foto profil disimpan HANYA di localStorage browser
+// (`UserDetailView.tsx`) sebagai data URI base64 — tidak pernah tersimpan
+// di database, tidak terlihat pengguna lain, dan hilang begitu pindah
+// browser/hapus cache. Endpoint ini meniru persis pola `POST
+// /api/users/:id/avatar` di atas: divalidasi sama, disimpan lewat
+// `simpanBerkas()` (driver storage yang sama, ikut memakai S3 begitu
+// dikonfigurasi — lihat storage.service.ts / item #30), dan URL-nya
+// disimpan ke kolom "coverUrl" di tabel Users.
+router.post(
+  "/api/users/:id/cover",
+  authenticateJWT,
+  upload.single("file"),
+  async (req: any, res: any) => {
+    try {
+      const { id } = req.params;
+      const currentUserId = req.user?.id || req.user?.uid;
+      const currentUserRole = String(req.user?.role || req.user?.system_role || "").toLowerCase();
+      const isAdmin = currentUserRole === "admin";
 
-    // If user is not admin and trying to update someone else:
-    if (!isAdmin && String(id) !== String(currentUserId)) {
-      return res.status(403).json({
-        status: "error",
-        message: "Akses ditolak: Anda hanya dapat memperbarui profil Anda sendiri.",
-      });
-    }
-
-    let {
-      role,
-      system_role,
-      status,
-      account_status,
-      department,
-      position,
-      permissions,
-      displayName,
-      username,
-      email,
-      phone,
-      passwordHash,
-      password,
-      photoURL,
-      avatar_url,
-    } = req.body;
-    // Disaring: nilai avatar dari klien tidak boleh dipercaya begitu saja.
-    // Lihat catatan pada sanitizeAvatarValue.
-    const effectiveAvatar = sanitizeAvatarValue(avatar_url || photoURL) ?? undefined;
-
-    // If user is NOT admin, automatically strip out sensitive system/organizational attributes
-    if (!isAdmin) {
-      role = undefined;
-      system_role = undefined;
-      status = undefined;
-      account_status = undefined;
-      department = undefined;
-      position = undefined;
-      permissions = undefined;
-    }
-
-    const connection = await db.getConnection();
-
-    const updates = [];
-    const values = [];
-
-    if (isAdmin) {
-      if (role !== undefined) {
-        updates.push("role = ?");
-        values.push(role);
-      }
-      if (status !== undefined) {
-        updates.push("status = ?");
-        values.push(status);
-      }
-      if (permissions !== undefined) {
-        updates.push("permissions = ?");
-        values.push(permissions ? JSON.stringify(permissions) : null);
-      }
-      if (department !== undefined) {
-        updates.push("department = ?");
-        values.push(department || null);
-      }
-      if (position !== undefined) {
-        updates.push("position = ?");
-        values.push(position || null);
-      }
-    }
-
-    if (displayName !== undefined) {
-      updates.push("displayName = ?");
-      values.push(displayName);
-    }
-    if (username !== undefined) {
-      updates.push("username = ?");
-      values.push(username);
-    }
-    if (email !== undefined) {
-      updates.push("email = ?");
-      values.push(email && email.trim() !== "" ? email.trim() : null);
-    }
-    if (effectiveAvatar !== undefined) {
-      updates.push("photoURL = ?", "avatar_url = ?", "avatarUrl = ?");
-      values.push(effectiveAvatar, effectiveAvatar, effectiveAvatar);
-    }
-    if (phone !== undefined) {
-      updates.push("phone = ?");
-      values.push(phone && phone.trim() !== "" ? phone.trim() : null);
-    }
-    const rawPassword = passwordHash || password;
-    if (rawPassword !== undefined && rawPassword !== null && rawPassword !== "") {
-      updates.push("passwordHash = ?");
-      values.push(rawPassword.startsWith("pbkdf2$") ? rawPassword : hashPassword(rawPassword));
-    }
-
-    if (updates.length > 0) {
-      values.push(id);
-      await connection.query(`UPDATE Users SET ${updates.join(", ")} WHERE id = ?`, values);
-    }
-
-    connection.release();
-    res.json({ status: "success", message: "User updated" });
-  } catch (error: any) {
-    console.error("LOG ANOMALI CRITICAL: PUT /api/users error:", error);
-    res
-      .status(500)
-      .json({ status: "error", message: "Terjadi kesalahan internal server: " + error.message });
-  }
-});
-
-router.delete("/api/users/:id", authenticateJWT, verifyGlobalAdmin, async (req: any, res) => {
-  try {
-    const { id } = req.params;
-    const connection = await db.getConnection();
-    await connection.query("DELETE FROM Users WHERE id = ?", [id]);
-    connection.release();
-    res.json({ status: "success", message: "User deleted" });
-  } catch (error: any) {
-    console.error("LOG ANOMALI CRITICAL: DELETE /api/users error:", error);
-    res
-      .status(500)
-      .json({ status: "error", message: "Terjadi kesalahan internal server: " + error.message });
-  }
-});
-
-router.put("/api/profile/update", authenticateJWT, async (req: any, res: any) => {
-  try {
-    const { id } = req.user;
-    const {
-      displayName,
-      username,
-      email,
-      phone,
-      currentPassword,
-      newPassword,
-      photoURL,
-      avatar_url,
-    } = req.body;
-    // Disaring: nilai avatar dari klien tidak boleh dipercaya begitu saja.
-    // Lihat catatan pada sanitizeAvatarValue.
-    const effectiveAvatar = sanitizeAvatarValue(avatar_url || photoURL) ?? undefined;
-    const connection = await db.getConnection();
-
-    const [users]: any = await connection.query("SELECT * FROM Users WHERE id = ?", [id]);
-    if (users.length === 0) {
-      connection.release();
-      return res.status(404).json({ status: "error", message: "User not found" });
-    }
-    const user = users[0];
-
-    if (currentPassword && newPassword) {
-      // verifyPassword hanya menerima (password, storedHash). Argumen ketiga
-      // user.username sebelumnya dikirim tetapi diabaikan diam-diam: salt
-      // sudah tertanam di dalam string hash pbkdf2, dan bcrypt tidak
-      // memerlukannya. Menghapusnya tidak mengubah perilaku.
-      const isValid = await verifyPassword(currentPassword, user.passwordHash);
-      if (!isValid) {
-        connection.release();
-        return res
-          .status(400)
-          .json({ status: "error", message: "Password lama yang Anda masukkan salah!" });
-      }
-      await connection.query("UPDATE Users SET passwordHash = ? WHERE id = ?", [
-        hashPassword(newPassword),
-        id,
-      ]);
-    }
-
-    const finalAvatar =
-      effectiveAvatar !== undefined ? effectiveAvatar : user.avatar_url || user.photoURL;
-
-    await connection.query(
-      "UPDATE Users SET displayName = ?, username = ?, email = ?, phone = ?, photoURL = ?, avatar_url = ?, avatarUrl = ? WHERE id = ?",
-      [displayName, username, email, phone, finalAvatar, finalAvatar, finalAvatar, id]
-    );
-
-    const io = req.app.get("io") || (req as any).io;
-    if (io) {
-      io.emit("data_changed", { path: `/api/users/${id}`, method: "PUT" });
-      io.emit("data_changed", { path: `/api/users`, method: "GET" });
-
-      // Dipancarkan juga bila avatar ikut berubah lewat jalur ini.
-      //
-      // Sebelumnya hanya endpoint unggah avatar yang memancarkan
-      // "user_avatar_updated", sehingga perubahan avatar lewat pembaruan
-      // profil tidak memicu listener khusus di klien — avatar di header baru
-      // ikut berganti setelah muat ulang daftar pengguna yang lebih lambat.
-      //
-      // Perbandingan dengan nilai lama mencegah pancaran sia-sia saat
-      // pengguna hanya mengubah nama atau nomor telepon.
-      const avatarLama = user.avatar_url || user.photoURL || user.avatarUrl || null;
-      if (finalAvatar && finalAvatar !== avatarLama) {
-        io.emit("user_avatar_updated", {
-          userId: id,
-          avatar_url: finalAvatar,
-          user: { ...user, avatar_url: finalAvatar, photoURL: finalAvatar, avatarUrl: finalAvatar },
+      if (!isAdmin && String(id) !== String(currentUserId)) {
+        return res.status(403).json({
+          status: "error",
+          code: "srv.akses_ditolak_anda_hanya_cover_sendiri",
+          message: "Akses ditolak: Anda hanya dapat memperbarui cover Anda sendiri.",
         });
       }
-    }
 
-    connection.release();
-    res.json({ status: "success", message: "Profile updated" });
-  } catch (error: any) {
-    console.error("LOG ANOMALI CRITICAL: PUT /api/profile/update error:", error);
-    res
-      .status(500)
-      .json({ status: "error", message: "Terjadi kesalahan internal server: " + error.message });
+      const file = req.file || (req.files && req.files[0]);
+      if (!file) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.file_gambar_cover_wajib",
+          message: "File gambar cover wajib disertakan.",
+        });
+      }
+
+      const fileBuffer = fs.readFileSync(file.path);
+      const validation = validateFileBuffer(fileBuffer, file.originalname);
+      const ext = path.extname(file.originalname).toLowerCase().replace(".", "");
+      if (!validation.valid || !AVATAR_ALLOWED_EXT.has(ext)) {
+        if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+        return res.status(400).json({
+          status: "error",
+          code: "srv.foto_cover_harus_berupa",
+          message: "Foto cover harus berupa gambar (PNG, JPG, WEBP, atau GIF).",
+        });
+      }
+
+      // Nama diawali "cover-" (bukan "avatar-") supaya diberi akses publik
+      // lewat penjaga khusus di server.ts (item #208), pola sama seperti
+      // avatar tapi kategori file terpisah.
+      const safeFilename = `cover-${id}-${Date.now()}.${ext}`;
+      const coverUrl = await simpanBerkas(safeFilename, fileBuffer, file.mimetype);
+      // Item #211 — lihat catatan sama di endpoint /avatar di atas.
+      console.log(`[UPLOAD] Cover disimpan untuk user ${id}: ${coverUrl}`);
+
+      try {
+        if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+      } catch {}
+
+      const coverLama = await userRepository.getCover(id);
+      const updatedUser = await userRepository.updateCover(id, coverUrl);
+      hapusAvatarLama(coverLama, coverUrl);
+
+      const io = req.app.get("io") || (req as any).io;
+      if (io) {
+        io.emit("data_changed", { path: `/api/users/${id}`, method: "PUT" });
+        io.emit("data_changed", { path: `/api/users`, method: "GET" });
+        io.emit("user_cover_updated", { userId: id, cover_url: coverUrl, user: updatedUser });
+      }
+
+      return res.json({
+        status: "success",
+        code: "srv.cover_berhasil_diperbarui",
+        message: "Cover berhasil diperbarui",
+        cover_url: coverUrl,
+        data: {
+          id: id,
+          cover_url: coverUrl,
+          user: updatedUser || { id, coverUrl },
+        },
+      });
+    } catch (error: any) {
+      console.error("LOG ANOMALI CRITICAL: POST /api/users/:id/cover error:", error);
+      return res.status(500).json({
+        status: "error",
+        code: "srv.gagal_memperbarui_cover",
+        message: "Gagal memperbarui cover: " + error.message,
+      });
+    }
   }
-});
+);
+
+router.put(
+  "/api/users/:id",
+  authenticateJWT,
+  validasiBody(updateUserSchema),
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const currentUserId = req.user?.id || req.user?.uid;
+      const currentUserRole = String(req.user?.role || req.user?.system_role || "").toLowerCase();
+      const isAdmin = currentUserRole === "admin";
+
+      if (!isAdmin && String(id) !== String(currentUserId)) {
+        return res.status(403).json({
+          status: "error",
+          code: "srv.akses_ditolak_anda_hanya_6",
+          message: "Akses ditolak: Anda hanya dapat memperbarui profil Anda sendiri.",
+        });
+      }
+
+      const {
+        role,
+        status,
+        department,
+        position,
+        permissions,
+        displayName,
+        username,
+        email,
+        phone,
+        passwordHash,
+        password,
+        photoURL,
+        avatar_url,
+      } = req.body;
+
+      const effectiveAvatar = sanitizeAvatarValue(avatar_url || photoURL) ?? undefined;
+      const rawPassword = passwordHash || password;
+      const computedPasswordHash = rawPassword
+        ? rawPassword.startsWith("pbkdf2$")
+          ? rawPassword
+          : hashPassword(rawPassword)
+        : undefined;
+
+      // #178 — username & email unik di database, tapi tanpa pemeriksaan ini
+      // klien hanya melihat galat Postgres mentah, bukan pesan yang jelas.
+      if (username !== undefined && (await userRepository.isUsernameTaken(username, id))) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.username_sudah_digunakan_oleh",
+          message: "Username sudah digunakan oleh akun lain.",
+        });
+      }
+      if (email && (await userRepository.isEmailTaken(email, id))) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.email_sudah_digunakan_oleh",
+          message: "Email sudah digunakan oleh akun lain.",
+        });
+      }
+
+      // Item #195 — snapshot SEBELUM update: aksi manajemen-user sebelumnya
+      // tidak pernah tercatat di mana pun (hanya ActivityLogs Task yang
+      // ditulis), jadi panel "Recent Activity" di Detail User selalu kosong
+      // untuk perubahan seperti ini. Dicatat ke AuditLogs (tabel global,
+      // sudah dipakai fitur "Audit Perusahaan") supaya konsisten dengan
+      // aksi lain di aplikasi, bukan tabel baru.
+      const oldUser = await userRepository.findByIdOrUid(id);
+
+      // #354 — SoD tipis siklus user: status hanya boleh diubah admin, dan
+      // bukan untuk akun sendiri (maker ≠ checker / self-approve).
+      if (status !== undefined) {
+        if (!isAdmin) {
+          return res.status(403).json({
+            status: "error",
+            code: "srv.akses_ditolak_status_hanya_admin",
+            message: "Hanya administrator yang dapat mengubah status akun.",
+          });
+        }
+        const targetIds = [oldUser?.id, oldUser?.uid].filter(Boolean).map(String);
+        if (targetIds.includes(String(currentUserId))) {
+          return res.status(400).json({
+            status: "error",
+            code: "srv.tidak_bisa_ubah_status_akun_sendiri",
+            message: "Anda tidak dapat mengubah status akun Anda sendiri.",
+          });
+        }
+      }
+
+      await userRepository.updateUser(
+        id,
+        {
+          role,
+          status,
+          department,
+          position,
+          permissions,
+          displayName,
+          username,
+          email,
+          phone,
+          effectiveAvatar,
+          passwordHash: computedPasswordHash,
+        },
+        isAdmin
+      );
+
+      createAuditLog({
+        userId: currentUserId,
+        projectId: null,
+        actionType: "UPDATE",
+        entityName: "User",
+        entityId: id,
+        oldValues: oldUser,
+        newValues: { role, status, department, position, displayName, username, email, phone },
+      });
+
+      // Item #261 — Kirim email notifikasi aktivasi akun bila status berubah
+      // menjadi aktif.
+      //
+      // #301(a) — dulu baris ini menuntut persis `"active"`, dan karena itu
+      // TIDAK PERNAH menyala pada jalur yang benar-benar dipakai manusia:
+      // admin yang menyetujui lewat UI mengirim `"approved"`, dan tidak ada
+      // pemetaan di mana pun antara keduanya. Emailnya sudah dibangun sejak
+      // #261 tapi tidak pernah terkirim sekali pun.
+      const isBeingActivated =
+        Boolean(oldUser) && !statusBerartiAktif(oldUser?.status) && statusBerartiAktif(status);
+
+      if (isBeingActivated && oldUser) {
+        const targetEmail = email || oldUser.email;
+        const targetUsername = username || oldUser.username || targetEmail;
+        const targetName =
+          displayName || oldUser.displayName || oldUser.nama_lengkap || targetUsername;
+
+        if (targetEmail) {
+          await kirimEmailLatarBelakang(
+            kirimEmailAktivasiAkun({
+              email: targetEmail,
+              username: targetUsername,
+              nama: targetName,
+            }),
+            `Email aktivasi akun untuk ${targetEmail}`
+          );
+        }
+      }
+
+      // #301(b) — penolakan senyap. Status `rejected` memblokir login di
+      // `middleware/auth.ts:102`, tetapi sebelum ini tidak ada apa pun yang
+      // memberi tahu orangnya: dari sisi pengguna akunnya sekadar berhenti
+      // bekerja tanpa penjelasan.
+      //
+      // Syarat "sebelumnya BUKAN rejected" bukan hiasan: tanpanya, tiap kali
+      // admin menyunting nama atau departemen akun yang memang sudah ditolak,
+      // orangnya dikirimi ulang kabar buruk yang sama.
+      const isBeingRejected =
+        Boolean(oldUser) && !statusBerartiDitolak(oldUser?.status) && statusBerartiDitolak(status);
+
+      if (isBeingRejected && oldUser) {
+        const targetEmail = email || oldUser.email;
+        const targetUsername = username || oldUser.username || targetEmail;
+        const targetName =
+          displayName || oldUser.displayName || oldUser.nama_lengkap || targetUsername;
+
+        // Satu status, dua arti. Yang membedakan adalah status SEBELUMNYA:
+        // yang tadinya aktif sedang DINONAKTIFKAN, yang tadinya `pending`
+        // pendaftarannya DITOLAK. Mengirimi karyawan lama "pendaftaran Anda
+        // ditolak" terbaca sebagai pesan salah alamat.
+        const jenis = statusBerartiAktif(oldUser?.status)
+          ? "akun_dinonaktifkan"
+          : "pendaftaran_ditolak";
+
+        if (targetEmail) {
+          await kirimEmailLatarBelakang(
+            kirimEmailPenolakanAkun({
+              email: targetEmail,
+              username: targetUsername,
+              nama: targetName,
+              jenis,
+            }),
+            `Email ${jenis === "akun_dinonaktifkan" ? "penonaktifan" : "penolakan"} akun untuk ${targetEmail}`
+          );
+        }
+      }
+
+      res.json({ status: "success", code: "srv.user_updated", message: "User updated" });
+    } catch (error: any) {
+      console.error("LOG ANOMALI CRITICAL: PUT /api/users error:", error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server_3",
+        message: "Terjadi kesalahan internal server: " + error.message,
+      });
+    }
+  }
+);
+
+router.delete(
+  "/api/users/:id",
+  authenticateJWT,
+  verifyGlobalAdmin,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const currentUserId = req.user?.id || req.user?.uid;
+      const oldUser = await userRepository.findByIdOrUid(id);
+
+      /**
+       * #190 — tiga penolakan sebelum menghapus.
+       *
+       * `verifyGlobalAdmin` di atas hanya menjawab "penghapusnya admin?",
+       * bukan "yang dihapus boleh dihapus?". Sampai sebelum ini, admin bisa
+       * menghapus AKUN DIRINYA SENDIRI. Dan karena barisnya sendiri berada di
+       * urutan teratas tabel User Management, salah klik pada baris pertama
+       * adalah kesalahan yang paling mungkin terjadi, bukan yang paling tidak
+       * mungkin. Bila ia satu-satunya admin — keadaan nyata saat #190
+       * dilaporkan, kartu ringkasan menunjukkan ADMINISTRATOR: 1 — seluruh
+       * administrasi sistem terkunci tanpa jalan pemulihan lewat UI.
+       */
+
+      // (1) Menghapus yang tidak ada sebelumnya "berhasil" diam-diam: tanpa
+      // baris ini `userRepository.delete()` tidak menghapus apa pun, audit log
+      // tetap tertulis, dan klien menerima "User deleted" yang keliru.
+      if (!oldUser) {
+        return res.status(404).json({
+          status: "error",
+          code: "srv.user_not_found",
+          message: "User not found",
+        });
+      }
+
+      // (2) Tidak boleh menghapus akun sendiri. Dibandingkan lewat `oldUser`
+      // dan bukan `id` mentah dari URL, sebab `findByIdOrUid` menerima id
+      // MAUPUN uid — membandingkan `id` langsung akan meleset ketika yang satu
+      // uid dan yang lain id, dan penjaganya diam-diam tidak berlaku.
+      const iniAkunSendiri = [oldUser.id, oldUser.uid]
+        .filter(Boolean)
+        .map(String)
+        .includes(String(currentUserId));
+      if (iniAkunSendiri) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.tidak_bisa_hapus_akun_sendiri",
+          message: "Anda tidak bisa menghapus akun Anda sendiri.",
+        });
+      }
+
+      // (3) Tidak boleh menghapus admin terakhir. Dengan (2) sudah berlaku,
+      // kasus ini secara logika sulit tercapai lewat rute ini — penghapusnya
+      // pasti admin, jadi kalau targetnya juga admin berarti ada minimal dua.
+      // Tetap dipasang: ia tidak bergantung pada penalaran itu tetap benar
+      // bila kelak muncul jalur hapus lain atau peran admin kedua.
+      if (String(oldUser.role || "").toLowerCase() === "admin") {
+        const semua = await userRepository.findAll();
+        const jumlahAdmin = semua.filter(
+          (u: any) => String(u.role || "").toLowerCase() === "admin"
+        ).length;
+        if (jumlahAdmin <= 1) {
+          return res.status(400).json({
+            status: "error",
+            code: "srv.tidak_bisa_hapus_admin_terakhir",
+            message: "Tidak bisa menghapus administrator terakhir yang tersisa.",
+          });
+        }
+      }
+
+      await userRepository.delete(id);
+
+      createAuditLog({
+        userId: currentUserId,
+        projectId: null,
+        actionType: "DELETE",
+        entityName: "User",
+        entityId: id,
+        oldValues: oldUser,
+        newValues: null,
+      });
+
+      res.json({ status: "success", code: "srv.user_deleted", message: "User deleted" });
+    } catch (error: any) {
+      console.error("LOG ANOMALI CRITICAL: DELETE /api/users error:", error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server_3",
+        message: "Terjadi kesalahan internal server: " + error.message,
+      });
+    }
+  }
+);
+
+router.put(
+  "/api/profile/update",
+  authenticateJWT,
+  validasiBody(updateProfileSchema),
+  async (req: AuthenticatedRequest, res: any) => {
+    try {
+      const userId = req.user?.id || req.user?.uid;
+      if (!userId) {
+        return res
+          .status(401)
+          .json({ status: "error", code: "srv.sesi_tidak_valid", message: "Sesi tidak valid." });
+      }
+      const id = userId;
+      const {
+        displayName,
+        username,
+        email,
+        phone,
+        currentPassword,
+        newPassword,
+        photoURL,
+        avatar_url,
+      } = req.body;
+
+      const effectiveAvatar = sanitizeAvatarValue(avatar_url || photoURL) ?? undefined;
+      const user = await userRepository.findByIdOrUid(id);
+      if (!user) {
+        return res
+          .status(404)
+          .json({ status: "error", code: "srv.user_not_found", message: "User not found" });
+      }
+
+      let newPasswordHash: string | undefined;
+      if (currentPassword && newPassword) {
+        // #241 — hash diminta TERPISAH, hanya di titik yang benar-benar
+        // memverifikasinya. Sebelumnya ia menumpang di objek `user` hasil
+        // `findByIdOrUid()`, dan objek itu juga dipakai `GET /api/users/:id`
+        // yang memulangkannya utuh ke klien.
+        const hashTersimpan = await userRepository.findPasswordHashById(id);
+        const isValid = await verifyPassword(currentPassword, hashTersimpan || "");
+        if (!isValid) {
+          return res.status(400).json({
+            status: "error",
+            code: "srv.password_lama_yang_anda",
+            message: "Password lama yang Anda masukkan salah!",
+          });
+        }
+        newPasswordHash = hashPassword(newPassword);
+      }
+
+      const finalAvatar =
+        effectiveAvatar !== undefined
+          ? effectiveAvatar
+          : user.avatar_url || user.photoURL || user.avatarUrl || null;
+
+      // #178 — sama seperti PUT /api/users/:id: cegah bentrok eksplisit
+      // sebelum UPDATE, supaya pesannya jelas alih-alih galat Postgres mentah.
+      if (username !== undefined && (await userRepository.isUsernameTaken(username, id))) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.username_sudah_digunakan_oleh",
+          message: "Username sudah digunakan oleh akun lain.",
+        });
+      }
+      if (email && (await userRepository.isEmailTaken(email, id))) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.email_sudah_digunakan_oleh",
+          message: "Email sudah digunakan oleh akun lain.",
+        });
+      }
+
+      await userRepository.updateProfile(id, {
+        displayName,
+        username,
+        email,
+        phone,
+        avatar: finalAvatar,
+        newPasswordHash,
+      });
+
+      // Item #195 — self-service profile update juga tidak pernah tercatat
+      // sebelumnya, sama seperti PUT /api/users/:id.
+      createAuditLog({
+        userId: id,
+        projectId: null,
+        actionType: "UPDATE",
+        entityName: "User",
+        entityId: id,
+        oldValues: user,
+        newValues: { displayName, username, email, phone, avatar: finalAvatar },
+      });
+
+      const io = req.app.get("io") || (req as any).io;
+      if (io) {
+        io.emit("data_changed", { path: `/api/users/${id}`, method: "PUT" });
+        io.emit("data_changed", { path: `/api/users`, method: "GET" });
+
+        const avatarLama = user.avatar_url || user.photoURL || user.avatarUrl || null;
+        if (finalAvatar && finalAvatar !== avatarLama) {
+          io.emit("user_avatar_updated", {
+            userId: id,
+            avatar_url: finalAvatar,
+            user: {
+              ...user,
+              avatar_url: finalAvatar,
+              photoURL: finalAvatar,
+              avatarUrl: finalAvatar,
+            },
+          });
+        }
+      }
+
+      res.json({ status: "success", code: "srv.profile_updated", message: "Profile updated" });
+    } catch (error: any) {
+      console.error("LOG ANOMALI CRITICAL: PUT /api/profile/update error:", error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server_3",
+        message: "Terjadi kesalahan internal server: " + error.message,
+      });
+    }
+  }
+);
 
 export default router;

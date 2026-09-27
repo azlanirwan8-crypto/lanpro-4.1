@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { ambilProviderSso, urlMulaiSso, type ProviderSso } from "../services/sso.service";
 
@@ -56,6 +57,7 @@ const NAMA: Record<ProviderSso, string> = {
 };
 
 export const SsoButtons = ({ mode }: SsoButtonsProps) => {
+  const { t } = useTranslation();
   const [providers, setProviders] = useState<ProviderSso[]>([]);
   const [memuat, setMemuat] = useState(true);
 
@@ -63,6 +65,24 @@ export const SsoButtons = ({ mode }: SsoButtonsProps) => {
     let dibatalkan = false;
     ambilProviderSso().then((hasil) => {
       if (!dibatalkan) {
+        // Item #305 — penyaring `p !== "microsoft"` dari #197 DIHAPUS di sini.
+        //
+        // #197 memasangnya karena backend melaporkan microsoft terkonfigurasi
+        // sementara alur OIDC-nya belum siap: tombolnya ada, kliknya gagal.
+        // Adaptor OIDC-nya kini lengkap dan generik (`oidc.service.ts` sudah
+        // menyusun discovery Entra ID beserta tenant-nya), jadi penyaring itu
+        // sudah tidak menjaga apa pun — ia justru menyembunyikan provider yang
+        // sah bila kredensialnya suatu saat diisi.
+        //
+        // Penjaganya sekarang ada di tempat yang benar, yaitu BACKEND:
+        // `providerTersedia()` hanya memulangkan provider yang client id dan
+        // secret-nya benar-benar terisi. Selama `OIDC_MICROSOFT_CLIENT_ID` dan
+        // `_CLIENT_SECRET` kosong, daftar ini tidak memuat "microsoft" dan
+        // tombolnya tetap tidak tampil — tanpa perlu penyaring di sini.
+        //
+        // Jadi baris ini TIDAK memunculkan tombol Microsoft dengan sendirinya.
+        // Ia memulihkan aturan aslinya: tombol tampil bila, dan hanya bila,
+        // providernya benar-benar bisa dipakai.
         setProviders(hasil);
         setMemuat(false);
       }
@@ -74,15 +94,13 @@ export const SsoButtons = ({ mode }: SsoButtonsProps) => {
 
   if (memuat || providers.length === 0) return null;
 
-  const kataKerja = mode === "login" ? "Masuk" : "Daftar";
-
   return (
     <div className="mt-5">
       {/* Pemisah dengan label, supaya jelas ini alternatif dari form di atasnya */}
       <div className="flex items-center gap-3 mb-4">
-        <span className="h-px flex-1 bg-border-subtle" />
-        <span className="text-xs text-content-muted">atau</span>
-        <span className="h-px flex-1 bg-border-subtle" />
+        <span className="h-px flex-1 border-t border-border-subtle" />
+        <span className="text-xs text-content-muted">{t("ui.or")}</span>
+        <span className="h-px flex-1 border-t border-border-subtle" />
       </div>
 
       <div className="flex flex-col gap-2.5">
@@ -99,7 +117,9 @@ export const SsoButtons = ({ mode }: SsoButtonsProps) => {
           >
             {p === "google" ? <LogoGoogle /> : <LogoMicrosoft />}
             <span>
-              {kataKerja} dengan {NAMA[p]}
+              {mode === "login"
+                ? t("rakit.ssoSignIn", { penyedia: NAMA[p] })
+                : t("rakit.ssoSignUp", { penyedia: NAMA[p] })}
             </span>
           </a>
         ))}

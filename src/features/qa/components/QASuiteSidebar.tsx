@@ -1,7 +1,18 @@
+import { useTranslation } from "react-i18next";
+import { useMasterOptionItems } from "../../../hooks/useMasterOptions";
 import React from "react";
-import { Plus, Edit3, Trash2, FileSpreadsheet, CheckCircle2, User, ChevronDown } from "lucide-react";
+import {
+  Plus,
+  Edit3,
+  Trash2,
+  FileSpreadsheet,
+  CheckCircle2,
+  User,
+  ChevronDown,
+} from "lucide-react";
 import { QATestSuite } from "../types";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
+import { StyledDropdown } from "../../../components/ui/CommonComponents";
 
 interface QASuiteSidebarProps {
   suitesForFilter: QATestSuite[];
@@ -13,7 +24,7 @@ interface QASuiteSidebarProps {
   setSuiteToEdit: (suite: QATestSuite) => void;
   setSuiteEditName: (name: string) => void;
   setSuiteEditAssignedTo: (assignedTo: string) => void;
-  setSuiteToDelete: (suite: QATestSuite) => void;
+  handleDeleteSuite: (suite: QATestSuite) => void;
   activeSuitePicDropdownId: string | null;
   setActiveSuitePicDropdownId: (id: string | null) => void;
   handleUpdateSuitePic: (suiteId: string, assignedTo: string) => void;
@@ -22,6 +33,13 @@ interface QASuiteSidebarProps {
   canUpdate: boolean;
   canDelete: boolean;
 }
+
+/** Dipakai hanya bila MasterData belum memuat tipe qa_phase. */
+const CADANGAN_FASE = [
+  { id: "SIT", label: "SIT", icon: "Cpu", color: "#3B82F6" },
+  { id: "UAT", label: "UAT", icon: "CheckCircle2", color: "#10B981" },
+  { id: "PTR", label: "PTR", icon: "ShieldCheck", color: "#F59E0B" },
+];
 
 export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
   suitesForFilter,
@@ -33,7 +51,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
   setSuiteToEdit,
   setSuiteEditName,
   setSuiteEditAssignedTo,
-  setSuiteToDelete,
+  handleDeleteSuite,
   activeSuitePicDropdownId,
   setActiveSuitePicDropdownId,
   handleUpdateSuitePic,
@@ -42,51 +60,54 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
   canUpdate,
   canDelete,
 }) => {
+  const { t } = useTranslation();
+  const opsiFase = useMasterOptionItems("qa_phase", CADANGAN_FASE);
   return (
-    <div className="lg:col-span-3 space-y-3 lg:max-h-[calc(100vh-140px)] lg:sticky lg:top-4 pr-1 custom-scrollbar">
+    <div className="md:col-span-3 space-y-3 md:max-h-[calc(100dvh-140px)] md:sticky md:top-4 pr-1 custom-scrollbar">
       {/* Velzon Ultra-Compact Card Box */}
       <div className="bg-surface border border-border-subtle/80 rounded-md p-3.5 shadow-xs space-y-3">
         {/* Header Title */}
         <div className="flex items-center justify-between border-b border-border-faint pb-2.5">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md bg-primary/10 text-primary flex items-center justify-center font-medium">
+            <div className="w-7 h-7 rounded-md bg-primary-surface/10 text-primary flex items-center justify-center font-medium">
               <FileSpreadsheet className="w-3.5 h-3.5" />
             </div>
             <div>
-              <h3 className="text-xs sm:text-[11px] font-medium text-content-strong uppercase tracking-wider">
-                Daftar Modul Testing
+              <h3 className="text-xs font-semibold text-content-strong">
+                {t("qaSuite.moduleList")}
               </h3>
-              <p className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-medium">Dokumen & Skenario Pengujian</p>
+              <p className="text-xs text-content-subtle font-normal">{t("qaSuite.docScenario")}</p>
             </div>
           </div>
-          <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs sm:text-[11px] sm:text-[9px] font-medium rounded-md">
-            {suitesForFilter.length} Modul
+          <span className="px-2 py-[3px] bg-primary-surface/10 text-primary text-[10px] leading-none font-medium rounded-md">
+            {t("rakit.modulesCount", { count: suitesForFilter.length })}
           </span>
         </div>
 
         {/* Phase Filter Dropdown & Add Button (Hidden for non-creators) */}
         <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <select
+          <div className="flex-1 min-w-0">
+            <StyledDropdown
               value={phaseFilter}
-              onChange={(e) => setPhaseFilter(e.target.value as any)}
-              className="w-full py-1.5 px-2.5 bg-surface-sunken/80 border border-border-subtle rounded-md text-xs font-medium text-content-body focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all cursor-pointer"
-            >
-              <option value="ALL">Semua Fase (ALL)</option>
-              <option value="SIT">Fase SIT (System Integration Test)</option>
-              <option value="UAT">Fase UAT (User Acceptance Test)</option>
-              <option value="PTR">Fase PTR (Production Readiness Test)</option>
-            </select>
+              onChange={(val) => setPhaseFilter(val as any)}
+              options={[
+                { id: "ALL", label: t("qaSuite.allPhases"), icon: "Layers", color: "#6366F1" },
+                ...opsiFase,
+              ]}
+              masterData={[]}
+              className="w-full"
+              buttonClassName="h-8 bg-surface-sunken/80 rounded-md border border-border-subtle hover:border-border-subtle px-2.5 text-xs font-normal text-content-body"
+            />
           </div>
 
           {canCreate && (
             <button
               onClick={() => setIsAddSuiteOpen(true)}
-              className="px-2.5 py-1.5 bg-primary hover:bg-primary-hover active:bg-primary-active text-white rounded-md shadow-2xs transition-all flex items-center gap-1 text-xs font-medium cursor-pointer shrink-0"
-              title="Tambah Modul Testing Baru"
+              className="btn-animation waves-effect waves-light btn-primary h-8 px-3 rounded-lg text-xs font-medium flex items-center gap-1 cursor-pointer shrink-0"
+              title={t("qaSuite.addModule")}
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Tambah</span>
+              <span>{t("qaSuite.add")}</span>
             </button>
           )}
         </div>
@@ -94,8 +115,8 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
         {/* Suite Cards List */}
         <div className="space-y-2.5 max-h-[480px] overflow-y-auto pr-1 custom-scrollbar pb-10">
           {suitesForFilter.length === 0 ? (
-            <div className="text-center py-10 text-content-subtle text-xs font-medium">
-              Tidak ada dokumen pengujian untuk filter ini.
+            <div className="text-center py-10 text-content-subtle text-xs font-normal">
+              {t("qaSuite.emptyFilter")}
             </div>
           ) : (
             suitesForFilter.map((suite, sIdx) => {
@@ -136,8 +157,8 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                             setSuiteEditName(cleanTitle);
                             setSuiteEditAssignedTo(suite.assignedTo || "");
                           }}
-                          className="text-content-subtle hover:text-primary transition-all p-1 bg-surface-sunken hover:bg-indigo-50 rounded-md border border-border-faint"
-                          title="Ubah Dokumen"
+                          className="text-content-subtle hover:text-primary transition-all p-1 bg-surface-sunken hover:bg-primary/10 rounded-md border border-border-faint"
+                          title={t("qaSuite.editDoc")}
                         >
                           <Edit3 className="w-3 h-3" />
                         </button>
@@ -146,10 +167,10 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSuiteToDelete(suite);
+                            handleDeleteSuite(suite);
                           }}
-                          className="text-content-subtle hover:text-rose-500 transition-all p-1 bg-surface-sunken hover:bg-rose-50 rounded-md border border-border-faint"
-                          title="Hapus Dokumen"
+                          className="text-content-subtle hover:text-rose-500 transition-all p-1 bg-surface-sunken hover:bg-rose-500/10 rounded-md border border-border-faint"
+                          title={t("qaSuite.deleteDoc")}
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>
@@ -160,31 +181,33 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                   {/* Phase Pill Badge */}
                   <div className="flex items-center gap-1.5">
                     <span
-                      className={`px-2 py-0.2 text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase rounded-full tracking-wider ${
+                      className={`px-2 py-0.2 text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase rounded-full tracking-normal ${
                         suite.phase === "SIT"
-                          ? "bg-amber-50 text-amber-700 border border-amber-200/60"
+                          ? "bg-amber-500/10 text-amber-700 border border-amber-500/30"
                           : suite.phase === "UAT"
-                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
-                          : "bg-purple-50 text-purple-700 border border-purple-200/60"
+                            ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30"
+                            : "bg-purple-500/10 text-purple-700 border border-purple-500/30"
                       }`}
                     >
                       {suite.phase}
                     </span>
-                    <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-subtle">
+                    <span className="text-xs sm:text-[11px] sm:text-[9px] font-normal text-content-subtle">
                       {new Date(suite.uploadedAt).toLocaleDateString("id-ID")}
                     </span>
                   </div>
 
                   {/* Suite Title (Clean without duplicate phase suffix) */}
-                  <h4 className="text-xs font-medium text-content-strong mt-1.5 line-clamp-1 group-hover:text-primary transition-colors pr-10">
+                  <h4 className="text-xs font-normal text-content-strong mt-1.5 line-clamp-1 group-hover:text-primary transition-colors pr-10">
                     {cleanTitle}
                   </h4>
 
                   {/* Velzon Front-Card PIC Assignment Badge */}
-                  <div className="mt-2.5 flex items-center justify-between text-xs sm:text-[10px] font-medium text-content-muted pt-2 border-t border-border-faint">
+                  <div className="mt-2.5 flex items-center justify-between text-xs sm:text-[10px] font-normal text-content-muted pt-2 border-t border-border-faint">
                     <span className="flex items-center gap-1 text-content-subtle text-xs sm:text-[11px] sm:text-[9px]">
                       <FileSpreadsheet className="w-3 h-3 text-content-subtle" />
-                      <span className="truncate max-w-[85px]">{suite.fileName || "Custom Script"}</span>
+                      <span className="truncate max-w-[85px]">
+                        {suite.fileName || "Custom Script"}
+                      </span>
                     </span>
 
                     {/* Front Card PIC Avatar Button */}
@@ -197,21 +220,31 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                           }
                         }}
                         className={`flex items-center gap-1 px-2 py-0.5 bg-surface-sunken rounded-md border border-border-subtle/80 transition-all ${
-                          canUpdate ? "cursor-pointer hover:bg-indigo-50/80 hover:border-primary/50" : "cursor-default"
+                          canUpdate
+                            ? "cursor-pointer hover:bg-primary/10 hover:border-primary/50"
+                            : "cursor-default"
                         }`}
-                        title={canUpdate ? "Assign / Ubah PIC Modul" : "PIC Modul Terdaftar"}
+                        title={canUpdate ? t("qaSuite.assignPic") : t("qaSuite.picRegistered")}
                       >
                         {suite.assignedTo ? (
                           <>
-                            <UserAvatar uid={suite.assignedTo} members={projectMembers} className="w-3.5 h-3.5 rounded-full" />
-                            <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-primary truncate max-w-[80px]">
-                              {matchedMember?.displayName?.split(" ")[0] || matchedMember?.username || "PIC"}
+                            <UserAvatar
+                              uid={suite.assignedTo}
+                              members={projectMembers}
+                              className="w-3.5 h-3.5 rounded-full"
+                            />
+                            <span className="text-xs sm:text-[11px] sm:text-[9px] font-normal text-primary truncate max-w-[80px]">
+                              {matchedMember?.displayName?.split(" ")[0] ||
+                                matchedMember?.username ||
+                                "PIC"}
                             </span>
                           </>
                         ) : (
                           <div className="flex items-center gap-1 text-primary">
                             <User className="w-2.5 h-2.5" />
-                            <span className="text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase">All PIC</span>
+                            <span className="text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase">
+                              {t("qaSuite.allPic")}
+                            </span>
                           </div>
                         )}
                         {canUpdate && <ChevronDown className="w-2.5 h-2.5 text-content-subtle" />}
@@ -227,21 +260,25 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                               setActiveSuitePicDropdownId(null);
                             }}
                           />
-                          <div className="absolute right-0 bottom-full mb-1.5 w-56 bg-surface rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                            <div className="px-3 py-1 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider text-primary border-b border-border-faint mb-1">
-                              Assign PIC Modul (Tim Proyek)
+                          <div className="absolute right-0 bottom-full mb-1.5 w-56 bg-surface rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-dropdown">
+                            <div className="px-3 py-1 text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-normal text-primary border-b border-border-faint mb-1">
+                              {t("qa.assignModulePicProjectTeam")}
                             </div>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleUpdateSuitePic(suite.id, "");
                               }}
-                              className={`w-full text-left px-3 py-1.5 text-xs font-medium hover:bg-indigo-50 hover:text-primary transition-colors flex items-center justify-between ${
-                                !suite.assignedTo ? "bg-indigo-50/60 text-primary" : "text-content-body"
+                              className={`w-full text-left px-3 py-1.5 text-xs font-normal hover:bg-primary/10 hover:text-primary transition-colors flex items-center justify-between ${
+                                !suite.assignedTo
+                                  ? "bg-primary/10 text-primary"
+                                  : "text-content-body"
                               }`}
                             >
-                              <span>Semua PIC Proyek (All Members)</span>
-                              {!suite.assignedTo && <CheckCircle2 className="w-3.5 h-3.5 text-primary" />}
+                              <span>{t("qaSuite.allProjectPic")}</span>
+                              {!suite.assignedTo && (
+                                <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
+                              )}
                             </button>
                             <div className="max-h-40 overflow-y-auto custom-scrollbar">
                               {(projectMembers || []).map((m: any) => {
@@ -254,15 +291,25 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                                       e.stopPropagation();
                                       handleUpdateSuitePic(suite.id, mId);
                                     }}
-                                    className={`w-full text-left px-3 py-1.5 text-xs font-medium hover:bg-indigo-50 hover:text-primary transition-colors flex items-center justify-between gap-2 ${
-                                      isSelected ? "bg-indigo-50/60 text-primary" : "text-content-body"
+                                    className={`w-full text-left px-3 py-1.5 text-xs font-normal hover:bg-primary/10 hover:text-primary transition-colors flex items-center justify-between gap-2 ${
+                                      isSelected
+                                        ? "bg-primary/10 text-primary"
+                                        : "text-content-body"
                                     }`}
                                   >
                                     <div className="flex items-center gap-1.5 truncate">
-                                      <UserAvatar uid={mId} members={projectMembers} className="w-4 h-4 shrink-0" />
-                                      <span className="truncate">{m.displayName || m.email || m.username}</span>
+                                      <UserAvatar
+                                        uid={mId}
+                                        members={projectMembers}
+                                        className="w-4 h-4 shrink-0"
+                                      />
+                                      <span className="truncate">
+                                        {m.displayName || m.email || m.username}
+                                      </span>
                                     </div>
-                                    {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />}
+                                    {isSelected && (
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                                    )}
                                   </button>
                                 );
                               })}
@@ -276,7 +323,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                   {/* Micro Progress Bar */}
                   <div className="w-full h-1 bg-surface-muted rounded-full mt-2 overflow-hidden">
                     <div
-                      className="h-full bg-primary transition-all duration-500 rounded-full"
+                      className="h-full bg-primary-surface transition-all duration-500 rounded-full"
                       style={{ width: `${percent}%` }}
                     />
                   </div>

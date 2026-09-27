@@ -45,7 +45,23 @@ export const taskService = {
  * URL, metode, header, dan bentuk body dipertahankan persis seperti aslinya.
  * ------------------------------------------------------------------------- */
 
-export const fetchTasks = (projectId: string) => apiRequest(`/api/projects/${projectId}/tasks`);
+export const fetchTasks = (
+  projectId: string,
+  options?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    rootsOnly?: boolean;
+  }
+) => {
+  const params = new URLSearchParams();
+  if (options?.page !== undefined) params.set("page", String(options.page));
+  if (options?.limit !== undefined) params.set("limit", String(options.limit));
+  if (options?.search?.trim()) params.set("search", options.search.trim());
+  if (options?.rootsOnly) params.set("rootsOnly", "1");
+  const qs = params.toString();
+  return apiRequest(`/api/projects/${projectId}/tasks${qs ? `?${qs}` : ""}`);
+};
 
 export const createTask = (projectId: string, body: any) =>
   apiRequest(`/api/projects/${projectId}/tasks`, { method: "POST", body });
@@ -92,3 +108,18 @@ export const createTaskLink = (projectId: string, taskId: string, body: any) =>
 
 export const deleteTaskLink = (projectId: string, taskId: string, linkId: string) =>
   apiRequest(`/api/projects/${projectId}/tasks/${taskId}/links/${linkId}`, { method: "DELETE" });
+
+/** #343 — daftar work log tugas. */
+export const fetchTaskWorkLogs = (projectId: string, taskId: string) =>
+  apiRequest(`/api/projects/${projectId}/tasks/${taskId}/work-logs`);
+
+/** #343 — catat jam kerja. */
+export const createTaskWorkLog = (
+  projectId: string,
+  taskId: string,
+  body: { hours: number; note?: string }
+) =>
+  apiRequest(`/api/projects/${projectId}/tasks/${taskId}/work-logs`, {
+    method: "POST",
+    body,
+  });

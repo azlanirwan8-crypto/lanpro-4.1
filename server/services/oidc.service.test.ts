@@ -208,9 +208,13 @@ describe("oidc.service", () => {
       expect(oidc.domainDiizinkan("Budi@PERUSAHAAN.com")).toBe(true);
     });
 
-    it("tidak tertipu domain yang hanya berakhiran sama", () => {
-      process.env.SSO_ALLOWED_DOMAINS = "perusahaan.com";
-      expect(oidc.domainDiizinkan("penyerang@jahatperusahaan.com")).toBe(false);
+    it("menerima multi-domain yang dipisah koma", () => {
+      process.env.SSO_ALLOWED_DOMAINS = "rajonet.com, bni.co.id, gmail.com, outlook.com";
+      expect(oidc.domainDiizinkan("budi@rajonet.com")).toBe(true);
+      expect(oidc.domainDiizinkan("siti@bni.co.id")).toBe(true);
+      expect(oidc.domainDiizinkan("ani@gmail.com")).toBe(true);
+      expect(oidc.domainDiizinkan("joko@outlook.com")).toBe(true);
+      expect(oidc.domainDiizinkan("asing@yahoo.com")).toBe(false);
     });
   });
 

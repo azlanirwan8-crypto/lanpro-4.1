@@ -8,16 +8,16 @@
 export const colorPaletteHex: Record<string, { bg: string; bgGrad: string; stroke: string }> = {
   yellow: { bg: "#fffbeb", bgGrad: "#fef3c7", stroke: "#eab308" }, // amber-50 / amber-100 / amber-500
   orange: { bg: "#fff7ed", bgGrad: "#ffedd5", stroke: "#f97316" }, // orange-50 / orange-100 / orange-500
-  pink: { bg: "#fdf2f8", bgGrad: "#fce7f3", stroke: "#ec4899" },   // pink-50 / pink-100 / pink-500
-  blue: { bg: "#eff6ff", bgGrad: "#dbeafe", stroke: "#3b82f6" },   // blue-50 / blue-100 / blue-550
-  green: { bg: "#ecfdf5", bgGrad: "#d1fae5", stroke: "#10b981" },  // emerald-50 / emerald-100 / emerald-500
+  pink: { bg: "#fdf2f8", bgGrad: "#fce7f3", stroke: "#ec4899" }, // pink-50 / pink-100 / pink-500
+  blue: { bg: "#eff6ff", bgGrad: "#dbeafe", stroke: "#3b82f6" }, // blue-50 / blue-100 / blue-550
+  green: { bg: "#ecfdf5", bgGrad: "#d1fae5", stroke: "#10b981" }, // emerald-50 / emerald-100 / emerald-500
   purple: { bg: "#faf5ff", bgGrad: "#f3e8ff", stroke: "#a855f7" }, // purple-50 / purple-100 / purple-500
   indigo: { bg: "#eef2ff", bgGrad: "#e0e7ff", stroke: "#6366f1" }, // indigo-50 / indigo-100 / indigo-500
-  sky: { bg: "#f0f9ff", bgGrad: "#e0f2fe", stroke: "#0ea5e9" },    // sky-50 / sky-100 / sky-500
-  amber: { bg: "#fffbeb", bgGrad: "#fef3c7", stroke: "#f59e0b" },  // amber-50 / amber-100 / amber-550
-  rose: { bg: "#fff1f2", bgGrad: "#ffe4e6", stroke: "#f43f5e" },   // rose-50 / rose-100 / rose-500
+  sky: { bg: "#f0f9ff", bgGrad: "#e0f2fe", stroke: "#0ea5e9" }, // sky-50 / sky-100 / sky-500
+  amber: { bg: "#fffbeb", bgGrad: "#fef3c7", stroke: "#f59e0b" }, // amber-50 / amber-100 / amber-550
+  rose: { bg: "#fff1f2", bgGrad: "#ffe4e6", stroke: "#f43f5e" }, // rose-50 / rose-100 / rose-500
   violet: { bg: "#f5f3ff", bgGrad: "#ede9fe", stroke: "#8b5cf6" }, // violet-50 / violet-100 / violet-500
-  slate: { bg: "#f8fafc", bgGrad: "#f1f5f9", stroke: "#64748b" }   // slate-50 / slate-100 / slate-500
+  slate: { bg: "#f8fafc", bgGrad: "#f1f5f9", stroke: "#64748b" }, // slate-50 / slate-100 / slate-500
 };
 
 /**
@@ -27,22 +27,239 @@ export const colorPaletteHex: Record<string, { bg: string; bgGrad: string; strok
  * yang butuh nilai HEX, yang ini dipakai bentuk berbasis div yang butuh nama
  * kelas. Keduanya harus memuat kunci warna yang sama.
  */
-export const colorPalettes: Record<string, { bg: string; text: string; border: string; preview: string }> = {
-  yellow: { bg: "bg-amber-50/85 border-amber-300", text: "text-amber-900", border: "border-amber-300", preview: "bg-amber-200" },
-  orange: { bg: "bg-orange-50/80 border-orange-300", text: "text-orange-900", border: "border-orange-300", preview: "bg-orange-200" },
-  pink: { bg: "bg-pink-50/80 border-pink-300", text: "text-pink-900", border: "border-pink-300", preview: "bg-pink-200" },
-  blue: { bg: "bg-blue-50/80 border-blue-300", text: "text-blue-900", border: "border-blue-300", preview: "bg-blue-200" },
-  green: { bg: "bg-emerald-50/80 border-emerald-300", text: "text-emerald-900", border: "border-emerald-300", preview: "bg-emerald-200" },
-  purple: { bg: "bg-purple-50/80 border-purple-300", text: "text-purple-900", border: "border-purple-300", preview: "bg-purple-200" },
-  indigo: { bg: "bg-indigo-50/80 border-indigo-300", text: "text-indigo-900", border: "border-indigo-300", preview: "bg-indigo-200" },
-  sky: { bg: "bg-sky-50/80 border-sky-300", text: "text-sky-900", border: "border-sky-300", preview: "bg-sky-200" },
-  amber: { bg: "bg-amber-50/80 border-amber-400", text: "text-amber-900", border: "border-amber-400", preview: "bg-amber-300" },
-  rose: { bg: "bg-rose-50/80 border-rose-300", text: "text-rose-900", border: "border-rose-300", preview: "bg-rose-200" },
-  violet: { bg: "bg-violet-50/80 border-violet-300", text: "text-violet-900", border: "border-violet-300", preview: "bg-violet-250" },
-  slate: { bg: "bg-slate-50/80 border-slate-300", text: "text-slate-800", border: "border-slate-300", preview: "bg-slate-300" }
+export const colorPalettes: Record<
+  string,
+  { bg: string; text: string; border: string; preview: string }
+> = {
+  yellow: {
+    bg: "bg-amber-50/85 border-amber-300",
+    text: "text-amber-900",
+    border: "border-amber-300",
+    preview: "bg-amber-200",
+  },
+  orange: {
+    bg: "bg-orange-50/80 border-orange-300",
+    text: "text-orange-900",
+    border: "border-orange-300",
+    preview: "bg-orange-200",
+  },
+  pink: {
+    bg: "bg-pink-50/80 border-pink-300",
+    text: "text-pink-900",
+    border: "border-pink-300",
+    preview: "bg-pink-200",
+  },
+  blue: {
+    bg: "bg-blue-50/80 border-blue-300",
+    text: "text-blue-900",
+    border: "border-blue-300",
+    preview: "bg-blue-200",
+  },
+  green: {
+    bg: "bg-emerald-50/80 border-emerald-300",
+    text: "text-emerald-900",
+    border: "border-emerald-300",
+    preview: "bg-emerald-200",
+  },
+  purple: {
+    bg: "bg-purple-50/80 border-purple-300",
+    text: "text-purple-900",
+    border: "border-purple-300",
+    preview: "bg-purple-200",
+  },
+  indigo: {
+    bg: "bg-indigo-50/80 border-indigo-300",
+    text: "text-indigo-900",
+    border: "border-indigo-300",
+    preview: "bg-indigo-200",
+  },
+  sky: {
+    bg: "bg-sky-50/80 border-sky-300",
+    text: "text-sky-900",
+    border: "border-sky-300",
+    preview: "bg-sky-200",
+  },
+  amber: {
+    bg: "bg-amber-50/80 border-amber-400",
+    text: "text-amber-900",
+    border: "border-amber-400",
+    preview: "bg-amber-300",
+  },
+  rose: {
+    bg: "bg-rose-50/80 border-rose-300",
+    text: "text-rose-900",
+    border: "border-rose-300",
+    preview: "bg-rose-200",
+  },
+  violet: {
+    bg: "bg-violet-50/80 border-violet-300",
+    text: "text-violet-900",
+    border: "border-violet-300",
+    preview: "",
+  },
+  slate: {
+    // slate-50 di bawah ini SENGAJA masih kelas keras, bukan token: ia pasangan
+    // `colorPaletteHex.slate` (#f8fafc) yang dipakai bentuk SVG, dan kanvas ini
+    // mewakili dokumen, bukan antarmuka — ikut tema aplikasi membuat node "slate"
+    // jadi hitam pekat di mode gelap sementara sebelahnya tetap pastel.
+    bg: "bg-slate-50/80 border-border-subtle",
+    text: "text-content-strong",
+    border: "border-border-subtle",
+    preview: "bg-surface-marker",
+  },
 };
 
 /** Kelompok bentuk yang tampil di panel pemilih diagram. Data murni. */
+/**
+ * Ukuran lahir tiap bentuk baru (#541).
+ *
+ * `handleAddNewNode` hanya punya kasus untuk sebagian tipe; sisanya lahir sebagai
+ * kotak 140×70, sehingga lingkaran jadi telur dan panah jadi papan. Peta ini
+ * dibaca SEBELUM switch, jadi kasus yang sudah ada tetap menang.
+ */
+export const UKURAN_BENTUK: Record<string, { width: number; height: number; fontSize?: number }> = {
+  heptagon: { width: 110, height: 110 },
+  nonagon: { width: 110, height: 110 },
+  ring: { width: 110, height: 110 },
+  semicircleUp: { width: 110, height: 110 },
+  semicircleDown: { width: 110, height: 110 },
+  quarterDisc: { width: 110, height: 110 },
+  chord: { width: 110, height: 110 },
+  pieSlice: { width: 110, height: 110 },
+  lens: { width: 110, height: 110 },
+  star4: { width: 110, height: 110 },
+  hexagram: { width: 110, height: 110 },
+  connectorSmall: { width: 110, height: 110 },
+  umlInitial: { width: 110, height: 110 },
+  umlActivityFinal: { width: 110, height: 110 },
+  stamp: { width: 110, height: 110 },
+  sphere: { width: 110, height: 110 },
+  cube: { width: 110, height: 110 },
+  cone: { width: 110, height: 110 },
+  lShape: { width: 110, height: 110 },
+  tShape: { width: 110, height: 110 },
+  cdnEdge: { width: 110, height: 110 },
+  dns: { width: 110, height: 110 },
+  internet: { width: 110, height: 110 },
+  loadBalancer: { width: 110, height: 110 },
+  lock: { width: 110, height: 110 },
+  server: { width: 110, height: 110 },
+  container: { width: 110, height: 110 },
+  apiGateway: { width: 110, height: 110 },
+  bpmnTimerEvent: { width: 110, height: 110 },
+  bpmnMessageEvent: { width: 110, height: 110 },
+  bpmnErrorEvent: { width: 110, height: 110 },
+  bpmnSignalEvent: { width: 110, height: 110 },
+  bpmnConditionalEvent: { width: 110, height: 110 },
+  bpmnAndGateway: { width: 110, height: 110 },
+  bpmnXorGateway: { width: 110, height: 110 },
+  person: { width: 110, height: 110 },
+  team: { width: 110, height: 110 },
+  printer: { width: 110, height: 110 },
+  laptop: { width: 110, height: 110 },
+  bpmnTask: { width: 165, height: 80 },
+  bpmnUserTask: { width: 165, height: 80 },
+  bpmnServiceTask: { width: 165, height: 80 },
+  bpmnScriptTask: { width: 165, height: 80 },
+  bpmnBusinessRuleTask: { width: 165, height: 80 },
+  bpmnSendTask: { width: 165, height: 80 },
+  bpmnReceiveTask: { width: 165, height: 80 },
+  bubbleRound: { width: 170, height: 105 },
+  bubbleTailLeft: { width: 170, height: 105 },
+  bubbleTailRight: { width: 170, height: 105 },
+  bubbleTailUp: { width: 170, height: 105 },
+  tag: { width: 170, height: 105 },
+  banner: { width: 170, height: 105 },
+  cloudCallout: { width: 170, height: 105 },
+  speechDouble: { width: 170, height: 105 },
+  bpmnPool: { width: 260, height: 150 },
+  bracketLeft: { width: 56, height: 130 },
+  bracketRight: { width: 56, height: 130 },
+  braceLeft: { width: 56, height: 130 },
+  braceRight: { width: 56, height: 130 },
+  annotationLeft: { width: 56, height: 130 },
+  annotationRight: { width: 56, height: 130 },
+  arrowUp: { width: 90, height: 130 },
+  arrowDown: { width: 90, height: 130 },
+  arrowUpDown: { width: 90, height: 150 },
+  mobile: { width: 76, height: 130 },
+  rack: { width: 96, height: 130 },
+  umlGeneralization: { width: 90, height: 140 },
+  badge: { width: 110, height: 130 },
+  noteCorner: { width: 120, height: 120 },
+  curvedArrow: { width: 150, height: 90 },
+  homePlate: { width: 160, height: 80 },
+  arrowCallout: { width: 175, height: 85 },
+  extract: { width: 120, height: 110 },
+  offPage: { width: 140, height: 90 },
+  loopLimit: { width: 140, height: 90 },
+  storage: { width: 150, height: 100 },
+  punchCard: { width: 140, height: 100 },
+  parallelMode: { width: 120, height: 110 },
+  sequentialData: { width: 160, height: 90 },
+  compare: { width: 120, height: 110 },
+  draftDocument: { width: 150, height: 100 },
+  umlPackage: { width: 160, height: 120 },
+  umlComponent: { width: 160, height: 100 },
+  umlObject: { width: 160, height: 90 },
+  umlSwimlane: { width: 220, height: 150 },
+  umlDependency: { width: 170, height: 60 },
+  queue: { width: 170, height: 80 },
+  key: { width: 130, height: 90 },
+  wifi: { width: 130, height: 110 },
+  firewall: { width: 150, height: 90 },
+
+  /* #549 — keluarga diagram standar baru. Proporsinya ikut bentuk aslinya:
+     komponen listrik memanjang, gerbang logika hampir persegi, lane melebar. */
+  erEntity: { width: 180, height: 120 },
+  erWeakEntity: { width: 180, height: 120 },
+  erAttribute: { width: 160, height: 110 },
+  erKeyAttribute: { width: 165, height: 120 },
+  erDerivedAttribute: { width: 160, height: 110 },
+  erMultiValued: { width: 170, height: 125 },
+  erRelationship: { width: 150, height: 150 },
+  erCrowsFoot: { width: 190, height: 80 },
+  gateAnd: { width: 140, height: 100 },
+  gateOr: { width: 140, height: 100 },
+  gateNot: { width: 140, height: 100 },
+  gateNand: { width: 140, height: 100 },
+  gateNor: { width: 140, height: 100 },
+  gateXor: { width: 140, height: 100 },
+  gateMux: { width: 110, height: 145 },
+  gateFlipFlop: { width: 130, height: 115 },
+  laneHorizontal: { width: 320, height: 170 },
+  laneVertical: { width: 200, height: 300 },
+  poolLane: { width: 340, height: 190 },
+  vsmProcess: { width: 150, height: 130 },
+  vsmData: { width: 140, height: 120 },
+  vsmInventory: { width: 140, height: 120 },
+  vsmWait: { width: 150, height: 115 },
+  vsmKanbanPillar: { width: 100, height: 150 },
+  uiBrowser: { width: 280, height: 180 },
+  uiMobile: { width: 96, height: 175 },
+  uiButton: { width: 150, height: 62 },
+  uiInput: { width: 200, height: 66 },
+  uiCheckbox: { width: 110, height: 110 },
+  uiRadio: { width: 110, height: 110 },
+  uiDropdown: { width: 200, height: 66 },
+  uiImagePlaceholder: { width: 150, height: 140 },
+  netRouter: { width: 130, height: 130 },
+  netSwitch: { width: 200, height: 110 },
+  netHub: { width: 130, height: 130 },
+  netFirewall: { width: 150, height: 140 },
+  netWirelessAp: { width: 140, height: 150 },
+  netStorage: { width: 150, height: 125 },
+  netSubnet: { width: 280, height: 180 },
+  netClient: { width: 160, height: 130 },
+  elResistor: { width: 200, height: 60 },
+  elCapacitor: { width: 200, height: 60 },
+  elInductor: { width: 200, height: 60 },
+  elGround: { width: 110, height: 130 },
+  elLamp: { width: 110, height: 110 },
+  elMotor: { width: 110, height: 110 },
+  pidValve: { width: 150, height: 110 },
+  pidPump: { width: 130, height: 120 },
+};
 export const DIAGRAM_SHAPE_GROUPS = [
   {
     title: "Basic Shapes",
@@ -57,7 +274,27 @@ export const DIAGRAM_SHAPE_GROUPS = [
       { type: "star", name: "Spotlight Star", desc: "Sorotan Utama" },
       { type: "cross", name: "Cross / Plus", desc: "Summing Junction" },
       { type: "trapezoid", name: "Trapezoid", desc: "Manual Input" },
-    ]
+      { type: "heptagon", name: "Heptagon", desc: "Segi Tujuh" },
+      { type: "nonagon", name: "Nonagon", desc: "Segi Sembilan" },
+      { type: "ring", name: "Ring / Donut", desc: "Cincin Konsentris" },
+      { type: "semicircleUp", name: "Semicircle Up", desc: "Setengah Lingkaran" },
+      { type: "semicircleDown", name: "Semicircle Down", desc: "Mangkuk / Tandon" },
+      { type: "quarterDisc", name: "Quarter Circle", desc: "Seperempat Lingkaran" },
+      { type: "chord", name: "Chord Segment", desc: "Tali Busur Lingkaran" },
+      { type: "pieSlice", name: "Pie Sector", desc: "Irisan Lingkaran" },
+      { type: "lens", name: "Lens Shape", desc: "Perpotongan Dua Busur" },
+      { type: "cube", name: "Cube 3D", desc: "Balok Isometrik" },
+      { type: "cone", name: "Cone", desc: "Kerucut" },
+      { type: "sphere", name: "Sphere", desc: "Bola Berjaring" },
+      { type: "lShape", name: "L Block", desc: "Susut Sudut Kanan" },
+      { type: "tShape", name: "T Block", desc: "Cabang Tiga" },
+      { type: "star4", name: "Star Four Point", desc: "Bintang Empat" },
+      { type: "hexagram", name: "Hexagram", desc: "Bintang Enam" },
+      { type: "bracketLeft", name: "Bracket Left", desc: "Kurung Siku Buka" },
+      { type: "bracketRight", name: "Bracket Right", desc: "Kurung Siku Tutup" },
+      { type: "braceLeft", name: "Brace Left", desc: "Kurung Akolade" },
+      { type: "braceRight", name: "Brace Right", desc: "Kurung Akolade Balik" },
+    ],
   },
   {
     title: "Flowchart",
@@ -82,7 +319,19 @@ export const DIAGRAM_SHAPE_GROUPS = [
       { type: "card", name: "Backlog Epic Card", desc: "Story Board Task" },
       { type: "predefined", name: "Predefined Process", desc: "Double Border" },
       { type: "parallelogram", name: "Data Parallelogram", desc: "Input / Output" },
-    ]
+      { type: "extract", name: "Extract", desc: "Jam Pasir Pemisah" },
+      { type: "offPage", name: "Off-Page Reference", desc: "Lanjut Halaman Lain" },
+      { type: "connectorSmall", name: "Connector", desc: "Bulat Penghubung" },
+      { type: "loopLimit", name: "Loop Limit", desc: "Batas Perulangan" },
+      { type: "storage", name: "Storage Drum", desc: "Gudang Data" },
+      { type: "annotationLeft", name: "Annotation Left", desc: "Catatan Kiri" },
+      { type: "annotationRight", name: "Annotation Right", desc: "Catatan Kanan" },
+      { type: "punchCard", name: "Punch Card", desc: "Kartu Berlubang" },
+      { type: "parallelMode", name: "Parallel Mode", desc: "Jalur Bersamaan" },
+      { type: "sequentialData", name: "Sequential Data", desc: "Pita Berurutan" },
+      { type: "compare", name: "Compare", desc: "Uji Dua Masukan" },
+      { type: "draftDocument", name: "Draft Document", desc: "Dokumen Bergelombang" },
+    ],
   },
   {
     title: "Callouts",
@@ -95,14 +344,25 @@ export const DIAGRAM_SHAPE_GROUPS = [
       { type: "chevron", name: "Chevron Process", desc: "Langkah Beruntun" },
       { type: "curlyLeft", name: "Curly Left", desc: "Grup Awal" },
       { type: "curlyRight", name: "Curly Right", desc: "Grup Akhir" },
-    ]
+      { type: "bubbleRound", name: "Speech Bubble", desc: "Balon Kata Bulat" },
+      { type: "bubbleTailLeft", name: "Bubble Tail Left", desc: "Ekor Kiri Bawah" },
+      { type: "bubbleTailRight", name: "Bubble Tail Right", desc: "Ekor Kanan Bawah" },
+      { type: "bubbleTailUp", name: "Bubble Tail Up", desc: "Ekor Menunjuk Atas" },
+      { type: "tag", name: "Tag Label", desc: "Label Berlubang" },
+      { type: "badge", name: "Award Badge", desc: "Lencana Berpita" },
+      { type: "banner", name: "Banner Ribbon", desc: "Pita Lebar" },
+      { type: "stamp", name: "Stamp Frame", desc: "Bingkai Perangko" },
+      { type: "noteCorner", name: "Note Fold", desc: "Catatan Lipat Sudut" },
+      { type: "cloudCallout", name: "Cloud Callout", desc: "Awan Berbicara" },
+      { type: "speechDouble", name: "Speech Double", desc: "Dua Ekor Obrolan" },
+    ],
   },
   {
     title: "My Shapes",
     items: [
       { type: "sticky", name: "Sticky Notes", desc: "Miro Post-It" },
       { type: "actor", name: "System Actor", desc: "Aktor Pengguna" },
-    ]
+    ],
   },
   {
     title: "AWS Active Cloud",
@@ -114,7 +374,7 @@ export const DIAGRAM_SHAPE_GROUPS = [
       { type: "awsRds", name: "AWS RDS", desc: "Relational DB Cluster" },
       { type: "awsCloudwatch", name: "AWS CloudWatch", desc: "Monitoring & Stats" },
       { type: "awsDynamo", name: "AWS DynamoDB", desc: "NoSQL Database Table" },
-    ]
+    ],
   },
   {
     title: "Azure Cloud",
@@ -127,7 +387,7 @@ export const DIAGRAM_SHAPE_GROUPS = [
       { type: "azurePowerBi", name: "PowerBI Report", desc: "Data Analytics Insights" },
       { type: "azureVm", name: "Azure VM Node", desc: "Classic Computes Server" },
       { type: "azureStorage", name: "Azure Storage", desc: "File and Blob Cloud Storage" },
-    ]
+    ],
   },
   {
     title: "UML Modeling",
@@ -139,7 +399,15 @@ export const DIAGRAM_SHAPE_GROUPS = [
       { type: "umlControl", name: "UML Control", desc: "Controller Logic Node" },
       { type: "umlEntity", name: "UML Entity", desc: "Database Entity Model" },
       { type: "umlNote", name: "UML Note Page", desc: "UML Dog-Ear Comment" },
-    ]
+      { type: "umlPackage", name: "UML Package", desc: "Kotak Berlabel" },
+      { type: "umlComponent", name: "UML Component", desc: "Komponen Berpfokus" },
+      { type: "umlObject", name: "UML Object", desc: "Instansi Bergaris Bawah" },
+      { type: "umlInitial", name: "UML Initial Node", desc: "Titik Mulai Penuh" },
+      { type: "umlActivityFinal", name: "UML Activity Final", desc: "Lingkaran Berinti" },
+      { type: "umlDependency", name: "UML Dependency", desc: "Panah Putus-Putus" },
+      { type: "umlGeneralization", name: "UML Generalization", desc: "Warisan Segitiga" },
+      { type: "umlSwimlane", name: "UML Swimlane", desc: "Kolom Aktor" },
+    ],
   },
   {
     title: "BPMN Diagram",
@@ -150,6 +418,137 @@ export const DIAGRAM_SHAPE_GROUPS = [
       { type: "bpmnDataStore", name: "BPMN Storage", desc: "System Datastore" },
       { type: "bpmnDataObject", name: "Data Object Page", desc: "BPMN File Artifact" },
       { type: "bpmnEventEnd", name: "End Event Terminal", desc: "Process Terminus Point" },
-    ]
-  }
+      { type: "bpmnTask", name: "BPMN Task", desc: "Tugas Umum" },
+      { type: "bpmnUserTask", name: "User Task", desc: "Tugas Melibatkan Orang" },
+      { type: "bpmnServiceTask", name: "Service Task", desc: "Tugas Otomatis" },
+      { type: "bpmnScriptTask", name: "Script Task", desc: "Tugas Skrip" },
+      { type: "bpmnBusinessRuleTask", name: "Business Rule Task", desc: "Tugas Aturan Bisnis" },
+      { type: "bpmnSendTask", name: "Send Task", desc: "Kirim Pesan" },
+      { type: "bpmnReceiveTask", name: "Receive Task", desc: "Terima Pesan" },
+      { type: "bpmnTimerEvent", name: "Timer Event", desc: "Event Waktu" },
+      { type: "bpmnMessageEvent", name: "Message Event", desc: "Event Pesan" },
+      { type: "bpmnErrorEvent", name: "Error Event", desc: "Event Kesalahan" },
+      { type: "bpmnSignalEvent", name: "Signal Event", desc: "Event Isyarat" },
+      { type: "bpmnConditionalEvent", name: "Conditional Event", desc: "Event Bersyarat" },
+      { type: "bpmnAndGateway", name: "Parallel Gateway", desc: "Gerbang AND" },
+      { type: "bpmnXorGateway", name: "Exclusive Gateway", desc: "Gerbang XOR" },
+      { type: "bpmnPool", name: "Pool / Lane", desc: "Kolam Proses" },
+    ],
+  },
+  {
+    title: "Arrows",
+    items: [
+      { type: "arrowUp", name: "Arrow Up", desc: "Panah Blok Atas" },
+      { type: "arrowDown", name: "Arrow Down", desc: "Panah Blok Bawah" },
+      { type: "arrowUpDown", name: "Arrow Up Down", desc: "Panah Dua Arah" },
+      { type: "curvedArrow", name: "Curved Arrow", desc: "Panah Melengkung" },
+      { type: "homePlate", name: "Home Plate", desc: "Panah Hapus Sudut" },
+      { type: "arrowCallout", name: "Arrow Callout", desc: "Label Bersambung Panah" },
+    ],
+  },
+  {
+    title: "Cloud & Network",
+    items: [
+      { type: "server", name: "Server", desc: "Mesin Layanan" },
+      { type: "rack", name: "Rack / Cabinet", desc: "Lemari Perangkat" },
+      { type: "queue", name: "Queue", desc: "Antrean Pesan" },
+      { type: "container", name: "Container", desc: "Kemasan Enam Sisi" },
+      { type: "loadBalancer", name: "Load Balancer", desc: "Pembagi Beban" },
+      { type: "cdnEdge", name: "CDN Edge", desc: "Titik Tepi Jaringan" },
+      { type: "dns", name: "DNS Resolver", desc: "Nama Domain" },
+      { type: "lock", name: "Lock / Secrets", desc: "Gerendel Aman" },
+      { type: "key", name: "Key", desc: "Kunci Akses" },
+      { type: "internet", name: "Internet", desc: "Jaringan Global" },
+      { type: "wifi", name: "Wireless", desc: "Sinyal Nirkabel" },
+      { type: "firewall", name: "Firewall", desc: "Tembok Api" },
+      { type: "laptop", name: "Laptop", desc: "Perangkat Kerja" },
+      { type: "mobile", name: "Mobile Device", desc: "Perangkat Genggam" },
+      { type: "printer", name: "Printer", desc: "Alat Cetak" },
+      { type: "person", name: "Person", desc: "Satu Orang" },
+      { type: "team", name: "Team", desc: "Kelompok Orang" },
+      { type: "apiGateway", name: "API Gateway", desc: "Gerbang Layanan" },
+    ],
+  },
+  {
+    title: "Entity Relationship",
+    items: [
+      { type: "erEntity", name: "Entity", desc: "Entitas dengan pemisah atribut" },
+      { type: "erWeakEntity", name: "Weak Entity", desc: "Entitas lemah bergaris ganda" },
+      { type: "erAttribute", name: "Attribute", desc: "Atribut berbentuk elips" },
+      { type: "erKeyAttribute", name: "Key Attribute", desc: "Atribut kunci bergaris ganda" },
+      {
+        type: "erDerivedAttribute",
+        name: "Derived Attribute",
+        desc: "Atribut turunan putus-putus",
+      },
+      { type: "erMultiValued", name: "Multi-Valued Attribute", desc: "Atribut banyak nilai" },
+      { type: "erRelationship", name: "Relationship", desc: "Relasi belah ketupat" },
+      { type: "erCrowsFoot", name: "Crow's Foot", desc: "Kaki gagak simbol banyak" },
+    ],
+  },
+  {
+    title: "Logic Gates",
+    items: [
+      { type: "gateAnd", name: "AND Gate", desc: "Gerbang DAN kanonik" },
+      { type: "gateOr", name: "OR Gate", desc: "Gerbang ATAU kurva ganda" },
+      { type: "gateNot", name: "NOT Gate", desc: "Inverter segitiga berbintik" },
+      { type: "gateNand", name: "NAND Gate", desc: "DAN dengan sangkalan" },
+      { type: "gateNor", name: "NOR Gate", desc: "ATAU dengan sangkalan" },
+      { type: "gateXor", name: "XOR Gate", desc: "ATAU eksklusif bersisi ganda" },
+      { type: "gateMux", name: "Multiplexer", desc: "Pemilih jalur trapesium" },
+      { type: "gateFlipFlop", name: "Flip-Flop", desc: "Sel memori bertanda jam" },
+    ],
+  },
+  {
+    title: "Swimlane & VSM",
+    items: [
+      { type: "laneHorizontal", name: "Horizontal Lane", desc: "Lane melebar per peran" },
+      { type: "laneVertical", name: "Vertical Lane", desc: "Lane menurun per tahap" },
+      { type: "poolLane", name: "Pool With Lanes", desc: "Kolam berbar judul" },
+      { type: "vsmProcess", name: "VSM Process", desc: "Proses value stream berkaki" },
+      { type: "vsmData", name: "VSM Data", desc: "Corong data dan informasi" },
+      { type: "vsmInventory", name: "VSM Inventory", desc: "Persediaan berjalan" },
+      { type: "vsmWait", name: "VSM Wait", desc: "Antrean tunggu berjari jam" },
+      { type: "vsmKanbanPillar", name: "Kanban Pillar", desc: "Pilar kanban penarik aliran" },
+    ],
+  },
+  {
+    title: "Wireframe",
+    items: [
+      { type: "uiBrowser", name: "Browser Window", desc: "Jendela berbar alamat" },
+      { type: "uiMobile", name: "Mobile Screen", desc: "Layar ponsel berlekuk" },
+      { type: "uiButton", name: "UI Button", desc: "Tombol kapsul" },
+      { type: "uiInput", name: "Text Input", desc: "Kolom isian dengan kursor" },
+      { type: "uiCheckbox", name: "Checkbox", desc: "Kotak centang" },
+      { type: "uiRadio", name: "Radio Button", desc: "Pilihan tunggal bundar" },
+      { type: "uiDropdown", name: "Dropdown", desc: "Menu pilihan bercaret" },
+      { type: "uiImagePlaceholder", name: "Image Placeholder", desc: "Gambar sementara" },
+    ],
+  },
+  {
+    title: "Network Symbols",
+    items: [
+      { type: "netRouter", name: "Router", desc: "Pengarah paket empat jurusan" },
+      { type: "netSwitch", name: "Switch", desc: "Sakelar multi porta" },
+      { type: "netHub", name: "Hub", desc: "Pusat simpul berbentuk bintang" },
+      { type: "netFirewall", name: "Firewall Wall", desc: "Tembok bata penyaring" },
+      { type: "netWirelessAp", name: "Access Point", desc: "Titik akses nirkabel" },
+      { type: "netStorage", name: "Storage Cylinder", desc: "Silinder penyimpanan" },
+      { type: "netSubnet", name: "Subnet", desc: "Blok jaringan putus-putus" },
+      { type: "netClient", name: "Client Workstation", desc: "Klien bermonitor" },
+    ],
+  },
+  {
+    title: "Electrical & P&ID",
+    items: [
+      { type: "elResistor", name: "Resistor", desc: "Hambatan zigzag berkaki" },
+      { type: "elCapacitor", name: "Capacitor", desc: "Kapasitor dua pelat sejajar" },
+      { type: "elInductor", name: "Inductor", desc: "Kumparan induktor bergelombang" },
+      { type: "elGround", name: "Ground", desc: "Arde bertiang tiga garis" },
+      { type: "elLamp", name: "Lamp", desc: "Lampu bersilang di dalam" },
+      { type: "elMotor", name: "Motor", desc: "Motor listrik lingkaran bergores" },
+      { type: "pidValve", name: "P&ID Valve", desc: "Katup dasi kupu-kupu beroda" },
+      { type: "pidPump", name: "P&ID Pump", desc: "Pompa dengan panah keluar" },
+    ],
+  },
 ];

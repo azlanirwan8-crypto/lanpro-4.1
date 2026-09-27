@@ -1,4 +1,4 @@
-import { Task, Sprint, UserProfile, MasterData, AppRole } from '../../types';
+import { Task, Sprint, UserProfile, MasterData, AppRole, PeranEfektif } from "../../types";
 
 export interface IssueListViewProps {
   projectRole?: string;
@@ -8,7 +8,7 @@ export interface IssueListViewProps {
   projectMembers: UserProfile[];
   allUsers: UserProfile[];
   masterData: MasterData[];
-  userRole: AppRole;
+  userRole: PeranEfektif;
   user: UserProfile | null;
   currentUserProfile: UserProfile;
   hasPermission: any;
@@ -20,7 +20,22 @@ export interface IssueListViewProps {
   setIsTaskDetailModalOpen: (open: boolean) => void;
   setIsNewTaskModalOpen?: (open: boolean) => void;
   selectedProject: any;
-  fetchTasks?: () => void;
+  fetchTasks?: (opts?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    rootsOnly?: boolean;
+  }) => void | Promise<void>;
+  issueListPage?: number;
+  setIssueListPage?: (page: number) => void;
+  issueListSearch?: string;
+  setIssueListSearch?: (search: string) => void;
+  issueListMeta?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  } | null;
 }
 
 export interface TaskDetailModalProps {
@@ -32,7 +47,7 @@ export interface TaskDetailModalProps {
   tasks: Task[];
   projectMembers: UserProfile[];
   masterData: MasterData[];
-  userRole: AppRole;
+  userRole: PeranEfektif;
   user: UserProfile | null;
   currentUserProfile: UserProfile;
   sprints: Sprint[];
@@ -42,12 +57,12 @@ export interface TaskDetailModalProps {
   comments: any[];
   newCommentText: string;
   setNewCommentText: (t: string) => void;
-  handleAddComment: () => void;
+  handleAddComment: (customText?: string, parentId?: string) => Promise<void> | void;
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveAttachment?: (attachmentId: string) => void;
   uploadProgress: Record<string, number>;
   isLoggedIn: boolean;
-  handleQuickAddSubtask: (parentId: string, type: string) => void;
+  handleQuickAddSubtask: (parentId: string, type: "task" | "subtask") => void | Promise<void>;
   mentionState: any;
   handleSelectMention: (username: string) => void;
   handleCommentChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;

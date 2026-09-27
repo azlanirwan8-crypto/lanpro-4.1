@@ -4,6 +4,9 @@ import { safeLocalStorage } from "../lib/safeStorage";
  * Stores local state snapshot to localStorage for instantaneous loading (Stale-While-Revalidate).
  */
 
+const pendingSaveTimers = new Map<string, ReturnType<typeof setTimeout>>();
+const DEFAULT_SAVE_DEBOUNCE_MS = 400;
+
 export const CacheManager = {
   save: (key: string, data: any) => {
     try {
@@ -15,6 +18,19 @@ export const CacheManager = {
     } catch (e) {
       console.warn("Failed to save to client-side cache:", e);
     }
+  },
+
+  /** Menunda serialisasi localStorage agar burst setTasks tidak memblokir UI (#317). */
+  saveDebounced: (key: string, data: any, delayMs = DEFAULT_SAVE_DEBOUNCE_MS) => {
+    const pending = pendingSaveTimers.get(key);
+    if (pending) clearTimeout(pending);
+    pendingSaveTimers.set(
+      key,
+      setTimeout(() => {
+        pendingSaveTimers.delete(key);
+        CacheManager.save(key, data);
+      }, delayMs)
+    );
   },
 
   get: <T>(key: string): T | null => {

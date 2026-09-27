@@ -1,9 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import {
   Plus,
   Trash2,
-  ChevronLeft,
   Edit2,
   MessageSquare,
   Calendar,
@@ -15,25 +15,58 @@ import {
   X,
   Eye,
   Download,
+  ArrowLeft,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  getMeetings,
   createMeeting,
   updateMeeting,
   deleteMeeting,
   getUsers,
 } from "../../services/meetingService";
-import { type Meeting, type UserProfile, type AppRole, type UserPermissions } from "../../types";
-import { DiscussionPointsTable } from "./DiscussionPointsTable";
+import {
+  type Meeting,
+  type UserProfile,
+  type AppRole,
+  type PeranEfektif,
+  type UserPermissions,
+} from "../../types";
 import { UserAvatar } from "../../components/ui/UserAvatar";
-import { hasPermission } from "../../lib/permissions";
 import { downloadMeetingFile, resolveUserId } from "./services/meeting.service";
+import { hasPermission } from "../../lib/permissions";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
+import { LanproDatePicker } from "../../components/ui/LanproDatePicker";
+import { LanproTimePicker } from "../../components/ui/LanproTimePicker";
+import { MeetingMobileCardView } from "./components/MeetingMobileCardView";
+import { useMobileAction } from "../../contexts/MobileActionContext";
+import { PageHeader } from "../../components/ui/PageHeader";
+import { DetailViewChrome } from "../../components/ui/DetailViewChrome";
+import {
+  ListPageShell,
+  LIST_SEARCH_INPUT_CLASS,
+  LIST_TABLE_WRAP_CLASS,
+  LIST_THEAD_ROW_CLASS,
+} from "../../components/ui/ListPageShell";
+import {
+  loadProjectMeetings,
+  peekProjectMeetings,
+  writeProjectMeetings,
+  invalidateProjectMeetings,
+} from "../../lib/moduleDataCache";
+import { lazyWithRetry } from "../../lib/lazyWithRetry";
+
+/**
+ * #460 — DiscussionPointsTable (beserta AI/FFmpeg di dalamnya)
+ * hanya dibutuhkan di detail. Impor statis membuat daftar ikut menunggu
+ * chunk FFmpeg dan bisa meninggalkan area utama putih.
+ */
+const DiscussionPointsTable = lazyWithRetry(() =>
+  import("./DiscussionPointsTable").then((m) => ({ default: m.DiscussionPointsTable }))
+);
 
 interface MeetingNotesProps {
   projectId: string;
-  userRole: AppRole;
+  userRole: PeranEfektif;
   currentUser: UserProfile | null;
   permissions?: Partial<UserPermissions>;
   projectMembers?: UserProfile[];
@@ -48,8 +81,17 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
   projectMembers = [],
   masterData = [],
 }) => {
-  const [meetings, setMeetings] = useState<Meeting[]>([]);
-  const [users, setUsers] = useState<UserProfile[]>([]);
+  const { t } = useTranslation();
+  const effectiveUserId = currentUser?.uid || "guest";
+
+  const syncMeetingsCache = (next: Meeting[]) => {
+    writeProjectMeetings(projectId, effectiveUserId, next);
+  };
+
+  const [meetings, setMeetings] = useState<Meeting[]>(() => {
+    return peekProjectMeetings<Meeting>(projectId, effectiveUserId) ?? [];
+  });
+  const [users, setUsers] = useState<UserProfile[]>(projectMembers);
   const [loading, setLoading] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
@@ -118,7 +160,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
   };
 
   const handleDownloadMeeting = async (meetingId: string, fName: string) => {
-    toast.info("Mengunduh berkas lampiran...");
+    toast.info(t("toast.downloadingAttachment"));
     try {
       const data = await downloadMeetingFile(projectId, meetingId, resolveUserId(currentUser));
       if (data.status === "success" && data.data && data.data.fileData) {
@@ -129,9 +171,9 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        showSuccessAlert("Berhasil!", "Berkas berhasil diunduh.");
+        showSuccessAlert(t("alerts.successTitle"), t("alerts.fileDownloaded"));
       } else {
-        toast.error("Berkas lampiran tidak ditemukan.");
+        toast.error(t("toast.attachmentNotFound"));
       }
     } catch (error: any) {
       toast.error(error.message || "Gagal mengunduh berkas.");
@@ -140,6 +182,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [totalMeetings, setTotalMeetings] = useState(0);
   const itemsPerPage = 8; // adjusted for side-by-side list density
 
   const currentUserProfile = users.find((u) => u.uid === currentUser?.uid) || currentUser;
@@ -154,24 +197,54 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
   const canAdd = hasPermission(userRole, "meetingNotes", "create", false, permissions);
 
-  const filteredMeetings = meetings.filter((m) =>
-    m.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const { registerAction, unregisterAction } = useMobileAction();
 
-  const totalPages = Math.ceil(filteredMeetings.length / itemsPerPage);
-  const paginatedMeetings = filteredMeetings.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  useEffect(() => {
+    if (!activeMeetingId && canAdd) {
+      registerAction({
+        id: "meeting-add-new",
+        label: t("meetings.addMeeting") || "Buat Notula Baru",
+        onClick: startAddMeeting,
+        canCreate: canAdd,
+      });
+    } else if (!activeMeetingId) {
+      unregisterAction("meeting-add-new");
+    }
+    return () => unregisterAction("meeting-add-new");
+  }, [canAdd, activeMeetingId, registerAction, unregisterAction, t]);
+
+  const totalPages = Math.max(1, Math.ceil(totalMeetings / itemsPerPage) || 1);
+  const paginatedMeetings = meetings;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, projectId]);
+
+  useEffect(() => {
+    setActiveMeetingId(null);
+  }, [projectId]);
 
   useEffect(() => {
     fetchMeetings();
-    fetchUsers();
-  }, [projectId]);
+    if (projectMembers.length > 0) {
+      setUsers(projectMembers);
+    } else {
+      fetchUsers();
+    }
+  }, [projectId, projectMembers, currentPage, searchQuery]);
 
   useEffect(() => {
     setWorkspaceTab("manual");
   }, [activeMeetingId]);
+
+  // #460 — ID detail basi (hapus / halaman berubah / cache tidak punya baris)
+  // sebelumnya merender `null` → area utama putih tanpa PageHeader.
+  useEffect(() => {
+    if (loading || activeMeetingId === null) return;
+    if (!meetings.some((m) => m.id === activeMeetingId)) {
+      setActiveMeetingId(null);
+    }
+  }, [loading, activeMeetingId, meetings]);
 
   const fetchUsers = async () => {
     try {
@@ -183,27 +256,40 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
     }
   };
 
-  const fetchMeetings = async () => {
-    setLoading(true);
+  const fetchMeetings = async (opts?: { force?: boolean; silent?: boolean }) => {
+    const userId = currentUser?.uid || "guest";
+    const listOpts = { page: currentPage, limit: itemsPerPage, search: searchQuery };
+    const cached = peekProjectMeetings<Meeting>(projectId, userId);
+    if (cached && !opts?.force && currentPage === 1 && !searchQuery) {
+      setMeetings(cached);
+      if (!opts?.silent) setLoading(false);
+    } else if (!opts?.silent && !cached) {
+      setLoading(true);
+    }
+
     try {
-      const fetchedMeetings = await getMeetings(projectId, currentUser?.uid);
-      setMeetings(fetchedMeetings);
+      const result = await loadProjectMeetings(projectId, userId, {
+        ...listOpts,
+        force: opts?.force,
+      });
+      setMeetings(result.data as Meeting[]);
+      setTotalMeetings(result.meta?.total ?? result.data.length);
     } catch (error: any) {
       console.error("Failed to fetch meetings:", error);
-      toast.error(error.message || "Failed to load meetings");
+      if (!cached) toast.error(error.message || "Failed to load meetings");
     } finally {
-      setLoading(false);
+      if (!opts?.silent) setLoading(false);
     }
   };
 
   const handleCreateMeeting = async () => {
     const trimmedTitle = newTitle.trim();
     if (!trimmedTitle) {
-      toast.error("Meeting title cannot be empty.");
+      toast.error(t("toast.meetingTitleEmpty"));
       return;
     }
     if (!currentUser) {
-      toast.error("Please login first.");
+      toast.error(t("toast.pleaseLoginFirst"));
       return;
     }
 
@@ -212,12 +298,16 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
     const permissionAction = isEdit ? "update" : "create";
 
     if (!hasPermission(userRole, "meetingNotes", permissionAction, isOwner, permissions)) {
-      toast.error(`You do not have permission to ${isEdit ? "update" : "add"} the meeting.`);
+      toast.error(
+        t("toast.noPermMeeting", {
+          aksi: isEdit ? t("toast.meetingActionUpdate") : t("toast.meetingActionAdd"),
+        })
+      );
       return;
     }
 
     if (!projectId) {
-      toast.error("Project ID not found.");
+      toast.error(t("toast.projectIdNotFound"));
       return;
     }
     setLoading(true);
@@ -236,7 +326,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
       if (newMeetingFile) {
         if (newMeetingFile.size > 5 * 1024 * 1024) {
-          toast.error("Ukuran berkas melebihi batas maksimal 5 MB.");
+          toast.error(t("toast.fileTooLarge5"));
           setLoading(false);
           return;
         }
@@ -246,6 +336,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
       }
 
       if (editingMeeting) {
+        const meetingId = editingMeeting.id!;
         const payload: Partial<Meeting> = {
           title: trimmedTitle,
           description: newDescription.trim(),
@@ -261,9 +352,32 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
           payload.fileType = "";
         }
 
-        await updateMeeting(projectId, editingMeeting.id!, payload, currentUser.uid);
-        showSuccessAlert("Berhasil!", "Data catatan rapat berhasil diubah.");
+        setMeetings((prev) => {
+          const next = prev.map((m) => (m.id === meetingId ? { ...m, ...payload } : m));
+          syncMeetingsCache(next);
+          return next;
+        });
+        setNewTitle("");
+        setNewDescription("");
+        setNewMeetingLink("");
+        setNewMeetingFile(null);
+        setShouldRemoveMeetingFile(false);
+        setIsModalOpen(false);
+        setEditingMeeting(null);
+        setLoading(false);
+        toast.success(t("alerts.meetingUpdated"));
+
+        try {
+          await updateMeeting(projectId, meetingId, payload, currentUser.uid);
+        } catch (error) {
+          invalidateProjectMeetings(projectId, effectiveUserId);
+          fetchMeetings({ force: true, silent: true });
+          console.error("Failed to save meeting:", error);
+          toast.error(t("toast.meetingSaveFailed") + (error as Error).message);
+        }
+        return;
       } else {
+        const tempId = `temp-meeting-${crypto.randomUUID()}`;
         const payload: Partial<Meeting> = {
           projectId,
           title: trimmedTitle,
@@ -276,8 +390,56 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
           payload.fileName = fileName;
           payload.fileType = fileTypeStr;
         }
-        await createMeeting(projectId, trimmedTitle, currentUser.uid, payload, currentUser.uid);
-        showSuccessAlert("Berhasil!", "Data catatan rapat berhasil ditambahkan.");
+
+        const optimistic: Meeting = {
+          id: tempId,
+          projectId,
+          title: trimmedTitle,
+          description: newDescription.trim(),
+          meetingLink: newMeetingLink.trim(),
+          authorId: currentUser.uid,
+          createdAt: new Date().toISOString(),
+          ...(newMeetingFile ? { fileName, fileType: fileTypeStr } : {}),
+        };
+
+        setMeetings((prev) => {
+          const next = [optimistic, ...prev];
+          syncMeetingsCache(next);
+          return next;
+        });
+        setNewTitle("");
+        setNewDescription("");
+        setNewMeetingLink("");
+        setNewMeetingFile(null);
+        setShouldRemoveMeetingFile(false);
+        setIsModalOpen(false);
+        setEditingMeeting(null);
+        setLoading(false);
+        toast.success(t("alerts.meetingAdded"));
+
+        try {
+          const realId = await createMeeting(
+            projectId,
+            trimmedTitle,
+            currentUser.uid,
+            payload,
+            currentUser.uid
+          );
+          setMeetings((prev) => {
+            const next = prev.map((m) => (m.id === tempId ? { ...m, id: realId } : m));
+            syncMeetingsCache(next);
+            return next;
+          });
+        } catch (error) {
+          setMeetings((prev) => {
+            const next = prev.filter((m) => m.id !== tempId);
+            syncMeetingsCache(next);
+            return next;
+          });
+          console.error("Failed to save meeting:", error);
+          toast.error(t("toast.meetingSaveFailed") + (error as Error).message);
+        }
+        return;
       }
       setNewTitle("");
       setNewDescription("");
@@ -289,7 +451,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
       await fetchMeetings();
     } catch (error) {
       console.error("Failed to save meeting:", error);
-      toast.error("Failed to save meeting: " + (error as Error).message);
+      toast.error(t("toast.meetingSaveFailed") + (error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -317,21 +479,26 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
   const handleDeleteMeeting = async (meetingId: string) => {
     const isConfirmed = await confirmDeleteAlert(
-      "Apakah Anda Yakin?",
-      "Data catatan rapat ini akan dihapus secara permanen dan tidak dapat dikembalikan!"
+      t("alerts.confirmTitle"),
+      t("alerts.confirmMeetingText")
     );
     if (!isConfirmed) return;
 
-    setLoading(true);
+    setMeetings((prev) => {
+      const next = prev.filter((m) => m.id !== meetingId);
+      syncMeetingsCache(next);
+      return next;
+    });
+    if (activeMeetingId === meetingId) {
+      setActiveMeetingId(null);
+    }
+    toast.success(t("alerts.meetingDeleted"));
+
     try {
       await deleteMeeting(projectId, meetingId, currentUser?.uid);
-      setMeetings((prev) => prev.filter((m) => m.id !== meetingId));
-      if (activeMeetingId === meetingId) {
-        setActiveMeetingId(null);
-      }
-      showSuccessAlert("Berhasil!", "Data catatan rapat berhasil dihapus.");
-      fetchMeetings();
     } catch (error: any) {
+      invalidateProjectMeetings(projectId, effectiveUserId);
+      fetchMeetings({ force: true, silent: true });
       toast.error(error.message || "Failed to delete meeting.");
     } finally {
       setLoading(false);
@@ -381,349 +548,386 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
   const activeMeeting = meetings.find((m) => m.id === activeMeetingId);
 
   return (
-    <div className="w-full flex-1 flex flex-col p-3 md:p-6 min-h-0 overflow-hidden bg-surface-muted text-left">
-      <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden">
-        {activeMeetingId === null ? (
-          /* DATATABLE VIEW */
-          <div className="flex-1 flex flex-col min-h-0 bg-surface">
-            {/* Table Header / Action Bar */}
-            <div className="p-4 md:p-6 border-b border-border-subtle/80 bg-surface flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
-              <div className="flex items-center gap-3.5">
-                <div className="p-2.5 bg-indigo-50 border border-indigo-100 rounded-lg text-primary shadow-2xs">
-                  <FileText className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-content-strong tracking-tight">
-                    Meeting Notes
-                  </h3>
-                  <p className="text-xs text-content-muted mt-0.5">
-                    Kelola catatan rapat proyek, agenda, datetime, dan poin diskusi.
-                  </p>
-                </div>
+    <>
+      {activeMeetingId === null ? (
+        <ListPageShell
+          header={<PageHeader title={t("meetings.title")} />}
+          toolbar={
+            <div className="flex items-center gap-2 w-full sm:w-auto min-w-0 sm:ml-auto">
+              <div className="relative flex-1 min-w-0 sm:w-64 sm:flex-none sm:max-w-[16rem]">
+                <input
+                  type="text"
+                  placeholder={t("meetings.searchPlaceholder")}
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className={LIST_SEARCH_INPUT_CLASS}
+                />
+                <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2" />
               </div>
 
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <div className="relative flex-1 sm:w-72">
-                  <input
-                    type="text"
-                    placeholder="Search meetings by title..."
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="w-full pl-9 pr-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-content-strong shadow-2xs font-medium"
-                  />
-                  <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2" />
-                </div>
-
-                {canAdd && (
-                  <button
-                    onClick={startAddMeeting}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active text-white rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer shrink-0"
-                  >
-                    <Plus className="w-4 h-4" /> Add Meeting
-                  </button>
-                )}
-              </div>
+              {canAdd && (
+                <button
+                  onClick={startAddMeeting}
+                  className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs whitespace-nowrap"
+                  title={t("meetings.addMeeting")}
+                >
+                  <Plus className="w-4 h-4" />
+                  <span className="hidden sm:inline">{t("meetings.addMeeting")}</span>
+                </button>
+              )}
             </div>
-
-            {/* DataTable Container */}
-            <div className="flex-1 overflow-x-auto overflow-y-auto m-4 md:m-6 bg-surface rounded-lg border border-border-subtle/80 shadow-2xs">
-              <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
-                <thead>
-                  <tr className="bg-primary/5 border-b border-primary/15 text-xs sm:text-[11px] font-medium uppercase tracking-wider text-primary whitespace-nowrap">
-                    <th className="py-3 px-4 w-14 text-center">No</th>
-                    <th className="py-3 px-4 min-w-[180px] max-w-[260px]">Meeting Title</th>
-                    <th className="py-3 px-4 w-44">Datetime Meeting</th>
-                    <th className="py-3 px-4 w-40">Meeting Link</th>
-                    <th className="py-3 px-4 w-40">Document File</th>
-                    <th className="py-3 px-4 w-36">Author</th>
-                    <th className="py-3 px-4 min-w-[180px] max-w-[260px]">Description</th>
-                    <th className="py-3 px-4 w-28 text-center">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border-faint text-xs text-content-body">
-                  {paginatedMeetings.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} className="text-center py-16 text-content-subtle">
-                        <div className="w-12 h-12 rounded-lg bg-indigo-50/80 border border-indigo-100 flex items-center justify-center mx-auto mb-3 shadow-2xs">
-                          <MessageSquare className="w-6 h-6 text-primary" />
-                        </div>
-                        <p className="font-medium text-content-strong text-sm">No meetings found</p>
-                        <p className="text-xs text-content-subtle mt-1">
-                          Create a new meeting or adjust your search keyword.
-                        </p>
-                      </td>
-                    </tr>
-                  ) : (
-                    paginatedMeetings.map((meeting, index) => {
-                      const srNo = (currentPage - 1) * itemsPerPage + index + 1;
-                      const author = getAuthorDisplay(meeting.authorId);
-                      return (
-                        <tr
-                          key={meeting.id}
-                          onClick={() => {
-                            setActiveMeetingId(meeting.id!);
-                            setMobileViewMode("detail");
-                          }}
-                          className="hover:bg-surface-sunken/70 transition-colors duration-200 group cursor-pointer"
+          }
+        >
+          {/* DataTable Container (Desktop sm+) */}
+          <div className={LIST_TABLE_WRAP_CLASS}>
+            <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
+              <thead>
+                <tr className={LIST_THEAD_ROW_CLASS}>
+                  <th className="py-3 px-4 w-14 text-center">{t("meetings.thNo")}</th>
+                  <th className="py-3 px-4 min-w-[180px] max-w-[260px]">{t("meetings.thTitle")}</th>
+                  <th className="py-3 px-4 w-44">{t("meetings.thDatetime")}</th>
+                  <th className="py-3 px-4 w-40">{t("meetings.thLink")}</th>
+                  <th className="py-3 px-4 w-40">{t("meetings.thDocument")}</th>
+                  <th className="py-3 px-4 w-36">{t("meetings.thAuthor")}</th>
+                  <th className="py-3 px-4 min-w-[180px] max-w-[260px]">
+                    {t("meetings.thDescription")}
+                  </th>
+                  <th className="py-3 px-4 w-28 text-center">{t("meetings.thAction")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border-faint text-xs text-content-body">
+                {paginatedMeetings.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="text-center py-16 text-content-subtle">
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-3 shadow-2xs">
+                        <MessageSquare className="w-6 h-6 text-primary" />
+                      </div>
+                      <p className="font-medium text-content-strong text-sm">
+                        {t("meetings.emptyTitle")}
+                      </p>
+                      <p className="text-xs text-content-subtle mt-1">{t("meetings.emptyHint")}</p>
+                      {canAdd && (
+                        <button
+                          type="button"
+                          onClick={startAddMeeting}
+                          className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium shadow-xs cursor-pointer"
                         >
-                          <td className="py-3 px-4 text-center text-content-subtle font-medium">
-                            {String(srNo).padStart(2, "0")}
-                          </td>
-                          <td className="py-3 px-4 font-medium text-content group-hover:text-primary transition-colors">
-                            <div className="line-clamp-1">{meeting.title}</div>
-                          </td>
-                          <td className="py-3 px-4 text-content-muted font-medium">
-                            <div className="flex items-center gap-1.5">
-                              <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />
-                              <span>{formatDate(meeting.createdAt)}</span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
-                            {meeting.meetingLink ? (
-                              <a
-                                href={
-                                  meeting.meetingLink.startsWith("http")
-                                    ? meeting.meetingLink
-                                    : `https://${meeting.meetingLink}`
-                                }
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50/80 text-primary hover:bg-indigo-100 rounded-md font-medium truncate max-w-[150px] transition-all text-xs sm:text-[11px] border border-indigo-100/80"
-                                title={meeting.meetingLink}
-                              >
-                                <Video className="w-3.5 h-3.5 shrink-0" />
-                                <span className="truncate">Join Room</span>
-                              </a>
-                            ) : (
-                              <span className="px-2 py-0.5 bg-surface-muted text-content-muted rounded-md text-xs sm:text-[10px] font-medium">
-                                No link
+                          <Plus className="w-4 h-4" /> {t("meetings.addMeeting")}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedMeetings.map((meeting, index) => {
+                    const srNo = (currentPage - 1) * itemsPerPage + index + 1;
+                    const author = getAuthorDisplay(meeting.authorId);
+                    return (
+                      <tr
+                        key={meeting.id}
+                        onClick={() => {
+                          setActiveMeetingId(meeting.id!);
+                          setMobileViewMode("detail");
+                        }}
+                        className="hover:bg-surface-sunken/70 transition-colors duration-200 group cursor-pointer"
+                      >
+                        <td className="py-3 px-4 text-center text-content-subtle font-medium">
+                          {String(srNo).padStart(2, "0")}
+                        </td>
+                        <td className="py-3 px-4 font-medium text-content group-hover:text-primary transition-colors">
+                          <div className="line-clamp-1">{meeting.title}</div>
+                        </td>
+                        <td className="py-3 px-4 text-content-muted font-medium">
+                          <div className="flex items-center gap-1.5">
+                            <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />
+                            <span>{formatDate(meeting.createdAt)}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
+                          {meeting.meetingLink ? (
+                            <a
+                              href={
+                                meeting.meetingLink.startsWith("http")
+                                  ? meeting.meetingLink
+                                  : `https://${meeting.meetingLink}`
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-500/10 text-primary hover:bg-indigo-500/15 rounded-md font-medium truncate max-w-[150px] transition-all text-[10px] leading-none border border-indigo-500/30"
+                              title={meeting.meetingLink}
+                            >
+                              <Video className="w-3.5 h-3.5 shrink-0" />
+                              <span className="truncate">{t("meetings.joinRoom")}</span>
+                            </a>
+                          ) : (
+                            <span className="px-2 py-0.5 bg-surface-muted text-content-muted rounded-md text-xs sm:text-[10px] font-medium">
+                              {t("meetings.noLink")}
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
+                          {meeting.fileName ? (
+                            <button
+                              onClick={() => handleDownloadMeeting(meeting.id!, meeting.fileName!)}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs"
+                              title={t("meetings.clickToDownload")}
+                            >
+                              <Download className="w-3.5 h-3.5 shrink-0 text-emerald-600 group-hover/file:scale-110 transition-transform" />
+                              <span className="truncate max-w-[140px]">{meeting.fileName}</span>
+                            </button>
+                          ) : (
+                            <span className="text-content-subtle italic text-xs">—</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-content-body font-medium">
+                          <div className="flex items-center gap-2">
+                            <UserAvatar
+                              uid={meeting.authorId}
+                              members={users && users.length > 0 ? users : projectMembers}
+                              name={author.name}
+                              className="w-6 h-6 text-xs sm:text-[10px]"
+                            />
+                            <span className="truncate">{author.name}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-content-muted font-normal">
+                          <div className="line-clamp-1 max-w-xs">
+                            {meeting.description || (
+                              <span className="text-content-subtle text-xs sm:text-[11px] italic">
+                                {t("meetings.noDescription")}
                               </span>
                             )}
-                          </td>
-                          <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
-                            {meeting.fileName ? (
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-center" onClick={(e) => e.stopPropagation()}>
+                          <div className="inline-flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => {
+                                setActiveMeetingId(meeting.id!);
+                                setMobileViewMode("detail");
+                              }}
+                              className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
+                              title={t("meetings.viewDetails")}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            {(isUserAdmin || isMeetingAuthor(meeting)) && (
                               <button
-                                onClick={() =>
-                                  handleDownloadMeeting(meeting.id!, meeting.fileName!)
-                                }
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs"
-                                title="Klik untuk mengunduh berkas"
+                                onClick={() => startEdit(meeting)}
+                                className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
+                                title={t("meetings.editMeeting")}
                               >
-                                <Download className="w-3.5 h-3.5 shrink-0 text-emerald-600 group-hover/file:scale-110 transition-transform" />
-                                <span className="truncate max-w-[140px]">{meeting.fileName}</span>
+                                <Edit2 className="w-4 h-4" />
                               </button>
-                            ) : (
-                              <span className="text-slate-300 italic text-xs">—</span>
                             )}
-                          </td>
-                          <td className="py-3 px-4 text-content-body font-medium">
-                            <div className="flex items-center gap-2">
-                              <UserAvatar
-                                uid={meeting.authorId}
-                                members={users && users.length > 0 ? users : projectMembers}
-                                name={author.name}
-                                className="w-6 h-6 text-xs sm:text-[10px]"
-                              />
-                              <span className="truncate">{author.name}</span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 text-content-muted font-normal">
-                            <div className="line-clamp-1 max-w-xs">
-                              {meeting.description || (
-                                <span className="text-content-subtle text-xs sm:text-[11px] italic">
-                                  No description
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          <td
-                            className="py-3 px-4 text-center"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <div className="inline-flex items-center justify-center gap-1">
+                            {canDeleteMeeting(meeting) && (
                               <button
-                                onClick={() => {
-                                  setActiveMeetingId(meeting.id!);
-                                  setMobileViewMode("detail");
-                                }}
-                                className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-50 rounded-md transition-all cursor-pointer"
-                                title="View meeting details and discussion points"
+                                onClick={() => handleDeleteMeeting(meeting.id!)}
+                                className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
+                                title={t("meetings.deleteMeeting")}
                               >
-                                <Eye className="w-4 h-4" />
+                                <Trash2 className="w-4 h-4" />
                               </button>
-                              {(isUserAdmin || isMeetingAuthor(meeting)) && (
-                                <button
-                                  onClick={() => startEdit(meeting)}
-                                  className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-50 rounded-md transition-all cursor-pointer"
-                                  title="Edit meeting"
-                                >
-                                  <Edit2 className="w-4 h-4" />
-                                </button>
-                              )}
-                              {canDeleteMeeting(meeting) && (
-                                <button
-                                  onClick={() => handleDeleteMeeting(meeting.id!)}
-                                  className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all cursor-pointer"
-                                  title="Delete meeting"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </ResponsiveTable>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </ResponsiveTable>
+          </div>
+
+          {/* Mobile Card List View (< 640px) */}
+          <div className="sm:hidden flex-1 overflow-y-auto p-4 space-y-3">
+            <MeetingMobileCardView
+              meetings={paginatedMeetings}
+              users={users}
+              projectMembers={projectMembers}
+              onSelectMeeting={(id) => {
+                setActiveMeetingId(id);
+                setMobileViewMode("detail");
+              }}
+              onEditMeeting={(meeting) => startEdit(meeting)}
+              onDeleteMeeting={(meeting) => handleDeleteMeeting(meeting.id!)}
+              onDownloadAttachment={(meetingId, fileName) =>
+                handleDownloadMeeting(meetingId, fileName)
+              }
+              canEdit={canAdd}
+              canDelete={true}
+              isMeetingAuthor={isMeetingAuthor}
+              isAdmin={isUserAdmin}
+            />
+          </div>
+
+          {/* Table Footer / Pagination */}
+          <div className="px-6 py-3.5 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+            <div className="text-[11px] text-content-subtle font-normal">
+              {t("common.showing")} {totalMeetings === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
+              {t("common.to")} {Math.min(currentPage * itemsPerPage, totalMeetings)}{" "}
+              {t("common.of")} {totalMeetings} {t("common.entries")}
             </div>
 
-            {/* Table Footer / Pagination */}
-            <div className="px-6 py-3.5 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-              <div className="text-xs text-content-muted font-medium">
-                Showing {filteredMeetings.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
-                to {Math.min(currentPage * itemsPerPage, filteredMeetings.length)} of{" "}
-                {filteredMeetings.length} entries
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
+                >
+                  {t("meetingExtra.previous")}
+                </button>
+                <span className="px-3 py-1.5 bg-primary-surface text-content-inverse rounded-md text-xs sm:text-[10px] font-normal shadow-xs">
+                  {currentPage}
+                </span>
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
+                >
+                  {t("meetingExtra.next")}
+                </button>
               </div>
+            )}
+          </div>
+        </ListPageShell>
+      ) : (
+        /* DETAIL VIEW — #422: tanpa PageHeader dalam card; panel detail di kartu */
+        <div className="w-full flex-1 flex flex-col p-3 md:p-6 min-h-0 overflow-hidden bg-surface-muted text-left">
+          <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden">
+            <div className="flex-1 flex flex-col min-h-0 bg-surface-sunken/50 w-full">
+              {activeMeeting ? (
+                <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 md:p-6 space-y-4">
+                  {/* #425 — DetailViewChrome: Back+Edit+Delete kiri, judul Velzon 15px */}
+                  <DetailViewChrome
+                    backLabel={t("meetings.backToList")}
+                    onBack={() => setActiveMeetingId(null)}
+                    title={activeMeeting.title}
+                    canEdit={isUserAdmin || isMeetingAuthor(activeMeeting)}
+                    canDelete={canDeleteMeeting(activeMeeting)}
+                    onEdit={() => startEdit(activeMeeting)}
+                    onDelete={() => handleDeleteMeeting(activeMeeting.id!)}
+                    editTitle={t("meetings.edit")}
+                    deleteTitle={t("meetings.delete")}
+                    description={
+                      activeMeeting.description ? (
+                        <div className="mt-3 p-4 border border-primary/30 bg-primary/10 rounded-lg border-l-4 border-l-primary flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <span className="text-xs font-medium text-primary block mb-1">
+                              {t("meetings.meetingDescriptionAgenda")}
+                            </span>
+                            <div className="flex items-center gap-2 text-xs text-content-muted mb-2">
+                              <Calendar className="w-3.5 h-3.5 text-content-subtle" />
+                              <span className="text-content-secondary font-medium">
+                                {formatDate(activeMeeting.createdAt)}
+                              </span>
+                            </div>
+                            <p className="text-xs text-content-body leading-relaxed whitespace-pre-wrap">
+                              {activeMeeting.description}
+                            </p>
+                          </div>
+                          {activeMeeting.fileName && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleDownloadMeeting(activeMeeting.id!, activeMeeting.fileName!)
+                              }
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 rounded-md text-xs font-medium transition-all border border-emerald-500/30 cursor-pointer shadow-2xs shrink-0 self-start sm:self-center"
+                              title={t("meetingExtra.downloadAttachment")}
+                            >
+                              <FileText className="w-3.5 h-3.5 text-emerald-600" />
+                              <span className="truncate max-w-[140px]">
+                                {activeMeeting.fileName}
+                              </span>
+                              <span className="text-[10px] bg-emerald-200/60 px-1.5 py-0.5 rounded font-medium">
+                                {t("meetingExtra.download")}
+                              </span>
+                            </button>
+                          )}
+                        </div>
+                      ) : undefined
+                    }
+                    trailing={
+                      activeMeeting.meetingLink ? (
+                        <a
+                          href={
+                            activeMeeting.meetingLink.startsWith("http")
+                              ? activeMeeting.meetingLink
+                              : `https://${activeMeeting.meetingLink}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer"
+                        >
+                          <Video className="w-3.5 h-3.5" /> {t("rakit.joinMeeting")}{" "}
+                          <ExternalLink className="w-3 h-3 opacity-80" />
+                        </a>
+                      ) : undefined
+                    }
+                  />
 
-              {totalPages > 1 && (
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs font-medium disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
-                  >
-                    Previous
-                  </button>
-                  <span className="px-3 py-1.5 bg-primary text-white rounded-md text-xs font-medium shadow-xs">
-                    {currentPage}
-                  </span>
-                  <button
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs font-medium disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
-                  >
-                    Next
-                  </button>
+                  {/* Discussion Points Table — lazy (#460): FFmpeg/AI tidak masuk chunk daftar */}
+                  <div className="flex-1 flex flex-col min-h-0">
+                    <Suspense
+                      fallback={
+                        <div className="flex-1 flex flex-col items-center justify-center p-8">
+                          <div className="h-8 w-8 animate-spin rounded-full border-2 border-border-subtle border-t-primary" />
+                          <p className="mt-3 text-sm text-content-muted">{t("appShell.loading")}</p>
+                        </div>
+                      }
+                    >
+                      <DiscussionPointsTable
+                        projectId={projectId}
+                        meetingId={activeMeeting.id!}
+                        userRole={userRole}
+                        currentUser={currentUser}
+                        permissions={permissions}
+                        projectMembers={projectMembers}
+                        masterData={masterData}
+                      />
+                    </Suspense>
+                  </div>
+                </div>
+              ) : (
+                /* #460 — jangan `null`: putih tanpa chrome saat ID basi / masih memuat */
+                <div className="flex-1 flex flex-col items-center justify-center gap-3 p-8 text-center">
+                  {loading ? (
+                    <>
+                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-border-subtle border-t-primary" />
+                      <p className="text-sm text-content-muted">{t("appShell.loading")}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-medium text-content-strong text-sm">
+                        {t("meetings.emptyTitle")}
+                      </p>
+                      <p className="text-xs text-content-subtle">{t("meetings.emptyHint")}</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveMeetingId(null);
+                          setMobileViewMode("list");
+                        }}
+                        className="mt-2 inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium shadow-xs cursor-pointer"
+                      >
+                        <ArrowLeft className="w-3.5 h-3.5" />
+                        {t("meetings.backToList")}
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>
           </div>
-        ) : (
-          /* DETAIL VIEW */
-          <div className="flex-1 flex flex-col min-h-0 bg-surface-sunken/50 w-full">
-            {activeMeeting ? (
-              <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 md:p-6 space-y-4 animate-in fade-in duration-300">
-                {/* Panel 1: Top Actions */}
-                <div className="bg-surface border border-border-subtle/80 rounded-lg p-4 flex items-center justify-between shadow-2xs shrink-0">
-                  <button
-                    onClick={() => setActiveMeetingId(null)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-border-subtle hover:bg-surface-sunken rounded-md text-xs font-medium text-content-body transition-all cursor-pointer shadow-2xs"
-                  >
-                    <ChevronLeft className="w-4 h-4" /> Back to Meeting List
-                  </button>
-
-                  <div className="flex items-center gap-2">
-                    {activeMeeting.meetingLink && (
-                      <a
-                        href={
-                          activeMeeting.meetingLink.startsWith("http")
-                            ? activeMeeting.meetingLink
-                            : `https://${activeMeeting.meetingLink}`
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer"
-                      >
-                        <Video className="w-3.5 h-3.5" /> Join Meeting{" "}
-                        <ExternalLink className="w-3 h-3 opacity-80" />
-                      </a>
-                    )}
-                    {(isUserAdmin || isMeetingAuthor(activeMeeting)) && (
-                      <button
-                        onClick={() => startEdit(activeMeeting)}
-                        className="px-3.5 py-1.5 bg-surface border border-border-subtle hover:bg-surface-sunken text-content-body rounded-md text-xs font-medium transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
-                      >
-                        <Edit2 className="w-3.5 h-3.5 text-primary" /> Edit
-                      </button>
-                    )}
-                    {canDeleteMeeting(activeMeeting) && (
-                      <button
-                        onClick={() => handleDeleteMeeting(activeMeeting.id!)}
-                        className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-md text-xs font-medium transition-all cursor-pointer border border-rose-200/80 flex items-center gap-1.5"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" /> Delete
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Panel 2: Meeting Context & Agenda */}
-                <div className="bg-surface border border-border-subtle/80 rounded-lg p-5 md:p-6 shadow-2xs shrink-0">
-                  <h2 className="text-lg md:text-xl font-medium text-content tracking-tight">
-                    {activeMeeting.title}
-                  </h2>
-
-                  {activeMeeting.description && (
-                    <div className="mt-4 p-4 border border-indigo-100/80 bg-indigo-50/30 rounded-lg border-l-4 border-l-primary flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <span className="text-xs sm:text-[10px] font-medium text-primary tracking-wider uppercase block mb-1">
-                          Meeting Description / Agenda
-                        </span>
-                        <div className="flex items-center gap-2 text-xs sm:text-[11px] text-content-muted mb-2 not-italic">
-                          <Calendar className="w-3.5 h-3.5 text-content-subtle" />
-                          <span className="text-content-secondary font-medium">
-                            {formatDate(activeMeeting.createdAt)}
-                          </span>
-                        </div>
-                        <p className="text-xs text-content-body leading-relaxed whitespace-pre-wrap">
-                          {activeMeeting.description}
-                        </p>
-                      </div>
-                      {activeMeeting.fileName && (
-                        <button
-                          onClick={() =>
-                            handleDownloadMeeting(activeMeeting.id!, activeMeeting.fileName!)
-                          }
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-md text-xs font-medium transition-all border border-emerald-200/80 cursor-pointer shadow-2xs shrink-0 self-start sm:self-center"
-                          title="Unduh Berkas Lampiran"
-                        >
-                          <FileText className="w-3.5 h-3.5 text-emerald-600" />
-                          <span className="truncate max-w-[140px]">{activeMeeting.fileName}</span>
-                          <span className="text-xs sm:text-[10px] bg-emerald-200/60 px-1.5 py-0.5 rounded font-medium">
-                            Download
-                          </span>
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Panel 3: Discussion Points Table */}
-                <div className="bg-surface border border-border-subtle/80 rounded-lg p-5 md:p-6 shadow-2xs flex-1 flex flex-col min-h-0">
-                  <DiscussionPointsTable
-                    projectId={projectId}
-                    meetingId={activeMeeting.id!}
-                    userRole={userRole}
-                    currentUser={currentUser}
-                    permissions={permissions}
-                    projectMembers={projectMembers}
-                    masterData={masterData}
-                  />
-                </div>
-              </div>
-            ) : null}
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* POPUP MODAL: Add / Edit Meeting */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
+        <div className="fixed inset-0 bg-overlay/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-surface p-5 sm:p-6 rounded-lg shadow-xl w-full max-w-lg border border-border-subtle text-left relative">
             <button
               onClick={() => {
@@ -737,31 +941,31 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 setSelectedAttendees([]);
               }}
               className="absolute top-4 right-4 sm:top-5 sm:right-5 p-1.5 text-content-subtle hover:text-content-body hover:bg-surface-muted rounded-md transition-all cursor-pointer"
-              title="Close"
+              title={t("common.close")}
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-3 mb-5 pr-10">
-              <div className="w-9 h-9 rounded-md bg-indigo-50 border border-indigo-100 flex items-center justify-center text-primary shrink-0">
+              <div className="w-9 h-9 rounded-md bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-primary shrink-0">
                 <Calendar className="w-5 h-5" />
               </div>
               <div>
                 <h3 className="text-base font-medium text-content tracking-tight">
-                  {editingMeeting ? "Edit Meeting Note" : "Create New Meeting Note"}
+                  {editingMeeting ? t("meetings.editNote") : t("meetings.createNewNote")}
                 </h3>
               </div>
             </div>
 
             <div className="space-y-4 mb-5">
               <div>
-                <label className="block text-content-body font-medium text-xs tracking-wider uppercase mb-1.5">
-                  Meeting Title <span className="text-rose-500">*</span>
+                <label className="block text-content-body font-normal text-xs tracking-normal uppercase mb-1.5">
+                  {t("meetings.meetingTitle")} <span className="text-rose-500">*</span>
                 </label>
                 <input
                   disabled={!canModify}
-                  className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-medium text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
-                  placeholder="e.g., Sprint 4 Planning & Architecture Review"
+                  className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
+                  placeholder={t("meetings.titlePlaceholder")}
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                 />
@@ -769,38 +973,34 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-content-body font-medium text-xs tracking-wider uppercase mb-1.5 flex items-center gap-1.5">
+                  <label className="block text-content-body font-normal text-xs tracking-normal uppercase mb-1.5 flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-content-subtle" />
-                    Meeting Date
+                    {t("meetings.meetingDate")}
                   </label>
-                  <input
-                    type="date"
+                  <LanproDatePicker
                     disabled={!canModify}
-                    className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-medium text-content-strong outline-none transition-all shadow-2xs cursor-pointer"
                     value={newMeetingDate}
-                    onChange={(e) => setNewMeetingDate(e.target.value)}
+                    onChange={(val) => setNewMeetingDate(val)}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-content-body font-medium text-xs tracking-wider uppercase mb-1.5 flex items-center gap-1.5">
+                  <label className="block text-content-body font-normal text-xs tracking-normal uppercase mb-1.5 flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-content-subtle" />
-                    Meeting Time
+                    {t("meetings.meetingTime")}
                   </label>
-                  <input
-                    type="time"
+                  <LanproTimePicker
                     disabled={!canModify}
-                    className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-medium text-content-strong outline-none transition-all shadow-2xs cursor-pointer"
                     value={newMeetingTime}
-                    onChange={(e) => setNewMeetingTime(e.target.value)}
+                    onChange={(val) => setNewMeetingTime(val)}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-content-body font-medium text-xs tracking-wider uppercase mb-1.5 flex items-center gap-1.5">
+                <label className="block text-content-body font-normal text-xs tracking-normal uppercase mb-1.5 flex items-center gap-1.5">
                   <Video className="w-3.5 h-3.5 text-content-subtle" />
-                  Meeting Link
+                  {t("meetings.meetingLink")}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-content-subtle">
@@ -808,8 +1008,8 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   </div>
                   <input
                     disabled={!canModify}
-                    className="w-full pl-9 pr-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-medium text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
-                    placeholder="https://zoom.us/j/... or Google Meet"
+                    className="w-full pl-9 pr-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
+                    placeholder={t("meetings.linkPlaceholder")}
                     value={newMeetingLink}
                     onChange={(e) => setNewMeetingLink(e.target.value)}
                   />
@@ -817,13 +1017,13 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
               </div>
 
               <div>
-                <label className="block text-content-body font-medium text-xs tracking-wider uppercase mb-1.5">
-                  Description / Agenda
+                <label className="block text-content-body font-normal text-xs tracking-normal uppercase mb-1.5">
+                  {t("meetings.descriptionAgenda")}
                 </label>
                 <textarea
                   disabled={!canModify}
-                  className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-medium text-content-strong outline-none transition-all resize-none min-h-[80px] placeholder:text-content-subtle shadow-2xs"
-                  placeholder="Outline key discussion topics..."
+                  className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none transition-all resize-none min-h-[80px] placeholder:text-content-subtle shadow-2xs"
+                  placeholder={t("meetings.agendaPlaceholder")}
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
                 />
@@ -831,15 +1031,15 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
               {/* Upload Document Section */}
               <div>
-                <label className="block text-content-body font-medium text-xs tracking-wider uppercase mb-1.5 flex items-center justify-between">
-                  <span>Upload Document (PDF, Word, Excel • Max 5MB)</span>
+                <label className="block text-content-body font-normal text-xs tracking-normal uppercase mb-1.5 flex items-center justify-between">
+                  <span>{t("meetings.uploadDocument")}</span>
                   {newMeetingFile && canModify && (
                     <button
                       type="button"
                       onClick={() => setNewMeetingFile(null)}
                       className="text-xs sm:text-[10px] text-rose-600 hover:underline font-medium"
                     >
-                      Remove
+                      {t("meetingExtra.remove")}
                     </button>
                   )}
                 </label>
@@ -854,7 +1054,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                       const file = e.target.files?.[0];
                       if (file) {
                         if (file.size > 5 * 1024 * 1024) {
-                          toast.error("Ukuran berkas maksimal 5 MB.");
+                          toast.error(t("toast.fileMax5"));
                           return;
                         }
                         setNewMeetingFile(file);
@@ -880,7 +1080,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                           {editingMeeting.fileName}
                         </span>
                         <span className="text-xs sm:text-[10px] text-content-subtle">
-                          (Existing)
+                          {t("meetings.existing")}
                         </span>
                       </div>
                       {canModify && (
@@ -890,19 +1090,19 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                             e.stopPropagation();
                             setShouldRemoveMeetingFile(true);
                           }}
-                          className="text-xs sm:text-[10px] bg-rose-50 hover:bg-rose-100 text-rose-700 px-2 py-1 rounded font-medium transition-all"
+                          className="text-[10px] leading-none bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 px-2 py-1 rounded font-medium transition-all"
                         >
-                          Hapus Berkas
+                          {t("meetingExtra.deleteFile")}
                         </button>
                       )}
                     </div>
                   ) : (
                     <div className="space-y-1">
                       <p className="text-xs font-medium text-content-secondary">
-                        Klik atau seret berkas ke sini untuk upload
+                        {t("meetings.uploadHint")}
                       </p>
                       <p className="text-xs sm:text-[10px] text-content-subtle">
-                        PDF, Word (.doc, .docx), Excel (.xls, .xlsx) hingga 5MB
+                        {t("meetings.uploadFormats")}
                       </p>
                     </div>
                   )}
@@ -925,27 +1125,27 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   setSelectedAttendees([]);
                 }}
               >
-                Close
+                {t("common.close")}
               </button>
               {!canModify ? (
-                <div className="text-xs font-medium text-rose-600 flex items-center gap-1.5 bg-rose-50 px-3.5 py-2 rounded-md border border-rose-100 shadow-2xs">
+                <div className="text-xs font-medium text-rose-600 flex items-center gap-1.5 bg-rose-500/10 px-3.5 py-2 rounded-md border border-rose-500/30 shadow-2xs">
                   <Eye className="w-4 h-4 text-rose-500" />
-                  <span>Mode Baca Saja (Bukan Author/Admin)</span>
+                  <span>{t("meetingExtra.readOnlyMode")}</span>
                 </div>
               ) : (
                 <button
                   type="button"
                   onClick={handleCreateMeeting}
                   disabled={loading || !newTitle.trim()}
-                  className="px-5 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active disabled:opacity-50 text-white rounded-md text-xs font-medium shadow-xs transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-50 text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all flex items-center gap-2 cursor-pointer"
                 >
                   {loading ? (
                     <>
-                      <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      <span>Saving...</span>
+                      <div className="w-3.5 h-3.5 border-2 border-border-glass/30 border-t-border-glass rounded-full animate-spin"></div>
+                      <span>{t("meetingExtra.saving")}</span>
                     </>
                   ) : (
-                    <span>Save Meeting</span>
+                    <span>{t("meetings.saveMeeting")}</span>
                   )}
                 </button>
               )}
@@ -953,6 +1153,6 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };

@@ -1,18 +1,31 @@
+/**
+ * Gaya Daftar Isu — #340: mode gelap via token saja (§22), tanpa override manual.
+ */
 export const styles = {
-  container: "flex flex-col bg-white dark:bg-slate-900 rounded-md border border-slate-200/80 dark:border-slate-800 shadow-xs font-sans relative flex-1 min-h-[500px] overflow-hidden",
-  toolbar: "flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-b border-slate-200/80 bg-slate-50/50 dark:bg-slate-800/30 shrink-0",
-  searchWrapper: "relative group",
-  searchInput: "pl-9 pr-4 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-200 w-full sm:w-64 placeholder:font-normal placeholder:text-slate-400 focus:ring-1 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-2xs",
-  filterPill: "px-2.5 py-1 bg-indigo-50/80 dark:bg-indigo-950/20 text-primary dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-900 rounded-md text-[10px] font-medium uppercase tracking-tight shadow-2xs",
-  filterPillAmber: "px-2.5 py-1 bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900 rounded-md text-[10px] font-medium uppercase tracking-tight shadow-2xs",
-  tableWrapper: "overflow-auto w-full custom-scrollbar relative flex-1 min-h-0 max-h-[calc(100vh-220px)]",
+  container:
+    "flex flex-col bg-surface rounded-lg border border-border-subtle/80 shadow-xs font-sans relative flex-1 min-h-[500px] overflow-hidden",
+  // #363 — kontrol utama (search/filter/config) 1 baris di HP; pill aktif di baris bawah.
+  toolbar:
+    "flex flex-col gap-2 px-3 sm:px-4 py-3 border-b border-border-subtle/80 bg-surface-sunken/50 shrink-0",
+  searchWrapper: "relative group min-w-0 flex-1 sm:flex-none",
+  searchInput:
+    "pl-9 pr-3 sm:pr-4 py-2 bg-surface border border-border-subtle rounded-md text-xs font-normal text-content-body w-full sm:w-64 min-w-0 placeholder:font-normal placeholder:text-content-subtle focus:ring-1 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-2xs",
+  filterPill:
+    "px-2.5 py-1 bg-primary/10 text-primary border border-primary/30 rounded-md text-[10px] font-normal tracking-tight shadow-2xs",
+  filterPillAmber:
+    "px-2.5 py-1 bg-warning/10 text-warning-text border border-warning/30 rounded-md text-[10px] font-normal tracking-tight shadow-2xs",
+  tableWrapper:
+    "overflow-auto w-full custom-scrollbar relative flex-1 min-h-0 max-h-[calc(100vh-220px)]",
   table: "w-full text-left border-collapse flex-none",
-  tableHeader: "bg-primary/5 dark:bg-slate-950/50 border-b border-primary/15 sticky top-0 z-10 shadow-2xs",
-  tableHeaderCell: "group relative px-4 py-3 text-[11px] font-semibold text-primary dark:text-slate-400 uppercase tracking-wider border-r border-primary/10 dark:border-slate-800",
-  tableRow: "group hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-all duration-150 cursor-default border-b border-slate-100 dark:border-slate-800",
-  selectedTableRow: "bg-primary/5 dark:bg-primary/20",
-  inlineAddRow: "bg-white dark:bg-slate-900 group/inline-add animate-in fade-in slide-in-from-top-1 duration-200 relative overflow-visible",
-  inlineAddBorderedCell: "p-0 border-r border-slate-100/50 dark:border-slate-800 relative border-y-2 border-primary",
-  inlineAddInput: "w-full bg-transparent border-none text-xs font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:ring-0 outline-none",
+  tableHeader: "bg-primary-surface/5 border-b border-primary/15 sticky top-0 z-10 shadow-2xs",
+  tableHeaderCell:
+    "group relative px-4 py-2.5 text-[10px] font-normal text-content-subtle whitespace-nowrap border-r border-primary/10",
+  tableRow:
+    "group hover:bg-surface-sunken/70 transition-all duration-150 cursor-default border-b border-border-faint",
+  selectedTableRow: "bg-primary-surface/5",
+  inlineAddRow: "bg-surface group/inline-add relative overflow-visible",
+  // #486 — tanpa border-y-2 border-primary (terlalu tebal); cukup pemisah kolom tipis
+  inlineAddBorderedCell: "p-0 border-r border-border-faint relative",
+  inlineAddInput:
+    "w-full bg-transparent border-none text-xs font-normal text-content-strong placeholder:text-content-subtle focus:ring-0 outline-none",
 };
-

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useMemo } from "react";
 import { ArrowRight, Eye, EyeOff, AlertCircle, X } from "lucide-react";
 import { motion } from "framer-motion";
@@ -8,6 +9,7 @@ import { SsoButtons } from "./components/SsoButtons";
 import type { RegisterScreenProps } from "./types";
 
 export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProps) => {
+  const { t } = useTranslation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -37,17 +39,21 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawVal = e.target.value;
-    // Allow only alphabetic letters
-    const filteredVal = rawVal.replace(/[^a-zA-Z]/g, "").slice(0, 10);
 
-    if (rawVal !== filteredVal) {
-      setFieldErrors((prev) => ({ ...prev, username: "Username hanya boleh berupa huruf" }));
-    } else if (filteredVal.length > 10) {
-      setFieldErrors((prev) => ({ ...prev, username: "Username maksimal 10 karakter" }));
-    } else {
-      setFieldErrors((prev) => ({ ...prev, username: undefined }));
-    }
-    setUsername(filteredVal);
+    // Nilainya disimpan APA ADANYA (#168). Versi sebelumnya membuang karakter
+    // terlarang pada setiap ketikan, sehingga angka lenyap sebelum sempat
+    // terlihat dan papan ketik terasa rusak. Panjangnya tetap dibatasi lewat
+    // `maxLength` di kolomnya — itu batas peramban yang menolak ketikan
+    // berikutnya, bukan penghapusan diam-diam atas apa yang sudah diketik.
+    // Pengiriman tetap dijaga `registrationSchema`, jadi nilai tak sah tidak
+    // pernah lolos ke `onRegister`.
+    setUsername(rawVal);
+
+    const hanyaHuruf = /^[a-zA-Z]*$/.test(rawVal);
+    setFieldErrors((prev) => ({
+      ...prev,
+      username: hanyaHuruf ? undefined : t("regValidation.usernameLettersOnly"),
+    }));
   };
 
   const handleEmailChange = (val: string) => {
@@ -70,7 +76,9 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
       const formattedErrors: Record<string, string> = {};
       result.error.issues.forEach((err) => {
         if (err.path[0]) {
-          formattedErrors[err.path[0] as string] = err.message;
+          // `err.message` berisi KUNCI i18n, bukan teks (#171). Diterjemahkan
+          // di sini, bukan di skema, supaya ganti bahasa ikut terasa.
+          formattedErrors[err.path[0] as string] = t(err.message);
         }
       });
       setFieldErrors(formattedErrors);
@@ -105,40 +113,37 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ duration: 0.25 }}
-      className="w-full max-w-md bg-surface rounded-2xl shadow-2xl border border-border-faint/90 p-8 sm:p-10 relative z-10 font-sans mx-auto"
+      className="w-full max-w-md bg-surface rounded-2xl shadow-2xl border border-border-faint/90 p-5 sm:p-6 relative z-10 font-sans mx-auto my-auto"
     >
       {/* Velzon Header */}
-      <div className="text-center space-y-1.5 mb-6">
-        <h2 className="text-2xl font-bold text-content-strong tracking-tight">
-          Create New Account
+      <div className="text-center space-y-1 mb-4">
+        <h2 className="text-xl font-bold text-content-strong tracking-tight">
+          {t("register.createAccount")}
         </h2>
-        <p className="text-xs font-medium text-content-muted">
-          Join LanPro to manage projects and workflows
-        </p>
+        <p className="text-xs font-medium text-content-muted">{t("register.subtitle")}</p>
       </div>
 
-      <form className="space-y-4" onSubmit={handleRegisterSubmit}>
+      <form className="space-y-3" onSubmit={handleRegisterSubmit}>
         {/* FULL NAME INPUT */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-content-body tracking-wide block">
-            Full Name <span className="text-rose-500">*</span>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-content-body tracking-normal block">
+            {t("register.fullName")} <span className="text-danger-text">*</span>
           </label>
           <input
             type="text"
             maxLength={25}
-            required
             value={name}
             onChange={(e) => handleNameChange(e.target.value)}
-            placeholder="John Doe"
+            placeholder={t("register.namePlaceholder")}
             className={cn(
-              "w-full px-4 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-sm font-medium text-content placeholder:text-content-subtle",
+              "w-full h-11 px-3.5 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
               fieldErrors.name
-                ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
+                ? "border-danger focus:ring-danger/20 focus:border-danger"
                 : "border-border-subtle focus:ring-primary/20 focus:border-primary"
             )}
           />
           {fieldErrors.name && (
-            <p className="text-xs sm:text-[11px] font-medium text-rose-500 flex items-center gap-1 mt-1">
+            <p className="text-xs sm:text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{fieldErrors.name}</span>
             </p>
@@ -146,25 +151,24 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         </div>
 
         {/* EMAIL ADDRESS INPUT */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-content-body tracking-wide block">
-            Email Address <span className="text-rose-500">*</span>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-content-body tracking-normal block">
+            {t("forgotPwd.emailAddress")} <span className="text-danger-text">*</span>
           </label>
           <input
             type="email"
-            required
             value={email}
             onChange={(e) => handleEmailChange(e.target.value)}
-            placeholder="john.doe@company.com"
+            placeholder={t("register.emailPlaceholder")}
             className={cn(
-              "w-full px-4 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-sm font-medium text-content placeholder:text-content-subtle",
+              "w-full h-11 px-3.5 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
               fieldErrors.email
-                ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
+                ? "border-danger focus:ring-danger/20 focus:border-danger"
                 : "border-border-subtle focus:ring-primary/20 focus:border-primary"
             )}
           />
           {fieldErrors.email && (
-            <p className="text-xs sm:text-[11px] font-medium text-rose-500 flex items-center gap-1 mt-1">
+            <p className="text-xs sm:text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{fieldErrors.email}</span>
             </p>
@@ -172,29 +176,28 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         </div>
 
         {/* USERNAME INPUT */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-content-body tracking-wide block">
-            Username <span className="text-rose-500">*</span>{" "}
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-content-body tracking-normal block">
+            {t("common.username")} <span className="text-danger-text">*</span>{" "}
             <span className="text-xs sm:text-[11px] text-content-subtle font-normal">
-              (Huruf saja, maks 10)
+              {t("register.lettersOnlyMax10")}
             </span>
           </label>
           <input
             type="text"
             maxLength={10}
-            required
             value={username}
             onChange={handleUsernameChange}
-            placeholder="johndoe"
+            placeholder={t("register.usernamePlaceholder")}
             className={cn(
-              "w-full px-4 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-sm font-medium text-content placeholder:text-content-subtle",
+              "w-full h-11 px-3.5 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
               fieldErrors.username
-                ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
+                ? "border-danger focus:ring-danger/20 focus:border-danger"
                 : "border-border-subtle focus:ring-primary/20 focus:border-primary"
             )}
           />
           {fieldErrors.username && (
-            <p className="text-xs sm:text-[11px] font-medium text-rose-500 flex items-center gap-1 mt-1">
+            <p className="text-xs sm:text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{fieldErrors.username}</span>
             </p>
@@ -202,21 +205,20 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         </div>
 
         {/* PASSWORD INPUT & STRENGTH METER */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-content-body tracking-wide block">
-            Password <span className="text-rose-500">*</span>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-content-body tracking-normal block">
+            {t("register.password")} <span className="text-danger-text">*</span>
           </label>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
-              required
               value={password}
               onChange={(e) => handlePasswordChange(e.target.value)}
-              placeholder="••••••••"
+              placeholder={t("register.passwordPlaceholder")}
               className={cn(
-                "w-full pl-4 pr-11 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-sm font-medium text-content placeholder:text-content-subtle",
+                "w-full h-11 pl-3.5 pr-10 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
                 fieldErrors.password
-                  ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
+                  ? "border-danger focus:ring-danger/20 focus:border-danger"
                   : "border-border-subtle focus:ring-primary/20 focus:border-primary"
               )}
             />
@@ -224,7 +226,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-content-subtle hover:text-primary focus:outline-none cursor-pointer transition-colors"
-              title={showPassword ? "Hide password" : "Show password"}
+              title={showPassword ? t("common.hidePassword") : t("common.showPassword")}
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -234,10 +236,10 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
           {password.length > 0 && (
             <div className="mt-2 space-y-1.5 p-2.5 bg-surface-sunken border border-border-subtle/80 rounded-lg">
               <div className="flex items-center justify-between text-xs sm:text-[11px] font-medium">
-                <span className="text-content-secondary">Password Strength:</span>
-                <span className={passStrength.color}>{passStrength.label}</span>
+                <span className="text-content-secondary">{t("register.passwordStrength")}</span>
+                <span className={passStrength.color}>{t(passStrength.label)}</span>
               </div>
-              <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+              <div className="w-full bg-surface-strong rounded-full h-1.5 overflow-hidden">
                 <div
                   className={cn(
                     "h-full transition-all duration-300 rounded-full",
@@ -257,7 +259,8 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
                       : "text-content-subtle"
                   )}
                 >
-                  <span>{passStrength.criteria.minLength ? "[✓]" : "[ ]"}</span> Min 8 Karakter
+                  <span>{passStrength.criteria.minLength ? "[✓]" : "[ ]"}</span>{" "}
+                  {t("register.min8Chars")}
                 </div>
                 <div
                   className={cn(
@@ -267,7 +270,8 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
                       : "text-content-subtle"
                   )}
                 >
-                  <span>{passStrength.criteria.upper ? "[✓]" : "[ ]"}</span> Huruf Besar (A-Z)
+                  <span>{passStrength.criteria.upper ? "[✓]" : "[ ]"}</span>{" "}
+                  {t("register.uppercaseAZ")}
                 </div>
                 <div
                   className={cn(
@@ -277,7 +281,8 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
                       : "text-content-subtle"
                   )}
                 >
-                  <span>{passStrength.criteria.digit ? "[✓]" : "[ ]"}</span> Angka (0-9)
+                  <span>{passStrength.criteria.digit ? "[✓]" : "[ ]"}</span>{" "}
+                  {t("register.digits09")}
                 </div>
                 <div
                   className={cn(
@@ -287,14 +292,15 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
                       : "text-content-subtle"
                   )}
                 >
-                  <span>{passStrength.criteria.special ? "[✓]" : "[ ]"}</span> Simbol (@$!%*?&)
+                  <span>{passStrength.criteria.special ? "[✓]" : "[ ]"}</span>{" "}
+                  {t("register.symbols")}
                 </div>
               </div>
             </div>
           )}
 
           {fieldErrors.password && (
-            <p className="text-xs sm:text-[11px] font-medium text-rose-500 flex items-center gap-1 mt-1">
+            <p className="text-xs sm:text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{fieldErrors.password}</span>
             </p>
@@ -304,16 +310,16 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         <button
           type="submit"
           disabled={isRegistering}
-          className="w-full bg-primary text-white py-3 rounded-lg font-semibold uppercase tracking-wider text-xs hover:bg-[#364574] transition-all shadow-md shadow-primary/20 active:scale-[0.99] mt-3 flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+          className="w-full bg-primary-surface text-content-inverse py-3 rounded-lg font-normal uppercase tracking-normal text-xs hover:bg-primary-surface-hover transition-all shadow-md shadow-primary/20 active:scale-[0.99] mt-3 flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {isRegistering ? (
             <>
-              <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-              <span>Creating Account...</span>
+              <div className="w-4 h-4 border-2 border-border-glass/20 border-t-border-glass rounded-full animate-spin" />
+              <span>{t("register.creating")}</span>
             </>
           ) : (
             <>
-              <span>Sign Up</span>
+              <span>{t("register.register")}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </>
           )}
@@ -325,19 +331,19 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
       <SsoButtons mode="daftar" />
 
       <p className="text-center text-xs font-medium text-content-muted pt-5 mt-4 border-t border-border-faint">
-        Already have an account?{" "}
+        {t("register.alreadyHaveAnAccount")}{" "}
         <button
           type="button"
           onClick={onBackToLogin}
-          className="text-primary font-semibold hover:text-[#364574] transition-colors ml-1 cursor-pointer hover:underline"
+          className="text-primary font-semibold hover:text-primary-hover transition-colors ml-1 cursor-pointer hover:underline"
         >
-          Sign In
+          {t("register.signIn")}
         </button>
       </p>
 
       {/* REGISTRATION SUCCESS MODAL (VELZON SWEETALERT STYLE) */}
       {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 font-sans">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay/50 backdrop-blur-xs p-4 font-sans">
           <motion.div
             initial={{ scale: 0.85, opacity: 0, y: 15 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -345,8 +351,8 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
           >
             <button
               onClick={handleSuccessModalConfirm}
-              className="absolute top-4 right-4 text-slate-300 hover:text-content-secondary transition-colors p-1 rounded-md"
-              title="Close"
+              className="absolute top-4 right-4 text-content-subtle hover:text-content-secondary transition-colors p-1 rounded-md"
+              title={t("register.close")}
             >
               <X className="w-5 h-5" />
             </button>
@@ -356,10 +362,10 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
 
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-content-strong tracking-tight">
-                Registrasi berhasil!
+                {t("register.successTitle")}
               </h3>
               <p className="text-sm text-content-muted font-normal leading-relaxed px-2">
-                Silakan tunggu Administrator menyetujui akun Anda sebelum bisa Login.
+                {t("register.successHint")}
               </p>
             </div>
 
@@ -367,9 +373,9 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleSuccessModalConfirm}
-              className="px-8 py-2.5 bg-primary hover:bg-[#364574] text-white rounded-md text-sm font-semibold shadow-md transition-all cursor-pointer min-w-[120px] mt-2"
+              className="px-8 py-2.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-sm font-semibold shadow-md transition-all cursor-pointer min-w-[120px] mt-2"
             >
-              Ke Halaman Login
+              {t("register.toLoginPage")}
             </motion.button>
           </motion.div>
         </div>

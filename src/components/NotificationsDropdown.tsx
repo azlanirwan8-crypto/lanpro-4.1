@@ -6,12 +6,15 @@
  * Tanpa state sendiri: daftar notifikasi dan status buka-tutupnya tetap tinggal
  * di AppContainer karena header dan penghitung lonceng juga membacanya.
  */
-import React from "react";
+import { useTranslation } from "react-i18next";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { format } from "date-fns";
 import { Mail } from "lucide-react";
 import { formatNotification } from "../utils/notificationFormatter";
 import type { AppNotification, Task } from "../types";
+import { fetchNotifPrefs, patchNotifPrefs } from "../features/users/services/users.service";
+import { toast } from "sonner";
 
 interface NotificationsDropdownProps {
   isNotificationsOpen: boolean;
@@ -44,6 +47,47 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
   fetchNotifications,
   tasks,
 }) => {
+  const { t } = useTranslation();
+  const [dueReminder, setDueReminder] = useState(true);
+  const [prefSaving, setPrefSaving] = useState(false);
+
+  useEffect(() => {
+    if (!isNotificationsOpen) return;
+    let cancelled = false;
+    void fetchNotifPrefs()
+      .then((res: any) => {
+        if (!cancelled && typeof res?.data?.dueReminder === "boolean") {
+          setDueReminder(res.data.dueReminder);
+        }
+      })
+      .catch(() => {
+        /* default true */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isNotificationsOpen]);
+
+  const toggleDueReminder = async () => {
+    if (prefSaving) return;
+    const next = !dueReminder;
+    setPrefSaving(true);
+    setDueReminder(next);
+    try {
+      await patchNotifPrefs({ dueReminder: next });
+      toast.success(
+        next
+          ? t("notifications.dueReminderOn", "Pengingat jatuh tempo diaktifkan")
+          : t("notifications.dueReminderOff", "Pengingat jatuh tempo dimatikan")
+      );
+    } catch (e: any) {
+      setDueReminder(!next);
+      toast.error(e?.message || t("notifications.prefFailed", "Gagal menyimpan preferensi"));
+    } finally {
+      setPrefSaving(false);
+    }
+  };
+
   return (
     <>
       <AnimatePresence>
@@ -53,18 +97,21 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute right-0 mt-2 w-80 sm:w-[380px] bg-surface rounded-xl shadow-soft-lg border border-border-subtle z-50 overflow-hidden origin-top-right"
+            className="absolute right-0 mt-2 w-80 sm:w-[380px] bg-surface rounded-xl shadow-soft-lg border border-border-subtle z-50 overflow-hidden origin-top-right max-md:fixed max-md:inset-x-0 max-md:right-0 max-md:left-0 max-md:mt-0 max-md:bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] max-md:w-full max-md:max-w-none max-md:rounded-t-2xl max-md:rounded-b-none max-md:origin-bottom max-md:h-[min(72vh,520px)] max-md:flex max-md:flex-col"
           >
             {/* Dropdown Header */}
-            <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between bg-surface">
-              <h3 className="font-medium text-content text-[16px]">Notification</h3>
+            <div className="md:hidden flex justify-center pt-2 pb-0 shrink-0" aria-hidden>
+              <div className="w-10 h-1 rounded-full bg-surface-marker" />
+            </div>
+            <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between bg-surface shrink-0">
+              <h3 className="font-medium text-content text-[16px]">{t("notifications.title")}</h3>
               <div className="flex items-center gap-2.5">
-                <span className="bg-violet-100 text-violet-700 text-xs font-medium px-2.5 py-1 rounded-md">
-                  {notifications.filter((n) => !n.read).length} New
+                <span className="bg-violet-500/15 text-violet-700 text-xs font-medium px-2.5 py-1 rounded-md">
+                  {t("rakit.newCount", { count: notifications.filter((n) => !n.read).length })}
                 </span>
                 <button
                   className="p-1 text-content-muted hover:text-content-secondary hover:bg-surface-muted rounded-full transition-all"
-                  title="Mark all read"
+                  title={t("notifications.markAllRead")}
                   onClick={async () => {
                     try {
                       const unread = notifications.filter((n) => !n.read);
@@ -81,10 +128,10 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
             </div>
 
             {/* Notification Items List */}
-            <div className="max-h-[380px] overflow-y-auto">
+            <div className="max-h-[380px] max-md:flex-1 max-md:max-h-none overflow-y-auto">
               {notifications.length === 0 ? (
                 <div className="p-8 text-center text-content-muted text-sm italic">
-                  Belum ada notifikasi
+                  {t("notifications.empty")}
                 </div>
               ) : (
                 <div className="flex flex-col">
@@ -144,7 +191,6 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
                               })
                             );
                           } else if (n.relatedId) {
-                            // if it's a task id
                             const t = tasks.find((x) => x.id === n.relatedId);
                             if (t) {
                               setSelectedTaskForDetail(t);
@@ -155,14 +201,12 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
                         }}
                         className="py-3.5 px-5 hover:bg-surface-muted transition-all cursor-pointer flex gap-3 items-start relative border-b border-border-subtle last:border-b-0"
                       >
-                        {/* Left Icon - Compact & circular */}
                         <div
-                          className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${parsed.iconBgClass || "bg-violet-50 text-violet-600"}`}
+                          className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${parsed.iconBgClass || "bg-violet-500/10 text-violet-600"}`}
                         >
                           {parsed.icon}
                         </div>
 
-                        {/* Content Stack */}
                         <div className="flex-1 min-w-0 pr-4">
                           <h4 className="text-sm font-medium text-content leading-snug break-words">
                             {parsed.formattedMessage}
@@ -172,11 +216,10 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
                           </span>
                         </div>
 
-                        {/* Unread indicator dot */}
                         {!n.read && (
                           <div className="absolute right-5 top-5 flex h-2 w-2 shrink-0">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600 shadow-xs shadow-indigo-300"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-surface shadow-xs"></span>
                           </div>
                         )}
                       </div>
@@ -186,15 +229,25 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
               )}
             </div>
 
-            {/* Dropdown Footer */}
-            <div className="p-4 border-t border-border-subtle bg-surface">
+            {/* Dropdown Footer — #345 preferensi minimal */}
+            <div className="p-4 border-t border-border-subtle bg-surface space-y-3 shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-4">
+              <label className="flex items-center justify-between gap-3 text-xs text-content-secondary cursor-pointer select-none">
+                <span>{t("notifications.dueReminderPref", "Pengingat jatuh tempo (24 jam)")}</span>
+                <input
+                  type="checkbox"
+                  checked={dueReminder}
+                  disabled={prefSaving}
+                  onChange={() => void toggleDueReminder()}
+                  className="rounded border-border-subtle text-primary focus:ring-primary/30"
+                />
+              </label>
               <button
                 onClick={() => {
                   setIsNotificationsOpen(false);
                 }}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 px-4 rounded-xl text-sm font-medium transition-all duration-150 text-center block shadow-xs"
+                className="w-full bg-primary-surface hover:bg-primary-surface-hover text-content-inverse py-2.5 px-4 rounded-xl text-sm font-medium transition-all duration-150 text-center block shadow-xs"
               >
-                View all notifications
+                {t("notifications.viewAll")}
               </button>
             </div>
           </motion.div>

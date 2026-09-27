@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion } from "motion/react";
 import { ArrowRight, Minus } from "lucide-react";
@@ -12,6 +13,7 @@ interface DiffViewerProps {
  * Membandingkan state sebelum dan sesudah secara elegan untuk auditor.
  */
 export const DiffViewer: React.FC<DiffViewerProps> = ({ oldValues, newValues }) => {
+  const { t } = useTranslation();
   const allKeys = Array.from(
     new Set([...Object.keys(oldValues || {}), ...Object.keys(newValues || {})])
   ).filter((key) => {
@@ -25,14 +27,14 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({ oldValues, newValues }) 
     return (
       <div className="flex flex-col items-center justify-center py-8 text-content-subtle bg-surface-sunken rounded-xl border border-dashed border-border-subtle">
         <Minus className="w-6 h-6 mb-2 opacity-20" />
-        <p className="text-sm italic">Tidak ada perubahan field data yang terdeteksi.</p>
+        <p className="text-sm italic">{t("diff.noChange")}</p>
       </div>
     );
   }
 
   const formatValue = (val: any) => {
     if (val === null || val === undefined)
-      return <span className="text-slate-300 font-normal italic">kosong</span>;
+      return <span className="text-content-subtle font-normal italic">{t("diff.empty")}</span>;
     if (typeof val === "boolean") return val ? "Ya" : "Tidak";
     if (typeof val === "object") return JSON.stringify(val);
     return String(val);
@@ -40,10 +42,10 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({ oldValues, newValues }) 
 
   return (
     <div className="overflow-hidden rounded-xl border border-border-subtle bg-surface">
-      <div className="grid grid-cols-12 gap-0 bg-surface-sunken border-b border-border-subtle text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-widest p-3">
-        <div className="col-span-4 px-2">Nama Field</div>
-        <div className="col-span-4 px-2 border-l border-border-subtle">Nilai Lama</div>
-        <div className="col-span-4 px-2 border-l border-border-subtle">Nilai Baru</div>
+      <div className="grid grid-cols-12 gap-0 bg-surface-sunken border-b border-border-subtle text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-normal p-3">
+        <div className="col-span-4 px-2">{t("diff.fieldName")}</div>
+        <div className="col-span-4 px-2 border-l border-border-subtle">{t("diff.oldValue")}</div>
+        <div className="col-span-4 px-2 border-l border-border-subtle">{t("diff.newValue")}</div>
       </div>
 
       <div className="divide-y divide-border-faint max-h-[500px] overflow-y-auto custom-scrollbar">
@@ -60,7 +62,7 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({ oldValues, newValues }) 
               key={key}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className={`grid grid-cols-12 gap-0 py-3 px-3 items-center transition-colors hover:bg-surface-sunken/50 ${isDifferent ? "bg-indigo-50/10" : ""}`}
+              className={`grid grid-cols-12 gap-0 py-3 px-3 items-center transition-colors hover:bg-surface-sunken/50 ${isDifferent ? "bg-primary/10" : ""}`}
             >
               <div className="col-span-4 px-2">
                 <span className="text-xs font-medium text-content-body bg-surface-muted px-2 py-1 rounded-md break-all">
@@ -71,10 +73,10 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({ oldValues, newValues }) 
               <div className="col-span-4 px-2 border-l border-border-faint min-h-[1.5rem] flex items-center">
                 {oldVal === undefined || oldVal === null ? (
                   <span className="text-xs sm:text-[10px] font-medium text-content-subtle italic flex items-center gap-1">
-                    <Minus className="w-2 h-2" /> Data Baru
+                    <Minus className="w-2 h-2" /> {t("audit.newData")}
                   </span>
                 ) : (
-                  <span className="text-xs text-rose-500 line-through decoration-rose-300 break-words w-full">
+                  <span className="text-xs text-danger-text line-through decoration-danger/40 break-words w-full">
                     {formatValue(oldVal)}
                   </span>
                 )}
@@ -82,15 +84,13 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({ oldValues, newValues }) 
 
               <div className="col-span-4 px-2 border-l border-border-faint min-h-[1.5rem] flex items-center">
                 {newVal === undefined || newVal === null ? (
-                  <span className="text-xs sm:text-[10px] font-medium text-rose-400 italic">
-                    Dihapus
+                  <span className="text-xs sm:text-[10px] font-medium text-danger-text italic">
+                    {t("diff.deleted")}
                   </span>
                 ) : (
                   <div className="flex items-center gap-2 w-full">
-                    {isDifferent && (
-                      <ArrowRight className="w-3 h-3 text-indigo-300 flex-shrink-0" />
-                    )}
-                    <span className="text-xs text-emerald-600 font-medium break-words">
+                    {isDifferent && <ArrowRight className="w-3 h-3 text-primary flex-shrink-0" />}
+                    <span className="text-xs text-success-text font-medium break-words">
                       {formatValue(newVal)}
                     </span>
                   </div>

@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+import { useMasterOptionItems } from "../../../hooks/useMasterOptions";
 import React, { useState } from "react";
 import {
   Plus,
@@ -16,10 +18,15 @@ import {
   UserCheck,
   Layers,
   CheckSquare,
+  Lock,
+  Unlock,
+  ShieldAlert,
 } from "lucide-react";
 import { QATestCase, QATestSuite } from "../types";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
 import { ResponsiveTable } from "../../../components/ResponsiveTable";
+import { StyledDropdown } from "../../../components/ui/CommonComponents";
+import { QATestCaseMobileCardView } from "./QATestCaseMobileCardView";
 
 interface QATestCaseTableProps {
   activeSuite: QATestSuite | undefined;
@@ -32,6 +39,9 @@ interface QATestCaseTableProps {
   currentUserUid: string;
   currentUserRole: string;
   lockState: { lockedBy: string | null; userName: string | null; lockedAt: number | null };
+  remainingTime: number;
+  handleForceUnlock: () => void;
+  releaseLockManually: () => void;
   isGeneratingAi: boolean;
   handleGenerateWithAi: () => void;
   handleExportQAReport: () => void;
@@ -51,7 +61,7 @@ interface QATestCaseTableProps {
   setCaseEditExpected: (expected: string) => void;
   setCaseEditPriority: (priority: "High" | "Medium" | "Low" | "Critical") => void;
   setCaseEditAssignedTo: (assignedTo: string) => void;
-  setCaseToDelete: (tc: QATestCase) => void;
+  handleDeleteTestCase: (tc: QATestCase) => void;
   handleOpenCreateBugModal: (tc: QATestCase) => void;
   setSelectedTestCase: (tc: QATestCase) => void;
 
@@ -66,7 +76,20 @@ interface QATestCaseTableProps {
   handleBulkAssignPic: (assignedTo: string) => void;
   handleBulkChangeStatus: (status: "Passed" | "Failed" | "Blocked" | "Retest" | "Pending") => void;
   handleBulkDeleteCases: () => void;
+  casesPage?: number;
+  setCasesPage?: (page: number) => void;
+  casesTotal?: number;
+  casesPerPage?: number;
 }
+
+/** Dipakai hanya bila MasterData belum memuat tipe qa_status. */
+const CADANGAN_STATUS_QA = [
+  { id: "Passed", label: "Passed", icon: "CheckCircle2", color: "#10B981" },
+  { id: "Failed", label: "Failed", icon: "XCircle", color: "#EF4444" },
+  { id: "Blocked", label: "Blocked", icon: "AlertOctagon", color: "#F59E0B" },
+  { id: "Retest", label: "Retest", icon: "RefreshCw", color: "#6366F1" },
+  { id: "Pending", label: "Pending", icon: "Clock", color: "#64748B" },
+];
 
 export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
   activeSuite,
@@ -76,6 +99,12 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
   searchTerm,
   setSearchTerm,
   projectMembers,
+  currentUserUid,
+  currentUserRole,
+  lockState,
+  remainingTime,
+  handleForceUnlock,
+  releaseLockManually,
   isGeneratingAi,
   handleGenerateWithAi,
   handleExportQAReport,
@@ -92,7 +121,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
   setCaseEditExpected,
   setCaseEditPriority,
   setCaseEditAssignedTo,
-  setCaseToDelete,
+  handleDeleteTestCase,
   handleOpenCreateBugModal,
   setSelectedTestCase,
 
@@ -106,20 +135,25 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
   handleBulkAssignPic,
   handleBulkChangeStatus,
   handleBulkDeleteCases,
+  casesPage = 1,
+  setCasesPage,
+  casesTotal = 0,
+  casesPerPage = 20,
 }) => {
+  const { t } = useTranslation();
+  const opsiStatusQa = useMasterOptionItems("qa_status", CADANGAN_STATUS_QA);
   const [isBulkPicDropdownOpen, setIsBulkPicDropdownOpen] = useState(false);
   const [isBulkStatusDropdownOpen, setIsBulkStatusDropdownOpen] = useState(false);
 
   if (!activeSuite) {
     return (
-      <div className="lg:col-span-9 bg-surface border border-border-subtle/80 p-10 rounded-md text-center shadow-xs">
-        <div className="w-10 h-10 bg-primary/10 text-primary rounded-md flex items-center justify-center mx-auto mb-2.5">
+      <div className="md:col-span-9 bg-surface border border-border-subtle/80 p-10 rounded-md text-center shadow-xs">
+        <div className="w-10 h-10 bg-primary-surface/10 text-primary rounded-md flex items-center justify-center mx-auto mb-2.5">
           <FileSpreadsheet className="w-5 h-5" />
         </div>
-        <h3 className="text-sm font-medium text-content-strong">Silakan Pilih Modul Testing</h3>
+        <h3 className="text-sm font-medium text-content-strong">{t("qaTable.pickModule")}</h3>
         <p className="text-xs text-content-subtle font-medium mt-1">
-          Pilih dokumen pengujian di panel sebelah kiri untuk menampilkan matriks eksekusi test
-          case.
+          {t("qa.pickATestDocumentIn")}
         </p>
       </div>
     );
@@ -137,52 +171,109 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
   const passedPercent =
     totalCasesCount > 0 ? Math.round((passedCasesCount / totalCasesCount) * 100) : 0;
 
-  // Filter cases with search term
-  const searchedCases = filteredCases.filter((tc) => {
-    if (!searchTerm.trim()) return true;
-    const q = searchTerm.toLowerCase();
-    return (
-      tc.title?.toLowerCase().includes(q) ||
-      tc.steps?.toLowerCase().includes(q) ||
-      tc.expectedResult?.toLowerCase().includes(q) ||
-      (tc.linkedBugKey && tc.linkedBugKey.toLowerCase().includes(q))
-    );
-  });
-
+  // Search ditangani server (#318); status filter tetap di halaman aktif
+  const searchedCases = filteredCases;
+  const totalPages = Math.max(1, Math.ceil((casesTotal || filteredCases.length) / casesPerPage));
   const isAllSelected = searchedCases.length > 0 && selectedCaseIds.length === searchedCases.length;
+  const isLockedBySomeoneElse = lockState.lockedBy && lockState.lockedBy !== currentUserUid;
+  const fmtTime = (secs: number) => {
+    const m = Math.floor(secs / 60)
+      .toString()
+      .padStart(2, "0");
+    const s = (secs % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
 
   return (
-    <div className="lg:col-span-9 space-y-3.5 lg:sticky lg:top-4">
+    <div className="md:col-span-9 space-y-3.5 md:sticky md:top-4">
       {/* Velzon Header & Micro Stats Box */}
       <div className="bg-surface border border-border-subtle/80 p-4 rounded-md shadow-xs space-y-3">
+        {/* #426 — Lock indicator dipindah ke atas Add Task biar 1 konteks */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 bg-surface-muted border border-border-subtle/60 px-3 py-2 rounded-lg shadow-2xs">
+            {lockState.lockedBy ? (
+              isLockedBySomeoneElse ? (
+                <>
+                  <div className="p-1.5 bg-danger/10 text-danger-text rounded-md">
+                    <Lock className="w-3.5 h-3.5 animate-pulse" />
+                  </div>
+                  <span className="text-[10px] text-danger-text font-normal uppercase tracking-normal">
+                    {t("qaTop.lockedByOther")}
+                  </span>
+                  <span className="text-xs font-medium text-content-body">
+                    {lockState.userName}
+                  </span>
+                  {(currentUserRole === "admin" ||
+                    currentUserRole === "head" ||
+                    currentUserRole === "manager") && (
+                    <button
+                      onClick={handleForceUnlock}
+                      className="ml-1 px-2 py-1 bg-danger-surface hover:bg-danger-hover text-content-inverse text-[10px] font-normal uppercase tracking-normal rounded-md transition-all shadow-xs flex items-center gap-1 cursor-pointer"
+                    >
+                      <ShieldAlert className="w-3 h-3" />
+                      {t("qaTop.forceUnlock")}
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="p-1.5 bg-success/10 text-success-text rounded-md">
+                    <Unlock className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="text-[10px] text-success-text font-normal uppercase tracking-normal">
+                    {t("qaTop.youHoldLock")}
+                  </span>
+                  <span className="px-1.5 py-[2px] bg-primary-surface/10 text-primary text-[10px] leading-none font-medium rounded-md">
+                    {fmtTime(remainingTime)}
+                  </span>
+                  <button
+                    onClick={releaseLockManually}
+                    className="ml-1 px-2 py-1 bg-surface hover:bg-surface-sunken text-content-body text-[10px] font-normal uppercase tracking-normal rounded-md transition-all cursor-pointer border border-border-subtle"
+                  >
+                    {t("qaTop.unlockNow")}
+                  </button>
+                </>
+              )
+            ) : (
+              <>
+                <span className="w-2 h-2 rounded-full bg-surface-marker" />
+                <span className="text-xs text-content-muted font-medium">
+                  {t("qaTop.noActiveLock")}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-primary text-white font-medium text-xs sm:text-[11px] sm:text-[9px] rounded-md uppercase tracking-wider">
+              <span className="px-2 py-0.5 bg-primary-surface text-content-inverse font-normal text-[10px] rounded-md uppercase tracking-normal">
                 {activeSuite.phase}
               </span>
-              <h2 className="text-base font-medium text-content-strong tracking-tight">
+              <h2 className="text-sm font-semibold text-content-strong tracking-tight">
                 {cleanSuiteName}
               </h2>
             </div>
-            <p className="text-xs sm:text-[11px] text-content-subtle font-medium mt-0.5">
-              Diupload oleh: {activeSuite.uploadedBy} •{" "}
+            <p className="text-xs text-content-subtle font-normal mt-0.5">
+              {t("qa.uploadedBy")} {activeSuite.uploadedBy} •{" "}
               {new Date(activeSuite.uploadedAt).toLocaleDateString("id-ID")}
             </p>
           </div>
 
-          {/* Action Buttons Header */}
-          <div className="flex flex-wrap items-center gap-1.5">
+          {/* Action Buttons Header — #367: icon-only di HP, nowrap */}
+          <div className="flex flex-nowrap items-center gap-1.5 overflow-x-auto max-w-full">
             {canCreate && (
               <button
                 onClick={() => {
                   setIsAddCaseOpen(true);
                   setActiveAddTab("single");
                 }}
-                className="px-3 py-1.5 bg-primary hover:bg-[#354473] text-white font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
+                className="btn-animation waves-effect waves-light btn-primary h-8 px-2.5 sm:px-3 rounded-lg text-xs font-medium flex items-center gap-1 cursor-pointer shrink-0 shadow-xs"
+                title={t("qa.addTask")}
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Tambah Task</span>
+                <span className="hidden sm:inline">{t("qa.addTask")}</span>
               </button>
             )}
 
@@ -190,21 +281,23 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               <button
                 onClick={handleGenerateWithAi}
                 disabled={isGeneratingAi}
-                className="px-3 py-1.5 bg-gradient-to-r from-primary to-indigo-600 hover:from-indigo-700 hover:to-indigo-800 disabled:opacity-50 text-white font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
-                title="Generate test cases dengan AI"
+                className="px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-primary to-indigo-600 hover:from-indigo-700 hover:to-indigo-800 disabled:opacity-50 text-content-inverse font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95 shrink-0"
+                title={t("qaTable.generateAi")}
               >
                 <Sparkles className={`w-3.5 h-3.5 ${isGeneratingAi ? "animate-spin" : ""}`} />
-                <span>{isGeneratingAi ? "Menganalisis..." : "Generate AI"}</span>
+                <span className="hidden sm:inline">
+                  {isGeneratingAi ? "Menganalisis..." : "Generate AI"}
+                </span>
               </button>
             )}
 
             <button
               onClick={handleExportQAReport}
-              className="px-2.5 py-1.5 bg-surface-muted hover:bg-slate-200 text-content-body font-medium rounded-md text-xs flex items-center gap-1 transition-all cursor-pointer"
-              title="Export Laporan Eksekusi QA"
+              className="px-2.5 py-1.5 bg-surface-muted hover:bg-surface-strong text-content-body font-medium rounded-md text-xs flex items-center gap-1 transition-all cursor-pointer shrink-0"
+              title={t("qa.exportReport")}
             >
               <Download className="w-3.5 h-3.5 text-primary" />
-              <span>Export</span>
+              <span className="hidden sm:inline">{t("qa.export")}</span>
             </button>
 
             {passedPercent === 100 &&
@@ -213,10 +306,13 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               canUpdate && (
                 <button
                   onClick={handleMigrateSuitePhase}
-                  className="px-3 py-1.5 bg-success hover:bg-[#089683] text-white font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
+                  className="px-2.5 sm:px-3 py-1.5 bg-success-surface hover:bg-success-hover text-content-inverse font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95 shrink-0"
+                  title={activeSuite.phase === "SIT" ? "Migrate to UAT" : "Migrate to PTR"}
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>{activeSuite.phase === "SIT" ? "Migrate to UAT" : "Migrate to PTR"}</span>
+                  <span className="hidden sm:inline">
+                    {activeSuite.phase === "SIT" ? "Migrate to UAT" : "Migrate to PTR"}
+                  </span>
                 </button>
               )}
           </div>
@@ -224,51 +320,45 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
 
         {/* Velzon Compact Micro Stats Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-          <div className="bg-primary/5 border border-primary/10 p-2 rounded-md text-center">
-            <span className="text-xs sm:text-[11px] sm:text-[9px] text-primary font-medium uppercase tracking-wider block">
-              Total Case
-            </span>
-            <span className="text-base font-medium text-primary block mt-0.5">
+          <div className="bg-primary-surface/5 border border-primary/10 p-2 rounded-md text-center">
+            <span className="text-[10px] text-primary font-normal block">{t("qa.totalCase")}</span>
+            <span className="text-sm font-semibold text-primary block mt-0.5">
               {totalCasesCount}
             </span>
           </div>
           <div className="bg-surface-sunken p-2 rounded-md border border-border-subtle/60 text-center">
-            <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium uppercase tracking-wider block">
-              Passed Rate
+            <span className="text-[10px] text-content-muted font-normal block">
+              {t("qaTable.passedRate")}
             </span>
-            <span className="text-base font-medium text-content-strong block mt-0.5">
+            <span className="text-sm font-semibold text-content-strong block mt-0.5">
               {passedPercent}%
             </span>
           </div>
-          <div className="bg-emerald-50/50 p-2 rounded-md border border-emerald-100 text-center">
-            <span className="text-xs sm:text-[11px] sm:text-[9px] text-success font-medium uppercase tracking-wider block">
-              PASSED
+          <div className="bg-emerald-500/10 p-2 rounded-md border border-emerald-500/30 text-center">
+            <span className="text-[10px] text-success-text font-normal block">
+              {t("qa.passed")}
             </span>
-            <span className="text-base font-medium text-success block mt-0.5">
+            <span className="text-sm font-semibold text-success-text block mt-0.5">
               {passedCasesCount}
             </span>
           </div>
-          <div className="bg-rose-50/50 p-2 rounded-md border border-rose-100 text-center">
-            <span className="text-xs sm:text-[11px] sm:text-[9px] text-danger font-medium uppercase tracking-wider block">
-              FAILED
-            </span>
-            <span className="text-base font-medium text-danger block mt-0.5">
+          <div className="bg-rose-500/10 p-2 rounded-md border border-rose-500/30 text-center">
+            <span className="text-[10px] text-danger-text font-normal block">{t("qa.failed")}</span>
+            <span className="text-sm font-semibold text-danger-text block mt-0.5">
               {failedCasesCount}
             </span>
           </div>
-          <div className="bg-amber-50/50 p-2 rounded-md border border-amber-100 text-center">
-            <span className="text-xs sm:text-[11px] sm:text-[9px] text-warning font-medium uppercase tracking-wider block">
-              BLOCKED
-            </span>
-            <span className="text-base font-medium text-warning block mt-0.5">
+          <div className="bg-amber-500/10 p-2 rounded-md border border-amber-500/30 text-center">
+            <span className="text-[10px] text-warning-text font-normal block">Blocked</span>
+            <span className="text-sm font-semibold text-warning-text block mt-0.5">
               {blockedCasesCount}
             </span>
           </div>
           <div className="bg-surface-sunken p-2 rounded-md border border-border-subtle/60 text-center">
-            <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium uppercase tracking-wider block">
-              RETEST/PEND
+            <span className="text-[10px] text-content-muted font-normal block">
+              {t("qa.retestPend")}
             </span>
-            <span className="text-base font-medium text-content-body block mt-0.5">
+            <span className="text-sm font-semibold text-content-body block mt-0.5">
               {retestCasesCount + pendingCasesCount}
             </span>
           </div>
@@ -276,7 +366,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
 
         {/* ELEGANT TOP RIGHT SEARCH & FILTER BAR */}
         <div className="flex items-center justify-between gap-2.5 pt-2.5 border-t border-border-faint">
-          <div className="text-xs sm:text-[11px] font-medium text-content-strong uppercase tracking-wider flex items-center gap-1.5">
+          <div className="text-xs font-normal text-content-strong flex items-center gap-1.5">
             <FileSpreadsheet className="w-3.5 h-3.5 text-primary" />
             <span>Matriks Skenario Test Case ({searchedCases.length})</span>
           </div>
@@ -287,28 +377,31 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               <Search className="w-3.5 h-3.5 absolute left-2.5 top-2 text-content-subtle" />
               <input
                 type="text"
-                placeholder="Cari scenario..."
+                placeholder={t("qaTable.searchScenario")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-7 pr-2.5 py-1 bg-surface-sunken border border-border-subtle/80 rounded-md text-xs font-medium text-content-body focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-36 sm:w-48"
+                className="pl-7 pr-2.5 py-1 bg-surface-sunken border border-border-subtle/80 rounded-md text-xs font-normal text-content-body focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-36 sm:w-48"
               />
             </div>
 
             {/* Elegant Filter Status Select */}
-            <div className="relative flex items-center gap-1 bg-surface-sunken border border-border-subtle/80 rounded-md px-2 py-1 text-xs font-medium text-content-body">
-              <Filter className="w-3 h-3 text-primary" />
-              <select
+            <div className="w-36 sm:w-44">
+              <StyledDropdown
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="bg-transparent border-none outline-none font-medium text-xs cursor-pointer text-content-body pr-1"
-              >
-                <option value="ALL">Status: Semua (ALL)</option>
-                <option value="Passed">Status: Passed</option>
-                <option value="Failed">Status: Failed</option>
-                <option value="Blocked">Status: Blocked</option>
-                <option value="Retest">Status: Retest</option>
-                <option value="Pending">Status: Pending</option>
-              </select>
+                onChange={(val) => setStatusFilter(val as any)}
+                options={[
+                  {
+                    id: "ALL",
+                    label: t("qaTable.allStatusFilter"),
+                    icon: "Layers",
+                    color: "#6366F1",
+                  },
+                  ...opsiStatusQa,
+                ]}
+                masterData={[]}
+                className="w-full"
+                buttonClassName="h-[30px] bg-surface-sunken rounded-md border border-border-subtle/80 hover:border-border-subtle px-2.5 text-xs font-medium text-content-body"
+              />
             </div>
           </div>
         </div>
@@ -316,12 +409,14 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
 
       {/* FLOATING BULK ACTIONS TOOLBAR FOR ADMIN / PROJECT ADMIN */}
       {selectedCaseIds.length > 0 && (canUpdate || isAdminRole) && (
-        <div className="bg-gradient-to-r from-primary to-indigo-900 text-white p-3 rounded-md shadow-xl flex flex-wrap items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="bg-gradient-to-r from-primary to-indigo-900 text-content-inverse p-3 rounded-md shadow-xl flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="p-1.5 bg-surface/10 rounded-md">
               <CheckSquare className="w-4 h-4 text-emerald-400" />
             </span>
-            <span className="text-xs font-medium">{selectedCaseIds.length} Task Terpilih</span>
+            <span className="text-xs font-medium">
+              {t("rakit.tasksSelected", { count: selectedCaseIds.length })}
+            </span>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -329,10 +424,10 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             <div className="relative">
               <button
                 onClick={() => setIsBulkPicDropdownOpen(!isBulkPicDropdownOpen)}
-                className="px-3 py-1.5 bg-surface/10 hover:bg-surface/20 text-white text-xs font-medium rounded-md flex items-center gap-1.5 transition-all cursor-pointer border border-white/20"
+                className="px-3 py-1.5 bg-surface/10 hover:bg-surface/20 text-content-inverse text-xs font-medium rounded-md flex items-center gap-1.5 transition-all cursor-pointer border border-border-glass/20"
               >
                 <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Bulk Assign PIC</span>
+                <span>{t("qa.bulkAssignPic")}</span>
                 <ChevronDown className="w-3 h-3 opacity-70" />
               </button>
 
@@ -342,18 +437,18 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                     className="fixed inset-0 z-40"
                     onClick={() => setIsBulkPicDropdownOpen(false)}
                   />
-                  <div className="absolute right-0 top-full mt-1.5 w-60 bg-surface text-content-strong rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                    <div className="px-3.5 py-1.5 text-xs sm:text-[10px] font-medium uppercase tracking-wider text-primary border-b border-border-faint mb-1">
-                      Tetapkan PIC ke {selectedCaseIds.length} Task
+                  <div className="absolute right-0 top-full mt-1.5 w-60 bg-surface text-content-strong rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-dropdown">
+                    <div className="px-3.5 py-1.5 text-xs sm:text-[10px] font-normal uppercase tracking-normal text-primary border-b border-border-faint mb-1">
+                      {t("rakit.assignPicToTasks", { count: selectedCaseIds.length })}
                     </div>
                     <button
                       onClick={() => {
                         handleBulkAssignPic("");
                         setIsBulkPicDropdownOpen(false);
                       }}
-                      className="w-full text-left px-3.5 py-2 text-xs font-medium hover:bg-indigo-50 hover:text-primary transition-colors"
+                      className="w-full text-left px-3.5 py-2 text-xs font-medium hover:bg-primary/10 hover:text-primary transition-colors"
                     >
-                      Semua PIC Proyek (All Members)
+                      {t("qa.allProjectPic")}
                     </button>
                     <div className="max-h-44 overflow-y-auto custom-scrollbar">
                       {(projectMembers || []).map((m: any) => {
@@ -365,7 +460,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                               handleBulkAssignPic(mId);
                               setIsBulkPicDropdownOpen(false);
                             }}
-                            className="w-full text-left px-3.5 py-2 text-xs font-medium hover:bg-indigo-50 hover:text-primary transition-colors flex items-center gap-2"
+                            className="w-full text-left px-3.5 py-2 text-xs font-medium hover:bg-primary/10 hover:text-primary transition-colors flex items-center gap-2"
                           >
                             <UserAvatar
                               uid={mId}
@@ -388,10 +483,10 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             <div className="relative">
               <button
                 onClick={() => setIsBulkStatusDropdownOpen(!isBulkStatusDropdownOpen)}
-                className="px-3 py-1.5 bg-surface/10 hover:bg-surface/20 text-white text-xs font-medium rounded-md flex items-center gap-1.5 transition-all cursor-pointer border border-white/20"
+                className="px-3 py-1.5 bg-surface/10 hover:bg-surface/20 text-content-inverse text-xs font-medium rounded-md flex items-center gap-1.5 transition-all cursor-pointer border border-border-glass/20"
               >
                 <Layers className="w-3.5 h-3.5 text-amber-300" />
-                <span>Bulk Status</span>
+                <span>{t("qa.bulkStatus")}</span>
                 <ChevronDown className="w-3 h-3 opacity-70" />
               </button>
 
@@ -401,7 +496,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                     className="fixed inset-0 z-40"
                     onClick={() => setIsBulkStatusDropdownOpen(false)}
                   />
-                  <div className="absolute right-0 top-full mt-1.5 w-44 bg-surface text-content-strong rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute right-0 top-full mt-1.5 w-44 bg-surface text-content-strong rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-dropdown">
                     {["Passed", "Failed", "Blocked", "Retest", "Pending"].map((st) => (
                       <button
                         key={st}
@@ -409,9 +504,9 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                           handleBulkChangeStatus(st as any);
                           setIsBulkStatusDropdownOpen(false);
                         }}
-                        className="w-full text-left px-3.5 py-1.5 text-xs font-medium hover:bg-indigo-50 hover:text-primary transition-colors"
+                        className="w-full text-left px-3.5 py-1.5 text-xs font-medium hover:bg-primary/10 hover:text-primary transition-colors"
                       >
-                        Set to {st}
+                        {t("rakit.setTo", { nilai: st })}
                       </button>
                     ))}
                   </div>
@@ -423,22 +518,22 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             {canDelete && (
               <button
                 onClick={handleBulkDeleteCases}
-                className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white text-xs font-medium rounded-md flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+                className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-content-inverse text-xs font-medium rounded-md flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                <span>Hapus Terpilih</span>
+                <span>{t("qaTable.deleteSelected")}</span>
               </button>
             )}
           </div>
         </div>
       )}
 
-      {/* ULTRA-SLEEK 5-COLUMN ENTERPRISE QA TABLE MATRIX */}
+      {/* ULTRA-SLEEK 5-COLUMN ENTERPRISE QA TABLE MATRIX (Desktop sm+) */}
       <div className="bg-surface border border-border-subtle/80 rounded-md shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="hidden sm:block overflow-x-auto">
           <ResponsiveTable className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-primary/5 border-b border-primary/15 text-xs sm:text-[10px] font-medium uppercase tracking-wider text-primary">
+              <tr className="bg-primary-surface/5 border-b border-primary/15 text-[10px] font-normal uppercase tracking-normal text-content-subtle">
                 {/* SELECT ALL CHECKBOX (For Admin / Users with edit access) */}
                 <th className="py-2.5 px-3 w-8 text-center" onClick={(e) => e.stopPropagation()}>
                   {(canUpdate || isAdminRole) && (
@@ -446,22 +541,22 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                       type="checkbox"
                       checked={isAllSelected}
                       onChange={() => handleToggleSelectAll(searchedCases)}
-                      className="rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+                      className="rounded border-border-subtle text-primary focus:ring-primary cursor-pointer"
                     />
                   )}
                 </th>
                 <th className="py-2.5 px-3 w-8 text-center">#</th>
-                <th className="py-2.5 px-4 min-w-[280px]">Test Scenario / Title</th>
-                <th className="py-2.5 px-3 min-w-[90px] text-center">Priority</th>
-                <th className="py-2.5 px-3 min-w-[180px] text-center">Status & PIC Assignee</th>
-                <th className="py-2.5 px-3 w-28 text-center">Actions</th>
+                <th className="py-2.5 px-4 min-w-[280px]">{t("qa.testScenario")}</th>
+                <th className="py-2.5 px-3 min-w-[90px] text-center">{t("qa.priority")}</th>
+                <th className="py-2.5 px-3 min-w-[180px] text-center">{t("qa.statusPic")}</th>
+                <th className="py-2.5 px-3 w-28 text-center">{t("qaTable.actions")}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border-faint text-xs font-medium text-content-body">
+            <tbody className="divide-y divide-border-faint text-xs font-normal text-content-body">
               {searchedCases.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-10 text-content-subtle font-medium">
-                    Tidak ada test case yang sesuai dengan filter atau kata kunci pencarian.
+                  <td colSpan={6} className="text-center py-10 text-content-subtle font-normal">
+                    {t("qaTable.emptyFilter")}
                   </td>
                 </tr>
               ) : (
@@ -481,8 +576,8 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                     <tr
                       key={tc.id || idx}
                       onClick={() => setSelectedTestCase(tc)}
-                      className={`hover:bg-primary/[0.03] transition-colors cursor-pointer group ${
-                        isChecked ? "bg-indigo-50/40" : ""
+                      className={`hover:bg-primary-surface/[0.03] transition-colors cursor-pointer group ${
+                        isChecked ? "bg-primary/10" : ""
                       }`}
                     >
                       {/* Checkbox Multi-Select */}
@@ -492,24 +587,27 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => handleToggleSelectCase(tc.id)}
-                            className="rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+                            className="rounded border-border-subtle text-primary focus:ring-primary cursor-pointer"
                           />
                         )}
                       </td>
 
                       {/* Row Num */}
-                      <td className="py-2.5 px-3 text-center font-medium text-content-subtle text-xs group-hover:text-primary">
+                      <td className="py-2.5 px-3 text-center font-normal text-content-subtle text-xs group-hover:text-primary">
                         {tc.rowNum || idx + 1}
                       </td>
 
                       {/* Title & Linked Bug Key */}
-                      <td className="py-2.5 px-4 font-medium text-content-strong">
+                      <td className="py-2.5 px-4 font-normal text-content-strong">
                         <div className="flex items-center gap-2">
                           <span className="line-clamp-1 text-xs group-hover:text-primary transition-colors">
                             {tc.title}
                           </span>
                           {tc.linkedBugKey && (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.2 bg-rose-50 border border-rose-200/60 rounded text-xs sm:text-[11px] sm:text-[9px] font-medium text-danger shrink-0">
+                            <span
+                              className="inline-flex items-center gap-1 px-1.5 py-0.2 bg-danger-surface/40 border border-danger/30 rounded text-[10px] leading-none sm:text-[9px] font-medium text-danger-text shrink-0"
+                              title={tc.linkedTaskId ? `Task ${tc.linkedTaskId}` : tc.linkedBugKey}
+                            >
                               <Bug className="w-2.5 h-2.5" />
                               {tc.linkedBugKey}
                             </span>
@@ -520,12 +618,12 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                       {/* Velzon Priority Compact Pill Badge */}
                       <td className="py-2.5 px-3 text-center">
                         <span
-                          className={`px-2 py-0.5 rounded text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider inline-block ${
+                          className={`px-2 py-0.5 rounded text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-normal inline-block ${
                             tc.priority === "Critical" || tc.priority === "High"
-                              ? "bg-rose-50 text-danger border border-rose-200/60"
+                              ? "bg-rose-500/10 text-danger-text border border-rose-500/30"
                               : tc.priority === "Low"
                                 ? "bg-surface-muted text-content-secondary border border-border-subtle/60"
-                                : "bg-amber-50 text-warning border border-amber-200/60"
+                                : "bg-amber-500/10 text-warning-text border border-amber-500/30"
                           }`}
                         >
                           {tc.priority || "Medium"}
@@ -536,27 +634,45 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                       <td className="py-2.5 px-3" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-center gap-1.5">
                           {/* 1. Status Dropdown Pill (ALL USERS CAN UPDATE STATUS) */}
-                          <select
+                          <StyledDropdown
                             value={tc.status}
-                            onChange={(e) => handleStatusChange(tc.id, e.target.value as any)}
-                            className={`py-1 px-2.5 rounded-md text-xs sm:text-[10px] font-medium uppercase tracking-wider outline-none cursor-pointer transition-all border shadow-2xs ${
+                            onChange={(val) => handleStatusChange(tc.id, val as any)}
+                            options={[
+                              {
+                                id: "Passed",
+                                label: "Passed",
+                                icon: "CheckCircle2",
+                                color: "#10B981",
+                              },
+                              { id: "Failed", label: "Failed", icon: "XCircle", color: "#EF4444" },
+                              {
+                                id: "Blocked",
+                                label: "Blocked",
+                                icon: "AlertOctagon",
+                                color: "#F59E0B",
+                              },
+                              {
+                                id: "Retest",
+                                label: "Retest",
+                                icon: "RefreshCw",
+                                color: "#6366F1",
+                              },
+                              { id: "Pending", label: "Pending", icon: "Clock", color: "#64748B" },
+                            ]}
+                            masterData={[]}
+                            className="min-w-[100px]"
+                            buttonClassName={`py-1 px-2.5 rounded-md text-xs sm:text-[10px] font-normal uppercase tracking-normal border shadow-2xs ${
                               tc.status === "Passed"
-                                ? "bg-emerald-50 text-success border-emerald-200"
+                                ? "bg-emerald-500/10 text-success-text border-emerald-500/30"
                                 : tc.status === "Failed"
-                                  ? "bg-rose-50 text-danger border-rose-200"
+                                  ? "bg-rose-500/10 text-danger-text border-rose-500/30"
                                   : tc.status === "Blocked"
-                                    ? "bg-amber-50 text-warning border-amber-200"
+                                    ? "bg-amber-500/10 text-warning-text border-amber-500/30"
                                     : tc.status === "Retest"
-                                      ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                                      ? "bg-primary/10 text-primary border-primary/30"
                                       : "bg-surface-muted text-content-secondary border-border-subtle"
                             }`}
-                          >
-                            <option value="Passed">Passed</option>
-                            <option value="Failed">Failed</option>
-                            <option value="Blocked">Blocked</option>
-                            <option value="Retest">Retest</option>
-                            <option value="Pending">Pending</option>
-                          </select>
+                          />
 
                           {/* 2. Sleek PIC Avatar Icon Button NEXT TO STATUS */}
                           <div className="relative">
@@ -573,7 +689,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                   : "cursor-default"
                               } ${
                                 tc.assignedTo
-                                  ? "bg-primary/10 border-primary/40"
+                                  ? "bg-primary-surface/10 border-primary/40"
                                   : "bg-surface-muted border-border-subtle/80 text-content-muted"
                               }`}
                               title={
@@ -603,22 +719,22 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                     setActiveCasePicDropdownId(null);
                                   }}
                                 />
-                                <div className="absolute right-0 top-full mt-1.5 w-56 bg-surface rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                                  <div className="px-3.5 py-1.5 text-xs sm:text-[10px] font-medium uppercase tracking-wider text-primary border-b border-border-faint mb-1">
-                                    Assign PIC Task (Tim Proyek)
+                                <div className="absolute right-0 top-full mt-1.5 w-56 bg-surface rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-dropdown">
+                                  <div className="px-3.5 py-1.5 text-xs sm:text-[10px] font-normal uppercase tracking-normal text-primary border-b border-border-faint mb-1">
+                                    {t("qa.assignPicTask")}
                                   </div>
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       handleUpdateCasePic(activeSuite.id, tc.id, "");
                                     }}
-                                    className={`w-full text-left px-3.5 py-1.5 text-xs font-medium hover:bg-indigo-50 hover:text-primary transition-colors flex items-center justify-between ${
+                                    className={`w-full text-left px-3.5 py-1.5 text-xs font-medium hover:bg-primary/10 hover:text-primary transition-colors flex items-center justify-between ${
                                       !tc.assignedTo
-                                        ? "bg-indigo-50/60 text-primary"
+                                        ? "bg-primary/10 text-primary"
                                         : "text-content-body"
                                     }`}
                                   >
-                                    <span>Semua PIC Proyek (All Members)</span>
+                                    <span>{t("qa.allProjectPic")}</span>
                                     {!tc.assignedTo && (
                                       <CheckCircle2 className="w-4 h-4 text-primary" />
                                     )}
@@ -634,9 +750,9 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                             e.stopPropagation();
                                             handleUpdateCasePic(activeSuite.id, tc.id, mId);
                                           }}
-                                          className={`w-full text-left px-3.5 py-1.5 text-xs font-medium hover:bg-indigo-50 hover:text-primary transition-colors flex items-center justify-between gap-2 ${
+                                          className={`w-full text-left px-3.5 py-1.5 text-xs font-medium hover:bg-primary/10 hover:text-primary transition-colors flex items-center justify-between gap-2 ${
                                             isSelected
-                                              ? "bg-indigo-50/60 text-primary"
+                                              ? "bg-primary/10 text-primary"
                                               : "text-content-body"
                                           }`}
                                         >
@@ -669,8 +785,8 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                         <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => setSelectedTestCase(tc)}
-                            className="p-1 text-content-subtle hover:text-primary hover:bg-indigo-50 rounded-md transition-all"
-                            title="Lihat Detail Skenario & Langkah Pengujian"
+                            className="p-1 text-content-subtle hover:text-primary hover:bg-primary/10 rounded-md transition-all"
+                            title={t("qaTable.viewScenario")}
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
@@ -678,8 +794,8 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                           {tc.status === "Failed" && (
                             <button
                               onClick={() => handleOpenCreateBugModal(tc)}
-                              className="p-1 text-danger hover:bg-rose-50 rounded-md transition-all"
-                              title="Buat Tiket Bug"
+                              className="p-1 text-danger-text hover:bg-rose-500/10 rounded-md transition-all"
+                              title={t("qaTable.createBugTicket")}
                             >
                               <Bug className="w-3.5 h-3.5" />
                             </button>
@@ -695,8 +811,8 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                 setCaseEditPriority(tc.priority || "Medium");
                                 setCaseEditAssignedTo(tc.assignedTo || "");
                               }}
-                              className="p-1 text-content-subtle hover:text-primary hover:bg-indigo-50 rounded-md transition-all"
-                              title="Edit Test Case"
+                              className="p-1 text-content-subtle hover:text-primary hover:bg-primary/10 rounded-md transition-all"
+                              title={t("qa.editTestCase")}
                             >
                               <Edit3 className="w-3.5 h-3.5" />
                             </button>
@@ -704,9 +820,9 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
 
                           {canDelete && (
                             <button
-                              onClick={() => setCaseToDelete(tc)}
-                              className="p-1 text-content-subtle hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all"
-                              title="Hapus Test Case"
+                              onClick={() => handleDeleteTestCase(tc)}
+                              className="p-1 text-content-subtle hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all"
+                              title={t("qaTable.deleteTestCase")}
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -720,6 +836,61 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             </tbody>
           </ResponsiveTable>
         </div>
+
+        {/* Mobile Card List View (< 640px) */}
+        <div className="sm:hidden p-4 space-y-3">
+          <QATestCaseMobileCardView
+            cases={searchedCases}
+            selectedCaseIds={selectedCaseIds}
+            projectMembers={projectMembers}
+            canUpdate={canUpdate}
+            canDelete={canDelete}
+            isAdminRole={isAdminRole}
+            onSelectCase={(tc) => setSelectedTestCase(tc)}
+            onToggleCheckCase={(caseId) => handleToggleSelectCase(caseId)}
+            onStatusChange={(caseId, status) => handleStatusChange(caseId, status)}
+            onEditCase={(tc) => {
+              setCaseToEditInfo(tc);
+              setCaseEditTitle(tc.title);
+              setCaseEditSteps(tc.steps);
+              setCaseEditExpected(tc.expectedResult);
+              setCaseEditPriority(tc.priority || "Medium");
+              setCaseEditAssignedTo(tc.assignedTo || "");
+            }}
+            onDeleteCase={(tc) => handleDeleteTestCase(tc)}
+            onCreateBug={(tc) => handleOpenCreateBugModal(tc)}
+          />
+        </div>
+
+        {setCasesPage && (
+          <div className="px-4 py-3 border-t border-border-subtle flex items-center justify-between text-[11px] text-content-subtle">
+            <div>
+              {(casesPage - 1) * casesPerPage + (searchedCases.length ? 1 : 0)}–
+              {Math.min(casesPage * casesPerPage, casesTotal)} / {casesTotal}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setCasesPage(Math.max(1, casesPage - 1))}
+                disabled={casesPage <= 1}
+                className="px-2 py-1 rounded border border-border-subtle disabled:opacity-40"
+              >
+                ‹
+              </button>
+              <span>
+                {casesPage}/{totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => setCasesPage(Math.min(totalPages, casesPage + 1))}
+                disabled={casesPage >= totalPages}
+                className="px-2 py-1 rounded border border-border-subtle disabled:opacity-40"
+              >
+                ›
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

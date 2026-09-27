@@ -1,5 +1,5 @@
-import { safeLocalStorage } from "../lib/safeStorage";
-import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   MessageSquare,
   Send,
@@ -15,7 +15,6 @@ import {
   Paperclip,
   Image,
   FileText,
-  Users,
   Bot,
   Sparkles,
   Download,
@@ -31,7 +30,6 @@ import { validateFileClient } from "../lib/fileSecurity";
 // eslint-disable-next-line no-restricted-imports
 import { apiRequest } from "../lib/api";
 import { UserProfile } from "../types";
-import { getScreenSnapshot, type ScreenSnapshot } from "../lib/screenContext";
 import { UserAvatar } from "./ui/UserAvatar";
 import { usePresence } from "../contexts/PresenceContext";
 
@@ -55,6 +53,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
   currentUser,
   allUsers,
 }) => {
+  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeChatUser, setActiveChatUser] = useState<UserProfile | null>(null);
@@ -63,6 +62,12 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [lastMessages, setLastMessages] = useState<Record<string, ChatMessage>>({});
   const { onlineUserIds } = usePresence();
+  // Kunci daftar presence adalah `uid || id` (lihat PresenceContext). Memakai
+  // hanya `id` membuat rekan yang uid-nya beda selalu terbaca offline, dan
+  // memakai hanya `uid` membuat sebaliknya - jadi keduanya dicoba.
+  const onlineSet = useMemo(() => new Set(onlineUserIds.map(String)), [onlineUserIds]);
+  const adalahOnline = (u: UserProfile) =>
+    onlineSet.has(String(u.uid || u.id)) || onlineSet.has(String(u.id));
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isPartnerTyping, setIsPartnerTyping] = useState(false);
@@ -78,18 +83,9 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
   const chatBoxRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Virtual Users Setup
-  const groupVirtualUser: UserProfile = {
-    id: "group",
-    uid: "group",
-    displayName: "Grup Chat Tim",
-    username: "group_chat",
-    role: "viewer" as any,
-    email: "group@lanpro.com",
-    status: "approved",
-    passwordHash: "virtual",
-  };
-
+  // Virtual Users Setup. "Grup Chat Tim" dihapus 26 Sep atas permintaan
+  // pemilik papan: obrolan tim sudah punya menu sendiri, dan kanal yang berguna
+  // di widget ini cuma asisten.
   const aiVirtualUser: UserProfile = {
     id: "lanpro-ai",
     uid: "lanpro-ai",
@@ -155,10 +151,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
     // Listen for real-time socket events
 
     const handleReceiveMessage = (msg: ChatMessage) => {
-      const isCurrentActiveChat =
-        activeChatUser &&
-        ((msg.receiverId === "group" && activeChatUser.id === "group") ||
-          (msg.receiverId !== "group" && msg.senderId === activeChatUser.id));
+      const isCurrentActiveChat = activeChatUser && msg.senderId === activeChatUser.id;
 
       if (isCurrentActiveChat) {
         setMessages((prev) => {
@@ -166,17 +159,13 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
           return [...prev, msg];
         });
 
-        if (msg.receiverId !== "group") {
-          apiRequest("/api/chat/messages/read", {
-            method: "PUT",
-            body: { senderId: activeChatUser.id, receiverId: currentUser.id },
-          });
-        } else {
-          safeLocalStorage.setItem(`last_read_group_${currentUser.id}`, new Date().toISOString());
-        }
+        apiRequest("/api/chat/messages/read", {
+          method: "PUT",
+          body: { senderId: activeChatUser.id, receiverId: currentUser.id },
+        });
         playNotificationSound();
       } else {
-        const senderKey = msg.receiverId === "group" ? "group" : msg.senderId;
+        const senderKey = msg.senderId;
 
         setUnreadCounts((prev) => ({
           ...prev,
@@ -190,11 +179,9 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
         playNotificationSound();
         const displaySenderName =
-          msg.receiverId === "group"
-            ? "Grup Chat Tim"
-            : allUsers.find((u) => u.id === msg.senderId)?.displayName || "Rekan Tim";
+          allUsers.find((u) => u.id === msg.senderId)?.displayName || "Rekan Tim";
 
-        toast.info(`Pesan baru di ${displaySenderName}`);
+        toast.info(t("toast.newChatMessage", { nama: displaySenderName }));
       }
     };
 
@@ -225,17 +212,10 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
           // Mark as read
           if (unreadCounts[activeChatUser.id] > 0) {
-            if (activeChatUser.id !== "group") {
-              await apiRequest("/api/chat/messages/read", {
-                method: "PUT",
-                body: { senderId: activeChatUser.id, receiverId: currentUser.id },
-              });
-            } else {
-              safeLocalStorage.setItem(
-                `last_read_group_${currentUser.id}`,
-                new Date().toISOString()
-              );
-            }
+            await apiRequest("/api/chat/messages/read", {
+              method: "PUT",
+              body: { senderId: activeChatUser.id, receiverId: currentUser.id },
+            });
             setUnreadCounts((prev) => ({
               ...prev,
               [activeChatUser.id]: 0,
@@ -270,27 +250,6 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             previews[msg.partnerId] = msg;
           });
           setLastMessages(previews);
-
-          // Calculate unread count for Group Chat based on localStorage last read
-          const lastMsgGroup = previews["group"];
-          if (lastMsgGroup) {
-            const lastReadStr = safeLocalStorage.getItem(`last_read_group_${currentUser.id}`);
-            if (lastReadStr) {
-              const lastRead = new Date(lastReadStr);
-              const msgTs = new Date(lastMsgGroup.timestamp);
-              if (msgTs > lastRead && lastMsgGroup.senderId !== currentUser.id) {
-                setUnreadCounts((prev) => ({
-                  ...prev,
-                  group: 1,
-                }));
-              }
-            } else if (lastMsgGroup.senderId !== currentUser.id) {
-              setUnreadCounts((prev) => ({
-                ...prev,
-                group: 1,
-              }));
-            }
-          }
         }
       } catch (err) {
         console.warn("Gagal mengambil daftar pesan terakhir:", err);
@@ -302,65 +261,62 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
   if (!currentUser) return null;
 
-  // Trigger Gemini/simulated typing response
-  const triggerSimulation = (userMsgText: string, customPartner: UserProfile) => {
+  // Balasan otomatis: asisten menjawab dari data (/#551), rekan pakai simulasi.
+  const triggerBalasan = (userMsgText: string, customPartner: UserProfile) => {
+    const isAsisten = customPartner.id === "lanpro-ai";
     setIsPartnerTyping(true);
 
-    // Ambil snapshot riwayat percakapan saat fungsi dipanggil (sebelum setTimeout)
-    // supaya balasan AI/rekan punya konteks obrolan sebelumnya, tidak menjawab
-    // seolah pesan pertama. "me" = user, "them" = partner chat.
-    let historySnapshot: Array<{ from: "me" | "them"; text: string }> = [];
-    setMessages((prev) => {
-      historySnapshot = prev.slice(-12).map((m) => ({
-        from: m.senderId === currentUser.id ? ("me" as const) : ("them" as const),
-        text: m.message,
-      }));
-      return prev; // read-only snapshot, tidak mengubah state
-    });
+    // 1,8 d itu pura-pura "sedang mengetik" untuk simulasi rekan. Untuk asisten
+    // ia ditambahkan di atas waktu jawab model yang sudah 2-8 detik.
+    setTimeout(
+      async () => {
+        try {
+          const response = await apiRequest(
+            isAsisten ? "/api/chat/assistant" : "/api/chat/simulate-reply",
+            {
+              method: "POST",
+              body: isAsisten
+                ? { message: userMsgText, bahasa: i18n.language === "id" ? "id" : "en" }
+                : {
+                    senderId: customPartner.id,
+                    receiverId: currentUser.id,
+                    message: userMsgText,
+                    senderName: customPartner?.displayName || customPartner?.username,
+                    senderRole: customPartner.role,
+                  },
+            }
+          );
 
-    setTimeout(async () => {
-      try {
-        // "Mata" AI: kalau user sedang membuka flowchart, kirim snapshot
-        // kanvasnya supaya asisten bisa mengomentari flow yang sedang dibuka.
-        const screenSnapshot: ScreenSnapshot | null = getScreenSnapshot();
-        const response = await apiRequest("/api/chat/simulate-reply", {
-          method: "POST",
-          body: {
-            senderId: customPartner.id,
-            receiverId: currentUser.id,
-            message: userMsgText,
-            history: historySnapshot,
-            screenContext: screenSnapshot,
-            senderName: customPartner?.displayName || customPartner?.username,
-            senderRole: customPartner.role,
-          },
-        });
+          if (response.status === "success") {
+            const simulatedMsg = response.data;
 
-        if (response.status === "success") {
-          const simulatedMsg = response.data;
+            setMessages((prev) => {
+              if (prev.some((m) => m.id === simulatedMsg.id)) return prev;
+              return [...prev, simulatedMsg];
+            });
 
-          setMessages((prev) => {
-            if (prev.some((m) => m.id === simulatedMsg.id)) return prev;
-            return [...prev, simulatedMsg];
-          });
+            setLastMessages((prev) => ({
+              ...prev,
+              [customPartner.id]: simulatedMsg,
+            }));
 
-          setLastMessages((prev) => ({
-            ...prev,
-            [customPartner.id]: simulatedMsg,
-          }));
+            if (socket) {
+              socket.emit("send_message", simulatedMsg);
+            }
 
-          if (socket) {
-            socket.emit("send_message", simulatedMsg);
+            playNotificationSound();
           }
-
-          playNotificationSound();
+        } catch (err) {
+          console.warn("Gagal mendapatkan balasan otomatis:", err);
+          // Tanpa ini kegagalan hilang tanpa jejak: indikator "sedang mengetik"
+          // mati sendiri dan pengguna tidak pernah tahu ada yang gagal.
+          toast.error(t("chat.balasanGagal"));
+        } finally {
+          setIsPartnerTyping(false);
         }
-      } catch (err) {
-        console.warn("Gagal mendapatkan balasan otomatis:", err);
-      } finally {
-        setIsPartnerTyping(false);
-      }
-    }, 1800);
+      },
+      isAsisten ? 0 : 1800
+    );
   };
 
   // Handle message submission
@@ -408,12 +364,12 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
       // Simulation mode: auto response
       const isBot = activeChatUser.id === "lanpro-ai";
-      if (isBot || (simulationEnabled && activeChatUser.id !== "group")) {
-        triggerSimulation(msgText, activeChatUser);
+      if (isBot || simulationEnabled) {
+        triggerBalasan(msgText, activeChatUser);
       }
     } catch (err) {
       console.error("Gagal mengirim pesan:", err);
-      toast.error("Gagal mengirim pesan, silakan coba lagi.");
+      toast.error(t("toast.chatSendFailed"));
     }
   };
 
@@ -481,11 +437,11 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
         });
 
         if (activeChatUser.id === "lanpro-ai") {
-          triggerSimulation(`Mengirim dokumen: ${file.name}`, activeChatUser);
+          triggerBalasan(`Mengirim dokumen: ${file.name}`, activeChatUser);
         }
       } catch (err) {
         console.error("Gagal mengirim lampiran:", err);
-        toast.error("Gagal mengirim lampiran.");
+        toast.error(t("toast.chatAttachFailed"));
       } finally {
         setIsUploading(false);
       }
@@ -535,22 +491,26 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
       });
 
       if (activeChatUser.id === "lanpro-ai") {
-        triggerSimulation(`Mengirim mockup: ${name}`, activeChatUser);
+        triggerBalasan(`Mengirim mockup: ${name}`, activeChatUser);
       }
     } catch (err) {
       console.error("Gagal mengirim preset mockup:", err);
     }
   };
 
-  // Filter users based on search query
+  // Daftar DM hanya berisi orang yang SEDANG online (#557, lanjutan #552):
+  // nama yang tidak bisa diajak bicara cuma jadi baris mati, dan pemilik
+  // proyek menentukannya begitu. KECUALI kalau ia punya pesan belum dibaca —
+  // pesan masuk tidak boleh hilang dari layar hanya karena pengirimnya logout.
   const filteredUsers = allUsers.filter((u) => {
     if (u.id === currentUser.id) return false;
+    if (!adalahOnline(u) && !(unreadCounts[u.id] > 0)) return false;
     const name = u?.displayName || u?.username || "";
     return name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   // Filter virtual channels
-  const filteredVirtuals = [groupVirtualUser, aiVirtualUser].filter((u) => {
+  const filteredVirtuals = [aiVirtualUser].filter((u) => {
     const name = u?.displayName || u?.username || "";
     return name.toLowerCase().includes(searchQuery.toLowerCase());
   });
@@ -600,7 +560,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
       } catch (e) {
         return (
           <span className="italic text-rose-500 flex items-center gap-1">
-            <AlertCircle className="w-3 h-3" /> Gagal memuat gambar
+            <AlertCircle className="w-3 h-3" /> {t("chat.failedToLoadTheImage")}
           </span>
         );
       }
@@ -618,9 +578,9 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             download={name}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2.5 p-2 bg-slate-900/5 hover:bg-slate-900/10 text-content-strong rounded-xl transition-all border border-border-subtle/20 max-w-full"
+            className="flex items-center gap-2.5 p-2 bg-overlay/5 hover:bg-overlay/10 text-content-strong rounded-xl transition-all border border-border-subtle/20 max-w-full"
           >
-            <span className="p-2 bg-amber-500 text-white rounded-lg shrink-0">
+            <span className="p-2 bg-amber-500 text-content-inverse rounded-lg shrink-0">
               <FileText className="w-4 h-4" />
             </span>
             <div className="min-w-0 flex-1">
@@ -628,7 +588,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                 {name}
               </p>
               <p className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-mono">
-                Unduh berkas
+                {t("chat.downloadFile")}
               </p>
             </div>
             <Download className="w-3.5 h-3.5 text-content-subtle shrink-0" />
@@ -637,7 +597,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
       } catch (e) {
         return (
           <span className="italic text-rose-500 flex items-center gap-1">
-            <AlertCircle className="w-3 h-3" /> Gagal memuat berkas
+            <AlertCircle className="w-3 h-3" /> {t("chat.failedToLoadTheFile")}
           </span>
         );
       }
@@ -653,15 +613,18 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
   });
 
   return (
-    <div id="lanpro-live-chat-widget" className="fixed bottom-6 right-6 z-50 select-none">
+    <div
+      id="lanpro-live-chat-widget"
+      className="fixed bottom-20 md:bottom-6 right-6 z-50 select-none"
+    >
       {/* 1. FLOATING TOGGLE BUTTON */}
       <motion.button
         id="chat-floating-toggle"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="relative w-12 h-12 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-xl border border-slate-800 hover:bg-orange-600 hover:border-orange-500 hover:text-white transition-all duration-300"
-        title="Live Chat Obrolan LanPro"
+        className="relative w-12 h-12 rounded-full bg-surface-inverse-strong text-content-inverse flex items-center justify-center shadow-xl border border-border-inverse hover:bg-orange-600 hover:border-orange-500 hover:text-content-inverse transition-all duration-300"
+        title={t("chat.liveChat")}
       >
         <MessageSquare className="w-5 h-5" />
         {/* Red Badge Indicator */}
@@ -672,7 +635,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
-              className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-rose-500 text-white rounded-full flex items-center justify-center text-xs sm:text-[10px] font-medium px-1.5 border border-white shadow-md animate-pulse"
+              className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-rose-500 text-content-inverse rounded-full flex items-center justify-center text-xs sm:text-[10px] font-medium px-1.5 border border-surface shadow-md animate-pulse"
             >
               {totalUnread}
             </motion.div>
@@ -690,24 +653,24 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             ref={chatBoxRef}
-            className="absolute bottom-16 right-0 w-80 h-[480px] bg-surface rounded-xl border border-border-subtle/80 shadow-2xl flex flex-col overflow-hidden z-50 bg-opacity-95 backdrop-blur-md"
+            className="absolute bottom-16 right-0 max-md:fixed max-md:inset-x-0 max-md:bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] max-md:right-0 max-md:left-0 w-full md:w-80 h-[min(72vh,520px)] md:h-[480px] bg-surface rounded-t-2xl md:rounded-xl border border-border-subtle/80 shadow-2xl flex flex-col overflow-hidden z-50 bg-opacity-95 backdrop-blur-md"
           >
             {/* VIEW A: CONTACT LIST VIEW */}
             {!activeChatUser ? (
               <div id="chat-user-list-view" className="flex flex-col h-full bg-surface">
                 {/* Header */}
-                <div className="px-4 py-3 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex items-center justify-between border-b border-slate-800">
+                <div className="px-4 py-3 bg-surface-inverse-strong text-content-inverse flex items-center justify-between border-b border-border-inverse">
                   <div className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
-                    <span className="font-medium text-sm tracking-tight text-white">
-                      Obrolan LanPro
+                    <span className="font-medium text-sm tracking-tight text-content-inverse">
+                      {t("chat.chatTitle")}
                     </span>
                   </div>
                   <div className="flex items-center gap-2.5">
                     <button
                       onClick={() => setSoundEnabled(!soundEnabled)}
-                      className="text-content-subtle hover:text-white transition-colors"
-                      title={soundEnabled ? "Matikan Suara" : "Aktifkan Suara"}
+                      className="text-content-subtle hover:text-content-inverse transition-colors"
+                      title={soundEnabled ? t("chat.muteSound") : t("chat.unmuteSound")}
                     >
                       {soundEnabled ? (
                         <Volume2 className="w-4 h-4" />
@@ -717,7 +680,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     </button>
                     <button
                       onClick={() => setIsOpen(false)}
-                      className="text-content-subtle hover:text-white transition-colors"
+                      className="text-content-subtle hover:text-content-inverse transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -730,7 +693,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-2.5" />
                     <input
                       type="text"
-                      placeholder="Cari saluran atau rekan..."
+                      placeholder={t("chat.searchChannel")}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full pl-9 pr-3 py-1.5 bg-surface border border-border-subtle rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-orange-500/10 focus:border-orange-500 transition-all font-medium text-content-strong"
@@ -739,15 +702,14 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                 </div>
 
                 {/* Users & Channels List */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-slate-50">
+                <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-border-faint">
                   {/* Channels / Virtual Bots Section */}
                   {filteredVirtuals.length > 0 && (
                     <div className="bg-surface-sunken/40">
-                      <p className="px-4 pt-2.5 pb-1 text-xs sm:text-[11px] sm:text-[9px] font-medium tracking-widest text-content-subtle uppercase">
-                        Saluran & Asisten
+                      <p className="px-4 pt-2.5 pb-1 text-xs sm:text-[11px] sm:text-[9px] font-normal tracking-normal text-content-subtle uppercase">
+                        {t("chat.channelsAssistant")}
                       </p>
                       {filteredVirtuals.map((virtual) => {
-                        const isGroup = virtual.id === "group";
                         const unread = unreadCounts[virtual.id] || 0;
                         const lastMsg = lastMessages[virtual.id];
 
@@ -758,15 +720,9 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                             className="px-4 py-2.5 flex items-center gap-3 hover:bg-surface-sunken cursor-pointer transition-colors group"
                           >
                             <div className="shrink-0">
-                              {isGroup ? (
-                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 text-white flex items-center justify-center border border-orange-400 shadow-soft">
-                                  <Users className="w-4 h-4" />
-                                </div>
-                              ) : (
-                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 text-white flex items-center justify-center border border-purple-500 shadow-soft relative">
-                                  <Sparkles className="w-4 h-4 animate-pulse text-yellow-200" />
-                                </div>
-                              )}
+                              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-surface to-primary-surface-active text-content-inverse flex items-center justify-center border border-primary shadow-soft relative">
+                                <Sparkles className="w-4 h-4 animate-pulse text-yellow-200" />
+                              </div>
                             </div>
 
                             <div className="flex-1 min-w-0">
@@ -787,14 +743,12 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                                     : lastMsg.message.startsWith("[FILE:")
                                       ? "📂 Mengirim lampiran..."
                                       : lastMsg.message
-                                  : isGroup
-                                    ? "Hubungkan seluruh rekan dalam proyek"
-                                    : "Tanyakan apa saja kepada AI Assistant"}
+                                  : "Tanyakan apa saja kepada AI Assistant"}
                               </p>
                             </div>
 
                             {unread > 0 && (
-                              <div className="shrink-0 min-w-[16px] h-4 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 animate-bounce">
+                              <div className="shrink-0 min-w-[16px] h-4 bg-orange-500 text-content-inverse rounded-full flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 animate-bounce">
                                 {unread}
                               </div>
                             )}
@@ -806,16 +760,16 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
                   {/* Direct Message Section */}
                   <div className="bg-surface">
-                    <p className="px-4 pt-3 pb-1 text-xs sm:text-[11px] sm:text-[9px] font-medium tracking-widest text-content-subtle uppercase">
-                      Rekan Kerja (DM)
+                    <p className="px-4 pt-3 pb-1 text-xs sm:text-[11px] sm:text-[9px] font-normal tracking-normal text-content-subtle uppercase">
+                      {t("chat.colleaguesDm")}
                     </p>
                     {filteredUsers.length === 0 ? (
                       <div className="p-6 text-center text-content-subtle text-xs">
-                        Tidak ada rekan kerja ditemukan.
+                        {t("chat.noColleague")}
                       </div>
                     ) : (
                       filteredUsers.map((targetUser) => {
-                        const isOnline = onlineUserIds.includes(targetUser.id);
+                        const isOnline = adalahOnline(targetUser);
                         const userUnread = unreadCounts[targetUser.id] || 0;
                         const lastMsg = lastMessages[targetUser.id];
                         const initials = (targetUser?.displayName || targetUser?.username || "U")
@@ -834,12 +788,10 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                                 user={targetUser}
                                 className="w-9 h-9 border border-border-faint text-xs"
                               />
-                              {/* Online / Offline Indicator Dot */}
-                              <span
-                                className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white shadow-soft ${
-                                  isOnline ? "bg-emerald-500" : "bg-slate-300"
-                                }`}
-                              />
+                              {/* Penanda: hanya yang online yang memakai titik */}
+                              {isOnline && (
+                                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-surface shadow-soft" />
+                              )}
                             </div>
 
                             {/* Detail Info */}
@@ -867,7 +819,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
                             {/* Unread Count Badge */}
                             {userUnread > 0 && (
-                              <div className="shrink-0 min-w-[16px] h-4 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 shadow-soft">
+                              <div className="shrink-0 min-w-[16px] h-4 bg-orange-500 text-content-inverse rounded-full flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 shadow-soft">
                                 {userUnread}
                               </div>
                             )}
@@ -882,60 +834,49 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
               /* VIEW B: ACTIVE CHAT VIEW */
               <div id="chat-active-room-view" className="flex flex-col h-full bg-surface">
                 {/* Header */}
-                <div className="px-3 py-2 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex items-center justify-between border-b border-slate-800 shrink-0">
+                <div className="px-3 py-2 bg-surface-inverse-strong text-content-inverse flex items-center justify-between border-b border-border-inverse shrink-0">
                   <div className="flex items-center gap-2 min-w-0">
                     <button
                       onClick={() => setActiveChatUser(null)}
-                      className="p-1 text-content-subtle hover:text-white hover:bg-slate-800 rounded-lg transition-all"
-                      title="Kembali"
+                      className="p-1 text-content-subtle hover:text-content-inverse hover:bg-surface-inverse rounded-lg transition-all"
+                      title={t("chat.back")}
                     >
                       <ArrowLeft className="w-4 h-4" />
                     </button>
                     {/* Active User info */}
                     <div className="relative shrink-0">
-                      {activeChatUser.id === "group" ? (
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 text-white flex items-center justify-center border border-orange-400/30">
-                          <Users className="w-3.5 h-3.5" />
-                        </div>
-                      ) : activeChatUser.id === "lanpro-ai" ? (
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 text-white flex items-center justify-center border border-purple-500/30">
+                      {activeChatUser.id === "lanpro-ai" ? (
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-surface to-primary-surface-active text-content-inverse flex items-center justify-center border border-primary/30">
                           <Bot className="w-3.5 h-3.5 text-yellow-200" />
                         </div>
                       ) : (
                         <UserAvatar
                           user={activeChatUser}
-                          className="w-8 h-8 border border-slate-700 text-xs"
+                          className="w-8 h-8 border border-border-inverse text-xs"
                         />
                       )}
 
-                      {activeChatUser.id !== "group" && activeChatUser.id !== "lanpro-ai" && (
-                        <span
-                          className={`absolute bottom-0 right-0 w-2 h-2 rounded-full border border-slate-900 ${
-                            onlineUserIds.includes(activeChatUser.id)
-                              ? "bg-emerald-500"
-                              : "bg-slate-400"
-                          }`}
-                        />
+                      {activeChatUser.id !== "lanpro-ai" && adalahOnline(activeChatUser) && (
+                        <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-500 border border-border-inverse" />
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs font-medium text-white truncate leading-tight flex items-center gap-1">
+                      <p className="text-xs font-medium text-content-inverse truncate leading-tight flex items-center gap-1">
                         {activeChatUser?.displayName}
                         {activeChatUser.id === "lanpro-ai" && (
-                          <span className="px-1 py-0.2 bg-purple-500/20 text-purple-300 text-xs sm:text-[10px] sm:text-[8px] font-medium rounded uppercase border border-purple-500/30">
+                          <span
+                            title={t("chat.assistantEngine")}
+                            className="px-1 py-0.2 bg-primary/20 text-primary text-xs sm:text-[10px] sm:text-[8px] font-medium rounded uppercase border border-primary/30"
+                          >
                             AI
                           </span>
                         )}
                       </p>
-                      <p className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle">
-                        {activeChatUser.id === "group"
-                          ? `${allUsers.length} Anggota Proyek`
-                          : activeChatUser.id === "lanpro-ai"
-                            ? "Gemini 3.5 Assistant"
-                            : onlineUserIds.includes(activeChatUser.id)
-                              ? "Sedang Aktif"
-                              : "Offline"}
-                      </p>
+                      {activeChatUser.id !== "lanpro-ai" && (
+                        <p className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle">
+                          {adalahOnline(activeChatUser) ? "Sedang Aktif" : "Offline"}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
@@ -945,15 +886,15 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                         setIsMsgSearchOpen(!isMsgSearchOpen);
                         setMsgSearchQuery("");
                       }}
-                      className={`p-1.5 rounded-lg transition-all ${isMsgSearchOpen ? "bg-slate-800 text-orange-500" : "text-content-subtle hover:text-white"}`}
-                      title="Cari dalam chat ini"
+                      className={`p-1.5 rounded-lg transition-all ${isMsgSearchOpen ? "bg-surface-inverse text-orange-500" : "text-content-subtle hover:text-content-inverse"}`}
+                      title={t("chat.searchInChat")}
                     >
                       <Search className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => setActiveChatUser(null)}
-                      className="p-1.5 text-content-subtle hover:text-white hover:bg-slate-800 rounded-lg transition-all"
-                      title="Sembunyikan"
+                      className="p-1.5 text-content-subtle hover:text-content-inverse hover:bg-surface-inverse rounded-lg transition-all"
+                      title={t("chat.hide")}
                     >
                       <Minus className="w-3.5 h-3.5" />
                     </button>
@@ -966,7 +907,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     <Search className="w-3 h-3 text-content-subtle" />
                     <input
                       type="text"
-                      placeholder="Filter kata kunci percakapan..."
+                      placeholder={t("chat.filterKeyword")}
                       value={msgSearchQuery}
                       onChange={(e) => setMsgSearchQuery(e.target.value)}
                       className="flex-1 bg-transparent border-none text-xs sm:text-[11px] focus:outline-none focus:ring-0 text-content-strong font-medium"
@@ -989,50 +930,31 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     <div className="h-full flex flex-col items-center justify-center gap-1">
                       <Loader2 className="w-5 h-5 text-orange-500 animate-spin" />
                       <span className="text-xs sm:text-[10px] font-medium text-content-subtle">
-                        Memuat pesan...
+                        {t("chat.loadingMessages")}
                       </span>
                     </div>
                   ) : filteredMessages.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center text-center p-4">
-                      <MessageSquare className="w-8 h-8 text-slate-200 mb-1.5" />
+                      <MessageSquare className="w-8 h-8 text-content-inverse-muted mb-1.5" />
                       <p className="text-xs text-content-subtle font-medium">
-                        {msgSearchQuery ? "Tidak ada pesan cocok." : "Belum ada percakapan."}
+                        {msgSearchQuery ? t("chat.noMatchingMessage") : t("chat.noConversation")}
                       </p>
                     </div>
                   ) : (
                     filteredMessages.map((msg) => {
                       const isSelf = msg.senderId === currentUser.id;
 
-                      // For group chat, get actual sender profile
-                      const senderProfile =
-                        msg.receiverId === "group"
-                          ? allUsers.find((u) => u.id === msg.senderId)
-                          : null;
-
-                      const senderDisplayName = senderProfile
-                        ? senderProfile?.displayName || senderProfile.username
-                        : msg.senderId === "lanpro-ai"
-                          ? "LanPro AI Assistant"
-                          : "Rekan Kerja";
+                      const senderDisplayName =
+                        msg.senderId === "lanpro-ai" ? "LanPro AI Assistant" : "Rekan Kerja";
 
                       return (
                         <div
                           key={msg.id}
                           className={`flex flex-col ${isSelf ? "items-end" : "items-start"}`}
                         >
-                          {/* Sender name for Group Chat */}
-                          {!isSelf && msg.receiverId === "group" && (
-                            <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-muted mb-0.5 ml-1 flex items-center gap-1 select-none">
-                              {senderDisplayName}
-                              <span className="px-1 bg-slate-200 text-content-secondary rounded-[3px] text-xs sm:text-[10px] font-medium">
-                                {senderProfile?.role || "anggota"}
-                              </span>
-                            </span>
-                          )}
-
                           {/* Sender name for AI Assistant messages in direct chat */}
                           {!isSelf && msg.senderId === "lanpro-ai" && (
-                            <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-purple-600 mb-0.5 ml-1 flex items-center gap-0.5 select-none font-sans">
+                            <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-primary mb-0.5 ml-1 flex items-center gap-0.5 select-none font-sans">
                               <Sparkles className="w-2.5 h-2.5" /> {senderDisplayName}
                             </span>
                           )}
@@ -1040,7 +962,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                           <div
                             className={`max-w-[85%] px-3 py-2 rounded-xl text-xs break-all shadow-soft ${
                               isSelf
-                                ? "bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-br-none"
+                                ? "bg-surface-inverse-strong text-content-inverse rounded-br-none"
                                 : "bg-surface border border-border-faint text-content-strong rounded-bl-none"
                             }`}
                           >
@@ -1055,7 +977,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                                 {msg.read ? (
                                   <CheckCheck className="w-3 h-3 text-sky-500" />
                                 ) : (
-                                  <Check className="w-3 h-3 text-slate-300" />
+                                  <Check className="w-3 h-3 text-content-subtle" />
                                 )}
                               </span>
                             )}
@@ -1074,15 +996,15 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                         </span>
                         <span className="flex gap-0.5 items-center justify-center pt-0.5 shrink-0">
                           <span
-                            className="w-1 h-1 bg-slate-400 rounded-full animate-bounce"
+                            className="w-1 h-1 bg-surface-marker rounded-full animate-bounce"
                             style={{ animationDelay: "0ms" }}
                           />
                           <span
-                            className="w-1 h-1 bg-slate-400 rounded-full animate-bounce"
+                            className="w-1 h-1 bg-surface-marker rounded-full animate-bounce"
                             style={{ animationDelay: "150ms" }}
                           />
                           <span
-                            className="w-1 h-1 bg-slate-400 rounded-full animate-bounce"
+                            className="w-1 h-1 bg-surface-marker rounded-full animate-bounce"
                             style={{ animationDelay: "300ms" }}
                           />
                         </span>
@@ -1093,21 +1015,21 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                 </div>
 
                 {/* Simulation Mode Toggle Panel (Only for Direct Human Chat) */}
-                {activeChatUser.id !== "group" && activeChatUser.id !== "lanpro-ai" && (
+                {activeChatUser.id !== "lanpro-ai" && (
                   <div className="px-2.5 py-1 bg-surface-sunken border-t border-border-faint/60 flex items-center justify-between text-xs sm:text-[11px] sm:text-[9px] text-content-subtle shrink-0">
                     <span className="font-medium flex items-center gap-1">
                       <span
-                        className={`w-1.5 h-1.5 rounded-full ${simulationEnabled ? "bg-emerald-400 animate-pulse" : "bg-slate-300"}`}
+                        className={`w-1.5 h-1.5 rounded-full ${simulationEnabled ? "bg-emerald-400 animate-pulse" : "bg-surface-marker"}`}
                       />
-                      Simulasi Balasan Otomatis
+                      {t("chat.autoReplySim")}
                     </span>
                     <button
                       type="button"
                       onClick={() => setSimulationEnabled(!simulationEnabled)}
-                      className={`px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider transition-colors ${
+                      className={`px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase tracking-normal transition-colors ${
                         simulationEnabled
-                          ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                          : "bg-slate-200 text-content-secondary hover:bg-slate-300"
+                          ? "bg-emerald-500/15 text-emerald-700 hover:bg-emerald-200"
+                          : "bg-surface-strong text-content-secondary hover:bg-surface-marker"
                       }`}
                     >
                       {simulationEnabled ? "AKTIF" : "NONAKTIF"}
@@ -1125,8 +1047,8 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       className="p-3 bg-surface-sunken border-t border-border-faint flex flex-col gap-2 shrink-0 border-b border-border-faint"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-xs sm:text-[10px] font-medium tracking-widest text-content-muted uppercase">
-                          Kirim Lampiran & Mockup
+                        <span className="text-xs sm:text-[10px] font-normal tracking-normal text-content-muted uppercase">
+                          {t("chat.sendAttachment")}
                         </span>
                         <button
                           onClick={() => setIsAttachmentMenuOpen(false)}
@@ -1147,9 +1069,9 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                               "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?auto=format&fit=crop&w=600&q=85"
                             )
                           }
-                          className="flex items-center gap-2 p-2 bg-surface border border-border-subtle rounded-xl text-left hover:border-orange-500 hover:bg-orange-50/10 transition-all group"
+                          className="flex items-center gap-2 p-2 bg-surface border border-border-subtle rounded-xl text-left hover:border-orange-500 hover:bg-orange-500/10 transition-all group"
                         >
-                          <span className="p-1.5 bg-orange-100 text-orange-600 rounded-lg group-hover:bg-orange-600 group-hover:text-white transition-all shrink-0">
+                          <span className="p-1.5 bg-orange-500/15 text-orange-600 rounded-lg group-hover:bg-orange-600 group-hover:text-content-inverse transition-all shrink-0">
                             <Image className="w-3.5 h-3.5" />
                           </span>
                           <div className="min-w-0">
@@ -1172,9 +1094,9 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                               "data:text/plain;base64,U0RMQyBEYXRhYmFzZSBBcmNoaXRlY3R1cmUgQmx1ZXByaW50OiAxLiBVc2VycyAyLiBUYXNrcyAzLiBTcHJpbnRzIDQuIEF1ZGl0TG9ncyA1LiBNZXNzYWdlcy4gR2VtaW5pIEFJIEFzc2lzdGFudCBjb25maWd1cmVkLg=="
                             )
                           }
-                          className="flex items-center gap-2 p-2 bg-surface border border-border-subtle rounded-xl text-left hover:border-orange-500 hover:bg-orange-50/10 transition-all group"
+                          className="flex items-center gap-2 p-2 bg-surface border border-border-subtle rounded-xl text-left hover:border-orange-500 hover:bg-orange-500/10 transition-all group"
                         >
-                          <span className="p-1.5 bg-amber-100 text-amber-600 rounded-lg group-hover:bg-amber-600 group-hover:text-white transition-all shrink-0">
+                          <span className="p-1.5 bg-amber-500/15 text-amber-600 rounded-lg group-hover:bg-amber-600 group-hover:text-content-inverse transition-all shrink-0">
                             <FileText className="w-3.5 h-3.5" />
                           </span>
                           <div className="min-w-0">
@@ -1192,10 +1114,10 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="w-full py-1.5 bg-slate-900 text-white rounded-xl text-xs sm:text-[10px] font-medium tracking-wider uppercase flex items-center justify-center gap-1.5 hover:bg-orange-600 transition-colors shadow-soft"
+                        className="w-full py-1.5 bg-surface-inverse-strong text-content-inverse rounded-xl text-xs sm:text-[10px] font-normal tracking-normal uppercase flex items-center justify-center gap-1.5 hover:bg-orange-600 transition-colors shadow-soft"
                       >
                         <FileUp className="w-3.5 h-3.5" />
-                        Unggah File Komputer Anda
+                        {t("chat.uploadFromComputer")}
                       </button>
                       <input
                         type="file"
@@ -1219,10 +1141,10 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     onClick={() => setIsAttachmentMenuOpen(!isAttachmentMenuOpen)}
                     className={`p-2 rounded-xl transition-all border shrink-0 flex items-center justify-center ${
                       isAttachmentMenuOpen
-                        ? "bg-orange-50 border-orange-200 text-orange-600"
+                        ? "bg-orange-500/10 border-orange-500/30 text-orange-600"
                         : "bg-surface-sunken border-border-subtle text-content-muted hover:bg-surface-muted hover:text-content-strong"
                     }`}
-                    title="Sisipkan file, gambar, atau mockup"
+                    title={t("chat.insertFile")}
                   >
                     {isUploading ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin text-orange-500" />
@@ -1233,7 +1155,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
                   <input
                     type="text"
-                    placeholder={isUploading ? "Mengunggah file..." : "Ketik pesan..."}
+                    placeholder={isUploading ? t("chat.uploadingFile") : t("chat.typeMessage")}
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     disabled={isUploading}
@@ -1242,8 +1164,8 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                   <button
                     type="submit"
                     disabled={!inputMessage.trim() || isUploading}
-                    className="p-2 bg-slate-900 text-white hover:bg-orange-500 rounded-xl transition-all shadow-soft disabled:opacity-30 disabled:hover:bg-slate-900 flex items-center justify-center shrink-0"
-                    title="Kirim Pesan"
+                    className="p-2 bg-surface-inverse-strong text-content-inverse hover:bg-orange-500 rounded-xl transition-all shadow-soft disabled:opacity-30 disabled:hover:bg-surface-inverse-strong flex items-center justify-center shrink-0"
+                    title={t("chat.sendMessage")}
                   >
                     <Send className="w-3.5 h-3.5" />
                   </button>

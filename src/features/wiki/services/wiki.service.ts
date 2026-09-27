@@ -12,8 +12,8 @@
  * sepadan untuk sebuah refactor. Perubahan itu bisa menyusul terpisah.
  */
 
-import { apiRequest } from '../../../lib/api';
-import type { UserProfile } from '../../../types';
+import { apiRequest } from "../../../lib/api";
+import type { UserProfile } from "../../../types";
 
 /** Bentuk respons standar backend untuk endpoint dokumen. */
 export interface DocumentApiResponse {
@@ -30,32 +30,22 @@ export interface DocumentApiResponse {
  * fallback-nya dipertahankan persis.
  */
 export function resolveUserId(currentUser: UserProfile | null): string {
-  return (currentUser as any)?.id || (currentUser as any)?.uid || 'guest';
+  return (currentUser as any)?.id || (currentUser as any)?.uid || "guest";
 }
 
 /** Header yang dikirim pada setiap permintaan dokumen. */
 function userHeader(userId: string) {
-  return { 'x-user-id': userId };
-}
-
-/** Mengambil seluruh dokumen milik sebuah proyek. */
-export async function fetchDocuments(
-  projectId: string,
-  userId: string,
-): Promise<DocumentApiResponse> {
-  return apiRequest(`/api/projects/${projectId}/documents`, {
-    headers: userHeader(userId),
-  });
+  return { "x-user-id": userId };
 }
 
 /** Membuat dokumen baru. */
 export async function createDocument(
   projectId: string,
   userId: string,
-  payload: any,
+  payload: any
 ): Promise<DocumentApiResponse> {
   return apiRequest(`/api/projects/${projectId}/documents`, {
-    method: 'POST',
+    method: "POST",
     headers: userHeader(userId),
     body: payload,
   });
@@ -71,10 +61,10 @@ export async function updateDocument(
   projectId: string,
   userId: string,
   docId: string,
-  payload: any,
+  payload: any
 ): Promise<DocumentApiResponse> {
   return apiRequest(`/api/projects/${projectId}/documents/${docId}`, {
-    method: 'PUT',
+    method: "PUT",
     headers: userHeader(userId),
     body: payload,
   });
@@ -84,10 +74,10 @@ export async function updateDocument(
 export async function deleteDocument(
   projectId: string,
   userId: string,
-  docId: string,
+  docId: string
 ): Promise<DocumentApiResponse> {
   return apiRequest(`/api/projects/${projectId}/documents/${docId}`, {
-    method: 'DELETE',
+    method: "DELETE",
     headers: userHeader(userId),
   });
 }
@@ -102,7 +92,7 @@ export async function deleteDocument(
 export async function downloadDocument(
   projectId: string,
   userId: string,
-  docId: string,
+  docId: string
 ): Promise<DocumentApiResponse> {
   return apiRequest(`/api/projects/${projectId}/documents/${docId}/download`, {
     headers: userHeader(userId),

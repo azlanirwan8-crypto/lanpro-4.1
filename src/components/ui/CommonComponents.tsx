@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import {
   ChevronDown,
@@ -39,12 +41,12 @@ export const UserBadge = ({
     <div
       onClick={onClick}
       className={cn(
-        "flex items-center gap-2 pr-3 pl-1 py-1 rounded-full bg-surface-muted/50 hover:bg-slate-200/50 transition-all cursor-pointer border border-transparent hover:border-border-subtle group",
+        "flex items-center gap-2 pr-3 pl-1 py-1 rounded-full bg-surface-muted/50 hover:bg-surface-strong/50 transition-all cursor-pointer border border-transparent hover:border-border-subtle group",
         className
       )}
     >
       <UserAvatar uid={uid} members={members} size="sm" />
-      <span className="text-xs font-medium text-content-secondary group-hover:text-content truncate">
+      <span className="text-xs font-normal text-content-body group-hover:text-content truncate">
         {member?.displayName || member?.email?.split("@")[0] || "Unknown"}
       </span>
     </div>
@@ -85,7 +87,7 @@ export const PriorityIcon = ({
   if (pLowerCase.includes("hold"))
     return <MinusCircle {...iconProps} className="text-content-subtle" />;
 
-  return <Equal {...iconProps} className="text-slate-300" />;
+  return <Equal {...iconProps} className="text-content-subtle" />;
 };
 
 export const TypeIcon = ({
@@ -135,7 +137,7 @@ const getStatusClasses = (val: string) => {
     normalized.includes("rencana") ||
     normalized.includes("backlog")
   ) {
-    return "bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100 dark:bg-sky-950/30 dark:text-sky-400 dark:border-sky-900";
+    return "bg-info/10 text-info-text border-info/20 hover:bg-info/15";
   }
   if (
     normalized.includes("in progress") ||
@@ -144,7 +146,7 @@ const getStatusClasses = (val: string) => {
     normalized.includes("progress") ||
     normalized.includes("uji")
   ) {
-    return "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900";
+    return "bg-warning/10 text-warning-text border-warning/20 hover:bg-warning/15";
   }
   if (
     normalized.includes("done") ||
@@ -153,9 +155,9 @@ const getStatusClasses = (val: string) => {
     normalized.includes("closed") ||
     normalized.includes("ready")
   ) {
-    return "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900";
+    return "bg-success/10 text-success-text border-success/20 hover:bg-success/15";
   }
-  return "bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100 dark:bg-violet-950/30 dark:text-violet-400 dark:border-violet-900";
+  return "bg-primary-surface/10 text-primary border-primary/20 hover:bg-primary-surface/15";
 };
 
 const getPriorityClasses = (val: string) => {
@@ -167,15 +169,15 @@ const getPriorityClasses = (val: string) => {
     normalized.includes("tinggi") ||
     normalized.includes("mendesak")
   ) {
-    return "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900";
+    return "bg-danger/10 text-danger-text border-danger/20 hover:bg-danger/15";
   }
   if (normalized.includes("medium") || normalized.includes("sedang")) {
-    return "bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-900";
+    return "bg-warning/10 text-warning-text border-warning/20 hover:bg-warning/15";
   }
   if (normalized.includes("low") || normalized.includes("rendah")) {
-    return "bg-surface-muted text-content-body border-border-subtle hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700";
+    return "bg-surface-muted text-content-body border-border-subtle hover:bg-surface-sunken";
   }
-  return "bg-surface-sunken text-content-secondary border-border-subtle hover:bg-surface-muted dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700";
+  return "bg-surface-sunken text-content-secondary border-border-subtle hover:bg-surface-muted";
 };
 
 export const StyledDropdown = ({
@@ -194,38 +196,63 @@ export const StyledDropdown = ({
   onChange: (val: string) => void;
   options: { id: string; label: string; color?: string; icon?: string }[];
   type?: string;
-  masterData: MasterData[];
+  masterData?: MasterData[];
   className?: string;
   buttonClassName?: string;
   disabled?: boolean;
   members?: UserProfile[];
   customButton?: (selected: any) => React.ReactNode;
 }) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLDivElement>(null);
-  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
+  const [dropdownPos, setDropdownPos] = useState<{
+    top?: number;
+    bottom?: number;
+    left: number;
+    width: number;
+    placement: "bottom" | "top";
+  }>({ left: 0, width: 0, placement: "bottom" });
 
   // De-duplicate options to prevent duplicate key errors
   const safeOptions = Array.from(new Map((options || []).map((o) => [o.id, o])).values());
   const selected = safeOptions.find((o) => o.id === value);
 
-  useEffect(() => {
+  /**
+   * `useLayoutEffect`, BUKAN `useEffect` (#294).
+   *
+   * Posisi panel diukur dari `getBoundingClientRect()` pemicunya, jadi ia baru
+   * bisa dihitung sesudah panel ada di DOM. Dengan `useEffect`, pengukuran itu
+   * berjalan SESUDAH browser melukis — dan karena nilai awal state-nya
+   * `left: 0` tanpa `top`, bingkai pertama benar-benar tergambar di sudut
+   * kiri-atas layar sebelum melompat ke tempatnya. Digabung animasi masuk,
+   * gerakannya terbaca sebagai panel yang meluncur dari sudut.
+   *
+   * `useLayoutEffect` berjalan sesudah DOM berubah tapi SEBELUM paint, jadi
+   * bingkai salah posisi itu tidak pernah sampai ke mata.
+   */
+  useLayoutEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
       const dropdownHeight = Math.min(safeOptions.length * 36 + 20, 300);
       const spaceBelow = viewportHeight - rect.bottom;
 
-      let top = rect.bottom;
       if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
-        top = rect.top - dropdownHeight;
+        setDropdownPos({
+          bottom: viewportHeight - rect.top + 4,
+          left: rect.left,
+          width: Math.max(rect.width, 160),
+          placement: "top",
+        });
+      } else {
+        setDropdownPos({
+          top: rect.bottom + 4,
+          left: rect.left,
+          width: Math.max(rect.width, 160),
+          placement: "bottom",
+        });
       }
-
-      setDropdownPos({
-        top: top + window.scrollY,
-        left: rect.left + window.scrollX,
-        width: Math.max(rect.width, 160),
-      });
     }
   }, [isOpen, safeOptions.length]);
 
@@ -247,6 +274,7 @@ export const StyledDropdown = ({
         </div>
       ) : (
         <button
+          type="button"
           ref={buttonRef as any}
           onClick={(e) => {
             e.stopPropagation();
@@ -254,23 +282,23 @@ export const StyledDropdown = ({
           }}
           disabled={disabled}
           className={cn(
-            "flex items-center gap-2 group/dd transition-all cursor-pointer w-full justify-between focus:ring-2 focus:ring-blue-100",
+            "flex items-center gap-1.5 group/dd transition-all cursor-pointer w-full justify-between focus:ring-1 focus:ring-primary/20",
             isStatus
               ? cn(
-                  "px-3 py-1 border rounded-full font-medium text-xs sm:text-[10px] tracking-wider uppercase shadow-soft transition-colors",
+                  "px-2 py-0.5 border rounded-md font-normal text-[10px] tracking-tight uppercase transition-colors",
                   getStatusClasses(selected?.label || value)
                 )
               : isPriority
                 ? cn(
-                    "px-2.5 py-1.5 border rounded-md font-medium text-xs sm:text-[10px] tracking-wider uppercase shadow-soft transition-colors",
+                    "px-2 py-0.5 border rounded-md font-normal text-[10px] tracking-tight uppercase transition-colors",
                     getPriorityClasses(selected?.label || value)
                   )
-                : "px-2 py-1 bg-surface border border-transparent hover:border-border-subtle rounded",
+                : "px-1.5 py-0.5 bg-surface border border-transparent hover:border-border-subtle rounded text-xs font-normal",
             disabled && "opacity-50 cursor-not-allowed",
             buttonClassName
           )}
         >
-          <div className="flex items-center gap-2 overflow-hidden">
+          <div className="flex items-center gap-1.5 overflow-hidden">
             {type === "member" &&
             selected?.id &&
             selected.id !== "Unassigned" &&
@@ -278,9 +306,7 @@ export const StyledDropdown = ({
               <UserAvatar uid={selected.id} members={members} className="w-4 h-4 flex-shrink-0" />
             ) : type === "member" && (!selected?.id || selected.id === "Unassigned") ? (
               <div className="w-4 h-4 rounded-full bg-surface-muted border border-border-subtle border-dashed flex items-center justify-center flex-shrink-0">
-                <span className="text-xs sm:text-[10px] sm:text-[8px] text-content-subtle font-medium">
-                  ?
-                </span>
+                <span className="text-[9px] text-content-subtle font-normal">?</span>
               </div>
             ) : isStatus ? (
               selected?.icon ? (
@@ -291,7 +317,7 @@ export const StyledDropdown = ({
                 />
               ) : (
                 <div
-                  className="w-2.5 h-2.5 rounded-full shrink-0 shadow-inner border border-black/10"
+                  className="w-2 h-2 rounded-full shrink-0 shadow-inner border border-border-subtle"
                   style={{ backgroundColor: selected?.color || "#cbd5e1" }}
                 />
               )
@@ -310,21 +336,21 @@ export const StyledDropdown = ({
             ) : null}
             <span
               className={cn(
-                "text-[12px] capitalize tracking-tight truncate",
+                "capitalize tracking-tight truncate",
                 !selected?.label && !value
-                  ? "text-content-subtle font-medium opacity-80"
+                  ? "text-content-subtle font-normal opacity-80 text-xs"
                   : isStatus
-                    ? "font-medium text-xs sm:text-[10px] text-inherit tracking-wider uppercase"
+                    ? "font-normal text-[10px] text-inherit tracking-tight uppercase"
                     : isPriority
-                      ? "font-medium text-xs sm:text-[10px] text-inherit tracking-wider uppercase"
-                      : "font-medium text-content-secondary"
+                      ? "font-normal text-[10px] text-inherit tracking-tight uppercase"
+                      : "font-normal text-xs text-content-body"
               )}
             >
               {selected?.label || value || "Select..."}
             </span>
           </div>
           {!disabled && (
-            <ChevronDown className="w-3 h-3 text-slate-300 group-hover/dd:text-content-muted flex-shrink-0" />
+            <ChevronDown className="w-3 h-3 text-content-subtle group-hover/dd:text-content-muted flex-shrink-0" />
           )}
         </button>
       )}
@@ -341,18 +367,28 @@ export const StyledDropdown = ({
             <div
               style={{
                 position: "fixed",
-                top: dropdownPos.top - window.scrollY,
+                top: dropdownPos.placement === "bottom" ? dropdownPos.top : undefined,
+                bottom: dropdownPos.placement === "top" ? dropdownPos.bottom : undefined,
                 left: dropdownPos.left,
                 width: dropdownPos.width,
                 zIndex: 10000,
               }}
-              className="mt-1 bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden ring-1 ring-black/5 flex flex-col max-h-[300px]"
+              className="bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden ring-1 ring-border-faint flex flex-col max-h-[300px] animate-dropdown"
             >
-              <div className="overflow-y-auto p-1.5 custom-scrollbar">
+              {/*
+                `min-h-0` wajib (#294). Induknya `flex flex-col max-h-[300px]`
+                dengan `overflow-hidden`, dan anak flex punya `min-height: auto`
+                bawaan — tanpa `min-h-0` ia MENOLAK menyusut di bawah tinggi
+                isinya, sehingga daftar yang lebih panjang dari 300px terpotong
+                induknya DAN tidak bisa digulir sama sekali. Paling terasa di
+                pemilih bentuk flowchart yang punya 27 opsi (~810px).
+              */}
+              <div className="min-h-0 overflow-y-auto p-1.5 custom-scrollbar">
                 {safeOptions.map((opt, optIdx) => {
                   const isActive = opt.id === value;
                   return (
                     <button
+                      type="button"
                       key={opt.id ? `opt-${opt.id}-${optIdx}` : `opt-idx-${optIdx}`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -360,9 +396,9 @@ export const StyledDropdown = ({
                         setIsOpen(false);
                       }}
                       className={cn(
-                        "w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg transition-all text-left group/opt",
+                        "w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md transition-all text-left group/opt",
                         isActive
-                          ? "bg-indigo-50 text-indigo-700"
+                          ? "bg-primary/10 text-primary"
                           : "hover:bg-surface-sunken text-content-secondary"
                       )}
                     >
@@ -378,9 +414,7 @@ export const StyledDropdown = ({
                           />
                         ) : type === "member" && (!opt.id || opt.id === "Unassigned") ? (
                           <div className="w-5 h-5 rounded-full bg-surface-muted border border-border-subtle border-dashed flex items-center justify-center flex-shrink-0">
-                            <span className="text-xs sm:text-[10px] text-content-subtle font-medium">
-                              ?
-                            </span>
+                            <span className="text-[9px] text-content-subtle font-normal">?</span>
                           </div>
                         ) : isStatus ? (
                           opt.icon ? (
@@ -391,7 +425,7 @@ export const StyledDropdown = ({
                             />
                           ) : (
                             <div
-                              className="w-2.5 h-2.5 rounded-full shrink-0 shadow-inner border border-black/5"
+                              className="w-2.5 h-2.5 rounded-full shrink-0 shadow-inner border border-border-faint"
                               style={{ backgroundColor: opt.color || "#cbd5e1" }}
                             />
                           )
@@ -408,17 +442,17 @@ export const StyledDropdown = ({
                             style={{ color: opt.color }}
                           />
                         ) : null}
-                        <span className="text-xs sm:text-[11px] font-medium truncate uppercase tracking-tight">
+                        <span className="text-xs font-normal truncate text-content-body tracking-tight">
                           {opt.label}
                         </span>
                       </div>
-                      {isActive && <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />}
+                      {isActive && <div className="w-1.5 h-1.5 rounded-full bg-primary/100" />}
                     </button>
                   );
                 })}
                 {safeOptions.length === 0 && (
-                  <div className="p-4 text-center text-xs text-content-subtle italic font-medium">
-                    No options available
+                  <div className="p-4 text-center text-xs text-content-subtle italic font-normal">
+                    {t("ui.noOptions")}
                   </div>
                 )}
               </div>
@@ -441,31 +475,54 @@ export const TableStatusBadge = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
+  const [dropdownPos, setDropdownPos] = useState<{
+    top?: number;
+    bottom?: number;
+    left: number;
+    placement: "bottom" | "top";
+  }>({ left: 0, placement: "bottom" });
   const current = (statuses || []).find((s) => s.label === value);
 
-  useEffect(() => {
+  /**
+   * `useLayoutEffect`, BUKAN `useEffect` (#294).
+   *
+   * Posisi panel diukur dari `getBoundingClientRect()` pemicunya, jadi ia baru
+   * bisa dihitung sesudah panel ada di DOM. Dengan `useEffect`, pengukuran itu
+   * berjalan SESUDAH browser melukis — dan karena nilai awal state-nya
+   * `left: 0` tanpa `top`, bingkai pertama benar-benar tergambar di sudut
+   * kiri-atas layar sebelum melompat ke tempatnya. Digabung animasi masuk,
+   * gerakannya terbaca sebagai panel yang meluncur dari sudut.
+   *
+   * `useLayoutEffect` berjalan sesudah DOM berubah tapi SEBELUM paint, jadi
+   * bingkai salah posisi itu tidak pernah sampai ke mata.
+   */
+  useLayoutEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
       const dropdownHeight = (statuses || []).length * 36 + 20;
       const spaceBelow = viewportHeight - rect.bottom;
 
-      let top = rect.bottom;
       if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
-        top = rect.top - dropdownHeight;
+        setDropdownPos({
+          bottom: viewportHeight - rect.top + 4,
+          left: rect.left,
+          placement: "top",
+        });
+      } else {
+        setDropdownPos({
+          top: rect.bottom + 4,
+          left: rect.left,
+          placement: "bottom",
+        });
       }
-
-      setDropdownPos({
-        top: top + window.scrollY,
-        left: rect.left + window.scrollX,
-      });
     }
   }, [isOpen, statuses?.length]);
 
   return (
     <div className="relative">
       <button
+        type="button"
         ref={buttonRef}
         onClick={(e) => {
           e.stopPropagation();
@@ -485,9 +542,7 @@ export const TableStatusBadge = ({
             style={{ backgroundColor: current?.color || "#cbd5e1" }}
           />
         )}
-        <span className="text-xs sm:text-[10px] font-medium uppercase text-content-body tracking-tight">
-          {value}
-        </span>
+        <span className="text-[10px] font-normal text-content-body tracking-tight">{value}</span>
         <ChevronDown className="w-3 h-3 text-content-subtle group-hover:text-content-secondary transition-colors" />
       </button>
       {isOpen &&
@@ -503,21 +558,23 @@ export const TableStatusBadge = ({
             <div
               style={{
                 position: "fixed",
-                top: dropdownPos.top - window.scrollY,
+                top: dropdownPos.placement === "bottom" ? dropdownPos.top : undefined,
+                bottom: dropdownPos.placement === "top" ? dropdownPos.bottom : undefined,
                 left: dropdownPos.left,
                 zIndex: 10000,
               }}
-              className="mt-1 bg-surface rounded-lg shadow-xl border border-border-subtle p-1 min-w-[140px]"
+              className="bg-surface rounded-lg shadow-xl border border-border-subtle p-1 min-w-[140px] animate-dropdown"
             >
               {(statuses || []).map((s, index) => (
                 <button
+                  type="button"
                   key={`${s.id || s.label}-${index}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     onChange(s.label);
                     setIsOpen(false);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 hover:bg-surface-sunken rounded-md transition-colors text-xs sm:text-[10px] font-medium uppercase text-content-body text-left"
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-surface-sunken rounded-md transition-colors text-xs font-normal text-content-body text-left"
                 >
                   {s.icon ? (
                     <RenderIcon iconName={s.icon} className="w-3 h-3" style={{ color: s.color }} />

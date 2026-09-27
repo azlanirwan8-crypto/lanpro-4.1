@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { safeLocalStorage } from "../../../lib/safeStorage";
 import React, { useState } from "react";
 import { motion } from "motion/react";
@@ -5,7 +6,15 @@ import { cn, ensureDate } from "../../../lib/utils";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
 import { RenderIcon } from "../../../components/RenderIcon";
 import { useAppStore } from "../../../store/useAppStore";
-import { AlertTriangle, ChevronDown, ChevronUp, CheckSquare, Square } from "lucide-react";
+import { statusSelesai } from "../../../lib/statusSelesai";
+import {
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  CheckSquare,
+  Square,
+  MessageSquare,
+} from "lucide-react";
 
 interface KanbanCardProps {
   task: any;
@@ -18,6 +27,7 @@ interface KanbanCardProps {
 
 export const KanbanCard = React.memo<KanbanCardProps>(
   ({ task, mArr, pArr, onClick, isDragging, shakingTaskId }) => {
+    const { t } = useTranslation();
     // ...
     // Line 94 (approx):
     // ...
@@ -31,13 +41,19 @@ export const KanbanCard = React.memo<KanbanCardProps>(
     const isCompact = density === "compact";
 
     const subtasks = task.subtasks || [];
-    const hasUnfinishedSubtasks = subtasks.some((st: any) => st.status !== "Done");
+    const hasUnfinishedSubtasks = subtasks.some((st: any) => !statusSelesai(st.status, mArr));
     const totalCount = subtasks.length;
-    const completedCount = subtasks.filter((st: any) => st.status === "Done").length;
+    const completedCount = subtasks.filter((st: any) => statusSelesai(st.status, mArr)).length;
     const percentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
     const handleToggleSubtask = (subtask: any) => {
-      const newStatus = subtask.status === "Done" ? "TODO" : "Done";
+      const terminal =
+        mArr.find((m) => m.type === "status" && (m.isTerminal === true || m.isTerminal === 1))
+          ?.label || "Done";
+      const todo =
+        mArr.find((m) => m.type === "status" && !(m.isTerminal === true || m.isTerminal === 1))
+          ?.label || "TODO";
+      const newStatus = statusSelesai(subtask.status, mArr) ? todo : terminal;
       const updatedSubtasks = subtasks.map((st: any) =>
         st.id === subtask.id ? { ...st, status: newStatus } : st
       );
@@ -98,162 +114,144 @@ export const KanbanCard = React.memo<KanbanCardProps>(
           : {})}
         onClick={onClick}
         className={cn(
-          "bg-surface dark:bg-slate-800 rounded-lg shadow-2xs border cursor-pointer group flex flex-col overflow-hidden",
+          "bg-surface rounded-lg shadow-2xs border cursor-pointer group flex flex-col overflow-hidden",
           "transition-all duration-200 ease-out select-none border-l-4",
           isCompact ? "p-2 gap-1.5" : "p-3 gap-2",
           task.isBlocked
-            ? "border-l-red-600 border-red-200 dark:border-red-900/50 bg-red-50/10 dark:bg-red-950/20 hover:border-red-400 shadow-rose-100/30"
+            ? "border-l-danger border-danger/30 bg-danger/5 hover:border-danger shadow-xs"
             : task.priority === "Highest" || task.priority === "High"
-              ? "border-l-red-500 border-border-subtle/80 dark:border-slate-700/80 hover:border-red-300 dark:hover:border-red-500 hover:shadow-xs"
+              ? "border-l-danger border-border-subtle/80 hover:border-danger/60 hover:shadow-xs"
               : task.priority === "Medium"
-                ? "border-l-amber-500 border-border-subtle/80 dark:border-slate-700/80 hover:border-amber-300 dark:hover:border-amber-500 hover:shadow-xs"
-                : "border-l-primary border-border-subtle/80 dark:border-slate-700/80 hover:border-primary/50 dark:hover:border-primary hover:shadow-xs",
-          hasUnfinishedSubtasks &&
-            "border-red-300 dark:border-red-800 bg-red-50/10 dark:bg-red-950/30",
+                ? "border-l-warning border-border-subtle/80 hover:border-warning/60 hover:shadow-xs"
+                : "border-l-primary border-border-subtle/80 hover:border-primary/60 hover:shadow-xs",
+          hasUnfinishedSubtasks && "border-danger/30 bg-danger/5",
           isDragging &&
             "z-[9999] cursor-grabbing opacity-90 shadow-xl ring-2 ring-primary !transition-none pointer-events-none",
           shakingTaskId === task.id && "animate-shake"
         )}
       >
-        {/* Top row: task key + status badges */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 transition-colors flex-wrap">
-            {priorityInfo ? (
-              <RenderIcon
-                iconName={priorityInfo.icon}
-                className={cn(
-                  "transition-transform duration-200",
-                  isCompact ? "w-3 h-3" : "w-3.5 h-3.5"
-                )}
-                style={{ color: priorityInfo.color }}
-              />
-            ) : (
-              <RenderIcon
-                iconName="CheckSquare"
-                className={cn(
-                  "transition-transform duration-200",
-                  isCompact ? "w-3 h-3" : "w-3.5 h-3.5"
-                )}
-              />
-            )}
-            <span className="font-mono font-semibold text-xs sm:text-[11px] text-primary dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded-md border border-indigo-200/60">
-              {task.key}
-            </span>
-            {task.priority && (
-              <span
-                className={cn(
-                  "font-medium uppercase rounded tracking-wider border",
-                  isCompact
-                    ? "text-xs sm:text-[10px] sm:text-[8px] px-1 py-0.2"
-                    : "text-xs sm:text-[11px] sm:text-[9px] px-1.5 py-0.2",
-                  task.priority === "Highest" || task.priority === "High"
-                    ? "bg-red-50 text-red-600 border-red-200 dark:bg-red-950/60 dark:text-red-400 dark:border-red-800"
-                    : task.priority === "Medium"
-                      ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-400 dark:border-amber-800"
-                      : "bg-surface-sunken text-content-secondary border-border-subtle dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
-                )}
-              >
-                {task.priority}
-              </span>
-            )}
-            {task.isBlocked && (
-              <span
-                className={cn(
-                  "font-medium uppercase text-red-600 dark:text-red-400 bg-red-100/90 dark:bg-red-950/90 rounded tracking-widest animate-pulse border border-red-200",
-                  isCompact
-                    ? "text-xs sm:text-[10px] sm:text-[8px] px-1 py-0.5"
-                    : "text-xs sm:text-[11px] sm:text-[9px] px-1.5 py-0.5"
-                )}
-              >
-                Blocked
-              </span>
-            )}
-            {hasUnfinishedSubtasks && (
+        {/* Top row: alert/blocked/QA/due badges (hanya jika ada) */}
+        {(task.isBlocked || hasUnfinishedSubtasks || qaStatus || isDueSoon) && (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 transition-colors flex-wrap">
+              {task.isBlocked && (
+                <span
+                  className={cn(
+                    "font-normal text-danger-text bg-danger/10 rounded animate-pulse border border-danger/20 text-[10px] px-1.5 py-0.5"
+                  )}
+                >
+                  Blocked
+                </span>
+              )}
+              {hasUnfinishedSubtasks && (
+                <div className="text-danger-text cursor-help" title={t("kanban.blockedCardHint")}>
+                  <AlertTriangle className={cn(isCompact ? "w-3 h-3" : "w-3.5 h-3.5")} />
+                </div>
+              )}
+              {qaStatus && (
+                <span
+                  className={cn(
+                    "font-normal uppercase rounded tracking-normal",
+                    isCompact
+                      ? "text-xs sm:text-[10px] sm:text-[7.5px] px-1 py-0.5"
+                      : "text-xs sm:text-[10px] sm:text-[8.5px] px-1.5 py-0.5",
+                    qaStatus === "passed"
+                      ? "bg-success/10 text-success-text border border-success/20"
+                      : qaStatus === "failed"
+                        ? "bg-danger/10 text-danger-text border border-danger/20 animate-pulse"
+                        : qaStatus === "blocked"
+                          ? "bg-warning/10 text-warning-text border border-warning/20"
+                          : "bg-surface-muted text-content-muted border border-border-subtle"
+                  )}
+                >
+                  QA:{" "}
+                  {qaStatus === "passed"
+                    ? "PASS ✅"
+                    : qaStatus === "failed"
+                      ? "FAIL ❌"
+                      : qaStatus === "blocked"
+                        ? "BLOCKED ⚠️"
+                        : "UNTESTED"}
+                </span>
+              )}
+            </div>
+
+            {/* Warning visual notification for due date within 48 hours */}
+            {isDueSoon && (
               <div
-                className="text-red-500 dark:text-red-400 cursor-help"
-                title="Kartu terbelenggu: Selesaikan semua subtask sebelum memindahkan ke Done"
+                className={cn(
+                  "flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs sm:text-[11px] sm:text-[9px] font-medium tracking-tight select-none border animate-pulse shrink-0",
+                  isOverdue
+                    ? "bg-danger/10 border-danger/20 text-danger-text"
+                    : "bg-warning/10 border-warning/20 text-warning-text"
+                )}
+                title={
+                  isOverdue
+                    ? "Terlambat! Tugas telah melewati tanggal jatuh tempo."
+                    : `Tenggat waktu kurang dari 48 jam (${daysHoursText})`
+                }
               >
                 <AlertTriangle className={cn(isCompact ? "w-3 h-3" : "w-3.5 h-3.5")} />
+                {!isCompact && <span>{isOverdue ? "Terlambat" : `Sisa ${daysHoursText}`}</span>}
               </div>
             )}
-            {qaStatus && (
-              <span
-                className={cn(
-                  "font-medium uppercase rounded tracking-widest",
-                  isCompact
-                    ? "text-xs sm:text-[10px] sm:text-[7.5px] px-1 py-0.5"
-                    : "text-xs sm:text-[10px] sm:text-[8.5px] px-1.5 py-0.5",
-                  qaStatus === "passed"
-                    ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
-                    : qaStatus === "failed"
-                      ? "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800 animate-pulse"
-                      : qaStatus === "blocked"
-                        ? "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800"
-                        : "bg-surface-muted dark:bg-slate-700 text-content-muted dark:text-slate-400 border border-border-subtle dark:border-slate-600"
-                )}
-              >
-                QA:{" "}
-                {qaStatus === "passed"
-                  ? "PASS ✅"
-                  : qaStatus === "failed"
-                    ? "FAIL ❌"
-                    : qaStatus === "blocked"
-                      ? "BLOCKED ⚠️"
-                      : "UNTESTED"}
-              </span>
-            )}
           </div>
-
-          {/* Warning visual notification for due date within 48 hours */}
-          {isDueSoon && (
-            <div
-              className={cn(
-                "flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs sm:text-[11px] sm:text-[9px] font-medium tracking-tight select-none border animate-pulse shrink-0",
-                isOverdue
-                  ? "bg-rose-50 dark:bg-rose-950/50 border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400"
-                  : "bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400"
-              )}
-              title={
-                isOverdue
-                  ? "Terlambat! Tugas telah melewati tanggal jatuh tempo."
-                  : `Tenggat waktu kurang dari 48 jam (${daysHoursText})`
-              }
-            >
-              <AlertTriangle className={cn(isCompact ? "w-3 h-3" : "w-3.5 h-3.5")} />
-              {!isCompact && <span>{isOverdue ? "Terlambat" : `Sisa ${daysHoursText}`}</span>}
-            </div>
-          )}
-        </div>
+        )}
 
         {/* Task Title */}
         <h4
           className={cn(
-            "text-content-body dark:text-slate-200 leading-snug group-hover:text-content dark:group-hover:text-white transition-colors duration-200",
-            isCompact ? "font-medium text-xs line-clamp-1" : "font-medium text-sm line-clamp-2"
+            "text-content-body leading-snug group-hover:text-content transition-colors duration-200",
+            isCompact ? "font-normal text-xs line-clamp-1" : "font-normal text-xs line-clamp-2"
           )}
         >
           {task.title}
         </h4>
 
-        {/* Info Row: Category & Avatar */}
+        {/* Info Row: Priority, Status, Category & Avatar */}
         <div
           className={cn(
-            "flex items-center justify-between border-t border-slate-50 dark:border-slate-700/50",
+            "flex items-center justify-between border-t border-border-faint",
             isCompact ? "mt-1 pt-1" : "mt-2 pt-2"
           )}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {task.priority && (
+              <div
+                className={cn(
+                  "flex items-center gap-1 rounded border text-[10px] font-normal",
+                  isCompact ? "px-1.5 py-0" : "px-1.5 py-0.5",
+                  task.priority === "Highest" || task.priority === "High"
+                    ? "bg-danger/10 text-danger-text border-danger/20"
+                    : task.priority === "Medium"
+                      ? "bg-warning/10 text-warning-text border-warning/20"
+                      : "bg-surface-sunken text-content-secondary border-border-subtle"
+                )}
+              >
+                {priorityInfo && (
+                  <RenderIcon
+                    iconName={priorityInfo.icon}
+                    className={cn(
+                      "transition-transform duration-200",
+                      isCompact ? "w-2.5 h-2.5" : "w-3 h-3"
+                    )}
+                    style={{ color: priorityInfo.color }}
+                  />
+                )}
+                <span>{task.priority}</span>
+              </div>
+            )}
             <div
               className={cn(
-                "flex items-center gap-1 bg-surface-sunken dark:bg-slate-900/60 border border-border-faint dark:border-slate-700 group-hover:bg-indigo-50/30 dark:group-hover:bg-indigo-950/30 group-hover:border-indigo-100/50 dark:group-hover:border-indigo-800/50 transition-colors duration-300 rounded-full",
+                "flex items-center gap-1 bg-surface-sunken border border-border-faint group-hover:bg-primary-surface/5 group-hover:border-primary/20 transition-colors duration-300 rounded-full",
                 isCompact ? "px-1.5 py-0" : "px-2 py-0.5"
               )}
             >
               <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusColor }} />
               <span
                 className={cn(
-                  "font-medium text-content-muted dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 uppercase tracking-wider transition-colors duration-300",
-                  isCompact ? "text-xs sm:text-[10px] sm:text-[8px]" : "text-xs sm:text-[10px]"
+                  "font-normal text-content-muted group-hover:text-primary transition-colors duration-300",
+                  isCompact ? "text-[10px]" : "text-xs"
                 )}
               >
                 {task.status}
@@ -262,7 +260,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
             {task.category && (
               <span
                 className={cn(
-                  "font-medium text-content-subtle dark:text-slate-500 capitalize px-1",
+                  "font-medium text-content-subtle capitalize px-1",
                   isCompact ? "text-xs sm:text-[10px] sm:text-[8px]" : "text-xs sm:text-[10px]"
                 )}
               >
@@ -270,35 +268,41 @@ export const KanbanCard = React.memo<KanbanCardProps>(
               </span>
             )}
           </div>
-          <div className="flex items-center group-hover:scale-105 transition-transform duration-300">
-            <UserAvatar
-              uid={task.assigneeId || ""}
-              members={pArr}
-              className={cn(
-                "ring-2 ring-white dark:ring-slate-800 shadow-soft",
-                isCompact ? "w-5 h-5" : "w-6 h-6"
-              )}
-            />
+          <div className="flex items-center gap-1.5 shrink-0">
+            {Number(task.commentsCount || 0) > 0 && (
+              <div
+                className="flex items-center gap-1 text-content-muted hover:text-content text-[10px] font-normal transition-colors select-none"
+                title={`${task.commentsCount} ${t("comments.tabComments", "Komentar")}`}
+              >
+                <MessageSquare className={cn(isCompact ? "w-2.5 h-2.5" : "w-3 h-3")} />
+                <span>{task.commentsCount}</span>
+              </div>
+            )}
+            <div className="flex items-center group-hover:scale-105 transition-transform duration-300">
+              <UserAvatar
+                uid={task.assigneeId || ""}
+                members={pArr}
+                className={cn("ring-2 ring-surface shadow-soft", isCompact ? "w-5 h-5" : "w-6 h-6")}
+              />
+            </div>
           </div>
         </div>
 
         {totalCount > 0 && (
-          <div className="mt-2 pt-2 border-t border-border-faint dark:border-slate-700/60">
+          <div className="mt-2 pt-2 border-t border-border-faint">
             <div
-              className="flex items-center justify-between text-xs sm:text-[10px] text-content-muted dark:text-slate-400 mb-1 cursor-pointer"
+              className="flex items-center justify-between text-xs sm:text-[10px] text-content-muted mb-1 cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsExpanded(!isExpanded);
               }}
             >
               <div className="flex items-center gap-1">
-                <CheckSquare className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
+                <CheckSquare className="w-3 h-3 text-primary" />
                 <span
                   className={cn(
                     "font-medium",
-                    percentage === 100
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-content-secondary dark:text-slate-300"
+                    percentage === 100 ? "text-success-text" : "text-content-secondary"
                   )}
                 >
                   {completedCount}/{totalCount} Subtasks ({Math.round(percentage)}%)
@@ -310,15 +314,15 @@ export const KanbanCard = React.memo<KanbanCardProps>(
                 <ChevronDown className="w-3 h-3 text-content-subtle" />
               )}
             </div>
-            <div className="h-1.5 w-full bg-surface-muted dark:bg-slate-700/80 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-surface-muted rounded-full overflow-hidden">
               <div
                 className={cn(
                   "h-full transition-all duration-300",
                   percentage === 0
-                    ? "bg-slate-300 dark:bg-slate-600"
+                    ? "bg-surface-marker"
                     : percentage === 100
-                      ? "bg-emerald-500 dark:bg-emerald-400"
-                      : "bg-indigo-500 dark:bg-indigo-400"
+                      ? "bg-success-surface"
+                      : "bg-primary-surface"
                 )}
                 style={{ width: `${percentage}%` }}
               />
@@ -329,22 +333,20 @@ export const KanbanCard = React.memo<KanbanCardProps>(
                 {subtasks.map((st: any) => (
                   <div
                     key={st.id}
-                    className="flex items-center gap-2 text-xs sm:text-[10px] text-content-secondary dark:text-slate-300 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400"
+                    className="flex items-center gap-2 text-xs sm:text-[10px] text-content-secondary cursor-pointer hover:text-primary"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleToggleSubtask(st);
                     }}
                   >
-                    {st.status === "Done" ? (
-                      <CheckSquare className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />
+                    {statusSelesai(st.status, mArr) ? (
+                      <CheckSquare className="w-3 h-3 text-success-text" />
                     ) : (
-                      <Square className="w-3 h-3 text-slate-300 dark:text-slate-600" />
+                      <Square className="w-3 h-3 text-content-subtle" />
                     )}
                     <span
                       className={
-                        st.status === "Done"
-                          ? "line-through text-content-subtle dark:text-slate-500"
-                          : ""
+                        statusSelesai(st.status, mArr) ? "line-through text-content-subtle" : ""
                       }
                     >
                       {st.title}

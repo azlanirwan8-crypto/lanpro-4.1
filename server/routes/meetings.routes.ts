@@ -3,35 +3,40 @@
  * Handles recording uploads, analysis, meeting management, and discussion points
  */
 
-import { Router } from 'express';
-import { verifyProjectAccess } from '../middleware/rbac';
-import db from '../../src/lib/db';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
-import crypto from 'crypto';
-import { validateFileBuffer, sanitizeFilename } from '../../src/lib/fileSecurity';
+import { Router } from "express";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import crypto from "crypto";
+import { validateFileBuffer, sanitizeFilename } from "../../src/lib/fileSecurity";
 
-// Import di bawah ini hilang saat rute diekstrak dari server.ts. Simbolnya
-// dulu hidup di scope server.ts, sehingga setelah dipindah menjadi nama yang
-// tidak terdefinisi — 119 error TypeScript, dan ReferenceError saat endpoint
-// terkait benar-benar dipanggil.
-import { GoogleGenAI, Type } from '@google/genai';
-import { generateContentWithFallback } from '../services/ai.service';
-import { getSocketServer } from '../config/socket';
-import { GLOBAL_UPLOADS_DIR } from '../config/uploads';
-import { runAIPipeline } from '../services/meeting.service';
-import { MULTIMODAL_ANALYSIS_SCHEMA } from '../services/meeting-ai.schema';
+import { GoogleGenAI, Type } from "@google/genai";
+import { generateContentWithFallback } from "../services/ai.service";
+import { getSocketServer } from "../config/socket";
+import { GLOBAL_UPLOADS_DIR } from "../config/uploads";
+import { runAIPipeline } from "../services/meeting.service";
+import { saringHasilAnalisisTempel } from "../services/meeting-ai-filter";
+import { MULTIMODAL_ANALYSIS_SCHEMA } from "../services/meeting-ai.schema";
+import { ekstensiPerluMp3UntukGemini, perintahFfmpegKeMp3 } from "../services/meeting-transcode";
+import { jagaProyek } from "../middleware/jagaProyek";
+import { meetingRepository } from "../repositories/meeting.repository";
+import { discussionPointsRepository } from "../repositories/discussion-points.repository";
+import { exec } from "child_process";
+import { promisify } from "util";
 
-/**
- * Instance Socket.IO untuk memancarkan progres AI.
- *
- * Sebagian pemancaran terjadi di dalam runAIPipeline(), fungsi level-modul yang
- * berjalan sebagai proses latar setelah response terkirim, sehingga tidak punya
- * akses ke `req.io`. Registry dipakai agar seluruh titik pemancaran memakai satu
- * cara yang sama. Optional chaining di pemanggilnya membuat event terlewat
- * dengan aman bila registry belum terisi.
- */
+const execAsync = promisify(exec);
+import { validasiBody, validasiQuery } from "../middleware/validate";
+import { listSearchQuerySchema } from "../schemas/pagination.schema";
+import { respondWithProjectList } from "../lib/listResponse";
+import {
+  createMeetingSchema,
+  updateMeetingSchema,
+  analyzeTranscriptSchema,
+  analyzeVideoSchema,
+  analyzeMeetingSchema,
+  cancelMeetingAnalysisSchema,
+} from "../schemas/meeting.schema";
+
 const io = { emit: (event: string, ...args: any[]) => getSocketServer()?.emit(event, ...args) };
 
 const router = Router();
@@ -39,25 +44,34 @@ const router = Router();
 // Upload configuration
 const upload = multer({ dest: GLOBAL_UPLOADS_DIR });
 
-  router.post("/api/v1/meetings/:meetingId/upload-recording", upload.single('recording'), async (req, res) => {
-    // Upload request received (debug log removed for production security)
+router.post(
+  "/api/v1/meetings/:meetingId/upload-recording",
+  jagaProyek("meetingNotes", "U", "meeting"),
+  upload.single("recording"),
+  async (req, res) => {
     try {
       const { meetingId } = req.params;
       const file = req.file;
 
       if (!file) {
-        return res.status(400).json({ status: "error", message: "File tidak ditemukan." });
+        return res.status(400).json({
+          status: "error",
+          code: "srv.file_tidak_ditemukan",
+          message: "File tidak ditemukan.",
+        });
       }
 
-      // Metadata parameter
       const { meeting_id, file_name, platform, chunkIndex, totalChunks, fileSize } = req.body;
       const targetMeetingId = meetingId || meeting_id;
 
       if (!targetMeetingId) {
-        return res.status(400).json({ status: "error", message: "meeting_id tidak ditemukan dalam request." });
+        return res.status(400).json({
+          status: "error",
+          code: "srv.meetingid_tidak_ditemukan_dalam",
+          message: "meeting_id tidak ditemukan dalam request.",
+        });
       }
 
-      // Check if this is a chunked upload
       const isChunked = chunkIndex !== undefined && totalChunks !== undefined;
 
       if (isChunked) {
@@ -66,23 +80,28 @@ const upload = multer({ dest: GLOBAL_UPLOADS_DIR });
         const originalSize = parseInt(fileSize as string) || file.size;
 
         if (isNaN(cIndex) || cIndex < 0 || cIndex >= tChunks) {
-          return res.status(400).json({ status: "error", message: "Invalid chunk index or total chunks." });
+          return res.status(400).json({
+            status: "error",
+            code: "srv.invalid_chunk_index_or",
+            message: "Invalid chunk index or total chunks.",
+          });
         }
         if (isNaN(tChunks) || tChunks <= 0) {
-          return res.status(400).json({ status: "error", message: "Invalid total chunks value." });
+          return res.status(400).json({
+            status: "error",
+            code: "srv.invalid_total_chunks_value",
+            message: "Invalid total chunks value.",
+          });
         }
 
-        // Temporary directory for chunks
         const chunksDir = path.join(GLOBAL_UPLOADS_DIR, "chunks", targetMeetingId);
         if (!fs.existsSync(chunksDir)) {
           fs.mkdirSync(chunksDir, { recursive: true });
         }
 
-        // Move chunk to chunksDir with the index as name
         const chunkPath = path.join(chunksDir, `chunk_${cIndex}`);
         fs.renameSync(file.path, chunkPath);
 
-        // Check if all chunks have arrived
         let allChunksArrived = true;
         for (let i = 0; i < tChunks; i++) {
           const expectedPath = path.join(chunksDir, `chunk_${i}`);
@@ -93,13 +112,15 @@ const upload = multer({ dest: GLOBAL_UPLOADS_DIR });
         }
 
         if (allChunksArrived) {
-          // Prevent concurrent merge by checking for a merge lock file
           const mergeLockPath = path.join(chunksDir, ".merging");
           if (fs.existsSync(mergeLockPath)) {
-            return res.status(409).json({ status: "error", message: "Merge already in progress for this upload." });
+            return res.status(409).json({
+              status: "error",
+              code: "srv.merge_already_in_progress",
+              message: "Merge already in progress for this upload.",
+            });
           }
 
-          // Create merge lock file
           fs.writeFileSync(mergeLockPath, Date.now().toString());
 
           const fileExt = path.extname(file_name || ".mp3") || ".mp3";
@@ -107,23 +128,17 @@ const upload = multer({ dest: GLOBAL_UPLOADS_DIR });
           const permanentPath = path.join(GLOBAL_UPLOADS_DIR, safeFileName);
 
           try {
-            // Merge all chunks
-
-            // Clear file if it exists
             if (fs.existsSync(permanentPath)) {
               fs.unlinkSync(permanentPath);
             }
 
-            // Append each chunk synchronously to the target file
             for (let i = 0; i < tChunks; i++) {
               const expectedPath = path.join(chunksDir, `chunk_${i}`);
               const chunkBuffer = fs.readFileSync(expectedPath);
               fs.appendFileSync(permanentPath, chunkBuffer);
-              // Delete chunk file immediately after reading
               fs.unlinkSync(expectedPath);
             }
           } finally {
-            // Remove merge lock file
             try {
               fs.unlinkSync(mergeLockPath);
             } catch (err) {
@@ -131,61 +146,54 @@ const upload = multer({ dest: GLOBAL_UPLOADS_DIR });
             }
           }
 
-          // Clean up chunks directory with proper error handling
           try {
             fs.rmdirSync(chunksDir);
             console.log(`[CLEANUP] Chunks directory deleted: ${chunksDir}`);
           } catch (rmErr: any) {
-            console.error(`[CLEANUP_ERROR] Failed to delete chunks directory ${chunksDir}:`, rmErr.message);
-            // Attempt to clean up remaining files before failing
+            console.error(
+              `[CLEANUP_ERROR] Failed to delete chunks directory ${chunksDir}:`,
+              rmErr.message
+            );
             try {
               const files = fs.readdirSync(chunksDir);
-              for (const file of files) {
-                const filePath = path.join(chunksDir, file);
+              for (const fileItem of files) {
+                const filePath = path.join(chunksDir, fileItem);
                 try {
                   fs.unlinkSync(filePath);
-                  console.log(`[CLEANUP] Removed orphaned file: ${filePath}`);
-                } catch (fileErr: any) {
-                  console.error(`[CLEANUP_ERROR] Failed to remove file ${filePath}:`, fileErr.message);
-                }
+                } catch (fileErr: any) {}
               }
-              // Retry directory deletion after cleaning up files
               fs.rmdirSync(chunksDir);
-              console.log(`[CLEANUP] Chunks directory deleted after cleanup: ${chunksDir}`);
-            } catch (cleanupErr: any) {
-              console.error(`[CLEANUP_ERROR] Could not clean up chunks directory. Manual removal required: ${chunksDir}`, cleanupErr.message);
-            }
+            } catch (cleanupErr: any) {}
           }
 
-          // Security & Magic Byte Validation on the assembled file — the chunked
-          // path skipped this entirely before, unlike the single-request path below.
           const mergedBuffer = fs.readFileSync(permanentPath);
-          const mergedVal = validateFileBuffer(mergedBuffer, file_name || `recording${fileExt}`, 120 * 1024 * 1024);
+          const mergedVal = validateFileBuffer(
+            mergedBuffer,
+            file_name || `recording${fileExt}`,
+            120 * 1024 * 1024
+          );
           if (!mergedVal.valid) {
             if (fs.existsSync(permanentPath)) fs.unlinkSync(permanentPath);
             return res.status(400).json({
               status: "error",
-              message: mergedVal.error || "Gagal Mengunggah Rekaman: Format file tidak didukung atau ukuran melebihi batas maksimum (Max 120MB)."
+              message:
+                mergedVal.error ||
+                "Gagal Mengunggah Rekaman: Format file tidak didukung atau ukuran melebihi batas maksimum (Max 120MB).",
             });
           }
 
-          // Construct relative production URL
           const recordingUrl = `/uploads/${safeFileName}`;
-
-          // Commit update to Relational Database
-          const connection = await db.getConnection();
-          await connection.query(
-            "UPDATE Meetings SET recording_url = ?, file_size = ?, upload_status = 'UPLOAD_SUCCESS' WHERE id = ?",
-            [recordingUrl, originalSize, targetMeetingId]
+          await meetingRepository.updateRecordingInfo(
+            targetMeetingId,
+            recordingUrl,
+            originalSize,
+            "UPLOAD_SUCCESS"
           );
-          connection.release();
 
-          // Trigger the asynchronous background AI worker! (runAIPipeline)
           runAIPipeline(targetMeetingId).catch((err) => {
             console.error(`[BACKGROUND PIPELINE START ERROR] for meeting ${targetMeetingId}:`, err);
           });
 
-          // Return 201 Created with valid file metadata instantly to prevent timeouts
           return res.status(201).json({
             status: "success",
             completed: true,
@@ -193,59 +201,58 @@ const upload = multer({ dest: GLOBAL_UPLOADS_DIR });
               meeting_id: targetMeetingId,
               recording_url: recordingUrl,
               file_size: originalSize,
-              upload_status: 'UPLOAD_SUCCESS',
+              upload_status: "UPLOAD_SUCCESS",
               file_name: file_name,
-              platform: platform || "Zoom"
-            }
+              platform: platform || "Zoom",
+            },
           });
         } else {
-          // Still uploading chunks, return success for this chunk
           return res.status(200).json({
             status: "success",
             completed: false,
             chunkIndex: cIndex,
-            message: `Chunk ${cIndex + 1}/${tChunks} berhasil diunggah.`
+            message: `Chunk ${cIndex + 1}/${tChunks} berhasil diunggah.`,
           });
         }
       } else {
-        // Security & Magic Byte Validation
         const fileBuf = fs.readFileSync(file.path);
-        const fileVal = validateFileBuffer(fileBuf, file.originalname || file_name || "recording.mp3", 120 * 1024 * 1024);
+        const fileVal = validateFileBuffer(
+          fileBuf,
+          file.originalname || file_name || "recording.mp3",
+          120 * 1024 * 1024
+        );
         if (!fileVal.valid) {
           if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
-          return res.status(400).json({ 
-            status: "error", 
-            message: fileVal.error || "Gagal Mengunggah Dokumen: Format file tidak didukung atau ukuran melebihi batas maksimum (Max 120MB)." 
+          return res.status(400).json({
+            status: "error",
+            message:
+              fileVal.error ||
+              "Gagal Mengunggah Dokumen: Format file tidak didukung atau ukuran melebihi batas maksimum (Max 120MB).",
           });
         }
 
-        // Save permanently to local production storage: uploads/
-        const safeFileName = fileVal.sanitizedName || sanitizeFilename(file.originalname || file_name || "recording.mp3");
-        
+        const safeFileName =
+          fileVal.sanitizedName ||
+          sanitizeFilename(file.originalname || file_name || "recording.mp3");
+
         const permanentPath = path.join(GLOBAL_UPLOADS_DIR, safeFileName);
-        
-        // Copy to permanent folder and delete the temp file
         fs.copyFileSync(file.path, permanentPath);
         fs.unlinkSync(file.path);
 
-        // Construct relative production URL
         const recordingUrl = `/uploads/${safeFileName}`;
         const fileSizeVal = file.size;
 
-        // Commit update to Relational Database
-        const connection = await db.getConnection();
-        await connection.query(
-          "UPDATE Meetings SET recording_url = ?, file_size = ?, upload_status = 'UPLOAD_SUCCESS' WHERE id = ?",
-          [recordingUrl, fileSizeVal, targetMeetingId]
+        await meetingRepository.updateRecordingInfo(
+          targetMeetingId,
+          recordingUrl,
+          fileSizeVal,
+          "UPLOAD_SUCCESS"
         );
-        connection.release();
 
-        // Trigger the asynchronous background AI worker! (runAIPipeline)
         runAIPipeline(targetMeetingId).catch((err) => {
           console.error(`[BACKGROUND PIPELINE START ERROR] for meeting ${targetMeetingId}:`, err);
         });
 
-        // Return 201 Created with valid file metadata instantly to prevent timeouts
         return res.status(201).json({
           status: "success",
           completed: true,
@@ -253,59 +260,74 @@ const upload = multer({ dest: GLOBAL_UPLOADS_DIR });
             meeting_id: targetMeetingId,
             recording_url: recordingUrl,
             file_size: fileSizeVal,
-            upload_status: 'UPLOAD_SUCCESS',
+            upload_status: "UPLOAD_SUCCESS",
             file_name: file.originalname || file_name,
-            platform: platform || "Zoom"
-          }
+            platform: platform || "Zoom",
+          },
+        });
+      }
+    } catch (error: any) {
+      console.error("POST /api/v1/meetings/:meetingId/upload-recording error:", error);
+      return res.status(500).json({
+        status: "error",
+        message: error.message || "Gagal mengunggah dan menyimpan rekaman.",
+      });
+    }
+  }
+);
+
+router.post(
+  "/api/projects/:projectId/meetings/:id/upload-recording",
+  jagaProyek("meetingNotes", "U"),
+  (req, res) => {
+    res.redirect(307, `/api/v1/meetings/${req.params.id}/upload-recording`);
+  }
+);
+
+// GET: Retrieve meeting status/details
+router.get("/api/v1/meetings/:id", jagaProyek("meetingNotes", "R", "meeting"), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const meeting = await meetingRepository.findById(id);
+    if (!meeting) {
+      return res.status(404).json({
+        status: "error",
+        code: "srv.meeting_tidak_ditemukan",
+        message: "Meeting tidak ditemukan.",
+      });
+    }
+    return res.json({ status: "success", data: meeting });
+  } catch (error: any) {
+    console.error(error);
+    return res.status(500).json({
+      status: "error",
+      code: "srv.gagal_mendapatkan_status_meeting",
+      message: "Gagal mendapatkan status meeting: " + error.message,
+    });
+  }
+});
+
+// GET: Dedicated short-polling endpoint for meeting AI processing status
+router.get(
+  "/api/v1/meetings/:meetingId/status",
+  jagaProyek("meetingNotes", "R", "meeting"),
+  async (req, res) => {
+    try {
+      const { meetingId } = req.params;
+      const meeting = await meetingRepository.findStatusById(meetingId);
+
+      if (!meeting) {
+        return res.status(404).json({
+          status: "error",
+          code: "srv.meeting_tidak_ditemukan",
+          message: "Meeting tidak ditemukan.",
         });
       }
 
-    } catch (error: any) {
-      console.error("POST /api/v1/meetings/:meetingId/upload-recording error:", error);
-      return res.status(500).json({ status: "error", message: error.message || "Gagal mengunggah dan menyimpan rekaman." });
-    }
-  });
-
-  router.post("/api/projects/:projectId/meetings/:id/upload-recording", (req, res) => {
-    res.redirect(307, `/api/v1/meetings/${req.params.id}/upload-recording`);
-  });
-
-
-  // GET: Retrieve meeting status/details (polling fallback)
-  router.get("/api/v1/meetings/:id", async (req, res) => {
-    try {
-      const { id } = req.params;
-      const connection = await db.getConnection();
-      const [rows]: any = await connection.query("SELECT * FROM Meetings WHERE id = ?", [id]);
-      connection.release();
-      if (!rows || rows.length === 0) {
-        return res.status(404).json({ status: "error", message: "Meeting tidak ditemukan." });
-      }
-      return res.json({ status: "success", data: rows[0] });
-    } catch (error: any) {
-      console.error(error);
-      return res.status(500).json({ status: "error", message: "Gagal mendapatkan status meeting: " + error.message });
-    }
-  });
-
-  // GET: Dedicated short-polling endpoint for meeting AI processing status
-  router.get("/api/v1/meetings/:meetingId/status", async (req, res) => {
-    try {
-      const { meetingId } = req.params;
-      const connection = await db.getConnection();
-      const [rows]: any = await connection.query("SELECT id, upload_status, transcript, analysis_result, aiSummary FROM Meetings WHERE id = ?", [meetingId]);
-      connection.release();
-      
-      if (!rows || rows.length === 0) {
-        return res.status(404).json({ status: "error", message: "Meeting tidak ditemukan." });
-      }
-      
-      const meeting = rows[0];
       let statusValue = meeting.upload_status || "IDLE";
       let progressPercentage = 0;
       let message = "Menunggu pemrosesan...";
 
-      // Standardize the status values for consistencies
       if (statusValue === "PROCESSING_AI") {
         statusValue = "EXTRACTING_AUDIO";
       } else if (statusValue === "TRANSCRIBING") {
@@ -350,162 +372,270 @@ const upload = multer({ dest: GLOBAL_UPLOADS_DIR });
         message: message,
         transcript: meeting.transcript,
         analysis_result: meeting.analysis_result,
-        aiSummary: meeting.aiSummary
+        aiSummary: meeting.aiSummary,
       });
     } catch (error: any) {
       console.error("GET /api/v1/meetings/:meetingId/status error:", error);
-      return res.status(500).json({ status: "error", message: "Gagal mendapatkan status: " + error.message });
+      return res.status(500).json({
+        status: "error",
+        code: "srv.gagal_mendapatkan_status",
+        message: "Gagal mendapatkan status: " + error.message,
+      });
     }
-  });
+  }
+);
 
-  // POST: Cancel or reset AI meeting background job & upload state
-  router.post("/api/v1/meetings/:meetingId/cancel", async (req, res) => {
+// POST: Cancel or reset AI meeting background job & upload state
+router.post(
+  "/api/v1/meetings/:meetingId/cancel",
+  jagaProyek("meetingNotes", "U", "meeting"),
+  validasiBody(cancelMeetingAnalysisSchema),
+  async (req, res) => {
     try {
       const { meetingId } = req.params;
-      const connection = await db.getConnection();
-      
-      // Update database back to IDLE and clear file attributes so user can upload again
-      await connection.query(
-        "UPDATE Meetings SET upload_status = 'IDLE', recording_url = NULL, file_size = NULL, transcript = NULL, aiSummary = NULL, analysis_result = NULL WHERE id = ?",
-        [meetingId]
-      );
-      connection.release();
+      // #320 — hapus berkas disk SEBELUM reset DB, supaya batal tidak
+      // meninggalkan orphan di uploads/ (retensi COMPLETED sudah bersih;
+      // jalur batal sebelumnya hanya NULL-kan kolom).
+      const meeting = await meetingRepository.findById(meetingId);
+      const recordingUrl = meeting?.recording_url;
+      if (recordingUrl) {
+        try {
+          const safeFileName = path.basename(recordingUrl);
+          const filePath = path.join(GLOBAL_UPLOADS_DIR, safeFileName);
+          if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        } catch (cleanupErr) {
+          console.warn("[CANCEL] Gagal menghapus berkas rekaman:", cleanupErr);
+        }
+      }
+      await meetingRepository.resetMeetingState(meetingId);
 
-      // Emit status back to IDLE
-      io.emit("meeting_ai_status", { 
-        meetingId, 
-        status: "IDLE", 
+      io.emit("meeting_ai_status", {
+        meetingId,
+        status: "IDLE",
         progress_percentage: 0,
-        message: "Pemrosesan dibatalkan."
+        code: "srv.pemrosesan_dibatalkan",
+        message: "Pemrosesan dibatalkan.",
       });
 
-      return res.json({ status: "success", message: "Pemrosesan rapat berhasil dibatalkan." });
+      return res.json({
+        status: "success",
+        code: "srv.pemrosesan_rapat_berhasil_dibatalkan",
+        message: "Pemrosesan rapat berhasil dibatalkan.",
+      });
     } catch (error: any) {
       console.error("POST /api/v1/meetings/:meetingId/cancel error:", error);
-      return res.status(500).json({ status: "error", message: "Gagal membatalkan pemrosesan: " + error.message });
+      return res.status(500).json({
+        status: "error",
+        code: "srv.gagal_membatalkan_pemrosesan",
+        message: "Gagal membatalkan pemrosesan: " + error.message,
+      });
     }
-  });
+  }
+);
 
-  // POST: Trigger asynchronous background AI pipeline analysis
-  router.post("/api/v1/meetings/:meetingId/analyze", async (req, res) => {
+// POST: Trigger asynchronous background AI pipeline analysis
+router.post(
+  "/api/v1/meetings/:meetingId/analyze",
+  jagaProyek("meetingNotes", "U", "meeting"),
+  validasiBody(analyzeMeetingSchema),
+  async (req, res) => {
     try {
       const { meetingId } = req.params;
+      const meeting = await meetingRepository.findById(meetingId);
 
-      const connection = await db.getConnection();
-      const [rows]: any = await connection.query("SELECT * FROM Meetings WHERE id = ?", [meetingId]);
-      connection.release();
-      
-      if (!rows || rows.length === 0) {
-        return res.status(404).json({ status: "error", message: "Meeting tidak ditemukan." });
+      if (!meeting) {
+        return res.status(404).json({
+          status: "error",
+          code: "srv.meeting_tidak_ditemukan",
+          message: "Meeting tidak ditemukan.",
+        });
       }
 
-      const meeting = rows[0];
       const recordingUrl = meeting.recording_url;
-
       if (!recordingUrl) {
-        return res.status(400).json({ status: "error", message: "File rekaman belum diunggah." });
+        return res.status(400).json({
+          status: "error",
+          code: "srv.file_rekaman_belum_diunggah",
+          message: "File rekaman belum diunggah.",
+        });
       }
 
-      // Trigger the background worker process asynchronously
-      runAIPipeline(meetingId).catch(err => console.error("Error in async background worker execution:", err));
+      runAIPipeline(meetingId).catch((err) =>
+        console.error("Error in async background worker execution:", err)
+      );
 
       return res.status(202).json({
         status: "success",
+        code: "srv.proses_pemrosesan_ai_stt",
         message: "Proses pemrosesan AI (STT & LLM) berhasil dimulai di latar belakang.",
         data: {
           meetingId,
-          upload_status: "PROCESSING_AI"
-        }
+          upload_status: "PROCESSING_AI",
+        },
       });
-
     } catch (error: any) {
       console.error("POST /api/v1/meetings/:meetingId/analyze error:", error);
-      return res.status(500).json({ status: "error", message: error.message || "Gagal memulai analisis AI." });
+      return res
+        .status(500)
+        .json({ status: "error", message: error.message || "Gagal memulai analisis AI." });
     }
-  });
+  }
+);
 
-  // POST: Multimodal Video/Audio analysis using Gemini API with exact JSON Schema & saves to meeting_details
-  router.post(["/analyze-video", "/api/v1/meetings/:meetingId/analyze-video"], async (req, res) => {
+// POST: Multimodal Video/Audio analysis using Gemini API with exact JSON Schema & saves to meeting_details
+/**
+ * Analisis video multimodal sebuah rapat — perbaikan item #233.
+ *
+ * DUA HAL YANG DIPERBAIKI DI SINI, dan keduanya lahir dari satu baris.
+ *
+ * 1. ALIAS TELANJANG `/analyze-video` DIHAPUS. Rute ini dulu didaftarkan
+ *    sebagai ARRAY dua jalur: `["/analyze-video", "/api/v1/meetings/..."]`.
+ *    Penjaga global di `server.ts:426` hanya menyaring URL yang diawali
+ *    `/api/`, sehingga alias telanjang itu melewatinya sepenuhnya. Terbukti
+ *    lewat probe: `POST /api/v1/meetings/1/analyze-video` menjawab 401,
+ *    sedangkan `POST /analyze-video` menembus sampai ke validasi di dalam
+ *    handler dan menjawab 400 — tanpa token sama sekali. Siapa pun tanpa akun
+ *    bisa menebak `meetingId`, memicu analisis Gemini atas rekaman rapat mana
+ *    pun, dan membebani kuota API berbayar.
+ *
+ *    Tidak ada kode klien yang memanggil `/analyze-video`; antarmuka memakai
+ *    `/api/projects/:projectId/meetings/:meetingId/analyze-transcript`
+ *    (`src/features/meeting-notes/services/meeting.service.ts:43`). Jadi alias
+ *    itu murni permukaan serang tanpa pemakai.
+ *
+ * 2. `jagaProyek` DIPASANG, dan `meetingId` kini HANYA dari path.
+ *    Sebelumnya handler menerima `meetingId` dari body dan query juga. Itu
+ *    berbahaya begitu ada penjaga: `jagaProyek` memvalidasi lingkup dari
+ *    parameter path, sehingga handler yang membaca id dari body bisa
+ *    mengerjakan rapat LAIN daripada yang barusan divalidasi. Penjaga dan
+ *    handler harus membaca nilai yang sama persis.
+ *
+ * KENAPA GERBANG TIDAK PERNAH MENANGKAPNYA. `rute-tanpa-penjaga.test.ts`
+ * menuntut setiap rute berlingkup proyek punya penjaga, dan `/api/v1/meetings/`
+ * memang terdaftar di `POLA_ENTITAS`-nya. Tetapi penguraiannya menuntut jalur
+ * berupa string dalam kutip tepat sesudah `(`; bentuk ARRAY seperti di sini
+ * tidak cocok dengan polanya, sehingga rute ini tidak pernah masuk himpunan
+ * yang diperiksa. Gerbangnya hijau justru karena rutenya tak terlihat. Sesudah
+ * jalurnya jadi string tunggal, rute ini akhirnya ikut terperiksa.
+ */
+router.post(
+  "/api/v1/meetings/:meetingId/analyze-video",
+  jagaProyek("meetingNotes", "U", "meeting"),
+  validasiBody(analyzeVideoSchema),
+  async (req, res) => {
     try {
-      const meetingId = req.params.meetingId || req.body.meetingId || req.query.meetingId;
+      const meetingId = req.params.meetingId;
       if (!meetingId) {
-        return res.status(400).json({ status: "error", message: "ID Meeting (meetingId) diperlukan." });
+        return res.status(400).json({
+          status: "error",
+          code: "srv.id_meeting_meetingid_diperlukan",
+          message: "ID Meeting (meetingId) diperlukan.",
+        });
       }
 
-      const connection = await db.getConnection();
-      const [rows]: any = await connection.query("SELECT * FROM Meetings WHERE id = ?", [meetingId]);
-      
-      if (!rows || rows.length === 0) {
-        connection.release();
-        return res.status(404).json({ status: "error", message: "Meeting tidak ditemukan." });
+      const meeting = await meetingRepository.findById(meetingId);
+      if (!meeting) {
+        return res.status(404).json({
+          status: "error",
+          code: "srv.meeting_tidak_ditemukan",
+          message: "Meeting tidak ditemukan.",
+        });
       }
 
-      const meeting = rows[0];
       const recordingUrl = meeting.recording_url;
-
       if (!recordingUrl) {
-        connection.release();
-        return res.status(400).json({ status: "error", message: "File rekaman belum diunggah." });
+        return res.status(400).json({
+          status: "error",
+          code: "srv.file_rekaman_belum_diunggah",
+          message: "File rekaman belum diunggah.",
+        });
       }
 
-      // Set status to ANALYZING_LLM to let client know multimodal processing is ongoing
-      await connection.query("UPDATE Meetings SET upload_status = 'ANALYZING_LLM' WHERE id = ?", [meetingId]);
-      io.emit("meeting_ai_status", { 
-        meetingId, 
+      await meetingRepository.setUploadStatus(meetingId, "ANALYZING_LLM");
+      io.emit("meeting_ai_status", {
+        meetingId,
         status: "ANALYZING_LLM",
         progress_percentage: 85,
-        message: "Menganalisis video & audio multimodal menggunakan Gemini 2.5 Pro..."
+        code: "srv.menganalisis_video_audio_multimodal",
+        message: "Menganalisis video & audio multimodal menggunakan Gemini 2.5 Pro...",
       });
-      
+
       const safeFileName = path.basename(recordingUrl);
-      
       const filePath = path.join(GLOBAL_UPLOADS_DIR, safeFileName);
 
       if (!fs.existsSync(filePath)) {
-        connection.release();
-        return res.status(404).json({ status: "error", message: `File rekaman tidak ditemukan di path: ${filePath}` });
+        return res
+          .status(404)
+          .json({ status: "error", message: `File rekaman tidak ditemukan di path: ${filePath}` });
       }
 
-      // Determine mime type
+      // #320 — sama seperti runAIPipeline: Gemini menolak audio/webm.
+      // Transcode ke MP3 bila ekstensi tidak aman, sebelum inlineData.
+      let analysisPath = filePath;
+      let mimeType = "audio/mp3";
       const fileExt = path.extname(filePath).toLowerCase();
-      let mimeType = "video/mp4";
-      if (fileExt === ".webm") mimeType = "video/webm";
-      else if (fileExt === ".avi") mimeType = "video/x-msvideo";
-      else if (fileExt === ".mov") mimeType = "video/quicktime";
-      else if (fileExt === ".mkv") mimeType = "video/x-matroska";
-      else if (fileExt === ".mp3" || fileExt === ".wav" || fileExt === ".m4a") {
-        mimeType = fileExt === ".mp3" ? "audio/mp3" : (fileExt === ".wav" ? "audio/wav" : "audio/x-m4a");
-      }
+      let extractedPath: string | null = null;
+      if (ekstensiPerluMp3UntukGemini(fileExt)) {
+        extractedPath = path.join(
+          GLOBAL_UPLOADS_DIR,
+          `extracted_multimodal_${meetingId}_${Date.now()}.mp3`
+        );
+        try {
+          try {
+            await execAsync(perintahFfmpegKeMp3(filePath, extractedPath, true));
+          } catch {
+            await execAsync(perintahFfmpegKeMp3(filePath, extractedPath, false));
+          }
+          analysisPath = extractedPath;
+          mimeType = "audio/mp3";
+        } catch {
+          return res.status(500).json({
+            status: "error",
+            code: "srv.rekaman_tidak_bisa_diubah_ke_mp3",
+            message:
+              "Rekaman WebM/MP4 tidak bisa diubah ke MP3. Pasang FFmpeg di server, atau unggah berkas MP3.",
+          });
+        }
+      } else if (fileExt === ".wav") mimeType = "audio/wav";
+      else if (fileExt === ".aac") mimeType = "audio/aac";
+      else if (fileExt === ".ogg") mimeType = "audio/ogg";
+      else if (fileExt === ".flac") mimeType = "audio/flac";
+      else mimeType = "audio/mp3";
 
-      console.log(`[MULTIMODAL AI] Reading file for multimodal analysis: ${filePath} (${mimeType})`);
-      const fileBuffer = fs.readFileSync(filePath);
-      const base64File = fileBuffer.toString('base64');
+      console.log(
+        `[MULTIMODAL AI] Reading file for multimodal analysis: ${analysisPath} (${mimeType})`
+      );
+      const fileBuffer = fs.readFileSync(analysisPath);
+      const base64File = fileBuffer.toString("base64");
 
       const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) {
-        connection.release();
-        return res.status(400).json({ status: "error", message: "Kunci API Gemini tidak dikonfigurasi." });
+        return res.status(400).json({
+          status: "error",
+          code: "srv.kunci_api_gemini_tidak",
+          message: "Kunci API Gemini tidak dikonfigurasi.",
+        });
       }
 
       const ai = new GoogleGenAI({
         apiKey: apiKey,
         httpOptions: {
           headers: {
-            'User-Agent': 'aistudio-build',
-          }
-        }
+            "User-Agent": "aistudio-build",
+          },
+        },
       });
 
-
-      // Fetch latest 5-10 learning notes from ai_learning_logs for multimodal analysis
       let learningNotesStr = "";
       try {
-        const [logs]: any = await connection.query(
-          "SELECT evaluation_notes, timestamp FROM ai_learning_logs WHERE project_id = ? ORDER BY timestamp DESC LIMIT 10",
-          [meeting.projectId]
-        );
+        const logs = await meetingRepository.getAiLearningLogs(meeting.projectId, 10);
         if (logs && logs.length > 0) {
-          learningNotesStr = logs.map((log: any, idx: number) => `[Evaluation #${idx + 1} - ${log.timestamp}]: ${log.evaluation_notes}`).join("\n");
+          learningNotesStr = logs
+            .map(
+              (log: any, idx: number) =>
+                `[Evaluation #${idx + 1} - ${log.timestamp}]: ${log.evaluation_notes}`
+            )
+            .join("\n");
         }
       } catch (logQueryErr) {
         console.warn("[MULTIMODAL AI] Gagal mengambil log evaluasi pembelajaran:", logQueryErr);
@@ -526,26 +656,28 @@ Gunakan responseSchema yang diberikan untuk menghasilkan objek JSON utuh tanpa b
 
 ${learningSection}`;
 
-      console.log(`[MULTIMODAL AI] Calling Gemini with multimodal prompt on file size: ${fileBuffer.length} bytes`);
-      
+      console.log(
+        `[MULTIMODAL AI] Calling Gemini with multimodal prompt on file size: ${fileBuffer.length} bytes`
+      );
+
       const responseGemini = await generateContentWithFallback(ai, {
         model: "gemini-2.5-pro",
         contents: [
           {
             inlineData: {
               data: base64File,
-              mimeType: mimeType
-            }
+              mimeType: mimeType,
+            },
           },
           {
-            text: multimodalPrompt
-          }
+            text: multimodalPrompt,
+          },
         ],
         config: {
           temperature: 0.2,
           responseMimeType: "application/json",
-          responseSchema: MULTIMODAL_ANALYSIS_SCHEMA
-        }
+          responseSchema: MULTIMODAL_ANALYSIS_SCHEMA,
+        },
       });
 
       const analysisJsonText = responseGemini.text ? responseGemini.text.trim() : "{}";
@@ -557,30 +689,6 @@ ${learningSection}`;
         parsedData = {};
       }
 
-      // Save to meeting_details table
-      const detailId = crypto.randomUUID();
-      await connection.query(
-        `INSERT INTO meeting_details (
-          id, meeting_id, ringkasan_eksekutif, topik_utama, 
-          kronologi_dan_kesimpulan, kesimpulan, saran_dan_ide, 
-          tindak_lanjut, next_plan, target_to_be_architecture, metadata_rapat
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          detailId,
-          meetingId,
-          parsedData.tab_ringkasan?.executive_summary_multimodal || "",
-          parsedData.tab_ringkasan?.topik_utama || "",
-          JSON.stringify(parsedData.tab_kronologi_rapat || []),
-          JSON.stringify(parsedData.tab_kesimpulan || []),
-          JSON.stringify(parsedData.tab_saran_dan_ide || []),
-          JSON.stringify(parsedData.tab_tindak_lanjut || []),
-          JSON.stringify(parsedData.tab_next_plan || []),
-          JSON.stringify(parsedData.tab_target_to_be || {}),
-          JSON.stringify(parsedData.tab_metadata || {})
-        ]
-      );
-
-      // Synthesize compatible fields for the main Meetings table update
       const ringkasan_eksekutif = parsedData.tab_ringkasan?.executive_summary_multimodal || "";
       const kronologiList = parsedData.tab_kronologi_rapat || [];
       const kesimpulanList = parsedData.tab_kesimpulan || [];
@@ -593,42 +701,39 @@ ${learningSection}`;
       const mappedKronologi = kronologiList.map((item: any) => ({
         topik_bahasan: `[${item.timestamp}] Visual: ${item.aktivitas_visual}`,
         latar_belakang_argumen: item.isi_percakapan_inti || "Tidak ada detail argumen.",
-        keputusan_akhir: item.isi_percakapan_inti || "Tidak ada keputusan."
+        keputusan_akhir: item.isi_percakapan_inti || "Tidak ada keputusan.",
       }));
 
       const mappedTindakLanjut = tindakLanjutList.map((item: any) => ({
         pembicara: "Rapat",
         kekhawatiran_spesifik: item.concern_masalah || "",
-        solusi_dan_arahan: item.solusi_disepakati || ""
+        solusi_dan_arahan: item.solusi_disepakati || "",
       }));
 
       const mappedNextPlan = nextPlanList.map((item: any) => ({
         action_item: item.action_item || "",
         pic: item.pic || "TBD",
-        estimasi_waktu: item.due_date || "TBD"
+        estimasi_waktu: item.due_date || "TBD",
       }));
 
       const mappedTargetToBe = {
         proses_bisnis_as_is: targetToBe.proses_bisnis_as_is || "",
         proses_bisnis_to_be: targetToBe.proses_bisnis_to_be || "",
-        langkah_transisi: targetToBe.langkah_transisi || []
+        langkah_transisi: targetToBe.langkah_transisi || [],
       };
 
       const mappedMetadata = {
         topik_utama: parsedData.tab_ringkasan?.topik_utama || "Rapat Multimodal",
         tanggal_waktu: metadataVal.tanggal_rapat || new Date().toISOString().split("T")[0],
-        peserta_aktif: metadataVal.peserta_rapat || []
+        peserta_aktif: metadataVal.peserta_rapat || [],
       };
 
-      // Construct backward compatible combined JSON to bind to the existing tabs reaktivitas
       const compatibleSummary = {
         ringkasan_eksekutif,
         kronologi_dan_kesimpulan: mappedKronologi,
         tindak_lanjut_dan_concern: mappedTindakLanjut,
         next_plan_roadmap: mappedNextPlan,
         target_to_be_architecture: mappedTargetToBe,
-        
-        // Exact original JSON schema keys so frontend activeMeetingData can bind them as well
         tab_ringkasan: parsedData.tab_ringkasan,
         tab_kronologi_rapat: parsedData.tab_kronologi_rapat,
         tab_kesimpulan: parsedData.tab_kesimpulan,
@@ -637,11 +742,9 @@ ${learningSection}`;
         tab_next_plan: parsedData.tab_next_plan,
         tab_target_to_be: parsedData.tab_target_to_be,
         tab_metadata: parsedData.tab_metadata,
-
-        // Legacy fallbacks
-        notulen_rapat: kronologiList.map((item: any, idx: number) => ({
+        notulen_rapat: kronologiList.map((item: any) => ({
           topik: `[${item.timestamp}] Visual: ${item.aktivitas_visual}`,
-          pembahasan: item.isi_percakapan_inti || ""
+          pembahasan: item.isi_percakapan_inti || "",
         })),
         kesimpulan: kesimpulanList,
         saran: saranList.map((item: any) => `${item.diusulkan_oleh}: ${item.deskripsi_ide}`),
@@ -650,35 +753,42 @@ ${learningSection}`;
           concern: item.concern_masalah || "",
           tindakanLanjut: item.solusi_disepakati || "",
           PIC: "TBD",
-          targetDate: "TBD"
+          targetDate: "TBD",
         })),
         next_plan: nextPlanList.map((item: any) => ({
           tahapan: item.action_item || "",
           deskripsi: `PIC: ${item.pic}. Target: ${item.due_date}`,
-          estimasi_waktu: item.due_date || "TBD"
+          estimasi_waktu: item.due_date || "TBD",
         })),
         to_be_scenario: {
           kondisi_sekarang: targetToBe.proses_bisnis_as_is || "",
           target_ke_depan: targetToBe.proses_bisnis_to_be || "",
-          langkah_transisi: targetToBe.langkah_transisi || []
-        }
+          langkah_transisi: targetToBe.langkah_transisi || [],
+        },
       };
 
       const finalJsonStr = JSON.stringify(compatibleSummary);
+      const detailId = crypto.randomUUID();
 
-      await connection.query(
-        "UPDATE Meetings SET aiSummary = ?, analysis_result = ?, upload_status = 'COMPLETED' WHERE id = ?",
-        [finalJsonStr, finalJsonStr, meetingId]
-      );
+      await meetingRepository.saveMultimodalDetails(detailId, meetingId, parsedData, finalJsonStr);
 
-      connection.release();
+      // #182: notulen sudah tersimpan di finalJsonStr — berkas video/audio mentah
+      // tidak lagi dibutuhkan. Dihapus dari disk supaya tidak menumpuk permanen
+      // (disk lokal di serverless bersifat sementara, lihat npm run doctor §6).
+      try {
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        if (extractedPath && fs.existsSync(extractedPath)) fs.unlinkSync(extractedPath);
+        await meetingRepository.clearRecordingFile(meetingId);
+      } catch (cleanupErr) {
+        console.warn("[MULTIMODAL AI] Gagal menghapus berkas rekaman pasca-analisis:", cleanupErr);
+      }
 
-      // Emit real-time completed events
-      io.emit("meeting_ai_status", { 
-        meetingId, 
+      io.emit("meeting_ai_status", {
+        meetingId,
         status: "COMPLETED",
         progress_percentage: 100,
-        message: "Pemrosesan analisis video multimodal selesai!"
+        code: "srv.pemrosesan_analisis_video_multimodal",
+        message: "Pemrosesan analisis video multimodal selesai!",
       });
 
       io.emit("meeting_ai_completed", {
@@ -687,51 +797,70 @@ ${learningSection}`;
         progress_percentage: 100,
         aiSummary: compatibleSummary,
         analysis_result: compatibleSummary,
-        transcript: meeting.transcript || "Transkrip tidak tersedia. Analisis dilakukan langsung dari rekaman visual video."
+        transcript:
+          meeting.transcript ||
+          "Transkrip tidak tersedia. Analisis dilakukan langsung dari rekaman visual video.",
       });
 
       return res.json({
         status: "success",
+        code: "srv.analisis_video_multimodal_berhasil",
         message: "Analisis video multimodal berhasil dilakukan dan disimpan.",
         data: {
           detailId,
           meetingId,
-          analysis: parsedData
-        }
+          analysis: parsedData,
+        },
       });
-
     } catch (error: any) {
       console.error("[MULTIMODAL API ERROR] Error processing video analysis:", error);
-      return res.status(500).json({ status: "error", message: "Gagal memproses analisis video multimodal: " + error.message });
+      return res.status(500).json({
+        status: "error",
+        code: "srv.gagal_memproses_analisis_video",
+        message: "Gagal memproses analisis video multimodal: " + error.message,
+      });
     }
-  });
+  }
+);
 
-  router.post("/api/projects/:projectId/meetings/:id/analyze-transcript", async (req, res) => {
+router.post(
+  "/api/projects/:projectId/meetings/:id/analyze-transcript",
+  jagaProyek("meetingNotes", "U"),
+  validasiBody(analyzeTranscriptSchema),
+  async (req, res) => {
     try {
       const { id } = req.params;
       const { transcript, meetingLink } = req.body;
 
       if (!transcript || !transcript.trim()) {
-        return res.status(400).json({ status: "error", message: "Transkrip tidak boleh kosong." });
+        return res.status(400).json({
+          status: "error",
+          code: "srv.transkrip_tidak_boleh_kosong",
+          message: "Transkrip tidak boleh kosong.",
+        });
       }
 
       const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) {
-        return res.status(400).json({ status: "error", message: "Kunci API Gemini tidak dikonfigurasi pada server." });
+        return res.status(400).json({
+          status: "error",
+          code: "srv.kunci_api_gemini_tidak_2",
+          message: "Kunci API Gemini tidak dikonfigurasi pada server.",
+        });
       }
 
       const ai = new GoogleGenAI({
         apiKey: apiKey,
         httpOptions: {
           headers: {
-            'User-Agent': 'aistudio-build',
-          }
-        }
+            "User-Agent": "aistudio-build",
+          },
+        },
       });
 
       const systemInstruction = `Bertindaklah sebagai Senior Business Analyst dan PMO Lead kelas enterprise yang sangat detail dan perfeksionis. Tugas Anda adalah menyusun Notulen Rapat Resmi yang sangat komprehensif, mendalam, detail secara UTUH dari Teks Transkrip Mentah (Raw Transcript) hasil rekaman rapat, dan TANPA meringkas/memotong poin penting.
 
-Input yang kamu terima adalah transkrip hasil Speech-to-Text${meetingLink ? ` dan link rapat: ${meetingLink}` : ''}.
+Input yang kamu terima adalah transkrip hasil Speech-to-Text${meetingLink ? ` dan link rapat: ${meetingLink}` : ""}.
 
 Patuhi instruksi ketat berikut:
 1. JANGAN lakukan enkapsulasi atau generalisasi (jangan meringkas perdebatan menjadi hanya satu kalimat jika di transkrip mereka berdiskusi panjang).
@@ -773,12 +902,13 @@ Kamu HARUS menghasilkan output dalam format JSON terstruktur yang memiliki kunci
 
 ATURAN KETAT (ANTI-HALUSINASI):
 - Kamu harus menganalisis transkrip secara RIIL. Jangan mengarang fitur, sistem, nama orang, tanggal, atau rencana yang sama sekali tidak disebutkan atau tidak disirat secara logis dari isi transkrip rapat.
+- Setiap butir notulen_rapat, poin_diskusi_tambahan, dan next_plan WAJIB punya bukti_cuplikan (kutipan singkat verbatim). Jika tidak ada kutipan: status_bukti=UNVERIFIED dan jangan isi klaim itu.
 - Gunakan Bahasa Indonesia yang formal, profesional, mudah dipahami, dan ringkas namun padat informasi.
 - Berikan output HANYA dalam format JSON valid sesuai skema yang diminta.`;
 
       const response = await generateContentWithFallback(ai, {
         model: "gemini-flash-latest",
-        contents: `[TRANSKRIP SELESAI]:\n${transcript}${meetingLink ? `\n[LINK RAPAT]: ${meetingLink}` : ''}`,
+        contents: `[TRANSKRIP SELESAI]:\n${transcript}${meetingLink ? `\n[LINK RAPAT]: ${meetingLink}` : ""}`,
         config: {
           systemInstruction: systemInstruction,
           temperature: 0.2,
@@ -788,92 +918,181 @@ ATURAN KETAT (ANTI-HALUSINASI):
             properties: {
               ringkasan_eksekutif: {
                 type: Type.STRING,
-                description: "Notulen Rapat dari transkrip secara UTUH, mendalam, dan TANPA meringkas/memotong poin penting menggunakan struktur formatting Markdown berikut secara ketat:\n\n## NOTULEN RAPAT: [Nama Topik/Agenda Rapat Utama]\n**Tanggal:** [Isi Tanggal/Bulan/Tahun jika disebutkan]\n**Topik Utama:** [Tujuan besar rapat ini diadakan]\n\n---\n\n### **A. DAFTAR HADIR & IDENTIFIKASI PERAN**\n(Daftar semua pembicara beserta peran, divisi, atau latar belakang mereka berdasarkan isi percakapan).\n\n---\n\n### **B. KRONOLOGI DISKUSI MENDALAM & DETAIL TEKNIS**\n(Kupas habis setiap topik yang didebatkan. Bagi menjadi sub-heading (###) berdasarkan topik masalah. Masukkan detail arsitektur sistem, skema database/API/flow data, alasan bisnis di balik sebuah request, serta perbandingan sistem eksisting vs sistem baru yang dibahas).\n\n---\n\n### **C. BREAKDOWN RENCANA TINDAK LANJUT (ACTION ITEMS)**\n(Buat daftar tugas konkret yang sifatnya operasional dan siap dieksekusi, sebutkan:\n- Pihak/Tim Penanggung Jawab.\n- Detail Tugas (Langkah 1, Langkah 2, dst).\n- Dampak Teknis/Bisnis jika tugas ini dijalankan)."
+                description:
+                  "Notulen Rapat dari transkrip secara UTUH, mendalam, dan TANPA meringkas/memotong poin penting menggunakan struktur formatting Markdown.",
               },
               notulen_rapat: {
                 type: Type.ARRAY,
                 items: {
                   type: Type.OBJECT,
                   properties: {
-                    topik: { type: Type.STRING, description: "Topik bahasan utama yang dibicarakan peserta rapat." },
-                    pembahasan: { type: Type.STRING, description: "Alur argumen dan jalannya rapat mengenai topik ini (dalam Bahasa Indonesia)." }
+                    topik: {
+                      type: Type.STRING,
+                      description: "Topik bahasan utama yang dibicarakan peserta rapat.",
+                    },
+                    pembahasan: {
+                      type: Type.STRING,
+                      description:
+                        "Alur argumen dan jalannya rapat mengenai topik ini (dalam Bahasa Indonesia).",
+                    },
+                    bukti_cuplikan: {
+                      type: Type.STRING,
+                      description:
+                        "Kutipan singkat verbatim dari transkrip yang membuktikan topik/pembahasan.",
+                    },
+                    status_bukti: {
+                      type: Type.STRING,
+                      description: "VERIFIED jika ada kutipan; UNVERIFIED jika tidak.",
+                    },
                   },
-                  required: ["topik", "pembahasan"]
+                  required: ["topik", "pembahasan", "bukti_cuplikan", "status_bukti"],
                 },
-                description: "Kronologi jalannya rapat terstruktur dikelompokkan berdasarkan topik bahasan utama."
+                description:
+                  "Kronologi jalannya rapat terstruktur dikelompokkan berdasarkan topik bahasan utama.",
               },
               kesimpulan: {
                 type: Type.ARRAY,
                 items: { type: Type.STRING },
-                description: "Poin-poin keputusan akhir yang disepakati (Bahasa Indonesia)."
+                description: "Poin-poin keputusan akhir yang disepakati (Bahasa Indonesia).",
               },
               saran: {
                 type: Type.ARRAY,
                 items: { type: Type.STRING },
-                description: "Rekomendasi, ide, atau masukan dari peserta rapat (Bahasa Indonesia)."
+                description:
+                  "Rekomendasi, ide, atau masukan dari peserta rapat (Bahasa Indonesia).",
               },
               meeting_metadata: {
                 type: Type.OBJECT,
                 properties: {
-                  topik_utama: { type: Type.STRING, description: "Deteksi otomatis topik utama rapat." },
-                  tanggal_waktu: { type: Type.STRING, description: "Perkiraan tanggal/waktu jika disebutkan, kosongkan jika tidak." },
+                  topik_utama: {
+                    type: Type.STRING,
+                    description: "Deteksi otomatis topik utama rapat.",
+                  },
+                  tanggal_waktu: {
+                    type: Type.STRING,
+                    description: "Perkiraan tanggal/waktu jika disebutkan, kosongkan jika tidak.",
+                  },
                   peserta_aktif: {
                     type: Type.ARRAY,
                     items: { type: Type.STRING },
-                    description: "Daftar nama peserta yang aktif berbicara."
-                  }
+                    description: "Daftar nama peserta yang aktif berbicara.",
+                  },
                 },
-                required: ["topik_utama", "peserta_aktif"]
+                required: ["topik_utama", "peserta_aktif"],
               },
               poin_diskusi_tambahan: {
                 type: Type.ARRAY,
                 items: {
                   type: Type.OBJECT,
                   properties: {
-                    concern: { type: Type.STRING, description: "Isu / poin diskusi penting pemicu tindak lanjut." },
-                    fitur: { type: Type.STRING, description: "Nama fitur terkait (kosongkan jika tidak ada)." },
-                    system: { type: Type.STRING, description: "Sistem / subsistem terkait (kosongkan jika tidak ada)." },
-                    surrounding: { type: Type.STRING, description: "Konteks/pihak lain sekeliling yang terdampak." },
+                    concern: {
+                      type: Type.STRING,
+                      description: "Isu / poin diskusi penting pemicu tindak lanjut.",
+                    },
+                    fitur: {
+                      type: Type.STRING,
+                      description: "Nama fitur terkait (kosongkan jika tidak ada).",
+                    },
+                    system: {
+                      type: Type.STRING,
+                      description: "Sistem / subsistem terkait (kosongkan jika tidak ada).",
+                    },
+                    surrounding: {
+                      type: Type.STRING,
+                      description: "Konteks/pihak lain sekeliling yang terdampak.",
+                    },
                     keterangan: { type: Type.STRING, description: "Penjelasan/deskripsi singkat." },
-                    tindakanLanjut: { type: Type.STRING, description: "Rencana tindak lanjut / action item konkret." },
+                    tindakanLanjut: {
+                      type: Type.STRING,
+                      description: "Rencana tindak lanjut / action item konkret.",
+                    },
                     PIC: { type: Type.STRING, description: "Nama Person In Charge jika ada." },
-                    targetDate: { type: Type.STRING, description: "Tenggat waktu pengerjaan (format YYYY-MM-DD jika ada, atau teks singkat)." }
+                    targetDate: {
+                      type: Type.STRING,
+                      description:
+                        "Tenggat waktu pengerjaan (format YYYY-MM-DD jika ada, atau teks singkat).",
+                    },
+                    bukti_cuplikan: {
+                      type: Type.STRING,
+                      description: "Kutipan verbatim yang mendukung concern/tindakan lanjut.",
+                    },
+                    status_bukti: {
+                      type: Type.STRING,
+                      description: "VERIFIED atau UNVERIFIED.",
+                    },
                   },
-                  required: ["concern", "tindakanLanjut"]
+                  required: ["concern", "tindakanLanjut", "bukti_cuplikan", "status_bukti"],
                 },
-                description: "Daftar poin diskusi tambahan / action items."
+                description: "Daftar poin diskusi tambahan / action items.",
               },
               next_plan: {
                 type: Type.ARRAY,
                 items: {
                   type: Type.OBJECT,
                   properties: {
-                    tahapan: { type: Type.STRING, description: "Nama tahapan atau fase rencana aksi selanjutnya." },
-                    deskripsi: { type: Type.STRING, description: "Penjelasan detail mengenai rencana aksi tersebut berdasarkan transkrip." },
-                    estimasi_waktu: { type: Type.STRING, description: "Estimasi waktu pelaksanaan jika dibahas, jika tidak kosongi." }
+                    tahapan: {
+                      type: Type.STRING,
+                      description: "Nama tahapan atau fase rencana aksi selanjutnya.",
+                    },
+                    deskripsi: {
+                      type: Type.STRING,
+                      description:
+                        "Penjelasan detail mengenai rencana aksi tersebut berdasarkan transkrip.",
+                    },
+                    estimasi_waktu: {
+                      type: Type.STRING,
+                      description: "Estimasi waktu pelaksanaan jika dibahas, jika tidak kosongi.",
+                    },
+                    bukti_cuplikan: {
+                      type: Type.STRING,
+                      description: "Kutipan verbatim yang mendukung tahapan rencana.",
+                    },
+                    status_bukti: {
+                      type: Type.STRING,
+                      description: "VERIFIED atau UNVERIFIED.",
+                    },
                   },
-                  required: ["tahapan", "deskripsi"]
+                  required: ["tahapan", "deskripsi", "bukti_cuplikan", "status_bukti"],
                 },
-                description: "Rencana jangka pendek dan menengah (Next Plan) riil hasil pembahasan rapat."
+                description:
+                  "Rencana jangka pendek dan menengah (Next Plan) riil hasil pembahasan rapat.",
               },
               to_be_scenario: {
                 type: Type.OBJECT,
                 properties: {
-                  kondisi_sekarang: { type: Type.STRING, description: "Kondisi sistem/proses saat ini (As-Is) yang dibahas atau dikeluhkan." },
-                  target_ke_depan: { type: Type.STRING, description: "Gambaran detail sistem/proses ke depan (To-Be) yang disepakati atau diusulkan." },
+                  kondisi_sekarang: {
+                    type: Type.STRING,
+                    description:
+                      "Kondisi sistem/proses saat ini (As-Is) yang dibahas atau dikeluhkan.",
+                  },
+                  target_ke_depan: {
+                    type: Type.STRING,
+                    description:
+                      "Gambaran detail sistem/proses ke depan (To-Be) yang disepakati atau diusulkan.",
+                  },
                   langkah_transisi: {
                     type: Type.ARRAY,
                     items: { type: Type.STRING },
-                    description: "Langkah transisi atau proses migrasi menuju kondisi To-Be."
-                  }
+                    description: "Langkah transisi atau proses migrasi menuju kondisi To-Be.",
+                  },
                 },
                 required: ["kondisi_sekarang", "target_ke_depan", "langkah_transisi"],
-                description: "Analisis kondisi sistem/proses masa depan (To-Be Scenario) riil hasil rapat."
-              }
+                description:
+                  "Analisis kondisi sistem/proses masa depan (To-Be Scenario) riil hasil rapat.",
+              },
             },
-            required: ["ringkasan_eksekutif", "notulen_rapat", "kesimpulan", "saran", "meeting_metadata", "poin_diskusi_tambahan", "next_plan", "to_be_scenario"]
-          }
-        }
+            required: [
+              "ringkasan_eksekutif",
+              "notulen_rapat",
+              "kesimpulan",
+              "saran",
+              "meeting_metadata",
+              "poin_diskusi_tambahan",
+              "next_plan",
+              "to_be_scenario",
+            ],
+          },
+        },
       });
 
       const jsonStr = response.text ? response.text.trim() : "{}";
@@ -885,168 +1104,240 @@ ATURAN KETAT (ANTI-HALUSINASI):
         parsedData = {};
       }
 
-      // Simpan langsung ke kolom Meetings jika inginkan persistence
-      const connection = await db.getConnection();
-      await connection.query(
-        "UPDATE Meetings SET transcript = ?, aiSummary = ? WHERE id = ?",
-        [transcript, jsonStr, id]
+      parsedData = saringHasilAnalisisTempel(parsedData);
+      await meetingRepository.updateTranscriptAndAiSummary(
+        id,
+        transcript,
+        JSON.stringify(parsedData)
       );
-      connection.release();
 
       res.json({
         status: "success",
-        data: parsedData
+        data: parsedData,
       });
     } catch (error: any) {
       console.error("POST /api/projects/:projectId/meetings/:id/analyze-transcript error:", error);
-      res.status(500).json({ status: "error", message: error.message || "Gagal menganalisis transkrip." });
+      res
+        .status(500)
+        .json({ status: "error", message: error.message || "Gagal menganalisis transkrip." });
     }
-  });
+  }
+);
 
-  // Meetings API
-  router.get("/api/projects/:projectId/meetings", verifyProjectAccess(['*']), async (req, res) => {
+// Meetings API
+router.get(
+  "/api/projects/:projectId/meetings",
+  jagaProyek("meetingNotes", "R"),
+  validasiQuery(listSearchQuerySchema),
+  async (req, res) => {
     try {
       const { projectId } = req.params;
-      const connection = await db.getConnection();
-      const [rows] = await connection.query(
-        "SELECT id, projectId, title, description, meetingLink, authorId, createdAt, updatedAt, fileName, fileType, file_size FROM Meetings WHERE projectId = ? ORDER BY createdAt DESC",
-        [projectId]
+      const search = req.query.search as string | undefined;
+      await respondWithProjectList(
+        res,
+        req.query as Record<string, unknown>,
+        () => meetingRepository.findByProjectId(projectId, search),
+        (pagination) => meetingRepository.findByProjectIdPaged(projectId, pagination, search)
       );
-      connection.release();
-      res.json({ status: "success", data: rows });
     } catch (error: any) {
       console.error(error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
-  });
+  }
+);
 
-  router.post("/api/projects/:projectId/meetings", verifyProjectAccess(['*']), async (req, res) => {
+router.post(
+  "/api/projects/:projectId/meetings",
+  jagaProyek("meetingNotes", "C"),
+  validasiBody(createMeetingSchema),
+  async (req, res) => {
     try {
       const { projectId } = req.params;
       const { title, description, meetingLink, authorId, fileData, fileName, fileType } = req.body;
       const effectiveAuthorId = authorId || req.headers["x-user-id"] || "guest";
-      const connection = await db.getConnection();
       const newId = crypto.randomUUID();
-      await connection.query(
-        "INSERT INTO Meetings (id, projectId, title, description, meetingLink, authorId, fileData, fileName, fileType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [newId, projectId, title, description || null, meetingLink || null, effectiveAuthorId, fileData || null, fileName || null, fileType || null]
-      );
-      connection.release();
-      res.json({ status: "success", data: { id: newId, projectId, title, description, meetingLink, authorId: effectiveAuthorId, fileName, fileType } });
+
+      await meetingRepository.create({
+        id: newId,
+        projectId,
+        title,
+        description: description || null,
+        meetingLink: meetingLink || null,
+        authorId: effectiveAuthorId,
+        fileData: fileData || null,
+        fileName: fileName || null,
+        fileType: fileType || null,
+      });
+
+      res.json({
+        status: "success",
+        data: {
+          id: newId,
+          projectId,
+          title,
+          description,
+          meetingLink,
+          authorId: effectiveAuthorId,
+          fileName,
+          fileType,
+        },
+      });
     } catch (error: any) {
       console.error(error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
-  });
+  }
+);
 
-  router.put("/api/projects/:projectId/meetings/:id", verifyProjectAccess(['*']), async (req: any, res) => {
-    let connection;
+router.put(
+  "/api/projects/:projectId/meetings/:id",
+  jagaProyek("meetingNotes", "U"),
+  validasiBody(updateMeetingSchema),
+  async (req: any, res) => {
     try {
       const { id } = req.params;
-      connection = await db.getConnection();
-
-      const [rows]: any = await connection.query("SELECT * FROM Meetings WHERE id = ?", [id]);
-      if (!rows || rows.length === 0) {
-        connection.release();
-        return res.status(404).json({ status: "error", message: "Meeting not found" });
+      const item = await meetingRepository.findById(id);
+      if (!item) {
+        return res
+          .status(404)
+          .json({ status: "error", code: "srv.meeting_not_found", message: "Meeting not found" });
       }
-      const item = rows[0];
 
       const currentUserId = req.user?.id || req.user?.uid || req.headers["x-user-id"];
-      const userRole = (req.user?.role || req.user?.system_role || '').toUpperCase();
-      const isAdmin = ['SADM', 'ADMN', 'ADMIN'].includes(userRole);
-      const authorId = item.authorId || item.author_id;
+      const userRole = (req.user?.role || req.user?.system_role || "").toUpperCase();
+      const isAdmin = userRole === "ADMIN";
+      const authorId = item.authorId || (item as any).author_id;
       const isAuthor = authorId === currentUserId;
 
       if (!isAuthor && !isAdmin) {
-        connection.release();
         return res.status(403).json({
           status: "error",
-          error: "Akses ditolak: Anda hanya diizinkan untuk melihat data ini."
+          error: "Akses ditolak: Anda hanya diizinkan untuk melihat data ini.",
         });
       }
 
-      const { title, description, meetingLink, transcript, aiSummary, fileData, fileName, fileType } = req.body;
-      const updates = [];
-      const values = [];
-      if (title !== undefined) { updates.push('title = ?'); values.push(title); }
-      if (description !== undefined) { updates.push('description = ?'); values.push(description); }
-      if (meetingLink !== undefined) { updates.push('meetingLink = ?'); values.push(meetingLink); }
-      if (transcript !== undefined) { updates.push('transcript = ?'); values.push(transcript); }
-      if (fileData !== undefined) { updates.push('fileData = ?'); values.push(fileData); }
-      if (fileName !== undefined) { updates.push('fileName = ?'); values.push(fileName); }
-      if (fileType !== undefined) { updates.push('fileType = ?'); values.push(fileType); }
-      if (aiSummary !== undefined) {
-        updates.push('aiSummary = ?');
-        values.push(aiSummary ? (typeof aiSummary === 'string' ? aiSummary : JSON.stringify(aiSummary)) : null);
-      }
-      
-      if (updates.length > 0) {
-        values.push(id);
-        await connection.query(`UPDATE Meetings SET ${updates.join(', ')} WHERE id = ?`, values);
-      }
-      connection.release();
-      res.json({ status: "success", message: "Meeting updated" });
-    } catch (error: any) {
-      if (connection) connection.release();
-      console.error(error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-    }
-  });
+      const {
+        title,
+        description,
+        meetingLink,
+        transcript,
+        aiSummary,
+        fileData,
+        fileName,
+        fileType,
+      } = req.body;
 
-  router.get("/api/projects/:projectId/meetings/:id/download", verifyProjectAccess(['*']), async (req, res) => {
-    let connection;
+      await meetingRepository.update(id, {
+        title,
+        description,
+        meetingLink,
+        transcript,
+        aiSummary,
+        fileData,
+        fileName,
+        fileType,
+      });
+
+      res.json({ status: "success", code: "srv.meeting_updated", message: "Meeting updated" });
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
+    }
+  }
+);
+
+router.get(
+  "/api/projects/:projectId/meetings/:id/download",
+  jagaProyek("meetingNotes", "R"),
+  async (req, res) => {
     try {
       const { id } = req.params;
-      connection = await db.getConnection();
-      const [rows] = await connection.query("SELECT fileData, fileName, fileType FROM Meetings WHERE id = ?", [id]);
-      if ((rows as any[]).length > 0) {
-         res.json({ status: "success", data: (rows as any[])[0] });
+      const file = await meetingRepository.getFileDownload(id);
+      if (file) {
+        res.json({ status: "success", data: file });
       } else {
-         res.status(404).json({ status: "error", message: "Meeting atau berkas tidak ditemukan" });
+        res.status(404).json({
+          status: "error",
+          code: "srv.meeting_atau_berkas_tidak",
+          message: "Meeting atau berkas tidak ditemukan",
+        });
       }
     } catch (error: any) {
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-    } finally {
-      if (connection) connection.release();
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
-  });
+  }
+);
 
-  router.delete("/api/projects/:projectId/meetings/:id", verifyProjectAccess(['*']), async (req: any, res) => {
-    let connection;
+router.delete(
+  "/api/projects/:projectId/meetings/:id",
+  jagaProyek("meetingNotes", "D"),
+  async (req: any, res) => {
     try {
       const { id } = req.params;
-      connection = await db.getConnection();
-
-      const [rows]: any = await connection.query("SELECT * FROM Meetings WHERE id = ?", [id]);
-      if (!rows || rows.length === 0) {
-        connection.release();
-        return res.status(404).json({ status: "error", message: "Meeting not found" });
+      const item = await meetingRepository.findById(id);
+      if (!item) {
+        return res
+          .status(404)
+          .json({ status: "error", code: "srv.meeting_not_found", message: "Meeting not found" });
       }
-      const item = rows[0];
 
       const currentUserId = req.user?.id || req.user?.uid || req.headers["x-user-id"];
-      const userRole = (req.user?.role || req.user?.system_role || '').toUpperCase();
-      const isAdmin = ['SADM', 'ADMN', 'ADMIN'].includes(userRole);
-      const authorId = item.authorId || item.author_id;
+      const userRole = (req.user?.role || req.user?.system_role || "").toUpperCase();
+      const isAdmin = userRole === "ADMIN";
+      const authorId = item.authorId || (item as any).author_id;
       const isAuthor = authorId === currentUserId;
 
       if (!isAuthor && !isAdmin) {
-        connection.release();
         return res.status(403).json({
           status: "error",
-          error: "Akses ditolak: Anda hanya diizinkan untuk melihat data ini."
+          error: "Akses ditolak: Anda hanya diizinkan untuk melihat data ini.",
         });
       }
 
-      await connection.query("DELETE FROM Meetings WHERE id = ?", [id]);
-      connection.release();
-      res.json({ status: "success", message: "Meeting deleted" });
+      // #444 / #472 — cascade wajib: titik diskusi (+ komentar) lalu meeting_details
+      // di repository.delete. Jangan swallow: gagal cascade → 500, parent tetap utuh.
+      const points = await discussionPointsRepository.findByMeetingId(id);
+      for (const point of points) {
+        await discussionPointsRepository.deletePoint(point.id);
+      }
+      const recordingUrl = item.recording_url || (item as any).recordingUrl;
+      if (recordingUrl) {
+        try {
+          const safeFileName = path.basename(String(recordingUrl));
+          const filePath = path.join(GLOBAL_UPLOADS_DIR, safeFileName);
+          if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        } catch (diskErr) {
+          console.warn("[MEETING DELETE] Gagal hapus berkas rekaman:", diskErr);
+        }
+      }
+
+      await meetingRepository.delete(id);
+      res.json({ status: "success", code: "srv.meeting_deleted", message: "Meeting deleted" });
     } catch (error: any) {
-      if (connection) connection.release();
       console.error(error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
-  });
+  }
+);
 
 export default router;

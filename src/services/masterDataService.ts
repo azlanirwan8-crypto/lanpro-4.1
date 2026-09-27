@@ -1,15 +1,16 @@
+import i18n from "../i18n";
 import { apiRequest } from "../lib/api";
 import { toast } from "sonner";
 
 export const masterDataService = {
   restore: async () => {
     const statuses = [
-      { type: "status", label: "Backlog", color: "#6B7280", order: 0 },
-      { type: "status", label: "To Do", color: "#3B82F6", order: 1 },
-      { type: "status", label: "In Progress", color: "#F59E0B", order: 2 },
-      { type: "status", label: "Code Review", color: "#8B5CF6", order: 3 },
-      { type: "status", label: "UAT", color: "#EC4899", order: 4 },
-      { type: "status", label: "Done", color: "#10B981", order: 5 },
+      { type: "status", label: "Backlog", color: "#6B7280", order: 0, isTerminal: false },
+      { type: "status", label: "To Do", color: "#3B82F6", order: 1, isTerminal: false },
+      { type: "status", label: "In Progress", color: "#F59E0B", order: 2, isTerminal: false },
+      { type: "status", label: "Code Review", color: "#8B5CF6", order: 3, isTerminal: false },
+      { type: "status", label: "UAT", color: "#EC4899", order: 4, isTerminal: true },
+      { type: "status", label: "Done", color: "#10B981", order: 5, isTerminal: true },
     ];
     const priorities = [
       {
@@ -41,16 +42,19 @@ export const masterDataService = {
         order: 3,
       },
     ];
+    // Fallback category — area teknis murni (item #85).
+    // Nilai duplikat issue_type (Bug/Enhancement/New Feature/Maintenance)
+    // telah dihapus dari Master Data.
     const categories = [
-      { type: "category", label: "Security", color: "#000000", order: 0 },
-      { type: "category", label: "Backend API", color: "#2563EB", order: 1 },
-      { type: "category", label: "Frontend UI", color: "#DB2777", order: 2 },
-      { type: "category", label: "Testing", color: "#059669", order: 3 },
+      { type: "category", label: "Backend", color: "#3B82F6", order: 1 },
+      { type: "category", label: "Frontend", color: "#EC4899", order: 2 },
+      { type: "category", label: "DevOps", color: "#8B5CF6", order: 3 },
+      { type: "category", label: "Security", color: "#DC2626", order: 4 },
+      { type: "category", label: "Infrastructure", color: "#0EA5E9", order: 5 },
+      { type: "category", label: "Database", color: "#F59E0B", order: 6 },
     ];
 
-    const releases = [
-      { type: "release", label: "v1.0", color: "#3b82f6", order: 0 },
-    ];
+    const releases = [{ type: "release", label: "v1.0", color: "#3b82f6", order: 0 }];
     const issueTypes = [
       {
         type: "issue_type",
@@ -99,17 +103,17 @@ export const masterDataService = {
         ...surroundings,
       ];
       for (const item of allItems) {
-        await apiRequest('/api/master-data', {
-          method: 'POST',
-          body: item
+        await apiRequest("/api/master-data", {
+          method: "POST",
+          body: item,
         });
       }
-      toast.success("Master data restored successfully!");
+      toast.success(i18n.t("toast.masterRestored"));
     } catch (e) {
       console.error("Restore failed", e);
-      toast.error("Failed to restore master data");
+      toast.error(i18n.t("toast.masterRestoreFailed"));
     }
-  }
+  },
 };
 
 /* ---------------------------------------------------------------------------

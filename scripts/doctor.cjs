@@ -294,9 +294,104 @@ section('6. Penyimpanan berkas unggahan');
 }
 
 // ── 7. Koneksi database sungguhan ─────────────────────────────────
-section('7. Uji koneksi database');
-
 (async () => {
+  // ── 6b. Domain pengirim email ─────────────────────────────────────
+  section('6b. Domain pengirim email (Resend)');
+
+  // #127 — #44 mencatat domain `rajonet.com` sudah terverifikasi, lalu 21 Agu 2026
+  // Resend menolak pengiriman dengan "The rajonet.com domain is not verified".
+  // Item yang ditandai selesai bisa berbalik tanpa satu pun berkas berubah, karena
+  // keadaannya hidup di layanan pihak ketiga. Tidak ada gerbang yang menangkapnya,
+  // jadi kegagalannya hanya muncul sebagai satu baris di log server saat email
+  // benar-benar dikirim — yaitu tepat saat pengguna sedang menunggunya.
+  // #157 — Cadangan `LanPro <lanpro@rajonet.com>` DIHAPUS dari sini. Selama ia
+  // ada, `EMAIL_FROM` yang kosong diperiksa seolah-olah domainnya sudah diisi,
+  // sehingga doctor bisa melaporkan sesuatu yang tidak dipakai kode mana pun.
+  const kunciResend = (process.env.RESEND_API_KEY || '').trim();
+  const pengirim = (process.env.EMAIL_FROM || '').trim();
+  const domainPengirim = (pengirim.match(/@([^>\s]+)/) || [])[1] || '';
+
+  if (!pengirim) {
+    warn('EMAIL_FROM kosong — tidak ada alamat pengirim',
+      'Pengiriman ditolak sebelum menyentuh Resend. Isi dengan bentuk ' +
+      '"Nama <alamat@domain>" memakai domain yang sudah terverifikasi');
+  } else if (!kunciResend) {
+    warn('RESEND_API_KEY belum diisi — status domain tidak bisa diperiksa',
+      'Di PRODUKSI ini berarti tidak ada email yang terkirim sama sekali: ' +
+      'verifikasi akun, tautan lupa kata sandi, dan digest harian semuanya diam');
+  } else if (!domainPengirim) {
+    warn(`EMAIL_FROM tidak memuat domain yang bisa dibaca: ${pengirim}`,
+      'Isi dengan bentuk "Nama <alamat@domain>"');
+  } else {
+    try {
+      const r = await fetch('https://api.resend.com/domains', {
+        headers: { Authorization: `Bearer ${kunciResend}` },
+      });
+      if (!r.ok) {
+        warn(`Resend menolak permintaan status domain (HTTP ${r.status})`,
+          'Periksa RESEND_API_KEY masih berlaku dan punya izin membaca domain');
+      } else {
+        const data = await r.json();
+        const daftar = Array.isArray(data && data.data) ? data.data : [];
+        const cocok = daftar.find((d) => (d && d.name || '').toLowerCase() === domainPengirim.toLowerCase());
+        // Sama seperti bagian 6: di PRODUKSI ini menahan rilis, di pengembangan
+        // cukup peringatan — domain email memang sering belum disiapkan di lokal.
+        const produksi = (process.env.NODE_ENV || '').toLowerCase() === 'production';
+        const angkat = produksi ? fail : warn;
+        if (!cocok) {
+          angkat(`Domain pengirim ${domainPengirim} TIDAK terdaftar di Resend`,
+            `EMAIL_FROM memakai ${pengirim}, tetapi domain itu tidak ada di akun Resend. ` +
+            'Tambahkan dan verifikasi domainnya, atau ganti EMAIL_FROM ke domain yang sudah ada');
+        } else if (String(cocok.status || '').toLowerCase() !== 'verified') {
+          angkat(`Domain pengirim ${domainPengirim} BELUM terverifikasi (status: ${cocok.status})`,
+            'Selesaikan verifikasi DNS di https://resend.com/domains. ' +
+            'Sampai itu selesai, SETIAP pengiriman ditolak dan hanya terlihat sebagai baris log');
+        } else {
+          ok(`Domain pengirim ${domainPengirim} terverifikasi`, pengirim);
+        }
+      }
+    } catch (e) {
+      warn('Gagal menghubungi Resend untuk memeriksa domain',
+        `Pemeriksaan DILEWATI, jangan diartikan domainnya sehat: ${e && e.message ? e.message : e}`);
+    }
+  }
+
+  // ── 6c. Alamat aplikasi untuk tautan di dalam email ─────────────────
+  section('6c. APP_URL (tautan di dalam email)');
+
+  // #157 — `urlFrontend()` MENGUTAMAKAN APP_URL di atas header permintaan bila
+  // nilainya berawalan http(s). Artinya APP_URL yang tertinggal di localhost
+  // tidak diabaikan di produksi, melainkan MENANG: tautan atur-ulang kata sandi
+  // yang dikirim ke pengguna menunjuk ke mesin mereka sendiri, dan tidak ada
+  // galat di mana pun karena emailnya terkirim dengan sukses.
+  const appUrl = (process.env.APP_URL || '').trim();
+  const diProduksi = (process.env.NODE_ENV || '').toLowerCase() === 'production';
+
+  if (!appUrl) {
+    warn('APP_URL kosong — tautan email mengikuti header permintaan',
+      'Biasanya benar di belakang reverse proxy, tetapi menjadi salah bila ' +
+      'Host dapat dipalsukan. Isi eksplisit untuk produksi');
+  } else if (!/^https?:\/\//i.test(appUrl)) {
+    warn(`APP_URL tidak berawalan http:// atau https:// (${appUrl})`,
+      'Nilai tanpa skema DIABAIKAN diam-diam oleh urlFrontend()');
+  } else if (/localhost|127\.0\.0\.1/i.test(appUrl)) {
+    (diProduksi ? fail : ok)(
+      diProduksi
+        ? `APP_URL masih menunjuk localhost di PRODUKSI: ${appUrl}`
+        : `APP_URL localhost (wajar di pengembangan)`,
+      diProduksi
+        ? 'Tautan atur-ulang kata sandi akan menunjuk mesin pengguna sendiri ' +
+          'dan mustahil diselesaikan. Ganti ke domain aplikasi sungguhan'
+        : appUrl);
+  } else if (diProduksi && appUrl.startsWith('http://')) {
+    warn(`APP_URL memakai http:// polos di produksi: ${appUrl}`,
+      'Tautan bertoken atur-ulang kata sandi akan melintas tanpa enkripsi');
+  } else {
+    ok('APP_URL siap dipakai untuk tautan email', appUrl);
+  }
+
+  section('7. Uji koneksi database');
+
   if (!process.env.DATABASE_URL) {
     fail('Dilewati — DATABASE_URL kosong');
   } else {
@@ -340,8 +435,33 @@ section('7. Uji koneksi database');
       connectionTimeoutMillis: 15000,
     });
     try {
-      // Tabel inti yang ketiadaannya pasti merusak fitur, bukan seluruh daftar.
-      const wajib = ['Users', 'Projects', 'Tasks', 'Documents', 'UserIdentities'];
+      // Item #275: daftar diambil dari TABEL_WAJIB di src/lib/pg-migrate.ts —
+      // satu sumber kebenaran dengan yang diperiksa server saat boot. Yang
+      // dibaca adalah literal array-nya, BUKAN string SQL-nya: mengurai SQL
+      // rapuh dan justru menambah cara baru untuk gagal diam-diam. Bila
+      // pembacaan gagal, jatuh ke lima tabel inti yang ketiadaannya pasti
+      // merusak fitur — dilewati diam-diam bukan pilihan.
+      const INTI = ['Users', 'Projects', 'Tasks', 'Documents', 'UserIdentities'];
+      let wajib = INTI;
+      try {
+        const sumber = fs.readFileSync(
+          path.join(__dirname, '..', 'src', 'lib', 'pg-migrate.ts'),
+          'utf8'
+        );
+        const blok = sumber.match(/export const TABEL_WAJIB[^=]*=\s*\[([^\]]*)\]/);
+        if (blok) {
+          const nama = [...blok[1].matchAll(/"([A-Za-z_]+)"/g)].map((m) => m[1]);
+          if (nama.length > 0) wajib = nama;
+        }
+      } catch {
+        // biarkan memakai INTI
+      }
+      if (wajib === INTI) {
+        warn(
+          'TABEL_WAJIB tidak terbaca — memeriksa 5 tabel inti saja',
+          'Daftar lengkap ada di src/lib/pg-migrate.ts; pemeriksaan ini jadi lebih dangkal dari semestinya'
+        );
+      }
       const r = await pool.query(
         `SELECT table_name FROM information_schema.tables
          WHERE table_schema = 'public' AND table_name = ANY($1)`,
@@ -380,6 +500,32 @@ section('7. Uji koneksi database');
     } finally {
       await pool.end().catch(() => {});
     }
+  }
+
+  // ── 9. FFmpeg (AI Meeting Notes #320) ─────────────────────────────
+  //
+  // Jalur live rekaman WebM → Gemini membutuhkan `ffmpeg` di PATH server.
+  // Tanpa itu, analisis gagal dengan pesan yang terlihat seperti bug AI,
+  // bukan ketiadaan binary. Pemeriksaan ini WARN (bukan GAGAL): aplikasi
+  // tetap jalan tanpa Meeting AI, dan Windows lokal sering belum memasang
+  // FFmpeg.
+  section('9. FFmpeg (transcode rekaman Meeting AI)');
+
+  try {
+    const { execSync } = require('child_process');
+    const out = execSync('ffmpeg -version', {
+      encoding: 'utf8',
+      timeout: 5000,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    const baris = String(out).split('\n')[0] || 'ffmpeg';
+    ok('ffmpeg tersedia di PATH', baris.slice(0, 80));
+  } catch {
+    warn(
+      'ffmpeg tidak ditemukan di PATH',
+      'Item #320: rekaman live WebM/MP4 gagal dianalisis sampai FFmpeg terpasang. ' +
+        'Pasang dari https://ffmpeg.org lalu pastikan `ffmpeg -version` jalan di shell yang sama'
+    );
   }
 
   // ── Ringkasan ───────────────────────────────────────────────────

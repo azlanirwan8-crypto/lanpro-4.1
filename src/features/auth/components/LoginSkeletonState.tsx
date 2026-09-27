@@ -1,7 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import type { LoginSkeletonStateProps } from "../types";
 
 export const LoginSkeletonState = ({ loadingText }: LoginSkeletonStateProps) => {
+  const { t } = useTranslation();
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -13,7 +15,7 @@ export const LoginSkeletonState = ({ loadingText }: LoginSkeletonStateProps) => 
       {/* Velzon Center Animated Logo Icon */}
       <div className="relative inline-flex items-center justify-center pt-2">
         <motion.div
-          className="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center shadow-soft-lg shadow-primary/30 relative z-10"
+          className="w-16 h-16 rounded-2xl bg-primary-surface text-content-inverse flex items-center justify-center shadow-soft-lg shadow-primary/30 relative z-10"
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
         >
@@ -21,7 +23,7 @@ export const LoginSkeletonState = ({ loadingText }: LoginSkeletonStateProps) => 
         </motion.div>
         {/* Pulsing Outer Ring */}
         <motion.div
-          className="absolute inset-0 rounded-2xl bg-primary/25"
+          className="absolute inset-0 rounded-2xl bg-primary-surface/25"
           animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }}
           transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
         />
@@ -30,16 +32,14 @@ export const LoginSkeletonState = ({ loadingText }: LoginSkeletonStateProps) => 
       {/* Loading Status & Message */}
       <div className="space-y-1.5">
         <h3 className="text-base font-semibold text-content-strong tracking-tight flex items-center justify-center gap-1.5">
-          <span>{loadingText || "Authenticating..."}</span>
+          <span>{loadingText || t("auth.authenticating")}</span>
           <span className="flex space-x-1">
-            <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" />
-            <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.2s]" />
-            <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.4s]" />
+            <span className="w-1.5 h-1.5 bg-primary-surface rounded-full animate-bounce" />
+            <span className="w-1.5 h-1.5 bg-primary-surface rounded-full animate-bounce [animation-delay:0.2s]" />
+            <span className="w-1.5 h-1.5 bg-primary-surface rounded-full animate-bounce [animation-delay:0.4s]" />
           </span>
         </h3>
-        <p className="text-xs text-content-subtle font-medium">
-          Memverifikasi sesi workspace Anda...
-        </p>
+        <p className="text-xs text-content-subtle font-medium">{t("ui.verifyingSession")}</p>
       </div>
 
       {/* Velzon Smooth Gradient Progress Bar */}

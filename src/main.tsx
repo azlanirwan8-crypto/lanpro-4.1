@@ -1,3 +1,4 @@
+import i18n, { siapBahasa } from "./i18n";
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
@@ -44,7 +45,7 @@ class ErrorBoundary extends Component<Props, State> {
             textAlign: "left",
           }}
         >
-          <h1 style={{ color: "#dc2626", marginTop: 0, fontSize: "20px" }}>
+          <h1 style={{ color: "var(--color-danger, #dc2626)", marginTop: 0, fontSize: "20px" }}>
             🚨 React Render Crash detected
           </h1>
           <p style={{ fontWeight: "bold" }}>{this.state.error?.toString()}</p>
@@ -78,7 +79,7 @@ class ErrorBoundary extends Component<Props, State> {
               cursor: "pointer",
             }}
           >
-            Reset Cache & Reload
+            {i18n.t("common.clearCacheReload")}
           </button>
         </div>
       );
@@ -131,10 +132,15 @@ try {
   console.error("[SSO] Gagal memproses kembalian SSO:", e);
 }
 
-createRoot(document.getElementById("root")!).render(
-  <ErrorBoundary>
-    <AuthNotificationProvider>
-      <App />
-    </AuthNotificationProvider>
-  </ErrorBoundary>
-);
+const pasang = () =>
+  createRoot(document.getElementById("root")!).render(
+    <ErrorBoundary>
+      <AuthNotificationProvider>
+        <App />
+      </AuthNotificationProvider>
+    </ErrorBoundary>
+  );
+
+// #515 — hanya kamus Indonesia yang ikut potongan awal, jadi piksel pertama
+// menunggu kamus bahasa pilihan tiba. Untuk Indonesia tungguannya nol.
+siapBahasa.then(pasang);

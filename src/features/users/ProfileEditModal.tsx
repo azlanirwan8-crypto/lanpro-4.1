@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, Save } from "lucide-react";
 import { Input } from "../../components/ui/CoreUI";
@@ -18,6 +19,7 @@ export const ProfileEditModal = ({
   userProfile: UserProfile | null;
   onProfileUpdated?: (updatedProfile: Partial<UserProfile>) => void;
 }) => {
+  const { t } = useTranslation();
   const [selectedAvatar, setSelectedAvatar] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState(userProfile?.displayName || "");
@@ -64,13 +66,13 @@ export const ProfileEditModal = ({
     // Client-side validation
     const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"];
     if (!allowedTypes.includes(file.type)) {
-      toast.error("Format file tidak didukung (gunakan JPG, PNG, WEBP, GIF, atau SVG)");
+      toast.error(t("toast.imageFormatUnsupported"));
       return;
     }
 
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
-      toast.error("Ukuran file maksimal 5MB");
+      toast.error(t("toast.fileMax5MB"));
       return;
     }
 
@@ -171,7 +173,7 @@ export const ProfileEditModal = ({
         });
       }
 
-      toast.success("Profile updated successfully.");
+      toast.success(t("toast.profileUpdated"));
       onClose();
     } catch (error: any) {
       console.error("Error updating profile", error);
@@ -179,7 +181,7 @@ export const ProfileEditModal = ({
       if (errorMessage === "Password lama yang Anda masukkan salah!") {
         setError(errorMessage);
       } else {
-        toast.error(`Failed to update profile: ${errorMessage}`);
+        toast.error(t("toast.profileUpdateFailed", { pesan: errorMessage }));
       }
     } finally {
       setLoading(false);
@@ -187,7 +189,7 @@ export const ProfileEditModal = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Edit Profil">
+    <Modal isOpen={isOpen} onClose={onClose} title={t("profile.editProfile")}>
       <div className="space-y-6">
         <div className="flex gap-4 items-center bg-surface-sunken p-4 rounded-xl border border-border-faint relative">
           <div className="relative group cursor-pointer">
@@ -215,13 +217,13 @@ export const ProfileEditModal = ({
               className="w-16 h-16 text-2xl"
             />
             {previewUrl && (
-              <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
-                Pratinjau
+              <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-amber-500 text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
+                {t("profile.preview")}
               </span>
             )}
-            <label className="absolute inset-0 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
-              <span className="text-xs sm:text-[10px] font-medium uppercase tracking-wider">
-                {isUploading ? "..." : "Pilih Foto"}
+            <label className="absolute inset-0 bg-overlay/50 text-content-inverse rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+              <span className="text-xs sm:text-[10px] font-normal uppercase tracking-normal">
+                {isUploading ? "..." : t("profile.choosePhoto")}
               </span>
               <input
                 type="file"
@@ -240,49 +242,61 @@ export const ProfileEditModal = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
-              Nama Lengkap
+            <label className="block text-xs font-normal text-content-muted uppercase tracking-normal">
+              {t("profile.fullName")}
             </label>
-            <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+            <Input
+              value={displayName}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisplayName(e.target.value)}
+            />
           </div>
 
           <div className="space-y-1">
-            <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
-              Username
+            <label className="block text-xs font-normal text-content-muted uppercase tracking-normal">
+              {t("profile.username")}
             </label>
-            <Input value={username} onChange={(e) => setUsername(e.target.value)} />
+            <Input
+              value={username}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
+            />
           </div>
 
           <div className="space-y-1 md:col-span-2">
-            <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
-              Email
+            <label className="block text-xs font-normal text-content-muted uppercase tracking-normal">
+              {t("profile.email")}
             </label>
-            <Input value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input
+              value={email}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+            />
           </div>
 
           <div className="space-y-1 md:col-span-2">
-            <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
-              Nomor Telepon
+            <label className="block text-xs font-normal text-content-muted uppercase tracking-normal">
+              {t("profile.phone")}
             </label>
-            <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <Input
+              value={phone}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
+            />
           </div>
         </div>
 
         <div className="pt-4 border-t border-border-faint space-y-3">
-          <h4 className="text-sm font-medium text-content-strong">Ubah Password</h4>
+          <h4 className="text-sm font-medium text-content-strong">{t("profile.changePassword")}</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1 relative">
-              <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
-                Password Lama
+              <label className="block text-xs font-normal text-content-muted uppercase tracking-normal">
+                {t("profile.oldPassword")}
               </label>
               <Input
                 type={showCurrentPassword ? "text" : "password"}
                 value={currentPassword}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setCurrentPassword(e.target.value);
                   setError(null);
                 }}
-                placeholder="••••••••"
+                placeholder={t("profile.oldPlaceholder")}
                 className="pr-10"
               />
               {error && <p className="text-xs sm:text-[10px] text-red-500 font-medium">{error}</p>}
@@ -295,14 +309,16 @@ export const ProfileEditModal = ({
               </button>
             </div>
             <div className="space-y-1 relative">
-              <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
-                Password Baru
+              <label className="block text-xs font-normal text-content-muted uppercase tracking-normal">
+                {t("profile.newPassword")}
               </label>
               <Input
                 type={showNewPassword ? "text" : "password"}
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="••••••••"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setNewPassword(e.target.value)
+                }
+                placeholder={t("profile.newPlaceholder")}
                 className="pr-10"
               />
               <button
@@ -320,14 +336,14 @@ export const ProfileEditModal = ({
           type="button"
           onClick={handleUpdateProfile}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2 font-medium transition-all disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-lg px-4 py-2 font-medium transition-all disabled:opacity-50"
         >
           {loading ? (
             "Saving..."
           ) : (
             <>
               <Save className="w-4 h-4" />
-              Save Changes
+              {t("profile.saveChanges")}
             </>
           )}
         </button>

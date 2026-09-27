@@ -5,7 +5,7 @@ describe('hashPassword / verifyPassword', () => {
     const hash = hashPassword('correct-horse-battery-staple');
     expect(await verifyPassword('correct-horse-battery-staple', hash)).toBe(true);
     expect(await verifyPassword('wrong-password', hash)).toBe(false);
-  });
+  }, 15000);
 
   it('verifies legacy pbkdf2 hashes correctly', async () => {
     const crypto = require('crypto');

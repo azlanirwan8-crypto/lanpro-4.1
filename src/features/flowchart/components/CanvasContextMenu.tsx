@@ -1,8 +1,22 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useRef } from "react";
 import { motion } from "motion/react";
-import { 
-  Plus, Square, Diamond, Circle, StickyNote, CreditCard, 
-  FileText, Database, ZoomIn, ZoomOut, RotateCcw, Undo, Redo, Trash2, MapPin
+import {
+  Plus,
+  Square,
+  Diamond,
+  Circle,
+  StickyNote,
+  CreditCard,
+  FileText,
+  Database,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  Undo,
+  Redo,
+  Trash2,
+  MapPin,
 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 
@@ -35,6 +49,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
   canUndo,
   canRedo,
 }) => {
+  const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Keep menu on screen bounds
@@ -56,7 +71,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
 
     document.addEventListener("mousedown", handleOutsideClick, true);
     document.addEventListener("keydown", handleKeyDown);
-    
+
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick, true);
       document.removeEventListener("keydown", handleKeyDown);
@@ -64,13 +79,55 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
   }, [onClose]);
 
   const shapeCategories = [
-    { type: "oval", label: "Mulai / Selesai", icon: Circle, color: "emerald", text: "Start/End" },
-    { type: "rect", label: "Langkah Proses", icon: Square, color: "indigo", text: "Proses" },
-    { type: "diamond", label: "Keputusan Alur", icon: Diamond, color: "amber", text: "Keputusan" },
-    { type: "sticky", label: "Catatan Tempel", icon: StickyNote, color: "yellow", text: "Memo/Sticky" },
-    { type: "card", label: "Kartu Informasi", icon: CreditCard, color: "slate", text: "Kartu" },
-    { type: "document", label: "Dokumen Cetak", icon: FileText, color: "sky", text: "Dokumen" },
-    { type: "database", label: "Basis Data", icon: Database, color: "violet", text: "Database" },
+    {
+      type: "oval",
+      label: t("canvasMenu.shapeStartEnd"),
+      icon: Circle,
+      color: "emerald",
+      text: t("canvasMenu.shapeStartEnd"),
+    },
+    {
+      type: "rect",
+      label: t("canvasMenu.shapeProcessStep"),
+      icon: Square,
+      color: "indigo",
+      text: t("canvasMenu.nodeProcess"),
+    },
+    {
+      type: "diamond",
+      label: t("canvasMenu.shapeDecisionFlow"),
+      icon: Diamond,
+      color: "amber",
+      text: t("canvasMenu.nodeDecision"),
+    },
+    {
+      type: "sticky",
+      label: t("canvasMenu.shapeStickyNote"),
+      icon: StickyNote,
+      color: "yellow",
+      text: t("canvasMenu.shapeMemo"),
+    },
+    {
+      type: "card",
+      label: t("canvasMenu.shapeInfoCard"),
+      icon: CreditCard,
+      color: "slate",
+      text: t("canvasMenu.nodeCard"),
+    },
+    {
+      type: "document",
+      label: t("canvasMenu.shapePrintDoc"),
+      icon: FileText,
+      color: "sky",
+      text: t("canvasMenu.nodeDocument"),
+    },
+    {
+      type: "database",
+      label: t("canvasMenu.shapeDatabase"),
+      icon: Database,
+      color: "violet",
+      text: t("canvasMenu.nodeDatabase"),
+    },
   ];
 
   return (
@@ -88,18 +145,18 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
       onContextMenu={(e) => e.preventDefault()}
     >
       {/* Title */}
-      <div className="px-3 py-1.5 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider text-content-subtle border-b border-border-faint mb-1 flex items-center justify-between">
-        <span>Aksi Kanvas</span>
-        <span className="text-indigo-600 font-mono text-xs sm:text-[10px] sm:text-[8px] flex items-center gap-0.5">
-          <MapPin className="w-2 h-2 text-indigo-400" />
-          KANVAS AKTIF
+      <div className="px-3 py-1.5 text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle border-b border-border-faint mb-1 flex items-center justify-between">
+        <span>{t("canvasMenu.title")}</span>
+        <span className="text-primary font-mono text-xs sm:text-[10px] flex items-center gap-0.5">
+          <MapPin className="w-2 h-2 text-primary" />
+          {t("canvasMenu.activeCanvas")}
         </span>
       </div>
 
       {/* Shapes Subheader */}
-      <div className="px-3 py-1 flex items-center gap-1.5 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider text-slate-450 text-content-subtle">
+      <div className="px-3 py-1 flex items-center gap-1.5 text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle">
         <Plus className="w-3 h-3 text-content-subtle" />
-        <span>Tambah Komponen Baru</span>
+        <span>{t("canvasMenu.addComponent")}</span>
       </div>
 
       {/* Shapes List */}
@@ -113,19 +170,23 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
                 onAddNode(shape.type, shape.label, shape.color);
                 onClose();
               }}
-              className="w-full flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-650 hover:text-indigo-600 hover:bg-surface hover:shadow-soft hover:border-slate-150 transition-all text-left border border-transparent"
+              className="w-full flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-lg hover:text-primary hover:bg-surface hover:shadow-soft transition-all text-left border border-transparent"
             >
               <Icon className={cn("w-3.5 h-3.5 text-content-subtle", `text-${shape.color}-500`)} />
               <div className="flex flex-col">
-                <span className="font-medium text-content-body hover:text-indigo-600">{shape.text}</span>
-                <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-normal">{shape.label}</span>
+                <span className="font-medium text-content-body hover:text-primary">
+                  {shape.text}
+                </span>
+                <span className="text-xs sm:text-[11px] text-content-subtle font-normal">
+                  {shape.label}
+                </span>
               </div>
             </button>
           );
         })}
       </div>
 
-      <div className="h-px bg-slate-150/70 my-1" />
+      <div className="h-px my-1" />
 
       {/* Canvas Zoom Section */}
       <div className="grid grid-cols-3 gap-1 px-1.5 my-1">
@@ -134,37 +195,37 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
             onZoomIn();
             onClose();
           }}
-          className="flex flex-col items-center gap-1 p-1.5 rounded-lg text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-secondary hover:text-indigo-600 hover:bg-surface-sunken border border-transparent hover:border-border-faint transition-all"
-          title="Perbesar Tampilan (+10%)"
+          className="flex flex-col items-center gap-1 p-1.5 rounded-lg text-xs sm:text-[11px] font-medium text-content-secondary hover:text-primary hover:bg-surface-sunken border border-transparent hover:border-border-faint transition-all"
+          title={t("canvasMenu.zoomInTip")}
         >
-          <ZoomIn className="w-3.5 h-3.5 text-slate-450 text-content-muted" />
-          <span>Zoom In</span>
+          <ZoomIn className="w-3.5 h-3.5 text-content-muted" />
+          <span>{t("canvasMenu.zoomIn")}</span>
         </button>
         <button
           onClick={() => {
             onZoomOut();
             onClose();
           }}
-          className="flex flex-col items-center gap-1 p-1.5 rounded-lg text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-secondary hover:text-indigo-600 hover:bg-surface-sunken border border-transparent hover:border-border-faint transition-all"
-          title="Perkecil Tampilan (-10%)"
+          className="flex flex-col items-center gap-1 p-1.5 rounded-lg text-xs sm:text-[11px] font-medium text-content-secondary hover:text-primary hover:bg-surface-sunken border border-transparent hover:border-border-faint transition-all"
+          title={t("canvasMenu.zoomOutTip")}
         >
-          <ZoomOut className="w-3.5 h-3.5 text-slate-450 text-content-muted" />
-          <span>Zoom Out</span>
+          <ZoomOut className="w-3.5 h-3.5 text-content-muted" />
+          <span>{t("canvasMenu.zoomOut")}</span>
         </button>
         <button
           onClick={() => {
             onResetZoom();
             onClose();
           }}
-          className="flex flex-col items-center gap-1 p-1.5 rounded-lg text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-secondary hover:text-indigo-600 hover:bg-surface-sunken border border-transparent hover:border-border-faint transition-all"
-          title="Fokus Ulang Kanvas (100%)"
+          className="flex flex-col items-center gap-1 p-1.5 rounded-lg text-xs sm:text-[11px] font-medium text-content-secondary hover:text-primary hover:bg-surface-sunken border border-transparent hover:border-border-faint transition-all"
+          title={t("canvasMenu.resetTip")}
         >
-          <RotateCcw className="w-3.5 h-3.5 text-slate-450 text-content-muted" />
-          <span>Reset</span>
+          <RotateCcw className="w-3.5 h-3.5 text-content-muted" />
+          <span>{t("canvasMenu.reset")}</span>
         </button>
       </div>
 
-      <div className="h-px bg-slate-150/70 my-1" />
+      <div className="h-px my-1" />
 
       {/* Undo / Redo Row */}
       <div className="flex gap-1 px-1 my-1">
@@ -176,13 +237,13 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
           disabled={!canUndo}
           className={cn(
             "flex-1 flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs sm:text-[10px] font-medium border transition-all",
-            canUndo 
-              ? "text-slate-650 hover:bg-surface-sunken hover:text-violet-600 border-border-faint/80 cursor-pointer" 
-              : "text-slate-300 border-transparent cursor-not-allowed"
+            canUndo
+              ? " hover:bg-surface-sunken hover:text-primary border-border-faint/80 cursor-pointer"
+              : "text-content-subtle border-transparent cursor-not-allowed"
           )}
         >
           <Undo className="w-3 h-3" />
-          <span>Undo</span>
+          <span>{t("canvasMenu.undo")}</span>
         </button>
 
         <button
@@ -193,17 +254,17 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
           disabled={!canRedo}
           className={cn(
             "flex-1 flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs sm:text-[10px] font-medium border transition-all",
-            canRedo 
-              ? "text-slate-650 hover:bg-surface-sunken hover:text-violet-600 border-border-faint/80 cursor-pointer" 
-              : "text-slate-300 border-transparent cursor-not-allowed"
+            canRedo
+              ? " hover:bg-surface-sunken hover:text-primary border-border-faint/80 cursor-pointer"
+              : "text-content-subtle border-transparent cursor-not-allowed"
           )}
         >
           <Redo className="w-3 h-3" />
-          <span>Redo</span>
+          <span>{t("canvasMenu.redo")}</span>
         </button>
       </div>
 
-      <div className="h-px bg-slate-150/70 my-1" />
+      <div className="h-px my-1" />
 
       {/* Clear Workspace button */}
       <button
@@ -211,10 +272,10 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
           onClear();
           onClose();
         }}
-        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-rose-600 hover:bg-rose-50 transition-colors text-left"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-rose-600 hover:bg-rose-500/10 transition-colors text-left"
       >
         <Trash2 className="w-3.5 h-3.5 text-rose-500" />
-        <span>Bersihkan Kanvas</span>
+        <span>{t("canvasMenu.clearCanvas")}</span>
       </button>
     </motion.div>
   );

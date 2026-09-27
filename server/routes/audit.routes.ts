@@ -1,37 +1,50 @@
 import { Router } from "express";
-import db from "../../src/lib/db";
 import { authenticateJWT } from "../middleware/auth";
+import { jagaAuditLogBaca } from "../middleware/jagaAuditLog";
+import { validasiQuery } from "../middleware/validate";
+import { auditLogsQuerySchema } from "../schemas/audit.schema";
+import { auditRepository } from "../repositories/audit.repository";
+import { listSuccessPayload, parsePaginationQuery } from "../lib/pagination";
 
 const router = Router();
 
-router.get("/api/audit-logs", authenticateJWT, async (req, res) => {
-  let connection;
-  try {
-    const { projectId, entityName, entityId, limit } = req.query;
-    connection = await db.getConnection();
-    
-    let sql = "SELECT a.*, u.displayName as userName FROM AuditLogs a JOIN Users u ON a.userId = u.id";
-    const params: any[] = [];
-    const filters = [];
+router.get(
+  "/api/audit-logs",
+  authenticateJWT,
+  validasiQuery(auditLogsQuerySchema),
+  jagaAuditLogBaca,
+  async (req, res) => {
+    try {
+      const { projectId, entityName, entityId, limit, page } = req.query as {
+        projectId?: string;
+        entityName?: string;
+        entityId?: string;
+        limit?: number;
+        page?: number;
+      };
+      const filters = { projectId, entityName, entityId };
+      const pagination = parsePaginationQuery(req.query as Record<string, unknown>);
 
-    if (projectId) { filters.push("a.projectId = ?"); params.push(projectId); }
-    if (entityName) { filters.push("a.entityName = ?"); params.push(entityName); }
-    if (entityId) { filters.push("a.entityId = ?"); params.push(entityId); }
+      if (pagination) {
+        const { items, total } = await auditRepository.findLogsPaged(filters, pagination);
+        return res.json(listSuccessPayload(items, pagination, total));
+      }
 
-    if (filters.length > 0) sql += " WHERE " + filters.join(" AND ");
-
-    sql += " ORDER BY a.createdAt DESC LIMIT ?";
-    const limitValue = Math.min(Math.max(parseInt(limit as string) || 50, 1), 500);
-    params.push(limitValue);
-
-    const [rows] = await connection.query(sql, params);
-    res.json({ status: "success", data: rows });
-  } catch (error: any) {
-    console.error("[AUDIT] Error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
+      const rows = await auditRepository.findLogs({
+        ...filters,
+        limit,
+        page,
+      });
+      res.json({ status: "success", data: rows });
+    } catch (error: any) {
+      console.error("[AUDIT] Error:", error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
+    }
   }
-});
+);
 
 export default router;

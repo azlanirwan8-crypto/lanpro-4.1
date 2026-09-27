@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { format, differenceInDays } from "date-fns";
-import { Calendar, AlertCircle } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 
 type Task = any;
@@ -55,13 +55,13 @@ export const TimelineDatePills = ({
   return (
     <>
       <div className="absolute -left-1 transform -translate-x-full pr-2 top-1/2 -translate-y-1/2 whitespace-nowrap z-50 pointer-events-none">
-        <div className="bg-slate-900/90 text-xs sm:text-[10px] font-medium text-white px-2 py-1 rounded shadow-soft-lg backdrop-blur-sm border border-slate-700/50 flex items-center gap-1.5 animate-in fade-in slide-in-from-right-1">
+        <div className="bg-overlay/90 text-xs sm:text-[10px] font-medium text-content-inverse px-2 py-1 rounded shadow-soft-lg backdrop-blur-sm border border-border-inverse flex items-center gap-1.5 animate-dropdown">
           <Calendar className="w-2.5 h-2.5 text-content-subtle" />
           {format(start, "MMM d, yyyy")}
         </div>
       </div>
       <div className="absolute -right-1 transform translate-x-full pl-2 top-1/2 -translate-y-1/2 whitespace-nowrap z-50 pointer-events-none">
-        <div className="bg-slate-900/90 text-xs sm:text-[10px] font-medium text-white px-2 py-1 rounded shadow-soft-lg backdrop-blur-sm border border-slate-700/50 flex items-center gap-1.5 animate-in fade-in slide-in-from-left-1">
+        <div className="bg-overlay/90 text-xs sm:text-[10px] font-medium text-content-inverse px-2 py-1 rounded shadow-soft-lg backdrop-blur-sm border border-border-inverse flex items-center gap-1.5 animate-dropdown">
           <Calendar className="w-2.5 h-2.5 text-content-subtle" />
           {format(end, "MMM d, yyyy")}
           <span className="text-content-subtle font-normal">
@@ -81,41 +81,50 @@ export const Button = ({
   className = "",
   disabled = false,
   size = "md",
+  dataText,
+  ...props
 }: any) => {
-  /* Warna diambil dari token merek, bukan palet Tailwind bawaan. Versi
-   * sebelumnya memakai bg-blue-600 dan gray-*, sehingga tombol "bersama" ini
-   * justru satu-satunya tempat di aplikasi yang TIDAK memakai warna merek.
-   *
-   * Tinggi minimum 44px pada ukuran md dan lg memenuhi WCAG 2.5.5; ukuran sm
-   * disediakan untuk toolbar padat di desktop dan sengaja tidak dipaksa 44px,
-   * tetapi tetap diberi min-h-9 agar tidak sekecil sebelumnya. */
   const base =
-    "rounded-lg font-medium transition-all inline-flex items-center justify-center gap-2 " +
+    "btn-animation waves-effect waves-light rounded-lg font-semibold transition-all inline-flex items-center justify-center gap-2 " +
     "disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none " +
-    "focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-1 active:scale-[0.98]";
+    "focus-visible:ring-2 focus-visible:ring-primary/25 active:scale-[0.98] cursor-pointer shadow-xs border";
+
   const sizes: any = {
-    sm: "px-3 py-2 min-h-9 text-xs",
-    md: "px-4 py-2.5 min-h-11 text-sm",
-    lg: "px-6 py-3 min-h-12 text-base",
+    sm: "px-3 py-1.5 h-8 text-xs",
+    md: "px-4 py-2 h-9 text-xs sm:text-[13px]",
+    lg: "px-5 py-2.5 h-11 text-sm",
   };
+
   const variants: any = {
-    primary: "bg-primary text-white hover:bg-primary-hover active:bg-primary-active shadow-soft",
-    secondary:
-      "bg-surface-muted text-content-body hover:bg-border-subtle border border-border-subtle",
-    danger: "bg-danger text-white hover:opacity-90 shadow-soft",
-    ghost: "text-content-secondary hover:bg-surface-muted",
+    primary: "btn-primary",
+    soft: "btn-soft-primary shadow-none",
+    secondary: "btn-secondary",
+    success: "btn-success",
+    info: "btn-info",
+    warning: "btn-warning",
+    danger: "btn-danger",
+    ["dark"]: "btn-dark",
+    ghost:
+      "bg-transparent text-content-secondary hover:bg-surface-sunken border-transparent shadow-none",
+    outline:
+      "bg-surface text-content-strong hover:bg-surface-sunken border-border-subtle shadow-none",
   };
+
   return (
     <button
-      type="button"
       onClick={onClick}
-      className={`${base} ${variants[variant]} ${sizes[size]} ${className}`}
+      data-text={dataText}
+      className={`${base} ${variants[variant] || variants.primary} ${sizes[size]} ${className}`}
       disabled={disabled}
+      type="button"
+      {...props}
     >
-      {children}
+      <span>{children}</span>
     </button>
   );
 };
+
+export const VelzonButton = Button;
 
 export const Input = ({
   value,
@@ -144,52 +153,6 @@ export const Textarea = ({ value, onChange, placeholder, className = "", rows = 
     className={`w-full px-4 py-2.5 bg-surface text-content border border-border-subtle rounded-lg placeholder:text-content-subtle focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none ${className}`}
   />
 );
-
-// --- Error Handling ---
-
-class ErrorBoundary extends React.Component<any, any> {
-  constructor(props: any) {
-    super(props);
-    (this as any).state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error: any) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: any, errorInfo: any) {
-    console.error("ErrorBoundary caught an error", error, errorInfo);
-  }
-
-  render() {
-    const error = (this as any).state.error;
-    if ((this as any).state.hasError) {
-      let message = "Something went wrong. Please try refreshing the page.";
-      try {
-        const errObj = JSON.parse(error.message);
-        if (
-          errObj.error.includes("permission-denied") ||
-          errObj.error.includes("Missing or insufficient permissions")
-        ) {
-          message =
-            "You don't have permission to perform this action. Please check your project access.";
-        }
-      } catch (e) {
-        // Not a JSON error
-      }
-      return (
-        <div className="h-screen flex flex-col items-center justify-center bg-surface-sunken p-4 text-center">
-          <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-          <h2 className="text-2xl font-medium text-content mb-2">Oops! An error occurred</h2>
-          <p className="text-content-secondary mb-6 max-w-md">{message}</p>
-          <Button onClick={() => window.location.reload()}>Refresh Page</Button>
-        </div>
-      );
-    }
-
-    return (this as any).props.children;
-  }
-}
 
 export const VelzonFloatingParticles = () => {
   const particles = useMemo(() => {
@@ -242,17 +205,50 @@ export const VelzonFloatingParticles = () => {
  * benar di mode gelap.
  * ───────────────────────────────────────────────────────────────────────── */
 
-export const Card = ({ children, className = "", ...props }: any) => (
-  <div
-    className={cn(
-      "bg-surface border border-border-subtle rounded-lg shadow-soft overflow-hidden",
-      className
-    )}
-    {...props}
-  >
-    {children}
-  </div>
-);
+/* ─── Card (#397 / #415) ───────────────────────────────────────────────────
+ * Wadah Velzon: radius 8px (rounded-lg), bayangan soft, opsional lift hover.
+ * Varian warna (bukan putih plos): default | primary | success | info | inverse
+ * sesuai contoh KPI Velzon (1–2 kartu solid + sisanya putih).
+ * ───────────────────────────────────────────────────────────────────────── */
+
+export type CardVariant = "default" | "primary" | "success" | "info" | "inverse";
+
+export const Card = ({
+  children,
+  className = "",
+  variant = "default",
+  hoverLift = false,
+  ...props
+}: {
+  children?: React.ReactNode;
+  className?: string;
+  variant?: CardVariant;
+  /** #415 — animasi naik sedikit saat hover (Velzon widget cards). */
+  hoverLift?: boolean;
+  [key: string]: any;
+}) => {
+  const variants: Record<CardVariant, string> = {
+    default: "bg-surface border border-border-subtle text-content-strong shadow-soft",
+    primary: "bg-primary-surface border border-primary-surface text-content-inverse shadow-soft",
+    success: "bg-success-surface border border-success-surface text-content-inverse shadow-soft",
+    info: "bg-info-surface border border-info-surface text-content-inverse shadow-soft",
+    inverse: "bg-surface-inverse border border-border-inverse text-content-inverse shadow-soft",
+  };
+
+  return (
+    <div
+      className={cn(
+        "rounded-lg overflow-hidden",
+        variants[variant] || variants.default,
+        hoverLift && "card-lift",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+};
 
 export const CardHeader = ({ children, className = "", ...props }: any) => (
   <div
@@ -290,18 +286,18 @@ export const Badge = ({
   className?: string;
 }) => {
   const variants: Record<BadgeVariant, string> = {
-    primary: "bg-primary/10 text-primary border-primary/20",
-    success: "bg-success/10 text-success border-success/20",
-    warning: "bg-warning/15 text-warning border-warning/30",
-    danger: "bg-danger/10 text-danger border-danger/20",
-    info: "bg-info/10 text-info border-info/20",
+    primary: "bg-primary-surface/10 text-primary border-primary/20",
+    success: "bg-success/10 text-success-text border-success/20",
+    warning: "bg-warning/15 text-warning-text border-warning/30",
+    danger: "bg-danger/10 text-danger-text border-danger/20",
+    info: "bg-info/10 text-info-text border-info/20",
     neutral: "bg-surface-muted text-content-secondary border-border-subtle",
   };
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1 px-2.5 py-1 rounded-md border",
-        "text-xs sm:text-[11px] font-medium uppercase tracking-wide whitespace-nowrap",
+        "text-xs sm:text-[11px] font-normal uppercase tracking-normal whitespace-nowrap",
         variants[variant],
         className
       )}

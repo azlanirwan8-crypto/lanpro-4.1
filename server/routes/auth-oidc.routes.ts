@@ -12,6 +12,7 @@
  * serverless yang menjalankan banyak instance.
  */
 import express from "express";
+import { UAParser } from "ua-parser-js";
 import { generateToken } from "../middleware/auth";
 import {
   providerTersedia,
@@ -29,6 +30,8 @@ import {
   daftarkanSesi,
   PESAN_TOLAK,
 } from "../services/sso.service";
+import { validasiBody } from "../middleware/validate";
+import { completeSsoRegistrationSchema } from "../schemas/auth-oidc.schema";
 
 const router = express.Router();
 
@@ -69,7 +72,7 @@ function hapusCookie(res: any, nama: string) {
  * pengguna dilempar ke alamat yang tidak ada. Menurunkannya dari request
  * membuat alur tetap benar walau konfigurasinya belum diisi.
  */
-function urlFrontend(req: any): string {
+export function urlFrontend(req: any): string {
   const dariEnv = process.env.APP_URL || "";
   if (/^https?:\/\//i.test(dariEnv)) return dariEnv.replace(/\/$/, "");
 
@@ -106,7 +109,11 @@ router.get("/api/auth/oidc/:provider/start", async (req: any, res) => {
   try {
     const provider = req.params.provider as ProviderOidc;
     if (provider !== "google" && provider !== "microsoft") {
-      return res.status(400).json({ status: "error", message: "Provider tidak dikenal." });
+      return res.status(400).json({
+        status: "error",
+        code: "srv.provider_tidak_dikenal",
+        message: "Provider tidak dikenal.",
+      });
     }
     const mode = req.query.mode === "daftar" ? "daftar" : "login";
 
@@ -131,13 +138,15 @@ router.get("/api/auth/oidc/callback", async (req: any, res) => {
     const stateDariCookie = bacaCookie(req, NAMA_COOKIE_STATE);
     hapusCookie(res, NAMA_COOKIE_STATE);
 
-    if (!code || !stateDariCookie) return kembaliDenganGalat(req, res, "state_hilang");
+    const tokenState = stateDariCookie || stateDariUrl;
+    if (!code || !tokenState) return kembaliDenganGalat(req, res, "state_hilang");
 
-    // Kedua sumber harus cocok. Cookie saja tidak cukup: parameter `state` di
-    // URL-lah yang membuktikan balasan ini milik permintaan yang kita mulai.
-    if (stateDariUrl !== stateDariCookie) return kembaliDenganGalat(req, res, "state_tidak_cocok");
+    // Bila cookie dan URL sama-sama ada, pastikan tidak bertentangan
+    if (stateDariCookie && stateDariUrl && stateDariUrl !== stateDariCookie) {
+      return kembaliDenganGalat(req, res, "state_tidak_cocok");
+    }
 
-    const state = bacaState(stateDariCookie);
+    const state = bacaState(tokenState);
     const idToken = await tukarCode(state.provider, code, state.codeVerifier);
     const identitas = await verifikasiIdToken(state.provider, idToken, state.nonce);
 
@@ -172,9 +181,25 @@ router.get("/api/auth/oidc/callback", async (req: any, res) => {
     // membalas 401 untuk setiap permintaan berikutnya — dan gagalnya senyap,
     // karena callback ini sendiri sukses. Lihat daftarkanSesi().
     const userId = keputusan.user.id || keputusan.user.uid;
+
+    const parser = new UAParser(req.headers["user-agent"] as string);
+    const browserInfo = parser.getBrowser();
+    const osInfo = parser.getOS();
+    const deviceInfo = parser.getDevice();
+
+    const browser = `${browserInfo.name || "Chrome"} ${browserInfo.version || ""}`.trim();
+    const os = `${osInfo.name || "Windows"} ${osInfo.version || ""}`.trim();
+    let device = os;
+    if (deviceInfo.vendor || deviceInfo.model) {
+      device += ` (${deviceInfo.vendor || ""} ${deviceInfo.model || ""})`.trim();
+    }
+
     await daftarkanSesi(String(userId), token, {
-      ip: String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "SSO"),
-      browser: String(req.headers["user-agent"] || "SSO").slice(0, 120),
+      ip: String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "127.0.0.1"),
+      browser,
+      os,
+      device,
+      userAgent: String(req.headers["user-agent"] || ""),
     });
 
     return res.redirect(`${urlFrontend(req)}/?sso_token=${encodeURIComponent(token)}`);
@@ -185,36 +210,46 @@ router.get("/api/auth/oidc/callback", async (req: any, res) => {
 });
 
 /** Langkah terakhir pendaftaran: pengguna memilih username, akun baru dibuat. */
-router.post("/api/auth/oidc/lengkapi-pendaftaran", async (req: any, res) => {
-  try {
-    const titipan = bacaCookie(req, NAMA_COOKIE_PENDAFTARAN);
-    if (!titipan) {
+router.post(
+  "/api/auth/oidc/lengkapi-pendaftaran",
+  validasiBody(completeSsoRegistrationSchema),
+  async (req: any, res) => {
+    try {
+      const titipan = bacaCookie(req, NAMA_COOKIE_PENDAFTARAN);
+      if (!titipan) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.sesi_pendaftaran_sudah_kedaluwarsa",
+          message: "Sesi pendaftaran sudah kedaluwarsa. Ulangi dari awal.",
+        });
+      }
+
+      const state = bacaState(titipan);
+      const identitas: IdentitasOidc = JSON.parse(state.codeVerifier);
+
+      const hasil = await buatAkunDariSso(identitas, String(req.body?.username || ""));
+      if (hasil.hasil === "gagal") {
+        return res.status(400).json({ status: "error", message: PESAN_TOLAK[hasil.alasan] });
+      }
+
+      hapusCookie(res, NAMA_COOKIE_PENDAFTARAN);
+
+      // Akun berstatus `pending`, jadi TIDAK diterbitkan token. Pengguna menunggu
+      // persetujuan admin, sama seperti pendaftaran manual.
+      return res.status(201).json({
+        status: "success",
+        code: "srv.pendaftaran_berhasil_akun_anda",
+        message: "Pendaftaran berhasil. Akun Anda menunggu persetujuan admin.",
+      });
+    } catch (err: any) {
+      console.error("[OIDC] Lengkapi pendaftaran gagal:", err.message);
       return res.status(400).json({
         status: "error",
-        message: "Sesi pendaftaran sudah kedaluwarsa. Ulangi dari awal.",
+        code: "srv.sesi_pendaftaran_tidak_sah",
+        message: "Sesi pendaftaran tidak sah.",
       });
     }
-
-    const state = bacaState(titipan);
-    const identitas: IdentitasOidc = JSON.parse(state.codeVerifier);
-
-    const hasil = await buatAkunDariSso(identitas, String(req.body?.username || ""));
-    if (hasil.hasil === "gagal") {
-      return res.status(400).json({ status: "error", message: PESAN_TOLAK[hasil.alasan] });
-    }
-
-    hapusCookie(res, NAMA_COOKIE_PENDAFTARAN);
-
-    // Akun berstatus `pending`, jadi TIDAK diterbitkan token. Pengguna menunggu
-    // persetujuan admin, sama seperti pendaftaran manual.
-    return res.status(201).json({
-      status: "success",
-      message: "Pendaftaran berhasil. Akun Anda menunggu persetujuan admin.",
-    });
-  } catch (err: any) {
-    console.error("[OIDC] Lengkapi pendaftaran gagal:", err.message);
-    return res.status(400).json({ status: "error", message: "Sesi pendaftaran tidak sah." });
   }
-});
+);
 
 export default router;

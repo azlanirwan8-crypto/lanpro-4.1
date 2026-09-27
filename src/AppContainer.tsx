@@ -1,7 +1,17 @@
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "./i18n/LanguageSwitcher";
+import { WebAppsDropdown } from "./components/navigation/WebAppsDropdown";
+import {
+  shouldSuppressSprintDataRefresh,
+  shouldSuppressTaskDataRefresh,
+  shouldSuppressUsersRefresh,
+  suppressSprintDataRefresh,
+  suppressTaskDataRefresh,
+} from "./lib/taskRefreshControl";
 import { safeLocalStorage, safeSessionStorage } from "./lib/safeStorage";
-import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense } from "react";
+import { lazyWithRetry } from "./lib/lazyWithRetry";
 import io from "socket.io-client";
 
 import {
@@ -14,10 +24,24 @@ import {
   ActivityLog,
   LinkedTask,
   AppNotification,
+  PeranEfektif,
 } from "./types";
-import { hasPermission } from "./lib/permissions";
+import { hasPermission, resolveProjectRole } from "./lib/permissions";
+import { adalahWaterfall } from "./lib/methodology";
 import { validateFileClient } from "./lib/fileSecurity";
-import { confirmDeleteAlert, showSuccessAlert, showErrorAlert } from "./lib/sweetalert";
+import {
+  confirmDeleteAlert,
+  confirmCompleteSprintAlert,
+  showSuccessAlert,
+  showErrorAlert,
+} from "./lib/sweetalert";
+import { statusSelesai } from "./lib/statusSelesai";
+import { adalahLingkupTerkunci } from "./lib/sprintLingkup";
+import {
+  buatDetailAssignee,
+  buatDetailFieldDiff,
+  buatDetailStatusDiperbarui,
+} from "./features/issues/lib/formatActivityHistory";
 import { useAppStore } from "./store/useAppStore";
 import { CacheManager } from "./lib/cache";
 import { useMasterData } from "./hooks/useMasterData";
@@ -33,16 +57,46 @@ import { useNewSprintForm } from "./hooks/useNewSprintForm";
 import { useNewProjectForm } from "./hooks/useNewProjectForm";
 import { useTaskSelection } from "./hooks/useTaskSelection";
 import { useAppSync } from "./hooks/useAppSync";
-import { TaskDetailModal } from "./features/issues";
-import { UserDetailView } from "./features/users/UserDetailView";
+import { useAppNavigation } from "./hooks/useAppNavigation";
+/**
+ * Lima tampilan besar di bawah dimuat SAAT DIBUTUHKAN (#293).
+ *
+ * Kelimanya dirender bersyarat di berkas ini, dan sebelumnya diimpor secara
+ * STATIS — sehingga ikut terkirim pada permintaan pertama walaupun pengguna
+ * hanya membuka Dashboard. Yang paling menipu: `MasterDataPanel` sudah dimuat
+ * malas di `AppRoutes.tsx`, tetapi impor statis di sini MENGALAHKANNYA tanpa
+ * satu pun galat maupun peringatan build.
+ *
+ * Diimpor dari berkasnya langsung, bukan dari barrel `./features/issues` atau
+ * `./features/users`: barrel mencampur ekspor yang malas dan yang tidak, dan
+ * Rollup menarik seluruh isinya ke potongan masuk begitu satu saja dipakai
+ * secara statis.
+ */
+const TaskDetailModal = lazyWithRetry(() =>
+  import("./features/issues/TaskDetailModal").then((m) => ({ default: m.TaskDetailModal }))
+);
+const UserDetailView = lazyWithRetry(() =>
+  import("./features/users/UserDetailView").then((m) => ({ default: m.UserDetailView }))
+);
 import { Sidebar } from "./features/sidebar";
-import { AdminUserPanel } from "./features/users";
-import { MasterDataPanel } from "./features/master/MasterDataPanel";
+const AdminUserPanel = lazyWithRetry(() =>
+  import("./features/users/AdminUserPanel").then((m) => ({ default: m.AdminUserPanel }))
+);
+const UserSessionsPanel = lazyWithRetry(() =>
+  import("./features/users/UserSessionsPanel").then((m) => ({ default: m.UserSessionsPanel }))
+);
+const MasterDataPanel = lazyWithRetry(() =>
+  import("./features/master/MasterDataPanel").then((m) => ({ default: m.MasterDataPanel }))
+);
+import { WelcomeScreen } from "./components/WelcomeScreen";
 import { LiveChatWidget } from "./components/LiveChatWidget";
 import { PresenceProvider } from "./contexts/PresenceContext";
 import { HeaderAvatarGroup } from "./components/HeaderAvatarGroup";
+import { UserProfileDropdown } from "./components/UserProfileDropdown";
+import { MobileBottomNav } from "./components/navigation/MobileBottomNav";
 import { SingleLoginCollisionModal } from "./components/SingleLoginCollisionModal";
 import { apiRequest, getAuthToken, isNetworkOrAuthError } from "./lib/api";
+import { WajibGantiKataSandiModal } from "./features/auth/components/WajibGantiKataSandiModal";
 import {
   verifyAuth,
   fetchUsers,
@@ -91,12 +145,16 @@ import { KeyboardShortcutsModal } from "./components/KeyboardShortcutsModal";
 import { RateLimitIndicator } from "./components/RateLimitIndicator";
 import { AppRoutes } from "./routes/AppRoutes";
 import { StyledDropdown } from "./components/ui/CommonComponents";
+import { NewSprintModal } from "./components/modals/NewSprintModal";
+import { EditSprintModal } from "./components/modals/EditSprintModal";
+import { NewProjectModal } from "./components/modals/NewProjectModal";
+import { EditProjectModal } from "./components/modals/EditProjectModal";
+import { NewTaskModal } from "./components/modals/NewTaskModal";
 
 import {
   Trash2,
   FolderKanban,
   Bug,
-  ShieldCheck,
   Sun,
   PieChart as PieIcon,
   Moon,
@@ -112,7 +170,9 @@ import {
   ArrowLeft,
   Lock as LockIcon,
   Link2 as Link2Icon,
+  MoreHorizontal,
   Settings,
+  ShieldAlert,
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { useAuthNotification } from "./components/AuthToastContainer";
@@ -136,8 +196,7 @@ const chunkArray = <T,>(arr: T[], size: number): T[][] => {
 // --- Recharts ---
 import { ensureDate, safeFormat, Button, Input, Textarea } from "./components/ui/CoreUI";
 import {
-  AuthHeroPanel,
-  AuthWatermarkPattern,
+  AuthLayout,
   RegisterScreen,
   LoginScreen,
   CompleteRegistrationScreen,
@@ -147,6 +206,7 @@ import { ProfileEditModal } from "./features/users/ProfileEditModal";
 const BROWSER_SESSION_ID = Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
 
 function AppContainer() {
+  const { t } = useTranslation();
   // Store & Notification Hooks
   const {
     currentView,
@@ -168,7 +228,18 @@ function AppContainer() {
     density,
     setDensity,
   } = useAppStore();
+
+  const [issueListPage, setIssueListPage] = useState(1);
+  const [issueListSearch, setIssueListSearch] = useState("");
+  const [issueListMeta, setIssueListMeta] = useState<{
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  } | null>(null);
+  const ISSUE_LIST_PAGE_SIZE = 25;
   const { handleAuthApiResponse, triggerNotification } = useAuthNotification();
+  useAppNavigation();
 
   // Dideklarasikan sebelum useAuthHook karena hook itu menerimanya sebagai argumen.
   // Bila dideklarasikan di bawah, pemanggilan useAuthHook mengaksesnya dalam
@@ -187,6 +258,8 @@ function AppContainer() {
     isAlert?: boolean;
     isLoading?: boolean;
     closeOnBackdropClick?: boolean;
+    iconSrc?: string;
+    iconColors?: string;
   } | null>(null);
 
   // useMasterData butuh isLoggedIn yang justru dihasilkan useAuthHook, sehingga
@@ -245,6 +318,16 @@ function AppContainer() {
   // di bawah membacanya saat render.
   const user: any = currentUser;
 
+  // Resolusi peran proyek anggota di dalam proyek aktif (§19.27 / #87)
+  const effectiveProjectRole = useMemo(() => {
+    if (!selectedProject || !currentUser) return null;
+    return resolveProjectRole(currentUser, selectedProject);
+  }, [selectedProject, currentUser]);
+
+  const userRoleForProject = useMemo(() => {
+    return (effectiveProjectRole || effectiveRole) as PeranEfektif;
+  }, [effectiveProjectRole, effectiveRole]);
+
   // Kembalian SSO. Dibaca sekali saat mount; token sudah ditangani lebih awal di
   // main.tsx, jadi yang tersisa di sini hanya dua keadaan yang butuh tampilan:
   // pesan penolakan, dan layar pemilihan username.
@@ -265,9 +348,33 @@ function AppContainer() {
   // username+password tanpa berpindah halaman.
   useEffect(() => {
     if (hasilSso.jenis !== "galat") return;
-    showErrorAlert("Tidak Dapat Masuk", hasilSso.pesan);
+    showErrorAlert(t("alerts.cannotSignIn"), hasilSso.pesan);
     bersihkanSso();
   }, [hasilSso]);
+
+  // Item #207 — sebelumnya `email`/`nama` (PII) tertinggal di address bar
+  // SELAMA layar "Lengkapi Pendaftaran" terbuka — baru dibersihkan lewat
+  // `bersihkanSso` saat pengguna menyelesaikan/membatalkan form (`onSelesai`/
+  // `onBatal` di bawah). Prinsip yang sudah ditegakkan untuk `sso_token`
+  // ("token tidak boleh tertinggal di address bar", `ssoCallback.ts`) berlaku
+  // sama untuk email: ikut tersalin ke riwayat peramban dan tertangkap kalau
+  // pengguna screenshot/share link SEBELUM sempat menutup form. Dibersihkan
+  // dari URL SEGERA di sini, TANPA mereset `hasilSso` — form tetap perlu
+  // `hasilSso.email` untuk pra-isi field, jadi hanya address bar-nya yang
+  // dirapikan, bukan state React-nya.
+  useEffect(() => {
+    if (hasilSso.jenis !== "lengkapi") return;
+    if (typeof window === "undefined") return;
+    const sisa = bersihkanQuerySso(window.location.search);
+    window.history.replaceState({}, "", window.location.pathname + sisa);
+  }, [hasilSso]);
+
+  // #311 — jangan biarkan view Sprint terbuka pada proyek Waterfall.
+  useEffect(() => {
+    if (currentView === "sprints" && adalahWaterfall(selectedProject?.category)) {
+      setCurrentView("timeline");
+    }
+  }, [currentView, selectedProject?.category, setCurrentView]);
 
   // Modal & Detail Panel Management
   const {
@@ -356,6 +463,20 @@ function AppContainer() {
   const setLoginStatusText = setHookLoginStatusText;
   const isAuthLoading = hookIsAuthLoading;
   const [isInitialDataLoading, setIsInitialDataLoading] = useState(false);
+  // #392 — overflow Settings/bahasa/tema di bawah md
+  const [isHeaderMoreOpen, setIsHeaderMoreOpen] = useState(false);
+  const headerMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isHeaderMoreOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      if (headerMoreRef.current && !headerMoreRef.current.contains(e.target as Node)) {
+        setIsHeaderMoreOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [isHeaderMoreOpen]);
 
   const {
     notifications,
@@ -429,20 +550,6 @@ function AppContainer() {
   }, [theme]);
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (themeDropdownRef.current && !themeDropdownRef.current.contains(event.target as Node)) {
-        setIsThemeOpen(false);
-      }
-    }
-    if (isThemeOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isThemeOpen]);
-
-  useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
@@ -462,10 +569,7 @@ function AppContainer() {
 
   useEffect(() => {
     // Initial Auth Restoration (LanPro v1.3)
-    let token = null;
-    try {
-      token = safeLocalStorage.getItem("lanpro_jwt_token");
-    } catch (e) {}
+    const token = getAuthToken();
 
     if (!token) {
       setIsLoggedIn(false);
@@ -495,7 +599,7 @@ function AppContainer() {
 
     // Verify token with backend to prevent expired/invalid session and parallel error toasts
     const verifySession = async () => {
-      const token = safeLocalStorage.getItem("lanpro_jwt_token");
+      const token = getAuthToken();
       if (!token) {
         setLoading(false);
 
@@ -539,9 +643,52 @@ function AppContainer() {
           await handleLogout(true);
         }
       } catch (e: any) {
-        console.warn("Token verification failed (session expired or invalid):", e?.message || e);
-        // Silent logout - clear state and go back to login without throwing loud error toasts
-        await handleLogout(true);
+        /**
+         * Item #252 — `catch` ini dulu memanggil `handleLogout(true)` untuk
+         * SEMUA kegagalan, tanpa membedakan dua hal yang sama sekali berbeda:
+         *
+         *   token DITOLAK server  -> sesi memang sudah tidak sah, keluar benar
+         *   server TIDAK TERJAWAB -> sesi tidak diketahui, keluar itu keliru
+         *
+         * Bedanya bukan teoretis di proyek ini. Log server memuat
+         * `read ECONNRESET` pada pool PostgreSQL dan kegagalan koneksi Neon,
+         * jadi satu kedipan basis data saat aplikasi dibuka sudah cukup untuk
+         * membuang pengguna ke layar Masuk dengan token yang masih sah — dan
+         * karena putusnya acak, gejalanya terbaca "kadang bisa kadang tidak".
+         *
+         * `apiRequest` SUDAH mengulang tiga kali dengan backoff sebelum
+         * menyerah (`src/lib/api.ts:108`). Jadi galat yang sampai ke sini
+         * bukan kedipan sekejap, dan justru karena itu membuang sesinya makin
+         * tidak beralasan: keadaan jaringan tidak mengatakan apa pun tentang
+         * keabsahan token.
+         *
+         * PEMBEDAANNYA memakai bentuk galat yang memang sudah disediakan
+         * `api.ts`, bukan mencocokkan teks pesan:
+         *   - gagal menghubungi server -> `ApiError` status 503 + `networkError`
+         *   - server menjawab tapi rusak -> status 5xx
+         *   - dibatasi laju             -> status 429
+         *   - token ditolak             -> status 401
+         *
+         * Yang TIDAK diubah: token sengaja tidak dihapus pada jalur jaringan,
+         * sehingga muat ulang berikutnya masih membawa sesi yang sama.
+         */
+        const status = typeof e?.status === "number" ? e.status : null;
+        const serverTidakTerjawab =
+          e?.data?.networkError === true ||
+          status === 503 ||
+          status === 429 ||
+          (status !== null && status >= 500);
+
+        if (serverTidakTerjawab) {
+          console.warn(
+            "Verifikasi token tidak sampai ke server; sesi DIPERTAHANKAN:",
+            e?.message || e
+          );
+        } else {
+          console.warn("Token verification failed (session expired or invalid):", e?.message || e);
+          // Silent logout - clear state and go back to login without throwing loud error toasts
+          await handleLogout(true);
+        }
       } finally {
         setLoading(false);
       }
@@ -671,6 +818,25 @@ function AppContainer() {
 
   const handleSetIsTaskDetailModalOpen = setIsTaskDetailModalOpen;
 
+  /**
+   * Membuka detail pengguna sambil MENGINGAT asalnya — item #161.
+   *
+   * `onBack` di `UserDetailView` dulu dikeraskan ke `"users"`, jadi tombol
+   * Kembali selalu bermuara di panel admin Manajemen Pengguna, dari mana pun
+   * layar itu dibuka. Untuk pengguna biasa yang membuka profilnya sendiri
+   * lewat footer sidebar atau layar sambutan, satu klik Kembali melemparkannya
+   * ke daftar SELURUH pengguna — layar yang menunya sendiri disembunyikan
+   * untuknya. Dipakai pola yang sudah ada untuk `issueDetail`, bukan state
+   * baru.
+   */
+  const bukaDetailPengguna = (target: any) => {
+    if (currentView !== "userDetail") {
+      setPreviousView(currentView);
+    }
+    setSelectedUserForDetail(target);
+    setCurrentView("userDetail" as any);
+  };
+
   const {
     socketConnected,
     setSocketConnected,
@@ -789,7 +955,7 @@ function AppContainer() {
 
   const exportTasksToCSV = () => {
     if (!selectedProject || tasks.length === 0) {
-      toast.error("Tidak ada tugas untuk diexport.");
+      toast.error(t("toast.noTasksToExport"));
       return;
     }
     const headers = [
@@ -808,8 +974,12 @@ function AppContainer() {
     const csvContent = [
       headers.join(","),
       ...tasks.map((t) => {
+        // Ekspor CSV sengaja seluruhnya berbahasa Inggris, tidak mengikuti tombol
+        // bahasa: seluruh headernya Inggris dan sel lain memakai "Unknown", jadi
+        // satu sel berbahasa Indonesia membuat berkasnya campur. Menerjemahkan
+        // headernya pun bukan pilihan — alat yang mem-parsing kolom akan pecah.
         const assigneeName =
-          projectMembers.find((m) => m.uid === t.assigneeId)?.displayName || "Belum Ditugaskan";
+          projectMembers.find((m) => m.uid === t.assigneeId)?.displayName || "Unassigned";
         const reporterName =
           (t as any).reporter?.name ||
           (t as any).reporter?.displayName ||
@@ -845,11 +1015,39 @@ function AppContainer() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast.success("Successfully exported tasks to CSV");
+    toast.success(t("toast.exportCsvOk"));
   };
 
   // Auth functions (handleManualLogin, handleRegister) are now managed by useAuth hook
   // See src/hooks/useAuth.ts for implementation
+
+  /**
+   * #74 — penjaga respons BASI.
+   *
+   * Efek pengambil data bergantung pada `[selectedProject?.id]` dan memakai
+   * jeda 300 ms dengan `clearTimeout` di cleanup. Jeda itu menahan permintaan
+   * yang BELUM berangkat — tetapi tidak membatalkan yang SUDAH berangkat, dan
+   * hasilnya tetap ditulis ke state tanpa memeriksa apakah proyeknya masih
+   * sama.
+   *
+   * Akibatnya berpindah dari proyek A ke B di dalam jendela permintaan membuat
+   * data A menimpa data B, dan pengguna melihat isi proyek yang salah tanpa
+   * satu pun galat.
+   *
+   * Ref ini menyimpan proyek yang SEDANG dilihat. Tiap pengambil menangkap id
+   * saat permintaan berangkat, lalu membandingkannya sebelum menulis state —
+   * pola yang sama dengan penjaga `isMounted` pada `fetchMembers`, tetapi
+   * menjaga hal yang berbeda: bukan komponen yang sudah dilepas, melainkan
+   * proyek yang sudah berganti.
+   */
+  const proyekAktifRef = React.useRef<string | undefined>(undefined);
+  React.useEffect(() => {
+    proyekAktifRef.current = selectedProject?.id;
+  }, [selectedProject?.id]);
+
+  /** `true` bila proyeknya belum berganti sejak permintaan berangkat. */
+  const masihProyekSama = (idSaatBerangkat: string | undefined) =>
+    proyekAktifRef.current === idSaatBerangkat;
 
   const fetchProjects = async () => {
     if (!getAuthToken()) return;
@@ -945,7 +1143,13 @@ function AppContainer() {
     return () => clearTimeout(timer);
   }, [currentUser?.uid, isLoggedIn]);
 
-  const fetchTasks = async () => {
+  const fetchTasks = async (opts?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    rootsOnly?: boolean;
+  }) => {
+    const proyekSaatBerangkat = selectedProject?.id;
     if (!getAuthToken()) return;
     if (!selectedProject) {
       setTasks([]);
@@ -960,33 +1164,35 @@ function AppContainer() {
     );
     const effectiveUserId = currentUser?.uid || user?.uid;
 
+    const useIssueListPage =
+      opts?.rootsOnly === true || (currentView === "list" && opts?.rootsOnly !== false);
+
     try {
-      const data = await fetchTasksApi(selectedProject.id);
+      const data = await fetchTasksApi(
+        selectedProject.id,
+        useIssueListPage
+          ? {
+              page: opts?.page ?? issueListPage,
+              limit: opts?.limit ?? ISSUE_LIST_PAGE_SIZE,
+              search: opts?.search ?? issueListSearch,
+              rootsOnly: true,
+            }
+          : undefined
+      );
       if (data.status === "success") {
         const allTasks = data.data as Task[];
         const uniqueAllTasks = Array.from(
           new Map((allTasks || []).filter((t) => t && t.id).map((t) => [t.id, t])).values()
         );
-        setAllProjectTasksForStats(uniqueAllTasks);
 
-        const effectiveUsername = currentUser?.username || currentUserProfile?.username;
-        const effectiveEmail = currentUser?.email || currentUserProfile?.email;
-        const effectiveDisplayName = currentUser?.displayName || currentUserProfile?.displayName;
-        const effectiveNamaLengkap =
-          (currentUser as any)?.nama_lengkap || (currentUserProfile as any)?.nama_lengkap;
+        if (!useIssueListPage) {
+          setAllProjectTasksForStats(uniqueAllTasks);
+          setIssueListMeta(null);
+        } else if (data.meta) {
+          setIssueListMeta(data.meta);
+        }
 
-        const validIdentifiers = [
-          effectiveUserId,
-          currentUser?.uid,
-          currentUser?.id,
-          currentUserProfile?.uid,
-          currentUserProfile?.id,
-          effectiveUsername,
-          effectiveEmail,
-          effectiveDisplayName,
-          effectiveNamaLengkap,
-        ].filter(Boolean);
-
+        if (!masihProyekSama(proyekSaatBerangkat)) return;
         setTasks(uniqueAllTasks);
       }
     } catch (e: any) {
@@ -1001,12 +1207,84 @@ function AppContainer() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      fetchTasks();
+      if (currentView === "list") {
+        fetchTasks({
+          rootsOnly: true,
+          page: issueListPage,
+          limit: ISSUE_LIST_PAGE_SIZE,
+          search: issueListSearch,
+        });
+      } else {
+        fetchTasks({ rootsOnly: false });
+      }
     }, 300);
     return () => clearTimeout(timer);
-  }, [selectedProject?.id, userRole, currentUser?.uid]);
+  }, [
+    selectedProject?.id,
+    userRole,
+    currentUser?.uid,
+    currentView,
+    issueListPage,
+    issueListSearch,
+  ]);
 
   const realTimeRefs = useRef<any>({});
+  const taskDataRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const activityLogsRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const scheduleTaskDataRefresh = useCallback(() => {
+    if (shouldSuppressTaskDataRefresh()) {
+      return;
+    }
+    if (taskDataRefreshTimerRef.current) {
+      clearTimeout(taskDataRefreshTimerRef.current);
+    }
+    taskDataRefreshTimerRef.current = setTimeout(() => {
+      taskDataRefreshTimerRef.current = null;
+      const refs = realTimeRefs.current;
+      if (refs.selectedProject) {
+        refs.fetchTasks();
+        refs.fetchSprints();
+        refs.fetchActivityLogs();
+      }
+    }, 400);
+  }, []);
+
+  const scheduleActivityLogsRefresh = useCallback(() => {
+    if (activityLogsRefreshTimerRef.current) {
+      clearTimeout(activityLogsRefreshTimerRef.current);
+    }
+    activityLogsRefreshTimerRef.current = setTimeout(() => {
+      activityLogsRefreshTimerRef.current = null;
+      const refs = realTimeRefs.current;
+      if (refs.selectedProject) {
+        refs.fetchActivityLogs();
+      }
+    }, 400);
+  }, []);
+
+  const projectsRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const usersRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // #516 — daftar proyek dan daftar pengguna dulunya ditarik ulang SETIAP event
+  // realtime, tanpa penggabungan: N rekan kerja yang mengubah apa pun berarti
+  // N permintaan penuh. Polanya disamakan dengan scheduleTaskDataRefresh.
+  const scheduleProjectsRefresh = useCallback(() => {
+    if (projectsRefreshTimerRef.current) clearTimeout(projectsRefreshTimerRef.current);
+    projectsRefreshTimerRef.current = setTimeout(() => {
+      projectsRefreshTimerRef.current = null;
+      realTimeRefs.current.fetchProjects();
+    }, 400);
+  }, []);
+
+  const scheduleUsersRefresh = useCallback(() => {
+    if (usersRefreshTimerRef.current) clearTimeout(usersRefreshTimerRef.current);
+    usersRefreshTimerRef.current = setTimeout(() => {
+      usersRefreshTimerRef.current = null;
+      if (shouldSuppressUsersRefresh()) return;
+      realTimeRefs.current.fetchAllUsers();
+    }, 400);
+  }, []);
 
   useEffect(() => {
     realTimeRefs.current = {
@@ -1018,15 +1296,39 @@ function AppContainer() {
       fetchActivityLogs,
       fetchComments,
       fetchNotifications,
+      scheduleTaskDataRefresh,
+      scheduleActivityLogsRefresh,
+      scheduleProjectsRefresh,
+      scheduleUsersRefresh,
+      setTasks,
       selectedProject,
+      currentUser,
     };
   });
 
   useEffect(() => {
+    // #50 — server kini mewajibkan token pada handshake Socket.IO.
+    //
+    // Efek ini DULU berdependensi `[]`, artinya socket dibuat sekali saat
+    // aplikasi mount — yaitu di layar login, saat token belum ada — dan tidak
+    // pernah dibuat ulang setelah login berhasil. Dengan gerbang autentikasi di
+    // server, dependensi kosong itu akan mematikan seluruh realtime bagi
+    // pengguna sah. Karena itu efek ini sekarang bergantung pada token dan
+    // dijalankan ulang begitu token berubah (login, force-logout, keluar).
+    const jwtToken = getAuthToken();
+
+    // Tanpa token, jangan menyambung sama sekali. Menyambung lalu ditolak hanya
+    // menghasilkan percobaan ulang dan kebisingan di console layar login.
+    if (!jwtToken) {
+      setSocketConnected(false);
+      return;
+    }
+
     // Vercel friendly socket config
     let socket: any;
     try {
       socket = io({
+        auth: { token: jwtToken },
         reconnectionAttempts: 3,
         timeout: 5000,
         transports: ["polling", "websocket"],
@@ -1066,7 +1368,7 @@ function AppContainer() {
 
     setSocket(socket);
 
-    socket.on("FORCE_LOGOUT_EVENT", (data: any) => {
+    socket.on("FORCE_LOGOUT_EVENT", async (data: any) => {
       if (data.browserSessionId === BROWSER_SESSION_ID) {
         return;
       }
@@ -1080,14 +1382,39 @@ function AppContainer() {
         }
       }
       const currentUserId = activeUser?.id || activeUser?.uid;
-      const currentToken = safeLocalStorage.getItem("lanpro_jwt_token");
+      const currentToken = getAuthToken();
 
-      if (
-        currentUserId &&
-        currentUserId.toString() === data.userId &&
-        currentToken !== data.newToken
-      ) {
-        toast.error("Sesi Anda telah diakhiri karena login di perangkat/browser lain.");
+      if (!currentUserId || currentUserId.toString() !== data.userId || !currentToken) {
+        return;
+      }
+
+      // #51 — server tidak lagi mengirim token sesi baru; ia mengirim SIDIK
+      // JARI-nya. Yang perlu dijawab di sini cuma satu: apakah sesi baru itu
+      // aku sendiri? Kalau ya, jangan keluarkan diri sendiri.
+      //
+      // Bila sidik jari tak bisa dihitung (crypto.subtle tidak tersedia, atau
+      // server versi lama tidak mengirimkannya), pilihannya jatuh ke TIDAK
+      // mengeluarkan pengguna. Gagal dengan membiarkan orang tetap bekerja jauh
+      // lebih baik daripada gagal dengan melempar semua orang ke layar login.
+      let sidikTokenSaya: string | null = null;
+      try {
+        if (globalThis.crypto?.subtle) {
+          const bytes = new TextEncoder().encode(currentToken);
+          const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes);
+          sidikTokenSaya = Array.from(new Uint8Array(digest))
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+        }
+      } catch {
+        sidikTokenSaya = null;
+      }
+
+      if (!data.sidikTokenBaru || !sidikTokenSaya) {
+        return;
+      }
+
+      if (sidikTokenSaya !== data.sidikTokenBaru) {
+        toast.error(t("toast.sessionEndedElsewhere"));
         handleLogout(true);
       }
     });
@@ -1096,7 +1423,7 @@ function AppContainer() {
       setSocketConnected(true);
     });
 
-    socket.on("connect_error", (err) => {
+    socket.on("connect_error", (err: any) => {
       // Suppress loud socket errors to avoid Vercel console spam
       setSocketConnected(false);
     });
@@ -1105,43 +1432,63 @@ function AppContainer() {
       setSocketConnected(false);
     });
 
-    socket.on("project_updated", (event) => {
+    socket.on("project_updated", (event: any) => {
       const refs = realTimeRefs.current;
       if (event && event.projectId === refs.selectedProject?.id) {
-        refs.fetchTasks();
+        refs.scheduleTaskDataRefresh?.();
       }
     });
 
-    socket.on("data_changed", (event) => {
+    socket.on("task_updated", (event: any) => {
+      const refs = realTimeRefs.current;
+      if (!event || event.projectId !== refs.selectedProject?.id) return;
+      const { taskId, changes } = event;
+      if (taskId && changes && typeof refs.setTasks === "function") {
+        refs.setTasks((prev: Task[]) =>
+          prev.map((t) => (t.id === taskId ? { ...t, ...changes } : t))
+        );
+        return;
+      }
+      refs.scheduleTaskDataRefresh?.();
+    });
+
+    socket.on("data_changed", (event: any) => {
       const path = event.path || "";
       const refs = realTimeRefs.current;
 
+      // #322 — abaikan event proyek lain (server kini mengirim projectId bila ada)
+      if (
+        event?.projectId &&
+        refs.selectedProject?.id &&
+        event.projectId !== refs.selectedProject.id
+      ) {
+        return;
+      }
+
       if (path.includes("/tasks") || path.includes("/sprint-tasks")) {
         if (refs.selectedProject) {
-          refs.fetchTasks();
-          refs.fetchSprints();
-          refs.fetchActivityLogs();
+          refs.scheduleTaskDataRefresh?.();
         }
       }
       if (path.includes("/activity")) {
-        if (refs.selectedProject) refs.fetchActivityLogs();
+        if (refs.selectedProject) refs.scheduleActivityLogsRefresh?.();
       }
       if (path.includes("/comments")) {
         if (refs.selectedProject) {
           refs.fetchComments();
-          refs.fetchActivityLogs();
+          refs.scheduleActivityLogsRefresh?.();
         }
       }
       if (path.includes("/projects") && !path.includes("/tasks") && !path.includes("/sprints")) {
-        refs.fetchProjects();
+        refs.scheduleProjectsRefresh?.();
       }
       if (path.includes("/users") || path.includes("/project-members")) {
-        refs.fetchAllUsers();
+        refs.scheduleUsersRefresh?.();
       }
       if (path.includes("/sprints")) {
-        if (refs.selectedProject) {
+        if (refs.selectedProject && !shouldSuppressSprintDataRefresh()) {
           refs.fetchSprints();
-          refs.fetchActivityLogs();
+          refs.scheduleActivityLogsRefresh?.();
         }
       }
       if (path.includes("/master-data")) {
@@ -1164,8 +1511,8 @@ function AppContainer() {
       }
       if (path.includes("/db-query")) {
         // A raw query might have modified anything. Safest is to refresh all.
-        refs.fetchProjects();
-        refs.fetchAllUsers();
+        refs.scheduleProjectsRefresh?.();
+        refs.scheduleUsersRefresh?.();
 
         // Debounce master data
         if (!refs.masterDataDebounceTimer) {
@@ -1176,9 +1523,7 @@ function AppContainer() {
         }
 
         if (refs.selectedProject) {
-          refs.fetchTasks();
-          refs.fetchSprints();
-          refs.fetchActivityLogs();
+          refs.scheduleTaskDataRefresh?.();
           refs.fetchComments();
         }
 
@@ -1192,7 +1537,7 @@ function AppContainer() {
       }
     });
 
-    socket.on("user_avatar_updated", (event) => {
+    socket.on("user_avatar_updated", (event: any) => {
       const refs = realTimeRefs.current;
       if (refs && typeof refs.fetchAllUsers === "function") {
         refs.fetchAllUsers();
@@ -1216,6 +1561,28 @@ function AppContainer() {
       }
     });
 
+    socket.on("user_cover_updated", (event: any) => {
+      const refs = realTimeRefs.current;
+      if (refs && typeof refs.fetchAllUsers === "function") {
+        refs.fetchAllUsers();
+      }
+      if (event && event.userId) {
+        if (
+          refs &&
+          refs.currentUser &&
+          (refs.currentUser.id === event.userId || refs.currentUser.uid === event.userId)
+        ) {
+          const updated = {
+            ...refs.currentUser,
+            coverUrl: event.cover_url,
+          };
+          setCurrentUser(updated);
+          setCurrentUserProfile(updated);
+          safeLocalStorage.setItem("sessionUser", JSON.stringify(updated));
+        }
+      }
+    });
+
     socket.on("PRESENCE_UPDATE", (users: any[]) => {
       // Deprecated in favor of global presence_sync
     });
@@ -1225,7 +1592,12 @@ function AppContainer() {
         socket.disconnect();
       }
     };
-  }, []);
+    // Bergantung pada identitas pengguna, bukan pada token mentah: nilai token
+    // tidak disimpan di state React, jadi perubahannya tidak memicu render.
+    // `currentUser?.id` berubah tepat pada dua peristiwa yang penting di sini —
+    // login berhasil dan keluar — dan pada saat itulah socket perlu dibuat ulang
+    // membawa token yang baru.
+  }, [currentUser?.id]);
 
   // Serverless Heartbeat Fallback
   useEffect(() => {
@@ -1291,6 +1663,7 @@ function AppContainer() {
   }, [selectedProject?.members?.join(","), selectedProject?.id, isLoggedIn]);
 
   const fetchSprints = async () => {
+    const proyekSaatBerangkat = selectedProject?.id;
     if (!getAuthToken()) return;
     if (!selectedProject) {
       setSprints([]);
@@ -1300,6 +1673,7 @@ function AppContainer() {
     try {
       const data = await fetchSprintsApi(selectedProject.id);
       if (data.status === "success") {
+        if (!masihProyekSama(proyekSaatBerangkat)) return;
         setSprints(data.data as Sprint[]);
       }
     } catch (e: any) {
@@ -1343,6 +1717,7 @@ function AppContainer() {
   }, [newProjectName]);
 
   const fetchComments = async () => {
+    const proyekSaatBerangkat = selectedProject?.id;
     if (!getAuthToken()) return;
     if (!selectedProject || !selectedTaskForDetail) {
       setComments([]);
@@ -1351,6 +1726,7 @@ function AppContainer() {
     try {
       const data = await fetchTaskComments(selectedProject.id, selectedTaskForDetail.id);
       if (data.status === "success") {
+        if (!masihProyekSama(proyekSaatBerangkat)) return;
         setComments(data.data as Comment[]);
       }
     } catch (error: any) {
@@ -1371,6 +1747,7 @@ function AppContainer() {
   }, [selectedProject?.id, selectedTaskForDetail?.id]);
 
   const fetchActivityLogs = async () => {
+    const proyekSaatBerangkat = selectedProject?.id;
     if (!getAuthToken()) return;
     if (!selectedProject) {
       setActivityLogs([]);
@@ -1379,6 +1756,7 @@ function AppContainer() {
     try {
       const data = await fetchActivity(selectedProject.id);
       if (data.status === "success") {
+        if (!masihProyekSama(proyekSaatBerangkat)) return;
         setActivityLogs(data.data as ActivityLog[]);
       }
     } catch (error: any) {
@@ -1407,7 +1785,7 @@ function AppContainer() {
 
   const handleSyncAll = async () => {
     setIsSyncing(true);
-    toast.info("Memulai sinkronisasi data dengan server...");
+    toast.info(t("toast.syncStarting"));
     try {
       await Promise.all([fetchProjects(), fetchMasterData(), fetchAllUsers()]);
       if (selectedProject) {
@@ -1415,9 +1793,9 @@ function AppContainer() {
       }
       setLastSyncedTime(new Date().toLocaleTimeString());
       setCacheStats(CacheManager.getStats());
-      toast.success("Sinkronisasi data berhasil diselesaikan!");
+      toast.success(t("toast.syncDone"));
     } catch (e: any) {
-      toast.error("Gagal sinkronisasi: " + (e?.message || e));
+      toast.error(t("toast.syncFailed") + (e?.message || e));
     } finally {
       setIsSyncing(false);
     }
@@ -1438,7 +1816,7 @@ function AppContainer() {
       if (new Date(newSprintStartDate) > new Date(newSprintEndDate)) {
         setConfirmAction({
           isOpen: true,
-          title: "Validasi Tanggal",
+          title: t("appShell.dateValidation"),
           message:
             "Tanggal selesari target fase tidak boleh sebelum tanggal mulai target fase (tidak bisa backdate).",
           onConfirm: () => {},
@@ -1447,6 +1825,27 @@ function AppContainer() {
         return;
       }
     }
+
+    const tempId = `temp-sprint-${crypto.randomUUID()}`;
+    const backlogIds = Array.from(selectedSprintBacklog as Set<string>);
+    const placeholder: Sprint = {
+      id: tempId,
+      projectId: selectedProject.id,
+      name: finalSprintName,
+      goal: newSprintGoal,
+      startDate: newSprintStartDate || null,
+      endDate: newSprintEndDate || null,
+      status: "planned",
+      createdAt: new Date().toISOString(),
+    };
+
+    suppressSprintDataRefresh(8000);
+    suppressTaskDataRefresh(8000);
+    setSprints((prev) => [placeholder, ...prev.filter((s) => s.id !== tempId)]);
+    resetNewSprintForm();
+    setSelectedSprintBacklog(new Set());
+    setIsNewSprintModalOpen(false);
+    toast.success(t("toast.sprintCreated"));
 
     try {
       const data = await createSprint(selectedProject.id, {
@@ -1458,31 +1857,23 @@ function AppContainer() {
       });
 
       const sprintId = data.data.id;
+      setSprints((prev) => prev.map((s) => (s.id === tempId ? { ...data.data, id: sprintId } : s)));
 
-      // Assign selected backlog items
-
-      // Sprint backlog assignment
-      if (selectedSprintBacklog.size > 0) {
-        const promises = Array.from(selectedSprintBacklog as Set<string>).map((taskId) =>
-          updateTask(selectedProject.id, taskId, { sprintId })
-            .then(() => {
-              /* task updated */
-            })
-            .catch((err) => console.error("Failed to update task:", taskId, err))
-        );
-        await Promise.all(promises);
-
-        setTasks((prevTasks) =>
-          prevTasks.map((t) => (selectedSprintBacklog.has(t.id) ? { ...t, sprintId } : t))
-        );
+      if (backlogIds.length > 0) {
+        void Promise.all(
+          backlogIds.map((taskId) =>
+            updateTask(selectedProject.id, taskId, { sprintId }).catch((err) =>
+              console.error("Failed to update task:", taskId, err)
+            )
+          )
+        ).then(() => {
+          setTasks((prevTasks) =>
+            prevTasks.map((t) => (backlogIds.includes(t.id) ? { ...t, sprintId } : t))
+          );
+        });
       }
-
-      resetNewSprintForm();
-      setSelectedSprintBacklog(new Set());
-      setIsNewSprintModalOpen(false);
-      fetchSprints();
-      toast.success("Sprint created successfully");
     } catch (e: any) {
+      setSprints((prev) => prev.filter((s) => s.id !== tempId));
       console.error(e);
       toast.error(e.message || "Failed to create sprint");
     }
@@ -1495,7 +1886,7 @@ function AppContainer() {
       if (ensureDate(editingSprint.startDate) > ensureDate(editingSprint.endDate)) {
         setConfirmAction({
           isOpen: true,
-          title: "Validasi Tanggal",
+          title: t("appShell.dateValidation"),
           message:
             "Tanggal selesai target fase tidak boleh sebelum tanggal mulai target fase (tidak bisa backdate).",
           onConfirm: () => {},
@@ -1506,41 +1897,66 @@ function AppContainer() {
     }
 
     try {
-      const data = await updateSprint(selectedProject.id, editingSprint.id, {
-        name: editingSprint.name,
-        goal: editingSprint.goal,
-        startDate: editingSprint.startDate,
-        endDate: editingSprint.endDate,
-        status: editingSprint.status,
+      const sprintSnapshot = editingSprint;
+      suppressSprintDataRefresh(8000);
+      setSprints((prev) =>
+        prev.map((s) => (s.id === sprintSnapshot.id ? { ...s, ...sprintSnapshot } : s))
+      );
+      setIsEditSprintModalOpen(false);
+      toast.success(t("toast.sprintUpdated"));
+
+      const data = await updateSprint(selectedProject.id, sprintSnapshot.id, {
+        name: sprintSnapshot.name,
+        goal: sprintSnapshot.goal,
+        startDate: sprintSnapshot.startDate,
+        endDate: sprintSnapshot.endDate,
+        status: sprintSnapshot.status,
       });
       if (data.status !== "success") throw new Error(data.message);
-
-      fetchSprints();
-
-      setIsEditSprintModalOpen(false);
-      toast.success("Sprint updated successfully");
     } catch (e: any) {
+      fetchSprints();
       console.error(e);
-      toast.error("Failed to update sprint: " + (e.message || e));
+      toast.error(t("toast.sprintUpdateFailed") + (e.message || e));
     }
   };
 
   const handleStartSprint = async (sprintId: string) => {
     if (!selectedProject) return;
     if (
-      !hasPermission(effectiveRole, "planning", "update", false, currentUserProfile?.permissions)
+      !hasPermission(
+        userRoleForProject,
+        "planning",
+        "update",
+        false,
+        currentUserProfile?.permissions
+      )
     ) {
-      toast.error("Anda tidak memiliki izin untuk memulai sprint.");
+      toast.error(t("toast.noPermStartSprint"));
       return;
     }
 
+    suppressSprintDataRefresh(8000);
+    // #462 — satu aktif: turunkan yang lain di UI lebih dulu
+    setSprints((prev) =>
+      prev.map((s) => {
+        if (s.id === sprintId) return { ...s, status: "active" as const };
+        if (
+          ["active", "in_progress", "ongoing", "in progress"].includes(
+            String(s.status || "").toLowerCase()
+          )
+        ) {
+          return { ...s, status: "planned" as const };
+        }
+        return s;
+      })
+    );
+    toast.success(t("toast.sprintStarted"));
+
     try {
       const data = await updateSprint(selectedProject.id, sprintId, { status: "active" });
-      if (data.status === "success") {
-        fetchSprints();
-        toast.success("Sprint successfully started.");
-      }
+      if (data.status !== "success") throw new Error(data.message || "Failed");
     } catch (e: any) {
+      fetchSprints();
       console.error(e);
       toast.error(e.message || "Failed to start sprint");
     }
@@ -1549,48 +1965,82 @@ function AppContainer() {
   const handleCompleteSprint = async (sprintId: string) => {
     if (!selectedProject) return;
     if (
-      !hasPermission(effectiveRole, "planning", "update", false, currentUserProfile?.permissions)
+      !hasPermission(
+        userRoleForProject,
+        "planning",
+        "update",
+        false,
+        currentUserProfile?.permissions
+      )
     ) {
-      toast.error("Anda tidak memiliki izin untuk menyelesaikan sprint.");
+      toast.error(t("toast.noPermCompleteSprint"));
       return;
     }
 
     const sprintToComplete = sprints.find((s) => s.id === sprintId);
     if (!sprintToComplete) return;
 
-    const isConfirmed = await confirmDeleteAlert(
-      "Selesaikan Fase?",
-      `Apakah Anda yakin ingin menyelesaikan "${sprintToComplete.name}"? Tugas yang belum selesai akan dipindahkan ke backlog secara otomatis.`
+    const nextSprint =
+      sprints
+        .filter(
+          (s) =>
+            s.id !== sprintId && (s.status === "planned" || s.status === "active") && s.startDate
+        )
+        .sort((a, b) => String(a.startDate).localeCompare(String(b.startDate)))[0] ||
+      sprints.find((s) => s.id !== sprintId && (s.status === "planned" || s.status === "active")) ||
+      null;
+
+    const pilihan = await confirmCompleteSprintAlert(
+      t("alerts.completeSprintTitle"),
+      t("alerts.completeSprintText", { name: sprintToComplete.name }),
+      nextSprint ? { id: nextSprint.id, name: nextSprint.name } : null
     );
 
-    if (!isConfirmed) return;
+    if (!pilihan) return;
 
-    const loadingToast = toast.loading("Sedang menyelesakan fase...");
+    const sprintTasks = tasks.filter((t) => t.sprintId === sprintId);
+    const undoneTasks = sprintTasks.filter((t) => !statusSelesai(t.status, masterData));
+
+    const targetSprintId =
+      pilihan === "backlog" ? null : pilihan === "next" && nextSprint ? nextSprint.id : undefined;
+
+    suppressSprintDataRefresh(8000);
+    suppressTaskDataRefresh(8000);
+    setSprints((prev) =>
+      prev.map((s) => (s.id === sprintId ? { ...s, status: "completed" as const } : s))
+    );
+    if (undoneTasks.length > 0 && targetSprintId !== undefined) {
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.sprintId === sprintId && !statusSelesai(t.status, masterData)
+            ? { ...t, sprintId: targetSprintId }
+            : t
+        )
+      );
+    }
+    toast.success(t("alerts.sprintCompleted", { name: sprintToComplete.name }));
+
+    const loadingToast = toast.loading(t("toast.completingSprint"));
 
     try {
-      const sprintTasks = tasks.filter((t) => t.sprintId === sprintId);
-      const undoneTasks = sprintTasks.filter(
-        (t) =>
-          !t.status.toLowerCase().includes("done") && !t.status.toLowerCase().includes("completed")
-      );
-
-      if (undoneTasks.length > 0) {
+      if (undoneTasks.length > 0 && targetSprintId !== undefined) {
         const promises = undoneTasks.map((t) =>
-          updateTask(selectedProject.id, t.id, { sprintId: null })
+          updateTask(selectedProject.id, t.id, {
+            sprintId: targetSprintId,
+            unlockScope: true,
+          })
         );
         await Promise.all(promises);
-        await fetchTasks();
       }
 
       const data = await updateSprint(selectedProject.id, sprintId, { status: "completed" });
 
-      if (data.status === "success") {
-        fetchSprints();
+      if (data.status !== "success") throw new Error(data.message || "Failed");
 
-        await logActivity("sprint_completed", `Fase ${sprintToComplete.name} telah diselesaikan.`);
-        showSuccessAlert("Berhasil!", `Fase "${sprintToComplete.name}" berhasil diselesaikan.`);
-      }
+      void logActivity("sprint_completed", `Fase ${sprintToComplete.name} telah diselesaikan.`);
     } catch (e: any) {
+      fetchSprints();
+      fetchTasks();
       console.error(e);
       toast.error(e.message || "Gagal menyelesaikan fase");
     } finally {
@@ -1605,29 +2055,34 @@ function AppContainer() {
     const sprintTasks = tasks.filter((t) => t.sprintId === sprintId);
 
     const isConfirmed = await confirmDeleteAlert(
-      "Hapus Fase?",
-      `Apakah Anda yakin ingin menghapus fase ini? ${sprintTasks.length > 0 ? `${sprintTasks.length} tugas di dalamnya akan dipindahkan kembali ke backlog.` : ""}`
+      t("alerts.deleteSprintTitle"),
+      t("alerts.deleteSprintText", {
+        extra:
+          sprintTasks.length > 0
+            ? t("alerts.deleteSprintExtra", { count: sprintTasks.length })
+            : "",
+      })
     );
 
     if (!isConfirmed) return;
 
-    const loadingToast = toast.loading("Sedang menghapus fase...");
+    suppressSprintDataRefresh(8000);
+    suppressTaskDataRefresh(8000);
+    setSprints((prev) => prev.filter((s) => s.id !== sprintId));
+    setTasks((prev) => prev.map((t) => (t.sprintId === sprintId ? { ...t, sprintId: null } : t)));
+    toast.success(t("alerts.sprintDeleted"));
+
+    const loadingToast = toast.loading(t("toast.deletingSprint"));
 
     try {
-      // 1. Move tasks back to backlog
       const promises = sprintTasks.map((t) =>
-        updateTask(selectedProject.id, t.id, { sprintId: null })
+        updateTask(selectedProject.id, t.id, { sprintId: null, unlockScope: true })
       );
       await Promise.all(promises);
-
-      // 2. Delete the sprint
       await deleteSprint(selectedProject.id, sprintId);
-
-      await fetchTasks();
-      fetchSprints();
-
-      showSuccessAlert("Berhasil!", "Fase berhasil dihapus.");
     } catch (e: any) {
+      fetchSprints();
+      fetchTasks();
       console.error(e);
       toast.error(e.message || "Gagal menghapus fase");
     } finally {
@@ -1663,12 +2118,23 @@ function AppContainer() {
       const isParentReporter = parentTask && isUserMatch(parentTask.reporterId);
 
       const isDirectReporter = isUserMatch(task.reporterId);
-      const isAdmin = ["admin", "manager"].includes(effectiveRole);
+      const isAdmin = ["admin", "manager", "owner"].includes(userRoleForProject);
 
       const isAuthorizedSprint = isDirectReporter || isParentReporter || isAdmin;
 
       if (!isAuthorizedSprint) {
-        toast.error("Failed: You do not have permission to move this task.");
+        toast.error(t("toast.noPermMoveTask"));
+        return;
+      }
+
+      // #461 — cek lingkup di klien (server tetap berwenang)
+      const fromSprint = task.sprintId ? sprints.find((s) => s.id === task.sprintId) : null;
+      const toSprint = sprintId ? sprints.find((s) => s.id === sprintId) : null;
+      if (
+        (fromSprint && adalahLingkupTerkunci(fromSprint.status)) ||
+        (toSprint && adalahLingkupTerkunci(toSprint.status))
+      ) {
+        toast.error(t("toast.sprintScopeLocked"));
         return;
       }
 
@@ -1694,7 +2160,7 @@ function AppContainer() {
               if (tStart < sprintStart || tEnd > sprintEnd) {
                 setConfirmAction({
                   isOpen: true,
-                  title: "Validasi Tanggal",
+                  title: t("appShell.dateValidation"),
                   message: `Tanggal task (${format(tStart, "dd MMM")} - ${format(tEnd, "dd MMM")}) di luar periode fase ini (${format(sprintStart, "dd MMM")} - ${format(sprintEnd, "dd MMM")}).`,
                   onConfirm: () => {},
                   isAlert: true,
@@ -1705,7 +2171,7 @@ function AppContainer() {
               if (tStart < sprintStart || tStart > sprintEnd) {
                 setConfirmAction({
                   isOpen: true,
-                  title: "Validasi Tanggal",
+                  title: t("appShell.dateValidation"),
                   message: `Waktu mulai task (${format(tStart, "dd MMM")}) di luar periode fase ini (${format(sprintStart, "dd MMM")} - ${format(sprintEnd, "dd MMM")}).`,
                   onConfirm: () => {},
                   isAlert: true,
@@ -1716,7 +2182,7 @@ function AppContainer() {
               if (tEnd < sprintStart || tEnd > sprintEnd) {
                 setConfirmAction({
                   isOpen: true,
-                  title: "Validasi Tanggal",
+                  title: t("appShell.dateValidation"),
                   message: `Eksekusi task melebih timeline fase ini (${format(sprintStart, "dd MMM")} - ${format(sprintEnd, "dd MMM")}).`,
                   onConfirm: () => {},
                   isAlert: true,
@@ -1745,9 +2211,15 @@ function AppContainer() {
     if (!selectedProject) return;
 
     if (
-      !hasPermission(effectiveRole, "planning", "update", false, currentUserProfile?.permissions)
+      !hasPermission(
+        userRoleForProject,
+        "planning",
+        "update",
+        false,
+        currentUserProfile?.permissions
+      )
     ) {
-      toast.error("Failed: You do not have permission to perform this action.");
+      toast.error(t("toast.noPermAction"));
       return;
     }
 
@@ -1772,7 +2244,7 @@ function AppContainer() {
             if (tStart && tEnd && (tStart < sprintStart || tEnd > sprintEnd)) {
               setConfirmAction({
                 isOpen: true,
-                title: "Validasi Tanggal",
+                title: t("appShell.dateValidation"),
                 message: `Ada task yang melewati timeline fase ini (${format(sprintStart, "dd MMM")} - ${format(sprintEnd, "dd MMM")}).`,
                 onConfirm: () => {},
                 isAlert: true,
@@ -1781,7 +2253,7 @@ function AppContainer() {
             } else if (tStart && (tStart < sprintStart || tStart > sprintEnd)) {
               setConfirmAction({
                 isOpen: true,
-                title: "Validasi Tanggal",
+                title: t("appShell.dateValidation"),
                 message: `Waktu mulai task di luar periode fase ini (${format(sprintStart, "dd MMM")} - ${format(sprintEnd, "dd MMM")}).`,
                 onConfirm: () => {},
                 isAlert: true,
@@ -1790,7 +2262,7 @@ function AppContainer() {
             } else if (tEnd && (tEnd < sprintStart || tEnd > sprintEnd)) {
               setConfirmAction({
                 isOpen: true,
-                title: "Validasi Tanggal",
+                title: t("appShell.dateValidation"),
                 message: `Eksekusi task melebih timeline fase ini (${format(sprintStart, "dd MMM")} - ${format(sprintEnd, "dd MMM")}).`,
                 onConfirm: () => {},
                 isAlert: true,
@@ -1807,8 +2279,8 @@ function AppContainer() {
         updateTask(selectedProject.id, taskId, { sprintId })
       );
       await Promise.all(promises);
-      await fetchTasks();
-      toast.success(`${taskIds.length} tasks moved successfully`);
+      setTasks((prev) => prev.map((t) => (taskIds.includes(t.id) ? { ...t, sprintId } : t)));
+      toast.success(t("toast.tasksMoved", { count: taskIds.length }));
       setSelectedTaskIds(new Set());
     } catch (e: any) {
       console.error(e);
@@ -1819,7 +2291,7 @@ function AppContainer() {
   const handleCreateProject = async () => {
     const effectiveUserId = currentUser?.uid || user?.uid;
     if (!effectiveUserId || !newProjectName.trim() || !newProjectKey.trim()) {
-      if (!effectiveUserId) toast.error("Sesi tidak ditemukan");
+      if (!effectiveUserId) toast.error(t("toast.sessionNotFound"));
       return;
     }
     try {
@@ -1834,7 +2306,7 @@ function AppContainer() {
       if (data.status === "success") {
         resetNewProjectForm();
         setIsNewProjectModalOpen(false);
-        toast.success("Project created successfully");
+        toast.success(t("toast.projectCreated"));
         fetchProjects();
       }
     } catch (e: any) {
@@ -1848,9 +2320,15 @@ function AppContainer() {
     if (!selectedProject || !newTaskTitle.trim() || !activeUid) return;
 
     if (
-      !hasPermission(effectiveRole, "issueList", "create", false, currentUserProfile?.permissions)
+      !hasPermission(
+        userRoleForProject,
+        "issueList",
+        "create",
+        false,
+        currentUserProfile?.permissions
+      )
     ) {
-      toast.error("Anda tidak memiliki izin untuk menambahkan tugas baru.");
+      toast.error(t("toast.noPermAddTask"));
       return;
     }
 
@@ -1865,7 +2343,7 @@ function AppContainer() {
         if (epicStart && taskStart && taskStart < epicStart) {
           setConfirmAction({
             isOpen: true,
-            title: "Validasi Batas Jadwal Epic Timeline",
+            title: t("appShell.epicTimelineLimit"),
             message:
               "Peringatan: Tanggal mulai task tidak boleh lebih awal dari rentang tanggal Epic induk.",
             onConfirm: () => {},
@@ -1876,7 +2354,7 @@ function AppContainer() {
         if (epicEnd && taskStart && taskStart > epicEnd) {
           setConfirmAction({
             isOpen: true,
-            title: "Validasi Batas Jadwal Epic Timeline",
+            title: t("appShell.epicTimelineLimit"),
             message:
               "Peringatan: Tanggal mulai task tidak boleh melebihi rentang tanggal Epic induk.",
             onConfirm: () => {},
@@ -1887,7 +2365,7 @@ function AppContainer() {
         if (epicStart && taskEnd && taskEnd < epicStart) {
           setConfirmAction({
             isOpen: true,
-            title: "Validasi Batas Jadwal Epic Timeline",
+            title: t("appShell.epicTimelineLimit"),
             message:
               "Peringatan: Tanggal selesai task tidak boleh lebih awal dari rentang tanggal Epic induk.",
             onConfirm: () => {},
@@ -1898,7 +2376,7 @@ function AppContainer() {
         if (epicEnd && taskEnd && taskEnd > epicEnd) {
           setConfirmAction({
             isOpen: true,
-            title: "Validasi Batas Jadwal Epic Timeline",
+            title: t("appShell.epicTimelineLimit"),
             message:
               "Peringatan: Tanggal selesai task tidak boleh melebihi rentang tanggal Epic induk.",
             onConfirm: () => {},
@@ -1913,7 +2391,7 @@ function AppContainer() {
       if (new Date(newTaskStartDate) > new Date(newTaskEndDate)) {
         setConfirmAction({
           isOpen: true,
-          title: "Validasi Tanggal",
+          title: t("appShell.dateValidation"),
           message:
             "Tanggal selesai tugas tidak boleh sebelum tanggal mulai tugas (tidak bisa backdate).",
           onConfirm: () => {},
@@ -1923,56 +2401,105 @@ function AppContainer() {
       }
     }
 
+    const tempId = `temp-${crypto.randomUUID()}`;
+    suppressTaskDataRefresh(8000);
+
+    const payload = {
+      title: newTaskTitle,
+      description: newTaskDescription,
+      acceptanceCriteria: newTaskAcceptanceCriteria,
+      storyPoints: newTaskStoryPoints,
+      projectRisk: newTaskProjectRisk,
+      status: newTaskStatus || "todo",
+      type: newTaskType,
+      parentId: newTaskParentId || null,
+      sprintId: newTaskSprintId || null,
+      assigneeId: newTaskAssigneeId,
+      priority: newTaskPriority || "medium",
+      startDate: newTaskStartDate || null,
+      endDate: newTaskEndDate || null,
+    };
+
+    const placeholder: Task = {
+      id: tempId,
+      projectId: selectedProject.id,
+      title: payload.title,
+      description: payload.description,
+      acceptanceCriteria: payload.acceptanceCriteria,
+      storyPoints: payload.storyPoints,
+      projectRisk: payload.projectRisk,
+      status: payload.status,
+      type: (payload.type || "task") as Task["type"],
+      parentId: payload.parentId || undefined,
+      sprintId: payload.sprintId || undefined,
+      assigneeId:
+        payload.assigneeId && !payload.assigneeId.includes("@") ? payload.assigneeId : undefined,
+      reporterId: activeUid,
+      priority: payload.priority,
+      startDate: payload.startDate || undefined,
+      endDate: payload.endDate || undefined,
+      key: "…",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    setTasks((prev) => [placeholder, ...prev.filter((t) => t.id !== tempId)]);
+    setAllProjectTasksForStats((prev) => [placeholder, ...prev.filter((t) => t.id !== tempId)]);
+    resetNewTaskForm();
+    setIsNewTaskModalOpen(false);
+    toast.success(t("toast.dataAdded"));
+
     try {
-      const assigneeIsEmail = newTaskAssigneeId.includes("@");
+      const assigneeIsEmail = payload.assigneeId.includes("@");
 
       const data = await createTask(selectedProject.id, {
-        title: newTaskTitle,
-        description: newTaskDescription,
-        acceptanceCriteria: newTaskAcceptanceCriteria,
-        storyPoints: newTaskStoryPoints,
-        projectRisk: newTaskProjectRisk,
-        status: newTaskStatus || "todo",
-        type: newTaskType,
-        parentId: newTaskParentId || null,
-        sprintId: newTaskSprintId || null,
-        assigneeId: assigneeIsEmail ? null : newTaskAssigneeId || null,
+        title: payload.title,
+        description: payload.description,
+        acceptanceCriteria: payload.acceptanceCriteria,
+        storyPoints: payload.storyPoints,
+        projectRisk: payload.projectRisk,
+        status: payload.status,
+        type: payload.type,
+        parentId: payload.parentId,
+        sprintId: payload.sprintId,
+        assigneeId: assigneeIsEmail ? null : payload.assigneeId || null,
         reporterId: activeUid,
-        priority: newTaskPriority || "medium",
-        startDate: newTaskStartDate || null,
-        endDate: newTaskEndDate || null,
+        priority: payload.priority,
+        startDate: payload.startDate,
+        endDate: payload.endDate,
       });
 
       const createdTaskKey = data.data.taskKey;
 
       if (data && data.data) {
         const createdTask = data.data;
-        setTasks((prev) => [createdTask, ...prev.filter((t) => t.id !== createdTask.id)]);
-        setAllProjectTasksForStats((prev) => [
-          createdTask,
-          ...prev.filter((t) => t.id !== createdTask.id),
-        ]);
+        setTasks((prev) =>
+          prev.map((t) =>
+            t.id === tempId ? { ...createdTask, key: createdTask.key || createdTask.taskKey } : t
+          )
+        );
+        setAllProjectTasksForStats((prev) =>
+          prev.map((t) =>
+            t.id === tempId ? { ...createdTask, key: createdTask.key || createdTask.taskKey } : t
+          )
+        );
       }
 
-      await logActivity("task_created", `Created task ${createdTaskKey}: ${newTaskTitle}`);
-
-      await fetchTasks(); // Refresh list
-
-      resetNewTaskForm();
-      setIsNewTaskModalOpen(false);
-      toast.success("Data added successfully");
+      void logActivity("task_created", `Created task ${createdTaskKey}: ${payload.title}`);
     } catch (e: any) {
+      setTasks((prev) => prev.filter((t) => t.id !== tempId));
+      setAllProjectTasksForStats((prev) => prev.filter((t) => t.id !== tempId));
       console.error(e, "error", `projects/${selectedProject.id}/tasks`);
       const errMessage = e?.message || "";
       const errCode = e?.data?.code || "";
       if (
-        errCode === "EPIC_TIMELINE_EXCEEDED" ||
+        errCode.startsWith("EPIC_TIMELINE_EXCEEDED") ||
         errMessage.includes("Epic") ||
         errMessage.includes("melebihi")
       ) {
         setConfirmAction({
           isOpen: true,
-          title: "Validasi Batas Jadwal Epic Timeline",
+          title: t("appShell.epicTimelineLimit"),
           message: "Peringatan: Tanggal task tidak boleh melewati rentang tanggal Epic induk!",
           onConfirm: () => {},
           isAlert: true,
@@ -1983,14 +2510,34 @@ function AppContainer() {
     }
   };
 
-  const handleQuickCreate = async (title: string, type: string) => {
+  const handleQuickCreate = async (title: string, type?: string) => {
     const activeUid = currentUser?.uid || user?.uid;
     if (!selectedProject || !title.trim() || !activeUid) return;
+    const tempId = `temp-${crypto.randomUUID()}`;
+    const taskType = ((type as Task["type"]) || "task") as Task["type"];
+    const placeholder: Task = {
+      id: tempId,
+      projectId: selectedProject.id,
+      title,
+      status: "To Do",
+      type: taskType,
+      reporterId: activeUid,
+      priority: "Medium",
+      key: "…",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    suppressTaskDataRefresh(8000);
+    setTasks((prev) => [placeholder, ...prev.filter((t) => t.id !== tempId)]);
+    setAllProjectTasksForStats((prev) => [placeholder, ...prev.filter((t) => t.id !== tempId)]);
+    toast.success(t("toast.taskCreated", { key: "…" }));
+
     try {
       const data = await createTask(selectedProject.id, {
         title: title,
         status: "To Do",
-        type: type,
+        type: taskType,
         assigneeId: null,
         priority: "Medium",
         reporterId: activeUid,
@@ -1998,12 +2545,20 @@ function AppContainer() {
 
       if (data.status === "success" && data.data) {
         const newTask = data.data;
-        setTasks((prev) => [newTask, ...prev.filter((t) => t.id !== newTask.id)]);
-        setAllProjectTasksForStats((prev) => [newTask, ...prev.filter((t) => t.id !== newTask.id)]);
-        await fetchTasks();
-        toast.success(`Task ${data.data.taskKey} created successfully`);
+        setTasks((prev) =>
+          prev.map((t) =>
+            t.id === tempId ? { ...newTask, key: newTask.key || newTask.taskKey } : t
+          )
+        );
+        setAllProjectTasksForStats((prev) =>
+          prev.map((t) =>
+            t.id === tempId ? { ...newTask, key: newTask.key || newTask.taskKey } : t
+          )
+        );
       }
     } catch (e: any) {
+      setTasks((prev) => prev.filter((t) => t.id !== tempId));
+      setAllProjectTasksForStats((prev) => prev.filter((t) => t.id !== tempId));
       console.error(e);
       toast.error(e.message || "Failed to create task");
     }
@@ -2011,35 +2566,49 @@ function AppContainer() {
 
   const handleSuggestStoryPoints = async (task: Task) => {
     if (!task.title || !task.description) {
-      toast.warning("Please provide title and description for AI estimation.");
+      toast.warning(t("toast.aiNeedTitleDesc"));
       return;
     }
 
-    const toastId = toast.loading("Calculating story points...");
+    const toastId = toast.loading(t("toast.aiCalculating"));
     try {
-      const { GoogleGenAI } = await import("@google/genai");
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      /**
+       * Item #292 — permintaan ini dikirim ke SERVER, bukan langsung ke Gemini.
+       *
+       * Sebelumnya blok ini memanggil `new GoogleGenAI({ apiKey:
+       * process.env.GEMINI_API_KEY })` dari peramban. `vite.config.ts`
+       * mengganti rujukan itu dengan nilai harfiahnya saat build, sehingga
+       * kunci API ikut terpanggang ke JavaScript publik dan bisa dibaca siapa
+       * pun yang membuka aplikasi. Dibuktikan dengan mencari nilai kuncinya di
+       * `dist/assets/*.js` dan menemukannya.
+       *
+       * Sekarang kuncinya tidak pernah meninggalkan server, dan rutenya
+       * dijaga izin proyek — bukan sekadar "punya akun".
+       */
+      const balasan = await apiRequest(
+        `/api/projects/${selectedProject!.id}/tasks/${task.id}/saran-story-point`,
+        {
+          method: "POST",
+          body: {
+            judul: task.title,
+            deskripsi: task.description,
+            tipe: task.type,
+          },
+        }
+      );
 
-      const prompt = `Analyze this task and suggest story points (Fibonacci: 1, 2, 3, 5, 8, 13).
-Task Title: ${task.title}
-Description: ${task.description}
-Type: ${task.type}
+      if (balasan?.status !== "success") {
+        throw new Error(balasan?.message || t("appShell.aiInvalidResponse"));
+      }
 
-Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"}`;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-        },
-      });
-
-      const result = JSON.parse(response.text || "{}");
+      const result = balasan.data;
       if (result.points) {
-        toast.success(`AI suggests ${result.points} points: ${result.reasoning}`, {
-          duration: 5000,
-        });
+        toast.success(
+          t("toast.aiSuggestion", { points: result.points, reasoning: result.reasoning }),
+          {
+            duration: 5000,
+          }
+        );
 
         // Simpan hasil estimasi AI ke task.
         //
@@ -2048,14 +2617,21 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         // tidak pernah menyala karena modal edit task tak terjangkau, dan ikut
         // dihapus bersama modalnya.
         const effectiveUserId = currentUser?.uid || user?.uid || "guest";
+        const poinLama = task.storyPoints;
         await updateTask(selectedProject!.id, task.id, { storyPoints: result.points });
-        await fetchTasks();
+        setTasks((prev) =>
+          prev.map((t) => (t.id === task.id ? { ...t, storyPoints: result.points } : t))
+        );
+        const detailPoin = buatDetailFieldDiff("storyPoints", poinLama, result.points);
+        if (detailPoin) {
+          await logActivity("task_points_updated", detailPoin, task.id);
+        }
       } else {
-        throw new Error("Invalid response from AI");
+        throw new Error(t("appShell.aiInvalidResponse"));
       }
     } catch (e) {
       console.error(e);
-      toast.error("AI Estimation failed");
+      toast.error(t("toast.aiEstimationFailed"));
     } finally {
       toast.dismiss(toastId);
     }
@@ -2099,7 +2675,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       fetchProjects();
     } catch (e: any) {
       console.error(e);
-      toast.error("Failed to update member role: " + (e.message || e));
+      toast.error(t("toast.memberRoleUpdateFailed") + (e.message || e));
     }
   };
 
@@ -2108,30 +2684,31 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
     try {
       const data = await removeMember(selectedProject.id, userId);
       if (data.status === "success") {
-        toast.success("Member removed from project successfully");
+        toast.success(t("toast.memberRemoved"));
         fetchProjects();
       } else {
         toast.error(data.message || "Failed to remove member");
       }
     } catch (e: any) {
       console.error(e);
-      toast.error("Failed to remove member: " + (e.message || e));
+      toast.error(t("toast.memberRemoveFailed") + (e.message || e));
     }
   };
 
-  const handleInviteMember = async () => {
+  const handleInviteMember = async (emailArg?: string) => {
     if (!selectedProject) {
-      toast.error("No project selected");
+      toast.error(t("toast.noProjectSelected"));
       return;
     }
-    if (!inviteEmail.trim()) {
-      toast.error("Please enter an email address");
+    const rawEmail = (emailArg ?? inviteEmail).trim();
+    if (!rawEmail) {
+      toast.error(t("toast.enterEmail"));
       return;
     }
 
-    const toastId = toast.loading("Sending invitation...");
+    const toastId = toast.loading(t("toast.sendingInvite"));
     try {
-      const emailToInvite = inviteEmail.trim().toLowerCase();
+      const emailToInvite = rawEmail.toLowerCase();
       // allUsers is available locally from the /api/users fetch
       const userToInvite = allUsers.find((u) => u.email === emailToInvite);
 
@@ -2139,7 +2716,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         // User not found, add to pending invites
         const pending = selectedProject.pendingInvites || [];
         if (pending.includes(emailToInvite)) {
-          toast.error("An invitation is already pending for this email.", {
+          toast.error(t("toast.inviteAlreadyPending"), {
             id: toastId,
           });
           return;
@@ -2150,7 +2727,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           `Invited ${emailToInvite} to the project (pending registration)`
         );
 
-        toast.success(`Invitation saved for ${emailToInvite}!`, {
+        toast.success(t("toast.inviteSaved", { email: emailToInvite }), {
           id: toastId,
         });
         setLastInvitedEmail(emailToInvite);
@@ -2164,7 +2741,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       const uid = userToInvite.uid;
 
       if ((selectedProject.members || []).includes(uid)) {
-        toast.error("User is already in the project", { id: toastId });
+        toast.error(t("toast.userAlreadyMember"), { id: toastId });
         return;
       }
 
@@ -2172,7 +2749,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       await addMember(selectedProject.id, effectiveUserId, uid);
       await logActivity("user_added", `Added ${emailToInvite} to the project`);
 
-      toast.success(`Added ${emailToInvite} to the project!`, { id: toastId });
+      toast.success(t("toast.memberAdded", { email: emailToInvite }), { id: toastId });
       setLastInvitedEmail(emailToInvite);
       setIsInviteModalOpen(false);
       setIsInviteSuccessModalOpen(true);
@@ -2180,7 +2757,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       fetchProjects();
     } catch (e) {
       console.error("Invite error:", e);
-      toast.error("Failed to send invitation. Please check your permissions.", {
+      toast.error(t("toast.inviteFailed"), {
         id: toastId,
       });
     }
@@ -2206,7 +2783,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         details,
         taskId: taskId || null,
       });
-      fetchActivityLogs();
+      scheduleActivityLogsRefresh();
     } catch (e) {
       console.error("Failed to log activity", e);
     }
@@ -2219,12 +2796,15 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         name: editingProject.name,
         description: editingProject.description || "",
         status: editingProject.status || "Active",
+        // Item #138 — tanpa baris ini dropdown Metodologi tampil dan bisa
+        // diubah, tapi nilainya tidak pernah sampai ke backend.
+        category: editingProject.category || "Agile",
       });
 
       if (data.status === "success") {
         setIsEditProjectModalOpen(false);
         setEditingProject(null);
-        toast.success("Project updated successfully");
+        toast.success(t("toast.projectUpdated"));
         fetchProjects();
       }
     } catch (e: any) {
@@ -2262,10 +2842,10 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       setNewLinkTitle("");
       setNewLinkUrl("");
       setIsAddingLink(false);
-      toast.success("Link added successfully");
+      toast.success(t("toast.linkAdded"));
     } catch (error) {
       console.error(error);
-      toast.error("Failed to add link");
+      toast.error(t("toast.linkAddFailed"));
     }
   };
 
@@ -2275,13 +2855,19 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
     if (!attachment) return;
 
     const isConfirmed = await confirmDeleteAlert(
-      "Hapus Lampiran?",
-      `Apakah Anda yakin ingin menghapus lampiran "${attachment.name}"?`
+      t("alerts.deleteAttachmentTitle"),
+      t("alerts.deleteAttachmentText", { name: attachment.name })
     );
 
     if (!isConfirmed) return;
 
     try {
+      if (selectedProject?.id) {
+        await apiRequest(
+          `/api/projects/${selectedProject.id}/tasks/${selectedTaskForDetail.id}/attachments/${attachmentId}`,
+          { method: "DELETE" }
+        ).catch((err) => console.warn("Delete attachment API warning:", err));
+      }
       const updatedAttachments = (selectedTaskForDetail.attachments || []).filter(
         (a) => a.id !== attachmentId
       );
@@ -2290,15 +2876,15 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         ...selectedTaskForDetail,
         attachments: updatedAttachments,
       });
-      showSuccessAlert("Berhasil!", "Lampiran berhasil dihapus.");
+      showSuccessAlert(t("alerts.successTitle"), t("alerts.attachmentDeleted"));
     } catch (error: any) {
       console.error(error);
-      toast.error("Gagal menghapus lampiran: " + (error.message || error));
+      toast.error(t("toast.attachmentDeleteFailed") + (error.message || error));
     }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    toast.error("File attachments are disabled for MySQL backend.");
+    toast.error(t("toast.attachmentsDisabled"));
     e.target.value = "";
   };
 
@@ -2316,7 +2902,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         `Task ${task.key} is now unblocked by completion of ${completedTaskId}`
       );
       // Notify via toast
-      toast.info(`Task ${task.key} is now unblocked by completion of ${completedTaskId}`);
+      toast.info(t("toast.taskUnblocked", { key: task.key, selesai: completedTaskId }));
     }
   };
 
@@ -2352,6 +2938,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           ...suite,
           cases: suite.cases.map((c: any) => {
             if (
+              c.linkedTaskId === taskToUpdate.id ||
               c.linkedBugKey === bugKey ||
               c.linkedBugKey === taskToUpdate.id ||
               c.linkedBugKey === taskToUpdate.key ||
@@ -2414,16 +3001,16 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       // Real-time Floating Toast Alert
       toast.custom(
         (t: any) => (
-          <div className="max-w-md w-full bg-slate-900 border border-emerald-500/60 shadow-2xl rounded-xl pointer-events-auto flex p-4 items-center justify-between gap-3 text-white ring-1 ring-emerald-500/30">
+          <div className="max-w-md w-full bg-surface-inverse-strong border border-emerald-500/60 shadow-2xl rounded-xl pointer-events-auto flex p-4 items-center justify-between gap-3 text-content-inverse ring-1 ring-emerald-500/30">
             <div className="flex items-center gap-3 min-w-0">
               <div className="p-2.5 bg-emerald-500/20 text-emerald-400 rounded-xl shrink-0">
                 <Bug className="w-5 h-5 animate-bounce text-emerald-400" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs sm:text-[10px] font-medium text-emerald-400 uppercase tracking-widest flex items-center gap-1">
-                  <span>🔔</span> QA Notification
+                <p className="text-xs sm:text-[10px] font-normal text-emerald-400 uppercase tracking-normal flex items-center gap-1">
+                  <span>🔔</span> {t("appShell.qaNotification")}
                 </p>
-                <p className="text-xs font-medium text-slate-100 mt-0.5 leading-snug">
+                <p className="text-xs font-medium text-content-inverse-strong mt-0.5 leading-snug">
                   Bug <span className="font-mono font-medium text-emerald-300">#{bugKey}</span>{" "}
                   telah diperbaiki oleh Developer. Klik untuk lakukan Retest.
                 </p>
@@ -2438,9 +3025,9 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                   new CustomEvent("lanpro_qa_retest_updated", { detail: { bugKey } })
                 );
               }}
-              className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-slate-950 text-xs font-medium rounded-xl uppercase tracking-wider shrink-0 transition-all cursor-pointer shadow-md flex items-center gap-1"
+              className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-content text-xs font-normal rounded-xl uppercase tracking-normal shrink-0 transition-all cursor-pointer shadow-md flex items-center gap-1"
             >
-              <span>LIHAT BUG</span>
+              <span>{t("appShell.viewBug")}</span>
             </button>
           </div>
         ),
@@ -2461,9 +3048,15 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
     const isOwner = taskToUpdate.assigneeId === user?.uid || taskToUpdate.reporterId === user?.uid;
     if (
-      !hasPermission(effectiveRole, "issueList", "update", isOwner, currentUserProfile?.permissions)
+      !hasPermission(
+        userRoleForProject,
+        "issueList",
+        "update",
+        isOwner,
+        currentUserProfile?.permissions
+      )
     ) {
-      toast.error("Failed: You do not have permission to edit this task.");
+      toast.error(t("toast.noPermEditTask"));
       return;
     }
 
@@ -2497,7 +3090,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       if (tStart && tEnd && tStart > tEnd) {
         setConfirmAction({
           isOpen: true,
-          title: "Validasi Tanggal",
+          title: t("appShell.dateValidation"),
           message:
             "Tanggal selesai tugas tidak boleh sebelum tanggal mulai tugas (tidak bisa backdate).",
           onConfirm: () => {},
@@ -2519,7 +3112,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           if (epicStart && taskStart && taskStart < epicStart) {
             setConfirmAction({
               isOpen: true,
-              title: "Validasi Batas Jadwal Epic Timeline",
+              title: t("appShell.epicTimelineLimit"),
               message:
                 "Peringatan: Tanggal mulai task tidak boleh lebih awal dari rentang tanggal Epic induk.",
               onConfirm: () => {},
@@ -2530,7 +3123,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           if (epicEnd && taskStart && taskStart > epicEnd) {
             setConfirmAction({
               isOpen: true,
-              title: "Validasi Batas Jadwal Epic Timeline",
+              title: t("appShell.epicTimelineLimit"),
               message:
                 "Peringatan: Tanggal mulai task tidak boleh melebihi rentang tanggal Epic induk.",
               onConfirm: () => {},
@@ -2541,7 +3134,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           if (epicStart && taskEnd && taskEnd < epicStart) {
             setConfirmAction({
               isOpen: true,
-              title: "Validasi Batas Jadwal Epic Timeline",
+              title: t("appShell.epicTimelineLimit"),
               message:
                 "Peringatan: Tanggal selesai task tidak boleh lebih awal dari rentang tanggal Epic induk.",
               onConfirm: () => {},
@@ -2552,7 +3145,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           if (epicEnd && taskEnd && taskEnd > epicEnd) {
             setConfirmAction({
               isOpen: true,
-              title: "Validasi Batas Jadwal Epic Timeline",
+              title: t("appShell.epicTimelineLimit"),
               message:
                 "Peringatan: Tanggal selesai task tidak boleh melebihi rentang tanggal Epic induk.",
               onConfirm: () => {},
@@ -2574,7 +3167,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           if (tStart && tEnd && (tStart < sprintStart || tEnd > sprintEnd)) {
             setConfirmAction({
               isOpen: true,
-              title: "Validasi Tanggal",
+              title: t("appShell.dateValidation"),
               message: `Range tanggal tugas (${format(tStart, "dd MMM")} - ${format(tEnd, "dd MMM")}) di luar periode fase ini (${format(sprintStart, "dd MMM")} - ${format(sprintEnd, "dd MMM")}).`,
               onConfirm: () => {},
               isAlert: true,
@@ -2583,7 +3176,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           } else if (tStart && (tStart < sprintStart || tStart > sprintEnd)) {
             setConfirmAction({
               isOpen: true,
-              title: "Validasi Tanggal",
+              title: t("appShell.dateValidation"),
               message: `Waktu mulai tugas (${format(tStart, "dd MMM")}) di luar periode fase ini (${format(sprintStart, "dd MMM")} - ${format(sprintEnd, "dd MMM")}).`,
               onConfirm: () => {},
               isAlert: true,
@@ -2592,7 +3185,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           } else if (tEnd && (tEnd < sprintStart || tEnd > sprintEnd)) {
             setConfirmAction({
               isOpen: true,
-              title: "Validasi Tanggal",
+              title: t("appShell.dateValidation"),
               message: `Eksekusi tugas melebihi timeline fase ini (${format(sprintStart, "dd MMM")} - ${format(sprintEnd, "dd MMM")}).`,
               onConfirm: () => {},
               isAlert: true,
@@ -2634,6 +3227,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
       const previousTasks = tasks;
       // Optimistic UI update
+      suppressTaskDataRefresh(8000);
       setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, ...updateData } : t)));
 
       setIsUpdatingTask((prev) => ({ ...prev, [taskId]: true }));
@@ -2648,13 +3242,30 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       // Explicit refresh removed to prevent UI freezing. Real-time updates handled by socket.
 
       if (field === "status") {
-        await logActivity("task_status_updated", `Task ${taskId} status updated to ${value}`);
-        // Notify blocked tasks if status is Done
+        // #456 — field-diff before/after; taskId di kolom terpisah
+        const detail =
+          buatDetailFieldDiff("status", taskToUpdate.status, value) ||
+          buatDetailStatusDiperbarui(String(value), taskToUpdate.status);
+        await logActivity("task_status_updated", detail, taskId);
         if (value === "Done") {
           await handleTaskCompletionDependencies(taskId);
         }
       } else if (field === "assigneeId") {
-        await logActivity("task_assigned", `Task ${taskId} assigned to ${value}`);
+        const sebelumnya = taskToUpdate.assigneeId || taskToUpdate.assigneeEmail || null;
+        const detail =
+          buatDetailFieldDiff(
+            "assignee",
+            sebelumnya,
+            value as string | null,
+            projectMembers || []
+          ) || buatDetailAssignee(value as string | null, projectMembers || [], sebelumnya);
+        await logActivity("task_assigned", detail, taskId);
+      } else if (field === "priority") {
+        const detail = buatDetailFieldDiff("priority", taskToUpdate.priority, value);
+        if (detail) await logActivity("task_priority_updated", detail, taskId);
+      } else if (field === "storyPoints") {
+        const detail = buatDetailFieldDiff("storyPoints", taskToUpdate.storyPoints, value);
+        if (detail) await logActivity("task_points_updated", detail, taskId);
       }
 
       if (selectedTaskForDetail?.id === taskId) {
@@ -2666,13 +3277,13 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       const errMessage = e?.message || "";
       const errCode = e?.data?.code || "";
       if (
-        errCode === "EPIC_TIMELINE_EXCEEDED" ||
+        errCode.startsWith("EPIC_TIMELINE_EXCEEDED") ||
         errMessage.includes("Epic") ||
         errMessage.includes("melebihi")
       ) {
         setConfirmAction({
           isOpen: true,
-          title: "Validasi Batas Jadwal Epic Timeline",
+          title: t("appShell.epicTimelineLimit"),
           message: "Peringatan: Tanggal task tidak boleh melewati rentang tanggal Epic induk!",
           onConfirm: () => {},
           isAlert: true,
@@ -2712,13 +3323,13 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
   const handleAddLinkedTask = async () => {
     if (!selectedProject || !selectedTaskForDetail || !taskLinkTargetId) {
-      toast.error("Failed to add relation, make sure a task is selected.");
+      toast.error(t("toast.relationNeedTask"));
       return;
     }
 
     // Validasi ngga boleh link ke diri sendiri
     if (taskLinkTargetId === selectedTaskForDetail.id) {
-      toast.error("Tidak bisa membuat relasi ke task ini sendiri.");
+      toast.error(t("toast.relationSelf"));
       return;
     }
 
@@ -2753,7 +3364,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         (t) => t.targetTaskId === targetId && t.relationType === taskLinkRelation
       );
       if (existingSourceRelation) {
-        toast.error("Relasi ini sudah ada.");
+        toast.error(t("toast.relationExists"));
         return;
       }
 
@@ -2767,7 +3378,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         relationType: mapInverseRelation(taskLinkRelation),
       });
 
-      await fetchTasks();
+      scheduleTaskDataRefresh();
 
       setSelectedTaskForDetail((prev) =>
         prev
@@ -2781,7 +3392,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       setIsAddingTaskLink(false);
       setTaskLinkTargetId("");
       setTaskLinkRelation("blocks");
-      toast.success("Linked task added successfully");
+      toast.success(t("toast.linkedTaskAdded"));
 
       await logActivity(
         "task_linked",
@@ -2789,7 +3400,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       );
     } catch (e) {
       console.error(e);
-      toast.error("Failed to add link");
+      toast.error(t("toast.linkAddFailed"));
     }
   };
 
@@ -2799,8 +3410,8 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
     if (!linkToRemove) return;
 
     const isConfirmed = await confirmDeleteAlert(
-      "Hapus Tautan Tugas?",
-      "Apakah Anda yakin ingin menghapus tautan hubungan antar-tugas ini?"
+      t("alerts.deleteTaskLinkTitle"),
+      t("alerts.deleteTaskLinkText")
     );
 
     if (!isConfirmed) return;
@@ -2808,8 +3419,6 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
     try {
       const data = await deleteTaskLink(selectedProject.id, sourceId, linkIdToRemove);
       if (data.status !== "success") throw new Error(data.message);
-
-      await fetchTasks();
 
       const newSourceLinks = selectedTaskForDetail.linkedTasks!.filter(
         (t) => t.id !== linkIdToRemove
@@ -2823,10 +3432,10 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           : null
       );
 
-      showSuccessAlert("Berhasil!", "Hubungan tugas berhasil dihapus.");
+      showSuccessAlert(t("alerts.successTitle"), t("alerts.taskLinkDeleted"));
     } catch (e: any) {
       console.error(e);
-      toast.error("Gagal menghapus hubungan tugas: " + (e.message || e));
+      toast.error(t("toast.relationDeleteFailed") + (e.message || e));
     }
   };
 
@@ -2844,8 +3453,10 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         reporterId: activeUid,
       });
 
-      if (data.status === "success") {
-        await await fetchTasks();
+      if (data.status === "success" && data.data) {
+        const created = data.data;
+        suppressTaskDataRefresh(8000);
+        setTasks((prev) => [created, ...prev.filter((t) => t.id !== created.id)]);
       }
     } catch (e: any) {
       console.error(e);
@@ -2854,25 +3465,16 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
   };
 
   const checkTaskBlockers = (taskId: string, targetStatus: string) => {
-    // Only block if moving to "Done" (or similar terminal status)
-    const isTerminalStatus =
-      targetStatus.toLowerCase().includes("done") ||
-      targetStatus.toLowerCase().includes("completed");
-    if (!isTerminalStatus) return true;
+    if (!statusSelesai(targetStatus, masterData)) return true;
 
     const task = tasks.find((t) => t.id === taskId);
     if (!task || !task.linkedTasks) return true;
 
-    // Find links where this task "is blocked by" someone
     const blockers = task.linkedTasks.filter((l) => l.relationType === "is_blocked_by");
 
     for (const blocker of blockers) {
       const blockingTask = tasks.find((t) => t.id === blocker.targetTaskId);
-      if (
-        blockingTask &&
-        !blockingTask.status.toLowerCase().includes("done") &&
-        !blockingTask.status.toLowerCase().includes("completed")
-      ) {
+      if (blockingTask && !statusSelesai(blockingTask.status, masterData)) {
         toast.error(
           `Tidak dapat menyelesaikan ${task.key}: tugas ini terblokir oleh ${blockingTask.key} (${blockingTask.status}).`
         );
@@ -2891,15 +3493,23 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       if (taskToUpdate) {
         statusToSave = await triggerBugDoneFlow(taskToUpdate, newStatus);
       }
+      suppressTaskDataRefresh(8000);
+      setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status: statusToSave } : t)));
       const effectiveUserId = currentUser?.uid || user?.uid || "guest";
       const data = await updateTaskAsUser(selectedProject.id, taskId, effectiveUserId, {
         status: statusToSave,
       });
-      if (data.status !== "success") throw new Error(data.message);
-      await fetchTasks();
+      if (data.status !== "success") {
+        if (taskToUpdate) {
+          setTasks((prev) =>
+            prev.map((t) => (t.id === taskId ? { ...t, status: taskToUpdate.status } : t))
+          );
+        }
+        throw new Error(data.message);
+      }
     } catch (e: any) {
       console.error(e);
-      toast.error("Failed to update status: " + (e.message || e));
+      toast.error(t("toast.statusUpdateFailed") + (e.message || e));
     }
   };
 
@@ -2921,7 +3531,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       fetchMasterData();
     } catch (e) {
       console.error(e);
-      toast.error("Failed to change order");
+      toast.error(t("toast.reorderFailed"));
     }
   };
 
@@ -2949,9 +3559,9 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       return options.includes(f);
     };
 
-    // Permission Check: Admin & Manager always allowed, otherwise only Task Creator (Reporter) or Epic Creator (Parent Reporter)
+    // Permission Check: Admin, Owner & Manager always allowed, otherwise only Task Creator (Reporter) or Epic Creator (Parent Reporter)
     const taskToMove = tasks.find((t) => t.id === draggableId);
-    if (taskToMove && !["admin", "manager"].includes(effectiveRole)) {
+    if (taskToMove && !["admin", "manager", "owner"].includes(userRoleForProject)) {
       const parentTask = taskToMove.parentId
         ? tasks.find((t) => t.id === taskToMove.parentId)
         : null;
@@ -2977,7 +3587,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
   const deleteProject = async (project: Project) => {
     const effectiveUserId = currentUser?.uid || user?.uid;
     if (!effectiveUserId) {
-      toast.error("Sesi tidak ditemukan");
+      toast.error(t("toast.sessionNotFound"));
       return;
     }
 
@@ -2992,18 +3602,18 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         currentUserProfile?.permissions
       )
     ) {
-      toast.error("Only project owners or workspace administrators can delete this project.");
+      toast.error(t("toast.onlyOwnerDeleteProject"));
       return;
     }
 
     const isConfirmed = await confirmDeleteAlert(
-      "Hapus Proyek Secara Permanen?",
-      `Anda akan menghapus "${project.name}" secara PERMANEN beserta SELURUH datanya (tugas, komentar, fase, log). Tindakan ini tidak dapat dibatalkan.`
+      t("alerts.deleteProjectTitle"),
+      t("alerts.deleteProjectText", { name: project.name })
     );
 
     if (!isConfirmed) return;
 
-    const loadingToast = toast.loading("Sedang menghapus secara permanen...");
+    const loadingToast = toast.loading(t("toast.deletingPermanently"));
 
     try {
       setIsEditProjectModalOpen(false);
@@ -3017,13 +3627,10 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       // Optimistic update
       setProjects((prev) => prev.filter((p) => p.id !== project.id));
 
-      showSuccessAlert(
-        "Berhasil!",
-        `Proyek "${project.name}" dan seluruh data terkait telah berhasil dihapus.`
-      );
+      showSuccessAlert("Berhasil!", t("alerts.projectDeleted", { name: project.name }));
     } catch (e: any) {
       console.error(e);
-      toast.error("Gagal menghapus proyek: " + (e.message || e));
+      toast.error(t("toast.projectDeleteFailed") + (e.message || e));
     } finally {
       toast.dismiss(loadingToast);
     }
@@ -3034,14 +3641,20 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
     const taskToDelete = tasks.find((t) => t.id === taskId);
     if (!taskToDelete) return;
 
-    const effectiveUserId =
-      currentUser?.uid || user?.uid || currentUserProfile?.uid || currentUserProfile?.id;
-    const effectiveUsername =
-      currentUser?.username || user?.username || currentUserProfile?.username;
-    const isReporter =
-      taskToDelete.reporterId === effectiveUserId || taskToDelete.reporterId === effectiveUsername;
-    if (!isReporter) {
-      toast.error("Hanya pelapor (reporter) asli yang memiliki izin untuk menghapus tugas ini.");
+    // #483 — Administrator sistem full akses; non-admin ikut checklist list.delete
+    const systemRole = String(
+      currentUserProfile?.role || user?.role || currentUser?.role || ""
+    ).toLowerCase();
+    const isSystemAdmin = systemRole === "admin";
+    const mayDeleteByChecklist = hasPermission(
+      (systemRole || "user") as PeranEfektif,
+      "list",
+      "delete",
+      false,
+      currentUserProfile?.permissions
+    );
+    if (!isSystemAdmin && !mayDeleteByChecklist) {
+      toast.error(t("toast.noPermDeleteTask"));
       return;
     }
 
@@ -3052,20 +3665,29 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
     if (!isConfirmed) return;
 
-    const loadingToast = toast.loading("Sedang menghapus tugas...");
+    suppressTaskDataRefresh(8000);
+    setTasks((prev) => prev.filter((t) => t.id !== taskId));
+    setAllProjectTasksForStats((prev) => prev.filter((t) => t.id !== taskId));
+
+    const loadingToast = toast.loading(t("toast.deletingTask"));
 
     try {
       const effectiveUserId = currentUser?.uid || user?.uid || "guest";
       const data = await deleteTaskApi(selectedProject.id, taskId, effectiveUserId);
       if (data.status !== "success") throw new Error(data.message);
 
-      setTasks((prev) => prev.filter((t) => t.id !== taskId));
-      await fetchTasks(); // Refresh explicitly
-
-      showSuccessAlert("Berhasil!", `Tugas "${taskToDelete.title}" telah berhasil dihapus.`);
+      toast.success(t("alerts.taskDeleted", { title: taskToDelete.title }));
     } catch (e: any) {
+      setTasks((prev) => {
+        if (prev.some((t) => t.id === taskId)) return prev;
+        return [taskToDelete, ...prev];
+      });
+      setAllProjectTasksForStats((prev) => {
+        if (prev.some((t) => t.id === taskId)) return prev;
+        return [taskToDelete, ...prev];
+      });
       console.error(e);
-      toast.error("Gagal menghapus tugas: " + (e.message || e));
+      toast.error(t("toast.taskDeleteFailed") + (e.message || e));
     } finally {
       toast.dismiss(loadingToast);
       if (selectedTaskForDetail?.id === taskId) {
@@ -3085,7 +3707,14 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
     if (!isConfirmed) return;
 
-    const loadingToast = toast.loading(`Sedang menghapus ${taskIds.length} tugas...`);
+    suppressTaskDataRefresh(8000);
+    const previousTasks = tasks;
+    const previousStats = allProjectTasksForStats;
+    const deletedSetPreview = new Set(taskIds);
+    setTasks((prev) => prev.filter((t) => !deletedSetPreview.has(t.id)));
+    setAllProjectTasksForStats((prev) => prev.filter((t) => !deletedSetPreview.has(t.id)));
+
+    const loadingToast = toast.loading(t("toast.deletingTasks", { count: taskIds.length }));
 
     try {
       const effectiveUserId = currentUser?.uid || user?.uid || "guest";
@@ -3094,14 +3723,12 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       if (data.status !== "success") throw new Error(data.message);
 
       const deletedSet = new Set(data.deletedIds || taskIds);
-      setTasks((prev) => prev.filter((t) => !deletedSet.has(t.id)));
-      setAllProjectTasksForStats((prev) => prev.filter((t) => !deletedSet.has(t.id)));
-      await fetchTasks();
-
-      showSuccessAlert("Berhasil!", `Berhasil menghapus ${deletedSet.size} tugas terpilih.`);
+      toast.success(`Berhasil menghapus ${deletedSet.size} tugas terpilih.`);
     } catch (e: any) {
+      setTasks(previousTasks);
+      setAllProjectTasksForStats(previousStats);
       console.error(e);
-      toast.error("Gagal menghapus beberapa tugas: " + (e.message || e));
+      toast.error(t("toast.tasksDeleteFailed") + (e.message || e));
     } finally {
       toast.dismiss(loadingToast);
     }
@@ -3138,30 +3765,34 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
     setMentionState({ active: false, query: "", index: -1 });
   };
 
-  const handleAddComment = async () => {
-    const activeUid = currentUser?.uid || user?.uid;
-    const authorName = currentUser?.displayName || user?.displayName || "Seseorang";
-    if (!selectedProject || !selectedTaskForDetail || !newCommentText.trim() || !activeUid) return;
+  const handleAddComment = async (customText?: string, parentId?: string) => {
+    const activeUid =
+      currentUser?.uid || (currentUser as any)?.id || user?.uid || (user as any)?.id;
+    const authorName =
+      currentUser?.displayName || (currentUser as any)?.name || user?.displayName || "Seseorang";
+    if (!selectedProject || !selectedTaskForDetail) return;
+    const textToSend = (typeof customText === "string" ? customText : newCommentText).trim();
+    if (!textToSend) return;
 
     try {
       await createTaskComment(selectedProject.id, selectedTaskForDetail.id, {
-        text: newCommentText.trim(),
-        authorId: activeUid,
+        text: textToSend,
+        content: textToSend,
+        authorId: activeUid || "guest",
+        parentId: parentId || null,
       });
 
       // Parse mentions
       const mentionRegex = /@(\w+)/g;
-      const mentions = Array.from(newCommentText.matchAll(mentionRegex)).map((m) =>
-        m[1].toLowerCase()
-      );
-      if (mentions.length > 0) {
+      const mentions = Array.from(textToSend.matchAll(mentionRegex)).map((m) => m[1].toLowerCase());
+      if (mentions.length > 0 && activeUid) {
         const mentionedUsers = projectMembers.filter(
           (m) => m?.username && mentions.includes(m?.username.toLowerCase()) && m.uid !== activeUid
         );
         for (const u of mentionedUsers) {
           await createNotification(u.uid, {
             senderId: activeUid,
-            title: "Anda di-mention",
+            title: t("appShell.youWereMentioned"),
             message: `${authorName} me-mention Anda di komentar tugas "${selectedTaskForDetail.title}"`,
             type: "mention",
             relatedId: selectedTaskForDetail.id,
@@ -3170,10 +3801,20 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         }
       }
 
-      setNewCommentText("");
+      if (!customText) {
+        setNewCommentText("");
+      }
       fetchComments();
-    } catch (e) {
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === selectedTaskForDetail.id
+            ? { ...t, commentsCount: (t.commentsCount || 0) + 1 }
+            : t
+        )
+      );
+    } catch (e: any) {
       console.error("Failed to add comment", e);
+      toast.error(e?.message || "Gagal menambahkan komentar");
     }
   };
 
@@ -3187,73 +3828,60 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen flex flex-col lg:flex-row font-sans bg-surface-sunken overflow-x-hidden">
-        {/* Toaster login tetap dirender di sini; layout utama punya Toaster sendiri (lihat return logged-in) */}
-        <Toaster position="top-right" richColors closeButton duration={5000} />
-        <RateLimitIndicator />
-
-        {/* Visual Hero Side (Desktop) - Stationary across login/register transitions */}
-        <AuthHeroPanel />
-
-        {/* Form Side with Watermark & Animated Form Switching */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-12 bg-surface-muted relative overflow-y-auto min-h-screen">
-          <AuthWatermarkPattern />
-
-          <AnimatePresence mode="wait">
-            {hasilSso.jenis === "lengkapi" ? (
-              <CompleteRegistrationScreen
-                key="sso-lengkapi-view"
-                email={hasilSso.email}
-                onSelesai={bersihkanSso}
-                onBatal={bersihkanSso}
-              />
-            ) : authView === "login" ? (
-              <LoginScreen
-                key="login-screen-view"
-                onLogin={handleManualLogin}
-                onRegisterClick={() => setAuthView("register")}
-                loading={isAuthLoading}
-                loadingText={loginStatusText}
-              />
-            ) : (
-              <RegisterScreen
-                key="register-screen-view"
-                onRegister={handleRegister}
-                onBackToLogin={() => setAuthView("login")}
-              />
-            )}
-          </AnimatePresence>
-
-          {/* Micro logo for mobile (<1024px) */}
-          <div className="absolute top-6 left-6 lg:hidden flex items-center gap-2">
-            <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center shadow-md shadow-primary/20">
-              <ShieldCheck className="text-white w-4 h-4" />
-            </div>
-            <span className="text-sm font-medium text-content tracking-tight">LANPRO</span>
-          </div>
-        </div>
-
-        {/* Single Login Collision Modal */}
-        <SingleLoginCollisionModal
-          isOpen={showCollisionModal}
-          activeSession={activeSessionData}
-          onClose={() => {
-            setShowCollisionModal(false);
-            setPendingLoginCredentials(null);
-          }}
-          onForceLogout={() => {
-            if (pendingLoginCredentials) {
-              handleManualLogin(
-                pendingLoginCredentials.username,
-                pendingLoginCredentials.password,
-                pendingLoginCredentials.remember,
-                true
-              );
-            }
-          }}
-          isLoading={loading}
-        />
-      </div>
+      <AuthLayout
+        variant="split"
+        overlays={
+          <>
+            <Toaster position="top-right" richColors />
+            <RateLimitIndicator />
+            {/* Modal tabrakan sesi tunggal. */}
+            <SingleLoginCollisionModal
+              isOpen={showCollisionModal}
+              activeSession={activeSessionData}
+              onClose={() => {
+                setShowCollisionModal(false);
+                setPendingLoginCredentials(null);
+              }}
+              onForceLogout={() => {
+                if (pendingLoginCredentials) {
+                  handleManualLogin(
+                    pendingLoginCredentials.username,
+                    pendingLoginCredentials.password,
+                    pendingLoginCredentials.remember,
+                    true
+                  );
+                }
+              }}
+              isLoading={loading}
+            />
+          </>
+        }
+      >
+        <AnimatePresence mode="wait">
+          {hasilSso.jenis === "lengkapi" ? (
+            <CompleteRegistrationScreen
+              key="sso-lengkapi-view"
+              email={hasilSso.email}
+              onSelesai={bersihkanSso}
+              onBatal={bersihkanSso}
+            />
+          ) : authView === "login" ? (
+            <LoginScreen
+              key="login-screen-view"
+              onLogin={handleManualLogin}
+              onRegisterClick={() => setAuthView("register")}
+              loading={isAuthLoading}
+              loadingText={loginStatusText}
+            />
+          ) : (
+            <RegisterScreen
+              key="register-screen-view"
+              onRegister={handleRegister}
+              onBackToLogin={() => setAuthView("login")}
+            />
+          )}
+        </AnimatePresence>
+      </AuthLayout>
     );
   }
 
@@ -3261,7 +3889,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
     <PresenceProvider currentUser={currentUser} socket={socket} allUsers={allUsers}>
       <Toaster position="top-right" richColors closeButton duration={5000} />
       <RateLimitIndicator />
-      <div className="min-h-screen flex h-screen bg-surface-sunken text-content transition-colors duration-200">
+      <div className="min-h-dvh flex h-dvh bg-surface-sunken text-content transition-colors duration-200">
         {/* Backdrop Overlay for Mobile Sidebar */}
         <AnimatePresence>
           {isMobileMenuOpen && (
@@ -3270,7 +3898,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="md:hidden bg-black/50 fixed inset-0 z-40"
+              className="md:hidden bg-overlay/50 fixed inset-0 z-40"
               onClick={() => setIsMobileMenuOpen(false)}
             />
           )}
@@ -3301,12 +3929,6 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           hasPermission={hasPermission}
           currentUser={currentUser}
           user={user}
-          setIsProfileModalOpen={setIsProfileModalOpen}
-          onOpenProfile={() => {
-            setSelectedUserForDetail(currentUserProfile || currentUser || user);
-            setCurrentView("userDetail" as any);
-          }}
-          handleLogout={handleLogoutRequest}
         />
 
         {/* Live Chat Widget */}
@@ -3329,8 +3951,9 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           <div className="absolute inset-0 bg-surface-sunken/50 backdrop-blur-3xl z-[-1]" />
 
           {/* Global Top Header Bar */}
-          <header className="flex items-center justify-between w-full px-6 py-3 border-b border-border-faint dark:border-slate-800 bg-surface dark:bg-slate-900 shrink-0 pl-14 md:pl-6 text-content-strong dark:text-white transition-all z-20">
-            <div className="flex items-center gap-4 min-w-0">
+          {/* #445 — border-b seperti Velzon: garis antara topbar dan PageHeader */}
+          <header className="flex items-center justify-between w-full px-4 md:px-5 py-2 bg-surface-raised border-b border-border-subtle shrink-0 pl-14 md:pl-5 text-content-strong transition-all z-20">
+            <div className="flex items-center gap-3 min-w-0">
               {selectedProject &&
               ![
                 "userDetail",
@@ -3345,10 +3968,13 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                 "configuration",
               ].includes(currentView as string) ? (
                 <>
-                  <h2 className="text-sm md:text-lg font-medium text-content dark:text-white truncate text-ellipsis whitespace-nowrap max-w-[150px] sm:max-w-[300px] md:max-w-none">
+                  <h2
+                    className="text-[13px] md:text-sm font-medium text-content truncate text-ellipsis whitespace-nowrap max-w-[min(42vw,11rem)] sm:max-w-[300px] md:max-w-none"
+                    title={selectedProject.name}
+                  >
                     {selectedProject.name}
                   </h2>
-                  <div className="h-4 w-px bg-gray-200 dark:bg-slate-800 mx-2 shrink-0" />
+                  <div className="h-3.5 w-px border-l border-border-subtle mx-1 shrink-0" />
                   <HeaderAvatarGroup
                     allUsers={allUsers}
                     currentUserUid={currentUser?.uid || currentUser?.id}
@@ -3357,117 +3983,135 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
               ) : null}
             </div>
 
-            {/* Area Ikon Navigasi Kanan */}
-            <div className="flex items-center gap-2">
-              {/* Tombol Pengaturan Proyek */}
-              {selectedProject &&
-                hasPermission(
-                  effectiveRole,
-                  "configuration",
-                  "read",
-                  selectedProject?.ownerId === (currentUser?.uid || user?.uid),
-                  currentUserProfile?.permissions
-                ) && (
-                  <button
-                    onClick={() => {
-                      setEditingProject(selectedProject);
-                      setIsEditProjectModalOpen(true);
-                    }}
-                    className="p-2.5 min-w-11 min-h-11 flex items-center justify-center hover:bg-surface-sunken rounded-full text-content-subtle hover:text-content-secondary group transition-all"
-                    title="Pengaturan Proyek"
-                  >
-                    <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform" />
-                  </button>
-                )}
+            {/* Area Ikon Navigasi Kanan — #392: di HP Settings/bahasa/tema masuk menu overflow */}
+            <div className="flex items-center gap-1 sm:gap-2">
+              {/* Desktop md+: Settings + Language + Theme */}
+              <div className="hidden md:flex items-center gap-2">
+                {selectedProject &&
+                  hasPermission(
+                    userRoleForProject,
+                    "configuration",
+                    "read",
+                    selectedProject?.ownerId === (currentUser?.uid || user?.uid),
+                    currentUserProfile?.permissions
+                  ) && (
+                    <button
+                      onClick={() => {
+                        setEditingProject(selectedProject);
+                        setIsEditProjectModalOpen(true);
+                      }}
+                      className="p-1.5 md:min-w-0 md:min-h-0 min-w-11 min-h-11 flex items-center justify-center hover:bg-surface-sunken rounded-md text-content-subtle hover:text-content-secondary group transition-all"
+                      title={t("common.projectSettings")}
+                    >
+                      <Settings className="w-4 h-4 group-hover:rotate-90 transition-transform" />
+                    </button>
+                  )}
 
-              {/* Fullscreen Toggle Button */}
-              <button
-                onClick={toggleFullscreen}
-                className="hidden sm:flex p-2.5 min-w-11 min-h-11 items-center justify-center text-content-subtle hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 rounded-full transition-all items-center justify-center"
-                title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
-              >
-                {isFullscreen ? (
-                  <Minimize2 className="w-5 h-5" />
-                ) : (
-                  <Maximize className="w-5 h-5" />
-                )}
-              </button>
-
-              {/* Theme Switcher Button & Dropdown */}
-              <div className="relative" ref={themeDropdownRef}>
                 <button
-                  onClick={() => setIsThemeOpen(!isThemeOpen)}
-                  className="p-2.5 min-w-11 min-h-11 items-center justify-center text-content-subtle hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-slate-800 rounded-full transition-all flex items-center justify-center relative"
-                  title="Ubah Tema"
+                  onClick={toggleFullscreen}
+                  className="hidden sm:flex p-1.5 md:min-w-0 md:min-h-0 items-center justify-center text-content-subtle hover:text-primary hover:bg-surface-sunken rounded-md transition-all"
+                  title={isFullscreen ? t("common.exitFullscreen") : t("common.fullscreen")}
                 >
-                  {theme === "light" ? (
-                    <Sun className="w-5 h-5 text-amber-500" />
-                  ) : theme === "dark" ? (
-                    <Moon className="w-5 h-5 text-indigo-400" />
+                  {isFullscreen ? (
+                    <Minimize2 className="w-4 h-4" />
                   ) : (
-                    <Monitor className="w-5 h-5" />
+                    <Maximize className="w-4 h-4" />
                   )}
                 </button>
 
-                <AnimatePresence>
-                  {isThemeOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.15, ease: "easeOut" }}
-                      className="absolute right-0 mt-2 w-36 bg-surface dark:bg-slate-800 border border-border-subtle dark:border-slate-700 rounded-xl shadow-soft-lg z-50 py-1.5 overflow-hidden origin-top-right"
-                    >
-                      <button
-                        onClick={() => {
-                          setTheme("light");
-                          setIsThemeOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-2.5 transition-colors ${theme === "light" ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400" : "text-content-secondary dark:text-slate-300 hover:bg-surface-sunken dark:hover:bg-slate-700/50"}`}
-                      >
-                        <Sun
-                          className={`w-4 h-4 ${theme === "light" ? "text-amber-500" : "text-content-subtle dark:text-slate-500"}`}
-                        />
-                        <span>Light</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          setTheme("dark");
-                          setIsThemeOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-2.5 transition-colors ${theme === "dark" ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400" : "text-content-secondary dark:text-slate-300 hover:bg-surface-sunken dark:hover:bg-slate-700/50"}`}
-                      >
-                        <Moon
-                          className={`w-4 h-4 ${theme === "dark" ? "text-indigo-400" : "text-content-subtle dark:text-slate-500"}`}
-                        />
-                        <span>Dark</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          setTheme("system");
-                          setIsThemeOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-2.5 transition-colors ${theme === "system" ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400" : "text-content-secondary dark:text-slate-300 hover:bg-surface-sunken dark:hover:bg-slate-700/50"}`}
-                      >
-                        <Monitor
-                          className={`w-4 h-4 ${theme === "system" ? "text-indigo-600 dark:text-indigo-400" : "text-content-subtle dark:text-slate-500"}`}
-                        />
-                        <span>Auto</span>
-                      </button>
-                    </motion.div>
+                <LanguageSwitcher />
+
+                <WebAppsDropdown />
+
+                <button
+                  onClick={toggleTheme}
+                  className="p-1.5 md:min-w-0 md:min-h-0 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-content-strong hover:bg-surface-sunken rounded-md transition-all cursor-pointer relative"
+                  title={isDarkMode() ? t("appShell.toLightMode") : t("appShell.toDarkMode")}
+                  aria-label={isDarkMode() ? t("appShell.toLightMode") : t("appShell.toDarkMode")}
+                >
+                  {isDarkMode() ? (
+                    <Sun className="w-4 h-4 text-warning transition-transform hover:rotate-45 duration-200" />
+                  ) : (
+                    <Moon className="w-4 h-4 text-content-body transition-transform hover:-rotate-12 duration-200" />
                   )}
-                </AnimatePresence>
+                </button>
+              </div>
+
+              {/* HP: satu tombol More untuk Settings / bahasa / apps / tema */}
+              <div className="relative md:hidden" ref={headerMoreRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsHeaderMoreOpen((o) => !o)}
+                  className="p-2.5 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-content-strong hover:bg-surface-sunken rounded-full transition-all cursor-pointer"
+                  title={t("appShell.moreActions", "Lainnya")}
+                  aria-label={t("appShell.moreActions", "Lainnya")}
+                  aria-expanded={isHeaderMoreOpen}
+                >
+                  <MoreHorizontal className="w-5 h-5" />
+                </button>
+                {isHeaderMoreOpen && (
+                  <div className="absolute right-0 top-full mt-1 z-50 min-w-[11rem] rounded-lg border border-border-subtle bg-surface shadow-soft-lg py-1">
+                    {selectedProject &&
+                      hasPermission(
+                        userRoleForProject,
+                        "configuration",
+                        "read",
+                        selectedProject?.ownerId === (currentUser?.uid || user?.uid),
+                        currentUserProfile?.permissions
+                      ) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingProject(selectedProject);
+                            setIsEditProjectModalOpen(true);
+                            setIsHeaderMoreOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3 min-h-11 text-left text-xs text-content-body hover:bg-surface-sunken cursor-pointer"
+                        >
+                          <Settings className="w-4 h-4 shrink-0" />
+                          {t("common.projectSettings")}
+                        </button>
+                      )}
+                    <div className="flex items-center gap-2.5 px-3 min-h-11">
+                      <span className="text-xs text-content-muted shrink-0 w-16">
+                        {t("common.language", "Bahasa")}
+                      </span>
+                      <LanguageSwitcher />
+                    </div>
+                    <div className="flex items-center gap-2.5 px-3 min-h-11">
+                      <span className="text-xs text-content-muted shrink-0 w-16">
+                        {t("appShell.webApps", "Web Apps")}
+                      </span>
+                      <WebAppsDropdown />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        toggleTheme();
+                        setIsHeaderMoreOpen(false);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 min-h-11 text-left text-xs text-content-body hover:bg-surface-sunken cursor-pointer"
+                    >
+                      {isDarkMode() ? (
+                        <Sun className="w-4 h-4 text-warning shrink-0" />
+                      ) : (
+                        <Moon className="w-4 h-4 shrink-0" />
+                      )}
+                      {isDarkMode() ? t("appShell.toLightMode") : t("appShell.toDarkMode")}
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="relative" ref={notificationsRef}>
                 <button
                   onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                  className="p-2.5 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-violet-600 hover:bg-violet-50 rounded-full transition-all relative"
-                  title="Notifikasi"
+                  className="p-1.5 md:min-w-0 md:min-h-0 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-violet-600 hover:bg-violet-500/10 rounded-md transition-all relative"
+                  title={t("appShell.notifications")}
                 >
-                  <Bell className="w-5 h-5" />
+                  <Bell className="w-4 h-4" />
                   {notifications.filter((n) => !n.read).length > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
+                    <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-rose-500 rounded-full ring-2 ring-surface"></span>
                   )}
                 </button>
 
@@ -3486,484 +4130,435 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                   tasks={tasks}
                 />
               </div>
+
+              {/* Velzon Top-Right User Profile Dropdown */}
+              <UserProfileDropdown
+                currentUser={currentUser}
+                currentUserProfile={currentUserProfile}
+                user={user}
+                userRole={effectiveRole}
+                masterData={masterData}
+                onOpenProfile={() => bukaDetailPengguna(currentUserProfile || currentUser || user)}
+                onOpenMessages={() => {
+                  // Trigger socket or scroll to live chat if needed
+                }}
+                onOpenHelp={() => {
+                  window.open("https://github.com", "_blank");
+                }}
+                handleLogout={handleLogoutRequest}
+              />
             </div>
           </header>
 
-          {currentView === "userDetail" ? (
-            <UserDetailView
-              user={selectedUserForDetail}
-              onBack={() => setCurrentView("users")}
-              projects={projects}
-              tasks={tasks}
-              departments={masterData.filter((m) => m.type === "department")}
-              positions={masterData.filter((m) => m.type === "position" || m.type === "jabatan")}
-              masterData={masterData}
-              currentUser={currentUser || currentUserProfile}
-              onUserUpdated={() => {
-                fetchProjects();
-              }}
-            />
-          ) : currentView === "users" ? (
-            <AdminUserPanel
-              projects={projects}
-              tasks={tasks}
-              masterData={masterData}
-              userRole={effectiveRole}
-              currentUserId={currentUser?.uid || user?.uid}
-              onAddUser={() => {}}
-              onRefreshProjects={fetchProjects}
-              onSelectUserForDetail={(u) => {
-                setSelectedUserForDetail(u);
-                setCurrentView("userDetail" as any);
-              }}
-            />
-          ) : currentView === "master" ? (
-            <MasterDataPanel
-              projects={projects}
-              tasks={tasks}
-              masterData={masterData}
-              userRole={effectiveRole}
-              currentUserProfile={currentUserProfile!}
-              hasPermission={hasPermission}
-              onRefresh={fetchMasterData}
-            />
-          ) : selectedProject ? (
-            <React.Fragment>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentView + (selectedProject?.id || "")}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -12 }}
-                  transition={{ duration: 0.22, ease: "easeOut" }}
-                  className="flex-1 flex flex-col min-h-0 bg-surface-sunken dark:bg-slate-950 transition-colors duration-200"
-                >
-                  {currentView === "issueDetail" && (
-                    <div className="w-full flex-1 flex flex-col p-3 md:p-4 min-h-0 overflow-hidden bg-surface-muted text-left">
-                      <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden">
-                        {/* Velzon-style Action / Title Bar */}
-                        <div className="px-4 py-3 md:px-6 md:py-3.5 border-b border-border-subtle/80 bg-surface flex items-center justify-between gap-4 shrink-0 shadow-2xs">
-                          <div className="flex items-center gap-3">
-                            <button
-                              onClick={() => setIsTaskDetailModalOpen(false)}
-                              className="h-8 w-8 rounded-md bg-surface-sunken border border-border-subtle/80 text-content-secondary hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-100 flex items-center justify-center transition-all shadow-2xs"
-                              title="Back"
-                            >
-                              <ArrowLeft className="w-4 h-4" />
-                            </button>
-                            <div className="flex items-center gap-2.5">
-                              <h3 className="text-sm font-medium text-content-strong tracking-tight">
-                                Issue Details
-                              </h3>
-                              <span className="text-xs font-medium text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-100/70">
-                                {selectedTaskForDetail?.key || "TASK"}
-                              </span>
+          {/*
+            Batas Suspense untuk lima tampilan yang kini dimuat malas (#293).
+            Fallback-nya sengaja sama bentuknya dengan yang dipakai AppRoutes
+            supaya perpindahan antar tampilan tidak terasa berbeda tergantung
+            siapa yang merendernya.
+          */}
+          <Suspense
+            fallback={
+              <div className="flex-1 flex flex-col items-center justify-center bg-surface-sunken/50 p-8">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-border-subtle border-t-primary" />
+                <p className="mt-3 text-sm text-content-muted">{t("appShell.loading")}</p>
+              </div>
+            }
+          >
+            {currentView === "userDetail" ? (
+              <UserDetailView
+                user={selectedUserForDetail}
+                onBack={() => setCurrentView(previousView as any)}
+                projects={projects}
+                tasks={tasks}
+                departments={masterData.filter((m) => m.type === "department")}
+                positions={masterData.filter((m) => m.type === "position" || m.type === "jabatan")}
+                masterData={masterData}
+                currentUser={currentUser || currentUserProfile}
+                activityLogs={activityLogs || []}
+                onOpenTask={(task) => {
+                  setSelectedTaskForDetail(task);
+                  setCurrentView("issueDetail" as any);
+                }}
+                onUserUpdated={() => {
+                  fetchProjects();
+                }}
+              />
+            ) : currentView === "users" ? (
+              /* Penjaga izin — item #161. `AdminUserPanel` tidak memeriksa izin
+               sama sekali di dalamnya, dan cabang ini berada DI ATAS penjaga
+               `selectedProject`, jadi apa pun yang berhasil menyetel
+               `currentView` ke "users" langsung mendapat daftar SELURUH
+               pengguna. Menyembunyikan menunya di sidebar bukan penjaga:
+               menu hanya salah satu jalan masuk. */
+              !hasPermission(
+                effectiveRole,
+                "userManagement",
+                "read",
+                false,
+                currentUserProfile?.permissions
+              ) ? (
+                <div className="flex flex-col items-center justify-center w-full flex-1 p-8 text-center bg-surface-sunken">
+                  <ShieldAlert className="w-16 h-16 text-danger mb-4" />
+                  <h2 className="text-2xl font-medium text-content-strong mb-2">
+                    {t("appShell.forbidden")}
+                  </h2>
+                  <p className="text-content-muted max-w-md">{t("appShell.forbiddenUsers")}</p>
+                </div>
+              ) : (
+                <AdminUserPanel
+                  projects={projects}
+                  tasks={tasks}
+                  masterData={masterData}
+                  userRole={effectiveRole}
+                  currentUserId={currentUser?.uid || user?.uid}
+                  onAddUser={() => {}}
+                  onRefreshProjects={fetchProjects}
+                  onSelectUserForDetail={(u) => bukaDetailPengguna(u)}
+                />
+              )
+            ) : currentView === "userSessions" ? (
+              !hasPermission(
+                effectiveRole,
+                "userManagement",
+                "read",
+                false,
+                currentUserProfile?.permissions
+              ) ? (
+                <div className="flex flex-col items-center justify-center w-full flex-1 p-8 text-center bg-surface-sunken">
+                  <ShieldAlert className="w-16 h-16 text-danger mb-4" />
+                  <h2 className="text-2xl font-medium text-content-strong mb-2">
+                    {t("appShell.forbidden")}
+                  </h2>
+                  <p className="text-content-muted max-w-md">{t("appShell.forbiddenUsers")}</p>
+                </div>
+              ) : (
+                <UserSessionsPanel
+                  userRole={effectiveRole}
+                  currentUserId={currentUser?.uid || user?.uid}
+                />
+              )
+            ) : currentView === "master" ? (
+              <MasterDataPanel
+                projects={projects}
+                tasks={tasks}
+                masterData={masterData}
+                userRole={effectiveRole}
+                currentUserProfile={currentUserProfile!}
+                hasPermission={hasPermission}
+                onRefresh={fetchMasterData}
+              />
+            ) : selectedProject ? (
+              <React.Fragment>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentView + (selectedProject?.id || "")}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -12 }}
+                    transition={{ duration: 0.12, ease: "easeOut" }}
+                    className="flex-1 flex flex-col min-h-0 bg-surface-sunken transition-colors duration-200"
+                  >
+                    {currentView === "issueDetail" && (
+                      <div className="w-full flex-1 flex flex-col p-3 md:p-4 min-h-0 overflow-hidden bg-surface-sunken text-left">
+                        {/* #418 — full-page TaskDetail chrome = Card + title bar Velzon (bukan Modal overlay) */}
+                        <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle rounded-lg shadow-soft overflow-hidden">
+                          <div className="px-4 py-3 md:px-5 md:py-3.5 border-b border-border-subtle bg-surface-sunken/40 flex items-center justify-between gap-4 shrink-0">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <button
+                                type="button"
+                                onClick={() => setIsTaskDetailModalOpen(false)}
+                                className="h-9 w-9 rounded-lg bg-surface border border-border-subtle text-content-secondary hover:bg-primary/10 hover:text-primary hover:border-primary/30 flex items-center justify-center transition-all shadow-2xs shrink-0"
+                                title={t("appShell.back")}
+                              >
+                                <ArrowLeft className="w-4 h-4" />
+                              </button>
+                              <div className="min-w-0">
+                                <div className="text-[11px] font-normal uppercase tracking-normal text-content-subtle">
+                                  {t("issues.breadcrumbGroup", "PROJECT")} /{" "}
+                                  {t("sidebar.issueList")}
+                                </div>
+                                <div className="flex items-center gap-2.5 mt-0.5 min-w-0">
+                                  <h3 className="text-base font-bold text-content-strong tracking-tight truncate">
+                                    {t("appShell.issueDetails")}
+                                  </h3>
+                                  <span className="text-xs font-medium text-primary bg-primary/10 px-2.5 py-[3px] rounded-md border border-primary/30 shrink-0">
+                                    {selectedTaskForDetail?.key || "TASK"}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                        </div>
 
-                        <div className="flex-1 overflow-auto bg-surface custom-scrollbar w-full h-full relative">
-                          <TaskDetailModal
-                            projectRole={
-                              selectedProject && currentUser?.uid
-                                ? selectedProject.memberRoles?.[currentUser.uid]
-                                : undefined
-                            }
-                            isUpdatingTask={isUpdatingTask}
-                            isOpen={true}
-                            onClose={() => setIsTaskDetailModalOpen(false)}
-                            task={selectedTaskForDetail}
-                            tasks={tasks || []}
-                            projectMembers={projectMembers || []}
-                            masterData={masterData || []}
-                            userRole={effectiveRole}
-                            user={currentUser}
-                            currentUserProfile={currentUserProfile!}
-                            sprints={sprints || []}
-                            updateTaskField={updateTaskField}
-                            hasPermission={hasPermission}
-                            activityLogs={activityLogs || []}
-                            comments={comments || []}
-                            newCommentText={newCommentText}
-                            setNewCommentText={setNewCommentText}
-                            handleAddComment={handleAddComment}
-                            handleFileUpload={handleFileUpload}
-                            handleRemoveAttachment={handleRemoveAttachment}
-                            uploadProgress={uploadProgress}
-                            isLoggedIn={!!currentUser}
-                            handleQuickAddSubtask={handleQuickAddSubtask}
-                            mentionState={mentionState}
-                            handleSelectMention={handleSelectMention}
-                            handleCommentChange={handleCommentChange}
-                            removeTaskLink={removeTaskLink}
-                            handleAddLinkedTask={handleAddLinkedTask}
-                            handleRemoveLinkedTask={handleRemoveLinkedTask}
-                            taskLinkTargetId={taskLinkTargetId}
-                            setTaskLinkTargetId={setTaskLinkTargetId}
-                            taskLinkRelation={taskLinkRelation}
-                            setTaskLinkRelation={setTaskLinkRelation}
-                            isAddingTaskLink={isAddingTaskLink}
-                            setIsAddingTaskLink={setIsAddingTaskLink}
-                            isAddingExternalLink={isAddingExternalLink}
-                            setIsAddingExternalLink={setIsAddingExternalLink}
-                            newExternalLinkTitle={newExternalLinkTitle}
-                            setNewExternalLinkTitle={setNewExternalLinkTitle}
-                            newExternalLinkUrl={newExternalLinkUrl}
-                            setNewExternalLinkUrl={setNewExternalLinkUrl}
-                            handleAddExternalLink={handleAddExternalLink}
-                            removeExternalLink={removeExternalLink}
-                            toggleBlockedStatus={toggleBlockedStatus}
-                            handleSuggestStoryPoints={handleSuggestStoryPoints}
-                            handleAddLink={handleAddLink}
-                            newLinkTitle={newLinkTitle}
-                            setNewLinkTitle={setNewLinkTitle}
-                            newLinkUrl={newLinkUrl}
-                            setNewLinkUrl={setNewLinkUrl}
-                            isAddingLink={isAddingLink}
-                            setIsAddingLink={setIsAddingLink}
-                            deleteTask={deleteTask}
-                          />
+                          <div className="flex-1 overflow-auto bg-surface custom-scrollbar w-full h-full relative">
+                            <TaskDetailModal
+                              projectRole={
+                                selectedProject && currentUser?.uid
+                                  ? selectedProject.memberRoles?.[currentUser.uid]
+                                  : undefined
+                              }
+                              isUpdatingTask={isUpdatingTask}
+                              isOpen={true}
+                              onClose={() => setIsTaskDetailModalOpen(false)}
+                              task={selectedTaskForDetail}
+                              tasks={tasks || []}
+                              projectMembers={projectMembers || []}
+                              masterData={masterData || []}
+                              userRole={effectiveRole}
+                              user={currentUser}
+                              currentUserProfile={currentUserProfile!}
+                              sprints={sprints || []}
+                              updateTaskField={updateTaskField}
+                              hasPermission={hasPermission}
+                              activityLogs={activityLogs || []}
+                              comments={comments || []}
+                              newCommentText={newCommentText}
+                              setNewCommentText={setNewCommentText}
+                              handleAddComment={handleAddComment}
+                              handleFileUpload={handleFileUpload}
+                              handleRemoveAttachment={handleRemoveAttachment}
+                              uploadProgress={uploadProgress}
+                              isLoggedIn={!!currentUser}
+                              handleQuickAddSubtask={handleQuickAddSubtask}
+                              mentionState={mentionState}
+                              handleSelectMention={handleSelectMention}
+                              handleCommentChange={handleCommentChange}
+                              removeTaskLink={removeTaskLink}
+                              handleAddLinkedTask={handleAddLinkedTask}
+                              handleRemoveLinkedTask={handleRemoveLinkedTask}
+                              taskLinkTargetId={taskLinkTargetId}
+                              setTaskLinkTargetId={setTaskLinkTargetId}
+                              taskLinkRelation={taskLinkRelation}
+                              setTaskLinkRelation={setTaskLinkRelation}
+                              isAddingTaskLink={isAddingTaskLink}
+                              setIsAddingTaskLink={setIsAddingTaskLink}
+                              isAddingExternalLink={isAddingExternalLink}
+                              setIsAddingExternalLink={setIsAddingExternalLink}
+                              newExternalLinkTitle={newExternalLinkTitle}
+                              setNewExternalLinkTitle={setNewExternalLinkTitle}
+                              newExternalLinkUrl={newExternalLinkUrl}
+                              setNewExternalLinkUrl={setNewExternalLinkUrl}
+                              handleAddExternalLink={handleAddExternalLink}
+                              removeExternalLink={removeExternalLink}
+                              toggleBlockedStatus={toggleBlockedStatus}
+                              handleSuggestStoryPoints={handleSuggestStoryPoints}
+                              handleAddLink={handleAddLink}
+                              newLinkTitle={newLinkTitle}
+                              setNewLinkTitle={setNewLinkTitle}
+                              newLinkUrl={newLinkUrl}
+                              setNewLinkUrl={setNewLinkUrl}
+                              isAddingLink={isAddingLink}
+                              setIsAddingLink={setIsAddingLink}
+                              deleteTask={deleteTask}
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                  <AppRoutes
-                    currentView={currentView}
-                    setCurrentView={setCurrentView}
-                    selectedProject={selectedProject}
-                    effectiveRole={effectiveRole}
-                    currentUser={currentUser}
-                    currentUserProfile={currentUserProfile}
-                    projectMembers={projectMembers || []}
-                    masterData={masterData || []}
-                    tasks={tasks || []}
-                    sprints={sprints || []}
-                    allUsers={allUsers || []}
-                    activityLogs={activityLogs || []}
-                    selectedTaskForDetail={selectedTaskForDetail}
-                    expandedSprintId={expandedSprintId}
-                    hasPermission={hasPermission}
-                    updateTaskField={updateTaskField}
-                    updateTaskStatus={updateTaskStatus}
-                    handleQuickCreate={handleQuickCreate}
-                    setSelectedTaskForDetail={setSelectedTaskForDetail}
-                    setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
-                    setIsNewTaskModalOpen={setIsNewTaskModalOpen}
-                    deleteTask={deleteTask}
-                    bulkDeleteTasks={bulkDeleteTasks}
-                    fetchTasks={fetchTasks}
-                    setExpandedSprintId={setExpandedSprintId}
-                    setIsNewSprintModalOpen={setIsNewSprintModalOpen}
-                    setIsEditSprintModalOpen={setIsEditSprintModalOpen}
-                    setEditingSprint={setEditingSprint}
-                    handleStartSprint={handleStartSprint}
-                    handleCompleteSprint={handleCompleteSprint}
-                    handleDeleteSprint={handleDeleteSprint}
-                    handleDragEndPlanning={handleDragEndPlanning}
-                    fetchMasterData={fetchMasterData}
-                    fetchProjects={fetchProjects}
-                    setTasks={setTasks}
-                    socket={socket}
-                    qaInitialStatusFilter={qaInitialStatusFilter}
-                    exportTasksToCSV={exportTasksToCSV}
-                    safeFormat={safeFormat}
-                    StyledDropdown={StyledDropdown}
-                    updateProjectRole={updateProjectRole}
-                    removeProjectMember={removeProjectMember}
-                  />
-                </motion.div>
-              </AnimatePresence>
-            </React.Fragment>
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center bg-surface-sunken/50 p-8 text-center">
-              <div className="w-16 h-16 rounded-xl bg-indigo-100/80 border border-indigo-200 flex items-center justify-center text-indigo-600 mb-4 shadow-soft">
-                <FolderKanban className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-medium text-content-strong mb-2">
-                Pilih atau Buat Proyek Baru
-              </h3>
-              <p className="text-sm text-content-muted max-w-md mb-6">
+                    )}
+                    <AppRoutes
+                      currentView={currentView}
+                      setCurrentView={setCurrentView}
+                      selectedProject={selectedProject}
+                      tasks={tasks}
+                      sprints={sprints}
+                      masterData={masterData}
+                      projectMembers={projectMembers}
+                      allUsers={allUsers}
+                      activityLogs={activityLogs}
+                      setTasks={setTasks}
+                      effectiveRole={userRoleForProject}
+                      currentUser={currentUser}
+                      currentUserProfile={currentUserProfile}
+                      selectedTaskForDetail={selectedTaskForDetail}
+                      expandedSprintId={expandedSprintId}
+                      hasPermission={hasPermission}
+                      updateTaskField={updateTaskField}
+                      updateTaskStatus={updateTaskStatus}
+                      handleQuickCreate={handleQuickCreate}
+                      setSelectedTaskForDetail={setSelectedTaskForDetail}
+                      setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
+                      setIsNewTaskModalOpen={setIsNewTaskModalOpen}
+                      deleteTask={deleteTask}
+                      bulkDeleteTasks={bulkDeleteTasks}
+                      fetchTasks={fetchTasks}
+                      issueListPage={issueListPage}
+                      setIssueListPage={setIssueListPage}
+                      issueListSearch={issueListSearch}
+                      setIssueListSearch={setIssueListSearch}
+                      issueListMeta={issueListMeta}
+                      setExpandedSprintId={setExpandedSprintId}
+                      setIsNewSprintModalOpen={setIsNewSprintModalOpen}
+                      setIsEditSprintModalOpen={setIsEditSprintModalOpen}
+                      setEditingSprint={setEditingSprint}
+                      handleStartSprint={handleStartSprint}
+                      handleCompleteSprint={handleCompleteSprint}
+                      handleDeleteSprint={handleDeleteSprint}
+                      handleDragEndPlanning={handleDragEndPlanning}
+                      fetchMasterData={fetchMasterData}
+                      fetchProjects={fetchProjects}
+                      socket={socket}
+                      qaInitialStatusFilter={qaInitialStatusFilter}
+                      exportTasksToCSV={exportTasksToCSV}
+                      safeFormat={safeFormat}
+                      StyledDropdown={StyledDropdown}
+                      updateProjectRole={updateProjectRole}
+                      removeProjectMember={removeProjectMember}
+                      onInviteMember={handleInviteMember}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+              </React.Fragment>
+            ) : projects.length === 0 ? (
+              /* Belum tergabung di proyek MANA PUN — item #160. Kartu di bawah
+               menyuruh memilih proyek dari sidebar, dan pada kondisi ini
+               sidebar-nya justru kosong, jadi perintahnya mustahil dijalankan. */
+              <WelcomeScreen
+                /* Urutan field SENGAJA disamakan dengan footer sidebar
+                 (`user?.displayName || currentUser?.displayName ||
+                 currentUser?.username`). Sebelumnya sapaan memulai dari
+                 `name`, yang kosong pada akun ini, sehingga sapaan jatuh ke
+                 "azlanirwan" sementara footer di layar yang SAMA menampilkan
+                 "alan Ir" — dua identitas untuk satu orang dalam satu
+                 tatapan. */
+                namaPengguna={
+                  user?.displayName ||
+                  currentUserProfile?.displayName ||
+                  currentUser?.displayName ||
+                  currentUserProfile?.name ||
+                  currentUser?.name ||
+                  currentUserProfile?.username ||
+                  currentUser?.username ||
+                  ""
+                }
+                onOpenProfile={() => bukaDetailPengguna(currentUserProfile || currentUser || user)}
+                bolehBuatProyek={hasPermission(
+                  effectiveRole,
+                  "configuration",
+                  "create",
+                  false,
+                  currentUserProfile?.permissions
+                )}
+                onCreateProject={() => setIsNewProjectModalOpen(true)}
+              />
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center bg-surface-sunken/50 p-8 text-center">
+                <div className="w-16 h-16 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary mb-4 shadow-soft">
+                  <FolderKanban className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-medium text-content-strong mb-2">
+                  {t("appShell.pickOrCreateProject")}
+                </h3>
+                <p className="text-sm text-content-muted max-w-md mb-6">
+                  {hasPermission(
+                    effectiveRole,
+                    "configuration",
+                    "create",
+                    false,
+                    currentUserProfile?.permissions
+                  )
+                    ? t("appShell.pickProjectHintAdmin")
+                    : t("appShell.pickProjectHint")}
+                </p>
+                {/* Penjaga izin memakai pemeriksaan yang SAMA dengan tombol di
+                  sidebar. Sebelumnya tombol ini tidak dijaga sama sekali,
+                  sehingga pengguna biasa melihat ajakan membuat proyek yang
+                  pasti ditolak backend. */}
                 {hasPermission(
                   effectiveRole,
                   "configuration",
                   "create",
                   false,
                   currentUserProfile?.permissions
-                )
-                  ? "Silakan pilih salah satu proyek dari sidebar di sebelah kiri, atau buat proyek baru untuk mulai mengelola tugas & sprint tim Anda."
-                  : "Silakan pilih salah satu proyek dari sidebar di sebelah kiri. Pembuatan proyek baru hanya dapat dilakukan oleh administrator."}
-              </p>
-              {/* Penjaga izin memakai pemeriksaan yang SAMA dengan tombol di
-                  sidebar. Sebelumnya tombol ini tidak dijaga sama sekali,
-                  sehingga pengguna biasa melihat ajakan membuat proyek yang
-                  pasti ditolak backend. */}
-              {hasPermission(
-                effectiveRole,
-                "configuration",
-                "create",
-                false,
-                currentUserProfile?.permissions
-              ) && (
-                <button
-                  onClick={() => setIsNewProjectModalOpen(true)}
-                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm shadow-md shadow-indigo-200 transition-all flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Buat Proyek Baru</span>
-                </button>
-              )}
-            </div>
+                ) && (
+                  <button
+                    onClick={() => setIsNewProjectModalOpen(true)}
+                    className="px-5 py-2.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-xl font-medium text-sm shadow-md shadow-primary/20 transition-all flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>{t("appShell.createNewProject")}</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </Suspense>
+          {/*
+            Gerbang wajib ganti kata sandi (#296).
+
+            Dipasang di sini, DI DALAM cabang pengguna yang sudah masuk, supaya
+            ia hanya muncul sesudah sesi benar-benar ada. Menaruhnya di akar
+            akan membuatnya sempat berkedip saat aplikasi masih memulihkan
+            sesi, dan kedipan itu justru terlihat seperti aplikasi rusak.
+
+            Penandanya datang dari server (`mustChangePassword` di respons
+            login), bukan dihitung di klien. Klien tidak tahu kapan kata sandi
+            sementara diterbitkan, dan menebaknya di sini akan membuat penjaga
+            ini gampang dilewati.
+          */}
+          {(currentUserProfile as any)?.mustChangePassword === true && (
+            <WajibGantiKataSandiModal
+              onKeluar={handleLogoutRequest}
+              onGanti={async (kataSandiLama, kataSandiBaru) => {
+                const hasil = await apiRequest("/api/auth/change-password", {
+                  method: "POST",
+                  body: { currentPassword: kataSandiLama, newPassword: kataSandiBaru },
+                });
+                if (hasil?.status !== "success") {
+                  throw new Error(hasil?.message || t("gantiSandi.gagal"));
+                }
+                // Penanda dibersihkan di klien SESUDAH server memastikan
+                // berhasil; membersihkannya lebih dulu akan menutup gerbang
+                // ini walaupun penyimpanannya gagal.
+                setCurrentUserProfile({
+                  ...(currentUserProfile as any),
+                  mustChangePassword: false,
+                });
+                setCurrentUser({ ...(currentUser as any), mustChangePassword: false });
+                toast.success(t("gantiSandi.berhasil"));
+              }}
+            />
           )}
 
           {/* </main> */}
 
           {/* Modals */}
-          <Modal
+          <NewSprintModal
             isOpen={isNewSprintModalOpen}
             onClose={() => {
               setIsNewSprintModalOpen(false);
               setSelectedSprintBacklog(new Set());
             }}
-            title="Buat Fase Baru"
-          >
-            <div className="space-y-4 max-h-[80vh] overflow-y-auto pr-2">
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Nama Fase
-                </label>
-                <Input
-                  value={newSprintName}
-                  onChange={(e: any) => setNewSprintName(e.target.value)}
-                  placeholder="contoh: Fase 1 - Fondasi"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Tujuan Fase
-                </label>
-                <Textarea
-                  value={newSprintGoal}
-                  onChange={(e: any) => setNewSprintGoal(e.target.value)}
-                  placeholder="Apa yang ingin dicapai dalam sprint ini?"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-content-body mb-1">
-                    Start Date
-                  </label>
-                  <input
-                    type="date"
-                    value={newSprintStartDate}
-                    onChange={(e: any) => setNewSprintStartDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-border-subtle rounded-md text-xs focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-content-body mb-1">
-                    End Date
-                  </label>
-                  <input
-                    type="date"
-                    value={newSprintEndDate}
-                    onChange={(e: any) => setNewSprintEndDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-border-subtle rounded-md text-xs focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none"
-                  />
-                </div>
-              </div>
+            newSprintName={newSprintName}
+            setNewSprintName={setNewSprintName}
+            newSprintGoal={newSprintGoal}
+            setNewSprintGoal={setNewSprintGoal}
+            newSprintStartDate={newSprintStartDate}
+            setNewSprintStartDate={setNewSprintStartDate}
+            newSprintEndDate={newSprintEndDate}
+            setNewSprintEndDate={setNewSprintEndDate}
+            onSubmit={wrapAppSubmit("createSprint", handleCreateSprint)}
+            isSubmitting={!!isSubmitting["createSprint"]}
+          />
 
-              <Button
-                onClick={wrapAppSubmit("createSprint", handleCreateSprint)}
-                disabled={isSubmitting["createSprint"]}
-                className="w-full justify-center bg-primary hover:bg-primary-hover active:bg-primary-active text-white shadow-xs py-2.5 rounded-md font-medium text-xs cursor-pointer"
-              >
-                Create Phase & Assign Tasks
-              </Button>
-            </div>
-          </Modal>
-
-          <Modal
+          <EditSprintModal
             isOpen={isEditSprintModalOpen}
             onClose={() => setIsEditSprintModalOpen(false)}
-            title="Edit Phase"
-            maxWidth="max-w-xl"
-          >
-            {editingSprint && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                    Name
-                  </label>
-                  <Input
-                    value={editingSprint.name}
-                    onChange={(e: any) =>
-                      setEditingSprint({ ...editingSprint, name: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                    Goal
-                  </label>
-                  <Textarea
-                    value={editingSprint.goal}
-                    onChange={(e: any) =>
-                      setEditingSprint({ ...editingSprint, goal: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                    Status
-                  </label>
-                  <select
-                    value={editingSprint.status}
-                    onChange={(e: any) =>
-                      setEditingSprint({
-                        ...editingSprint,
-                        status: e.target.value as "planned" | "active" | "completed",
-                      })
-                    }
-                    className="w-full px-4 py-2 border border-border-subtle rounded-lg text-sm bg-surface"
-                  >
-                    <option value="planned">Planned</option>
-                    <option value="active">Active</option>
-                    <option value="completed">Completed</option>
-                  </select>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                      Start Date
-                    </label>
-                    <input
-                      type="date"
-                      value={
-                        editingSprint.startDate
-                          ? typeof editingSprint.startDate === "string"
-                            ? editingSprint.startDate
-                            : format(ensureDate(editingSprint.startDate), "yyyy-MM-dd")
-                          : ""
-                      }
-                      onChange={(e: any) =>
-                        setEditingSprint({
-                          ...editingSprint,
-                          startDate: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-2 border border-border-subtle rounded-lg text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                      End Date
-                    </label>
-                    <input
-                      type="date"
-                      value={
-                        editingSprint.endDate
-                          ? typeof editingSprint.endDate === "string"
-                            ? editingSprint.endDate
-                            : format(ensureDate(editingSprint.endDate), "yyyy-MM-dd")
-                          : ""
-                      }
-                      onChange={(e: any) =>
-                        setEditingSprint({
-                          ...editingSprint,
-                          endDate: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-2 border border-border-subtle rounded-lg text-sm"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                    Status
-                  </label>
-                  <select
-                    value={editingSprint.status}
-                    onChange={(e: any) =>
-                      setEditingSprint({
-                        ...editingSprint,
-                        status: e.target.value as any,
-                      })
-                    }
-                    className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium outline-none"
-                  >
-                    <option value="planned">Planned</option>
-                    <option value="active">Active</option>
-                    <option value="completed">Completed</option>
-                  </select>
-                </div>
+            editingSprint={editingSprint}
+            setEditingSprint={setEditingSprint}
+            onSubmit={wrapAppSubmit("updateSprint", handleUpdateSprint)}
+            isSubmitting={!!isSubmitting["updateSprint"]}
+          />
 
-                <div className="flex gap-3 pt-4 border-t border-gray-50">
-                  <Button
-                    variant="secondary"
-                    onClick={() => setIsEditSprintModalOpen(false)}
-                    className="flex-1 justify-center"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={wrapAppSubmit("updateSprint", handleUpdateSprint)}
-                    disabled={isSubmitting["updateSprint"]}
-                    className="flex-1 justify-center bg-primary hover:bg-primary-hover active:bg-primary-active text-white shadow-xs rounded-md text-xs font-medium py-2 cursor-pointer"
-                  >
-                    Save Changes
-                  </Button>
-                </div>
-              </div>
-            )}
-          </Modal>
-
-          <Modal
+          <NewProjectModal
             isOpen={isNewProjectModalOpen}
             onClose={() => setIsNewProjectModalOpen(false)}
-            title="Create New Project"
-          >
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Project Name
-                </label>
-                <Input
-                  value={newProjectName}
-                  onChange={(e: any) => setNewProjectName(e.target.value)}
-                  placeholder="e.g. Website Redesign"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Project Key (Short)
-                </label>
-                <Input
-                  value={newProjectKey}
-                  onChange={(e: any) => setNewProjectKey(e.target.value.toUpperCase())}
-                  placeholder="e.g. KAN"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Description
-                </label>
-                <textarea
-                  value={newProjectDescription}
-                  onChange={(e) => setNewProjectDescription(e.target.value)}
-                  className="w-full border border-border-subtle rounded-lg p-2 text-sm"
-                  placeholder="Describe this project..."
-                  rows={3}
-                />
-              </div>
-              <Button
-                onClick={wrapAppSubmit("createProject", handleCreateProject)}
-                disabled={isSubmitting["createProject"]}
-                className="w-full justify-center"
-              >
-                Create Project
-              </Button>
-            </div>
-          </Modal>
+            newProjectName={newProjectName}
+            setNewProjectName={setNewProjectName}
+            newProjectKey={newProjectKey}
+            setNewProjectKey={setNewProjectKey}
+            newProjectDescription={newProjectDescription}
+            setNewProjectDescription={setNewProjectDescription}
+            onSubmit={wrapAppSubmit("createProject", handleCreateProject)}
+            isSubmitting={!!isSubmitting["createProject"]}
+          />
 
           {/* Keyboard Shortcuts Modal */}
           <KeyboardShortcutsModal
@@ -3971,479 +4566,74 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
             setIsShortcutsModalOpen={setIsShortcutsModalOpen}
           />
 
-          <Modal
+          <NewTaskModal
             isOpen={isNewTaskModalOpen}
             onClose={() => setIsNewTaskModalOpen(false)}
-            title="Add New Issue"
-            maxWidth="max-w-3xl"
-          >
-            <div className="space-y-4">
-              {/* Group 1: Basic Info */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Issue Title
-                  </label>
-                  <Input
-                    value={newTaskTitle}
-                    onChange={(e: any) => setNewTaskTitle(e.target.value)}
-                    placeholder="What needs to be done?"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-content-body mb-1">Type</label>
-                    <select
-                      value={newTaskType}
-                      onChange={(e: any) => setNewTaskType(e.target.value)}
-                      className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                    >
-                      {masterData.filter((m) => m.type === "issue_type").length > 0 ? (
-                        masterData
-                          .filter((m) => m.type === "issue_type")
-                          .map((t, idx) => (
-                            <option
-                              key={t.id ? `it-${t.id}-${idx}` : `it-${idx}`}
-                              value={t.label.toLowerCase()}
-                            >
-                              {t.label}
-                            </option>
-                          ))
-                      ) : (
-                        <>
-                          <option value="epic">Epic</option>
-                          <option value="task">Task</option>
-                          <option value="subtask">Subtask</option>
-                          <option value="bug">Bug</option>
-                          <option value="meeting">Meeting</option>
-                          <option value="document">Document</option>
-                          <option value="approval">Approval</option>
-                        </>
-                      )}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-content-body mb-1">
-                      Sprint
-                    </label>
-                    <select
-                      value={newTaskSprintId}
-                      onChange={(e: any) => setNewTaskSprintId(e.target.value)}
-                      className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                    >
-                      <option value="">Backlog</option>
-                      {sprints.map((s, idx) => (
-                        <option key={s.id ? `sp-${s.id}-${idx}` : `sp-${idx}`} value={s.id}>
-                          {s.name} ({s.status})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Initial Status
-                </label>
-                <StyledDropdown
-                  value={newTaskStatus}
-                  onChange={(val) => setNewTaskStatus(val)}
-                  options={masterData
-                    .filter((d) => d.type === "status")
-                    .map((d) => ({
-                      id: d.label,
-                      label: d.label,
-                      icon: d.icon,
-                      color: d.color,
-                    }))}
-                  type="status"
-                  masterData={masterData}
-                />
-              </div>
-              {newTaskType === "subtask" && (
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Parent Task / Epic
-                  </label>
-                  <select
-                    value={newTaskParentId}
-                    onChange={(e: any) => setNewTaskParentId(e.target.value)}
-                    className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                  >
-                    <option value="">Select Parent...</option>
-                    {tasks
-                      .filter((t) => t.type !== "subtask")
-                      .map((t, idx) => (
-                        <option key={t.id ? `pt-${t.id}-${idx}` : `pt-${idx}`} value={t.id}>
-                          {t.key}: {t.title}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-              )}
-              {/* Group 2: Assignment & Categorization */}
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border-faint">
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Priority
-                  </label>
-                  <StyledDropdown
-                    value={newTaskPriority}
-                    onChange={(val) => setNewTaskPriority(val)}
-                    options={masterData
-                      .filter((d) => d.type === "priority")
-                      .map((d) => ({
-                        id: d.label,
-                        label: d.label,
-                        icon: d.icon,
-                        color: d.color,
-                      }))}
-                    type="priority"
-                    masterData={masterData}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Category
-                  </label>
-                  <StyledDropdown
-                    value={newTaskCategory}
-                    onChange={(val) => setNewTaskCategory(val)}
-                    options={[
-                      { id: "none", label: "" },
-                      ...masterData.filter((d) => d.type === "category"),
-                    ]}
-                    type="category"
-                    masterData={masterData}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">Assignee</label>
-                <select
-                  value={newTaskAssigneeId}
-                  onChange={(e: any) => setNewTaskAssigneeId(e.target.value)}
-                  className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                >
-                  <option value="">Unassigned</option>
-                  {projectMembers.map((m, idx) => (
-                    <option key={m?.uid ? `pm-${m.uid}-${idx}` : `pm-${idx}`} value={m?.uid}>
-                      {m?.displayName || m?.email || "Anggota Tim"}
-                    </option>
-                  ))}
-                  {selectedProject?.pendingInvites?.map((email, idx) => (
-                    <option key={email ? `pi-${email}-${idx}` : `pi-${idx}`} value={email}>
-                      {email} (Pending)
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">Release</label>
-                <StyledDropdown
-                  value={newTaskRelease}
-                  onChange={(val) => setNewTaskRelease(val)}
-                  options={[
-                    { id: "none", label: "" },
-                    ...masterData
-                      .filter((d) => d.type === "release")
-                      .sort((a, b) => (a.order || 0) - (b.order || 0)),
-                  ]}
-                  type="release"
-                  masterData={masterData}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Story Points
-                  </label>
-                  <Input
-                    type="number"
-                    value={newTaskStoryPoints || ""}
-                    onChange={(e: any) => setNewTaskStoryPoints(parseInt(e.target.value) || 0)}
-                    placeholder="e.g. 5"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Labels (comma separated)
-                  </label>
-                  <Input
-                    value={newTaskLabels}
-                    onChange={(e: any) => setNewTaskLabels(e.target.value)}
-                    placeholder="e.g. frontend, bug"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Business Value
-                  </label>
-                  <select
-                    value={newTaskBusinessValue}
-                    onChange={(e: any) => setNewTaskBusinessValue(e.target.value)}
-                    className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                  >
-                    <option value="">Not Set</option>
-                    <option value="critical">Critical</option>
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
-                    <option value="low">Low</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    System Risk
-                  </label>
-                  <select
-                    value={newTaskProjectRisk}
-                    onChange={(e: any) => setNewTaskProjectRisk(e.target.value)}
-                    className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                  >
-                    <option value="">Not Set</option>
-                    <option value="high">High Risk</option>
-                    <option value="medium">Medium Risk</option>
-                    <option value="low">Low Risk</option>
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Environment
-                </label>
-                <StyledDropdown
-                  value={newTaskEnvironment}
-                  onChange={(val) => setNewTaskEnvironment(val)}
-                  options={[
-                    { id: "none", label: "None" },
-                    ...masterData.filter((d) => d.type === "environment"),
-                  ]}
-                  type="environment"
-                  masterData={masterData}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Figma URL
-                </label>
-                <Input
-                  type="url"
-                  value={newTaskFigmaUrl}
-                  onChange={(e: any) => setNewTaskFigmaUrl(e.target.value)}
-                  placeholder="https://figma.com/..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Acceptance Criteria
-                </label>
-                <textarea
-                  value={newTaskAcceptanceCriteria}
-                  onChange={(e: any) => setNewTaskAcceptanceCriteria(e.target.value)}
-                  placeholder="What are the conditions for completion?"
-                  className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                  rows={3}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Description
-                </label>
-                <textarea
-                  value={newTaskDescription}
-                  onChange={(e: any) => setNewTaskDescription(e.target.value)}
-                  placeholder="Add description..."
-                  className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                  rows={4}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Attachments
-                </label>
-                <input
-                  type="file"
-                  multiple
-                  onChange={(e: any) => {
-                    const files = Array.from(e.target.files || []) as File[];
-                    const validFiles: File[] = [];
-                    for (const f of files) {
-                      const check = validateFileClient(f);
-                      if (!check.valid) {
-                        toast.error(
-                          check.error ||
-                            "Gagal Mengunggah Dokumen: Format file tidak didukung atau ukuran melebihi batas maksimum (Max 10MB)."
-                        );
-                      } else {
-                        validFiles.push(f);
-                      }
-                    }
-                    setNewTaskAttachments(validFiles);
-                  }}
-                  className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Start Date
-                  </label>
-                  <Input
-                    type="date"
-                    value={newTaskStartDate}
-                    onChange={(e: any) => setNewTaskStartDate(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    End Date
-                  </label>
-                  <Input
-                    type="date"
-                    value={newTaskEndDate}
-                    onChange={(e: any) => setNewTaskEndDate(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Due Date
-                  </label>
-                  <Input
-                    type="date"
-                    value={newTaskDueDate}
-                    onChange={(e: any) => setNewTaskDueDate(e.target.value)}
-                  />
-                </div>
-              </div>
-              <Button
-                onClick={wrapAppSubmit("createTask", handleCreateTask)}
-                disabled={isSubmitting["createTask"]}
-                className="w-full justify-center"
-              >
-                Create Issue
-              </Button>
-            </div>
-          </Modal>
+            newTaskTitle={newTaskTitle}
+            setNewTaskTitle={setNewTaskTitle}
+            newTaskType={newTaskType}
+            setNewTaskType={setNewTaskType}
+            newTaskSprintId={newTaskSprintId}
+            setNewTaskSprintId={setNewTaskSprintId}
+            newTaskStatus={newTaskStatus}
+            setNewTaskStatus={setNewTaskStatus}
+            newTaskParentId={newTaskParentId}
+            setNewTaskParentId={setNewTaskParentId}
+            newTaskPriority={newTaskPriority}
+            setNewTaskPriority={setNewTaskPriority}
+            newTaskCategory={newTaskCategory}
+            setNewTaskCategory={setNewTaskCategory}
+            newTaskAssigneeId={newTaskAssigneeId}
+            setNewTaskAssigneeId={setNewTaskAssigneeId}
+            newTaskRelease={newTaskRelease}
+            setNewTaskRelease={setNewTaskRelease}
+            newTaskStoryPoints={newTaskStoryPoints}
+            setNewTaskStoryPoints={setNewTaskStoryPoints}
+            newTaskLabels={newTaskLabels}
+            setNewTaskLabels={setNewTaskLabels}
+            newTaskBusinessValue={newTaskBusinessValue}
+            setNewTaskBusinessValue={setNewTaskBusinessValue}
+            newTaskProjectRisk={newTaskProjectRisk}
+            setNewTaskProjectRisk={setNewTaskProjectRisk}
+            newTaskEnvironment={newTaskEnvironment}
+            setNewTaskEnvironment={setNewTaskEnvironment}
+            newTaskFigmaUrl={newTaskFigmaUrl}
+            setNewTaskFigmaUrl={setNewTaskFigmaUrl}
+            newTaskAcceptanceCriteria={newTaskAcceptanceCriteria}
+            setNewTaskAcceptanceCriteria={setNewTaskAcceptanceCriteria}
+            newTaskDescription={newTaskDescription}
+            setNewTaskDescription={setNewTaskDescription}
+            setNewTaskAttachments={setNewTaskAttachments}
+            newTaskStartDate={newTaskStartDate}
+            setNewTaskStartDate={setNewTaskStartDate}
+            newTaskEndDate={newTaskEndDate}
+            setNewTaskEndDate={setNewTaskEndDate}
+            newTaskDueDate={newTaskDueDate}
+            setNewTaskDueDate={setNewTaskDueDate}
+            masterData={masterData}
+            sprints={sprints}
+            tasks={tasks}
+            projectMembers={projectMembers}
+            selectedProject={selectedProject}
+            onSubmit={wrapAppSubmit("createTask", handleCreateTask)}
+            isSubmitting={!!isSubmitting["createTask"]}
+          />
 
-          <Modal
+          <EditProjectModal
             isOpen={isEditProjectModalOpen}
             onClose={() => setIsEditProjectModalOpen(false)}
-            title="Edit Project"
-            maxWidth="max-w-2xl"
-          >
-            {editingProject && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Project Name
-                  </label>
-                  <Input
-                    value={editingProject.name ?? ""}
-                    onChange={(e: any) =>
-                      setEditingProject({
-                        ...editingProject,
-                        name: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Project Key
-                  </label>
-                  <Input
-                    value={editingProject.key ?? ""}
-                    onChange={(e: any) =>
-                      setEditingProject({
-                        ...editingProject,
-                        key: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    value={editingProject.description || ""}
-                    onChange={(e) =>
-                      setEditingProject({
-                        ...editingProject,
-                        description: e.target.value,
-                      })
-                    }
-                    className="w-full border border-border-subtle rounded-lg p-2 text-sm"
-                    placeholder="Describe project..."
-                    rows={3}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-content-body mb-1">
-                      Status
-                    </label>
-                    <select
-                      value={editingProject.status || "Active"}
-                      onChange={(e) =>
-                        setEditingProject({
-                          ...editingProject,
-                          status: e.target.value as any,
-                        })
-                      }
-                      className="w-full border border-border-subtle rounded-lg p-2 text-sm"
-                    >
-                      <option value="Active">Active</option>
-                      <option value="On Hold">On Hold</option>
-                      <option value="Completed">Completed</option>
-                      <option value="Archived">Archived</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-content-body mb-1">
-                      ID (Ref)
-                    </label>
-                    <div className="px-3 py-2 bg-surface-sunken rounded-lg text-sm text-content-muted font-mono border border-border-faint italic">
-                      #{editingProject.id.slice(-6).toUpperCase()}
-                    </div>
-                  </div>
-                </div>
-                <div className="pt-2">
-                  <Button
-                    onClick={wrapAppSubmit("updateProject", handleUpdateProject)}
-                    disabled={isSubmitting["updateProject"]}
-                    className="w-full justify-center"
-                  >
-                    Save Changes
-                  </Button>
-                </div>
-
-                {hasPermission(
-                  effectiveRole,
-                  "configuration",
-                  "delete",
-                  (currentUser?.uid || user?.uid) === editingProject.ownerId,
-                  currentUserProfile?.permissions
-                ) && (
-                  <div className="mt-6 pt-6 border-t border-red-50">
-                    <p className="text-xs sm:text-[10px] font-medium text-red-400 uppercase tracking-widest mb-3">
-                      Danger Zone
-                    </p>
-                    <Button
-                      onClick={() => deleteProject(editingProject)}
-                      variant="danger"
-                      className="w-full justify-center"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      Terminate Project (Permanent Delete)
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
-          </Modal>
+            editingProject={editingProject}
+            setEditingProject={setEditingProject}
+            onSubmit={wrapAppSubmit("updateProject", handleUpdateProject)}
+            isSubmitting={!!isSubmitting["updateProject"]}
+            effectiveRole={effectiveRole}
+            currentUser={currentUser}
+            user={user}
+            currentUserProfile={currentUserProfile}
+            hasPermission={hasPermission}
+            deleteProject={deleteProject}
+            masterData={masterData}
+          />
 
           {confirmAction?.isOpen && (
             <ConfirmationModal
@@ -4489,6 +4679,8 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                   confirmAction?.title?.toLowerCase().includes("terminate")
                 )
               }
+              iconSrc={confirmAction?.iconSrc}
+              iconColors={confirmAction?.iconColors}
             />
           )}
 
@@ -4524,6 +4716,13 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                 );
               }
             }}
+          />
+
+          {/* Mobile Bottom Navigation Bar (< 768px) */}
+          <MobileBottomNav
+            currentView={currentView}
+            setCurrentView={setCurrentView}
+            onOpenNewTask={() => setIsNewTaskModalOpen(true)}
           />
         </div>
       </div>

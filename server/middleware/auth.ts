@@ -36,9 +36,11 @@ export const verifyGlobalAdmin = (req: any, res: Response, next: NextFunction) =
   if (req.user?.role === "admin") {
     next();
   } else {
-    res
-      .status(403)
-      .json({ status: "error", message: "Akses ditolak: Hanya Global Admin yang memiliki izin." });
+    res.status(403).json({
+      status: "error",
+      code: "srv.akses_ditolak_hanya_global",
+      message: "Akses ditolak: Hanya Global Admin yang memiliki izin.",
+    });
   }
 };
 
@@ -48,6 +50,7 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
   if (!authHeader) {
     return res.status(401).json({
       status: "error",
+      code: "srv.akses_ditolak_token_autentikasi",
       message: "Akses ditolak: Token autentikasi tidak ditemukan.",
     });
   }
@@ -59,6 +62,7 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
     if (!token) {
       return res.status(401).json({
         status: "error",
+        code: "srv.format_token_tidak_valid",
         message: "Format token tidak valid.",
       });
     }
@@ -67,54 +71,110 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
       if (err) {
         return res.status(401).json({
           status: "error",
+          code: "srv.sesi_anda_telah_berakhir",
           message: "Sesi Anda telah berakhir atau token tidak valid. Silakan login kembali.",
         });
       }
 
-      // Single login concurrent session check (Database-backed for Serverless & Multi-instance compatibility - NO BYPASS)
-      const userId = user.id || user.uid;
+      const safeToken = String(token).slice(0, 512);
 
-      if (userId) {
-        db.query("SELECT currentSessionToken FROM Users WHERE id = ?", [userId.toString()])
-          .then(([rows]: any) => {
-            if (rows && rows.length > 0) {
-              const currentToken = rows[0].currentSessionToken;
-              if (currentToken && currentToken !== token) {
-                return res.status(401).json({
-                  status: "error",
-                  message:
-                    "Sesi Anda telah diakhiri karena akun Anda telah masuk di perangkat/browser lain.",
-                });
+      // #347 — denylist TokenBlacklist SEBELUM cek sesi-tunggal.
+      // Baca via db.query (sama pola sesi); tulis denylist lewat auth.repository.
+      // Gagal baca → fail-open; currentSessionToken tetap penahan utama.
+      const lanjutSetelahDenylist = () => {
+        // Single login concurrent session check (Database-backed for Serverless & Multi-instance compatibility - NO BYPASS)
+        const userId = user.id || user.uid;
+
+        if (userId) {
+          db.query(
+            'SELECT "currentSessionToken", role, status FROM Users WHERE id = ? OR uid = ?',
+            [userId.toString(), userId.toString()]
+          )
+            .then(([rows]: any) => {
+              if (rows && rows.length > 0) {
+                const dbUser = rows[0];
+                const currentToken = dbUser.currentSessionToken;
+                if (!currentToken || currentToken !== token) {
+                  return res.status(401).json({
+                    status: "error",
+                    code: "srv.sesi_anda_telah_diakhiri",
+                    message:
+                      "Sesi Anda telah diakhiri oleh Administrator atau Anda telah masuk di perangkat/browser lain.",
+                  });
+                }
+
+                // Tolak akun yang dinonaktifkan atau belum aktif (status sah: 'approved' atau 'active')
+                const statusLower = dbUser.status ? String(dbUser.status).toLowerCase() : "";
+                if (statusLower && statusLower !== "active" && statusLower !== "approved") {
+                  return res.status(403).json({
+                    status: "error",
+                    code: "srv.akses_ditolak_akun_anda",
+                    message: "Akses ditolak: Akun Anda dinonaktifkan atau belum aktif.",
+                  });
+                }
+
+                // Sinkronisasi peran real-time dari database ke req.user (§19.28 / #92)
+                req.user = {
+                  ...user,
+                  role: dbUser.role || user.role,
+                  status: dbUser.status || user.status,
+                };
+                return next();
               }
-            }
-            req.user = user;
-            next();
-          })
-          .catch((dbErr: any) => {
-            console.error(
-              "[AUTH MIDDLEWARE] Gagal memverifikasi token sesi dari database, fallback ke in-memory check:",
-              dbErr
-            );
-            // Fallback to in-memory activeUserSessions if DB fails
-            const activeSession = activeUserSessions.get(userId.toString());
-            if (activeSession && activeSession.token !== token) {
+
               return res.status(401).json({
                 status: "error",
-                message:
-                  "Sesi Anda telah diakhiri karena akun Anda telah masuk di perangkat/browser lain.",
+                code: "srv.akses_ditolak_pengguna_tidak",
+                message: "Akses ditolak: Pengguna tidak ditemukan.",
               });
-            }
-            req.user = user;
-            next();
-          });
-      } else {
-        req.user = user;
-        next();
-      }
+            })
+            .catch((dbErr: any) => {
+              console.error(
+                "[AUTH MIDDLEWARE] Gagal memverifikasi token sesi dari database, fallback ke in-memory check:",
+                dbErr
+              );
+              // Fallback to in-memory activeUserSessions if DB fails
+              const activeSession = activeUserSessions.get(userId.toString());
+              if (!activeSession || activeSession.token !== token) {
+                return res.status(401).json({
+                  status: "error",
+                  code: "srv.sesi_anda_telah_diakhiri",
+                  message:
+                    "Sesi Anda telah diakhiri oleh Administrator atau Anda telah masuk di perangkat/browser lain.",
+                });
+              }
+              req.user = user;
+              next();
+            });
+        } else {
+          req.user = user;
+          next();
+        }
+      };
+
+      db.query(
+        `SELECT 1 AS hit FROM "TokenBlacklist" WHERE token = ? AND "expiresAt" > NOW() LIMIT 1`,
+        [safeToken]
+      )
+        .then(([rows]: any) => {
+          if (rows && rows.length > 0) {
+            return res.status(401).json({
+              status: "error",
+              code: "srv.token_dicabut",
+              message: "Sesi Anda telah diakhiri. Silakan login kembali.",
+            });
+          }
+          lanjutSetelahDenylist();
+        })
+        .catch((blErr: any) => {
+          console.error("[AUTH MIDDLEWARE] Gagal memeriksa TokenBlacklist:", blErr);
+          lanjutSetelahDenylist();
+        });
     });
   } else {
     res.status(401).json({
       status: "error",
+      code: "srv.akses_ditolak_format_authorization",
       message: "Akses ditolak: Format Authorization bukan Bearer.",
     });
   }

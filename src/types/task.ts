@@ -8,6 +8,9 @@ export interface Attachment {
   name: string;
   url: string;
   type: string; // 'link' | 'image' | 'pdf' | 'doc' | 'file'
+  filename?: string;
+  originalName?: string;
+  size?: number;
   fileRef?: string; // Optional path in storage if it's an uploaded file
   createdAt: any;
   uploadedByUserId?: string;
@@ -17,14 +20,14 @@ export interface Attachment {
 export interface LinkedTask {
   id: string;
   targetTaskId: string;
-  relationType: 'blocks' | 'is_blocked_by' | 'relates_to' | 'clones' | 'is_cloned_by';
+  relationType: "blocks" | "is_blocked_by" | "relates_to" | "clones" | "is_cloned_by";
   createdAt: any;
 }
 
 export interface Task {
   id: string;
   projectId: string;
-  sprintId?: string; // Link task to a sprint
+  sprintId?: string | null; // Link task to a sprint
   key: string; // e.g. "KAN-29"
   title: string;
   description?: string;
@@ -36,8 +39,9 @@ export interface Task {
   externalLinks?: { id: string; title: string; url: string; createdAt: any }[];
   attachments?: Attachment[];
   linkedTasks?: LinkedTask[];
+  commentsCount?: number;
   status: string;
-  type: 'epic' | 'task' | 'subtask' | 'bug' | 'meeting' | 'document' | 'approval';
+  type: "epic" | "task" | "subtask" | "bug" | "meeting" | "document" | "approval";
   parentId?: string; // ID of the parent task/epic (Epic Link)
   assigneeId?: string;
   assignees?: string[];
@@ -46,6 +50,8 @@ export interface Task {
   priority: string; // Now dynamic from master data
   category?: string;
   release?: string;
+  /** FK ke tabel Milestones — terpisah dari MasterData `release`. */
+  milestoneId?: string | null;
   resolution?: string;
   businessValue?: string;
   projectRisk?: string;
@@ -77,6 +83,7 @@ export interface ActivityLog {
   userId: string;
   action: string;
   details: string;
+  taskId?: string | null;
   createdAt: any;
 }
 
@@ -84,7 +91,7 @@ export interface AuditLog {
   id: string;
   userId: string;
   projectId: string | null;
-  actionType: 'CREATE' | 'UPDATE' | 'DELETE';
+  actionType: "CREATE" | "UPDATE" | "DELETE";
   entityName: string;
   entityId: string;
   oldValues: any;

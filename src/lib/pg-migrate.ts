@@ -12,7 +12,7 @@ export async function runMigrations(pool: Pool): Promise<void> {
   console.log("🚀 [PG-MIGRATE] Memulai migrasi schema ke Neon PostgreSQL...");
 
   try {
-    await client.query("BEGIN");
+    // Non-transactional DDL execution to prevent table locking on startup
 
     // ── Users ───────────────────────────────────────────────────────────────
     await client.query(`
@@ -34,8 +34,14 @@ export async function runMigrations(pool: Pool): Promise<void> {
         "avatarUrl"       TEXT,
         "photoUrl"        TEXT,
         "photoURL"        TEXT,
+        "coverUrl"        TEXT,
         permissions       TEXT,
         "currentSessionToken" TEXT,
+        -- Item #296 — kata sandi sementara dari alur lupa-password.
+        -- Kolom tempPasswordExpiresAt bernilai NULL berarti kata sandi tetap,
+        -- sehingga baris lama otomatis benar tanpa migrasi data.
+        "tempPasswordExpiresAt" TIMESTAMP,
+        "mustChangePassword"    BOOLEAN NOT NULL DEFAULT false,
         "createdAt"       TIMESTAMP DEFAULT NOW(),
         "updatedAt"       TIMESTAMP DEFAULT NOW()
       );
@@ -46,6 +52,7 @@ export async function runMigrations(pool: Pool): Promise<void> {
       'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "photoURL" TEXT',
       'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "avatarUrl" TEXT',
       'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "avatar_url" TEXT',
+      'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "coverUrl" TEXT',
       'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "permissions" TEXT',
       'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "currentSessionToken" TEXT',
       'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "phone" VARCHAR(50)',
@@ -54,6 +61,11 @@ export async function runMigrations(pool: Pool): Promise<void> {
       'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "position" VARCHAR(255)',
       'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "nama_lengkap" VARCHAR(255)',
       'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "displayName" VARCHAR(255)',
+      // Item #296 — lihat komentar di CREATE TABLE di atas.
+      'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "tempPasswordExpiresAt" TIMESTAMP',
+      'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "mustChangePassword" BOOLEAN NOT NULL DEFAULT false',
+      // #345 — preferensi minimal: reminder due date in-app
+      'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "notifDueReminder" BOOLEAN NOT NULL DEFAULT true',
     ];
     for (const stmt of userAlters) {
       try {
@@ -78,13 +90,35 @@ export async function runMigrations(pool: Pool): Promise<void> {
         role_type         VARCHAR(20),
         "createdAt"       TIMESTAMP DEFAULT NOW()
       );
+      -- #82 — kode peran yang STABIL. Nilai inilah yang disimpan ke
+      -- Users.role dan ProjectMembers.role, bukan labelnya. Dengan begitu
+      -- mengganti nama tampilan sebuah peran di Master Data tidak merusak
+      -- otorisasi, dan sebaliknya otorisasi tidak memaksa label tetap kaku.
+      ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS code VARCHAR(50);
       ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS color VARCHAR(50);
       ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS icon VARCHAR(50);
       ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS description TEXT;
       ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS "fieldType" VARCHAR(50);
       ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS "dropdownOptions" JSONB;
       ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS role_type VARCHAR(20);
+      -- #313 — status terminal (Done/UAT/…) tanpa hardcode string di aplikasi
+      ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS "isTerminal" BOOLEAN DEFAULT FALSE;
     `);
+
+    // Seed flag terminal untuk status yang sudah ada (UAT = terminal, keputusan #313)
+    try {
+      await client.query(`
+        UPDATE "MasterData"
+        SET "isTerminal" = TRUE
+        WHERE type = 'status'
+          AND (
+            LOWER(COALESCE(code, '')) IN ('done','selesai','uat','completed','resolved','closed')
+            OR LOWER(label) IN ('done','selesai','uat','completed','resolved','closed')
+          )
+      `);
+    } catch (e: any) {
+      console.warn("[PG-MIGRATE] isTerminal seed warning:", e.message);
+    }
 
     // ── Projects ────────────────────────────────────────────────────────────
     await client.query(`
@@ -103,6 +137,13 @@ export async function runMigrations(pool: Pool): Promise<void> {
       );
       ALTER TABLE "Projects" ADD COLUMN IF NOT EXISTS category VARCHAR(50) DEFAULT 'Agile';
     `);
+    // #311 — satukan casing metodologi lama (Waterfall → WATERFALL) di baris yang sudah ada.
+    await client.query(`
+      UPDATE "Projects"
+         SET category = UPPER(TRIM(category))
+       WHERE category IS NOT NULL
+         AND category <> UPPER(TRIM(category));
+    `);
 
     // ── ProjectMembers ──────────────────────────────────────────────────────
     await client.query(`
@@ -110,7 +151,7 @@ export async function runMigrations(pool: Pool): Promise<void> {
         "projectId"     VARCHAR(36) NOT NULL,
         "userId"        VARCHAR(36) NOT NULL,
         role            VARCHAR(50) DEFAULT 'developer',
-        "parentAdminId" VARCHAR(36),
+        -- #81 - kolom parentAdminId DIBUANG: ditulis, tidak pernah dibaca.
         PRIMARY KEY ("projectId", "userId")
       );
     `);
@@ -224,7 +265,10 @@ export async function runMigrations(pool: Pool): Promise<void> {
       CREATE TABLE IF NOT EXISTS "Attachments" (
         id           VARCHAR(36) PRIMARY KEY,
         "taskId"     VARCHAR(36) NOT NULL,
-        filename     VARCHAR(255),
+        -- #79 — NOT NULL menyamai production. Ini juga yang membuat #78 tidak
+        -- bisa diperbaiki hanya dengan mengganti nama tabel: kode WAJIB menulis
+        -- kolom ini.
+        filename     VARCHAR(255) NOT NULL,
         name         VARCHAR(255),
         "originalName" VARCHAR(255),
         mimetype     VARCHAR(100),
@@ -255,6 +299,34 @@ export async function runMigrations(pool: Pool): Promise<void> {
       );
     `);
 
+    // ── TaskWorkLogs (#343 MVP; #469 selaras camelCase live Neon) ───────────
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "TaskWorkLogs" (
+        id           VARCHAR(36) PRIMARY KEY,
+        "taskId"     VARCHAR(36) NOT NULL,
+        "userId"     VARCHAR(36),
+        hours        DOUBLE PRECISION NOT NULL DEFAULT 0,
+        note         TEXT,
+        "loggedAt"   TIMESTAMP DEFAULT NOW(),
+        "createdAt"  TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_task_work_logs_task ON "TaskWorkLogs" ("taskId");
+    `);
+
+    // ── NotificationDeliveryFailures (#345) — log gagal kirim in-app ──
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "NotificationDeliveryFailures" (
+        id             VARCHAR(36) PRIMARY KEY,
+        channel        VARCHAR(32) NOT NULL DEFAULT 'in_app',
+        context        VARCHAR(64),
+        recipient_id   VARCHAR(36),
+        related_id     VARCHAR(36),
+        error_message  TEXT,
+        created_at     TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_notif_fail_created ON "NotificationDeliveryFailures" (created_at DESC);
+    `);
+
     // ── Comments ────────────────────────────────────────────────────────────
     await client.query(`
       CREATE TABLE IF NOT EXISTS "Comments" (
@@ -265,6 +337,8 @@ export async function runMigrations(pool: Pool): Promise<void> {
         "createdAt" TIMESTAMP DEFAULT NOW(),
         "updatedAt" TIMESTAMP DEFAULT NOW()
       );
+      ALTER TABLE "Comments" ADD COLUMN IF NOT EXISTS "parentId" VARCHAR(36);
+      CREATE INDEX IF NOT EXISTS idx_comments_parent ON "Comments" ("parentId");
     `);
 
     // ── TaskCustomFields ─────────────────────────────────────────────────────
@@ -379,7 +453,8 @@ export async function runMigrations(pool: Pool): Promise<void> {
       CREATE TABLE IF NOT EXISTS "DiscussionPoints" (
         id                    VARCHAR(36) PRIMARY KEY,
         "meetingId"           VARCHAR(36) NOT NULL,
-        content               TEXT DEFAULT '',
+        -- #79 — NOT NULL menyamai production.
+        content               TEXT NOT NULL DEFAULT '',
         "parentPointId"       VARCHAR(36),
         "authorId"            VARCHAR(36),
         "assignTo"            VARCHAR(36),
@@ -467,6 +542,7 @@ export async function runMigrations(pool: Pool): Promise<void> {
         "evidenceType"    VARCHAR(50),
         "evidenceName"    VARCHAR(255),
         "linkedBugKey"    VARCHAR(50),
+        "linkedTaskId"    VARCHAR(36),
         "commentsList"    JSONB,
         evidences         JSONB,
         "modulId"         VARCHAR(36),
@@ -476,12 +552,28 @@ export async function runMigrations(pool: Pool): Promise<void> {
     await client.query(
       `ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "assignedTo" VARCHAR(255);`
     );
+    // #463 — FK lunak ke Tasks.id; linkedBugKey tetap untuk tampilan/kunci isu.
+    await client.query(
+      `ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "linkedTaskId" VARCHAR(36);`
+    );
+    await client.query(`
+      UPDATE "QATestCases" q
+      SET "linkedTaskId" = t.id
+      FROM "Tasks" t
+      WHERE q."linkedTaskId" IS NULL
+        AND q."linkedBugKey" IS NOT NULL
+        AND q."linkedBugKey" <> ''
+        AND q."projectId" = t."projectId"
+        AND (q."linkedBugKey" = t."taskKey" OR q."linkedBugKey" = t.id)
+    `);
 
     // ── QATestCaseExecutionLogs ───────────────────────────────────────────────
     await client.query(`
       CREATE TABLE IF NOT EXISTS "QATestCaseExecutionLogs" (
         id                  VARCHAR(36) PRIMARY KEY,
-        "testCaseId"        VARCHAR(36),
+        -- #79 — NOT NULL menyamai production. Tanpa ini database bersih
+        -- menerima baris tanpa testCaseId, sementara production menolaknya.
+        "testCaseId"        VARCHAR(36) NOT NULL,
         "caseId"            VARCHAR(36),
         "projectId"         VARCHAR(36) NOT NULL,
         "runVersion"        INT NOT NULL DEFAULT 1,
@@ -533,6 +625,43 @@ export async function runMigrations(pool: Pool): Promise<void> {
       ALTER TABLE "Documents" ADD COLUMN IF NOT EXISTS "fileSize" BIGINT DEFAULT 0;
       ALTER TABLE "Documents" ADD COLUMN IF NOT EXISTS "fileRef" TEXT;
       ALTER TABLE "Documents" ADD COLUMN IF NOT EXISTS "fileData" TEXT;
+      ALTER TABLE "Documents" ADD COLUMN IF NOT EXISTS "canvasData" TEXT;
+
+      -- Item #144 — kategori dokumen/flowchart. Kolom "type" sudah dipakai
+      -- ganda: untuk flowchart ia penanda jenis ('flowchart'), untuk dokumen
+      -- wiki ia justru kategorinya. Akibatnya kategori flowchart tidak punya
+      -- tempat, dan pilihan pengguna di modal dibuang diam-diam.
+      ALTER TABLE "Documents" ADD COLUMN IF NOT EXISTS category VARCHAR(255);
+
+      -- Item #268 — nama tampilan pembuat, TERPISAH dari "createdBy" yang
+      -- menyimpan id. Sebelumnya backend menimpa nama yang dikirim klien
+      -- dengan id mentah, sehingga nama pembuat hilang dari data DAN
+      -- pengecekan "apakah saya pembuatnya" di frontend jadi menebak-nebak:
+      -- ia mencocokkan satu nilai ke enam field identitas sekaligus
+      -- (id/uid/username/email/name/displayName), dan gagal secara TIDAK
+      -- KONSISTEN begitu format yang tersimpan berbeda dari field yang
+      -- kebetulan ada di sesi. Dua kolom terpisah membuat keduanya punya
+      -- sumber kebenaran sendiri: id untuk otorisasi, nama untuk ditampilkan.
+      ALTER TABLE "Documents" ADD COLUMN IF NOT EXISTS "createdByName" VARCHAR(255);
+    `);
+
+    // Item #136 — payload kanvas flowchart pindah dari `description` ke kolom
+    // sendiri. Sebelumnya flowchart menumpang kolom `description`, sehingga
+    // daftar Dokumentasi (yang menampilkan description sebagai subjudul untuk
+    // SEMUA dokumen) memuntahkan JSON mentah ke layar.
+    //
+    // Backfill ini sengaja sempit: hanya baris flowchart yang description-nya
+    // benar-benar berbentuk payload kanvas. Deskripsi manusia yang kebetulan
+    // ada di baris flowchart lama tidak ikut terbawa atau terhapus.
+    //
+    // Idempoten: setelah dijalankan sekali, tidak ada lagi baris yang cocok.
+    await client.query(`
+      UPDATE "Documents"
+         SET "canvasData" = description,
+             description  = NULL
+       WHERE type = 'flowchart'
+         AND "canvasData" IS NULL
+         AND description LIKE '{%"nodes"%';
     `);
 
     // ── ai_learning_logs ──────────────────────────────────────────────────────
@@ -556,25 +685,27 @@ export async function runMigrations(pool: Pool): Promise<void> {
     // menulis ke sini. Di database yang sedang berjalan tabelnya sudah ada
     // dengan data nyata, sehingga cacatnya tidak terlihat.
     //
-    // Definisinya disalin PERSIS APA ADANYA, termasuk kolom kembarnya
-    // (`pointId` dan `point_id`, `userId` dan `user_id`, dan seterusnya).
-    // Kolom kembar itu memang keliru — kodenya menulis ke keduanya setiap kali
-    // menyimpan komentar — tetapi merapikannya menyentuh data hidup dan
-    // dikerjakan terpisah (item #47). Menyatukan sistem migrasi dulu, baru
-    // membersihkan bentuknya.
+    // #47 LANGKAH 4 — kolom kembar snake_case DIBUANG 16 Agu 2026 atas ketetapan
+    // pemilik proyek: camelCase adalah sumber kebenaran (§19.38).
+    //
+    // Urutannya sengaja: baca diseragamkan, tulis diseragamkan, jalur tulis
+    // dibuktikan lewat komentar sungguhan (baris 4 -> 5, sisi snake tetap 4),
+    // BARU definisinya dicabut di sini dan kolomnya dijatuhkan dari production
+    // lewat `npm run db:hapus-kolom-kembar`.
+    //
+    // #79 tetap berlaku: `"userId"` dan `"createdAt"` WAJIB ber-kutip. Tanpa
+    // kutip PostgreSQL melipatnya jadi userid/createdat, sementara production
+    // menyimpan versi camelCase. `pointid`, `username`, `commenttext` sengaja
+    // TANPA kutip karena production memang menyimpannya dalam huruf kecil —
+    // ketiganya lahir dari identifier tak berkutip di masa lalu (§19.39).
     await client.query(`
       CREATE TABLE IF NOT EXISTS discussion_point_comments (
         id VARCHAR(36) PRIMARY KEY,
         pointId VARCHAR(36) NOT NULL,
-        point_id VARCHAR(36),
-        userId VARCHAR(50),
-        user_id VARCHAR(50),
+        "userId" VARCHAR(50),
         userName VARCHAR(255),
-        user_name VARCHAR(255),
         commentText TEXT NOT NULL,
-        comment_text TEXT,
-        createdAt VARCHAR(50) NOT NULL,
-        created_at VARCHAR(50)
+        "createdAt" VARCHAR(50) NOT NULL
       );
     `);
 
@@ -631,6 +762,61 @@ export async function runMigrations(pool: Pool): Promise<void> {
       END $$;
     `);
 
+    // ── UserSessions (Item #212 — Monitoring Sesi & Aktivitas Pengguna) ──────
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "UserSessions" (
+        id            VARCHAR(255) PRIMARY KEY,
+        "userId"      VARCHAR(255) NOT NULL,
+        "ipAddress"   VARCHAR(255),
+        "userAgent"   TEXT,
+        browser       TEXT,
+        os            TEXT,
+        device        TEXT,
+        city          VARCHAR(255),
+        country       VARCHAR(255),
+        location      TEXT,
+        "loginAt"     TIMESTAMP DEFAULT NOW(),
+        "logoutAt"    TIMESTAMP,
+        "lastActiveAt" TIMESTAMP DEFAULT NOW(),
+        status        VARCHAR(50) DEFAULT 'ACTIVE',
+        token         TEXT,
+        "createdAt"   TIMESTAMP DEFAULT NOW(),
+        "updatedAt"   TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS "UserSessions_userId_idx" ON "UserSessions" ("userId");
+      CREATE INDEX IF NOT EXISTS "UserSessions_loginAt_idx" ON "UserSessions" ("loginAt" DESC);
+    `);
+
+    await client.query(`
+      ALTER TABLE "UserSessions" ALTER COLUMN id TYPE VARCHAR(255);
+      ALTER TABLE "UserSessions" ALTER COLUMN "userId" TYPE VARCHAR(255);
+      ALTER TABLE "UserSessions" ALTER COLUMN "ipAddress" TYPE VARCHAR(255);
+      ALTER TABLE "UserSessions" ALTER COLUMN browser TYPE TEXT;
+      ALTER TABLE "UserSessions" ALTER COLUMN os TYPE TEXT;
+      ALTER TABLE "UserSessions" ALTER COLUMN device TYPE TEXT;
+      ALTER TABLE "UserSessions" ALTER COLUMN city TYPE VARCHAR(255);
+      ALTER TABLE "UserSessions" ALTER COLUMN country TYPE VARCHAR(255);
+      ALTER TABLE "UserSessions" ALTER COLUMN location TYPE TEXT;
+    `);
+
+    await client.query(`
+      DELETE FROM "UserSessions" us
+      WHERE NOT EXISTS (SELECT 1 FROM "Users" u WHERE u.id = us."userId");
+    `);
+
+    await client.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname = 'UserSessions_userId_fkey'
+        ) THEN
+          ALTER TABLE "UserSessions"
+            ADD CONSTRAINT "UserSessions_userId_fkey"
+            FOREIGN KEY ("userId") REFERENCES "Users" (id) ON DELETE CASCADE;
+        END IF;
+      END $$;
+    `);
+
     // ── TokenBlacklist ────────────────────────────────────────────────────────
     await client.query(`
       CREATE TABLE IF NOT EXISTS "TokenBlacklist" (
@@ -639,6 +825,216 @@ export async function runMigrations(pool: Pool): Promise<void> {
         "expiresAt" TIMESTAMP NOT NULL,
         "createdAt" TIMESTAMP DEFAULT NOW()
       );
+    `);
+
+    // ── BroadcastConfig (item #193) ──────────────────────────────────────────
+    //
+    // Jadwal broadcast (hari/jam) dan daftar penerima sebelumnya hardcode di
+    // kode server (cron.schedule("0 7 * * *") + SELECT semua user), tidak ada
+    // tempat penyimpanan sama sekali sehingga panel "WhatsApp gateway" di UI
+    // tidak punya apa pun untuk dibaca/diubah. Satu baris per channel
+    // ("whatsapp"), dibuat otomatis dengan nilai default saat pertama diakses.
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "BroadcastConfig" (
+        id                 SERIAL PRIMARY KEY,
+        channel            VARCHAR(20) NOT NULL UNIQUE,
+        "scheduleDays"     VARCHAR(20) NOT NULL DEFAULT '1,2,3,4,5,6,7',
+        "scheduleTime"     VARCHAR(5) NOT NULL DEFAULT '07:00',
+        "recipientIds"     TEXT NOT NULL DEFAULT '',
+        "messageTemplate"  TEXT,
+        "updatedAt"        TIMESTAMP DEFAULT NOW()
+      );
+    `);
+    // #304 — penahan dobel di DB (bukan memori proses serverless).
+    await client.query(`
+      ALTER TABLE "BroadcastConfig"
+        ADD COLUMN IF NOT EXISTS "lastFiredKey" VARCHAR(32);
+    `);
+
+    // ── BroadcastLogs (item #501) ──────────────────────────────────────────
+    // Menyimpan log riwayat pengiriman siaran harian (WhatsApp / Email)
+    // agar panel BroadcastMonitor menampilkan waktu & status nyata (bukan mock)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "BroadcastLogs" (
+        id                SERIAL PRIMARY KEY,
+        channel           VARCHAR(20) NOT NULL,
+        "userId"          VARCHAR(128),
+        "recipientName"   VARCHAR(255),
+        "recipientTarget" VARCHAR(255),
+        status            VARCHAR(30) NOT NULL,
+        "taskCount"       INT DEFAULT 0,
+        details           TEXT,
+        "createdAt"       TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_broadcast_logs_created ON "BroadcastLogs" ("createdAt" DESC);
+    `);
+
+    // ── IntegrationSettings (item #264, #270) ─────────────────────────────────
+    //
+    // Menyimpan konfigurasi integrasi pihak ketiga (email SMTP / Resend, WhatsApp)
+    // langsung ke database PostgreSQL, menggantikan ketergantungan pada variabel
+    // lingkungan .env agar admin dapat mengonfigurasi email/domain langsung dari UI.
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "IntegrationSettings" (
+        id                SERIAL PRIMARY KEY,
+        channel           VARCHAR(20) NOT NULL UNIQUE,
+        provider          VARCHAR(50) NOT NULL DEFAULT 'smtp',
+        "smtpHost"        VARCHAR(255),
+        "smtpPort"        INT DEFAULT 465,
+        "smtpUser"        VARCHAR(255),
+        "smtpPass"        TEXT,
+        "smtpSecure"      BOOLEAN DEFAULT TRUE,
+        "senderEmail"     VARCHAR(255),
+        "senderName"      VARCHAR(255),
+        "apiKey"          TEXT,
+        "subjectTemplate" TEXT,
+        "bodyTemplate"    TEXT,
+        "updatedAt"       TIMESTAMP DEFAULT NOW()
+      );
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS provider VARCHAR(50) DEFAULT 'smtp';
+      -- Item #278: URL aplikasi dipindah dari env var APP_URL ke basis data,
+      -- supaya pergantian domain tidak lagi menuntut deploy ulang.
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "appUrl" VARCHAR(255);
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "smtpHost" VARCHAR(255);
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "smtpPort" INT DEFAULT 465;
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "smtpUser" VARCHAR(255);
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "smtpPass" TEXT;
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "smtpSecure" BOOLEAN DEFAULT TRUE;
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "senderEmail" VARCHAR(255);
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "senderName" VARCHAR(255);
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "apiKey" TEXT;
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "subjectTemplate" TEXT;
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "bodyTemplate" TEXT;
+      -- Item #279: Sisa konfigurasi operasional (SSO allowed domains, Slack webhook, CORS allowed origins, WhatsApp connection)
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "ssoAllowedDomains" TEXT;
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "slackWebhookUrl" TEXT;
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "allowedOrigins" TEXT;
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS endpoint TEXT;
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "senderNumber" VARCHAR(50);
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "deviceId" VARCHAR(100);
+    `);
+
+    // ── PENYETARAAN SCHEMA (item #79) ─────────────────────────────────────────
+    //
+    // Diukur 16 Agu 2026: 13 tabel dan 54 kolom ADA di database production tetapi
+    // TIDAK pernah dibuat migrasi ini. Arahnya satu — database selalu lebih
+    // lengkap. Artinya migrasi bukan tertinggal versi; ia belum pernah menjadi
+    // sumber kebenaran.
+    //
+    // Akibatnya nyata: `npm run db:migrate` pada database BERSIH menghasilkan
+    // schema yang kekurangan kolom yang dipakai kode secara aktif — `description`
+    // 80 rujukan, `content` 26, `expectedResult` 6, dan seterusnya. Deployment ke
+    // database baru akan rusak, dan fitur QA paling parah dengan 9 kolom hilang.
+    // Tidak ketahuan selama ini karena seluruh pengembangan memakai satu database
+    // yang sama, yang sudah lengkap sejak lama.
+    //
+    // Ditulis sebagai ADD COLUMN IF NOT EXISTS, bukan mengubah CREATE TABLE di
+    // atas. Alasannya: blok ini menjadi NO-OP di database yang sudah lengkap
+    // (production tidak tersentuh sama sekali) sekaligus memperbaiki database
+    // bersih. Mengubah CREATE TABLE tidak akan berpengaruh apa pun pada database
+    // yang tabelnya sudah ada.
+    //
+    // Kolom kembar SENGAJA ikut disalin apa adanya — `fileName` di samping
+    // `filename`, `tindakanlanjut` di samping `tindakan_lanjut`, dan seterusnya.
+    // Merapikannya adalah pekerjaan terpisah (#47, #78); menyatukan schema dan
+    // membersihkan bentuk dalam satu langkah membuat kegagalan sulit ditelusuri.
+    await client.query(`
+      ALTER TABLE "Projects" ADD COLUMN IF NOT EXISTS "department" VARCHAR(255);
+
+      ALTER TABLE "Sprints" ADD COLUMN IF NOT EXISTS "approvalstatus" VARCHAR(50);
+      ALTER TABLE "Sprints" ADD COLUMN IF NOT EXISTS "approvedby" VARCHAR(36);
+
+      ALTER TABLE "Tasks" ADD COLUMN IF NOT EXISTS "environment" VARCHAR(255);
+
+      -- Item #139 — tiga kolom yang sudah punya dropdown di Daftar Isu tetapi
+      -- tidak pernah punya tempat penyimpanan. Karena kolomnya tidak ada,
+      -- nilainya tidak bisa disimpan sama sekali; pembaruan optimistis di UI
+      -- membuatnya tampak berhasil sampai halaman dimuat ulang.
+      --
+      -- Kolom "category" di sini adalah AREA TEKNIS (Backend/Frontend/
+      -- DevOps/...) sesuai keputusan item #85, bukan duplikat "issue_type"
+      -- yang dulu dihapus dari MasterData.
+      ALTER TABLE "Tasks" ADD COLUMN IF NOT EXISTS "resolution" VARCHAR(255);
+      ALTER TABLE "Tasks" ADD COLUMN IF NOT EXISTS "release" VARCHAR(255);
+      ALTER TABLE "Tasks" ADD COLUMN IF NOT EXISTS "category" VARCHAR(255);
+
+      -- #343 — jam estimasi / aktual (logged). Tanpa kutip agar PG melipat ke
+      -- huruf kecil dan cocok dengan adapter yang tidak mengutip kolom ini.
+      ALTER TABLE "Tasks" ADD COLUMN IF NOT EXISTS estimatedHours DOUBLE PRECISION DEFAULT 0;
+      ALTER TABLE "Tasks" ADD COLUMN IF NOT EXISTS loggedHours DOUBLE PRECISION DEFAULT 0;
+
+      ALTER TABLE "Attachments" ADD COLUMN IF NOT EXISTS "fileName" VARCHAR(255);
+      ALTER TABLE "Attachments" ADD COLUMN IF NOT EXISTS "fileType" VARCHAR(100);
+      ALTER TABLE "Attachments" ADD COLUMN IF NOT EXISTS "fileSize" BIGINT;
+      ALTER TABLE "Attachments" ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP DEFAULT NOW();
+
+      ALTER TABLE "Comments" ADD COLUMN IF NOT EXISTS "userId" VARCHAR(36);
+      ALTER TABLE "Comments" ADD COLUMN IF NOT EXISTS "content" TEXT;
+
+      ALTER TABLE "ActivityLogs" ADD COLUMN IF NOT EXISTS "entityId" VARCHAR(36);
+      ALTER TABLE "ActivityLogs" ADD COLUMN IF NOT EXISTS "entityName" VARCHAR(255);
+      ALTER TABLE "ActivityLogs" ADD COLUMN IF NOT EXISTS "actionType" VARCHAR(100);
+      ALTER TABLE "ActivityLogs" ADD COLUMN IF NOT EXISTS "description" TEXT;
+
+      ALTER TABLE "Messages" ADD COLUMN IF NOT EXISTS "projectId" VARCHAR(36);
+      ALTER TABLE "Messages" ADD COLUMN IF NOT EXISTS "content" TEXT;
+      ALTER TABLE "Messages" ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP DEFAULT NOW();
+
+      ALTER TABLE "Notifications" ADD COLUMN IF NOT EXISTS "userId" VARCHAR(36);
+
+      ALTER TABLE "Meetings" ADD COLUMN IF NOT EXISTS "fileData" TEXT;
+      ALTER TABLE "Meetings" ADD COLUMN IF NOT EXISTS "fileName" VARCHAR(255);
+      ALTER TABLE "Meetings" ADD COLUMN IF NOT EXISTS "fileType" VARCHAR(100);
+
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "topic" TEXT;
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "assigneeId" VARCHAR(36);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "parentpointid" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "parent_point_id" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "comment" TEXT;
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "next_action" TEXT;
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "assignee_id" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "feature_id" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "system_id" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "surrounding_id" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "target_date" DATE;
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "assignto" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "assign_to" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "tindakanlanjut" TEXT;
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "tindakan_lanjut" TEXT;
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "targetdate" VARCHAR(50);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "tanggalupdatestatus" VARCHAR(50);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "decision" TEXT;
+
+      ALTER TABLE "QATestSuites" ADD COLUMN IF NOT EXISTS "description" TEXT;
+      ALTER TABLE "QATestSuites" ADD COLUMN IF NOT EXISTS "createdBy" VARCHAR(36);
+      ALTER TABLE "QATestSuites" ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP DEFAULT NOW();
+      ALTER TABLE "QATestSuites" ADD COLUMN IF NOT EXISTS "assignedto" VARCHAR(255);
+
+      ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "namaModul" VARCHAR(255);
+      ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "description" TEXT;
+      ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "expectedResult" TEXT;
+      ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "actualResult" TEXT;
+      ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "executionStatus" VARCHAR(50);
+      ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "executedByUserId" VARCHAR(36);
+      ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "executedByName" VARCHAR(255);
+      ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP DEFAULT NOW();
+      ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "assignedto" VARCHAR(255);
+    `);
+
+    // #79 — dua kolom di bawah punya sebab yang BERBEDA dari 54 di atas.
+    //
+    // Blok CREATE TABLE untuk `discussion_point_comments` menulis `userId` dan
+    // `createdAt` TANPA KUTIP. PostgreSQL melipat identifier tanpa kutip menjadi
+    // huruf kecil, jadi database bersih memperoleh `userid` dan `createdat` —
+    // sementara production punya `userId` dan `createdAt`, dan kode menulis
+    // versi ber-kutip. Di database bersih, penyimpanan komentar akan GAGAL.
+    //
+    // Ditambahkan di sini alih-alih memperbaiki kutip di CREATE TABLE, karena
+    // memperbaiki di sana tidak berpengaruh pada database yang tabelnya sudah
+    // ada — dan justru menyisakan `userid` yatim di database bersih.
+    await client.query(`
+      ALTER TABLE discussion_point_comments ADD COLUMN IF NOT EXISTS "userId" VARCHAR(50);
+      ALTER TABLE discussion_point_comments ADD COLUMN IF NOT EXISTS "createdAt" VARCHAR(50);
     `);
 
     // ── Indexes ────────────────────────────────────────────────────────────────
@@ -657,6 +1053,10 @@ export async function runMigrations(pool: Pool): Promise<void> {
       `CREATE INDEX IF NOT EXISTS idx_messages_receiver ON "Messages" ("receiverId")`,
       `CREATE INDEX IF NOT EXISTS idx_token_blacklist ON "TokenBlacklist" (token)`,
       `CREATE INDEX IF NOT EXISTS idx_token_expiry ON "TokenBlacklist" ("expiresAt")`,
+      `CREATE INDEX IF NOT EXISTS idx_usersessions_userid ON "UserSessions" ("userId")`,
+      `CREATE INDEX IF NOT EXISTS idx_usersessions_loginat ON "UserSessions" ("loginAt" DESC)`,
+      `CREATE INDEX IF NOT EXISTS idx_auditlogs_userid_createdat ON "AuditLogs" ("userId", "createdAt" DESC)`,
+      `CREATE INDEX IF NOT EXISTS idx_activitylogs_userid_createdat ON "ActivityLogs" ("userId", "createdAt" DESC)`,
     ];
     for (const idx of indexes) {
       try {
@@ -664,12 +1064,87 @@ export async function runMigrations(pool: Pool): Promise<void> {
       } catch {}
     }
 
-    await client.query("COMMIT");
     console.log("✅ [PG-MIGRATE] Semua tabel berhasil dibuat/diverifikasi di Neon PostgreSQL!");
   } catch (err: any) {
-    await client.query("ROLLBACK");
     console.error("❌ [PG-MIGRATE] Migrasi gagal:", err.message);
     throw err;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Tabel yang WAJIB ada sesudah migrasi berjalan (item #275).
+ *
+ * MASALAH YANG DIPECAHKAN. Status migrasi dulu hanya merekam "panggilan
+ * runMigrations() selesai tanpa melempar" — bukan "schema di database sudah
+ * lengkap". Saat insiden #273, GET /api/health-check menjawab
+ * {"migrasi":"berhasil"} PADAHAL tabel "IntegrationSettings" tidak ada di
+ * database, sebab proses itu boot dari kode lama yang blok DDL-nya memang
+ * belum memuat tabel tersebut. Jujur untuk versi kodenya sendiri, menyesatkan
+ * bagi orang yang membacanya untuk memutuskan apakah schema siap.
+ *
+ * Daftar ini SENGAJA ditulis eksplisit, bukan diturunkan dari string SQL saat
+ * runtime: parsing SQL sendiri rapuh dan justru menambah cara baru untuk gagal
+ * diam-diam. Sinkronnya dijaga oleh test `pg-migrate.tabel-wajib.test.ts`,
+ * yang membaca berkas ini dan MERAH bila ada CREATE TABLE yang tidak terdaftar
+ * di sini — jadi menambah tabel tanpa memperbarui daftar tidak mungkin lolos.
+ */
+export const TABEL_WAJIB: readonly string[] = [
+  "ActivityLogs",
+  "Attachments",
+  "AuditLogs",
+  "BroadcastConfig",
+  "BroadcastLogs",
+  "Comments",
+  "DiscussionPoints",
+  "Documents",
+  "IntegrationSettings",
+  "LinkedTasks",
+  "MasterData",
+  "Meetings",
+  "Messages",
+  "MilestoneSprints",
+  "Milestones",
+  "NotificationDeliveryFailures",
+  "Notifications",
+  "ProjectInvites",
+  "ProjectMembers",
+  "ProjectModules",
+  "Projects",
+  "QATestCaseExecutionLogs",
+  "QATestCases",
+  "QATestSuites",
+  "Sprints",
+  "TaskCustomFields",
+  "TaskExternalLinks",
+  "TaskWorkLogs",
+  "Tasks",
+  "TokenBlacklist",
+  "UserIdentities",
+  "UserSessions",
+  "Users",
+  "ai_learning_logs",
+  "discussion_point_comments",
+  "meeting_details",
+];
+
+/**
+ * Memeriksa tabel mana yang TIDAK ada di database (item #275).
+ *
+ * Dipakai sesudah migrasi untuk menjawab pertanyaan yang benar — "schema
+ * lengkap atau tidak" — bukan sekadar "fungsi migrasi tidak melempar".
+ * Menangkap juga kasus DDL berurutan yang putus di tengah: satu CREATE TABLE
+ * gagal membuat semua tabel sesudahnya ikut terlewat.
+ */
+export async function cariTabelHilang(pool: Pool): Promise<string[]> {
+  const client = await pool.connect();
+  try {
+    const hasil = await client.query(
+      `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'`
+    );
+    const ada = new Set(hasil.rows.map((r: any) => r.table_name));
+    return TABEL_WAJIB.filter((t) => !ada.has(t));
   } finally {
     client.release();
   }

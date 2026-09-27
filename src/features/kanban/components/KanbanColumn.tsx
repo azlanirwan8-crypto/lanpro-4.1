@@ -1,11 +1,14 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion } from "motion/react";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
+import { GripVertical } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { RenderIcon } from "../../../components/RenderIcon";
 import { KanbanCard } from "./KanbanCard";
 import { useAppStore } from "../../../store/useAppStore";
-import { TERMINAL_STATUSES } from "../../../lib/constants";
+import { statusSelesai } from "../../../lib/statusSelesai";
+import { statusColumnKey } from "../../../lib/statusKolom";
 
 interface KanbanColumnProps {
   status: any;
@@ -16,22 +19,39 @@ interface KanbanColumnProps {
   columnId?: string;
   showHeader?: boolean;
   shakingTaskId?: string | null;
+  /** #455 — batas WIP lunak (peringatan visual; tidak memblokir DnD). */
+  wipLimit?: number;
 }
 
+/** Default WIP lunak per kolom (#455). */
+export const DEFAULT_KANBAN_WIP_LIMIT = 8;
+
 export const KanbanColumn = React.memo<KanbanColumnProps>(
-  ({ status, tasks, mArr, pArr, onTaskClick, columnId, showHeader = true, shakingTaskId }) => {
+  ({
+    status,
+    tasks,
+    mArr,
+    pArr,
+    onTaskClick,
+    columnId,
+    showHeader = true,
+    shakingTaskId,
+    wipLimit = DEFAULT_KANBAN_WIP_LIMIT,
+  }) => {
+    const { t } = useTranslation();
     const { density } = useAppStore();
     const isCompact = density === "compact";
+    const overWip = typeof wipLimit === "number" && wipLimit > 0 && tasks.length > wipLimit;
 
     return (
       <div
         className={cn(
-          "shrink-0 flex flex-col h-full rounded-md transition-all duration-200 group/col relative bg-surface-muted/50 dark:bg-slate-900/60 border border-border-subtle/70 dark:border-slate-800",
-          isCompact ? "w-[240px]" : "w-[270px]"
+          "shrink-0 flex flex-col h-full rounded-md transition-all duration-200 group/col relative bg-surface-muted/50 border border-border-subtle/70 w-full",
+          overWip && "border-warning/50"
         )}
       >
         {showHeader && (
-          <div className="flex items-center justify-between px-3.5 py-2 border-b border-border-subtle/70 dark:border-slate-800 bg-surface dark:bg-slate-800/80 rounded-t-md shadow-2xs">
+          <div className="flex items-center justify-between px-3.5 py-2 border-b border-border-subtle/70 bg-surface rounded-t-md shadow-2xs">
             <div className="flex items-center gap-2">
               {status.icon ? (
                 <RenderIcon
@@ -45,12 +65,22 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
                   style={{ backgroundColor: status.color }}
                 />
               )}
-              <span className="text-xs font-semibold uppercase tracking-wider text-content-strong dark:text-slate-200">
-                {status.label}
-              </span>
+              <span className="text-xs font-normal text-content-strong">{status.label}</span>
             </div>
-            <span className="bg-surface-muted dark:bg-slate-700 text-content-secondary dark:text-slate-300 px-2 py-0.5 rounded-md text-xs sm:text-[10px] font-semibold border border-border-subtle/60">
-              {tasks.length}
+            <span
+              className={cn(
+                "px-2 py-0.5 rounded-md text-[10px] font-normal border",
+                overWip
+                  ? "bg-warning/15 text-warning-text border-warning/40"
+                  : "bg-surface-muted text-content-secondary border-border-subtle/60"
+              )}
+              title={
+                wipLimit > 0
+                  ? t("kanban.wipCount", { count: tasks.length, limit: wipLimit })
+                  : String(tasks.length)
+              }
+            >
+              {wipLimit > 0 ? `${tasks.length}/${wipLimit}` : tasks.length}
             </span>
           </div>
         )}
@@ -61,7 +91,7 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
             isCompact ? "p-1.5" : "p-2"
           )}
         >
-          <Droppable droppableId={columnId || status.label}>
+          <Droppable droppableId={columnId || statusColumnKey(status)}>
             {(provided: any, snapshot: any) => (
               <div
                 {...provided.droppableProps}
@@ -70,9 +100,9 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
                   "flex flex-col rounded-md min-h-[100px] h-full transition-all duration-200 flex-1",
                   isCompact ? "gap-1.5" : "gap-2",
                   snapshot.isDraggingOver &&
-                    (TERMINAL_STATUSES.some((s) => status.label.toLowerCase().includes(s))
-                      ? "bg-red-50/40 border-2 border-dashed border-red-400 cursor-not-allowed"
-                      : "bg-primary/10 border-2 border-dashed border-primary")
+                    (statusSelesai(status.label, mArr) || statusSelesai(status.code, mArr)
+                      ? "bg-red-500/10 border-2 border-dashed border-red-400 cursor-not-allowed"
+                      : "bg-primary-surface/10 border-2 border-dashed border-primary")
                 )}
               >
                 {tasks.map((task, index) => (
@@ -81,32 +111,36 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        {...provided.dragHandleProps}
                         style={provided.draggableProps.style}
-                        className="rounded-lg"
+                        className="rounded-lg relative group/drag"
                       >
-                        {/* Bungkus motion HANYA saat tidak sedang di-drag.
-                            Saat drag, DOM harus identik dengan estimasi posisi dnd-kit/hello-pangea
-                            supaya tidak terjadi lompatan/offset. */}
-                        {snapshot.isDragging ? (
-                          <KanbanCard
-                            task={task}
-                            mArr={mArr}
-                            pArr={pArr}
-                            onClick={() => onTaskClick(task)}
-                            isDragging={snapshot.isDragging}
-                            shakingTaskId={shakingTaskId}
-                          />
-                        ) : (
-                          <motion.div
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{
-                              duration: 0.25,
-                              delay: Math.min(index * 0.03, 0.3),
-                              ease: [0.16, 1, 0.3, 1],
-                            }}
-                          >
+                        {/*
+                          #357 — handle drag terpisah + touch-action:none agar
+                          scroll kolom tidak merebut gesture di mobile browser.
+                          Di desktop, seluruh kartu tetap bisa digeser lewat
+                          area handle yang lebih lebar (hover).
+                        */}
+                        <button
+                          type="button"
+                          aria-label={t("kanban.dragHandle", "Geser kartu")}
+                          {...provided.dragHandleProps}
+                          style={{ touchAction: "none" }}
+                          className={cn(
+                            "absolute left-0.5 top-1/2 -translate-y-1/2 z-10",
+                            "flex items-center justify-center w-7 h-9 rounded-md",
+                            "text-content-subtle hover:text-content-strong hover:bg-surface-muted",
+                            "border border-transparent hover:border-border-subtle/70",
+                            "active:scale-95 cursor-grab active:cursor-grabbing touch-none"
+                          )}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <GripVertical className="w-4 h-4" />
+                        </button>
+                        <div className="pl-7">
+                          {/* Bungkus motion HANYA saat tidak sedang di-drag.
+                              Saat drag, DOM harus identik dengan estimasi posisi dnd-kit/hello-pangea
+                              supaya tidak terjadi lompatan/offset. */}
+                          {snapshot.isDragging ? (
                             <KanbanCard
                               task={task}
                               mArr={mArr}
@@ -115,8 +149,27 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
                               isDragging={snapshot.isDragging}
                               shakingTaskId={shakingTaskId}
                             />
-                          </motion.div>
-                        )}
+                          ) : (
+                            <motion.div
+                              initial={{ opacity: 0, y: 8 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{
+                                duration: 0.25,
+                                delay: Math.min(index * 0.03, 0.3),
+                                ease: [0.16, 1, 0.3, 1],
+                              }}
+                            >
+                              <KanbanCard
+                                task={task}
+                                mArr={mArr}
+                                pArr={pArr}
+                                onClick={() => onTaskClick(task)}
+                                isDragging={snapshot.isDragging}
+                                shakingTaskId={shakingTaskId}
+                              />
+                            </motion.div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </Draggable>
@@ -124,9 +177,9 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
                 {provided.placeholder}
 
                 {tasks.length === 0 && snapshot.isDraggingOver && (
-                  <div className="flex items-center justify-center p-3 rounded-md border border-dashed border-primary bg-primary/10 min-h-[50px] select-none">
-                    <span className="text-xs sm:text-[10px] font-semibold text-primary uppercase tracking-wider">
-                      Drop here
+                  <div className="flex items-center justify-center p-3 rounded-md border border-dashed border-primary bg-primary-surface/10 min-h-[50px] select-none">
+                    <span className="text-xs sm:text-[10px] font-normal text-primary uppercase tracking-normal">
+                      {t("kanban.dropHere")}
                     </span>
                   </div>
                 )}

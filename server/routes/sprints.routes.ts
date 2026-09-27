@@ -1,7 +1,14 @@
 import { Express } from "express";
 import crypto from "crypto";
-import db from "../../src/lib/db";
-import { verifyProjectAccess } from "../middleware/rbac";
+import { jagaProyek } from "../middleware/jagaProyek";
+import { sprintRepository } from "../repositories/sprint.repository";
+import { projectRepository } from "../repositories/project.repository";
+import { validasiBody, validasiQuery } from "../middleware/validate";
+import { paginationQuerySchema } from "../schemas/pagination.schema";
+import { respondWithProjectList } from "../lib/listResponse";
+import { createSprintSchema, updateSprintSchema } from "../schemas/sprint.schema";
+import { adalahWaterfall } from "../lib/methodology";
+import { adalahSprintAktif } from "../lib/sprintLingkup";
 
 export function setupSprintsRoutes(
   app: Express,
@@ -18,24 +25,24 @@ export function setupSprintsRoutes(
   // GET: List Sprints for a project
   app.get(
     "/api/projects/:projectId/sprints",
-    verifyProjectAccess(["*"]),
+    jagaProyek("sprints", "R"),
+    validasiQuery(paginationQuerySchema),
     async (req, res) => {
-      let connection;
       try {
         const { projectId } = req.params;
-        connection = await db.getConnection();
-        const [rows] = await connection.query(
-          "SELECT * FROM Sprints WHERE projectId = ? ORDER BY startDate ASC",
-          [projectId]
+        await respondWithProjectList(
+          res,
+          req.query as Record<string, unknown>,
+          () => sprintRepository.findByProjectId(projectId),
+          (pagination) => sprintRepository.findByProjectIdPaged(projectId, pagination)
         );
-        res.json({ status: "success", data: rows });
       } catch (error: any) {
         console.error("LOG ANOMALI CRITICAL: GET /api/projects/:projectId/sprints error:", error);
-        res
-          .status(500)
-          .json({ status: "error", message: "Terjadi kesalahan internal server" });
-      } finally {
-        if (connection) connection.release();
+        res.status(500).json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
       }
     }
   );
@@ -43,43 +50,42 @@ export function setupSprintsRoutes(
   // POST: Create Sprint
   app.post(
     "/api/projects/:projectId/sprints",
-    verifyProjectAccess(["admin", "manager", "head"]),
+    jagaProyek("sprints", "C"),
+    validasiBody(createSprintSchema),
     async (req: any, res) => {
-      let connection;
       try {
         const { projectId } = req.params;
         const { name, goal, startDate, endDate, status } = req.body;
-        connection = await db.getConnection();
 
-        const [proj]: any = await connection.query(
-          "SELECT category FROM Projects WHERE id = ?",
-          [projectId]
-        );
-        if (proj.length > 0 && proj[0].category === "Waterfall") {
+        const category = await projectRepository.getCategory(projectId);
+        if (adalahWaterfall(category)) {
           return res.status(400).json({
             status: "error",
+            code: "srv.metodologi_waterfall_tidak_mendukung",
             message:
               "Metodologi Waterfall tidak mendukung pembuatan Sprint. Gunakan Milestone atau GANTT Chart.",
           });
         }
 
         const newId = crypto.randomUUID();
-
-        await connection.query(
-          "INSERT INTO Sprints (id, projectId, name, goal, startDate, endDate, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
-          [
-            newId,
-            projectId,
-            name,
-            goal || "",
-            startDate || null,
-            endDate || null,
-            status || "planned",
-          ]
-        );
+        const created = await sprintRepository.create({
+          id: newId,
+          projectId,
+          name,
+          goal: goal || "",
+          startDate: startDate || null,
+          endDate: endDate || null,
+          status: status || "planned",
+        });
 
         const userIdStr = req.headers["x-user-id"] || "guest";
-        await createAuditLog(
+
+        res.json({
+          status: "success",
+          data: created,
+        });
+
+        void createAuditLog(
           userIdStr as string,
           projectId,
           "CREATE",
@@ -87,30 +93,14 @@ export function setupSprintsRoutes(
           newId,
           null,
           req.body
-        );
-
-        res.json({
-          status: "success",
-          data: {
-            id: newId,
-            projectId,
-            name,
-            goal,
-            startDate,
-            endDate,
-            status: status || "planned",
-          },
-        });
+        ).catch((err) => console.error("[SPRINT CREATE] audit log gagal:", err));
       } catch (error: any) {
-        console.error(
-          "LOG ANOMALI CRITICAL: POST /api/projects/:projectId/sprints error:",
-          error
-        );
-        res
-          .status(500)
-          .json({ status: "error", message: "Terjadi kesalahan internal server" });
-      } finally {
-        if (connection) connection.release();
+        console.error("LOG ANOMALI CRITICAL: POST /api/projects/:projectId/sprints error:", error);
+        res.status(500).json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
       }
     }
   );
@@ -118,63 +108,54 @@ export function setupSprintsRoutes(
   // PUT: Update Sprint
   app.put(
     "/api/projects/:projectId/sprints/:id",
-    verifyProjectAccess(["admin", "manager", "head"]),
+    jagaProyek("sprints", "U"),
+    validasiBody(updateSprintSchema),
     async (req, res) => {
-      let connection;
       try {
         const { id } = req.params;
-        connection = await db.getConnection();
-
-        const [existingSprints]: any = await connection.query(
-          "SELECT * FROM Sprints WHERE id = ?",
-          [id]
-        );
-        if (existingSprints.length === 0) {
-          return res
-            .status(404)
-            .json({ status: "error", message: "Sprint tidak ditemukan" });
+        const existing = await sprintRepository.findById(id);
+        if (!existing) {
+          return res.status(404).json({
+            status: "error",
+            code: "srv.sprint_tidak_ditemukan",
+            message: "Sprint tidak ditemukan",
+          });
         }
 
-        const existing = existingSprints[0];
-        const finalName = req.body.hasOwnProperty("name")
-          ? req.body.name
-          : existing.name;
-        const finalGoal = req.body.hasOwnProperty("goal")
-          ? req.body.goal
-          : existing.goal;
+        const finalName = req.body.hasOwnProperty("name") ? req.body.name : existing.name;
+        const finalGoal = req.body.hasOwnProperty("goal") ? req.body.goal : existing.goal;
         const finalStartDate = req.body.hasOwnProperty("startDate")
           ? req.body.startDate
           : existing.startDate;
         const finalEndDate = req.body.hasOwnProperty("endDate")
           ? req.body.endDate
           : existing.endDate;
-        const finalStatus = req.body.hasOwnProperty("status")
-          ? req.body.status
-          : existing.status;
+        const finalStatus = req.body.hasOwnProperty("status") ? req.body.status : existing.status;
 
-        await connection.query(
-          "UPDATE Sprints SET name=?, goal=?, startDate=?, endDate=?, status=? WHERE id=?",
-          [
-            finalName,
-            finalGoal,
-            finalStartDate || null,
-            finalEndDate || null,
-            finalStatus,
-            id,
-          ]
-        );
+        // #462 — paling banyak satu sprint aktif per proyek
+        if (adalahSprintAktif(finalStatus)) {
+          await sprintRepository.demoteOtherActives(req.params.projectId, id);
+        }
 
-        res.json({ status: "success", message: "Sprint updated" });
+        await sprintRepository.update(id, {
+          name: finalName,
+          goal: finalGoal,
+          startDate: finalStartDate,
+          endDate: finalEndDate,
+          status: finalStatus,
+        });
+
+        res.json({ status: "success", code: "srv.sprint_updated", message: "Sprint updated" });
       } catch (error: any) {
         console.error(
           "LOG ANOMALI CRITICAL: PUT /api/projects/:projectId/sprints/:id error:",
           error
         );
-        res
-          .status(500)
-          .json({ status: "error", message: "Terjadi kesalahan internal server" });
-      } finally {
-        if (connection) connection.release();
+        res.status(500).json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
       }
     }
   );
@@ -182,25 +163,22 @@ export function setupSprintsRoutes(
   // DELETE: Remove Sprint
   app.delete(
     "/api/projects/:projectId/sprints/:id",
-    verifyProjectAccess(["admin", "manager", "head"]),
+    jagaProyek("sprints", "D"),
     async (req, res) => {
       try {
         const { id, projectId } = req.params;
-        const connection = await db.getConnection();
-        await connection.query("DELETE FROM Sprints WHERE id = ? AND projectId = ?", [
-          id,
-          projectId,
-        ]);
-        connection.release();
-        res.json({ status: "success", message: "Sprint deleted" });
+        await sprintRepository.delete(id, projectId);
+        res.json({ status: "success", code: "srv.sprint_deleted", message: "Sprint deleted" });
       } catch (error: any) {
         console.error(
           "LOG ANOMALI CRITICAL: DELETE /api/projects/:projectId/sprints/:id error:",
           error
         );
-        res
-          .status(500)
-          .json({ status: "error", message: "Terjadi kesalahan internal server" });
+        res.status(500).json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
       }
     }
   );

@@ -1,6 +1,10 @@
+import { useTranslation } from "react-i18next";
+import { useMasterOptionItems } from "../../hooks/useMasterOptions";
+import { StyledDropdown } from "../../components/ui/CommonComponents";
 import { safeLocalStorage, safeSessionStorage } from "../../lib/safeStorage";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useFlowchartCanvas } from "../../hooks/useFlowchartCanvas";
+import { useFlowchartAutosave } from "../../hooks/useFlowchartAutosave";
 import { useFlowchartUI } from "../../hooks/useFlowchartUI";
 import { useFlowchartHistory } from "../../hooks/useFlowchartHistory";
 import { useFlowchartSelection } from "../../hooks/useFlowchartSelection";
@@ -9,7 +13,6 @@ import { useFlowchartNodes } from "../../hooks/useFlowchartNodes";
 import {
   Plus,
   Trash2,
-  ArrowRight,
   Save,
   Sparkles,
   Eye,
@@ -17,9 +20,6 @@ import {
   Circle as CircleIcon,
   Layers,
   MousePointer,
-  Hand,
-  StickyNote,
-  Type,
   ZoomIn,
   ZoomOut,
   BookOpen,
@@ -36,15 +36,18 @@ import {
   Upload,
   Image as ImageIcon,
   CheckCircle,
+  ChevronLeft,
 } from "lucide-react";
 import { toJpeg } from "html-to-image";
 import { Task, Project } from "../../types";
 import { cn } from "../../lib/utils";
 import { toast } from "sonner";
 import { ConfirmationModal } from "../../components/ui/ConfirmationModal";
+import { DetailViewChrome } from "../../components/ui/DetailViewChrome";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import { FlowchartDashboard } from "./components/FlowchartDashboard";
-import { ShapePalette } from "./components/ShapePalette";
+import { CanvasToolRail } from "./components/CanvasToolRail";
+import { FlowchartDocumentModal } from "./components/FlowchartDocumentModal";
 import { ImportDiagramModal } from "./components/ImportDiagramModal";
 import { CanvasToolbar } from "./components/CanvasToolbar";
 import { FlowchartNode } from "./components/FlowchartNode";
@@ -54,8 +57,9 @@ import { NodeContextMenu } from "./components/NodeContextMenu";
 import { CanvasContextMenu } from "./components/CanvasContextMenu";
 import type { FlowNode, FlowEdge, FlowchartDocument, FlowchartData } from "./types";
 import { setScreenSnapshot, clearScreenSnapshot } from "../../lib/screenContext";
-import { parseDrawIoXML, parseMiroContent } from "./lib/importers";
-import { colorPalettes } from "./constants";
+import { parseUniversalDiagram } from "./lib/importers";
+import { apakahPembuat, tampilanNamaPembuat } from "./lib/authorIdentity";
+import { colorPalettes, UKURAN_BENTUK } from "./constants";
 // Diberi akhiran Api karena useFlowchartList() juga mengekspos updateFlowchart
 // dan deleteFlowchart untuk state daftar lokal. Nama berbeda mencegah salah
 // panggil, sekaligus memperjelas mana yang menembak backend.
@@ -67,14 +71,25 @@ import {
 } from "./services/flowchart.service";
 
 interface FlowchartViewProps {
-  selectedProject: Project;
+  selectedProject: Project | null;
   tasks: Task[];
   projectMembers: any[];
   setSelectedTaskForDetail: (task: Task) => void;
   setIsTaskDetailModalOpen: (isOpen: boolean) => void;
   currentUserProfile?: any;
-  onSaveFlowcharts?: (data: any) => Promise<void>;
 }
+
+/**
+ * Dipakai hanya bila MasterData belum memuat tipe jenis_dokumen.
+ *
+ * Isinya sengaja tiga nilai lama (PRD/Panduan/Laporan) supaya diagram yang
+ * terlanjur menyimpan salah satunya tetap punya pilihan yang cocok.
+ */
+const CADANGAN_KATEGORI_DOKUMEN = [
+  { id: "PRD", label: "PRD", icon: "FileText", color: "#8B5CF6" },
+  { id: "Panduan", label: "Panduan", icon: "BookOpen", color: "#3B82F6" },
+  { id: "Laporan", label: "Laporan", icon: "FileBarChart", color: "#F59E0B" },
+];
 
 export const FlowchartView: React.FC<FlowchartViewProps> = ({
   selectedProject,
@@ -82,8 +97,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   setSelectedTaskForDetail,
   setIsTaskDetailModalOpen,
   currentUserProfile,
-  onSaveFlowcharts,
 }) => {
+  const { t } = useTranslation();
+  // Item #144 — sumber yang SAMA dengan modal Dokumentasi. Sebelumnya modal
+  // ini punya daftar kerasnya sendiri (PRD/Panduan/Laporan), jadi dua dropdown
+  // "Kategori Dokumen" pada tabel Documents yang sama menawarkan pilihan
+  // berbeda: 3 di sini, 9 di Dokumentasi.
+  const opsiKategoriDokumen = useMasterOptionItems("jenis_dokumen", CADANGAN_KATEGORI_DOKUMEN);
   // Get active logged in user author name dynamically
   const getResolvedAuthor = () => {
     if (currentUserProfile?.displayName) return currentUserProfile.displayName;
@@ -119,40 +139,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const userRoleStr = effectiveUser?.role || effectiveUser?.system_role || "user";
   const isAdmin = ["admin", "sadm", "admn"].includes(String(userRoleStr).toLowerCase());
 
-  const isAuthor = (fw: FlowchartData) => {
-    if (!fw || !effectiveUser) return false;
-    const author = String(fw.createdBy || "")
-      .trim()
-      .toLowerCase();
-    const curId = String(effectiveUser.id || "")
-      .trim()
-      .toLowerCase();
-    const curUid = String(effectiveUser.uid || "")
-      .trim()
-      .toLowerCase();
-    const curUser = String(effectiveUser.username || "")
-      .trim()
-      .toLowerCase();
-    const curEmail = String(effectiveUser.email || "")
-      .trim()
-      .toLowerCase();
-    const curName = String(effectiveUser.name || "")
-      .trim()
-      .toLowerCase();
-    const curDisplay = String(effectiveUser.displayName || "")
-      .trim()
-      .toLowerCase();
-
-    return (
-      author !== "" &&
-      (author === curId ||
-        author === curUid ||
-        author === curUser ||
-        author === curEmail ||
-        author === curName ||
-        author === curDisplay)
-    );
-  };
+  // Item #268 — logikanya pindah ke `lib/authorIdentity.ts` supaya bisa diuji
+  // tanpa merender kanvas. Versi lama di sini mencocokkan satu nilai tersimpan
+  // ke enam field identitas sekaligus dan gagal secara tidak konsisten; alasan
+  // lengkapnya ditulis di berkas itu.
+  const isAuthor = (fw: FlowchartData) => apakahPembuat(fw, effectiveUser);
   const canModifyFlowchart = (fw: FlowchartData) => isAuthor(fw) || isAdmin;
 
   // Canvas Viewport & Theme Management
@@ -161,27 +152,58 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     panOffset,
     setPanOffset,
     zoomLevel,
-    setZoomLevel,
     isPanning,
     setIsPanning,
     panStart,
     setPanStart,
     canvasTheme,
-    setCanvasTheme,
     isSnapToGrid,
     setIsSnapToGrid,
     canvasContainerRef,
+    pasangKanvas,
     isPanningRef,
     startCanvasPanning,
     updatePanOffset,
     stopCanvasPanning,
-    toggleCanvasTheme,
     toggleGridSnap,
+    aturZoom,
+    geserZoom,
     resetZoom,
     resetPan,
     resetCanvas,
     applyGridSnap,
   } = canvasHook;
+
+  // Item #530 — layar penuh KHUSUS PAPAN. Yang diminta masuk fullscreen adalah
+  // pembungkus ruang kerjanya: bilah atas, bilah alat kiri, dock bawah, minimap,
+  // dan panel properti semuanya anak dari elemen itu, jadi semuanya ikut
+  // memenuhi layar. Kalau elemen kanvas yang diminta, chrome papan justru hilang.
+  const papanRef = useRef<HTMLDivElement>(null);
+  const [papanPenuh, setPapanPenuh] = useState(false);
+
+  useEffect(() => {
+    // Pengguna bisa keluar lewat Esc milik peramban atau isyarat sistem lain,
+    // jadi statusnya dibaca dari dokumen - tidak dipercaya dari tombol saja.
+    const sinkron = () => setPapanPenuh(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", sinkron);
+    return () => document.removeEventListener("fullscreenchange", sinkron);
+  }, []);
+
+  const togglePapanPenuh = () => {
+    if (document.fullscreenElement) {
+      void document.exitFullscreen().catch(() => setPapanPenuh(false));
+      return;
+    }
+    const papan = papanRef.current;
+    // Peramban tanpa Element.requestFullscreen (iOS di bawah 16.4) akan
+    // melempar TypeError di tengah klik; lebih baik bilah papan bilang tidak
+    // bisa daripada seluruh view ikut runtuh.
+    if (!papan || typeof papan.requestFullscreen !== "function") {
+      toast.error(t("flowchart.fullscreenGagal"));
+      return;
+    }
+    void papan.requestFullscreen().catch(() => toast.error(t("flowchart.fullscreenGagal")));
+  };
 
   // UI Modals & Sidebars
   const uiHook = useFlowchartUI();
@@ -440,6 +462,16 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
+  /**
+   * #548 — bentuk asal dari sambungan yang SEDANG ditarik. Null berarti tidak ada
+   * seretan sambungan; mode klik-lalu-klik lama tetap hidup tanpanya.
+   */
+  const [seretSambung, setSeretSambung] = useState<string | null>(null);
+  const awalSeretSambung = useRef<{ x: number; y: number } | null>(null);
+
+  // Canvas-level drag-drop overlay state (file drop directly onto canvas)
+  const [canvasDragOver, setCanvasDragOver] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleProcessImportFile = (file: File) => {
@@ -447,52 +479,97 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     reader.onload = (e) => {
       try {
         const text = e.target?.result as string;
-        let result: { nodes: FlowNode[]; edges: FlowEdge[] } | null = null;
-        let detectedType: typeof importType = "drawio";
-
         const fileName = file.name.toLowerCase();
         setParsedFilename(file.name);
 
-        if (fileName.endsWith(".xml") || fileName.endsWith(".drawio")) {
-          result = parseDrawIoXML(text);
-          detectedType = "drawio";
-        } else if (fileName.endsWith(".json")) {
+        // Detect import type for display in modal
+        let detectedType: typeof importType = "drawio";
+        if (fileName.endsWith(".json")) detectedType = "miro";
+        else if (fileName.endsWith(".csv")) detectedType = "miro";
+        else if (
+          fileName.endsWith(".mmd") ||
+          fileName.endsWith(".mermaid") ||
+          fileName.endsWith(".txt")
+        )
+          detectedType = "native";
+
+        // Universal parser handles: .drawio, .xml, .json (Miro/LanPro), .csv, .mmd, .mermaid, .txt
+        const result = parseUniversalDiagram(text, file.name);
+
+        // Check for LanPro native JSON (has nodes/edges keys directly)
+        if (fileName.endsWith(".json")) {
           try {
             const parsedJson = JSON.parse(text);
             if (parsedJson && (parsedJson.nodes !== undefined || parsedJson.edges !== undefined)) {
-              result = {
-                nodes: Array.isArray(parsedJson.nodes) ? parsedJson.nodes : [],
-                edges: Array.isArray(parsedJson.edges) ? parsedJson.edges : [],
-              };
               detectedType = "native";
-            } else {
-              result = parseMiroContent(text, false);
-              detectedType = "miro";
             }
-          } catch (e) {
-            throw new Error("File JSON tidak dapat dibaca atau rusak.");
+          } catch {
+            /* handled by parseUniversalDiagram */
           }
-        } else if (fileName.endsWith(".csv")) {
-          result = parseMiroContent(text, true);
-          detectedType = "miro";
-        } else {
-          throw new Error(
-            "Format file tidak didukung. Silakan gunakan .xml, .drawio, .json, atau .csv."
-          );
         }
 
         if (result && (result.nodes.length > 0 || result.edges.length > 0)) {
           setParsedImportData(result);
           setImportType(detectedType);
           toast.success(
-            `Berhasil memuat file "${file.name}"! Ditemukan ${result.nodes.length} bentuk & ${result.edges.length} garis.`
+            `Berhasil memuat "${file.name}" — ${result.nodes.length} bentuk, ${result.edges.length} panah.`
           );
         } else {
-          toast.error("Tidak ditemukan bentuk atau garis alur di dalam file ini.");
+          toast.error(t("toast.noShapesInFile"));
         }
       } catch (err: any) {
-        toast.error(`Gagal membaca file: ${err.message || err}`);
+        toast.error(t("toast.fileReadFailed", { pesan: err.message || err }));
         console.error(err);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  /**
+   * Handler drag-drop file langsung ke permukaan kanvas (tanpa perlu buka modal impor).
+   * Format yang didukung: .drawio, .xml, .json, .csv, .mmd, .mermaid, .txt
+   */
+  const handleCanvasFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCanvasDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+
+    const allowed = [".drawio", ".xml", ".json", ".csv", ".mmd", ".mermaid", ".txt"];
+    const lowerName = file.name.toLowerCase();
+    if (!allowed.some((ext) => lowerName.endsWith(ext))) {
+      toast.error(
+        `Format file "${file.name}" belum didukung. Gunakan: .drawio, .xml, .json, .csv, .mmd`
+      );
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const text = ev.target?.result as string;
+        const result = parseUniversalDiagram(text, file.name);
+        if (result && (result.nodes.length > 0 || result.edges.length > 0)) {
+          setNodes(result.nodes);
+          setEdges(result.edges);
+          setHistoryStack([
+            {
+              nodes: JSON.parse(JSON.stringify(result.nodes)),
+              edges: JSON.parse(JSON.stringify(result.edges)),
+            },
+          ]);
+          setHistoryIndex(0);
+          setSelectedNodeId(null);
+          setSelectedEdgeId(null);
+          toast.success(
+            `"${file.name}" berhasil dimuat — ${result.nodes.length} bentuk, ${result.edges.length} panah. Langsung siap diedit!`
+          );
+        } else {
+          toast.error(`File "${file.name}" tidak mengandung bentuk yang dapat dibaca.`);
+        }
+      } catch (err: any) {
+        toast.error(`Gagal memuat "${file.name}": ${err.message || err}`);
       }
     };
     reader.readAsText(file);
@@ -521,13 +598,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         type: n.type,
         label: (n.label || "").slice(0, 80),
       })),
-      edges: edges
-        .slice(0, 80)
-        .map((e) => ({
-          fromLabel: nodeLabelById.get(e.fromNodeId) || e.fromNodeId,
-          toLabel: nodeLabelById.get(e.toNodeId) || e.toNodeId,
-          label: e.label ? String(e.label).slice(0, 80) : undefined,
-        })),
+      edges: edges.slice(0, 80).map((e) => ({
+        fromLabel: nodeLabelById.get(e.fromNodeId) || e.fromNodeId,
+        toLabel: nodeLabelById.get(e.toNodeId) || e.toNodeId,
+        label: e.label ? String(e.label).slice(0, 80) : undefined,
+      })),
       selectedNodeId,
       updatedAt: Date.now(),
     });
@@ -552,7 +627,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setSelectedEdgeId(null);
     setIsImportModalOpen(false);
     setParsedImportData(null);
-    toast.success("Berhasil menggantikan kanvas dengan alur kerja yang diimpor! 🎉");
+    toast.success(t("toast.canvasReplaced"));
   };
 
   const handleApplyImportMerge = () => {
@@ -592,7 +667,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
     setIsImportModalOpen(false);
     setParsedImportData(null);
-    toast.success("Berhasil menggabungkan diagram yang diimpor ke dalam kanvas Anda! 🚀");
+    toast.success(t("toast.canvasMerged"));
   };
 
   // Wrapper handlers for undo/redo that apply to state
@@ -615,7 +690,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   // Auto layout mathematical alignment helper
   const handleAutoAlignNodes = () => {
     if (nodes.length === 0) {
-      toast.error("Kanvas kosong, tidak ada bentuk untuk dirapikan.");
+      toast.error(t("toast.canvasEmptyTidy"));
       return;
     }
 
@@ -693,13 +768,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
     setNodes(alignedNodes);
     recordHistory(alignedNodes, edges);
-    toast.success("Auto-Layout Sukses! Diagram alur Anda berhasil dirapikan secara otomatis ✨");
+    toast.success(t("toast.autoLayoutOk"));
   };
 
   // Sequential Live Flow Simulator Trace
   const handleSimulateFlow = async () => {
     if (nodes.length === 0) {
-      toast.error("Kanvas kosong, tidak ada alur yang bisa disimulasikan.");
+      toast.error(t("toast.canvasEmptySim"));
       return;
     }
 
@@ -707,13 +782,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       simCancelRef.current = true;
       setIsSimulating(false);
       setActiveSimNodeId(null);
-      toast.info("Simulasi Alur Kerja Dihentikan.");
+      toast.info(t("toast.simStopped"));
       return;
     }
 
     simCancelRef.current = false;
     setIsSimulating(true);
-    toast.success("Memulai Simulasi Langkah Hubungan Alur Kerja...", {
+    toast.success(t("toast.simStarting"), {
       description: "Sistem menelusuri alur kerja dari titik awal hingga akhir.",
     });
 
@@ -754,7 +829,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setActiveSimNodeId(null);
     setIsSimulating(false);
     if (!simCancelRef.current) {
-      toast.success("Simulasi Alur Kerja Selesai!");
+      toast.success(t("toast.simDone"));
     }
   };
 
@@ -783,14 +858,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
-    toast.success("JSON Workspace Berhasil Diunduh!");
+    toast.success(t("toast.jsonDownloaded"));
   };
 
   // Download JPG Snapshot
   const handleExportJPG = async () => {
     if (!canvasContainerRef.current) return;
     try {
-      toast.info("Menyiapkan gambar...");
+      toast.info(t("toast.preparingImage"));
       const dataUrl = await toJpeg(canvasContainerRef.current, {
         backgroundColor: "#f4f7f9",
         quality: 0.95,
@@ -799,10 +874,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       link.download = `${currentFlowMetadata?.name || "flow_workspace"}.jpg`;
       link.href = dataUrl;
       link.click();
-      toast.success("Gambar JPG Berhasil Diunduh!");
+      toast.success(t("toast.jpgDownloaded"));
     } catch (err) {
       console.error(err);
-      toast.error("Gagal mendownload gambar.");
+      toast.error(t("toast.imageDownloadFailed"));
     }
   };
 
@@ -821,7 +896,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
           setNodes(loadedNodes);
           setEdges(loadedEdges);
-          if (json.theme) setCanvasTheme(json.theme);
 
           setHistoryStack([
             {
@@ -834,12 +908,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           setSelectedNodeId(null);
           setSelectedEdgeId(null);
 
-          toast.success("Workspace Diagram Berhasil Di-import! 🎉");
+          toast.success(t("toast.workspaceImported"));
         } else {
-          toast.error("Format JSON tidak valid untuk Diagram Flowchart.");
+          toast.error(t("toast.jsonInvalid"));
         }
       } catch (err) {
-        toast.error("Gagal membaca file JSON!");
+        toast.error(t("toast.jsonReadFailed"));
         console.error(err);
       }
     };
@@ -850,13 +924,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   // Clear entire whiteboard canvas with confirmation
   const handleClearWhiteboard = async () => {
     if (nodes.length === 0 && edges.length === 0) {
-      toast.info("Kanvas sudah kosong.");
+      toast.info(t("toast.canvasAlreadyEmpty"));
       return;
     }
 
     const isConfirmed = await confirmDeleteAlert(
-      "Kosongkan Kanvas?",
-      "Apakah Anda yakin ingin mengosongkan seluruh papan kerja flowchart ini? Semua bentuk dan garis hubung akan dihapus secara permanen."
+      t("alerts.clearCanvasTitle"),
+      t("alerts.clearCanvasText")
     );
 
     if (!isConfirmed) return;
@@ -866,7 +940,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setSelectedNodeId(null);
     setSelectedEdgeId(null);
     recordHistory([], []);
-    showSuccessAlert("Berhasil!", "Kanvas berhasil dikosongkan.");
+    showSuccessAlert(t("alerts.successTitle"), t("alerts.canvasCleared"));
   };
 
   // Filter Tasks which are "epics" to hook them up
@@ -961,7 +1035,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
         e.preventDefault();
         setCopiedNodes(nodes);
-        toast.info(nodes.length + " objek diblok siap disalin (Tekan Ctrl+C lalu Ctrl+V).");
+        toast.info(t("toast.nodesSelectedCopy", { count: nodes.length }));
       }
 
       // Add: Ctrl+C / Cmd+C - Copy
@@ -971,7 +1045,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           const nodeToCopy = nodes.find((n) => n.id === selectedNodeId);
           if (nodeToCopy) {
             setCopiedNodes([nodeToCopy]);
-            toast.success("Objek disalin!");
+            toast.success(t("toast.objectCopied"));
           }
         } else if (copiedNodes.length > 0) {
           e.preventDefault();
@@ -1016,8 +1090,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       // Add: Ctrl +/- for zooming canvas precisely instead of zooming native browser window
       if ((e.ctrlKey || e.metaKey) && (e.key === "=" || e.key === "+" || e.key === "-")) {
         e.preventDefault();
-        const zoomDelta = e.key === "-" ? -0.1 : 0.1;
-        setZoomLevel((prev) => Math.min(3.0, Math.max(0.2, prev + zoomDelta)));
+        geserZoom(e.key === "-" ? 1 / 1.1 : 1.1);
       }
     };
 
@@ -1075,6 +1148,36 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     };
   }, [draggingNodeId !== null, resizingNodeId !== null, isPanning, marqueeBox !== null]);
 
+  // Item #519 — peta kanvas yang isinya belum sampai ke basis data.
+  //
+  // Tanpa penanda ini, efek muat di bawah menimpa cache perangkat dengan
+  // salinan server. Salinan server hanya berisi apa yang terkirim saat flow
+  // DIBUAT — yaitu satu node "Mulai" — sehingga setiap bentuk yang digambar
+  // setelahnya terhapus diam-diam sebelum pernah dikirim ke mana pun.
+  const kunciBelumTersinkron = (projId: string) => `lanpro_flowcharts_unsynced_${projId}`;
+
+  const bacaBelumTersinkron = (projId: string): Record<string, number> => {
+    try {
+      const peta = JSON.parse(safeLocalStorage.getItem(kunciBelumTersinkron(projId)) || "{}");
+      return peta && typeof peta === "object" ? peta : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const tandaiBelumTersinkron = (projId: string, flowId: string) => {
+    const peta = bacaBelumTersinkron(projId);
+    peta[flowId] = Date.now();
+    safeLocalStorage.setItem(kunciBelumTersinkron(projId), JSON.stringify(peta));
+  };
+
+  const bersihkanTandaBelumTersinkron = (projId: string, flowId: string) => {
+    const peta = bacaBelumTersinkron(projId);
+    if (!(flowId in peta)) return;
+    delete peta[flowId];
+    safeLocalStorage.setItem(kunciBelumTersinkron(projId), JSON.stringify(peta));
+  };
+
   // Load flowcharts list scoped by project ID on load
   useEffect(() => {
     const projId = selectedProject?.id || selectedProject?.key || "default";
@@ -1098,9 +1201,19 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     if (selectedProject?.id) {
       fetchFlowcharts(selectedProject.id)
         .then((apiFlowcharts) => {
-          if (apiFlowcharts.length > 0) {
-            setFlowcharts(apiFlowcharts);
-            safeLocalStorage.setItem(listKey, JSON.stringify(apiFlowcharts));
+          // #519 — bekasnya: `if (apiFlowcharts.length > 0)` lalu menimpa
+          // state DAN cache dengan salinan server. Salinan itu tidak pernah
+          // berisi kanvas hasil menggambar, jadi penimpaan buta itulah yang
+          // membuat diagram yang sudah dibuat "hilang". Yang belum
+          // tersinkron dipertahankan; sisanya ikut server.
+          const tertunda = bacaBelumTersinkron(projId);
+          const gabungan = [
+            ...initialList.filter((f) => f.id in tertunda),
+            ...apiFlowcharts.filter((f) => !(f.id in tertunda)),
+          ];
+          if (gabungan.length > 0) {
+            setFlowcharts(gabungan);
+            safeLocalStorage.setItem(listKey, JSON.stringify(gabungan));
           }
         })
         .catch((err) => {
@@ -1119,7 +1232,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setSelectedFlowId(null);
     setNodes([]);
     setEdges([]);
-    setCanvasTheme("miro");
     setHistoryStack([]);
     setHistoryIndex(0);
     setRightViewMode("embed");
@@ -1135,7 +1247,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       const loadedEdges = found.edges || [];
       setNodes(loadedNodes);
       setEdges(loadedEdges);
-      setCanvasTheme(found.theme || "miro");
       setHistoryStack([
         {
           nodes: JSON.parse(JSON.stringify(loadedNodes)),
@@ -1148,8 +1259,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       setSelectedNodeId(null);
       setSelectedEdgeId(null);
       setConnectSourceId(null);
-      setPanOffset({ x: 50, y: 50 });
-      setZoomLevel(0.9);
+      resetCanvas();
       setRightViewMode("embed");
     }
   };
@@ -1193,13 +1303,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       const fileExtension = file.name.split(".").pop()?.toLowerCase();
 
       if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
-        toast.error("Format dokumen tidak sesuai! Harap unggah format Excel, Word, atau PDF.");
+        toast.error(t("toast.docFormatInvalid"));
         return;
       }
 
       // Validasi max 5MB
       if (file.size > 5 * 1024 * 1024) {
-        toast.error("Ukuran dokumen tidak boleh melebihi 5 MB");
+        toast.error(t("toast.docTooLarge"));
         return;
       }
       setUploadDocFile(file);
@@ -1217,12 +1327,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
   const handleSaveDocument = () => {
     if (!uploadDocName.trim() || !uploadDocFile || !uploadDocBase64) {
-      toast.error("Nama dokumen dan file dokumen wajib diisi!");
+      toast.error(t("toast.docNameFileRequired"));
       return;
     }
 
     if (!selectedFlowId) {
-      toast.error("Pilih flowchart terlebih dahulu!");
+      toast.error(t("toast.pickFlowchartFirst"));
       return;
     }
 
@@ -1258,7 +1368,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       return updatedList;
     });
 
-    toast.success("Dokumen berhasil diunggah!");
+    toast.success(t("toast.docUploaded"));
     closeUploadDocumentModal();
   };
 
@@ -1271,10 +1381,125 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setFlowEpicId(flow.epicTaskId || "");
     setFlowDescription(flow.description || "");
     setFlowCategory(flow.category || "Panduan");
-    setFlowCreator(flow.createdBy || getResolvedAuthor());
+    setFlowCreator(tampilanNamaPembuat(flow, getResolvedAuthor()));
     setFlowExternalUrl(flow.externalUrl || "");
     setIsModalOpen(true);
   };
+
+  // ─── SATU KEPUTUSAN UNTUK TIGA JALUR KIRIM ─────────────────────────────────────
+  //
+  // Item #519 — di sinilah letak kerusakan aslinya. Dahulu blok ini memanggil prop
+  // `onSaveFlowcharts`, tetapi tidak ada satu pun pemanggil <FlowchartView> yang pernah
+  // mengirimkannya (diperiksa pada seluruh riwayat git), jadi pengiriman ke server
+  // selalu dilewati sementara toast tetap membunyikan "berhasil menyimpan".
+
+  /**
+   * Papan ini punya baris di basis data? Flow yang baru dibuat di daftar perangkat
+   * memakai id "flow_..." dan belum pernah di-POST, jadi tidak ada yang bisa di-PUT.
+   */
+  const papanPunyaBarisServer = () =>
+    Boolean(selectedProject?.id) && !!selectedFlowId && !selectedFlowId.startsWith("flow_");
+
+  /**
+   * Satu kali pengiriman papan ke barisnya — dipakai tombol Simpan, autosave (#538),
+   * dan pengiriman saat keluar, supaya ketiganya tidak bisa mengambil keputusan berbeda.
+   *
+   * `senyap` menelan toast dan melempar kesalahan ke pemanggilnya: autosave berjalan
+   * tanpa diminta, jadi membunyikan toast tiap beberapa detik akan menimbun layar;
+   * kegagalannya cukup terbaca di bilah status dock.
+   */
+  const kirimKanvasKeServer = async (opts: { senyap: boolean }) => {
+    const idProyek = selectedProject?.id;
+    const projId = idProyek || selectedProject?.key || "default";
+    if (!selectedFlowId) return;
+    if (!idProyek || selectedFlowId.startsWith("flow_")) {
+      if (!opts.senyap) toast.error(t("flowchart.saveNoServerRow"));
+      return;
+    }
+    const alur = flowcharts.find((f) => f.id === selectedFlowId);
+    try {
+      await updateFlowchartApi(idProyek, selectedFlowId, {
+        name: alur?.name ?? flowName,
+        nodes,
+        edges,
+        externalUrl: alur?.externalUrl ?? flowExternalUrl,
+        description: alur?.description ?? flowDescription,
+        category: alur?.category ?? flowCategory,
+      });
+      bersihkanTandaBelumTersinkron(projId, selectedFlowId);
+      if (!opts.senyap) {
+        toast.success(t("flowchart.savedToDb", { shapes: nodes.length, arrows: edges.length }));
+      }
+    } catch (apiErr) {
+      console.warn("Could not save flowchart canvas to API:", apiErr);
+      if (!opts.senyap) {
+        toast.error(
+          t("flowchart.saveToDbFailed", {
+            penyebab: apiErr instanceof Error ? apiErr.message : String(apiErr),
+          })
+        );
+      }
+      throw apiErr;
+    }
+  };
+
+  /* ─── #538 AUTOSAVE PAPAN ─────────────────────────────────────────────────────── */
+  //
+  // Papan mengirim dirinya sendiri beberapa detik setelah pengguna berhenti
+  // menggerakkan isinya. Kebijakannya (jeda, jangan kirim isi yang sama, jangan
+  // potong seretan, jangan menumpuk kiriman) ada di useFlowchartAutosave.
+  //
+  // `isiPapan` hanya berganti identitas kalau isi papan benar-benar berubah, jadi
+  // menggerakkan mouse, memperbesar, atau membuka panel tidak memasang timer baru;
+  // nama/category ikut di dalamnya supaya mengganti nama papan juga tersimpan
+  // sendiri. Salinan perangkat tetap ditulis tiap 1,5 detik oleh efek di atas.
+  const isiPapan = useMemo(
+    () => ({
+      nodes,
+      edges,
+      canvasTheme,
+      name: currentFlowMetadata?.name ?? flowName,
+      description: currentFlowMetadata?.description ?? flowDescription,
+      category: currentFlowMetadata?.category ?? flowCategory,
+      externalUrl: currentFlowMetadata?.externalUrl ?? flowExternalUrl,
+    }),
+    [
+      nodes,
+      edges,
+      canvasTheme,
+      currentFlowMetadata,
+      flowName,
+      flowDescription,
+      flowCategory,
+      flowExternalUrl,
+    ]
+  );
+
+  const {
+    status: statusSimpan,
+    jam: jamSimpan,
+    tandaiTersimpan: tandaiTersimpanOtomatis,
+  } = useFlowchartAutosave({
+    isi: isiPapan,
+    boleh: isWorkspaceEditable && papanPunyaBarisServer(),
+    papan: selectedFlowId,
+    diseret: draggingNodeId !== null || resizingNodeId !== null || marqueeBox !== null,
+    kirim: () => kirimKanvasKeServer({ senyap: true }),
+  });
+
+  const labelStatusSimpan =
+    statusSimpan === "menyimpan"
+      ? t("flowchart.autosaveSaving")
+      : statusSimpan === "gagal"
+        ? t("flowchart.autosaveFailed")
+        : jamSimpan
+          ? t("flowchart.autosavedAt", {
+              jam: jamSimpan.toLocaleTimeString(undefined, {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            })
+          : t("flowchart.autosaveSaved");
 
   // Save Flowchart list & current items to LocalStorage & Backend API
   const handleSaveWorkspace = async (isAutoSave = false) => {
@@ -1302,21 +1527,32 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       return updatedList;
     });
 
-    if (!isAutoSave) {
-      if (onSaveFlowcharts) {
-        try {
-          const workspaceData = {
-            projectId: projId,
-            flowcharts: JSON.parse(safeLocalStorage.getItem(`lanpro_flowcharts_${projId}`) || "[]"),
-          };
-          await onSaveFlowcharts(workspaceData);
-        } catch (err) {
-          console.warn("Could not sync flowchart workspace to API:", err);
-        }
-      }
+    // Setiap perubahan kanvas membuat salinan di perangkat ini mendahului
+    // basis data — termasuk perubahan yang baru menyentuh autosave.
+    tandaiBelumTersinkron(projId, selectedFlowId);
 
-      toast.success("Berhasil menyimpan seluruh skema alur flowchart Anda!");
+    // Efek pemicu di atas (1,5 detik) sengaja berhenti di salinan perangkat.
+    // Yang menulis ke server adalah autosave #538 dan tombol Simpan di bawah.
+    if (isAutoSave) return;
+
+    try {
+      await kirimKanvasKeServer({ senyap: false });
+      tandaiTersimpanOtomatis();
+    } catch {
+      // Toast "gagal" sudah dibunyikan di dalam kirimKanvasKeServer. Salinan
+      // perangkat dan penanda belum tersinkron tetap menahan kerja pengguna,
+      // dan autosave akan mencoba lagi pada perubahan berikutnya.
     }
+  };
+
+  // Keluar editor adalah kesempatan terakhir mengirim kanvas: navigasi lewat
+  // menu samping me-mount ulang view ini, dan efek muatnya memakai salinan
+  // server. Hanya dijalankan bila memang ada perubahan yang belum terkirim.
+  const sinkronSaatKeluar = () => {
+    if (!isWorkspaceEditable || !selectedFlowId) return;
+    const projId = selectedProject?.id || selectedProject?.key || "default";
+    if (!(selectedFlowId in bacaBelumTersinkron(projId))) return;
+    void handleSaveWorkspace();
   };
 
   // Delete an entire flowchart diagram
@@ -1324,8 +1560,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     e.stopPropagation();
 
     const isConfirmed = await confirmDeleteAlert(
-      "Hapus Flowchart?",
-      "Apakah Anda yakin ingin menghapus dokumentasi flowchart ini secara permanen?"
+      t("alerts.deleteFlowchartTitle"),
+      t("alerts.deleteFlowchartText")
     );
 
     if (!isConfirmed) return;
@@ -1334,6 +1570,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     const remaining = flowcharts.filter((f) => f.id !== id);
     setFlowcharts(remaining);
     safeLocalStorage.setItem(`lanpro_flowcharts_${projId}`, JSON.stringify(remaining));
+    bersihkanTandaBelumTersinkron(projId, id);
 
     if (selectedFlowId === id) {
       if (remaining.length > 0) {
@@ -1345,7 +1582,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       }
     }
 
-    showSuccessAlert("Berhasil!", "Flowchart berhasil dihapus.");
+    showSuccessAlert(t("alerts.successTitle"), t("alerts.flowchartDeleted"));
 
     if (selectedProject?.id && !id.startsWith("flow_")) {
       try {
@@ -1360,7 +1597,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const handleModalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!flowName.trim()) {
-      toast.error("Nama flowchart wajib diisi.");
+      toast.error(t("toast.flowNameRequired"));
       return;
     }
 
@@ -1394,7 +1631,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         edges: [],
         theme: "miro",
         createdAt: new Date().toLocaleDateString("id-ID"),
-        createdBy: flowCreator || currentAuthor,
+        // Item #268 — baris optimistik ini dibuat SEBELUM server menjawab, dan
+        // dulu bentuknya berbeda dari yang nanti dipulangkan server: di sini
+        // `createdBy` berisi nama, di server ia berisi id. Begitu daftarnya
+        // disegarkan, bentuknya berganti diam-diam dan pemeriksaan kepemilikan
+        // ikut berubah hasilnya. Sekarang keduanya diisi sama seperti bentuk
+        // dari server, jadi tampilan sebelum dan sesudah refresh konsisten.
+        createdBy: currentUserId || flowCreator || currentAuthor,
+        createdByName: flowCreator || currentAuthor,
         lastEditedAt: currentTimestamp,
         externalUrl: flowExternalUrl,
       };
@@ -1409,14 +1653,20 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       setCurrentPage(1);
       setSearchQuery("");
       setIsModalOpen(false);
-      toast.success(`Berhasil membuat flowchart: ${flowName}`);
+      toast.success(t("toast.flowCreated", { nama: flowName }));
 
-      // Async sync with backend API
+      // Async sync with backend API — ganti id lokal dengan UUID server (#317).
       if (selectedProject?.id) {
         try {
-          await createFlowchartApi(selectedProject.id, newFlow);
+          const serverId = await createFlowchartApi(selectedProject.id, newFlow);
+          if (serverId) {
+            const reconciled = updated.map((f) => (f.id === newId ? { ...f, id: serverId } : f));
+            setFlowcharts(reconciled);
+            safeLocalStorage.setItem(listKey, JSON.stringify(reconciled));
+          }
         } catch (apiErr) {
           console.warn("API sync error (saved locally):", apiErr);
+          toast.error(t("toast.syncFailed") + (apiErr instanceof Error ? apiErr.message : ""));
         }
       }
     } else {
@@ -1439,7 +1689,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
       setFlowcharts(updated);
       safeLocalStorage.setItem(listKey, JSON.stringify(updated));
-      toast.success("Dokumentasi berhasil diperbarui!");
+      toast.success(t("toast.docUpdated"));
       setIsModalOpen(false);
 
       if (selectedProject?.id && editingFlowId && !editingFlowId.startsWith("flow_")) {
@@ -1450,9 +1700,21 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             nodes: foundFlow?.nodes || [],
             edges: foundFlow?.edges || [],
             externalUrl: flowExternalUrl,
+            description: flowDescription,
+            // Item #144 — tanpa baris ini kategorinya hanya bertahan di
+            // localStorage dan hilang begitu cache dibersihkan.
+            category: flowCategory,
           });
+          // PUT di atas ikut mendorong kanvas yang ada di state, jadi salinan
+          // server kini sama dengan yang di perangkat ini.
+          bersihkanTandaBelumTersinkron(projId, editingFlowId);
         } catch (apiErr) {
           console.warn("API sync error:", apiErr);
+          toast.error(
+            t("flowchart.saveToDbFailed", {
+              penyebab: apiErr instanceof Error ? apiErr.message : String(apiErr),
+            })
+          );
         }
       }
     }
@@ -1477,6 +1739,16 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     let fStyle: FlowNode["fontStyle"] = "sans";
     let alignment: FlowNode["align"] = "center";
     let bdStyle: FlowNode["borderStyle"] = "solid";
+
+    // #541 — switch di bawah hanya menyebut sebagian tipe; sisanya lahir sebagai
+    // kotak 140x70, jadi lingkaran jadi telur dan panah jadi papan. Peta dibaca
+    // SEBELUM switch supaya kasus yang sudah ada tetap menang.
+    const ukuranLahir = UKURAN_BENTUK[type];
+    if (ukuranLahir) {
+      width = ukuranLahir.width;
+      height = ukuranLahir.height;
+      if (ukuranLahir.fontSize) fSize = ukuranLahir.fontSize;
+    }
 
     switch (type) {
       case "sticky":
@@ -1944,7 +2216,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setSelectedNodeId(id);
     setSelectedEdgeId(null);
     setIsShapeDropdownOpen(false);
-    toast.success(`Ditambahkan: ${type === "sticky" ? "Miro Sticky Note" : type.toUpperCase()}`);
+    toast.success(
+      t("toast.shapeAdded", { nama: type === "sticky" ? "Miro Sticky Note" : type.toUpperCase() })
+    );
   };
 
   const handleAddNewNodeAtPosition = (
@@ -1968,6 +2242,16 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     let fStyle: FlowNode["fontStyle"] = "sans";
     let alignment: FlowNode["align"] = "center";
     let bdStyle: FlowNode["borderStyle"] = "solid";
+
+    // #541 — switch di bawah hanya menyebut sebagian tipe; sisanya lahir sebagai
+    // kotak 140x70, jadi lingkaran jadi telur dan panah jadi papan. Peta dibaca
+    // SEBELUM switch supaya kasus yang sudah ada tetap menang.
+    const ukuranLahir = UKURAN_BENTUK[type];
+    if (ukuranLahir) {
+      width = ukuranLahir.width;
+      height = ukuranLahir.height;
+      if (ukuranLahir.fontSize) fSize = ukuranLahir.fontSize;
+    }
 
     switch (type) {
       case "sticky":
@@ -2028,7 +2312,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     recordHistory(nextNodes, edges);
     setSelectedNodeId(id);
     setSelectedEdgeId(null);
-    toast.success(`Ditambahkan: ${label}`);
+    toast.success(t("toast.shapeAdded", { nama: label }));
   };
 
   // Node Drags & Canvas Window Pans
@@ -2080,9 +2364,23 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setSelectedEdgeId(null);
     setCopiedNodes([]);
 
-    if (activeTool === "hand" || isSpacePressed || e.button === 1 || e.shiftKey) {
+    // #546 — klik di luar bentuk membatalkan mode sambung. Sebelumnya mode ini
+    // hanya selesai lewat Escape atau klik port tujuan, sehingga siapa pun yang
+    // salah menekan paku sambung lalu mengklik kosong dibiarkan "menarik garis"
+    // selamanya: garis bantu + titik ungu terus menempel di kursor.
+    if (connectSourceId) setConnectSourceId(null);
+
+    // #540 — papan mengikuti tangan: klik-tahan di kanvas kosong MENGGESER papan
+    // (dulu: hanya tool tangan / spasi / tombol tengah, sementara drag biasa
+    // menggambar kerangka seleksi sehingga papan terasa mati). Seleksi kotak
+    // pindah ke Shift+drag dan tetap menyeleksi bentuk yang tersentuh.
+    const seleksiKotak = e.shiftKey;
+    if (
+      !seleksiKotak &&
+      (activeTool === "hand" || isSpacePressed || e.button === 1 || activeTool === "select")
+    ) {
       startCanvasPanning(e.clientX, e.clientY);
-    } else if (activeTool === "select") {
+    } else if (seleksiKotak && activeTool === "select") {
       const rect = canvasContainerRef.current?.getBoundingClientRect();
       if (rect) {
         setMarqueeBox({
@@ -2138,7 +2436,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setNodes(nextNodes);
     setSelectedNodeId(newNodeId);
     recordHistory(nextNodes, edges);
-    toast.success("Catatan Miro-style ditambahkan via klik ganda! 💡");
+    toast.success(t("toast.miroNoteAdded"));
   };
 
   const handleResizeMouseDown = (
@@ -2164,8 +2462,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   const handleCanvasMouseMove = (e: React.MouseEvent) => {
-    // Track cursor coordinates relative to infinite canvas (Miro-style coordinate info HUD)
-    if (canvasContainerRef.current) {
+    // Item #520 — posisi kursor hanya dibutuhkan garis bantu penghubung, yaitu
+    // saat pengguna SEDANG menarik koneksi. Sebelumnya state ini disetel pada
+    // SETIAP event mousemove; karena <FlowchartEdges> menerimanya sebagai props,
+    // satu kibasan mouse memaksa seluruh kanvas render ulang — termasuk rute
+    // tiap garis (terukur 105 ms untuk 25 bentuk / 35 garis sesudah rute
+    // dioptimasi, 298 ms sebelum itu). HUD koordinat yang dulu membaca nilai
+    // ini sudah disembunyikan ("HIDDEN AS REQUESTED" di blok bawah), jadi tidak
+    // ada tampilan yang berubah.
+    if (connectSourceId && canvasContainerRef.current) {
       const rect = canvasContainerRef.current.getBoundingClientRect();
       const relativeX = e.clientX - rect.left;
       const relativeY = e.clientY - rect.top;
@@ -2300,7 +2605,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const handleCanvasMouseUp = () => {
     if (marqueeBox && canvasContainerRef.current) {
       if (copiedNodes.length > 0) {
-        toast.info(`${copiedNodes.length} objek diblok (siap digeser/disalin/dihapus).`);
+        toast.info(t("toast.nodesSelected", { count: copiedNodes.length }));
       }
       setMarqueeBox(null);
     }
@@ -2320,40 +2625,173 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   // Edge link addition
-  const handleConnectPortClick = (nodeId: string, portName: string) => {
+  /**
+   * #548 — menekan paku kini MEMULAI seretan sambungan, bukan hanya menandai
+   * sumber lalu menunggu klik kedua. `portName` dulu dibuang di fungsi ini
+   * padahal tooltips-nya ("Tarik panah dari sisi atas") sudah menjanjikan
+   * gerakan ini sejak lama.
+   */
+  const handleConnectPortClick = (
+    nodeId: string,
+    _sisi: string,
+    e?: { clientX: number; clientY: number }
+  ) => {
+    const rect = canvasContainerRef.current?.getBoundingClientRect();
+    if (e && rect) {
+      awalSeretSambung.current = {
+        x: Math.round((e.clientX - rect.left - panOffset.x) / zoomLevel),
+        y: Math.round((e.clientY - rect.top - panOffset.y) / zoomLevel),
+      };
+    }
+    setSeretSambung(nodeId);
     handleConnectClick(nodeId);
+  };
+
+  /** Satu jalur menambah garis: dipakai mode klik dan mode tarik. */
+  const tambahSambungan = (dari: string, ke: string) => {
+    if (dari === ke) {
+      toast.error(t("toast.connectSelf"));
+      return false;
+    }
+    const sudahAda = edges.some((edge) => edge.fromNodeId === dari && edge.toNodeId === ke);
+    if (sudahAda) {
+      toast.info(t("toast.connectionExists"));
+      return false;
+    }
+    const id = "edge_" + Date.now();
+    const nextEdges = [...edges, { id, fromNodeId: dari, toNodeId: ke }];
+    setEdges(nextEdges);
+    recordHistory(nodes, nextEdges);
+    toast.success(t("toast.arrowAdded"));
+    return true;
+  };
+
+  /** Bentuk paling atas yang memuat sebuah titik ruang papan; null bila kosong. */
+  const bentukDiTitik = (x: number, y: number) => {
+    for (let i = nodes.length - 1; i >= 0; i--) {
+      const n = nodes[i];
+      if (x >= n.x && x <= n.x + (n.width || 130) && y >= n.y && y <= n.y + (n.height || 70))
+        return n.id;
+    }
+    return null;
   };
 
   const handleConnectClick = (nodeId: string) => {
     if (!connectSourceId) {
       setConnectSourceId(nodeId);
-      toast.info("Pilih bentuk TUJUAN untuk menyambung alur.");
+      // #546 — garis bantu berangkat dari bentuk asal, bukan dari posisi kursor
+      // terakhir. `hoverCoords` tidak pernah direset, jadi tanpa baris ini sambungan
+      // baru langsung lahir dengan titik ungu nyasar di sudut papan (dilaporkan
+      // pemilik papan 26 Sep: "saat membuat garis ada titik yang bergerak").
+      setHoverCoords(getNodeCenter(nodeId));
+      toast.info(t("toast.pickTargetShape"));
     } else {
       if (connectSourceId === nodeId) {
-        toast.error("Tidak dapat menghubungkan bentuk ke dirinya sendiri.");
+        toast.error(t("toast.connectSelf"));
         setConnectSourceId(null);
         return;
       }
-
-      const relationExists = edges.some(
-        (edge) => edge.fromNodeId === connectSourceId && edge.toNodeId === nodeId
-      );
-      if (relationExists) {
-        toast.info("Hubungan sudah ada.");
-      } else {
-        const id = "edge_" + Date.now();
-        const nextEdges = [...edges, { id, fromNodeId: connectSourceId, toNodeId: nodeId }];
-        setEdges(nextEdges);
-        recordHistory(nodes, nextEdges);
-        toast.success("Anak panah alur berhasil ditambahkan!");
-      }
-
+      tambahSambungan(connectSourceId, nodeId);
       setConnectSourceId(null);
       setActiveTool("select");
     }
   };
 
+  /**
+   * #548 — tarik-tahan-lepas dari paku menyelesaikan sambungan seperti di Miro.
+   *
+   * Dulu satu-satunya jalan adalah klik-lalu-klik, dan klik kedua hanya mau
+   * mendarat di paku 14 piksel atau di badan bentuk saat tool "connect" aktif —
+   * padahal masuk lewat paku tidak pernah mengaktifkan tool itu. Sasaran dicari
+   * dari KOORDINAT PAPAN, bukan `elementFromPoint`, supaya uji bisa menjalankan
+   * urutan manusia (tekan paku, gerakkan, lepas di atas bentuk) dan tidak bergantung
+   * pada layout yang jsdom tidak lakukan.
+   *
+   * `setHoverCoords` dibatasi satu kali per frame: tanpa `requestAnimationFrame`
+   * ini, setiap event mousemove (bisa 120/detik pada mouse presisi tinggi)
+   * memicu render seluruh papan — persis keluhan "tidak responsif" yang dilaporkan.
+   */
+  useEffect(() => {
+    if (!seretSambung) return;
+
+    let raf = 0;
+    let berikut: { x: number; y: number } | null = null;
+
+    const papanDari = (cx: number, cy: number) => {
+      const rect = canvasContainerRef.current?.getBoundingClientRect();
+      if (!rect) return null;
+      return {
+        x: Math.round((cx - rect.left - panOffset.x) / zoomLevel),
+        y: Math.round((cy - rect.top - panOffset.y) / zoomLevel),
+      };
+    };
+
+    const onMove = (e: MouseEvent) => {
+      berikut = papanDari(e.clientX, e.clientY);
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        if (berikut) setHoverCoords(berikut);
+      });
+    };
+
+    const onUp = (e: MouseEvent) => {
+      const titik = papanDari(e.clientX, e.clientY);
+      const target = titik ? bentukDiTitik(titik.x, titik.y) : null;
+      if (target && target !== seretSambung) {
+        tambahSambungan(seretSambung, target);
+        setConnectSourceId(null);
+        setActiveTool("select");
+      } else {
+        const awal = awalSeretSambung.current;
+        const digerakkan = !!titik && !!awal && Math.hypot(titik.x - awal.x, titik.y - awal.y) > 8;
+        // Dilepas di tempat kosong SETELAH bergerak = batal. Dilepas tanpa
+        // bergerak = klik biasa, mode klik-lalu-klik dibiarkan hidup.
+        if (digerakkan) setConnectSourceId(null);
+      }
+      setSeretSambung(null);
+      awalSeretSambung.current = null;
+    };
+
+    window.addEventListener("mousemove", onMove, { passive: true });
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      if (raf) cancelAnimationFrame(raf);
+    };
+    // nodes/edges ikut karena penambah garis dan uji sasaran membacanya.
+  }, [seretSambung, panOffset.x, panOffset.y, zoomLevel, nodes, edges]);
+
   // Node / Arrow delete handler
+  /**
+   * Simpan bentuk atau gaya goresan satu garis — dikirim bilah gaya yang muncul
+   * saat garis diklik. Dulu tidak mungkin dilakukan sama sekali: FlowEdge tidak
+   * punya field gaya, dan satu-satunya pengatur bentuk jalur (connectorType) tidak
+   * pernah bisa diubah dari antarmuka mana pun.
+   */
+  const handleEdgePatch = (id: string, patch: Partial<FlowEdge>) => {
+    if (!isWorkspaceEditable) return;
+    const updatedEdges = edges.map((edge) => (edge.id === id ? { ...edge, ...patch } : edge));
+    setEdges(updatedEdges);
+    recordHistory(nodes, updatedEdges);
+  };
+
+  /**
+   * Putuskan SATU garis terpilih. `handleDeleteSelected` sengaja tidak dipakai di
+   * sini: cabang pertamanya memeriksa `copiedNodes` SEBELUM `selectedEdgeId`, jadi
+   * sesudah sekali Ctrl+C menekan "putuskan" pada sebuah garis malah menghapus
+   * bentuk-bentuk yang tersalin. Untuk aksi pada baris, sasaran aksinya harus garis.
+   */
+  const handlePutuskanGaris = () => {
+    if (!isWorkspaceEditable || !selectedEdgeId) return;
+    const updatedEdges = edges.filter((edge) => edge.id !== selectedEdgeId);
+    setEdges(updatedEdges);
+    recordHistory(nodes, updatedEdges);
+    setSelectedEdgeId(null);
+    toast.success(t("toast.connectionCancelled"));
+  };
+
   const handleDeleteSelected = () => {
     if (selectedNodeId) {
       const updatedNodes = nodes.filter((n) => n.id !== selectedNodeId);
@@ -2364,7 +2802,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       setEdges(updatedEdges);
       recordHistory(updatedNodes, updatedEdges);
       setSelectedNodeId(null);
-      toast.success("Komponen berhasil dikosongkan.");
+      toast.success(t("toast.componentCleared"));
     } else if (copiedNodes.length > 0) {
       const copiedIds = copiedNodes.map((n) => n.id);
       const updatedNodes = nodes.filter((n) => !copiedIds.includes(n.id));
@@ -2375,15 +2813,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       setEdges(updatedEdges);
       recordHistory(updatedNodes, updatedEdges);
       setCopiedNodes([]);
-      toast.success(`${copiedIds.length} blok komponen berhasil dihapus.`);
+      toast.success(t("toast.nodesDeleted", { count: copiedIds.length }));
     } else if (selectedEdgeId) {
       const updatedEdges = edges.filter((edge) => edge.id !== selectedEdgeId);
       setEdges(updatedEdges);
       recordHistory(nodes, updatedEdges);
       setSelectedEdgeId(null);
-      toast.success("Hubungan alur dibatalkan.");
+      toast.success(t("toast.connectionCancelled"));
     } else {
-      toast.info("Pilih bentuk atau garir alur terlebih dahulu untuk menghapusnya.");
+      toast.info(t("toast.pickShapeToDelete"));
     }
   };
 
@@ -2401,7 +2839,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setNodes(nextNodes);
     recordHistory(nextNodes, edges);
     setSelectedNodeId(id);
-    toast.success("Simbol diduplikat!");
+    toast.success(t("toast.symbolDuplicated"));
   };
 
   // Right-click context menu specific handlers
@@ -2416,7 +2854,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     if (selectedNodeId === nodeId) {
       setSelectedNodeId(null);
     }
-    toast.success("Komponen berhasil dihapus.");
+    toast.success(t("toast.componentDeleted"));
   };
 
   const handleContextMenuEditProperties = (nodeId: string) => {
@@ -2429,7 +2867,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     const updated = nodes.map((n) => (n.id === nodeId ? { ...n, color: newColor } : n));
     setNodes(updated);
     recordHistory(updated, edges);
-    toast.success(`Warna komponen berhasil diubah ke ${newColor.toUpperCase()}.`);
+    toast.success(t("toast.colorChanged", { warna: newColor.toUpperCase() }));
   };
 
   const handleContextMenuDuplicate = (nodeId: string) => {
@@ -2454,7 +2892,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   const getLinkedTaskDetails = (taskId?: string) => {
-    if (!taskId) return null;
+    if (!taskId) return undefined;
     return tasks.find((t) => t.id === taskId);
   };
 
@@ -2506,162 +2944,140 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           handleSelectFlowchart={handleSelectFlowchart}
           setIsEditorActive={setIsEditorActive}
           canModifyFlowchart={canModifyFlowchart}
+          openEditModal={openEditModal}
           handleDeleteFlowchart={handleDeleteFlowchart}
         />
       ) : (
-        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto bg-surface-sunken p-4 md:p-6 space-y-4 animate-in fade-in duration-500 font-sans">
+        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto bg-surface-sunken p-4 md:p-6 space-y-4 font-sans">
           {/* VIEW-PORT UTAMA (DASHBOARD DENGAN EMBED VIEWER & TOGGLE KANVAS) */}
           <div className="flex-1 flex flex-col min-h-[600px] bg-transparent relative mb-8">
             {!selectedFlowId ? (
               <div className="flex-1 flex flex-col items-center justify-center p-8 bg-surface border border-border-subtle rounded-lg shadow-soft">
-                <div className="w-16 h-16 bg-surface border border-border-faint shadow-soft rounded-xl flex items-center justify-center mb-4 text-violet-600">
+                <div className="w-16 h-16 bg-surface border border-border-faint shadow-soft rounded-xl flex items-center justify-center mb-4 text-primary">
                   <FileText className="w-6 h-6 animate-pulse" />
                 </div>
                 <h2 className="text-base font-medium text-content-strong mb-1">
-                  Manajemen Dokumentasi
+                  {t("flowchart.canvasDocManagement")}
                 </h2>
                 <p className="text-xs text-content-muted font-medium">
-                  Pilih dokumen di sidebar atau buat baru untuk melihat preview dan merancang alur.
+                  {t("flowchart.pickADocumentInThe")}
                 </p>
                 <button
                   onClick={openCreateModal}
-                  className="mt-4 flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white font-medium p-2.5 px-5 rounded-xl text-xs shadow-md transition-all active:scale-95"
+                  className="mt-4 btn-animation waves-effect waves-light btn-primary h-9 px-4 rounded-lg text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-xs"
                 >
-                  <Plus className="w-4 h-4" /> Tambah Dokumen Baru
+                  <Plus className="w-4 h-4" /> {t("flowchart.uploadNewDocument")}
                 </button>
               </div>
             ) : (
               <div className="flex-1 flex flex-col min-h-0 relative space-y-4">
-                {/* Panel 1: Top Actions */}
-                <div className="bg-surface border border-border-subtle rounded-md p-4 flex items-center justify-between shadow-xs shrink-0">
-                  <button
-                    onClick={() => {
-                      setIsEditorActive(false);
-                      setSelectedFlowId(null);
-                      setCurrentPage(1);
-                    }}
-                    className="flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/15 border border-primary/20 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0 shadow-2xs"
-                  >
-                    ← Back to Flowchart List
-                  </button>
+                {/* #425 — DetailViewChrome: Back+Edit+Delete kiri, judul Velzon 15px */}
+                <DetailViewChrome
+                  backLabel={t("flowchart.backToList")}
+                  onBack={() => {
+                    sinkronSaatKeluar();
+                    setIsEditorActive(false);
+                    setSelectedFlowId(null);
+                    setCurrentPage(1);
+                  }}
+                  title={currentFlowMetadata?.name}
+                  titleIcon={<Workflow className="w-4 h-4 text-primary shrink-0" />}
+                  canEdit={!!(currentFlowMetadata && canModifyFlowchart(currentFlowMetadata))}
+                  canDelete={!!(currentFlowMetadata && canModifyFlowchart(currentFlowMetadata))}
+                  onEdit={(e) => currentFlowMetadata && openEditModal(currentFlowMetadata, e)}
+                  onDelete={(e) =>
+                    currentFlowMetadata && handleDeleteFlowchart(currentFlowMetadata.id, e)
+                  }
+                  editTitle={t("flowchart.editMetadata")}
+                  deleteTitle={t("flowchart.deleteDocument")}
+                  meta={
+                    <>
+                      {currentFlowMetadata?.category === "PRD" && (
+                        <span className="px-2.5 py-1 text-[10px] font-normal uppercase tracking-normal bg-surface-muted text-content-body border border-border-subtle/80 rounded-full">
+                          {t("flowchart.prd")}
+                        </span>
+                      )}
+                      {currentFlowMetadata?.category === "Panduan" && (
+                        <span className="px-2.5 py-1 text-[10px] font-normal uppercase tracking-normal bg-blue-500/10 text-blue-700 border border-blue-500/30 rounded-full">
+                          {t("flowchart.guideline")}
+                        </span>
+                      )}
+                      {currentFlowMetadata?.category === "Laporan" && (
+                        <span className="px-2.5 py-1 text-[10px] font-normal uppercase tracking-normal bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 rounded-full">
+                          {t("flowchart.report")}
+                        </span>
+                      )}
+                      {!currentFlowMetadata?.category && (
+                        <span className="px-2.5 py-1 text-[10px] font-normal uppercase tracking-normal bg-primary/10 text-primary border border-primary/30 rounded-full">
+                          {t("flowchart.general")}
+                        </span>
+                      )}
 
-                  {/* Action Buttons & View Mode Toggle */}
-                  <div className="flex items-center flex-wrap gap-3 shrink-0">
-                    {/* View Mode Segmented Control Toggle */}
+                      <span className="text-xs text-content-muted font-medium flex items-center gap-1">
+                        <User className="w-3 h-3" /> {t("flowchart.by")}{" "}
+                        <strong className="text-content-strong font-semibold">
+                          {tampilanNamaPembuat(currentFlowMetadata, getResolvedAuthor())}
+                        </strong>
+                      </span>
+
+                      <span className="text-content-subtle">•</span>
+
+                      <span className="text-xs text-content-subtle font-medium flex items-center gap-1">
+                        {t("flowchart.updatedAt")}{" "}
+                        {currentFlowMetadata?.lastEditedAt || currentFlowMetadata?.createdAt}
+                      </span>
+
+                      {linkedEpic && (
+                        <>
+                          <span className="text-content-subtle">•</span>
+                          <span
+                            className="text-[10px] font-medium bg-primary/10 border border-primary/30 px-2.5 py-[3px] rounded-full truncate max-w-[180px]"
+                            title={linkedEpic.title}
+                          >
+                            {t("flowchart.epic")} {linkedEpic.title}
+                          </span>
+                        </>
+                      )}
+                    </>
+                  }
+                  description={
+                    currentFlowMetadata?.description ? (
+                      <p className="text-xs text-content-muted font-medium max-w-3xl leading-relaxed mt-2">
+                        {currentFlowMetadata.description}
+                      </p>
+                    ) : undefined
+                  }
+                  trailing={
                     <div className="bg-surface-muted p-1 rounded-md flex items-center border border-border-subtle/60 shadow-inner">
                       <button
+                        type="button"
                         onClick={() => setRightViewMode("embed")}
                         className={cn(
-                          "px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
+                          "px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
                           rightViewMode === "embed"
                             ? "bg-surface text-content shadow-2xs font-semibold"
                             : "text-content-muted hover:text-content-strong"
                         )}
                       >
-                        <BookOpen className="w-3.5 h-3.5" /> Document List
+                        <BookOpen className="w-3.5 h-3.5" /> {t("flowchart.documentList")}
                       </button>
                       <button
+                        type="button"
                         onClick={() => setRightViewMode("canvas")}
                         className={cn(
-                          "px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
+                          "px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
                           rightViewMode === "canvas"
                             ? "bg-surface text-content shadow-2xs font-semibold"
                             : "text-content-muted hover:text-content-strong"
                         )}
                       >
-                        <Workflow className="w-3.5 h-3.5" /> Flow Diagram
+                        <Workflow className="w-3.5 h-3.5" /> {t("flowchart.flowDiagram")}
                       </button>
                     </div>
+                  }
+                />
 
-                    {/* Edit & Delete Action Buttons */}
-                    {currentFlowMetadata && canModifyFlowchart(currentFlowMetadata) && (
-                      <div className="flex items-center gap-1.5 bg-surface-muted p-1 rounded-md border border-border-subtle/60">
-                        <button
-                          onClick={(e) => openEditModal(currentFlowMetadata, e)}
-                          className="p-1.5 bg-surface hover:bg-surface-sunken text-content-secondary hover:text-primary rounded-md transition-all cursor-pointer shadow-2xs border border-border-subtle/80"
-                          title="Edit document metadata"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={(e) => handleDeleteFlowchart(currentFlowMetadata.id, e)}
-                          className="p-1.5 bg-surface hover:bg-rose-50 text-content-secondary hover:text-rose-600 rounded-md transition-all cursor-pointer shadow-2xs border border-border-subtle/80"
-                          title="Delete document"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Panel 2: Meta Context & Title */}
-                <div className="bg-surface border border-border-subtle rounded-lg p-5 md:p-6 shadow-soft shrink-0">
-                  <div className="flex flex-wrap items-center gap-2 select-none mb-3">
-                    {/* Category Badge */}
-                    {currentFlowMetadata?.category === "PRD" && (
-                      <span className="px-2.5 py-1 text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-surface-muted text-content-body border border-border-subtle/80 rounded-full">
-                        📄 PRD
-                      </span>
-                    )}
-                    {currentFlowMetadata?.category === "Panduan" && (
-                      <span className="px-2.5 py-1 text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200/80 rounded-full">
-                        📖 Panduan
-                      </span>
-                    )}
-                    {currentFlowMetadata?.category === "Laporan" && (
-                      <span className="px-2.5 py-1 text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-full">
-                        📊 Laporan
-                      </span>
-                    )}
-                    {!currentFlowMetadata?.category && (
-                      <span className="px-2.5 py-1 text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-violet-50 text-violet-700 border border-violet-200/80 rounded-full">
-                        ⚙️ Umum
-                      </span>
-                    )}
-
-                    {/* Creator Info */}
-                    <span className="text-xs text-content-muted font-medium flex items-center gap-1">
-                      <User className="w-3 h-3" /> Oleh{" "}
-                      <strong className="text-content-strong">
-                        {currentFlowMetadata?.createdBy || "Azlan Irwan"}
-                      </strong>
-                    </span>
-
-                    <span className="text-slate-300">•</span>
-
-                    {/* Date */}
-                    <span className="text-xs sm:text-[10px] text-content-subtle font-medium flex items-center gap-1">
-                      Diperbarui{" "}
-                      {currentFlowMetadata?.lastEditedAt || currentFlowMetadata?.createdAt}
-                    </span>
-
-                    {linkedEpic && (
-                      <>
-                        <span className="text-slate-300">•</span>
-                        <span
-                          className="text-xs sm:text-[10px] font-medium text-indigo-750 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full truncate max-w-[180px]"
-                          title={linkedEpic.title}
-                        >
-                          🎯 Epic: {linkedEpic.title}
-                        </span>
-                      </>
-                    )}
-                  </div>
-
-                  <h2 className="text-xl md:text-2xl font-medium text-content tracking-tight leading-snug flex items-center gap-2">
-                    <Workflow className="w-6 h-6 text-violet-600 shrink-0" />
-                    <span className="truncate">{currentFlowMetadata?.name}</span>
-                  </h2>
-
-                  {currentFlowMetadata?.description && (
-                    <p className="text-xs text-content-muted font-medium max-w-3xl leading-relaxed mt-2">
-                      {currentFlowMetadata.description}
-                    </p>
-                  )}
-                </div>
-
-                {/* Panel 3: Main Viewport (Canvas / Viewer) */}
+                {/* Main Viewport (Canvas / Viewer) */}
                 <div className="bg-surface border border-border-subtle rounded-lg shadow-soft flex-1 min-h-[600px] relative flex flex-col overflow-hidden">
                   {rightViewMode === "embed" ? (
                     /* 1. EMBED VIEWER (SPLIT PANE) */
@@ -2670,16 +3086,16 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       <div className="w-full flex-1 bg-surface-sunken/50 flex flex-col">
                         {/* Header Left Pane */}
                         <div className="p-4 border-b border-border-subtle flex items-center justify-between bg-surface shrink-0">
-                          <h4 className="text-sm font-medium text-content-strong flex items-center gap-2">
-                            <FileText className="w-5 h-5 text-violet-600" />
-                            Daftar Dokumen
+                          <h4 className="text-sm font-semibold text-content-strong flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-primary" />
+                            {t("flowchart.documentList")}
                           </h4>
                           <button
                             onClick={openUploadDocumentModal}
-                            className="p-2 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded text-xs transition-colors cursor-pointer shadow-soft active:scale-95 flex items-center gap-2"
-                            title="Upload Dokumen Baru"
+                            className="p-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium rounded text-xs transition-colors cursor-pointer shadow-soft active:scale-95 flex items-center gap-2"
+                            title={t("flowchart.uploadNewDocument")}
                           >
-                            <Plus className="w-4 h-4" /> Tambah Dokumen
+                            <Plus className="w-4 h-4" /> {t("flowchart.addDocument")}
                           </button>
                         </div>
                         {/* List Items */}
@@ -2690,10 +3106,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               {currentFlowMetadata.documents.map((doc, idx) => (
                                 <div
                                   key={doc.id}
-                                  className="p-4 rounded-xl border border-border-subtle bg-surface flex flex-col gap-4 shadow-soft hover:shadow hover:border-violet-300 transition-all group"
+                                  className="p-4 rounded-xl border border-border-subtle bg-surface flex flex-col gap-4 shadow-soft hover:shadow hover:border-primary/30 transition-all group"
                                 >
                                   <div className="flex items-start justify-between gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
+                                    <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
                                       <FileText className="w-5 h-5" />
                                     </div>
                                     <div className="flex flex-col flex-1 min-w-0">
@@ -2705,7 +3121,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                       </span>
                                       {doc.fileSize && (
                                         <span className="text-xs sm:text-[10px] text-content-subtle mt-1">
-                                          {(doc.fileSize / 1024 / 1024).toFixed(2)} MB
+                                          {t("rakit.sizeMb", {
+                                            ukuran: (doc.fileSize / 1024 / 1024).toFixed(2),
+                                          })}
                                         </span>
                                       )}
                                     </div>
@@ -2714,9 +3132,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                     <a
                                       href={doc.fileData}
                                       download={doc.fileName}
-                                      className="flex items-center gap-2 text-xs font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors"
+                                      className="flex items-center gap-2 text-xs font-medium text-primary hover:text-primary bg-primary/10 hover:bg-primary/15 px-3 py-1.5 rounded-lg transition-colors"
                                     >
-                                      <Download className="w-3.5 h-3.5" /> Download
+                                      <Download className="w-3.5 h-3.5" /> {t("flowchart.download")}
                                     </a>
                                   </div>
                                 </div>
@@ -2728,11 +3146,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <FileText className="w-8 h-8 text-content-subtle opacity-50" />
                               </div>
                               <h3 className="text-sm font-medium text-content-body mb-2">
-                                Belum Ada Dokumen
+                                {t("flowchart.noDocuments")}
                               </h3>
                               <span className="text-xs text-content-muted font-medium max-w-sm">
-                                Anda belum menambahkan dokumen apapun ke dalam flowchart ini.
-                                Silakan klik tombol "Tambah Dokumen" untuk mulai mengunggah file.
+                                {t("flowchart.noDocumentsHint")}
                               </span>
                             </div>
                           )}
@@ -2741,142 +3158,50 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                     </div>
                   ) : (
                     /* 2. HIGH-FIDELITY MIRO CANVAS WORKSPACE (DIAGRAM ALUR) */
-                    <div className="flex-1 relative overflow-hidden bg-surface flex flex-col h-full min-h-0">
+                    <div
+                      ref={papanRef}
+                      className="flex-1 relative overflow-hidden bg-surface flex flex-col h-full min-h-0"
+                    >
                       {/* FLOATING QUICK CANVAS CONTROL BAR ON TOP OF THE BOARD */}
                       <CanvasToolbar
-                        currentFlowMetadata={currentFlowMetadata}
-                        canvasTheme={canvasTheme}
-                        setCanvasTheme={setCanvasTheme}
                         isSnapToGrid={isSnapToGrid}
                         setIsSnapToGrid={setIsSnapToGrid}
                         handleExportJPG={handleExportJPG}
                         handleExportJSON={handleExportJSON}
                         isRightSidebarOpen={isRightSidebarOpen}
                         setIsRightSidebarOpen={setIsRightSidebarOpen}
+                        isFullscreen={papanPenuh}
+                        onToggleFullscreen={togglePapanPenuh}
                       />
 
-                      {/* FLOATING MIRO TOOLBAR (SISI KIRI CANVAS) */}
-                      <div
-                        className={cn(
-                          "absolute top-28 md:top-24 z-20 flex flex-col gap-2.5 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-2.5 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] shrink-0 select-none items-center transition-all duration-300 left-4"
-                        )}
-                      >
-                        {/* Active tools selector */}
-                        <button
-                          onClick={() => {
-                            setActiveTool("select");
-                            setConnectSourceId(null);
-                          }}
-                          className={cn(
-                            "p-2 rounded-lg transition-all",
-                            activeTool === "select"
-                              ? "bg-violet-650 text-white shadow-md scale-105"
-                              : "text-slate-650 hover:bg-surface-muted"
-                          )}
-                          title="Pointer Selector tool"
-                        >
-                          <MousePointer className="w-4 h-4" />
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            setActiveTool("hand");
-                            setConnectSourceId(null);
-                          }}
-                          className={cn(
-                            "p-2 rounded-lg transition-all",
-                            activeTool === "hand"
-                              ? "bg-violet-650 text-white shadow-md scale-105"
-                              : "text-slate-650 hover:bg-surface-muted"
-                          )}
-                          title="Hand Panner tool"
-                        >
-                          <Hand className="w-4 h-4" />
-                        </button>
-
-                        <div className="w-6 h-px bg-slate-200" />
-
-                        {/* Quick Sticky Note Adder */}
-                        <button
-                          onClick={() => handleAddNewNode("sticky", "yellow")}
-                          className="p-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 rounded-lg transition-all flex flex-col items-center shrink-0 w-10"
-                          title="Quick Yellow Sticky Note"
-                        >
-                          <StickyNote className="w-4 h-4 text-amber-500 fill-amber-300" />
-                          <span className="text-xs sm:text-[10px] sm:text-[7.5px] font-medium uppercase tracking-tight text-amber-600 mt-0.5">
-                            Sticky
-                          </span>
-                        </button>
-
-                        {/* Shapes COLLECTION TRIGGER */}
-                        <ShapePalette
-                          isShapeDropdownOpen={isShapeDropdownOpen}
-                          setIsShapeDropdownOpen={setIsShapeDropdownOpen}
-                          selectedAddColor={selectedAddColor}
-                          setSelectedAddColor={setSelectedAddColor}
-                          shapeSearchQuery={shapeSearchQuery}
-                          setShapeSearchQuery={setShapeSearchQuery}
-                          expandedGroups={expandedGroups}
-                          toggleGroupExpanded={toggleGroupExpanded}
-                          handleAddNewNode={handleAddNewNode}
-                        />
-
-                        {/* Quick Link connection helper */}
-                        <button
-                          onClick={() => {
-                            setActiveTool("connect");
-                            setConnectSourceId(null);
-                            toast.info(
-                              "Mode Anak Panah Aktif. Klik bentuk asal di Canvas, lalu klik bentuk penerima."
-                            );
-                          }}
-                          className={cn(
-                            "p-2 rounded-lg transition-all flex flex-col items-center w-10 border border-border-faint",
-                            activeTool === "connect"
-                              ? "bg-amber-505 bg-amber-400 text-content"
-                              : "text-slate-650 hover:bg-surface-muted"
-                          )}
-                          title="Anak Panah Penghubung shapes"
-                        >
-                          <ArrowRight className="w-4 h-4" />
-                          <span className="text-xs sm:text-[10px] sm:text-[7.5px] font-medium uppercase tracking-tight mt-0.5">
-                            Arrow
-                          </span>
-                        </button>
-
-                        <button
-                          onClick={() => handleAddNewNode("text")}
-                          className="p-2 hover:bg-surface-muted text-slate-650 rounded-lg transition-all flex flex-col items-center w-10"
-                          title="Tambahkan Teks dokumentasi"
-                        >
-                          <Type className="w-4 h-4 text-slate-505" />
-                          <span className="text-xs sm:text-[10px] sm:text-[7.5px] font-medium uppercase tracking-tight mt-0.5">
-                            Text
-                          </span>
-                        </button>
-
-                        <div className="w-6 h-px bg-slate-200" />
-
-                        {/* Quick tutorial indicator */}
-                        <div className="text-content-subtle hover:text-violet-600 transition-colors cursor-pointer">
-                          <HelpCircle
-                            className="w-4 h-4"
-                            onClick={() =>
-                              toast.info(
-                                "Gunakan menu ini untuk menambahkan komponen ke visual whiteboard. Anda dapat mengubah isi teks dengan mengetik langsung diatas bentuk."
-                              )
-                            }
-                          />
-                        </div>
-                      </div>
+                      {/* FLOATING MIRO TOOLBAR (SISI KIRI) — #321 / #433 */}
+                      <CanvasToolRail
+                        activeTool={activeTool}
+                        setActiveTool={setActiveTool}
+                        setConnectSourceId={setConnectSourceId}
+                        handleAddNewNode={handleAddNewNode}
+                        isShapeDropdownOpen={isShapeDropdownOpen}
+                        setIsShapeDropdownOpen={setIsShapeDropdownOpen}
+                        selectedAddColor={selectedAddColor}
+                        setSelectedAddColor={setSelectedAddColor}
+                        shapeSearchQuery={shapeSearchQuery}
+                        setShapeSearchQuery={setShapeSearchQuery}
+                        expandedGroups={expandedGroups}
+                        toggleGroupExpanded={toggleGroupExpanded}
+                        setIsRightSidebarOpen={setIsRightSidebarOpen}
+                      />
 
                       {/* ACTIVE DRAWING SHEET CANVAS (THE BASE BACKGROUND LAYER) */}
                       <div
                         className={cn(
-                          "absolute inset-0 w-full h-full overflow-hidden z-0 transition-colors duration-300 rounded-xl",
-                          canvasTheme === "miro"
-                            ? "bg-surface/95 text-slate-850 grid-dots-light"
-                            : "bg-[#0a1124] text-sky-100 grid-blueprint-dark border-slate-800"
+                          // #547 — papan ikut tema aplikasi, jadi latarnya memakai
+                          // token `surface` yang sudah berbalik sendiri saat aplikasi
+                          // gelap. Sebelumnya gelap menulis nilai keras `bg-[#0a1124]`
+                          // + `text-sky-100` di atas token, dan dua sumber itu
+                          // bertabrakan (keluhan pemilik papan 26 Sep). Yang tersisa
+                          // di sini hanya POLA kisi, bukan warna.
+                          "absolute inset-0 w-full h-full overflow-hidden z-0 transition-colors duration-300 rounded-xl bg-surface/95",
+                          canvasTheme === "miro" ? "grid-dots-light" : "grid-blueprint-dark"
                         )}
                         onMouseDown={handleCanvasMouseDown}
                         onMouseMove={handleCanvasMouseMove}
@@ -2905,10 +3230,29 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             });
                           }
                         }}
-                        ref={canvasContainerRef}
+                        onDragOver={(e) => {
+                          // Only activate canvas file-drop overlay when a file is being dragged (not node drag)
+                          if (e.dataTransfer.types.includes("Files")) {
+                            e.preventDefault();
+                            setCanvasDragOver(true);
+                          }
+                        }}
+                        onDragLeave={(e) => {
+                          // Only reset if leaving the canvas boundary (not entering a child element)
+                          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                            setCanvasDragOver(false);
+                          }
+                        }}
+                        onDrop={handleCanvasFileDrop}
+                        ref={pasangKanvas}
                         style={{
+                          // #540 — dengan tool panah, kanvas kosong kini ikut
+                          // digenggam; bentuk tetap punya kursornya sendiri.
                           cursor:
-                            activeTool === "hand" || isSpacePressed || isPanning
+                            activeTool === "hand" ||
+                            activeTool === "select" ||
+                            isSpacePressed ||
+                            isPanning
                               ? isPanning
                                 ? "grabbing"
                                 : "grab"
@@ -2920,6 +3264,21 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               : `${30 * zoomLevel}px ${30 * zoomLevel}px`,
                         }}
                       >
+                        {/* Canvas-level file drag-drop overlay */}
+                        {canvasDragOver && (
+                          <div className="absolute inset-0 z-50 pointer-events-none flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-primary/60 bg-primary/5 backdrop-blur-sm transition-all">
+                            <div className="bg-surface/90 backdrop-blur-md border border-border-subtle rounded-2xl px-6 py-5 shadow-xl flex flex-col items-center gap-2 select-none">
+                              <Upload className="w-8 h-8 text-primary" aria-hidden="true" />
+                              <p className="text-sm font-semibold text-content-strong">
+                                Lepaskan untuk Impor Diagram
+                              </p>
+                              <p className="text-xs text-content-muted text-center">
+                                .drawio &nbsp;·&nbsp; .xml &nbsp;·&nbsp; .json &nbsp;·&nbsp; .csv
+                                &nbsp;·&nbsp; .mmd
+                              </p>
+                            </div>
+                          </div>
+                        )}
                         {/* Custom SVG styling injection */}
                         <style
                           dangerouslySetInnerHTML={{
@@ -2941,7 +3300,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 height: 5px;
               }
               .custom-scrollbar::-webkit-scrollbar-thumb {
-                background: #5c6270;
+                background: var(--color-content-muted);
                 border-radius: 4px;
               }
             `,
@@ -2999,7 +3358,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             setConnectSourceId={setConnectSourceId}
                             hoverCoords={hoverCoords}
                             connectorType={connectorType}
+                            zoomLevel={zoomLevel}
+                            onEdgePatch={handleEdgePatch}
+                            onDeleteEdge={handlePutuskanGaris}
+                            isEditable={isWorkspaceEditable}
                             getNodeCenter={getNodeCenter}
+                            draggingNodeId={draggingNodeId}
+                            resizingNodeId={resizingNodeId}
                           />
 
                           {/* RENDER DYNAMIC SHAPES */}
@@ -3032,6 +3397,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               getLinkedTaskDetails={getLinkedTaskDetails}
                               setSelectedTaskForDetail={setSelectedTaskForDetail}
                               setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
+                              suppressNodeOverlay={isRightSidebarOpen}
                             />
                           ))}
                         </div>
@@ -3049,41 +3415,54 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                         {/* Miro Coordinate & Element Stats Hover HUD overlay (HIDDEN AS REQUESTED) */}
                         {/* <div className={cn(
-              "absolute bottom-16 z-30 p-1.5 px-3 bg-slate-900/95 backdrop-blur-sm border border-slate-800 text-slate-300 shadow-xl rounded-xl flex items-center gap-2 text-xs sm:text-[10px] font-mono select-none transition-all duration-300",
+              "absolute bottom-16 z-30 p-1.5 px-3 bg-overlay/95 backdrop-blur-sm border border-border-inverse text-content-subtle shadow-xl rounded-xl flex items-center gap-2 text-xs sm:text-[10px] font-mono select-none transition-all duration-300",
               // HUD hidden coordinate info
               false ? "left-[356px]" : "left-4"
             )}>
               <span className="flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs sm:text-[11px] sm:text-[9px] text-emerald-400 font-medium uppercase tracking-wider">Canvas</span>
+                <span className="text-xs sm:text-[11px] text-emerald-400 font-normal uppercase tracking-normal">{t("flowchart.canvas")}</span>
               </span>
-              <div className="w-px h-3.5 bg-slate-750" />
-              <span className="font-medium">X: <span className="text-slate-100">{hoverCoords.x}</span> Y: <span className="text-slate-100">{hoverCoords.y}</span></span>
-              <div className="w-px h-3.5 bg-slate-750" />
-              <span className="text-violet-300 font-medium">{nodes.length} Objek</span>
+              <div className="w-px h-3.5" />
+              <span className="font-medium">X: <span className="text-content-inverse-strong">{hoverCoords.x}</span> Y: <span className="text-content-inverse-strong">{hoverCoords.y}</span></span>
+              <div className="w-px h-3.5" />
+              <span className="text-primary font-medium">{t("rakit.objectsCount", { count: nodes.length })}</span>
             </div> */}
 
-                        {/* FLOATING ACTION FLAPS OVERLAYS FOR ZERO-CLICK SIDEBAR EXPANSION */}
-                        {/* Left sidebar flap toggle deleted as requested by user to make canvas full */}
-
-                        {/* Right sidebar flap toggle */}
+                        {/* Right sidebar flap — #321: icon-only di HP */}
                         <button
-                          onClick={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
+                          type="button"
+                          onClick={() => {
+                            const next = !isRightSidebarOpen;
+                            setIsRightSidebarOpen(next);
+                            if (next) setIsShapeDropdownOpen(false);
+                          }}
                           className={cn(
-                            "absolute bottom-4 z-30 p-2 bg-surface/70 backdrop-blur hover:bg-surface/85 border border-border-subtle/40 text-content-body hover:text-violet-600 shadow-soft-lg rounded-xl transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 text-xs font-medium transition-all duration-300",
-                            isRightSidebarOpen ? "right-[356px]" : "right-4"
+                            "absolute z-30 p-2 bg-surface/70 backdrop-blur hover:bg-surface/85 border border-border-subtle/40 text-content-body hover:text-primary shadow-soft-lg rounded-xl transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 text-xs font-medium duration-300",
+                            isRightSidebarOpen
+                              ? "right-3 bottom-[min(58vh,30rem)] md:bottom-4 md:right-[304px]"
+                              : "right-3 bottom-4"
                           )}
-                          title="Toggle Panel Properti"
+                          title={t("flowchart.togglePropertiesPanel")}
                         >
                           <Edit3 className="w-3.5 h-3.5 text-current" />
-                          <span className="text-xs sm:text-[10px] uppercase tracking-wider">
-                            Editor Properti
+                          <span className="hidden sm:inline text-[11px]">
+                            {t("flowchart.propertiesEditor")}
                           </span>
-                          <span>{isRightSidebarOpen ? "▶" : "◀"}</span>
+                          <span className="hidden md:inline text-content-subtle">
+                            {isRightSidebarOpen ? "▶" : "◀"}
+                          </span>
                         </button>
 
-                        {/* FLOATING CANVAS ACTION RIBBON (CENTER DOCK) */}
-                        <div className="absolute left-1/2 -translate-x-1/2 bottom-4 z-30 flex items-center gap-1.5 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1.5 px-3 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] select-none max-w-[85%] md:max-w-full transition-all duration-300">
+                        {/* FLOATING CANVAS ACTION RIBBON (CENTER DOCK) — #321: naik/sembunyi saat sheet HP */}
+                        <div
+                          className={cn(
+                            "absolute left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1 px-2 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] select-none max-w-[90%] md:max-w-full transition-all duration-300",
+                            isRightSidebarOpen || isShapeDropdownOpen
+                              ? "max-md:opacity-0 max-md:pointer-events-none max-md:translate-y-4 bottom-4"
+                              : "bottom-4 opacity-100"
+                          )}
+                        >
                           {/* Undo Button */}
                           <button
                             onClick={handleUndoClick}
@@ -3091,10 +3470,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             className={cn(
                               "p-2 rounded-xl transition-all flex items-center justify-center",
                               historyIndex <= 0
-                                ? "text-slate-300 cursor-not-allowed"
-                                : "text-slate-750 hover:bg-surface-muted hover:text-violet-600 active:scale-95"
+                                ? "text-content-subtle cursor-not-allowed"
+                                : " hover:bg-surface-muted hover:text-primary active:scale-95"
                             )}
-                            title="Undo Gagal Langkah (Ctrl+Z)"
+                            title={t("flowchart.undo")}
                           >
                             <Undo className="w-3.5 h-3.5" />
                           </button>
@@ -3106,24 +3485,24 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             className={cn(
                               "p-2 rounded-xl transition-all flex items-center justify-center",
                               historyIndex >= historyStack.length - 1
-                                ? "text-slate-300 cursor-not-allowed"
-                                : "text-slate-750 hover:bg-surface-muted hover:text-violet-600 active:scale-95"
+                                ? "text-content-subtle cursor-not-allowed"
+                                : " hover:bg-surface-muted hover:text-primary active:scale-95"
                             )}
-                            title="Redo Langkah Batal (Ctrl+Shift+Z)"
+                            title={t("flowchart.redo")}
                           >
                             <Redo className="w-3.5 h-3.5" />
                           </button>
 
-                          <div className="w-px h-5 bg-slate-200 mx-1" />
+                          <div className="w-px h-5 bg-surface-strong mx-1" />
 
                           {/* Auto-Align Layout Engine */}
                           <button
                             onClick={handleAutoAlignNodes}
-                            className="p-1 px-2 text-content-body hover:bg-surface-muted hover:text-violet-605 rounded-xl transition-all flex items-center gap-1 active:scale-95 text-xs sm:text-[10px] font-medium"
-                            title="Otomatis merapikan format diagram secara horizontal & vertikal"
+                            className="p-1 px-2 text-content-body hover:bg-surface-muted rounded-xl transition-all flex items-center gap-1 active:scale-95 text-xs sm:text-[10px] font-medium"
+                            title={t("flowchart.autoAlignHint")}
                           >
-                            <Sparkles className="w-3.5 h-3.5 text-violet-600 fill-violet-200" />
-                            <span className="hidden sm:inline">Auto-Align</span>
+                            <Sparkles className="w-3.5 h-3.5 text-primary fill-primary/20" />
+                            <span className="hidden sm:inline">{t("flowchart.autoAlign")}</span>
                           </button>
 
                           {/* Live Flow Simulator */}
@@ -3132,12 +3511,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             className={cn(
                               "p-1 px-2 rounded-xl transition-all flex items-center gap-1 active:scale-95 text-xs sm:text-[10px] font-medium",
                               isSimulating
-                                ? "bg-red-50 text-red-600 hover:bg-red-100 border border-red-150 shadow-soft"
+                                ? "bg-red-500/10 text-red-600 hover:bg-red-500/15 border  shadow-soft"
                                 : "text-content-body hover:bg-surface-muted hover:text-emerald-600"
                             )}
                             title={
                               isSimulating
-                                ? "Hentikan Simulasi"
+                                ? t("flowchart.stopSim")
                                 : "Jalankan Simulasi Alur Kerja Visual"
                             }
                           >
@@ -3154,13 +3533,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             </span>
                           </button>
 
-                          <div className="w-px h-5 bg-slate-200 mx-1" />
+                          <div className="w-px h-5 bg-surface-strong mx-1" />
 
                           {/* Export JPG Image */}
                           <button
                             onClick={handleExportJPG}
                             className="p-2 text-content-muted hover:bg-surface-muted hover:text-emerald-600 rounded-xl transition-all flex items-center justify-center active:scale-95"
-                            title="Unduh sebagai Gambar JPG"
+                            title={t("flowchart.downloadJpg")}
                           >
                             <ImageIcon className="w-3.5 h-3.5 text-emerald-500" />
                           </button>
@@ -3169,7 +3548,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           <button
                             onClick={handleExportJSON}
                             className="p-2 text-content-muted hover:bg-surface-muted hover:text-blue-600 rounded-xl transition-all flex items-center justify-center active:scale-95"
-                            title="Ekspor Workspace ke JSON"
+                            title={t("flowchart.exportJson")}
                           >
                             <Download className="w-3.5 h-3.5 text-blue-500" />
                           </button>
@@ -3184,66 +3563,84 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           <button
                             onClick={openImportModal}
                             className="p-2 text-content-muted hover:bg-surface-muted hover:text-emerald-600 rounded-xl transition-all flex items-center justify-center active:scale-95"
-                            title="Impor Diagram (Draw.io, Miro, atau JSON)"
+                            title={t("flowchart.importDiagram")}
                           >
                             <Upload className="w-3.5 h-3.5 text-emerald-500" />
                           </button>
 
                           {/* Simpan Alur DB */}
                           {isWorkspaceEditable ? (
-                            <button
-                              onClick={() => handleSaveWorkspace()}
-                              className="p-2 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-xl flex items-center gap-1.5 transition-all shadow-soft active:scale-95"
-                              title="Simpan seluruh flowchart ini ke database"
-                            >
-                              <Save className="w-3.5 h-3.5" />
-                            </button>
+                            <>
+                              <button
+                                onClick={() => handleSaveWorkspace()}
+                                className="p-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium rounded-xl flex items-center gap-1.5 transition-all shadow-soft active:scale-95"
+                                title={t("flowchart.saveFlowchart")}
+                              >
+                                <Save className="w-3.5 h-3.5" />
+                              </button>
+                              {/* #538 — autosave bekerja tanpa ditekan, jadi hasilnya
+                                  perlu satu tulisan kecil di sebelahnya. */}
+                              {statusSimpan !== "diam" && (
+                                <span
+                                  className={`hidden lg:inline text-[10px] leading-none font-medium tabular-nums ${
+                                    statusSimpan === "gagal"
+                                      ? "text-amber-700"
+                                      : "text-content-subtle"
+                                  }`}
+                                  title={t("flowchart.autosaveHint")}
+                                >
+                                  {labelStatusSimpan}
+                                </span>
+                              )}
+                            </>
                           ) : (
-                            <div className="px-2.5 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl flex items-center gap-1 text-xs sm:text-[10px] font-medium shadow-2xs">
+                            <div className="px-2.5 py-1.5 bg-amber-500/10 text-amber-700 border border-amber-500/30 rounded-xl flex items-center gap-1 text-[10px] leading-none font-medium shadow-2xs">
                               <Eye className="w-3.5 h-3.5 text-amber-500" />
-                              <span className="hidden sm:inline">Mode Baca Saja</span>
+                              <span className="hidden sm:inline">
+                                {t("flowchart.readOnlyMode")}
+                              </span>
                             </div>
                           )}
 
-                          <div className="w-px h-5 bg-slate-200 mx-1" />
+                          <div className="w-px h-5 bg-surface-strong mx-1" />
 
                           {/* Clear Canvas */}
                           <button
                             onClick={handleClearWhiteboard}
-                            className="p-2 text-content-subtle hover:bg-rose-50 hover:text-rose-600 rounded-xl transition-all flex items-center justify-center active:scale-95"
-                            title="Bersihkan Semua Bentuk dan Garis Kanvas"
+                            className="p-2 text-content-subtle hover:bg-rose-500/10 hover:text-rose-600 rounded-xl transition-all flex items-center justify-center active:scale-95"
+                            title={t("flowchart.clearCanvas")}
                           >
                             <RefreshCw className="w-3.5 h-3.5 text-rose-500" />
                           </button>
 
-                          <div className="w-px h-5 bg-slate-200 mx-1" />
+                          <div className="w-px h-5 bg-surface-strong mx-1" />
 
                           {/* Zoom Controls */}
                           <div className="flex items-center gap-0.5 bg-surface-sunken/50 rounded-xl p-0.5 border border-border-subtle/60">
                             <button
-                              onClick={() => setZoomLevel((prev) => Math.max(0.2, prev - 0.1))}
-                              className="p-1.5 text-content-muted hover:bg-slate-200 hover:text-content-strong rounded-lg transition-all active:scale-95"
-                              title="Perkecil (-)"
+                              onClick={() => geserZoom(1 / 1.1)}
+                              className="p-1.5 text-content-muted hover:bg-surface-strong hover:text-content-strong rounded-lg transition-all active:scale-95"
+                              title={t("flowchart.zoomOut")}
                             >
                               <ZoomOut className="w-3.5 h-3.5" />
                             </button>
                             <button
-                              onClick={() => setZoomLevel(1)}
-                              className="px-2 text-xs sm:text-[10px] font-medium text-content-secondary hover:text-violet-600 w-11 text-center font-mono cursor-pointer transition-colors"
-                              title="Reset Zoom (100%)"
+                              onClick={() => aturZoom(1)}
+                              className="px-2 text-xs sm:text-[10px] font-medium text-content-secondary hover:text-primary w-11 text-center font-mono cursor-pointer transition-colors"
+                              title={t("flowchart.zoomReset")}
                             >
                               {Math.round(zoomLevel * 100)}%
                             </button>
                             <button
-                              onClick={() => setZoomLevel((prev) => Math.min(3.0, prev + 0.1))}
-                              className="p-1.5 text-content-muted hover:bg-slate-200 hover:text-content-strong rounded-lg transition-all active:scale-95"
-                              title="Perbesar (+)"
+                              onClick={() => geserZoom(1.1)}
+                              className="p-1.5 text-content-muted hover:bg-surface-strong hover:text-content-strong rounded-lg transition-all active:scale-95"
+                              title={t("flowchart.zoomIn")}
                             >
                               <ZoomIn className="w-3.5 h-3.5" />
                             </button>
                           </div>
 
-                          <div className="w-px h-5 bg-slate-200 mx-1" />
+                          <div className="w-px h-5 bg-surface-strong mx-1" />
 
                           {/* Keyboard assistance trigger */}
                           <button
@@ -3251,10 +3648,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             className={cn(
                               "p-2 rounded-xl transition-all flex items-center justify-center",
                               isKeyboardHelpOpen
-                                ? "bg-amber-50 text-amber-600 border border-amber-250"
+                                ? "bg-amber-500/10 text-amber-600 border "
                                 : "text-content-muted hover:bg-surface-muted"
                             )}
-                            title="Bantuan Navigasi & Pintasan Keyboard"
+                            title={t("flowchart.helpNav")}
                           >
                             <HelpCircle className="w-3.5 h-3.5" />
                           </button>
@@ -3262,14 +3659,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                         {/* KEYBOARD SHORTCUTS NAVIGATIONAL HELP PANELS */}
                         {isKeyboardHelpOpen && (
-                          <div className="absolute left-4 right-4 md:left-auto md:right-4 bottom-20 z-40 bg-slate-900/95 backdrop-blur text-white p-4 rounded-xl border border-slate-750 shadow-2xl max-w-sm space-y-3 p-4 select-none">
-                            <div className="flex justify-between items-center pb-2 border-b border-slate-800">
-                              <span className="font-medium uppercase tracking-widest text-xs sm:text-[11px] sm:text-[9.5px] text-violet-400">
-                                Pintasan Keyboard & Tips
+                          <div className="absolute left-4 right-4 md:left-auto md:right-4 bottom-20 z-40 bg-overlay/95 backdrop-blur text-content-inverse p-4 rounded-xl border shadow-2xl max-w-sm space-y-3 p-4 select-none">
+                            <div className="flex justify-between items-center pb-2 border-b border-border-inverse">
+                              <span className="font-medium tracking-wide text-xs sm:text-[11px] text-primary">
+                                {t("flowchart.shortcutsTitle")}
                               </span>
                               <button
                                 onClick={() => setIsKeyboardHelpOpen(false)}
-                                className="text-content-subtle hover:text-white transition-colors"
+                                className="text-content-subtle hover:text-content-inverse transition-colors"
                               >
                                 <X className="w-3.5 h-3.5" />
                               </button>
@@ -3277,96 +3674,117 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             <div className="space-y-2 text-xs sm:text-[11px] leading-relaxed">
                               <div className="flex justify-between items-center">
                                 <span className="text-content-subtle font-medium font-sans">
-                                  Batal Aksi (Undo)
+                                  {t("flowchart.undoAction")}
                                 </span>
-                                <kbd className="bg-slate-800 text-slate-100 border border-slate-700 p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] font-medium">
                                   Ctrl + Z
                                 </kbd>
                               </div>
                               <div className="flex justify-between items-center">
                                 <span className="text-content-subtle font-medium font-sans">
-                                  Ulangi Aksi (Redo)
+                                  {t("flowchart.redoAction")}
                                 </span>
-                                <kbd className="bg-slate-800 text-slate-100 border border-slate-700 p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] font-medium">
                                   Ctrl + Y / Ctrl+Shift+Z
                                 </kbd>
                               </div>
                               <div className="flex justify-between items-center">
                                 <span className="text-content-subtle font-medium font-sans">
-                                  Duplikasi Bentuk
+                                  {t("flowchart.duplicateShape")}
                                 </span>
-                                <kbd className="bg-slate-800 text-slate-100 border border-slate-700 p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] font-medium">
                                   Ctrl + D
                                 </kbd>
                               </div>
                               <div className="flex justify-between items-center">
                                 <span className="text-content-subtle font-medium font-sans">
-                                  Geser Alur (Nudge)
+                                  {t("flowchart.nudgeFlow")}
                                 </span>
-                                <kbd className="bg-slate-800 text-slate-100 border border-slate-700 p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
-                                  Tombol Panah Arrow (↑↓←→)
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] font-medium">
+                                  {t("flowchart.arrowKeys")}
                                 </kbd>
                               </div>
                               <div className="flex justify-between items-center">
                                 <span className="text-content-subtle font-medium font-sans font-sans">
-                                  Geser Kelompok Lebar
+                                  {t("flowchart.moveGroupWide")}
                                 </span>
-                                <kbd className="bg-slate-800 text-slate-100 border border-slate-700 p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
-                                  Shift + Panah
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] font-medium">
+                                  {t("flowchart.shiftArrow")}
                                 </kbd>
                               </div>
                               <div className="flex justify-between items-center">
                                 <span className="text-content-subtle font-medium font-sans">
-                                  Batalkan Pilihan / Tool
+                                  {t("flowchart.cancelSelection")}
                                 </span>
-                                <kbd className="bg-slate-800 text-slate-100 border border-slate-700 p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] font-medium">
                                   Esc
                                 </kbd>
                               </div>
                               <div className="flex justify-between items-center">
                                 <span className="text-content-subtle font-medium font-sans">
-                                  Hapus Element Terpilih
+                                  {t("flowchart.deleteSelected")}
                                 </span>
-                                <kbd className="bg-slate-800 text-slate-100 border border-slate-700 p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium font-sans">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] font-medium font-sans">
                                   Delete / Backspace
                                 </kbd>
                               </div>
                             </div>
-                            <div className="h-px bg-slate-800 my-1" />
+                            <div className="h-px bg-surface-inverse my-1" />
                             <p className="text-xs sm:text-[10px] text-content-subtle italic font-mono leading-relaxed">
-                              💡 Tips BNI Doc: Aktifkan mode &ldquo;Arrow&rdquo; dari toolbar
-                              sebelah kiri, klik pada komponen awal, lalu klik pada komponen kedua
-                              untuk menyambung koneksi anak panah alur secara instan.
+                              Tips: Aktifkan mode &ldquo;Arrow&rdquo; dari toolbar sebelah kiri,
+                              klik pada komponen awal, lalu klik pada komponen kedua untuk
+                              menyambung koneksi anak panah alur secara instan.
                             </p>
                           </div>
                         )}
                       </div>
 
-                      {/* RIGHT EDIT ATTRIBUTES PANEL - SHAPES DETAILS EDITOR (FLOATING SHEET OVERLAY) */}
+                      {/* RIGHT EDIT ATTRIBUTES PANEL — #321: lebih sempit + lembar HP dengan handle */}
                       <div
                         className={cn(
-                          "absolute right-4 top-4 bottom-4 w-80 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 rounded-xl py-4 px-4 space-y-4 shrink-0 overflow-y-auto z-20 text-xs shadow-[0_12px_40px_rgba(0,0,0,0.08)] transition-all duration-300 flex flex-col",
+                          "absolute z-40 bg-surface/95 md:bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 py-3 px-3 space-y-3 shrink-0 overflow-y-auto text-xs shadow-[0_12px_40px_rgba(0,0,0,0.08)] flex flex-col transition-all duration-300",
+                          // Desktop: panel kanan lebih sempit
+                          "md:right-3 md:top-3 md:bottom-3 md:w-72 md:rounded-xl md:z-20",
                           isRightSidebarOpen
-                            ? "translate-x-0 opacity-100 pointer-events-auto"
-                            : "translate-x-[360px] opacity-0 pointer-events-none"
+                            ? "md:translate-x-0 md:opacity-100 md:pointer-events-auto"
+                            : "md:translate-x-[320px] md:opacity-0 md:pointer-events-none",
+                          // Mobile: lembar bawah
+                          "max-md:inset-x-0 max-md:bottom-0 max-md:top-auto max-md:w-full max-md:max-h-[55vh] max-md:rounded-t-2xl max-md:border-b-0 safe-area-pb",
+                          isRightSidebarOpen
+                            ? "max-md:translate-y-0 max-md:opacity-100 max-md:pointer-events-auto"
+                            : "max-md:translate-y-full max-md:opacity-0 max-md:pointer-events-none"
                         )}
                       >
+                        <div className="md:hidden flex items-center justify-between shrink-0 -mt-1 mb-1">
+                          <div className="flex-1 flex justify-center">
+                            <div className="w-10 h-1 rounded-full bg-surface-strong" />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsRightSidebarOpen(false)}
+                            className="p-1.5 text-content-subtle hover:text-content-body hover:bg-surface-muted rounded-lg absolute right-2 top-2"
+                            aria-label={t("flowchart.togglePropertiesPanel")}
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
                         {selectedNodeId ? (
-                          <div className="space-y-4">
-                            <div className="flex justify-between items-center bg-surface-sunken p-2.5 rounded-lg border border-border-subtle">
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center bg-surface-sunken p-2 rounded-lg border border-border-subtle">
                               <div>
-                                <span className="text-xs sm:text-[10px] sm:text-[8.5px] font-medium tracking-wider text-slate-550 text-content-muted uppercase">
-                                  Selected Component
+                                <span className="text-[11px] font-medium text-content-muted">
+                                  {t("flowchart.selectedComponent")}
                                 </span>
                                 <div className="text-content font-medium capitalize flex items-center gap-1.5 mt-0.5 text-xs">
-                                  <div className="w-2 h-2 rounded bg-violet-500" />
+                                  <div className="w-2 h-2 rounded bg-primary" />
                                   {nodes.find((n) => n.id === selectedNodeId)?.type || "Unknown"}
                                 </div>
                               </div>
                               <button
+                                type="button"
                                 onClick={handleDeleteSelected}
-                                className="p-2 bg-rose-50 rounded-lg hover:bg-rose-100 text-rose-600 transition-all active:scale-95 shadow-soft border border-rose-150"
-                                title="Hapus shape"
+                                className="p-2 bg-rose-500/10 rounded-lg hover:bg-rose-500/15 text-rose-600 transition-all active:scale-95 shadow-soft border"
+                                title={t("flowchart.deleteShape")}
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -3374,59 +3792,56 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                             {/* Shape Type Dropper Selector (Miro Dynamic conversion) */}
                             <div className="space-y-1.5">
-                              <label className="text-xs sm:text-[10px] uppercase font-medium text-slate-550 text-content-muted font-medium flex items-center gap-1">
-                                <Layers className="w-3.5 h-3.5 text-violet-600" />
-                                <span>Ubah Bentuk / Tipe Shape</span>
+                              <label className="text-[11px] font-medium text-content-muted flex items-center gap-1">
+                                <Layers className="w-3.5 h-3.5 text-primary" />
+                                <span>{t("flowchart.changeShapeType")}</span>
                               </label>
-                              <select
+                              <StyledDropdown
                                 value={nodes.find((n) => n.id === selectedNodeId)?.type || "rect"}
-                                onChange={(e) => {
-                                  const newType = e.target.value as FlowNode["type"];
+                                onChange={(val) => {
+                                  const newType = val as FlowNode["type"];
                                   handleUpdateActiveNode({ type: newType });
                                   toast.success(
                                     `Mengubah bentuk komponen alur menjadi: ${newType.toUpperCase()}`
                                   );
                                 }}
-                                className="w-full text-xs bg-surface-sunken border border-border-subtle rounded-lg p-2 text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-violet-500 font-medium transition-all"
-                              >
-                                <option value="rect">🔲 Proses (Rectangle)</option>
-                                <option value="decision">🔶 Decision / Keputusan (Diamond)</option>
-                                <option value="predefined">
-                                  📋 Predefined Process (Double Border)
-                                </option>
-                                <option value="database">🛢️ Database Server (Cylinder)</option>
-                                <option value="oval">🟢 Start / End (Oval Boundary)</option>
-                                <option value="circle">⚪ Bulatan Kategori (Circle)</option>
-                                <option value="sticky">💛 Catatan Tempel Miro (Sticky)</option>
-                                <option value="cloud">☁️ Arsitektur Awan (Cloud)</option>
-                                <option value="parallelogram">
-                                  📐 Input / Output (Parallelogram)
-                                </option>
-                                <option value="document">📄 Dokumen Laporan (Document)</option>
-                                <option value="actor">👤 Aktor Pengguna (User Actor)</option>
-                                <option value="folder">📂 Folder Penyimpanan (Folder)</option>
-                                <option value="card">🗂️ Story Backlog Card</option>
-                                <option value="text">✏️ Tulisan Bebas (Plain Text)</option>
-                              </select>
+                                options={[
+                                  { id: "rect", label: t("shapes.shRect") },
+                                  { id: "decision", label: t("shapes.shDecision") },
+                                  { id: "predefined", label: t("shapes.shPredefined") },
+                                  { id: "database", label: t("shapes.shDatabase") },
+                                  { id: "oval", label: t("shapes.shOval") },
+                                  { id: "circle", label: t("shapes.shCircle") },
+                                  { id: "sticky", label: t("shapes.shSticky") },
+                                  { id: "cloud", label: t("shapes.shCloud") },
+                                  { id: "parallelogram", label: t("shapes.shParallelogram") },
+                                  { id: "document", label: t("shapes.shDocument") },
+                                  { id: "actor", label: t("shapes.shActor") },
+                                  { id: "folder", label: t("shapes.shFolder") },
+                                  { id: "card", label: t("shapes.shCard") },
+                                  { id: "text", label: t("shapes.shText") },
+                                ]}
+                                buttonClassName="w-full text-xs bg-surface-sunken border border-border-subtle rounded-lg p-2 text-left text-content font-medium"
+                              />
                             </div>
 
                             {/* Edit inline message */}
                             <div className="space-y-1.5">
-                              <label className="text-xs sm:text-[10px] uppercase font-medium text-slate-550 text-content-muted font-medium">
-                                Sunting Teks
+                              <label className="text-[11px] font-medium text-content-muted">
+                                {t("flowchart.editText")}
                               </label>
                               <textarea
                                 value={nodes.find((n) => n.id === selectedNodeId)?.label || ""}
                                 onChange={(e) => handleUpdateActiveNode({ label: e.target.value })}
-                                className="w-full h-16 text-xs bg-surface-sunken border border-border-subtle rounded p-2 text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-violet-500 font-medium transition-all"
-                                placeholder="Masukkan label teks..."
+                                className="w-full h-16 text-xs bg-surface-sunken border border-border-subtle rounded p-2 text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary font-medium transition-all"
+                                placeholder={t("flowchart.textLabelPlaceholder")}
                               />
                             </div>
 
                             {/* Shape Theme Colors (Miro aesthetics) */}
                             <div className="space-y-2">
-                              <span className="text-xs sm:text-[10px] uppercase font-medium text-slate-550 text-content-muted block font-medium">
-                                Warna Palette Miro
+                              <span className="text-[11px] font-medium text-content-muted block">
+                                {t("flowchart.colorPalette")}
                               </span>
                               <div className="grid grid-cols-6 gap-1.5">
                                 {Object.keys(colorPalettes).map((colName) => {
@@ -3440,7 +3855,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                         "h-5 rounded-md hover:scale-105 border transition-all",
                                         colorPalettes[colName].preview,
                                         isActive
-                                          ? "border-slate-400 ring-2 ring-violet-500 scale-105"
+                                          ? "border-border-subtle ring-2 ring-primary scale-105"
                                           : "border-border-subtle"
                                       )}
                                       title={colName}
@@ -3452,8 +3867,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                             {/* Borders parameters styling */}
                             <div className="space-y-1.5">
-                              <span className="text-xs sm:text-[10px] uppercase font-medium text-content-muted block font-medium">
-                                Gaya Garis Bingkai
+                              <span className="text-[11px] font-medium text-content-muted block">
+                                {t("flowchart.borderStyle")}
                               </span>
                               <div className="grid grid-cols-3 gap-1">
                                 {[
@@ -3473,7 +3888,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                       className={cn(
                                         "p-1 rounded font-medium text-xs sm:text-[10px] text-center border capitalize transition-all",
                                         currentVal === st.val
-                                          ? "bg-violet-50 text-violet-700 border-violet-200"
+                                          ? "bg-primary/10 text-primary border-primary/30"
                                           : "bg-surface-sunken text-content-secondary border-border-subtle hover:bg-surface-muted"
                                       )}
                                     >
@@ -3486,13 +3901,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                             {/* Dimension adjustments */}
                             <div className="space-y-2">
-                              <span className="text-xs sm:text-[10px] uppercase font-medium text-content-muted block font-medium">
-                                Dimensi Ukuran
+                              <span className="text-[11px] font-medium text-content-muted block">
+                                {t("flowchart.dimensions")}
                               </span>
                               <div className="grid grid-cols-2 gap-2">
                                 <div>
-                                  <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-medium">
-                                    Lebar (W)
+                                  <span className="text-xs sm:text-[11px] text-content-subtle font-medium">
+                                    {t("flowchart.widthW")}
                                   </span>
                                   <input
                                     type="number"
@@ -3504,12 +3919,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                         width: parseInt(e.target.value) || 120,
                                       })
                                     }
-                                    className="w-full text-xs font-mono bg-surface-sunken border border-border-subtle rounded p-1 mt-0.5 text-center text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all font-medium"
+                                    className="w-full text-xs font-mono bg-surface-sunken border border-border-subtle rounded p-1 mt-0.5 text-center text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary transition-all font-medium"
                                   />
                                 </div>
                                 <div>
-                                  <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-medium">
-                                    Tinggi (H)
+                                  <span className="text-xs sm:text-[11px] text-content-subtle font-medium">
+                                    {t("flowchart.heightH")}
                                   </span>
                                   <input
                                     type="number"
@@ -3523,7 +3938,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                         height: parseInt(e.target.value) || 120,
                                       })
                                     }
-                                    className="w-full text-xs font-mono bg-surface-sunken border border-border-subtle rounded p-1 mt-0.5 text-center text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all font-medium"
+                                    className="w-full text-xs font-mono bg-surface-sunken border border-border-subtle rounded p-1 mt-0.5 text-center text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary transition-all font-medium"
                                   />
                                 </div>
                               </div>
@@ -3531,49 +3946,49 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                             {/* Integration with Workspace tasks list (LINKING TASKS BACKLOG TO SHAPES) */}
                             <div className="space-y-1.5 pt-2 border-t border-border-subtle">
-                              <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted flex items-center gap-1 font-medium">
-                                <Workflow className="w-3.5 h-3.5 text-violet-600" />
-                                <span>Link Task Backlog BNI</span>
+                              <label className="text-[11px] font-medium text-content-muted flex items-center gap-1">
+                                <Workflow className="w-3.5 h-3.5 text-primary" />
+                                <span>{t("flowchart.linkTaskBacklog")}</span>
                               </label>
-                              <p className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted mb-2 font-medium">
-                                Hubungkan bentuk dengan sprint backlog agar status tersinkronisasi
-                                otomatis.
+                              <p className="text-xs sm:text-[11px] text-content-muted mb-2 font-medium">
+                                {t("flowchart.linkTheShapeToThe")}
                               </p>
 
-                              <select
+                              <StyledDropdown
                                 value={nodes.find((n) => n.id === selectedNodeId)?.taskId || ""}
-                                onChange={(e) =>
-                                  handleUpdateActiveNode({ taskId: e.target.value || undefined })
+                                onChange={(val) =>
+                                  handleUpdateActiveNode({ taskId: val || undefined })
                                 }
-                                className="w-full text-xs bg-surface-sunken border border-border-subtle rounded p-1.5 text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all font-medium"
-                              >
-                                <option value="">-- Hubungkan Task --</option>
-                                {tasks.map((t) => (
-                                  <option key={t.id} value={t.id}>
-                                    [{t.key}] {t.title} ({t.status})
-                                  </option>
-                                ))}
-                              </select>
+                                options={[
+                                  { id: "", label: t("flowchart.connectTask") },
+                                  ...tasks.map((task) => ({
+                                    id: task.id,
+                                    label: `[${task.key}] ${task.title} (${task.status})`,
+                                  })),
+                                ]}
+                                buttonClassName="w-full text-xs bg-surface-sunken border border-border-subtle rounded p-1.5 text-left text-content font-medium"
+                              />
                             </div>
                           </div>
                         ) : selectedEdgeId ? (
-                          <div className="space-y-4">
+                          <div className="space-y-3">
                             <div className="bg-surface-sunken p-3 rounded-lg border border-border-subtle">
-                              <span className="text-xs sm:text-[10px] sm:text-[8px] font-mono text-content-muted uppercase tracking-widest block font-medium">
-                                Selected Relation
+                              <span className="text-[11px] font-medium text-content-muted block">
+                                {t("flowchart.selectedRelation")}
                               </span>
                               <div className="text-content font-medium mt-1 text-xs">
-                                Garis Alur Penghubung
+                                {t("flowchart.connectorLine")}
                               </div>
                             </div>
 
                             <div className="space-y-1.5">
-                              <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted font-medium">
-                                Lebel pada Garis Alur
+                              <label className="text-[11px] font-medium text-content-muted">
+                                {t("flowchart.lineLabel")}
                               </label>
                               <input
                                 type="text"
                                 value={edges.find((e) => e.id === selectedEdgeId)?.label || ""}
+                                disabled={!isWorkspaceEditable}
                                 onChange={(e) => {
                                   const updated = edges.map((edge) =>
                                     edge.id === selectedEdgeId
@@ -3582,29 +3997,30 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                   );
                                   setEdges(updated);
                                 }}
-                                className="w-full text-xs bg-surface-sunken border border-border-subtle rounded p-2 text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-violet-500 font-medium transition-all"
-                                placeholder="Ya / Tidak / Proses..."
+                                className="w-full text-xs bg-surface-sunken border border-border-subtle rounded p-2 text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary font-medium transition-all"
+                                placeholder={t("flowchart.lineLabelPlaceholder")}
                               />
                             </div>
 
-                            <button
-                              onClick={handleDeleteSelected}
-                              className="w-full p-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-medium rounded text-xs flex items-center justify-center gap-2 transition-all"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" /> Putuskan Alur
-                            </button>
+                            {isWorkspaceEditable && (
+                              <button
+                                onClick={handlePutuskanGaris}
+                                className="w-full p-2 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/30 text-rose-700 font-medium rounded text-xs flex items-center justify-center gap-2 transition-all"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" /> {t("flowchart.disconnectFlow")}
+                              </button>
+                            )}
                           </div>
                         ) : (
                           <div className="text-center py-16 text-content-muted space-y-3">
                             <div className="w-10 h-10 bg-surface-sunken rounded-full flex items-center justify-center mx-auto text-content-subtle border border-border-subtle shadow-soft">
-                              <MousePointer className="w-4 h-4 text-violet-600" />
+                              <MousePointer className="w-4 h-4 text-primary" />
                             </div>
                             <div className="text-xs sm:text-[11px] font-medium text-content">
-                              Tidak ada komponen dipilih
+                              {t("flowchart.noComponentSelected")}
                             </div>
                             <p className="text-xs sm:text-[10px] text-content-muted max-w-[190px] mx-auto leading-relaxed">
-                              Klik satu komponen bentuk, catatan tempel, atau anak panah alir di
-                              canvas untuk mengubah properti ornamen.
+                              {t("flowchart.clickAShapeStickyNote")}
                             </p>
                           </div>
                         )}
@@ -3635,133 +4051,24 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         handleApplyImportReplace={handleApplyImportReplace}
       />
 
-      {/* DETAILED POPUP DIALOG: TAMBAH DATA / ADD DATA / EDIT INFO DESCRIPTION */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-surface border border-border-subtle w-full max-w-md rounded-xl shadow-xl overflow-hidden text-content-strong">
-            {/* Modal Head */}
-            <div className="px-5 py-4 bg-surface border-b border-border-subtle flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                  <Layers className="w-4 h-4" />
-                </div>
-                <h3 className="font-medium text-sm text-content">
-                  {modalMode === "create" ? "Tambah Data Flowchart" : "Sunting Detail Dokumen"}
-                </h3>
-              </div>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-1 hover:bg-surface-muted rounded-lg text-content-subtle hover:text-content-secondary transition-all"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Modal Body / Form */}
-            <form onSubmit={handleModalSubmit} className="p-5 space-y-4 text-xs">
-              <div className="space-y-1.5">
-                <label className="text-xs sm:text-[11px] font-medium text-content-body">
-                  Nama Dokumen / Flowchart <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Penetration Testing Requirements"
-                  value={flowName}
-                  onChange={(e) => setFlowName(e.target.value)}
-                  className="w-full text-xs font-medium bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong placeholder:text-content-subtle focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
-                />
-              </div>
-
-              {/* Kategori Select */}
-              <div className="space-y-1.5">
-                <label className="text-xs sm:text-[11px] font-medium text-content-body">
-                  Kategori Dokumen <span className="text-rose-500">*</span>
-                </label>
-                <select
-                  value={flowCategory}
-                  onChange={(e) => setFlowCategory(e.target.value)}
-                  className="w-full text-xs font-medium bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
-                >
-                  <option value="PRD">PRD (Product Requirements Document)</option>
-                  <option value="Panduan">Panduan (Technical Guideline)</option>
-                  <option value="Laporan">Laporan (Report / Audit)</option>
-                </select>
-              </div>
-
-              {/* Tautan Eksternal Input */}
-              <div className="space-y-1.5">
-                <label className="text-xs sm:text-[11px] font-medium text-content-body">
-                  Tautan Eksternal (Google Docs / Sheets / Slides / URL)
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://docs.google.com/document/d/... atau URL lain"
-                  value={flowExternalUrl}
-                  onChange={(e) => setFlowExternalUrl(e.target.value)}
-                  className="w-full text-xs font-medium bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong placeholder:text-content-subtle focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
-                />
-                <p className="text-xs sm:text-[10px] text-content-subtle leading-normal">
-                  Jika memasukkan link Google Docs/Sheets/Slides, sistem akan mengubah tautan secara
-                  otomatis ke mode preview interaktif.
-                </p>
-              </div>
-
-              {/* Link Epic Option integration */}
-              <div className="space-y-1.5">
-                <label className="text-xs sm:text-[11px] font-medium text-content-body flex items-center gap-1.5">
-                  <Workflow className="w-3.5 h-3.5 text-primary" /> Link Epic Terkait
-                </label>
-                <select
-                  value={flowEpicId}
-                  onChange={(e) => setFlowEpicId(e.target.value)}
-                  className="w-full text-xs font-medium bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
-                >
-                  <option value="">-- Hubungkan dengan Epic --</option>
-                  {availableEpics.map((epic) => (
-                    <option key={epic.id} value={epic.id}>
-                      [{epic.key}] {epic.title}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs sm:text-[10px] text-content-subtle leading-relaxed">
-                  Hubungkan dengan epic utama dari backlog workspace agar dokumentasi diagram alur
-                  berkaitan erat dengan milestone tim.
-                </p>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs sm:text-[11px] font-medium text-content-body">
-                  Deskripsi Arsitektur
-                </label>
-                <textarea
-                  placeholder="Ketikan ringkasan atau batasan proses flowchart ini..."
-                  value={flowDescription}
-                  onChange={(e) => setFlowDescription(e.target.value)}
-                  className="w-full h-24 text-xs font-medium bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong placeholder:text-content-subtle focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
-                />
-              </div>
-
-              {/* Modal Actions */}
-              <div className="pt-3 flex justify-end items-center gap-2 border-t border-border-faint">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-surface-muted hover:bg-slate-200 font-medium text-content-body transition-all text-xs"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-primary hover:bg-[#364574] text-white font-medium rounded-lg text-xs shadow-xs transition-all"
-                >
-                  {modalMode === "create" ? "Buat Dokumen" : "Simpan Perubahan"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <FlowchartDocumentModal
+        open={isModalOpen}
+        modalMode={modalMode}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleModalSubmit}
+        flowName={flowName}
+        setFlowName={setFlowName}
+        flowCategory={flowCategory}
+        setFlowCategory={setFlowCategory}
+        opsiKategoriDokumen={opsiKategoriDokumen}
+        flowExternalUrl={flowExternalUrl}
+        setFlowExternalUrl={setFlowExternalUrl}
+        flowEpicId={flowEpicId}
+        setFlowEpicId={setFlowEpicId}
+        availableEpics={availableEpics}
+        flowDescription={flowDescription}
+        setFlowDescription={setFlowDescription}
+      />
 
       {nodeContextMenu && (
         <NodeContextMenu
@@ -3791,12 +4098,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               canvasContextMenu.y
             )
           }
-          onZoomIn={() => setZoomLevel((prev) => Math.min(3.0, prev + 0.1))}
-          onZoomOut={() => setZoomLevel((prev) => Math.max(0.2, prev - 0.1))}
-          onResetZoom={() => {
-            setZoomLevel(0.9);
-            setPanOffset({ x: 50, y: 50 });
-          }}
+          onZoomIn={() => geserZoom(1.1)}
+          onZoomOut={() => geserZoom(1 / 1.1)}
+          onResetZoom={resetCanvas}
           onUndo={handleUndoClick}
           onRedo={handleRedoClick}
           onClear={handleClearWhiteboard}
@@ -3807,14 +4111,16 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
       {/* Upload Document Modal */}
       {isUploadDocModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div className="bg-surface rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col border border-border-subtle animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay/60 backdrop-blur-xs p-4">
+          <div className="bg-surface rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col border border-border-subtle">
             <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between bg-surface">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-md bg-primary/10 text-primary flex items-center justify-center">
+                <div className="w-8 h-8 rounded-md bg-primary-surface/10 text-primary flex items-center justify-center">
                   <FileText className="w-4 h-4" />
                 </div>
-                <h3 className="text-sm font-medium text-content">Upload Dokumen Baru</h3>
+                <h3 className="text-sm font-medium text-content">
+                  {t("flowchart.uploadNewDocument")}
+                </h3>
               </div>
               <button
                 onClick={closeUploadDocumentModal}
@@ -3827,22 +4133,22 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             <div className="p-5 flex-1 overflow-y-auto space-y-4 text-xs">
               <div>
                 <label className="block text-xs sm:text-[11px] font-medium text-content-body mb-1.5">
-                  Nama Dokumen
+                  {t("flowchart.documentName")}
                 </label>
                 <input
                   type="text"
                   value={uploadDocName}
                   onChange={(e) => setUploadDocName(e.target.value)}
-                  placeholder="Contoh: Spesifikasi Teknis v1.2"
+                  placeholder={t("flowchart.documentNamePlaceholder")}
                   className="w-full px-3 py-2 bg-surface-sunken border border-border-subtle rounded-md text-xs focus:bg-surface focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all placeholder:text-content-subtle text-content-strong font-medium"
                 />
               </div>
 
               <div>
                 <label className="block text-xs sm:text-[11px] font-medium text-content-body mb-1.5">
-                  Upload File (Max 5MB)
+                  {t("flowchart.uploadFileMax")}
                 </label>
-                <div className="border border-dashed border-slate-300 rounded-md p-6 flex flex-col items-center justify-center bg-surface-sunken/50 relative overflow-hidden group hover:border-primary transition-colors">
+                <div className="border border-dashed border-border-subtle rounded-md p-6 flex flex-col items-center justify-center bg-surface-sunken/50 relative overflow-hidden group hover:border-primary transition-colors">
                   <input
                     type="file"
                     onChange={handleDocumentFileChange}
@@ -3853,20 +4159,22 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                     <Upload className="w-4 h-4" />
                   </div>
                   <p className="text-xs font-medium text-content-body mb-0.5">
-                    Pilih atau Seret File Kesini
+                    {t("flowchart.pickOrDrag")}
                   </p>
                   <p className="text-xs sm:text-[10px] text-content-subtle font-medium">
-                    Mendukung PDF, Word, Excel (Max. 5MB)
+                    {t("flowchart.supportsPdfWordExcelMax")}
                   </p>
 
                   {uploadDocFile && (
-                    <div className="mt-3 p-2.5 bg-indigo-50/80 border border-indigo-100 rounded-md w-full flex items-center justify-between">
+                    <div className="mt-3 p-2.5 bg-primary/10 border border-primary/30 rounded-md w-full flex items-center justify-between">
                       <div className="flex flex-col min-w-0">
                         <span className="text-xs font-medium text-primary truncate">
                           {uploadDocFile.name}
                         </span>
                         <span className="text-xs sm:text-[10px] text-content-muted font-medium">
-                          {(uploadDocFile.size / 1024 / 1024).toFixed(2)} MB
+                          {t("rakit.sizeMb", {
+                            ukuran: (uploadDocFile.size / 1024 / 1024).toFixed(2),
+                          })}
                         </span>
                       </div>
                       <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
@@ -3879,32 +4187,21 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             <div className="px-5 py-3.5 border-t border-border-faint bg-surface-sunken/50 flex justify-end items-center gap-2">
               <button
                 onClick={closeUploadDocumentModal}
-                className="px-4 py-2 text-xs font-medium text-content-body hover:bg-slate-200 rounded-md transition-colors"
+                className="px-4 py-2 text-xs font-medium text-content-body hover:bg-surface-strong rounded-md transition-colors"
               >
-                Batal
+                {t("flowchart.cancel")}
               </button>
               <button
                 onClick={handleSaveDocument}
                 disabled={!uploadDocName || !uploadDocFile}
-                className="px-4 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active disabled:opacity-50 text-white text-xs font-medium rounded-md transition-all shadow-xs active:scale-95 cursor-pointer"
+                className="px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-50 text-content-inverse text-xs font-medium rounded-md transition-all shadow-xs active:scale-95 cursor-pointer"
               >
-                Upload & Simpan
+                {t("flowchart.uploadAndSave")}
               </button>
             </div>
           </div>
         </div>
       )}
-
-      <ConfirmationModal
-        isOpen={confirmModal.isOpen}
-        onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
-        title={confirmModal.title}
-        message={confirmModal.message}
-        onConfirm={confirmModal.onConfirm}
-        confirmText="Ya, Hapus"
-        cancelText="Batal"
-        variant="danger"
-      />
     </div>
   );
 };

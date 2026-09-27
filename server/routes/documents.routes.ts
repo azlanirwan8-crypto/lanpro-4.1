@@ -1,159 +1,254 @@
 /**
  * Rute dokumen proyek: daftar, unduh, unggah, ubah, dan hapus.
  *
- * Diekstrak apa adanya dari meetings.routes.ts, yang sempat menampung enam
- * domain berbeda dalam satu berkas 2.264 baris. Isi handler tidak diubah
- * sebaris pun; yang berpindah hanya tempatnya.
+ * Menggunakan documentRepository untuk operasi basis data.
  */
-import { Router } from 'express';
-import { verifyProjectAccess } from '../middleware/rbac';
-import db from '../../src/lib/db';
-import crypto from 'crypto';
+import { Router } from "express";
+import crypto from "crypto";
+import { jagaProyek } from "../middleware/jagaProyek";
+import { documentRepository } from "../repositories/document.repository";
+import { validasiBody, validasiQuery } from "../middleware/validate";
+import { createDocumentSchema, updateDocumentSchema } from "../schemas/document.schema";
+import { documentListQuerySchema } from "../schemas/pagination.schema";
+import { respondWithProjectList } from "../lib/listResponse";
+import { sanitizeUserText } from "../lib/sanitizeText";
 
 const router = Router();
 
-  router.get("/api/projects/:projectId/documents", verifyProjectAccess(['*']), async (req, res) => {
-    let connection;
+router.get(
+  "/api/projects/:projectId/documents",
+  jagaProyek("wiki", "R"),
+  validasiQuery(documentListQuerySchema),
+  async (req, res) => {
     try {
       const { projectId } = req.params;
-      connection = await db.getConnection();
-      const [rows] = await connection.query("SELECT id, projectId, title, description, type, link, fileName, fileType, createdBy, downloadCount, createdAt, updatedAt FROM Documents WHERE projectId = ? ORDER BY createdAt DESC", [projectId]);
-      res.json({ status: "success", data: rows });
-    } catch (error: any) {
-      console.error(error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-    } finally {
-      if (connection) connection.release();
-    }
-  });
-
-  router.get("/api/projects/:projectId/documents/:id/download", verifyProjectAccess(['*']), async (req, res) => {
-    let connection;
-    try {
-      const { id } = req.params;
-      connection = await db.getConnection();
-      const [rows] = await connection.query("SELECT fileData, fileName, fileType FROM Documents WHERE id = ?", [id]);
-      console.log(`[DOWNLOAD DOC] id: ${id}, rows length: ${(rows as any[]).length}`);
-      await connection.query("UPDATE Documents SET downloadCount = downloadCount + 1 WHERE id = ?", [id]);
-      if ((rows as any[]).length > 0) {
-         res.json({ status: "success", data: (rows as any[])[0] });
-      } else {
-         const { getDbMode } = await import("../../src/lib/db"); res.status(404).json({ status: "error", message: "Document not found. id: " + id + ", mode: " + getDbMode() });
-      }
-    } catch (error: any) {
-      console.error(error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-    } finally {
-      if (connection) connection.release();
-    }
-  });
-
-  router.post("/api/projects/:projectId/documents", verifyProjectAccess(['*']), async (req: any, res) => {
-    try {
-      const { projectId } = req.params;
-      const { title, description, type, link, fileData, fileName, fileType, createdBy } = req.body;
-      const currentUserId = req.user?.id || req.user?.uid || createdBy || "guest";
-      const connection = await db.getConnection();
-      const newId = crypto.randomUUID();
-      await connection.query(
-        "INSERT INTO Documents (id, projectId, title, description, type, link, fileData, fileName, fileType, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [newId, projectId, title, description || null, type || null, link || null, fileData || null, fileName || null, fileType || null, currentUserId]
+      const search = req.query.search as string | undefined;
+      const type = req.query.type as string | undefined;
+      await respondWithProjectList(
+        res,
+        req.query as Record<string, unknown>,
+        () => documentRepository.findByProjectId(projectId, search, type),
+        (pagination) => documentRepository.findByProjectIdPaged(projectId, pagination, search, type)
       );
-      connection.release();
-      res.json({ status: "success", data: { id: newId, projectId, title, description, type, link, fileName, fileType, createdBy: currentUserId } });
     } catch (error: any) {
       console.error(error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
-  });
+  }
+);
 
-  router.put("/api/projects/:projectId/documents/:id", verifyProjectAccess(['*']), async (req: any, res) => {
-    let connection;
+router.get(
+  "/api/projects/:projectId/documents/:id/download",
+  jagaProyek("wiki", "R"),
+  async (req, res) => {
     try {
       const { id } = req.params;
-      connection = await db.getConnection();
-
-      const [rows]: any = await connection.query("SELECT * FROM Documents WHERE id = ?", [id]);
-      if (!rows || rows.length === 0) {
-        connection.release();
-        return res.status(404).json({ status: "error", message: "Document not found" });
+      const file = await documentRepository.getFileAndIncrementDownload(id);
+      if (file) {
+        res.json({ status: "success", data: file });
+      } else {
+        const { getDbMode } = await import("../../src/lib/db");
+        res.status(404).json({
+          status: "error",
+          code: "srv.document_not_found_id",
+          message: "Document not found. id: " + id + ", mode: " + getDbMode(),
+        });
       }
-      const item = rows[0];
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
+    }
+  }
+);
+
+router.post(
+  "/api/projects/:projectId/documents",
+  jagaProyek("wiki", "C"),
+  validasiBody(createDocumentSchema),
+  async (req: any, res) => {
+    try {
+      const { projectId } = req.params;
+      const {
+        title,
+        description,
+        type,
+        link,
+        fileData,
+        fileName,
+        fileType,
+        canvasData,
+        category,
+        createdBy,
+      } = req.body;
+      // Item #268 — id dan nama pembuat disimpan TERPISAH.
+      //
+      // Sebelumnya keduanya berebut satu kolom: klien mengirim `createdBy`
+      // berisi nama tampilan, lalu baris ini menimpanya dengan id sesi. Nama
+      // pembuat karena itu tidak pernah sampai ke basis data, dan frontend
+      // terpaksa menebak — `isAuthor()` mencocokkan satu nilai tersimpan ke
+      // ENAM field identitas sekaligus (id/uid/username/email/name/
+      // displayName). Tebakan itu gagal secara TIDAK KONSISTEN begitu format
+      // yang tersimpan berbeda dari field yang kebetulan ada di sesi, dan
+      // ketika gagal tombol Edit/Hapus flowchart hilang tanpa pesan apa pun —
+      // kanvasnya terbuka baca-saja, yang oleh pemilik proyek terbaca sebagai
+      // "klik edit malah ke detail".
+      //
+      // Id tetap yang menentukan otorisasi (tidak berubah saat pengguna ganti
+      // nama tampilan); nama hanya untuk ditampilkan.
+      const currentUserId = req.user?.id || req.user?.uid || "guest";
+      const currentUserName = req.user?.displayName || req.user?.username || createdBy || null;
+      const newId = crypto.randomUUID();
+      // #348 — sanitasi teks wiki sebelum simpan
+      const safeTitle = sanitizeUserText(title);
+      const safeDescription =
+        description !== undefined && description !== null ? sanitizeUserText(description) : null;
+
+      await documentRepository.create({
+        id: newId,
+        projectId,
+        title: safeTitle,
+        description: safeDescription,
+        type: type || null,
+        link: link || null,
+        fileData: fileData || null,
+        fileName: fileName || null,
+        fileType: fileType || null,
+        canvasData: canvasData || null,
+        category: category || null,
+        createdBy: currentUserId,
+        createdByName: currentUserName,
+      });
+
+      res.json({
+        status: "success",
+        data: {
+          id: newId,
+          projectId,
+          title: safeTitle,
+          description: safeDescription,
+          type,
+          link,
+          fileName,
+          fileType,
+          createdBy: currentUserId,
+          createdByName: currentUserName,
+        },
+      });
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
+    }
+  }
+);
+
+router.put(
+  "/api/projects/:projectId/documents/:id",
+  jagaProyek("wiki", "U"),
+  validasiBody(updateDocumentSchema),
+  async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const item = await documentRepository.findById(id);
+      if (!item) {
+        return res
+          .status(404)
+          .json({ status: "error", code: "srv.document_not_found", message: "Document not found" });
+      }
 
       const currentUserId = req.user?.id || req.user?.uid || req.headers["x-user-id"];
-      const userRole = (req.user?.role || req.user?.system_role || '').toUpperCase();
-      const isAdmin = ['SADM', 'ADMN', 'ADMIN'].includes(userRole);
-      const authorId = item.createdBy || item.author_id || item.authorId;
+      const userRole = (req.user?.role || req.user?.system_role || "").toUpperCase();
+      const isAdmin = userRole === "ADMIN";
+      const authorId = item.createdBy || (item as any).author_id || (item as any).authorId;
       const isAuthor = authorId === currentUserId;
 
       if (!isAuthor && !isAdmin) {
-        connection.release();
         return res.status(403).json({
           status: "error",
-          error: "Akses ditolak: Anda hanya diizinkan untuk melihat data ini."
+          error: "Akses ditolak: Anda hanya diizinkan untuk melihat data ini.",
         });
       }
 
-      const { title, description, type, link, fileData, fileName, fileType } = req.body;
-      
-      const updates = [];
-      const values = [];
-      if (title !== undefined) { updates.push("title = ?"); values.push(title); }
-      if (description !== undefined) { updates.push("description = ?"); values.push(description); }
-      if (type !== undefined) { updates.push("type = ?"); values.push(type); }
-      if (link !== undefined) { updates.push("link = ?"); values.push(link); }
-      if (fileData !== undefined) { updates.push("fileData = ?"); values.push(fileData); }
-      if (fileName !== undefined) { updates.push("fileName = ?"); values.push(fileName); }
-      if (fileType !== undefined) { updates.push("fileType = ?"); values.push(fileType); }
-      
-      if (updates.length > 0) {
-        values.push(id);
-        await connection.query(`UPDATE Documents SET ${updates.join(', ')} WHERE id = ?`, values);
-      }
-      connection.release();
-      res.json({ status: "success", message: "Document updated" });
-    } catch (error: any) {
-      if (connection) connection.release();
-      console.error(error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-    }
-  });
+      const { title, description, type, link, fileData, fileName, fileType, canvasData, category } =
+        req.body;
 
-  router.delete("/api/projects/:projectId/documents/:id", verifyProjectAccess(['*']), async (req: any, res) => {
-    let connection;
+      await documentRepository.update(id, {
+        title: title !== undefined ? sanitizeUserText(title) : title,
+        description:
+          description !== undefined
+            ? description === null
+              ? null
+              : sanitizeUserText(description)
+            : description,
+        type,
+        link,
+        fileData,
+        fileName,
+        fileType,
+        canvasData,
+        category,
+      });
+
+      res.json({ status: "success", code: "srv.document_updated", message: "Document updated" });
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
+    }
+  }
+);
+
+router.delete(
+  "/api/projects/:projectId/documents/:id",
+  jagaProyek("wiki", "D"),
+  async (req: any, res) => {
     try {
       const { id } = req.params;
-      connection = await db.getConnection();
-
-      const [rows]: any = await connection.query("SELECT * FROM Documents WHERE id = ?", [id]);
-      if (!rows || rows.length === 0) {
-        connection.release();
-        return res.status(404).json({ status: "error", message: "Document not found" });
+      const item = await documentRepository.findById(id);
+      if (!item) {
+        return res
+          .status(404)
+          .json({ status: "error", code: "srv.document_not_found", message: "Document not found" });
       }
-      const item = rows[0];
 
       const currentUserId = req.user?.id || req.user?.uid || req.headers["x-user-id"];
-      const userRole = (req.user?.role || req.user?.system_role || '').toUpperCase();
-      const isAdmin = ['SADM', 'ADMN', 'ADMIN'].includes(userRole);
-      const authorId = item.createdBy || item.author_id || item.authorId;
+      const userRole = (req.user?.role || req.user?.system_role || "").toUpperCase();
+      const isAdmin = userRole === "ADMIN";
+      const authorId = item.createdBy || (item as any).author_id || (item as any).authorId;
       const isAuthor = authorId === currentUserId;
 
       if (!isAuthor && !isAdmin) {
-        connection.release();
         return res.status(403).json({
           status: "error",
-          error: "Akses ditolak: Anda hanya diizinkan untuk melihat data ini."
+          error: "Akses ditolak: Anda hanya diizinkan untuk melihat data ini.",
         });
       }
 
-      await connection.query("DELETE FROM Documents WHERE id = ?", [id]);
-      connection.release();
-      res.json({ status: "success", message: "Document deleted" });
+      await documentRepository.delete(id);
+      res.json({ status: "success", code: "srv.document_deleted", message: "Document deleted" });
     } catch (error: any) {
-      if (connection) connection.release();
       console.error(error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
-  });
+  }
+);
 
 export default router;

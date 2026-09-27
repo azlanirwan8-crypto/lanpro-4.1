@@ -1,4 +1,6 @@
+import { useTranslation } from "react-i18next";
 import { safeLocalStorage } from "../../lib/safeStorage";
+import { getAuthToken } from "../../lib/api";
 import { showSuccessAlert } from "../../lib/sweetalert";
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
@@ -11,7 +13,6 @@ import {
   ListChecks,
   Clock,
   UserCheck,
-  Cpu,
   Lightbulb,
   CheckCircle2,
   Loader2,
@@ -20,6 +21,8 @@ import {
   Users,
   Info,
   FileText,
+  FileUp,
+  Mic,
   UploadCloud,
   X,
   XCircle,
@@ -30,12 +33,22 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { validateFileClient } from "../../lib/fileSecurity";
+import { suppressTaskDataRefresh } from "../../lib/taskRefreshControl";
+import { useAppStore } from "../../store/useAppStore";
 import { createDiscussionPoint } from "../../services/meetingService";
-import { type Meeting, type UserProfile, type DiscussionPoint } from "../../types";
+import { type Meeting, type UserProfile, type DiscussionPoint, type Task } from "../../types";
 import ReactMarkdown from "react-markdown";
 import type { AiMeetingCompanionProps, ActionItem, AiSummaryStructure } from "./types";
 import { mapToActiveMeetingData } from "./lib/mapping";
 import { analyzeTranscript, createTaskFromMeeting } from "./services/meeting.service";
+import {
+  bukaAliranMikrofon,
+  buatMeterLevel,
+  ekstensiDariMime,
+  pilihMimeRekaman,
+  rekamanPerluTranscodeKeMp3,
+} from "./lib/liveRecording";
+import { metadataUnggahRekaman } from "./lib/uploadRecordingMeta";
 
 export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   projectId,
@@ -44,6 +57,8 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   projectMembers = [],
   onPointsImported,
 }) => {
+  const { t } = useTranslation();
+  const setTasks = useAppStore((s) => s.setTasks);
   const [transcript, setTranscript] = useState("");
   const [meetingLink, setMeetingLink] = useState("");
   const [loading, setLoading] = useState(false);
@@ -134,7 +149,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
   const handleSubmitFeedback = async () => {
     if (!feedbackText.trim()) {
-      toast.error("Catatan evaluasi tidak boleh kosong.");
+      toast.error(t("toast.evalNoteEmpty"));
       return;
     }
     setSubmittingFeedback(true);
@@ -154,7 +169,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       }
     } catch (err: any) {
       console.error("[FEEDBACK SUBMIT ERROR]", err);
-      toast.error("Gagal mengirim masukan: " + (err.response?.data?.message || err.message));
+      toast.error(t("toast.feedbackSendFailed") + (err.response?.data?.message || err.message));
     } finally {
       setSubmittingFeedback(false);
     }
@@ -170,6 +185,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
   const [importingIds, setImportingIds] = useState<number[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const manuscriptInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadState, setUploadState] = useState<
     | "IDLE"
@@ -187,23 +203,40 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   const [uploadPercentage, setUploadPercentage] = useState(0);
   const [uploadedBytes, setUploadedBytes] = useState(0);
   const [totalBytes, setTotalBytes] = useState(0);
-  const [selectedPlatform, setSelectedPlatform] = useState<"Zoom" | "Teams" | "GMeet">("Zoom");
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [micLevel, setMicLevel] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const recordingStartedAtRef = useRef(0);
+  const meterStopRef = useRef<(() => void) | null>(null);
+  const liveStreamRef = useRef<MediaStream | null>(null);
+  /** True hanya setelah unggah sukses memicu pipeline server — cegah poll FAILED basi (#447). */
+  const sesiPipelineRef = useRef(false);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval> | undefined;
     if (isRecording) {
       interval = setInterval(() => {
-        setRecordingTime((prev) => prev + 1);
-      }, 1000);
+        setRecordingTime(Math.floor((Date.now() - recordingStartedAtRef.current) / 1000));
+      }, 250);
     } else {
       setRecordingTime(0);
+      setMicLevel(0);
     }
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [isRecording]);
+
+  useEffect(() => {
+    return () => {
+      meterStopRef.current?.();
+      meterStopRef.current = null;
+      liveStreamRef.current?.getTracks().forEach((track) => track.stop());
+      liveStreamRef.current = null;
+    };
+  }, []);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -211,11 +244,22 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const lepasAliranMikrofon = () => {
+    meterStopRef.current?.();
+    meterStopRef.current = null;
+    liveStreamRef.current?.getTracks().forEach((track) => track.stop());
+    liveStreamRef.current = null;
+  };
+
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await bukaAliranMikrofon();
+      liveStreamRef.current = stream;
       audioChunksRef.current = [];
-      const mediaRecorder = new MediaRecorder(stream);
+      const mime = pilihMimeRekaman();
+      const mediaRecorder = mime
+        ? new MediaRecorder(stream, { mimeType: mime })
+        : new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (event) => {
@@ -225,42 +269,64 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-        const file = new File([audioBlob], `recording-${new Date().getTime()}.webm`, {
-          type: "audio/webm",
+        const durasiDetik = Math.floor((Date.now() - recordingStartedAtRef.current) / 1000);
+        const mimeType = mediaRecorder.mimeType || mime || "audio/webm";
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        lepasAliranMikrofon();
+
+        if (durasiDetik < 5 || audioBlob.size < 1024) {
+          toast.error(t("toast.recordingTooShort"));
+          return;
+        }
+
+        const ext = ekstensiDariMime(mimeType);
+        const file = new File([audioBlob], `recording-${Date.now()}.${ext}`, {
+          type: mimeType.startsWith("audio/") ? mimeType : `audio/${ext}`,
         });
 
-        // Treat as a file upload
-        await processUploadedFile(file);
-        stream.getTracks().forEach((track) => track.stop());
+        try {
+          await processUploadedFile(file);
+        } catch (err: unknown) {
+          const pesan = err instanceof Error ? err.message : String(err);
+          toast.error(pesan || t("toast.uploadFailed"));
+        }
       };
 
-      mediaRecorder.start();
+      const meter = buatMeterLevel(stream, setMicLevel);
+      meterStopRef.current = meter.stop;
+
+      recordingStartedAtRef.current = Date.now();
+      mediaRecorder.start(1000);
       setIsRecording(true);
-      toast.info("Merekam...");
+      toast.info(t("toast.recording"));
     } catch (err) {
       console.error(err);
-      toast.error("Gagal mengakses mikrofon.");
+      lepasAliranMikrofon();
+      toast.error(t("toast.micAccessFailed"));
     }
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current) {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      // Removed premature toast.dismiss() to avoid clearing potential loading state
-      toast.success("Rekaman selesai, memulai pemrosesan...");
+      toast.success(t("toast.recordingDone"));
     }
   };
 
   const runAnalysisApi = async (transcriptText: string, link: string) => {
     setLoading(true);
     try {
-      const response = await analyzeTranscript(projectId, meeting.id, transcriptText, link);
+      const response = await analyzeTranscript(
+        projectId || "",
+        meeting.id || "",
+        transcriptText,
+        link
+      );
 
       if (response.status === "success") {
         setAiData(response.data);
-        toast.success("Transkrip berhasil dianalisis oleh Asisten AI!");
+        toast.success(t("toast.transcriptAnalyzed"));
         setActiveTab("summary");
       } else {
         toast.error(response.message || "Gagal menganalisis transkrip.");
@@ -280,27 +346,42 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       await ffmpeg.load();
       await ffmpeg.writeFile(file.name, await fetchFile(file));
 
-      // Extract audio to mp3
       const outputFileName = "extracted_audio.mp3";
-      // -vn: no video, -acodec libmp3lame: mp3 codec, -ar 16000: 16khz (sufficient for voice), -ac 1: mono (sufficient for voice)
-      // -map a: ensures we only take the audio stream, fails if none
-      const exitCode = await ffmpeg.exec([
-        "-i",
-        file.name,
-        "-vn",
-        "-acodec",
-        "libmp3lame",
-        "-ar",
-        "16000",
-        "-ac",
-        "1",
-        "-map",
-        "a",
-        outputFileName,
-      ]);
+      // Percobaan 1: -vn + -map a (video). Percobaan 2: tanpa keduanya (webm audio-only live).
+      const percobaanArgumen: string[][] = [
+        [
+          "-i",
+          file.name,
+          "-vn",
+          "-acodec",
+          "libmp3lame",
+          "-ar",
+          "16000",
+          "-ac",
+          "1",
+          "-map",
+          "a",
+          outputFileName,
+        ],
+        ["-i", file.name, "-acodec", "libmp3lame", "-ar", "16000", "-ac", "1", outputFileName],
+      ];
 
-      if (exitCode !== 0) {
-        throw new Error("FFmpeg failed to extract audio.");
+      let berhasil = false;
+      for (const args of percobaanArgumen) {
+        try {
+          await ffmpeg.deleteFile(outputFileName);
+        } catch {
+          /* belum ada */
+        }
+        const exitCode = await ffmpeg.exec(args);
+        if (exitCode === 0) {
+          berhasil = true;
+          break;
+        }
+      }
+
+      if (!berhasil) {
+        throw new Error(t("aiMeeting.ffmpegFailed"));
       }
 
       const data = await ffmpeg.readFile(outputFileName);
@@ -309,9 +390,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       return new File([audioBlob], outputFileName, { type: "audio/mp3" });
     } catch (error) {
       console.error("Audio extraction failed:", error);
-      throw new Error(
-        "Gagal mengekstrak audio. Pastikan file video memiliki track audio atau format tidak rusak."
-      );
+      throw error instanceof Error ? error : new Error(t("aiMeeting.ffmpegFailed"));
     }
   };
 
@@ -327,10 +406,18 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
     }
 
     let fileToUpload = file;
+    sesiPipelineRef.current = false;
 
-    // Check if it's a video file and needs extraction
-    if (file.type.startsWith("video/")) {
-      fileToUpload = await extractAudioFromVideo(file);
+    // Gemini menolak audio/webm live. Coba MP3 di klien; gagal → unggah mentah, server FFmpeg (#447).
+    if (rekamanPerluTranscodeKeMp3(file)) {
+      try {
+        fileToUpload = await extractAudioFromVideo(file);
+      } catch (err: unknown) {
+        console.warn("[#447] FFmpeg klien gagal; unggah mentah ke server:", err);
+        toast.info(t("aiMeeting.clientTranscodeFallback"));
+        fileToUpload = file;
+        setUploadState("IDLE");
+      }
     }
 
     setUploadState("IS_UPLOADING");
@@ -342,6 +429,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
     try {
       const chunkSize = 1024 * 1024 * 2; // 2MB chunk size to ensure we bypass reverse proxy limits
       const totalChunks = Math.ceil(fileToUpload.size / chunkSize);
+      const metaUnggah = metadataUnggahRekaman(fileToUpload);
       let lastResponse = null;
 
       for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
@@ -349,19 +437,17 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
         const end = Math.min(start + chunkSize, fileToUpload.size);
         const chunkBlob = fileToUpload.slice(start, end);
 
-        // Wrap the chunk blob back into a File object with original name
         const chunkFile = new File([chunkBlob], fileToUpload.name, { type: fileToUpload.type });
 
         const formData = new FormData();
         formData.append("recording", chunkFile);
         formData.append("meeting_id", meeting.id || "");
-        formData.append("file_name", file.name);
-        formData.append("platform", selectedPlatform);
+        formData.append("file_name", metaUnggah.file_name);
         formData.append("chunkIndex", chunkIndex.toString());
         formData.append("totalChunks", totalChunks.toString());
-        formData.append("fileSize", file.size.toString());
+        formData.append("fileSize", metaUnggah.fileSize);
 
-        const token = safeLocalStorage.getItem("lanpro_jwt_token");
+        const token = getAuthToken();
         lastResponse = await axios.post(
           `/api/v1/meetings/${meeting.id}/upload-recording`,
           formData,
@@ -375,7 +461,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                 // Calculate the overall progress of the entire file
                 const chunkProgress = progressEvent.loaded / progressEvent.total;
                 const overallUploadedBytes = start + chunkProgress * (end - start);
-                const percentage = Math.round((overallUploadedBytes * 100) / file.size);
+                const percentage = Math.round((overallUploadedBytes * 100) / fileToUpload.size);
 
                 setUploadPercentage(percentage);
                 setUploadedBytes(Math.round(overallUploadedBytes));
@@ -396,8 +482,9 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
           (lastResponse.data && lastResponse.data.status === "success"))
       ) {
         setUploadState("PROCESSING_AI");
-        toast.success("File rekaman rapat berhasil diunggah!");
-        toast.loading("Mengekstrak audio & menganalisis rapat dengan AI (STT & LLM)...", {
+        sesiPipelineRef.current = true;
+        toast.success(t("toast.recordingUploaded"));
+        toast.loading(t("toast.extractingAudio"), {
           id: "ai-analyze-toast",
         });
         setTimeout(() => {
@@ -405,12 +492,14 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
         }, 3000);
       } else {
         setUploadState("IDLE");
+        sesiPipelineRef.current = false;
         toast.error(lastResponse?.data?.message || "Gagal memproses rekaman.");
       }
     } catch (err: any) {
       setUploadState("IDLE");
+      sesiPipelineRef.current = false;
       console.error("Error uploading file:", err);
-      toast.error("Gagal mengunggah: " + (err.response?.data?.message || err.message));
+      toast.error(t("toast.uploadFailed") + (err.response?.data?.message || err.message));
     } finally {
       setUploading(false);
     }
@@ -422,9 +511,41 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
     await processUploadedFile(file);
   };
 
+  const handleManuscriptUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith(".txt")) {
+      toast.error(t("aiMeeting.manuscriptOnlyTxt"));
+      return;
+    }
+
+    const validation = validateFileClient(file, 5 * 1024 * 1024);
+    if (!validation.valid) {
+      toast.error(validation.error || t("aiMeeting.manuscriptOnlyTxt"));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = typeof reader.result === "string" ? reader.result : "";
+      if (!text.trim()) {
+        toast.error(t("aiMeeting.manuscriptEmpty"));
+        return;
+      }
+      setTranscript(text);
+      toast.success(t("aiMeeting.manuscriptLoaded"));
+    };
+    reader.onerror = () => {
+      toast.error(t("aiMeeting.manuscriptReadFailed"));
+    };
+    reader.readAsText(file);
+  };
+
   const handleCancelProcessing = async () => {
     try {
-      const token = safeLocalStorage.getItem("lanpro_jwt_token");
+      const token = getAuthToken();
       await axios.post(
         `/api/v1/meetings/${meeting.id}/cancel`,
         {},
@@ -435,10 +556,11 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       setUploadState("IDLE");
       setUploadPercentage(0);
       setUploading(false);
-      toast.success("Pemrosesan rapat berhasil dibatalkan dan di-reset.");
+      sesiPipelineRef.current = false;
+      toast.success(t("toast.processingCancelled"));
     } catch (err: any) {
       console.error("Cancel processing error:", err);
-      toast.error("Gagal membatalkan pemrosesan.");
+      toast.error(t("toast.cancelFailed"));
     }
   };
 
@@ -528,7 +650,8 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
           setUploadPercentage(100);
           setUploadState("IDLE");
           setUploading(false);
-          toast.success("Notulen Rapat otomatis berhasil disinkronisasi dalam waktu riil!");
+          sesiPipelineRef.current = false;
+          toast.success(t("toast.minutesSynced"));
           setActiveTab("summary");
         }
       });
@@ -536,23 +659,25 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       socket.on("meeting_ai_failed", (data: any) => {
         if (data.meetingId === meeting.id) {
           console.error("[SOCKET] AI Processing failed:", data.error);
-          toast.error(`Gagal menganalisis rapat: ${data.error}`);
+          toast.error(t("toast.meetingAnalysisFailed", { pesan: data.error }));
           setUploadPercentage(0);
           setUploadState("IDLE");
           setUploading(false);
+          sesiPipelineRef.current = false;
         }
       });
     }
 
-    // 2. Short-polling fallback to guarantee UI sync even with network glitches (polling every 3 seconds)
+    // 2. Short-polling fallback — hanya setelah unggah memicu pipeline (#447)
     let pollInterval: NodeJS.Timeout | null = null;
 
-    const isProcessingState = uploadState !== "IDLE" && uploadState !== "IS_UPLOADING";
+    const isProcessingState =
+      sesiPipelineRef.current && uploadState !== "IDLE" && uploadState !== "IS_UPLOADING";
 
     if (isProcessingState) {
       pollInterval = setInterval(async () => {
         try {
-          const token = safeLocalStorage.getItem("lanpro_jwt_token");
+          const token = getAuthToken();
           const response = await axios.get(`/api/v1/meetings/${meeting.id}/status`, {
             headers: token ? { Authorization: `Bearer ${token}` } : {},
           });
@@ -577,19 +702,30 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
               setUploadPercentage(100);
               setUploadState("IDLE");
               setUploading(false);
-              toast.success("Notulen Rapat otomatis berhasil dimuat!");
+              sesiPipelineRef.current = false;
+              toast.success(t("toast.minutesLoaded"));
               setActiveTab("summary");
               if (pollInterval) clearInterval(pollInterval);
             } else if (status === "FAILED") {
-              toast.error("Gagal memproses analisis otomatis di server.");
+              const detail =
+                typeof mData.message === "string" && mData.message.trim()
+                  ? mData.message
+                  : undefined;
+              toast.error(
+                detail
+                  ? t("toast.meetingAnalysisFailed", { pesan: detail })
+                  : t("toast.autoAnalysisFailed")
+              );
               setUploadPercentage(0);
               setUploadState("IDLE");
               setUploading(false);
+              sesiPipelineRef.current = false;
               if (pollInterval) clearInterval(pollInterval);
             } else if (status === "IDLE") {
               setUploadPercentage(0);
               setUploadState("IDLE");
               setUploading(false);
+              sesiPipelineRef.current = false;
               if (pollInterval) clearInterval(pollInterval);
             }
           }
@@ -609,7 +745,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
   const handleAnalyze = async () => {
     if (!transcript.trim()) {
-      toast.error("Silakan masukkan teks transkrip rapat terlebih dahulu.");
+      toast.error(t("toast.enterTranscript"));
       return;
     }
     runAnalysisApi(transcript, meetingLink);
@@ -617,16 +753,40 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
   const handleConvertToTask = async (item: any, index: number) => {
     if (!currentUser || !projectId) {
-      toast.error("Harap login & pilih project terlebih dahulu.");
+      toast.error(t("toast.loginPickProject"));
       return;
     }
 
     setConvertingTaskIds((prev) => [...prev, index]);
 
+    const concern = item.concern_masalah || item.concern || "";
+    const solusi = item.solusi_disepakati || item.tindakanLanjut || "";
+    const bukti = item.bukti_cuplikan ? `\n\n**Bukti cuplikan:**\n"${item.bukti_cuplikan}"` : "";
+    const tempId = `temp-${crypto.randomUUID()}`;
+    const title = `[Action Item] ${concern.substring(0, 50)}${concern.length > 50 ? "..." : ""}`;
+    const description = `**Concern:**\n${concern}\n\n**Solusi Disepakati:**\n${solusi}${bukti}`;
+    const placeholder: Task = {
+      id: tempId,
+      projectId,
+      title,
+      description,
+      status: "To Do",
+      priority: "High",
+      type: "task",
+      reporterId: currentUser.uid || currentUser.id || "guest",
+      key: "…",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    suppressTaskDataRefresh(8000);
+    setTasks((prev) => [placeholder, ...prev.filter((t) => t.id !== tempId)]);
+    toast.success(t("alerts.taskCreated"));
+
     try {
       const payload = {
-        title: `[Action Item] ${item.concern_masalah?.substring(0, 50)}...`,
-        description: `**Concern:**\n${item.concern_masalah}\n\n**Solusi Disepakati:**\n${item.solusi_disepakati}`,
+        title,
+        description,
         status: "To Do",
         priority: "High",
         type: "task",
@@ -636,16 +796,19 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
       const data = await createTaskFromMeeting(projectId, payload);
 
-      if (data.status === "success") {
-        showSuccessAlert("Berhasil!", "Berhasil membuat Task Issue baru di Backlog!");
-        // No refresh callback needed if websocket is active
-        // if (onRefreshTasks) {
-        //   onRefreshTasks();
-        // }
+      if (data.status === "success" && data.data) {
+        setTasks((prev) =>
+          prev.map((t) =>
+            t.id === tempId
+              ? { ...data.data, key: data.data.key || data.data.taskKey, projectId }
+              : t
+          )
+        );
       } else {
-        toast.error(data.message || "Gagal membuat task.");
+        throw new Error(data.message || "Gagal membuat task.");
       }
     } catch (err: any) {
+      setTasks((prev) => prev.filter((t) => t.id !== tempId));
       console.error("Failed to convert to task", err);
       toast.error(err.message || "Gagal membuat task.");
     } finally {
@@ -656,12 +819,12 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   const handleImportAllActionItems = async () => {
     const itemsToImport = activeMeetingData?.tab_tindak_lanjut || [];
     if (itemsToImport.length === 0) {
-      toast.error("Tidak ada butir tindak lanjut untuk diimpor.");
+      toast.error(t("toast.noActionItems"));
       return;
     }
 
     if (!currentUser) {
-      toast.error("Harap login terlebih dahulu.");
+      toast.error(t("toast.loginFirst"));
       return;
     }
 
@@ -671,6 +834,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
     for (let i = 0; i < itemsToImport.length; i++) {
       const item = itemsToImport[i];
       try {
+        const buktiNote = item.bukti_cuplikan ? ` Bukti: "${item.bukti_cuplikan}"` : "";
         const payload: Omit<DiscussionPoint, "id" | "meetingId" | "createdAt"> = {
           authorId: currentUser.uid,
           concern: item.concern_masalah || item.concern || "",
@@ -678,7 +842,8 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
           system: item.system || "System",
           surrounding: item.surrounding || "-",
           keterangan:
-            item.keterangan || "Diimpor otomatis dari analisis transkrip rapat oleh AI Companion.",
+            item.keterangan ||
+            `Diimpor otomatis dari analisis transkrip rapat oleh AI Companion.${buktiNote}`,
           tindakanLanjut: item.solusi_disepakati || item.tindakanLanjut || "",
           status: "pending",
           assignTo: undefined,
@@ -694,8 +859,8 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
     setImportingIds([]);
     showSuccessAlert(
-      "Berhasil!",
-      `Berhasil mengimpor ${successCount} butir tindak lanjut ke Poin Diskusi resmi.`
+      t("alerts.successTitle"),
+      t("alerts.actionImportedCount", { count: successCount })
     );
     if (onPointsImported) {
       onPointsImported();
@@ -704,12 +869,13 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
   const handleImportSingle = async (item: any, index: number) => {
     if (!currentUser) {
-      toast.error("Harap login terlebih dahulu.");
+      toast.error(t("toast.loginFirst"));
       return;
     }
 
     setImportingIds((prev) => [...prev, index]);
     try {
+      const buktiNote = item.bukti_cuplikan ? ` Bukti: "${item.bukti_cuplikan}"` : "";
       const payload: Omit<DiscussionPoint, "id" | "meetingId" | "createdAt"> = {
         authorId: currentUser.uid,
         concern: item.concern_masalah || item.concern || "",
@@ -717,7 +883,8 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
         system: item.system || "System",
         surrounding: item.surrounding || "-",
         keterangan:
-          item.keterangan || "Diimpor otomatis dari analisis transkrip rapat oleh AI Companion.",
+          item.keterangan ||
+          `Diimpor otomatis dari analisis transkrip rapat oleh AI Companion.${buktiNote}`,
         tindakanLanjut: item.solusi_disepakati || item.tindakanLanjut || "",
         status: "pending",
         assignTo: undefined,
@@ -725,168 +892,141 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       };
 
       await createDiscussionPoint(projectId, meeting.id!, payload, currentUser.uid);
-      showSuccessAlert("Berhasil!", "Butir tindak lanjut berhasil diimpor.");
+      showSuccessAlert(t("alerts.successTitle"), t("alerts.actionImported"));
       if (onPointsImported) {
         onPointsImported();
       }
     } catch (err: any) {
-      toast.error("Gagal mengimpor: " + err.message);
+      toast.error(t("toast.importFailed") + err.message);
     } finally {
       setImportingIds((prev) => prev.filter((id) => id !== index));
     }
   };
 
   return (
-    <div className="w-full flex flex-col bg-surface border border-border-subtle/80 rounded-lg overflow-hidden shadow-2xs">
-      {/* Companion Header Banner */}
-      <div className="p-4 sm:p-5 bg-gradient-to-r from-[#1a233a] via-primary to-[#283863] text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
-        <div className="flex items-center gap-3">
-          <span className="p-2.5 bg-surface/10 border border-white/15 rounded-lg text-indigo-200 shadow-2xs">
-            <Cpu className="w-5 h-5 animate-pulse" />
-          </span>
-          <div>
-            <div className="flex items-center gap-2">
-              <h4 className="text-sm font-medium tracking-tight text-white">
-                Asisten Notulen Rapat Otomatis
-              </h4>
-              <span className="px-2 py-0.5 bg-indigo-500/80 text-white text-xs sm:text-[11px] sm:text-[9px] font-medium rounded-md uppercase tracking-wider">
-                PRO
-              </span>
-            </div>
-            <p className="text-xs sm:text-[11px] text-slate-200/80 mt-0.5">
-              Analisis transkrip suara hasil Speech-to-Text rapat menjadi ringkasan & action items
-              terstruktur.
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => setShowFeedbackModal(true)}
-            className="px-3.5 py-1.5 bg-surface/10 hover:bg-surface/20 border border-white/20 text-white text-xs font-medium rounded-md transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
-          >
-            <Brain className="w-3.5 h-3.5" /> Beri Masukan Kualitas Notulen
-          </button>
-          {aiData && (
-            <button
-              onClick={() => setActiveTab("transcript")}
-              className="px-3.5 py-1.5 bg-surface/10 hover:bg-surface/20 border border-white/20 text-white text-xs font-medium rounded-md transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-200" /> Analisis Transkrip Baru
-            </button>
-          )}
-        </div>
-      </div>
-
+    <div className="w-full flex flex-col text-left">
+      {/* Continuous Learning Loop Feedback Modal Trigger — tombol feedback dipasang subtil jika ada data, atau diakses lewat modal */}
       {/* Tabs navigation */}
       {aiData && (
-        <div className="border-b border-border-subtle/80 bg-surface-sunken/70 p-1 flex flex-wrap gap-1">
+        <div className="border-b border-border-subtle/80 bg-surface-sunken/70 p-1 flex flex-wrap items-center justify-between gap-1 rounded-t-lg">
+          <div className="flex flex-wrap gap-1">
+            <button
+              onClick={() => setActiveTab("summary")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "summary"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5 text-primary" /> {t("aiMeeting.summary")}
+            </button>
+            <button
+              onClick={() => setActiveTab("chronology")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "chronology"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <Brain className="w-3.5 h-3.5 text-primary" /> {t("aiMeeting.meetingChronology")}
+            </button>
+            <button
+              onClick={() => setActiveTab("conclusions")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "conclusions"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {t("aiMeeting.conclusions")}
+            </button>
+            <button
+              onClick={() => setActiveTab("suggestions")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "suggestions"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <Lightbulb className="w-3.5 h-3.5 text-amber-500" /> {t("aiMeeting.suggestionsIdeas")}
+            </button>
+            <button
+              onClick={() => setActiveTab("actionItems")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer relative ${
+                activeTab === "actionItems"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <ListChecks className="w-3.5 h-3.5 text-primary" /> {t("aiMeeting.followUp")}
+              {activeMeetingData?.tab_tindak_lanjut?.length > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 bg-primary-surface text-content-inverse text-xs sm:text-[11px] sm:text-[9px] rounded-full font-medium min-w-[16px] text-center inline-block">
+                  {activeMeetingData.tab_tindak_lanjut.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("nextPlan")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "nextPlan"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <ArrowRight className="w-3.5 h-3.5 text-pink-500" /> {t("aiMeeting.nextPlan")}
+            </button>
+            <button
+              onClick={() => setActiveTab("toBeScenario")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "toBeScenario"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-cyan-600" /> {t("aiMeeting.toBeTarget")}
+            </button>
+            <button
+              onClick={() => setActiveTab("metadata")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "metadata"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5 text-teal-600" /> {t("aiMeeting.metadata")}
+            </button>
+            <button
+              onClick={() => setActiveTab("transcript")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "transcript"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5 text-content-muted" />{" "}
+              {t("aiMeeting.viewTranscript")}
+            </button>
+          </div>
+
           <button
-            onClick={() => setActiveTab("summary")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "summary"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
+            onClick={() => setShowFeedbackModal(true)}
+            className="px-3 py-1.5 bg-surface hover:bg-surface-muted border border-border-subtle text-content-body text-xs font-medium rounded-md transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs shrink-0"
+            title={t("aiMeeting.giveFeedbackOnMinuteQuality")}
           >
-            <FileText className="w-3.5 h-3.5 text-primary" /> Ringkasan
-          </button>
-          <button
-            onClick={() => setActiveTab("chronology")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "chronology"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <Brain className="w-3.5 h-3.5 text-primary" /> Kronologi Rapat
-          </button>
-          <button
-            onClick={() => setActiveTab("conclusions")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "conclusions"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Kesimpulan
-          </button>
-          <button
-            onClick={() => setActiveTab("suggestions")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "suggestions"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <Lightbulb className="w-3.5 h-3.5 text-amber-500" /> Saran & Ide
-          </button>
-          <button
-            onClick={() => setActiveTab("actionItems")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer relative ${
-              activeTab === "actionItems"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <ListChecks className="w-3.5 h-3.5 text-primary" /> Tindak Lanjut
-            {activeMeetingData?.tab_tindak_lanjut?.length > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 bg-primary text-white text-xs sm:text-[11px] sm:text-[9px] rounded-full font-medium min-w-[16px] text-center inline-block">
-                {activeMeetingData.tab_tindak_lanjut.length}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab("nextPlan")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "nextPlan"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <ArrowRight className="w-3.5 h-3.5 text-pink-500" /> Next Plan
-          </button>
-          <button
-            onClick={() => setActiveTab("toBeScenario")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "toBeScenario"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-cyan-600" /> Target To-Be
-          </button>
-          <button
-            onClick={() => setActiveTab("metadata")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "metadata"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <Clock className="w-3.5 h-3.5 text-teal-600" /> Metadata
-          </button>
-          <button
-            onClick={() => setActiveTab("transcript")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "transcript"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <FileText className="w-3.5 h-3.5 text-content-muted" /> Lihat Transkrip
+            <Brain className="w-3.5 h-3.5 text-primary" />{" "}
+            {t("aiMeeting.giveFeedbackOnMinuteQuality")}
           </button>
         </div>
       )}
 
       {/* Main workspace container */}
-      <div className="p-6 min-h-[300px] bg-surface-sunken/20 text-left">
+      <div className="p-4 sm:p-6 min-h-[300px] text-left">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mb-4" />
-            <h5 className="text-sm font-medium text-content-strong">Menyusun Catatan Rapat...</h5>
+            <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
+            <h5 className="text-sm font-medium text-content-strong">{t("aiMeeting.composing")}</h5>
             <p className="text-xs text-content-subtle mt-1.5 max-w-sm leading-relaxed">
-              Sekretaris AI sedang menganalisis alur argumen, mendeteksi topik bahasan, mengekstrak
-              poin kesimpulan, saran, serta butir tindak lanjut rapat Anda. Harap tunggu sebentar.
+              {t("aiMeeting.theAiSecretaryIsAnalysing")}
             </p>
           </div>
         ) : (
@@ -896,13 +1036,13 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
               <div className="space-y-6">
                 {/* Header Info & Stats Bar */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-2 p-5 bg-indigo-50/50 border border-indigo-100 rounded-xl flex flex-col justify-between">
+                  <div className="md:col-span-2 p-5 bg-primary/10 border border-primary/20 rounded-xl flex flex-col justify-between">
                     <div>
-                      <span className="text-xs sm:text-[10px] text-indigo-800 font-medium uppercase tracking-widest bg-indigo-100/70 px-2.5 py-1 rounded-md">
-                        Agenda Rapat Utama
+                      <span className="text-[10px] leading-none text-primary font-normal uppercase tracking-normal bg-primary/15 px-2.5 py-1 rounded-md">
+                        {t("aiMeeting.mainAgenda")}
                       </span>
                       <h3 className="text-sm font-medium text-content-strong mt-2 flex items-center gap-2">
-                        <Sparkles className="w-4.5 h-4.5 text-indigo-600 animate-pulse" />
+                        <Sparkles className="w-4.5 h-4.5 text-primary animate-pulse" />
                         {activeMeetingData.tab_ringkasan.topik_utama}
                       </h3>
                     </div>
@@ -910,20 +1050,24 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-surface p-4 rounded-xl border border-border-subtle/50 shadow-xs flex flex-col justify-between">
-                      <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle  uppercase tracking-wider block">
-                        Segmen Diskusi
+                      <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle uppercase tracking-normal block">
+                        {t("aiMeeting.discussionSegments")}
                       </span>
-                      <p className="text-base font-medium text-indigo-950 mt-1">
-                        {(activeMeetingData.tab_kronologi_rapat || []).length} Topik
+                      <p className="text-base font-medium text-primary mt-1">
+                        {t("rakit.topicsCount", {
+                          count: (activeMeetingData.tab_kronologi_rapat || []).length,
+                        })}
                       </p>
                     </div>
 
                     <div className="bg-surface p-4 rounded-xl border border-border-subtle/50 shadow-xs flex flex-col justify-between">
-                      <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle  uppercase tracking-wider block">
-                        Action Items
+                      <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle uppercase tracking-normal block">
+                        {t("aiMeeting.actionItems")}
                       </span>
                       <p className="text-base font-medium text-emerald-700 mt-1">
-                        {(activeMeetingData.tab_tindak_lanjut || []).length} Butir
+                        {t("rakit.itemsFound", {
+                          count: (activeMeetingData.tab_tindak_lanjut || []).length,
+                        })}
                       </p>
                     </div>
                   </div>
@@ -931,7 +1075,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
                 {/* PMO Enterprise Notulen Rapat Document */}
                 <div className="bg-surface p-8 md:p-10 rounded-xl border border-border-subtle/80 shadow-md relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-1.5 bg-indigo-600"></div>
+                  <div className="absolute top-0 left-0 w-full h-1.5 bg-primary-surface"></div>
 
                   {/* Premium Markdown styling with .prose */}
                   <div className="prose prose-sm prose-slate max-w-none text-content-strong leading-relaxed text-left">
@@ -970,11 +1114,11 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   <div className="p-6 bg-surface border border-border-subtle/80 rounded-xl shadow-soft space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border-faint">
                       <div className="flex items-center gap-2">
-                        <h4 className="text-xs font-medium text-content-strong uppercase tracking-widest flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-indigo-600" />
-                          Hasil Speech-to-Text Mentah (Raw Transcript)
+                        <h4 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-primary" />
+                          {t("aiMeeting.rawSpeechToTextResult")}
                         </h4>
-                        <span className="px-2.5 py-1 bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs sm:text-[10px] font-medium rounded-lg">
+                        <span className="px-2.5 py-1 bg-primary/10 border border-primary/20 text-primary text-[10px] leading-none font-medium rounded-lg">
                           {transcript ? `${transcript.split(/\s+/).length} Kata` : "0 Kata"}
                         </span>
                       </div>
@@ -985,56 +1129,54 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             setEditedTranscriptText(transcript);
                             setIsEditingTranscript(true);
                           }}
-                          className="px-3 py-1.5 bg-surface-muted hover:bg-indigo-50 hover:text-indigo-700 text-content-body text-xs font-medium rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-xs border border-border-subtle/60 hover:border-indigo-200"
+                          className="px-3 py-1.5 bg-surface-muted hover:bg-primary/10 hover:text-primary text-content-body text-xs font-medium rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-xs border border-border-subtle/60 hover:border-primary/20"
                         >
                           <Pencil className="w-3.5 h-3.5" />
-                          Edit & Analisis Ulang
+                          {t("aiMeeting.editReanalyse")}
                         </button>
                       )}
                     </div>
 
                     {isEditingTranscript ? (
-                      <div className="space-y-4 text-left animate-fade-in">
-                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs  text-amber-800 leading-relaxed flex items-start gap-2.5">
+                      <div className="space-y-4 text-left">
+                        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-xs text-amber-800 leading-relaxed flex items-start gap-2.5">
                           <Sparkles className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5 animate-pulse" />
                           <div>
-                            Mode Edit Aktif: Anda dapat menambah, mengoreksi, atau menempelkan
-                            transkrip percakapan rapat yang lebih lengkap di bawah ini. Setelah
-                            selesai, klik tombol{" "}
-                            <span className="underline">"Simpan & Mulai Analisis Ulang"</span> untuk
-                            memproses kembali Notulen Rapat PMO Anda secara instan.
+                            {t("aiMeeting.editModeAddCorrectOr")}{" "}
+                            <span className="underline">{t("aiMeeting.saveReRunAnalysis")}</span>{" "}
+                            {t("aiMeeting.toReprocessYourMeetingMinutes")}
                           </div>
                         </div>
 
                         <textarea
                           value={editedTranscriptText}
                           onChange={(e) => setEditedTranscriptText(e.target.value)}
-                          placeholder="Sunting atau lengkapi teks transkrip di sini..."
-                          className="w-full min-h-[350px] p-4 border border-border-subtle focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl text-xs  outline-none bg-surface font-mono leading-relaxed shadow-inner"
+                          placeholder={t("aiMeeting.transcriptPlaceholder")}
+                          className="w-full min-h-[350px] p-4 border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary rounded-xl text-xs outline-none bg-surface font-mono leading-relaxed shadow-inner"
                         />
 
                         <div className="flex items-center justify-end gap-3 pt-2">
                           <button
                             onClick={() => setIsEditingTranscript(false)}
-                            className="px-4 py-2.5 bg-surface-muted hover:bg-slate-200 text-content-body text-xs  rounded-xl border border-border-subtle/60 transition-all cursor-pointer"
+                            className="px-4 py-2.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs rounded-xl border border-border-subtle/60 transition-all cursor-pointer"
                           >
-                            Batal
+                            {t("aiMeeting.cancel")}
                           </button>
 
                           <button
                             onClick={async () => {
                               if (!editedTranscriptText.trim()) {
-                                toast.error("Transkrip tidak boleh kosong.");
+                                toast.error(t("toast.transcriptEmpty"));
                                 return;
                               }
                               setIsEditingTranscript(false);
                               setTranscript(editedTranscriptText);
                               await runAnalysisApi(editedTranscriptText, meetingLink);
                             }}
-                            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer hover:scale-[1.01] transition-transform"
+                            className="btn-primary px-5 py-2.5 text-xs font-medium rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer hover:scale-[1.01] transition-transform"
                           >
                             <Save className="w-4 h-4" />
-                            Simpan & Mulai Analisis Ulang
+                            {t("aiMeeting.saveReanalyse")}
                           </button>
                         </div>
                       </div>
@@ -1052,8 +1194,8 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Cari kata kunci, topik, pembicara, atau keputusan..."
-                                className="w-full pl-10 pr-10 py-2.5 bg-surface border border-border-subtle focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-xs text-slate-705 rounded-xl placeholder:text-content-subtle focus:outline-none transition-all "
+                                placeholder={t("aiMeeting.searchPlaceholder")}
+                                className="w-full pl-10 pr-10 py-2.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary text-xs rounded-xl placeholder:text-content-subtle focus:outline-none transition-all"
                               />
                               {searchTerm && (
                                 <button
@@ -1070,20 +1212,22 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                               onClick={() => setFilterOnlyMatches(!filterOnlyMatches)}
                               className={`px-4 py-2.5 rounded-xl border text-xs font-medium transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
                                 filterOnlyMatches
-                                  ? "bg-indigo-600 border-indigo-600 text-white shadow-md"
-                                  : "bg-surface border-border-subtle text-slate-655 hover:text-content-strong hover:bg-surface-sunken"
+                                  ? "bg-primary-surface border-primary text-content-inverse shadow-md"
+                                  : "bg-surface border-border-subtle  hover:text-content-strong hover:bg-surface-sunken"
                               }`}
                             >
                               <Filter className="w-3.5 h-3.5" />
-                              {filterOnlyMatches ? "Hanya Baris Cocok" : "Tampilkan Semua"}
+                              {filterOnlyMatches
+                                ? t("aiMeeting.onlyMatchingRows")
+                                : t("aiMeeting.showAll")}
                             </button>
                           </div>
 
                           {/* Quick Search Chips and Match Count */}
                           <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
                             <div className="flex flex-wrap items-center gap-1.5">
-                              <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mr-1">
-                                Cari Cepat:
+                              <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mr-1">
+                                {t("aiMeeting.quickSearch")}
                               </span>
                               {[
                                 "Speaker",
@@ -1099,8 +1243,8 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                                   onClick={() => setSearchTerm(chip)}
                                   className={`px-2.5 py-1 text-xs sm:text-[10px]  rounded-lg transition-all cursor-pointer border ${
                                     searchTerm === chip
-                                      ? "bg-indigo-50 border-indigo-200 text-indigo-700 font-medium"
-                                      : "bg-surface border-slate-150 text-content-muted hover:text-content-body hover:bg-surface-sunken"
+                                      ? "bg-primary/10 border-primary/20 text-primary font-medium"
+                                      : "bg-surface  text-content-muted hover:text-content-body hover:bg-surface-sunken"
                                   }`}
                                 >
                                   {chip}
@@ -1109,8 +1253,8 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             </div>
 
                             {searchTerm.trim() && (
-                              <div className="text-xs sm:text-[10px] font-medium uppercase tracking-wider px-2.5 py-1 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg animate-pulse">
-                                Ditemukan {getMatchCount()} kecocokan
+                              <div className="text-[10px] leading-none font-normal uppercase tracking-normal px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-800 rounded-lg animate-pulse">
+                                {t("rakit.matchesFound", { count: getMatchCount() })}
                               </div>
                             )}
                           </div>
@@ -1128,76 +1272,68 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                               </div>
                             ))
                           ) : (
-                            <div className="text-center py-8 text-content-subtle  italic">
-                              Tidak ada baris transkrip yang cocok dengan pencarian "{searchTerm}".
+                            <div className="text-center py-8 text-content-subtle italic">
+                              {t("aiMeeting.noTranscriptLineMatchesThe")}
+                              {searchTerm}".
                             </div>
                           )}
                         </div>
                       </div>
                     ) : (
-                      <p className="text-xs text-content-subtle  italic">
-                        Transkrip mentah tidak tersedia (Analisis multimodal diekstrak langsung dari
-                        rekaman video/audio).
+                      <p className="text-xs text-content-subtle italic">
+                        {t("aiMeeting.noRawTranscriptAvailableThe")}
                       </p>
                     )}
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Section 1: Record Langsung */}
                   <div className="space-y-4 p-6 bg-surface rounded-xl border border-border-faint shadow-soft">
-                    <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
+                    <div className="flex items-center gap-2 text-primary font-normal text-xs uppercase tracking-normalr">
                       <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                      1. Record Langsung (Mikrofon)
+                      {t("aiMeeting.recordLiveMicrophone")}
                     </div>
                     <p className="text-xs sm:text-[11px] text-content-subtle">
-                      Merekam suara rapat melalui mikrofon perangkat Anda (catatan: hanya suara yang
-                      ditangkap mikrofon).
+                      {t("aiMeeting.recordsTheMeetingThroughYour")}
+                    </p>
+                    <p className="text-xs sm:text-[11px] text-content-muted">
+                      {t("aiMeeting.recordingRetentionNote")}
                     </p>
 
                     <div className="flex flex-col items-center justify-center gap-3 w-full py-4">
                       <button
+                        type="button"
                         onClick={isRecording ? stopRecording : startRecording}
-                        className={`px-8 py-4 ${isRecording ? "bg-slate-800" : "bg-red-600"} hover:opacity-90 text-white rounded-xl text-sm font-medium shadow-soft-lg shadow-red-150 flex items-center gap-3 cursor-pointer transition-transform hover:scale-[1.02]`}
+                        className={`px-8 py-4 ${isRecording ? "bg-surface-inverse" : "bg-red-600"} hover:opacity-90 text-content-inverse rounded-xl text-sm font-medium shadow-soft-lg flex items-center gap-3 cursor-pointer transition-transform hover:scale-[1.02]`}
                       >
-                        <Brain className="w-5 h-5" />{" "}
-                        {isRecording ? "Hentikan Rekaman" : "Mulai Merekam"}
+                        <Mic className={`w-5 h-5 ${isRecording ? "animate-pulse" : ""}`} />{" "}
+                        {isRecording ? t("aiMeeting.stopRecording") : t("aiMeeting.startRecording")}
                       </button>
-                      <span className="text-sm font-mono  text-content-muted">
+                      <span className="text-sm font-mono text-content-muted">
                         {formatTime(recordingTime)}
                       </span>
+                      {isRecording && (
+                        <div className="w-full max-w-[220px] space-y-1">
+                          <div className="h-2 rounded-full bg-surface-sunken overflow-hidden border border-border-subtle">
+                            <div
+                              className="h-full bg-success-surface transition-[width] duration-100"
+                              style={{ width: `${Math.round(micLevel * 100)}%` }}
+                            />
+                          </div>
+                          <p className="text-[10px] text-center text-content-subtle">
+                            {t("aiMeeting.micLevelHint")}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   {/* Section 2: Upload / Paste */}
                   <div className="space-y-4 p-6 bg-surface rounded-xl border border-border-faint shadow-soft flex flex-col justify-between">
-                    <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
-                      <FileText className="w-4 h-4 text-indigo-600" />
-                      2. Upload Rekaman Atau Transkrip
-                    </div>
-
-                    {/* Media Platform Selector */}
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest">
-                        Platform Rekaman Rapat
-                      </label>
-                      <div className="grid grid-cols-3 gap-1.5 p-1 bg-surface-muted rounded-xl">
-                        {(["Zoom", "Teams", "GMeet"] as const).map((p) => (
-                          <button
-                            key={p}
-                            type="button"
-                            disabled={uploadState !== "IDLE"}
-                            onClick={() => setSelectedPlatform(p)}
-                            className={`py-1.5 text-xs sm:text-[11px]  rounded-lg transition-all cursor-pointer ${
-                              selectedPlatform === p
-                                ? "bg-surface text-indigo-700 shadow-soft border border-border-subtle/50"
-                                : "text-content-muted hover:text-content-strong disabled:opacity-50"
-                            }`}
-                          >
-                            {p}
-                          </button>
-                        ))}
-                      </div>
+                    <div className="flex items-center gap-2 text-primary font-normal text-xs uppercase tracking-normalr">
+                      <FileText className="w-4 h-4 text-primary" />
+                      {t("aiMeeting.uploadARecordingOrTranscript")}
                     </div>
 
                     {uploadState !== "IDLE" ? (
@@ -1214,13 +1350,13 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             icon = <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />;
                             break;
                           case "IS_PROCESSING":
-                            title = "Menyimpan Berkas Rapat...";
-                            subtext = "Menyimpan berkas rekaman secara permanen...";
-                            icon = <Loader2 className="w-4 h-4 text-indigo-600 animate-spin" />;
+                            title = t("aiMeeting.processingTitle");
+                            subtext = t("aiMeeting.processingTempStore");
+                            icon = <Loader2 className="w-4 h-4 text-primary animate-spin" />;
                             break;
                           case "UPLOAD_SUCCESS":
-                            title = "Unggah Selesai!";
-                            subtext = "Selesai! Memulai analisis transkrip...";
+                            title = t("aiMeeting.uploadDoneTitle");
+                            subtext = t("aiMeeting.uploadDoneSubtext");
                             icon = <CheckCircle2 className="w-4 h-4 text-emerald-600" />;
                             pct = Math.max(pct, 5);
                             break;
@@ -1247,8 +1383,8 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             pct = 90;
                             break;
                           case "COMPLETED":
-                            title = "Pemrosesan Selesai!";
-                            subtext = "Seluruh tahapan berhasil diselesaikan.";
+                            title = t("aiMeeting.completedTitle");
+                            subtext = t("aiMeeting.completedRetentionSubtext");
                             icon = <CheckCircle2 className="w-4 h-4 text-emerald-600" />;
                             pct = 100;
                             break;
@@ -1267,7 +1403,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 {icon}
-                                <span className="text-xs  text-content-body">{title}</span>
+                                <span className="text-xs text-content-body">{title}</span>
                               </div>
                               <span className="text-xs font-medium text-blue-600 transition-all duration-300">
                                 {pct}%
@@ -1275,9 +1411,9 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             </div>
 
                             {/* Progress bar with a contrast blue gradient */}
-                            <div className="w-full bg-slate-200 h-3 rounded-full overflow-hidden shadow-inner relative">
+                            <div className="w-full bg-surface-strong h-3 rounded-full overflow-hidden shadow-inner relative">
                               <div
-                                className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500 ease-out"
+                                className="h-full bg-gradient-to-r from-primary to-primary-hover transition-all duration-500 ease-out"
                                 style={{
                                   width: `${pct}%`,
                                 }}
@@ -1285,7 +1421,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             </div>
 
                             {/* Detail of bytes / stage */}
-                            <div className="flex items-center justify-between text-xs sm:text-[10px] text-content-muted ">
+                            <div className="flex items-center justify-between text-xs sm:text-[10px] text-content-muted">
                               <span>{subtext}</span>
                               <button
                                 onClick={(e) => {
@@ -1294,7 +1430,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                                 }}
                                 className="text-rose-500 hover:text-rose-700 underline cursor-pointer"
                               >
-                                Batal/Reset
+                                {t("aiMeeting.cancelReset")}
                               </button>
                             </div>
                           </div>
@@ -1303,7 +1439,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     ) : (
                       <div
                         onClick={() => fileInputRef.current?.click()}
-                        className="border-2 border-dashed border-border-subtle rounded-xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/50 transition-all text-content-muted hover:text-indigo-600 h-full min-h-[160px]"
+                        className="border-2 border-dashed border-border-subtle rounded-xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary hover:bg-primary/10 transition-all text-content-muted hover:text-primary h-full min-h-[160px]"
                       >
                         <input
                           type="file"
@@ -1313,43 +1449,85 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                           className="hidden"
                         />
                         <UploadCloud className="w-8 h-8" />
-                        <p className="text-xs  text-center">Unggah Rekaman ({selectedPlatform})</p>
+                        <p className="text-xs text-center">{t("aiMeeting.uploadRecordingCta")}</p>
                         <p className="text-xs sm:text-[10px] text-content-subtle text-center">
-                          Video / Audio (MP4, AVI, MKV, MOV, MP3, WAV, etc.)
+                          {t("aiMeeting.uploadRecordingFormats")}
+                        </p>
+                        <p className="text-xs sm:text-[10px] text-content-muted text-center mt-1">
+                          {t("aiMeeting.recordingRetentionNote")}
                         </p>
                       </div>
                     )}
                   </div>
+
+                  {/* Section 3: Upload Manuskrip (.txt) — #182 */}
+                  <div className="space-y-4 p-6 bg-surface rounded-xl border border-border-faint shadow-soft flex flex-col justify-between">
+                    <div className="flex items-center gap-2 text-primary font-normal text-xs uppercase tracking-normalr">
+                      <FileUp className="w-4 h-4 text-primary" />
+                      {t("aiMeeting.manuscriptUploadLabel")}
+                    </div>
+                    <p className="text-xs sm:text-[11px] text-content-subtle">
+                      {t("aiMeeting.manuscriptUploadDesc")}
+                    </p>
+
+                    <div
+                      onClick={() => manuscriptInputRef.current?.click()}
+                      className="border-2 border-dashed border-border-subtle rounded-xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary hover:bg-primary/10 transition-all text-content-muted hover:text-primary h-full min-h-[160px]"
+                    >
+                      <input
+                        type="file"
+                        ref={manuscriptInputRef}
+                        onChange={handleManuscriptUpload}
+                        accept=".txt,text/plain"
+                        className="hidden"
+                      />
+                      <FileUp className="w-8 h-8" />
+                      <p className="text-xs text-center">{t("aiMeeting.manuscriptDropText")}</p>
+                      <p className="text-xs sm:text-[10px] text-content-subtle text-center">
+                        {t("aiMeeting.manuscriptDropHint")}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Section 3: Paste Transcript */}
-                <div className="space-y-4 p-6 bg-surface rounded-xl border border-border-faint shadow-soft">
-                  <div className="text-center text-xs  text-content-subtle uppercase tracking-wider py-2">
-                    ATAU TEMPEL LINK / TRANSKRIP
+                {/* Section 4: Link rapat & transkrip manual — dipisah, tidak lagi digabung dalam satu label (#182) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2 p-6 bg-surface rounded-xl border border-border-faint shadow-soft">
+                    <div className="flex items-center gap-2 text-primary font-normal text-xs uppercase tracking-normalr">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      {t("aiMeeting.meetingLinkLabel")}
+                    </div>
+                    <input
+                      type="text"
+                      value={meetingLink}
+                      onChange={(e) => setMeetingLink(e.target.value)}
+                      placeholder={t("aiMeeting.pasteLinkPlaceholder")}
+                      className="w-full p-3 border border-border-subtle rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary bg-surface placeholder:text-content-subtle"
+                    />
                   </div>
 
-                  <input
-                    type="text"
-                    value={meetingLink}
-                    onChange={(e) => setMeetingLink(e.target.value)}
-                    placeholder="Tempel link rapat (Zoom/Teams/GMeet)..."
-                    className="w-full p-3 border border-border-subtle rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 bg-surface placeholder:text-slate-300 "
-                  />
-
-                  <textarea
-                    value={transcript}
-                    onChange={(e) => setTranscript(e.target.value)}
-                    placeholder="Tempel teks transkrip di sini..."
-                    className="w-full min-h-[160px] p-4 border border-border-subtle rounded-xl text-xs  outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 bg-surface placeholder:text-slate-300 font-mono leading-relaxed shadow-inner"
-                  />
-                  <div className="flex justify-end">
-                    <button
-                      onClick={handleAnalyze}
-                      className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl text-xs font-medium shadow-soft-lg shadow-indigo-150 flex items-center gap-2 cursor-pointer hover:scale-[1.01] transition-transform"
-                    >
-                      <Sparkles className="w-4 h-4 text-indigo-200" /> MULAI ANALISIS AI
-                    </button>
+                  <div className="space-y-2 p-6 bg-surface rounded-xl border border-border-faint shadow-soft">
+                    <div className="flex items-center gap-2 text-primary font-normal text-xs uppercase tracking-normalr">
+                      <FileText className="w-4 h-4 text-primary" />
+                      {t("aiMeeting.manualTranscriptLabel")}
+                    </div>
+                    <textarea
+                      value={transcript}
+                      onChange={(e) => setTranscript(e.target.value)}
+                      placeholder={t("aiMeeting.pasteTranscriptPlaceholder")}
+                      className="w-full min-h-[92px] p-4 border border-border-subtle rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary bg-surface placeholder:text-content-subtle font-mono leading-relaxed shadow-inner"
+                    />
                   </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleAnalyze}
+                    className="btn-primary px-6 py-3 rounded-xl text-xs font-medium shadow-soft-lg flex items-center gap-2 cursor-pointer hover:scale-[1.01] transition-transform"
+                  >
+                    <Sparkles className="w-4 h-4 text-content-inverse/80" />{" "}
+                    {t("aiMeeting.startAiAnalysis")}
+                  </button>
                 </div>
               </div>
             )}
@@ -1357,43 +1535,43 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
             {/* TAB: Chronology */}
             {activeTab === "chronology" && activeMeetingData?.tab_kronologi_rapat && (
               <div className="space-y-6">
-                <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider mb-2">
-                  <Brain className="w-4 h-4 text-indigo-600" />
-                  Kronologi Jalannya Pembahasan & Tampilan Layar Multimodal
+                <div className="flex items-center gap-2 text-primary font-normal text-xs uppercase tracking-normalr mb-2">
+                  <Brain className="w-4 h-4 text-primary" />
+                  {t("aiMeeting.chronology")}
                 </div>
 
                 {activeMeetingData.tab_kronologi_rapat.length === 0 ? (
-                  <div className="text-center py-8 text-slate-450 text-xs bg-surface border border-border-subtle/40 rounded-xl">
-                    Tidak ada kronologi terdeteksi.
+                  <div className="text-center py-8 text-xs bg-surface border border-border-subtle/40 rounded-xl">
+                    {t("aiMeeting.noChronology")}
                   </div>
                 ) : (
-                  <div className="relative border-l-2 border-indigo-100 pl-6 space-y-8 ml-3">
+                  <div className="relative border-l-2 border-primary/20 pl-6 space-y-8 ml-3">
                     {activeMeetingData.tab_kronologi_rapat.map((item: any, index: number) => (
                       <div key={index} className="relative group">
-                        <span className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-indigo-500 border-4 border-white group-hover:scale-125 transition-transform shadow-soft" />
+                        <span className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-primary border-4 border-surface group-hover:scale-125 transition-transform shadow-soft" />
 
                         <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft hover:shadow-md transition-all space-y-4">
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <div>
-                              <span className="text-xs sm:text-[10px] text-indigo-600 font-medium uppercase tracking-widest block mb-1">
-                                Topik {index + 1}
+                              <span className="text-xs sm:text-[10px] text-primary font-normal uppercase tracking-normalst block mb-1">
+                                {t("rakit.topicNo", { no: index + 1 })}
                               </span>
                               <div className="flex items-center gap-1.5">
-                                <span className="px-2 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-700 font-mono text-xs sm:text-[10px] font-medium rounded">
+                                <span className="px-2 py-[3px] bg-primary/10 border border-primary/20 text-primary font-mono text-[10px] leading-none font-medium rounded">
                                   {item.timestamp}
                                 </span>
                                 <h4 className="text-sm font-medium text-content-strong tracking-tight leading-snug">
-                                  Visual: {item.aktivitas_visual}
+                                  {t("aiMeeting.visual")} {item.aktivitas_visual}
                                 </h4>
                               </div>
                             </div>
                           </div>
 
                           <div className="space-y-2">
-                            <h5 className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest">
-                              Isi Percakapan Inti & Hasil Diskusi
+                            <h5 className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normalst">
+                              {t("aiMeeting.coreConversation")}
                             </h5>
-                            <p className="text-xs text-content-secondary leading-relaxed  whitespace-pre-wrap">
+                            <p className="text-xs text-content-secondary leading-relaxed whitespace-pre-wrap">
                               {item.isi_percakapan_inti}
                             </p>
                           </div>
@@ -1408,26 +1586,26 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
             {/* TAB: Conclusions */}
             {activeTab === "conclusions" && activeMeetingData?.tab_kesimpulan && (
               <div className="space-y-4">
-                <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider mb-2">
+                <div className="flex items-center gap-2 text-primary font-normal text-xs uppercase tracking-normalr mb-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  Keputusan & Hasil Akhir yang Disepakati (Final Decisions)
+                  {t("aiMeeting.agreedDecisionsFinalOutcomes")}
                 </div>
 
                 {activeMeetingData.tab_kesimpulan.length === 0 ? (
-                  <div className="text-center py-8 text-slate-450 text-xs bg-surface border border-border-subtle/40 rounded-xl">
-                    Tidak ada kesimpulan keputusan resmi yang terdeteksi.
+                  <div className="text-center py-8 text-xs bg-surface border border-border-subtle/40 rounded-xl">
+                    {t("aiMeeting.noConclusion")}
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-3">
                     {activeMeetingData.tab_kesimpulan.map((item: string, index: number) => (
                       <div
                         key={index}
-                        className="bg-surface p-4.5 rounded-xl border border-emerald-100/60 flex items-start gap-3 shadow-soft hover:border-emerald-200 transition-colors"
+                        className="bg-surface p-4.5 rounded-xl border border-emerald-500/30 flex items-start gap-3 shadow-soft hover:border-emerald-500/30 transition-colors"
                       >
-                        <span className="w-5 h-5 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 text-xs font-medium mt-0.5 border border-emerald-100">
+                        <span className="w-5 h-5 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 text-xs font-medium mt-0.5 border border-emerald-500/30">
                           {index + 1}
                         </span>
-                        <p className="text-xs text-content-body  leading-relaxed">{item}</p>
+                        <p className="text-xs text-content-body leading-relaxed">{item}</p>
                       </div>
                     ))}
                   </div>
@@ -1438,28 +1616,28 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
             {/* TAB: Suggestions */}
             {activeTab === "suggestions" && activeMeetingData?.tab_saran_dan_ide && (
               <div className="space-y-4">
-                <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider mb-2">
+                <div className="flex items-center gap-2 text-primary font-normal text-xs uppercase tracking-normalr mb-2">
                   <Lightbulb className="w-4 h-4 text-amber-500" />
-                  Ide, Masukan, dan Gagasan Inovasi Peserta
+                  {t("aiMeeting.ideas")}
                 </div>
 
                 {activeMeetingData.tab_saran_dan_ide.length === 0 ? (
-                  <div className="text-center py-8 text-slate-450 text-xs bg-surface border border-border-subtle/40 rounded-xl">
-                    Tidak ada usulan ide atau rekomendasi yang tercatat.
+                  <div className="text-center py-8 text-xs bg-surface border border-border-subtle/40 rounded-xl">
+                    {t("aiMeeting.noIdeas")}
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-3">
                     {activeMeetingData.tab_saran_dan_ide.map((item: any, index: number) => (
                       <div
                         key={index}
-                        className="bg-surface p-4.5 rounded-xl border border-amber-100/60 flex flex-col gap-2 shadow-soft hover:border-amber-200 transition-colors"
+                        className="bg-surface p-4.5 rounded-xl border border-amber-500/30 flex flex-col gap-2 shadow-soft hover:border-amber-500/30 transition-colors"
                       >
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 bg-amber-50 text-amber-750 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase rounded border border-amber-100">
-                            Diusulkan Oleh: {item.diusulkan_oleh}
+                          <span className="px-2 py-[3px] bg-amber-500/10 text-[10px] leading-none sm:text-[9px] font-medium uppercase rounded border border-amber-500/30">
+                            {t("aiMeeting.proposedBy")} {item.diusulkan_oleh}
                           </span>
                         </div>
-                        <p className="text-xs text-content-body  leading-relaxed pl-1">
+                        <p className="text-xs text-content-body leading-relaxed pl-1">
                           {item.deskripsi_ide}
                         </p>
                       </div>
@@ -1473,26 +1651,26 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
             {activeTab === "actionItems" && activeMeetingData?.tab_tindak_lanjut && (
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-2">
-                  <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
-                    <ListChecks className="w-4 h-4 text-indigo-600" />
-                    Butir Tindak Lanjut & Rencana Aksi (Action Items)
+                  <div className="flex items-center gap-2 text-primary font-normal text-xs uppercase tracking-normalr">
+                    <ListChecks className="w-4 h-4 text-primary" />
+                    {t("aiMeeting.followUpItemsActionPlan")}
                   </div>
 
                   {activeMeetingData.tab_tindak_lanjut.length > 0 && (
                     <button
                       onClick={handleImportAllActionItems}
                       disabled={importingIds.length > 0}
-                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-medium flex items-center gap-1.5 shadow-soft transition-colors cursor-pointer disabled:opacity-55"
+                      className="btn-primary px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 shadow-soft transition-colors cursor-pointer disabled:opacity-55"
                     >
-                      <Database className="w-3.5 h-3.5 text-indigo-200" /> Impor Semua ke Poin
-                      Diskusi
+                      <Database className="w-3.5 h-3.5 text-content-inverse/80" />{" "}
+                      {t("aiMeeting.importAllIntoDiscussionPoints")}
                     </button>
                   )}
                 </div>
 
                 {activeMeetingData.tab_tindak_lanjut.length === 0 ? (
-                  <div className="text-center py-8 text-slate-450 text-xs bg-surface border border-border-subtle/40 rounded-xl">
-                    Tidak ada butir tindak lanjut / action items yang terdeteksi.
+                  <div className="text-center py-8 text-xs bg-surface border border-border-subtle/40 rounded-xl">
+                    {t("aiMeeting.noActionItems")}
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -1501,65 +1679,85 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       const legacyMappedItem: ActionItem = {
                         concern: item.concern_masalah,
                         tindakanLanjut: item.solusi_disepakati,
-                        PIC: "TBD",
-                        targetDate: "TBD",
+                        PIC: item.pic || "UNVERIFIED",
+                        targetDate: item.due_date || "UNVERIFIED",
+                        bukti_cuplikan: item.bukti_cuplikan || "",
+                        status_bukti: item.status_bukti || "",
+                        keterangan: item.keterangan || "",
                       };
                       return (
                         <div
                           key={index}
-                          className="bg-surface rounded-xl border border-border-subtle/80 p-5 shadow-soft flex flex-col md:flex-row justify-between items-start md:items-center gap-5 hover:border-indigo-200 transition-all"
+                          className="bg-surface rounded-xl border border-border-subtle/80 p-5 shadow-soft flex flex-col md:flex-row justify-between items-start md:items-center gap-5 hover:border-primary/20 transition-all"
                         >
                           <div className="flex-1 space-y-3 min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="px-2 py-0.5 bg-rose-50 text-rose-600 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase rounded border border-rose-100">
-                                Concern Rapat {index + 1}
+                              <span className="px-2 py-[3px] bg-rose-500/10 text-rose-600 text-[10px] leading-none sm:text-[9px] font-medium uppercase rounded border border-rose-500/30">
+                                {t("rakit.meetingConcernNo", { no: index + 1 })}
                               </span>
+                              {item.pic && (
+                                <span className="px-2 py-[3px] bg-primary/10 text-primary text-[10px] leading-none font-medium rounded border border-primary/20">
+                                  {t("aiMeeting.personInChargePic")} {item.pic}
+                                </span>
+                              )}
+                              {item.due_date && (
+                                <span className="px-2 py-[3px] bg-surface-sunken text-content-secondary text-[10px] leading-none font-medium rounded border border-border-subtle">
+                                  {t("aiMeeting.target")} {item.due_date}
+                                </span>
+                              )}
                             </div>
 
                             <div>
-                              <h4 className="text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                                Ketakutan, Kendala Teknis, atau Gap Sistem
+                              <h4 className="text-xs font-normal text-content-subtle uppercase tracking-normalr mb-1">
+                                {t("aiMeeting.risksGaps")}
                               </h4>
-                              <p className="text-xs  text-content-strong leading-snug">
+                              <p className="text-xs text-content-strong leading-snug">
                                 {item.concern_masalah}
                               </p>
                             </div>
 
-                            <div className="pl-3 border-l-2 border-emerald-400 bg-emerald-50/10 py-1.5 pr-2 rounded">
-                              <h4 className="text-xs sm:text-[10px] font-medium text-emerald-600 uppercase tracking-wider mb-0.5">
-                                Solusi & Arahan yang Disepakati
+                            <div className="pl-3 border-l-2 border-emerald-400 bg-emerald-500/10 py-1.5 pr-2 rounded">
+                              <h4 className="text-xs sm:text-[10px] font-normal text-emerald-600 uppercase tracking-normalr mb-0.5">
+                                {t("aiMeeting.agreedSolutions")}
                               </h4>
-                              <p className="text-xs  text-content-secondary leading-normal">
+                              <p className="text-xs text-content-secondary leading-normal">
                                 {item.solusi_disepakati}
                               </p>
                             </div>
+
+                            {item.bukti_cuplikan ? (
+                              <blockquote className="text-xs text-content-muted italic border-l-2 border-border-subtle pl-3">
+                                {t("aiMeeting.evidenceQuote")}: “{item.bukti_cuplikan}”
+                              </blockquote>
+                            ) : null}
                           </div>
 
                           <div className="flex flex-col sm:flex-row gap-2 shrink-0">
                             <button
-                              onClick={() => handleConvertToTask(item, index)}
+                              onClick={() => handleConvertToTask(legacyMappedItem, index)}
                               disabled={convertingTaskIds.includes(index)}
-                              title="Buat sebagai Task Issue di Backlog"
-                              className="px-3.5 py-2.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 disabled:opacity-50 text-xs font-medium rounded-xl transition-all flex items-center gap-1 cursor-pointer shadow-soft"
+                              title={t("aiMeeting.createBacklogTask")}
+                              className="px-3.5 py-2.5 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/30 text-amber-700 disabled:opacity-50 text-xs font-medium rounded-xl transition-all flex items-center gap-1 cursor-pointer shadow-soft"
                             >
                               {convertingTaskIds.includes(index) ? (
                                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
                               ) : (
-                                <>Buat Task Issue</>
+                                <>{t("aiMeeting.createTaskIssue")}</>
                               )}
                             </button>
                             <button
                               onClick={() => handleImportSingle(item, index)}
                               disabled={isImporting}
-                              className="px-3.5 py-2.5 bg-surface-sunken hover:bg-indigo-50 border border-border-subtle hover:border-indigo-100 text-content-body hover:text-indigo-700 disabled:opacity-50 text-xs font-medium rounded-xl transition-all flex items-center gap-1 cursor-pointer"
+                              className="px-3.5 py-2.5 bg-surface-sunken hover:bg-primary/10 border border-border-subtle hover:border-primary/20 text-content-body hover:text-primary disabled:opacity-50 text-xs font-medium rounded-xl transition-all flex items-center gap-1 cursor-pointer"
                             >
                               {isImporting ? (
                                 <>
-                                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Mengimpor...
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />{" "}
+                                  {t("aiMeeting.importing")}
                                 </>
                               ) : (
                                 <>
-                                  Impor <ArrowRight className="w-3.5 h-3.5" />
+                                  {t("aiMeeting.import")} <ArrowRight className="w-3.5 h-3.5" />
                                 </>
                               )}
                             </button>
@@ -1575,42 +1773,48 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
             {/* TAB: Next Plan */}
             {activeTab === "nextPlan" && activeMeetingData?.tab_next_plan && (
               <div className="space-y-6">
-                <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider mb-2">
+                <div className="flex items-center gap-2 text-primary font-normal text-xs uppercase tracking-normalr mb-2">
                   <ArrowRight className="w-4 h-4 text-pink-600" />
-                  Rencana Lanjut & Roadmap Eksekusi (Next Plan)
+                  {t("aiMeeting.nextPlanExecutionRoadmap")}
                 </div>
 
                 {activeMeetingData.tab_next_plan.length === 0 ? (
-                  <div className="text-center py-8 text-slate-450 text-xs bg-surface border border-border-subtle/40 rounded-xl">
-                    Tidak ada rencana lanjut khusus yang terdeteksi secara eksplisit dari rekaman.
+                  <div className="text-center py-8 text-xs bg-surface border border-border-subtle/40 rounded-xl">
+                    {t("aiMeeting.noNextPlan")}
                   </div>
                 ) : (
-                  <div className="relative border-l-2 border-pink-100 pl-6 space-y-8 ml-3">
+                  <div className="relative border-l-2 border-pink-500/30 pl-6 space-y-8 ml-3">
                     {activeMeetingData.tab_next_plan.map((item: any, index: number) => (
                       <div key={index} className="relative group">
-                        <span className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-pink-500 border-4 border-white group-hover:scale-125 transition-transform shadow-soft" />
+                        <span className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-pink-500 border-4 border-surface group-hover:scale-125 transition-transform shadow-soft" />
 
                         <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft hover:shadow-md transition-all">
                           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                            <span className="px-2 py-0.5 bg-pink-50 border border-pink-100 text-pink-700 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase rounded">
-                              Rencana Aksi {index + 1}
+                            <span className="px-2 py-0.5 bg-pink-500/10 border border-pink-500/30 text-pink-700 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase rounded">
+                              {t("rakit.actionPlanNo", { no: index + 1 })}
                             </span>
                             {item.due_date && (
-                              <span className="px-2 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs sm:text-[10px] font-medium rounded-full">
-                                Target: {item.due_date}
+                              <span className="px-2 py-[3px] bg-primary/10 border border-primary/20 text-primary text-[10px] leading-none font-medium rounded-full">
+                                {t("aiMeeting.target")} {item.due_date}
                               </span>
                             )}
                           </div>
                           <div className="space-y-2">
-                            <p className="text-xs text-content-strong leading-relaxed  whitespace-pre-wrap">
+                            <p className="text-xs text-content-strong leading-relaxed whitespace-pre-wrap">
                               {item.action_item}
                             </p>
                             {item.pic && (
                               <div className="text-xs sm:text-[11px] text-content-muted font-medium flex items-center gap-1">
-                                <UserCheck className="w-3.5 h-3.5 text-pink-500" /> Penanggung Jawab
-                                (PIC): <span className="text-pink-600 font-medium">{item.pic}</span>
+                                <UserCheck className="w-3.5 h-3.5 text-pink-500" />{" "}
+                                {t("aiMeeting.personInChargePic")}{" "}
+                                <span className="text-pink-600 font-medium">{item.pic}</span>
                               </div>
                             )}
+                            {item.bukti_cuplikan ? (
+                              <blockquote className="text-xs text-content-muted italic border-l-2 border-border-subtle pl-3">
+                                {t("aiMeeting.evidenceQuote")}: “{item.bukti_cuplikan}”
+                              </blockquote>
+                            ) : null}
                           </div>
                         </div>
                       </div>
@@ -1623,32 +1827,32 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
             {/* TAB: To-Be Scenario */}
             {activeTab === "toBeScenario" && activeMeetingData?.tab_target_to_be && (
               <div className="space-y-6">
-                <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider mb-2">
+                <div className="flex items-center gap-2 text-primary font-normal text-xs uppercase tracking-normalr mb-2">
                   <Sparkles className="w-4 h-4 text-cyan-600 animate-pulse" />
-                  Rekomendasi Arsitektur & Target Proses (Target To-Be Architecture)
+                  {t("aiMeeting.architectureRecommendationTargetProcess")}
                 </div>
 
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* As-Is Card */}
                     <div className="bg-surface-sunken border border-border-subtle p-5 rounded-xl shadow-soft space-y-3">
-                      <div className="flex items-center gap-2 text-content-body font-medium text-xs sm:text-[10px] uppercase tracking-widest">
-                        <span className="w-2 h-2 rounded-full bg-slate-400" />
-                        Kondisi Saat Ini (As-Is)
+                      <div className="flex items-center gap-2 text-content-body font-normal text-xs sm:text-[10px] uppercase tracking-normalst">
+                        <span className="w-2 h-2 rounded-full bg-surface-marker" />
+                        {t("aiMeeting.currentStateAsIs")}
                       </div>
-                      <p className="text-xs text-content-secondary  leading-relaxed whitespace-pre-wrap">
+                      <p className="text-xs text-content-secondary leading-relaxed whitespace-pre-wrap">
                         {activeMeetingData.tab_target_to_be.proses_bisnis_as_is ||
                           "Kondisi sistem/proses saat ini tidak dibahas."}
                       </p>
                     </div>
 
                     {/* To-Be Card */}
-                    <div className="bg-indigo-50/50 border border-indigo-100 p-5 rounded-xl shadow-soft space-y-3">
-                      <div className="flex items-center gap-2 text-indigo-700 font-medium text-xs sm:text-[10px] uppercase tracking-widest">
-                        <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-                        Target Masa Depan (To-Be)
+                    <div className="bg-primary/10 border border-primary/20 p-5 rounded-xl shadow-soft space-y-3">
+                      <div className="flex items-center gap-2 text-primary font-normal text-xs sm:text-[10px] uppercase tracking-normalst">
+                        <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                        {t("aiMeeting.futureTargetToBe")}
                       </div>
-                      <p className="text-xs text-indigo-950 font-medium leading-relaxed whitespace-pre-wrap">
+                      <p className="text-xs text-primary font-medium leading-relaxed whitespace-pre-wrap">
                         {activeMeetingData.tab_target_to_be.proses_bisnis_to_be ||
                           "Target arsitektur/proses masa depan belum terdefinisi."}
                       </p>
@@ -1657,24 +1861,22 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
                   {/* Transition Steps Card */}
                   <div className="bg-surface border border-border-subtle p-5 rounded-xl shadow-soft space-y-4">
-                    <div className="flex items-center gap-2 text-content-body font-medium text-xs sm:text-[10px] uppercase tracking-widest">
-                      Langkah-Langkah Transisi Migrasi (Transition Roadmap)
+                    <div className="flex items-center gap-2 text-content-body font-normal text-xs sm:text-[10px] uppercase tracking-normalst">
+                      {t("aiMeeting.migrationTransitionSteps")}
                     </div>
 
                     {!activeMeetingData.tab_target_to_be.langkah_transisi ||
                     activeMeetingData.tab_target_to_be.langkah_transisi.length === 0 ? (
-                      <p className="text-xs text-content-subtle ">
-                        Tidak ada langkah transisi spesifik yang dibahas.
-                      </p>
+                      <p className="text-xs text-content-subtle">{t("aiMeeting.noTransition")}</p>
                     ) : (
                       <div className="grid grid-cols-1 gap-3">
                         {activeMeetingData.tab_target_to_be.langkah_transisi.map(
                           (step: string, idx: number) => (
                             <div key={idx} className="flex items-start gap-3 text-xs">
-                              <span className="w-5 h-5 rounded-full bg-cyan-50 border border-cyan-100 text-cyan-600 flex items-center justify-center font-medium shrink-0 mt-0.5">
+                              <span className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-600 flex items-center justify-center font-medium shrink-0 mt-0.5">
                                 {idx + 1}
                               </span>
-                              <p className="text-content-secondary  leading-relaxed mt-0.5">
+                              <p className="text-content-secondary leading-relaxed mt-0.5">
                                 {step}
                               </p>
                             </div>
@@ -1690,41 +1892,43 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
             {/* TAB: Metadata */}
             {activeTab === "metadata" && activeMeetingData?.tab_metadata && (
               <div className="space-y-6">
-                <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
+                <div className="flex items-center gap-2 text-primary font-normal text-xs uppercase tracking-normalr">
                   <Clock className="w-4 h-4 text-teal-600" />
-                  Metadata & Deteksi Peserta Rapat
+                  {t("aiMeeting.metadataParticipants")}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {/* Topic and platform detection */}
                   <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft space-y-3">
-                    <h5 className="text-xs sm:text-[10px] font-medium text-indigo-600 uppercase tracking-widest">
-                      Detil Rapat
+                    <h5 className="text-xs sm:text-[10px] font-normal text-primary uppercase tracking-normalst">
+                      {t("aiMeeting.meetingDetail")}
                     </h5>
                     <div className="space-y-2">
-                      <div className="text-xs  text-content-secondary">
-                        Host Rapat:{" "}
+                      <div className="text-xs text-content-secondary">
+                        {t("aiMeeting.meetingHost")}{" "}
                         <span className="text-content-strong font-medium">
                           {activeMeetingData.tab_metadata.host_rapat || "TBD"}
                         </span>
                       </div>
-                      <div className="text-xs  text-content-secondary">
-                        Tanggal Rapat:{" "}
+                      <div className="text-xs text-content-secondary">
+                        {t("aiMeeting.meetingDate")}{" "}
                         <span className="text-content-strong font-medium">
                           {activeMeetingData.tab_metadata.tanggal_rapat || "TBD"}
                         </span>
                       </div>
-                      <div className="text-xs  text-content-secondary">
-                        Platform:{" "}
-                        <span className="text-slate-850 font-medium px-1.5 py-0.5 bg-surface-muted rounded border border-border-subtle">
+                      <div className="text-xs text-content-secondary">
+                        {t("aiMeeting.platform")}{" "}
+                        <span className="font-medium px-1.5 py-0.5 bg-surface-muted rounded border border-border-subtle">
                           {activeMeetingData.tab_metadata.platform_digunakan || "Zoom"}
                         </span>
                       </div>
                       {activeMeetingData.tab_metadata.durasi_detik > 0 && (
-                        <div className="text-xs  text-content-secondary">
-                          Durasi:{" "}
-                          <span className="text-slate-850 font-medium">
-                            {Math.floor(activeMeetingData.tab_metadata.durasi_detik / 60)} menit
+                        <div className="text-xs text-content-secondary">
+                          {t("aiMeeting.duration")}{" "}
+                          <span className="font-medium">
+                            {t("rakit.minutesCount", {
+                              count: Math.floor(activeMeetingData.tab_metadata.durasi_detik / 60),
+                            })}
                           </span>
                         </div>
                       )}
@@ -1733,15 +1937,13 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
                   {/* Active Speakers / Participants */}
                   <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft space-y-3">
-                    <h5 className="text-xs sm:text-[10px] font-medium text-indigo-600 uppercase tracking-widest">
-                      Seluruh Peserta Rapat (Terdeteksi)
+                    <h5 className="text-xs sm:text-[10px] font-normal text-primary uppercase tracking-normalst">
+                      {t("aiMeeting.allDetectedMeetingParticipants")}
                     </h5>
 
                     {!activeMeetingData.tab_metadata.peserta_rapat ||
                     activeMeetingData.tab_metadata.peserta_rapat.length === 0 ? (
-                      <p className="text-xs text-content-subtle ">
-                        Tidak ada peserta yang terdeteksi.
-                      </p>
+                      <p className="text-xs text-content-subtle">{t("aiMeeting.noParticipants")}</p>
                     ) : (
                       <div className="flex flex-wrap gap-2 pt-1">
                         {activeMeetingData.tab_metadata.peserta_rapat.map(
@@ -1764,31 +1966,22 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
         )}
       </div>
 
-      {/* Info footer */}
-      <div className="bg-surface-sunken border-t border-slate-150 p-4 px-6 flex items-center gap-2 text-xs sm:text-[11px] text-content-subtle ">
-        <Info className="w-4 h-4 text-content-subtle shrink-0" />
-        <span>
-          Data di atas dianalisis secara aman menggunakan <strong>Gemini AI</strong>. Anda dapat
-          mengimpor Butir Tindak Lanjut di atas untuk menjadikannya Poin Diskusi resmi team.
-        </span>
-      </div>
-
       {/* Continuous Learning Loop Feedback Modal */}
       {showFeedbackModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-surface rounded-lg max-w-lg w-full overflow-hidden shadow-xl border border-border-subtle dark:border-slate-800 transform transition-all scale-100">
+        <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-surface rounded-lg max-w-lg w-full overflow-hidden shadow-xl border border-border-subtle transform transition-all scale-100">
             {/* Modal Header */}
-            <div className="p-6 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between">
+            <div className="p-6 bg-gradient-to-r from-primary-surface to-primary-surface-active text-content-inverse flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-indigo-500/20 border border-indigo-500/30 rounded-xl text-indigo-300">
+                <div className="p-2.5 bg-surface/15 border border-border-inverse rounded-xl text-content-inverse">
                   <Brain className="w-5 h-5 animate-pulse" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium tracking-tight text-white">
-                    Continuous Learning Loop
+                  <h4 className="text-sm font-medium tracking-tight text-content-inverse">
+                    {t("aiMeeting.continuousLearning")}
                   </h4>
-                  <p className="text-xs sm:text-[10px] text-slate-300 ">
-                    Latih AI agar belajar dari kesalahan & kritik Anda
+                  <p className="text-xs sm:text-[10px] text-content-subtle">
+                    {t("aiMeeting.trainAi")}
                   </p>
                 </div>
               </div>
@@ -1796,16 +1989,16 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 onClick={() => setShowFeedbackModal(false)}
                 className="p-1.5 hover:bg-surface/10 rounded-xl transition-all cursor-pointer"
               >
-                <X className="w-4 h-4 text-slate-300 hover:text-white" />
+                <X className="w-4 h-4 text-content-subtle hover:text-content-inverse" />
               </button>
             </div>
 
             {/* Modal Body */}
             <div className="p-6 space-y-4">
-              <div className="bg-indigo-50/50 border border-indigo-100 rounded-xl p-4 flex gap-3 text-left">
-                <Info className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
+              <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 flex gap-3 text-left">
+                <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                  <h5 className="text-xs font-medium text-indigo-950">Bagaimana Cara Kerjanya?</h5>
+                  <h5 className="text-xs font-medium text-primary">{t("aiMeeting.howItWorks")}</h5>
                   <p className="text-xs sm:text-[11px] text-content-secondary leading-relaxed">
                     Masukan kritik, koreksi, atau instruksi detail spesifik Anda pada kolom di
                     bawah. Sebelum melakukan analisis rapat berikutnya, AI kami akan secara dinamis
@@ -1818,14 +2011,14 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
               <div className="space-y-2 text-left">
                 <label className="text-xs font-medium text-content-strong flex items-center gap-1.5">
-                  <FileText className="w-3.5 h-3.5 text-indigo-500" /> Catatan Evaluasi & Koreksi
-                  Anda:
+                  <FileText className="w-3.5 h-3.5 text-primary" />{" "}
+                  {t("aiMeeting.yourEvaluationAndCorrectionNotes")}
                 </label>
                 <textarea
                   value={feedbackText}
                   onChange={(e) => setFeedbackText(e.target.value)}
                   placeholder="Contoh: AI kurang detail menangkap argumen teknis bagian API Hashing. Tolong jelaskan lebih rinci arsitektur keamanan datanya di rapat berikutnya."
-                  className="w-full h-32 p-3.5 bg-surface-sunken border border-border-subtle focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-xs text-content-body rounded-xl placeholder:text-content-subtle focus:outline-none transition-all resize-none"
+                  className="w-full h-32 p-3.5 bg-surface-sunken border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary text-xs text-content-body rounded-xl placeholder:text-content-subtle focus:outline-none transition-all resize-none"
                   disabled={submittingFeedback}
                 />
               </div>
@@ -1835,23 +2028,23 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
             <div className="px-6 py-4 bg-surface-sunken border-t border-border-faint flex justify-end gap-2.5">
               <button
                 onClick={() => setShowFeedbackModal(false)}
-                className="px-4 py-2.5 text-xs  text-content-secondary hover:text-content-strong hover:bg-surface-muted rounded-xl transition-all cursor-pointer"
+                className="px-4 py-2.5 text-xs text-content-secondary hover:text-content-strong hover:bg-surface-muted rounded-xl transition-all cursor-pointer"
                 disabled={submittingFeedback}
               >
-                Batal
+                {t("aiMeeting.cancel")}
               </button>
               <button
                 onClick={handleSubmitFeedback}
-                className="px-4 py-2.5 text-xs font-medium bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md hover:shadow-soft-lg hover:shadow-indigo-100 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                className="btn-primary px-4 py-2.5 text-xs font-medium rounded-xl shadow-md hover:shadow-soft-lg flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
                 disabled={submittingFeedback || !feedbackText.trim()}
               >
                 {submittingFeedback ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> Menyimpan...
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> {t("aiMeeting.saving")}
                   </>
                 ) : (
                   <>
-                    <Brain className="w-3.5 h-3.5" /> Simpan Evaluasi
+                    <Brain className="w-3.5 h-3.5" /> {t("aiMeeting.saveEvaluation")}
                   </>
                 )}
               </button>

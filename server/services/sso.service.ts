@@ -22,8 +22,11 @@
 import crypto from "crypto";
 import db from "../../src/lib/db";
 import { activeUserSessions } from "../middleware/auth";
+import { authRepository } from "../repositories/auth.repository";
 import type { IdentitasOidc } from "./oidc.service";
+import { kirimEmailSelamatDatang, kirimEmailLatarBelakang } from "./email.service";
 import { domainDiizinkan } from "./oidc.service";
+import { ambilSsoAllowedDomains } from "./integrationSettings.service";
 
 /** Alasan penolakan. Dipakai UI untuk memilih pesan yang tepat. */
 export type AlasanTolak =
@@ -32,7 +35,8 @@ export type AlasanTolak =
   | "belum_terdaftar"
   | "akun_belum_aktif"
   | "identitas_milik_akun_lain"
-  | "email_sudah_terdaftar";
+  | "email_sudah_terdaftar"
+  | "tautan_kedaluwarsa";
 
 export type HasilKebijakan =
   | { aksi: "masuk"; user: any }
@@ -95,7 +99,8 @@ export async function putuskanKebijakan(
 ): Promise<HasilKebijakan> {
   // 1. Domain. Berlaku untuk KEDUA tombol — termasuk login, supaya akun lama
   //    yang domainnya sudah tidak diizinkan tidak bisa masuk lewat jalur SSO.
-  if (!domainDiizinkan(identitas.email)) {
+  const domainSah = await ambilSsoAllowedDomains();
+  if (!domainDiizinkan(identitas.email, domainSah)) {
     return { aksi: "tolak", alasan: "domain_tidak_diizinkan" };
   }
 
@@ -107,6 +112,33 @@ export async function putuskanKebijakan(
     const user = await cariUserById(identitasTersimpan.userId);
 
     if (user) {
+      // #177 — tautan sub->user TIDAK berarti email itu masih milik user ini.
+      // `sub` sengaja dipercaya di atas email (lihat komentar di bawah), supaya
+      // pengguna yang mengganti emailnya SENDIRI tetap bisa SSO tanpa menaut
+      // ulang — itu tetap harus jalan. Tapi bila email yang dilaporkan provider
+      // SEKARANG sudah dipakai user AKTIF LAIN di tabel Users, tandanya beda:
+      // email itu sudah dipindah (mis. lewat panel admin) ke akun lain sejak
+      // tautan ini dibuat. Mempercayai tautan lama di sini berarti siapa pun
+      // yang memegang akun Google/Microsoft itu otomatis masuk ke identitas
+      // LAMA meski emailnya kini sah milik orang lain. TIDAK diarahkan otomatis
+      // ke pemilik baru pula — arah itu sama bahayanya, sebab tautan provider
+      // untuk akun baru itu belum pernah diverifikasi. Tautan basi diputus
+      // (pola sama seperti identitas yatim di bawah) supaya proses berikutnya
+      // bisa menaut ulang dengan bersih lewat jalur yang sah, bukan terkunci
+      // permanen ke akun lama.
+      const pemilikEmailSekarang = await cariUserByEmail(identitas.email);
+      if (
+        pemilikEmailSekarang &&
+        String(pemilikEmailSekarang.id) !== String(user.id) &&
+        akunAktif(pemilikEmailSekarang)
+      ) {
+        console.warn(
+          `[SSO] Tautan identitas basi diputus: ${identitas.provider}/${identitas.sub} menunjuk user ${user.id}, tetapi email ${identitas.email} kini milik user ${pemilikEmailSekarang.id}.`
+        );
+        await hapusIdentitas(identitas.provider, identitas.sub);
+        return { aksi: "tolak", alasan: "tautan_kedaluwarsa" };
+      }
+
       if (!akunAktif(user)) return { aksi: "tolak", alasan: "akun_belum_aktif" };
       return { aksi: "masuk", user };
     }
@@ -161,9 +193,9 @@ export async function putuskanKebijakan(
   return { aksi: "lengkapi_pendaftaran", identitas };
 }
 
-/** Username mengikuti aturan lama yang TIDAK berubah: huruf saja, maks 10. */
+/** Username mengikuti aturan baru (#214): huruf saja, maks 25. */
 export function usernameSah(username: string): boolean {
-  return /^[a-zA-Z]+$/.test(username) && username.length <= 10;
+  return /^[a-zA-Z]+$/.test(username) && username.length <= 25;
 }
 
 export async function usernameTersedia(username: string): Promise<boolean> {
@@ -195,7 +227,8 @@ export async function buatAkunDariSso(
   username: string
 ): Promise<HasilBuatAkun> {
   if (!usernameSah(username)) return { hasil: "gagal", alasan: "username_tidak_sah" };
-  if (!domainDiizinkan(identitas.email))
+  const domainSah = await ambilSsoAllowedDomains();
+  if (!domainDiizinkan(identitas.email, domainSah))
     return { hasil: "gagal", alasan: "domain_tidak_diizinkan" };
   if (!identitas.emailTerverifikasi) return { hasil: "gagal", alasan: "email_belum_terverifikasi" };
 
@@ -233,6 +266,18 @@ export async function buatAkunDariSso(
     );
 
     await connection.commit();
+
+    // #26 (F6.3) Email selamat datang pendaftaran SSO.
+    // Item #300: DITUNGGU. Inilah jalur yang terbukti gagal di Vercel —
+    // akun tercipta, respons terkirim, lambda beku, `fetch failed`.
+    await kirimEmailLatarBelakang(
+      kirimEmailSelamatDatang({
+        email: identitas.email,
+        nama: identitas.nama,
+        username,
+      }),
+      `Email selamat datang pendaftaran SSO untuk ${identitas.email}`
+    );
   } catch (err: any) {
     if (connection) {
       try {
@@ -270,7 +315,16 @@ export async function buatAkunDariSso(
 export async function daftarkanSesi(
   userId: string,
   token: string,
-  info: { ip?: string; browser?: string; device?: string } = {}
+  info: {
+    ip?: string;
+    browser?: string;
+    device?: string;
+    userAgent?: string;
+    os?: string;
+    city?: string;
+    country?: string;
+    location?: string;
+  } = {}
 ): Promise<void> {
   await db.query("UPDATE Users SET currentSessionToken = ?, lastSeen = ? WHERE id = ?", [
     token,
@@ -286,10 +340,31 @@ export async function daftarkanSesi(
     lastActiveAt: Date.now(),
     browserSessionId: "",
   });
+
+  const sessionId = crypto.randomUUID();
+  setImmediate(async () => {
+    try {
+      await authRepository.recordSessionLogin({
+        id: sessionId,
+        userId: String(userId),
+        ipAddress: info.ip || null,
+        userAgent: info.userAgent || null,
+        browser: info.browser || "SSO",
+        os: info.os || null,
+        device: info.device || "SSO",
+        city: info.city || null,
+        country: info.country || null,
+        location: info.location || null,
+        token: token || null,
+      });
+    } catch (err) {
+      console.error("[SSO] Gagal mencatat UserSession login:", err);
+    }
+  });
 }
 
 /** Pesan yang ditampilkan ke pengguna. Spesifik, supaya tidak terkesan aplikasi rusak. */
-export const PESAN_TOLAK: Record<AlasanTolak | "username_tidak_sah", string> = {
+export const PESAN_TOLAK: Record<string, string> = {
   // Pesan ini muncul saat pengguna menekan tombol MASUK dengan email yang belum
   // punya akun. Versi sebelumnya menyuruh menghubungi admin — itu menyesatkan,
   // karena pengguna sebenarnya bisa mendaftar sendiri lewat tombol di layar
@@ -300,8 +375,17 @@ export const PESAN_TOLAK: Record<AlasanTolak | "username_tidak_sah", string> = {
   email_belum_terverifikasi:
     "Email Google/Microsoft Anda belum terverifikasi, sehingga tidak dapat dipakai untuk masuk.",
   akun_belum_aktif: "Akun Anda belum aktif. Menunggu persetujuan admin.",
-  domain_tidak_diizinkan: "Domain email Anda tidak diizinkan untuk masuk ke LanPro.",
+  domain_tidak_diizinkan:
+    "Domain email Anda tidak diizinkan untuk masuk ke LanPro. Pastikan domain email Anda terdaftar pada SSO_ALLOWED_DOMAINS.",
   identitas_milik_akun_lain: "Akun Google/Microsoft ini sudah tertaut ke pengguna lain.",
   email_sudah_terdaftar: "Email ini sudah terdaftar. Silakan gunakan tombol masuk.",
+  tautan_kedaluwarsa:
+    "Tautan akun Google/Microsoft ini sudah tidak berlaku karena alamat emailnya kini terdaftar pada akun LanPro lain. Silakan masuk memakai kata sandi, atau hubungi admin untuk menautkan ulang.",
   username_tidak_sah: "Username hanya boleh berupa huruf, maksimal 10 karakter, dan belum dipakai.",
+  gagal_mulai:
+    "Gagal memulai otorisasi SSO. Pastikan kredensial OIDC dan JWT_SECRET telah dikonfigurasi di server.",
+  dibatalkan: "Proses otorisasi Google/Microsoft dibatalkan.",
+  state_hilang: "Sesi otorisasi kedaluwarsa atau state tidak ditemukan. Silakan coba lagi.",
+  state_tidak_cocok: "Validasi keamanan state tidak cocok. Silakan coba lagi.",
+  verifikasi_gagal: "Verifikasi identitas akun gagal. Silakan coba lagi.",
 };

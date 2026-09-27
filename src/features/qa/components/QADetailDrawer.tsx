@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import {
   XCircle,
@@ -10,6 +11,7 @@ import {
   Bug,
 } from "lucide-react";
 import { QATestCase } from "../types";
+import { StyledDropdown } from "../../../components/ui/CommonComponents";
 
 interface QADetailDrawerProps {
   selectedTestCase: QATestCase | null;
@@ -48,69 +50,72 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
   handleOpenCreateBugModal,
   handleStatusChange,
 }) => {
+  const { t } = useTranslation();
   if (!selectedTestCase) return null;
 
   return (
     /* BACKDROP OVERLAY WITH AUTO-CLOSE ON CLICK OUTSIDE */
     <div
-      className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex justify-end cursor-pointer animate-in fade-in duration-150"
+      className="fixed inset-0 bg-overlay/50 backdrop-blur-xs z-50 flex justify-end cursor-pointer"
       onClick={() => setSelectedTestCase(null)}
     >
       {/* INNER DRAWER CONTAINER (PREVENT CLICK PROPAGATION & COMPACT SLIM VELZON LOOK) */}
       <div
-        className="w-full max-w-lg bg-surface h-full shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-200 border-l border-border-subtle cursor-default"
+        className="w-full max-w-lg bg-surface h-full shadow-2xl flex flex-col justify-between border-l border-border-subtle cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Velzon Offcanvas Header - COMPACT INTEGRATED HEADER & STATUS */}
-        <div className="p-4 border-b border-border-faint bg-primary/5 space-y-2.5">
+        <div className="p-4 border-b border-border-faint bg-primary-surface/5 space-y-2.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-primary text-white font-medium text-xs sm:text-[10px] rounded-md">
+              <span className="px-2 py-0.5 bg-primary-surface text-content-inverse font-medium text-xs sm:text-[10px] rounded-md">
                 TC #{selectedTestCase.rowNum}
               </span>
               <span
-                className={`px-2 py-0.5 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase rounded-md ${
+                className={`px-2 py-0.5 text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase rounded-md ${
                   selectedTestCase.priority === "Critical" || selectedTestCase.priority === "High"
-                    ? "bg-rose-50 text-danger border border-rose-200/60"
+                    ? "bg-rose-500/10 text-danger-text border border-rose-500/30"
                     : "bg-surface-muted text-content-body border border-border-subtle/60"
                 }`}
               >
-                {selectedTestCase.priority || "Medium"} Priority
+                {t("rakit.priorityOf", { nama: selectedTestCase.priority || "Medium" })}
               </span>
             </div>
 
             {/* STATUS UPDATE SELECTOR INTEGRATED DIRECTLY IN TOP HEADER */}
-            <div className="flex items-center gap-2">
-              <select
+            <div className="flex items-center gap-2 min-w-[120px]">
+              <StyledDropdown
                 value={selectedTestCase.status}
-                onChange={(e) => {
-                  const val = e.target.value as any;
-                  handleStatusChange(selectedTestCase.id, val);
-                  setSelectedTestCase({ ...selectedTestCase, status: val });
+                onChange={(val) => {
+                  handleStatusChange(selectedTestCase.id, val as any);
+                  setSelectedTestCase({ ...selectedTestCase, status: val as any });
                 }}
-                className={`py-1 px-2.5 rounded-md text-xs sm:text-[11px] font-medium uppercase tracking-wider outline-none cursor-pointer border shadow-2xs ${
+                options={[
+                  { id: "Passed", label: "Passed", icon: "CheckCircle2", color: "#10B981" },
+                  { id: "Failed", label: "Failed", icon: "XCircle", color: "#EF4444" },
+                  { id: "Blocked", label: "Blocked", icon: "AlertOctagon", color: "#F59E0B" },
+                  { id: "Retest", label: "Retest", icon: "RefreshCw", color: "#6366F1" },
+                  { id: "Pending", label: "Pending", icon: "Clock", color: "#64748B" },
+                ]}
+                masterData={[]}
+                className="w-full"
+                buttonClassName={`py-1 px-2.5 rounded-md text-xs sm:text-[11px] font-normal uppercase tracking-normal border shadow-2xs ${
                   selectedTestCase.status === "Passed"
-                    ? "bg-emerald-50 text-success border-emerald-200"
+                    ? "bg-emerald-500/10 text-success-text border-emerald-500/30"
                     : selectedTestCase.status === "Failed"
-                      ? "bg-rose-50 text-danger border-rose-200"
+                      ? "bg-rose-500/10 text-danger-text border-rose-500/30"
                       : selectedTestCase.status === "Blocked"
-                        ? "bg-amber-50 text-warning border-amber-200"
+                        ? "bg-amber-500/10 text-warning-text border-amber-500/30"
                         : selectedTestCase.status === "Retest"
-                          ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                          ? "bg-primary/10 text-primary border-primary/30"
                           : "bg-surface-muted text-content-secondary border-border-subtle"
                 }`}
-              >
-                <option value="Passed">Passed</option>
-                <option value="Failed">Failed</option>
-                <option value="Blocked">Blocked</option>
-                <option value="Retest">Retest</option>
-                <option value="Pending">Pending</option>
-              </select>
+              />
 
               <button
                 onClick={() => setSelectedTestCase(null)}
-                className="p-1 rounded-md hover:bg-slate-200/80 text-content-subtle hover:text-content-secondary transition-colors cursor-pointer"
-                title="Tutup (Atau klik di luar panel)"
+                className="p-1 rounded-md hover:bg-surface-strong/80 text-content-subtle hover:text-content-secondary transition-colors cursor-pointer"
+                title={t("qaDetail.closeTip")}
               >
                 <XCircle className="w-5 h-5" />
               </button>
@@ -127,14 +132,14 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
           <button
             type="button"
             onClick={() => setDrawerActiveTab("details")}
-            className={`flex-1 py-1.5 text-xs sm:text-[10px] font-medium uppercase tracking-wider rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`flex-1 py-1.5 text-xs sm:text-[10px] font-normal uppercase tracking-normal rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               drawerActiveTab === "details"
                 ? "bg-surface text-primary shadow-2xs"
                 : "text-content-muted hover:text-content-strong"
             }`}
           >
             <FileSpreadsheet className="w-3.5 h-3.5" />
-            Detail Case
+            {t("qaDetail.caseDetail")}
           </button>
           <button
             type="button"
@@ -142,16 +147,16 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
               setDrawerActiveTab("history");
               fetchExecutionHistory(selectedTestCase.id);
             }}
-            className={`flex-1 py-1.5 text-xs sm:text-[10px] font-medium uppercase tracking-wider rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`flex-1 py-1.5 text-xs sm:text-[10px] font-normal uppercase tracking-normal rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               drawerActiveTab === "history"
                 ? "bg-surface text-primary shadow-2xs"
                 : "text-content-muted hover:text-content-strong"
             }`}
           >
             <History className="w-3.5 h-3.5" />
-            Execution History
+            {t("qa.executionHistory")}
             {executionLogs.length > 0 && (
-              <span className="bg-primary/10 text-primary text-xs sm:text-[11px] sm:text-[9px] px-1.5 py-0.2 rounded-full font-medium">
+              <span className="bg-primary-surface/10 text-primary text-[10px] leading-none sm:text-[9px] px-1.5 py-0.2 rounded-full font-medium">
                 {executionLogs.length}
               </span>
             )}
@@ -164,12 +169,12 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
                     <History className="w-3.5 h-3.5 text-primary" />
-                    Execution History Timeline
+                    {t("qaDetail.executionTimeline")}
                   </h4>
                   <p className="text-xs sm:text-[10px] text-content-subtle">
-                    Audit Trail historis eksekusi pengujian
+                    {t("qaDetail.auditTrail")}
                   </p>
                 </div>
                 <button
@@ -183,13 +188,13 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
               {loadingHistory ? (
                 <div className="py-6 text-center text-xs text-content-subtle flex items-center justify-center gap-2">
                   <RefreshCw className="w-4 h-4 animate-spin text-primary" />
-                  Memuat riwayat eksekusi...
+                  {t("qaDetail.loadingHistory")}
                 </div>
               ) : executionLogs.length === 0 ? (
                 <div className="py-8 text-center bg-surface-sunken border border-border-faint rounded-md p-3">
-                  <History className="w-6 h-6 text-slate-300 mx-auto mb-1.5" />
+                  <History className="w-6 h-6 text-content-subtle mx-auto mb-1.5" />
                   <p className="text-xs font-medium text-content-secondary">
-                    Belum Ada Catatan Run Eksekusi
+                    {t("qaDetail.noRunRecord")}
                   </p>
                 </div>
               ) : (
@@ -204,10 +209,10 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                         <div
                           className={`absolute -left-[19px] top-1.5 w-2.5 h-2.5 rounded-full border-2 ${
                             st === "PASSED"
-                              ? "border-success bg-success"
+                              ? "border-success bg-success-surface"
                               : st === "FAILED"
-                                ? "border-danger bg-danger"
-                                : "border-slate-400 bg-slate-400"
+                                ? "border-danger bg-danger-surface"
+                                : "border-border-subtle bg-surface-marker"
                           }`}
                         />
                         <div className="bg-surface-sunken p-2.5 rounded-md border border-border-faint space-y-1">
@@ -224,10 +229,10 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                           <span
                             className={`px-2 py-0.5 text-xs sm:text-[11px] sm:text-[9px] font-medium rounded ${
                               st === "PASSED"
-                                ? "bg-emerald-100 text-success"
+                                ? "bg-emerald-500/15 text-success-text"
                                 : st === "FAILED"
-                                  ? "bg-rose-100 text-danger"
-                                  : "bg-slate-200 text-content-body"
+                                  ? "bg-rose-500/15 text-danger-text"
+                                  : "bg-surface-strong text-content-body"
                             }`}
                           >
                             {st}
@@ -248,8 +253,8 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
             <div className="space-y-4">
               {/* Steps Box */}
               <div>
-                <h4 className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider mb-1">
-                  Langkah-Langkah Pengujian (Steps)
+                <h4 className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1">
+                  {t("qa.testSteps")}
                 </h4>
                 <div className="bg-surface-sunken p-3 rounded-md border border-border-subtle/60 text-xs font-medium text-content-body whitespace-pre-line leading-relaxed">
                   {selectedTestCase.steps}
@@ -258,10 +263,10 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
 
               {/* Expected Result Box */}
               <div>
-                <h4 className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider mb-1">
-                  Hasil yang Diharapkan (Expected Result)
+                <h4 className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1">
+                  {t("qa.expectedResult")}
                 </h4>
-                <div className="bg-emerald-50/40 p-3 rounded-md border border-emerald-100 text-xs font-medium text-success leading-relaxed">
+                <div className="bg-emerald-500/10 p-3 rounded-md border border-emerald-500/30 text-xs font-medium text-success-text leading-relaxed">
                   {selectedTestCase.expectedResult}
                 </div>
               </div>
@@ -269,12 +274,12 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
               {/* Evidence Screenshots */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <h4 className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
+                  <h4 className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
                     Bukti Pengujian ({selectedTestCase.evidences?.length || 0})
                   </h4>
-                  <label className="px-2.5 py-1 bg-primary/10 hover:bg-primary/20 text-primary text-xs sm:text-[10px] font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1">
+                  <label className="px-2.5 py-1 bg-primary-surface/10 hover:bg-primary-surface/20 text-primary text-[10px] leading-none font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1">
                     <Paperclip className="w-3 h-3" />
-                    <span>Upload Evidence</span>
+                    <span>{t("qaDetail.uploadEvidence")}</span>
                     <input
                       type="file"
                       multiple
@@ -299,8 +304,8 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                         )}
                         <button
                           onClick={() => handleRemoveSpecificEvidenceFromDrawer(ev.id)}
-                          className="absolute top-1 right-1 p-1 bg-danger text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-                          title="Hapus Bukti"
+                          className="absolute top-1 right-1 p-1 bg-danger-surface text-content-inverse rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                          title={t("qaDetail.deleteEvidence")}
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>
@@ -308,13 +313,13 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-content-subtle italic">Belum ada bukti pengujian.</p>
+                  <p className="text-xs text-content-subtle italic">{t("qaDetail.noEvidence")}</p>
                 )}
               </div>
 
               {/* Comments */}
               <div>
-                <h4 className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider mb-1.5">
+                <h4 className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5">
                   Komentar QA ({selectedTestCase.commentsList?.length || 0})
                 </h4>
                 <div className="space-y-2 mb-2.5">
@@ -344,12 +349,12 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                     type="text"
                     value={drawerNewComment}
                     onChange={(e) => setDrawerNewComment(e.target.value)}
-                    placeholder="Tulis komentar pengujian..."
+                    placeholder={t("qaDetail.commentPlaceholder")}
                     className="flex-1 px-3 py-2 bg-surface-sunken border border-border-subtle rounded-md text-xs font-medium outline-none focus:border-primary"
                   />
                   <button
                     type="submit"
-                    className="p-2 bg-primary hover:bg-[#354473] text-white rounded-md transition-colors cursor-pointer shadow-2xs"
+                    className="p-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md transition-colors cursor-pointer shadow-2xs"
                   >
                     <Send className="w-4 h-4" />
                   </button>
@@ -361,10 +366,10 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                 <div className="pt-2 border-t border-border-faint">
                   <button
                     onClick={() => handleOpenCreateBugModal(selectedTestCase)}
-                    className="w-full py-2 bg-danger hover:bg-[#d95338] text-white font-medium rounded-md text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
+                    className="w-full py-2 bg-danger-surface hover:bg-danger-hover text-content-inverse font-medium rounded-md text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
                   >
                     <Bug className="w-4 h-4" />
-                    <span>Buat Tiket Bug dari Test Case Ini</span>
+                    <span>{t("qaDetail.createBugFromCase")}</span>
                   </button>
                 </div>
               )}

@@ -32,9 +32,11 @@ import { TERMINAL_STATUSES } from "./src/lib/constants";
 
 
 import { authenticateJWT, verifyGlobalAdmin, getJwtSecret, generateToken } from './server/middleware/auth.ts';
+import { penjagaSocket, idPemilikSocket, profilAman, roomPengguna } from './server/middleware/socketAuth.ts';
 import healthRoutes from "./server/routes/health.routes";
 import systemRoutes from "./server/routes/system.routes";
 import auditRoutes from "./server/routes/audit.routes";
+import cronRoutes from "./server/routes/cron.routes";
 import authRoutes from "./server/routes/auth.routes";
 import authOidcRoutes from "./server/routes/auth-oidc.routes";
 import setupQARoutes from "./server/routes/qa.routes";
@@ -51,14 +53,17 @@ import { createAdapter } from "@socket.io/redis-adapter";
 import { generateContentWithFallback } from './server/services/ai.service';
 
 // --- PROMETHEUS METRICS REGISTRY (imported from server/config/metrics.ts) ---
-import { register, httpRequestsTotal, socketActiveConnections, optimisticLockingConflicts } from "./server/config/metrics";
+import { httpRequestsTotal, socketActiveConnections, optimisticLockingConflicts } from "./server/config/metrics";
 import { setSocketServer } from "./server/config/socket";
 
 import { getSecret } from "./server/config/secrets";
 import { initWhatsAppScheduler, sendDailyTaskDigest } from "./server/services/whatsapp.service";
+import { initEmailBroadcastScheduler } from "./server/services/emailBroadcast.service";
+import { initTaskDigestEmailScheduler } from "./server/services/taskDigest.service";
 import { jalankanMigrasiDenganUlangan, statusMigrasi } from "./server/services/migrasi-status";
 
 export const app = express();
+app.set('trust proxy', 1);
 
 async function startServer() {
   const PORT = 3000;
@@ -97,14 +102,21 @@ async function startServer() {
   // production hanya ALLOWED_ORIGINS / APP_URL yang diterima; bila keduanya
   // kosong, koneksi lintas-origin ditolak seluruhnya (aman secara bawaan).
   const isProduction = process.env.NODE_ENV === "production";
+  const vercelOrigins = [
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+  ].filter(Boolean) as string[];
+
   const configuredOrigins = (process.env.ALLOWED_ORIGINS || process.env.APP_URL || "")
     .split(",")
     .map((o) => o.trim())
     .filter((o) => o && o !== "MY_APP_URL");
 
+  const combinedOrigins = Array.from(new Set([...configuredOrigins, ...vercelOrigins]));
+
   const allowedOrigins = isProduction
-    ? configuredOrigins
-    : [...configuredOrigins, "http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173"];
+    ? combinedOrigins
+    : [...combinedOrigins, "http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173"];
 
   // Gagal saat startup, bukan diam-diam saat runtime.
   //
@@ -135,6 +147,23 @@ async function startServer() {
       methods: ["GET", "POST", "PUT", "DELETE"]
     }
   });
+
+  // #50 — Gerbang autentikasi koneksi Socket.IO.
+  //
+  // Sebelum ini TIDAK ADA `io.use()` sama sekali: siapa pun yang bisa menjangkau
+  // origin ini boleh menyambung tanpa token. Dibuktikan dengan klien anonim —
+  // ia menerima `presence_sync` berisi profil lengkap akun admin yang sedang
+  // login, dan berhasil menyuntikkan identitas palsu ke daftar kehadiran.
+  //
+  // Daftar origin CORS di atas BUKAN pengganti ini: origin hanya menahan
+  // browser di halaman lain, bukan skrip mana pun yang bicara langsung ke
+  // server.
+  //
+  // Identitas hasil verifikasi disimpan di `socket.data.user` dan itulah
+  // SATU-SATUNYA sumber identitas yang dipercaya di seluruh handler di bawah.
+  // Payload dari klien tetap boleh membawa data tampilan, tapi tidak boleh lagi
+  // menentukan SIAPA pengirimnya.
+  io.use(penjagaSocket);
 
   // Daftarkan instance ke registry agar modul route dapat memancarkan event
   // tanpa meng-import server.ts (yang akan membentuk lingkaran dependensi).
@@ -184,10 +213,15 @@ async function startServer() {
   // percobaannya diulang, dan bila tetap gagal statusnya tercatat serta bisa
   // dibaca lewat /api/health dan npm run doctor. Lihat migrasi-status.ts.
   (async () => {
-    const { runMigrations } = await import('./src/lib/pg-migrate');
+    const { runMigrations, cariTabelHilang } = await import('./src/lib/pg-migrate');
     const { getPgPool } = await import('./src/lib/db');
     console.log("[SERVER] Memulai auto-migrasi schema PostgreSQL...");
-    await jalankanMigrasiDenganUlangan(() => runMigrations(getPgPool()));
+    // Item #275: verifikasi dijalankan SESUDAH migrasi mengaku sukses, supaya
+    // status yang dilaporkan menjawab "schema lengkap?" bukan sekadar
+    // "fungsi migrasi tidak melempar?".
+    await jalankanMigrasiDenganUlangan(() => runMigrations(getPgPool()), {
+      verifikasi: () => cariTabelHilang(getPgPool()),
+    });
   })();
   // ==========================================
 // WILAYAH II: Keamanan (Middleware Global, authenticateJWT, verifyProjectAccess)
@@ -240,6 +274,7 @@ async function startServer() {
     message: "Terlalu banyak request dari IP ini, silakan coba lagi setelah 5 menit",
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
     skip: (req) => {
       // Bebaskan limitasi untuk localhost/Vite saat development
       const ip = req.ip || req.connection.remoteAddress;
@@ -267,11 +302,23 @@ async function startServer() {
     },
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
     // Login yang berhasil tidak ikut dihitung, sehingga pengguna sah yang
     // sesekali salah ketik tidak ikut terkunci.
     skipSuccessfulRequests: true,
   });
   app.use("/api/auth/login", loginLimiter);
+
+  // #52 — /api/auth/force-logout adalah pintu KEDUA ke pemeriksa password yang
+  // sama: ia memanggil handleUserAuthentication(username, password) persis
+  // seperti login. Tanpa baris ini, penjaga di atas bisa dilewati cukup dengan
+  // menembak endpoint yang berbeda, dan yang tersisa hanya globalLimiter —
+  // 1000 request / 5 menit, dan itu pun MEMBEBASKAN localhost.
+  //
+  // Sengaja memakai instance loginLimiter yang SAMA, bukan instance baru:
+  // dengan begitu kedua endpoint berbagi satu jatah 10 percobaan gagal per IP,
+  // sehingga menyelang-nyeling keduanya tidak melipatgandakan jatah tebakan.
+  app.use("/api/auth/force-logout", loginLimiter);
 
   // Register memakai pembatas TERPISAH tanpa skipSuccessfulRequests.
   //
@@ -289,8 +336,43 @@ async function startServer() {
     },
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
   });
   app.use("/api/auth/register", registerLimiter);
+
+  // #350 — forgot/reset tanpa limiter khusus: login 10/15m bisa dihindari lewat
+  // endpoint pemulihan. Forgot SELALU memulangkan 200 netral bila format email
+  // sah, jadi skipSuccessfulRequests akan membuat pembatas tidak pernah
+  // menghitung — harus hitung SEMUA permintaan.
+  const forgotPasswordLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: {
+      status: "error",
+      message:
+        "Terlalu banyak permintaan lupa kata sandi. Silakan coba lagi dalam 15 menit.",
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
+  });
+  app.use("/api/auth/forgot-password", forgotPasswordLimiter);
+
+  // Reset bertoken: hitung percobaan GAGAL (token rusak/tebakan), sukses boleh skip.
+  const resetPasswordLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: {
+      status: "error",
+      message:
+        "Terlalu banyak percobaan pengaturan ulang kata sandi. Silakan coba lagi dalam 15 menit.",
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
+    skipSuccessfulRequests: true,
+  });
+  app.use("/api/auth/reset-password", resetPasswordLimiter);
 
   app.use(express.json({ limit: '100mb' }));
   app.use(express.urlencoded({ extended: true, limit: '100mb' }));
@@ -334,15 +416,40 @@ async function startServer() {
       }
     }
 
-    // 3. For public image assets like user profile avatars, allow rendering if filename starts with avatar- or is an image
-    if (!isAuthorized && (safeName.startsWith('avatar-') || /\.(png|jpe?g|webp|gif)$/i.test(safeName))) {
+    // 3. Foto profil boleh dirender tanpa token — HANYA foto profil.
+    //
+    // #67 — syarat ini DULU berbunyi:
+    //
+    //   safeName.startsWith('avatar-') || /\.(png|jpe?g|webp|gif)$/i.test(safeName)
+    //
+    // Klausa kedua membuat SETIAP berkas berekstensi gambar ikut publik, bukan
+    // hanya avatar. Padahal `POST /api/v1/upload-document` memang menerima
+    // png/jpg, jadi tangkapan layar bukti QA, dokumen hasil pindai, dan foto
+    // papan tulis rapat semuanya bisa dibaca tanpa token dan tanpa login.
+    // Dibuktikan terhadap server berjalan: berkas gambar dijawab 200 tanpa
+    // kredensial apa pun.
+    //
+    // Nama berkas memang memuat 6 byte acak, tapi "sulit ditebak" bukan kendali
+    // akses: URL bocor lewat riwayat peramban, header referrer, tautan yang
+    // diteruskan, dan presignedUrl yang tampil apa adanya di respons API.
+    //
+    // Ketetapan pemilik proyek 16 Agu 2026: avatar tetap publik supaya sisi
+    // antarmuka tidak perlu berubah; selain avatar, semuanya lewat token.
+    if (!isAuthorized && safeName.startsWith('avatar-')) {
+      isAuthorized = true;
+    }
+
+    // Item #208 — cover foto profil, sama seperti avatar: ditampilkan di
+    // banner profil yang bisa dilihat siapa pun yang boleh membuka halaman
+    // itu, bukan dokumen privat.
+    if (!isAuthorized && safeName.startsWith('cover-')) {
       isAuthorized = true;
     }
 
     if (!isAuthorized) {
       return res.status(403).json({
         status: "error",
-        message: "Akses Ditolak: Storage Bucket bersifat PRIVATE. Akses file membutuhkan Presigned URL yang sah atau Autentikasi JWT."
+        message: "Akses Ditolak: Berkas ini bersifat privat. Akses membutuhkan Presigned URL yang sah atau Autentikasi JWT."
       });
     }
 
@@ -356,25 +463,116 @@ async function startServer() {
   });
 
 
-  // Attach io to req for routes to use
+  /**
+   * Penjaga otentikasi global — item #234.
+   *
+   * KENAPA DIUBAH. Versi sebelumnya menentukan rute publik lewat pencocokan
+   * AWALAN: `['/api/auth', '/api/health-check'].some(r => req.url.startsWith(r))`.
+   * Bentuk itu punya dua konsekuensi yang tidak terlihat oleh orang yang
+   * menulis rute baru, dan tidak ada gerbang yang memperingatkannya:
+   *
+   *   (a) apa pun DI BAWAH `/api/auth` otomatis publik. Menambah endpoint auth
+   *       baru yang seharusnya menuntut sesi akan diam-diam terbuka.
+   *   (b) apa pun DI LUAR `/api/` tidak pernah sampai ke sini sama sekali.
+   *       Persis celah yang dilewati #233: rute `/analyze-video` didaftarkan
+   *       sebagai alias telanjang dan melewati penjaga ini sepenuhnya.
+   *
+   * Daftar di bawah karena itu EKSAK, bukan awalan. Rute publik harus
+   * disebutkan namanya satu per satu; apa pun yang tidak tersebut dijaga.
+   * Bedanya bukan gaya: dengan daftar eksak, menambah rute baru yang lupa
+   * didaftarkan berarti rute itu DIJAGA — gagal ke arah yang aman. Dengan
+   * pencocokan awalan, rute baru yang lupa dipikirkan menjadi PUBLIK.
+   *
+   * Pencocokan eksak juga menutup penyusunan jalur yang menyesatkan seperti
+   * `/api/auth/login/../../users`: string semacam itu tidak sama dengan
+   * anggota mana pun di daftar, jadi ia dijaga. Pencocokan awalan akan
+   * meloloskannya.
+   *
+   * KENAPA `/api/` MASIH JADI SYARAT MASUK. Segala yang bukan `/api/` di sini
+   * adalah halaman SPA dan aset statis — memaksanya lewat `authenticateJWT`
+   * membuat aplikasinya tidak pernah bisa dimuat. Konsekuensi (b) karena itu
+   * TIDAK bisa ditutup di runtime tanpa merusak penyajian aset; ia ditutup di
+   * gerbang uji `server/routes/rute-di-luar-api.test.ts`, yang membaca
+   * pendaftaran rutenya dan melarang rute API lahir di luar `/api/`.
+   *
+   * ISI DAFTAR INI DIUKUR, BUKAN DITEBAK. Kedua belas rute `/api/auth` yang
+   * dulu publik karena awalan diperiksa satu per satu: `verify` dan `refresh`
+   * ternyata memasang `authenticateJWT` sendiri di dalam rutenya sehingga
+   * SENGAJA tidak didaftarkan di sini (dijaga penjaga global, lalu dijaga
+   * ulang oleh dirinya sendiri — berlapis, dan tidak merugikan); `force-logout`
+   * menuntut username+password lewat `handleUserAuthentication` dan dibatasi
+   * `loginLimiter`, jadi ia pintu login kedua yang memang publik (#52).
+   */
+  const RUTE_PUBLIK = new Set([
+    "/api/health-check",
+    "/api/auth/login",
+    "/api/auth/register",
+    "/api/auth/logout",
+    "/api/auth/force-logout",
+    "/api/auth/forgot-password",
+    "/api/auth/reset-password",
+    "/api/auth/oidc/providers",
+    "/api/auth/oidc/callback",
+    "/api/auth/oidc/lengkapi-pendaftaran",
+    // #304 — Vercel Cron / pemicu luar memakai CRON_SECRET, bukan JWT.
+    "/api/cron/tick",
+    "/api/cron/task-digest",
+    // #490 — stream berkas aman via presigned query token (token/expires/uid)
+    "/api/v1/files/secure-stream",
+  ]);
+
+  /**
+   * Satu-satunya rute publik yang jalurnya berparameter, jadi tidak bisa
+   * ditulis eksak: `/api/auth/oidc/:provider/start`. Polanya sengaja dikunci
+   * pada SATU segmen (`[^/]+`) supaya tidak ikut memayungi jalur yang lebih
+   * dalam.
+   */
+  const POLA_PUBLIK = [/^\/api\/auth\/oidc\/[^/]+\/start$/];
+
   app.use((req, res, next) => {
-    if (req.method !== 'OPTIONS' && req.url.startsWith('/api/')) {
-        const publicRoutes = ['/api/auth', '/api/health-check'];
-        if (!publicRoutes.some(route => req.url.startsWith(route))) {
-           return authenticateJWT(req, res, next);
-        }
-    }
-    next(); 
+    if (req.method === "OPTIONS" || !req.url.startsWith("/api/")) return next();
+
+    // Query string dibuang sebelum dicocokkan: rute publik nyata dipanggil
+    // dengan query (`/api/auth/oidc/google/start?mode=login`), dan
+    // membandingkan URL mentah akan menjaganya lalu memutus login SSO.
+    const jalur = req.url.split("?")[0].replace(/\/+$/, "") || "/";
+
+    if (RUTE_PUBLIK.has(jalur) || POLA_PUBLIK.some((p) => p.test(jalur))) return next();
+    return authenticateJWT(req, res, next);
   });
 
   app.use((req: any, res, next) => {
     req.io = io;
     
-    // Intercept response finish to emit event if it was a modification
+    // #322 — data_changed: scope ke room proyek bila projectId diketahui;
+    // entity global (users/master-data/dll) tetap broadcast ke semua.
     res.on("finish", () => {
-      if (["POST", "PUT", "DELETE"].includes(req.method)) {
+      if (["POST", "PUT", "DELETE", "PATCH"].includes(req.method)) {
         if (req.url.startsWith("/api/") && !req.url.startsWith("/api/auth")) {
-           io.emit("data_changed", { path: req.url, method: req.method });
+          const jalur = String(req.url).split("?")[0];
+          const dariParams = req.params?.projectId;
+          const dariBody =
+            req.body && typeof req.body === "object" ? req.body.projectId : undefined;
+          const dariQuery = typeof req.query?.projectId === "string" ? req.query.projectId : undefined;
+          const cocokUrl = jalur.match(/\/projects\/([^/]+)/);
+          const projectId =
+            (typeof dariParams === "string" && dariParams) ||
+            (typeof dariBody === "string" && dariBody) ||
+            (typeof dariQuery === "string" && dariQuery) ||
+            (cocokUrl && cocokUrl[1]) ||
+            null;
+
+          const payload = {
+            path: req.url,
+            method: req.method,
+            ...(projectId ? { projectId } : {}),
+          };
+
+          if (projectId) {
+            io.to(projectId).emit("data_changed", payload);
+          } else {
+            io.emit("data_changed", payload);
+          }
         }
       }
     });
@@ -395,6 +593,7 @@ async function startServer() {
   app.use(healthRoutes);
   app.use(systemRoutes);
   app.use(auditRoutes);
+  app.use(cronRoutes);
 
   const { default: dbAdminRoutes } = await import('./server/routes/db-admin.routes.ts');
   app.use(dbAdminRoutes);
@@ -424,9 +623,6 @@ async function startServer() {
   const { default: notificationsRoutes } = await import('./server/routes/notifications.routes.ts');
   app.use(notificationsRoutes);
 
-  const { default: notebooklmRoutes } = await import('./server/routes/notebooklm.routes.ts');
-  app.use(notebooklmRoutes);
-
   const { default: projectModulesRoutes } = await import('./server/routes/project-modules.routes.ts');
   app.use(projectModulesRoutes);
 
@@ -442,87 +638,22 @@ async function startServer() {
   // ==========================================
 // WILAYAH III: Core API Engine (Seluruh rute API dengan prefix /api/ disatukan di sini)
 // ==========================================
-  app.get("/api/audit-logs", authenticateJWT, async (req: any, res) => {
-    console.log(`[AUDIT] Request diterima: ${JSON.stringify(req.query)}`);
-    let connection;
-    try {
-      const { projectId, entityName, entityId, limit } = req.query;
-      connection = await db.getConnection();
-
-      // Non-admin users may only pull audit logs scoped to a project they belong to —
-      // never a system-wide dump, and never another project's log by guessing its id.
-      const requesterId = req.user?.id || req.user?.uid;
-      const [requesterRows]: any = await connection.query("SELECT id, role FROM Users WHERE id = ? OR uid = ?", [requesterId, requesterId]);
-      const requesterRole = requesterRows[0]?.role;
-      const resolvedRequesterId = requesterRows[0]?.id || requesterId;
-
-      if (requesterRole !== 'admin') {
-        if (!projectId) {
-          connection.release();
-          return res.status(403).json({ status: "error", message: "Akses ditolak: projectId wajib disertakan." });
-        }
-        const [proj]: any = await connection.query("SELECT ownerId FROM Projects WHERE id = ?", [projectId]);
-        const isOwner = proj.length > 0 && proj[0].ownerId === resolvedRequesterId;
-        if (!isOwner) {
-          const [member]: any = await connection.query(
-            "SELECT role FROM ProjectMembers WHERE projectId = ? AND userId = ?",
-            [projectId, resolvedRequesterId]
-          );
-          if (member.length === 0) {
-            connection.release();
-            return res.status(403).json({ status: "error", message: "Akses ditolak: Anda bukan anggota project ini." });
-          }
-        }
-      }
-
-      let sql = "SELECT a.*, u.displayName as userName FROM AuditLogs a JOIN Users u ON a.userId = u.id";
-      const params: any[] = [];
-      const filters = [];
-
-      if (projectId) { filters.push("a.projectId = ?"); params.push(projectId); }
-      if (entityName) { filters.push("a.entityName = ?"); params.push(entityName); }
-      if (entityId) { filters.push("a.entityId = ?"); params.push(entityId); }
-
-      if (filters.length > 0) sql += " WHERE " + filters.join(" AND ");
-      
-      sql += " ORDER BY a.createdAt DESC LIMIT ?";
-      params.push(parseInt(limit as string) || 50);
-
-      const [rows] = await connection.query(sql, params);
-      res.json({ status: "success", data: rows });
-    } catch (error: any) {
-      console.error("[AUDIT] Error:", error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-    } finally {
-      if (connection) connection.release();
-    }
-  });
+  // GET /api/audit-logs — dipindahkan ke server/routes/audit.routes.ts (#314).
+  // Handler inline lama dihapus agar tidak menimpa penjaga di router.
 
   // Endpoint publik. Sengaja hanya memuat STATUS migrasi, tanpa pesan
   // galatnya — pesan galat database bisa memuat detail koneksi, dan endpoint
   // ini bisa diakses tanpa autentikasi. Rinciannya ada di /api/health yang
   // terlindungi.
-  app.get("/api/health-check", (req, res) => {
-    const migrasi = statusMigrasi();
-    res.json({
-      status: migrasi.status === "gagal" ? "degraded" : "ok",
-      timestamp: new Date().toISOString(),
-      migrasi: migrasi.status,
-    });
-  });
+  // `/api/health-check` DIPINDAHKAN ke `server/routes/health.routes.ts` (#57).
+  // Jalurnya tidak berubah, jadi `publicRoutes` di atas tetap berlaku.
 
   const { default: fileRoutes } = await import('./server/routes/file.routes.ts');
   app.use(fileRoutes);
 
-  // --- PROMETHEUS METRICS ENDPOINT ---
-  app.get("/metrics", async (req, res) => {
-    try {
-      res.set("Content-Type", register.contentType);
-      res.end(await register.metrics());
-    } catch (ex) {
-      res.status(500).end(ex);
-    }
-  });
+  // GET /metrics — HANYA di health.routes.ts (#58, kaki #442 dihapus).
+  // Jangan daftarkan handler telanjang di sini: Express memakai rute pertama
+  // yang cocok, dan salinan tanpa METRIK_TOKEN adalah regresi.
 
   // RBAC Middleware (Moved to server/middleware/rbac.ts)
   const { verifyProjectAccess } = await import('./server/middleware/rbac.ts');
@@ -581,6 +712,18 @@ async function startServer() {
     socketActiveConnections.inc();
     console.log("Client connected via socket:", socket.id);
 
+    // #51 — setiap socket masuk ke room miliknya sendiri, dinamai dari identitas
+    // hasil verifikasi token (bukan dari payload klien). Ini yang membuat
+    // FORCE_LOGOUT_EVENT bisa dikirim HANYA ke pemilik akunnya, alih-alih
+    // ditebar ke seluruh klien yang terhubung lewat io.emit.
+    //
+    // Aman karena berada di belakang penjagaSocket: room ini hanya bisa dimasuki
+    // pemilik token yang sah.
+    const idPemilik = idPemilikSocket(socket);
+    if (idPemilik) {
+      socket.join(roomPengguna(idPemilik));
+    }
+
     // Live Chat Socket Handlers
     
     // NEW: Global Presence Join
@@ -604,19 +747,31 @@ async function startServer() {
     });
 
     socket.on("join_presence", (user) => {
-      if (user && (user.id || user.uid)) {
-        const userId = user.uid || user.id;
-        
-        // Add or update user in global presence map
-        globalPresence.set(userId, user);
+      // #50 — identitas diambil dari token, BUKAN dari payload. Sebelumnya siapa
+      // pun bisa hadir sebagai orang lain cukup dengan menyebutkan id-nya.
+      const userId = idPemilikSocket(socket);
+      if (userId) {
+        // Data tampilan boleh datang dari klien, tapi id/uid ditimpa oleh token
+        // dan bidangnya disaring (#59) supaya PII tidak ikut disiarkan.
+        const profil = profilAman({
+          ...(user || {}),
+          id: socket.data.user.id,
+          uid: socket.data.user.uid,
+        });
+
+        globalPresence.set(userId, profil);
         globalPresenceSockets.set(socket.id, userId);
-        
+
         // Broadcast the full list of online users to everyone
         io.emit("presence_sync", Array.from(globalPresence.values()));
-        console.log(`[GLOBAL PRESENCE] User ${user.displayName || user.username || userId} joined. Total online: ${globalPresence.size}`);
+        console.log(`[GLOBAL PRESENCE] User ${profil?.displayName || profil?.username || userId} joined. Total online: ${globalPresence.size}`);
       }
     });
-    socket.on("user_connected", (userId) => {
+    socket.on("user_connected", () => {
+      // #50 — dulu userId diambil dari argumen event, sehingga socket mana pun
+      // bisa mendaftarkan diri sebagai pengguna lain dan ikut menerima pesan
+      // pribadi yang ditujukan ke orang itu.
+      const userId = idPemilikSocket(socket);
       if (userId) {
         if (!chatSockets.has(userId)) {
           chatSockets.set(userId, new Set());
@@ -636,8 +791,15 @@ async function startServer() {
 
     socket.on("send_message", (msg) => {
       // msg: { id, senderId, receiverId, message, timestamp, read }
+
+      // #50 — pengirim ditetapkan dari token. Sebelumnya `senderId` dipercaya
+      // apa adanya dari payload, jadi pesan bisa dikirim atas nama siapa pun.
+      const pengirim = idPemilikSocket(socket);
+      if (!pengirim || !msg) return;
+      msg.senderId = pengirim;
+
       // Sanitize message content to prevent XSS
-      if (msg && msg.message) {
+      if (msg.message) {
         msg.message = xss(msg.message);
       }
 
@@ -667,6 +829,17 @@ async function startServer() {
       } else if (payload && typeof payload === 'object') {
         projectId = payload.projectId || "";
         user = payload.user;
+      }
+
+      // #50 — data tampilan boleh dari payload, identitasnya tidak.
+      if (idPemilikSocket(socket)) {
+        user = profilAman({
+          ...(user || {}),
+          id: socket.data.user.id,
+          uid: socket.data.user.uid,
+        });
+      } else {
+        user = null;
       }
 
       if (!projectId) {
@@ -707,7 +880,10 @@ async function startServer() {
       }
     });
  
-    socket.on("leave_project", ({ projectId, userId }) => {
+    socket.on("leave_project", ({ projectId }) => {
+      // #50 — dulu userId datang dari payload, sehingga satu klien bisa
+      // mengeluarkan orang lain dari daftar kehadiran proyek.
+      const userId = idPemilikSocket(socket);
       socket.leave(projectId);
       if (projectPresence[projectId]) {
         projectPresence[projectId] = projectPresence[projectId].filter(u => (u.id || u.uid) !== userId);
@@ -802,6 +978,9 @@ async function startServer() {
 
   const { default: userRoutes } = await import('./server/routes/user.routes.ts');
   app.use(userRoutes);
+
+  const { default: sessionRoutes } = await import('./server/routes/session.routes.ts');
+  app.use(sessionRoutes);
 
   app.post("/api/whatsapp/simulate", authenticateJWT, async (req: any, res) => {
     try {
@@ -983,6 +1162,20 @@ app.use(errorHandler);
     });
   }
 
+  // Penjaga saat boot — §19.8 tahap 2. Letaknya di SINI, sesudah SELURUH rute
+  // terpasang, bukan di tengah pemasangan.
+  //
+  // Versi pertama dipanggil sesudah `discussion-points` dan melaporkan 31
+  // penjaga — padahal `file.routes`, `user.routes`, dan `project.routes` baru
+  // dipasang ratusan baris sesudahnya. Ia juga melaporkan NOL korslet padahal
+  // #73 nyata ada, sebab rutenya belum termuat. Gerbang yang menghitung
+  // separuh isi lebih berbahaya daripada tidak ada gerbang: ia memberi rasa
+  // aman yang salah, persis cara gerbang F0 dulu dinyatakan lulus (§13.14).
+  //
+  // Mode saat ini LAPOR, belum menolak. Lihat `MODE` di daftarPeranRute.ts.
+  const { laporkanPenjaga } = await import('./server/middleware/daftarPeranRute');
+  laporkanPenjaga();
+
   if (isServerless) {
     console.log("[SERVERLESS] Running in serverless mode. Skipping httpServer.listen.");
     return;
@@ -990,7 +1183,43 @@ app.use(errorHandler);
 
   httpServer.on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
-      console.error(`[SERVER] Port ${PORT} is already in use. Exiting cleanly...`);
+      // Item #276. Pesan lama berbunyi "Port N is already in use. Exiting
+      // cleanly..." — dan kata "cleanly" itu berbohong: exit code-nya 1,
+      // ini kegagalan. Tiga hal bersekongkol menyembunyikannya: di bawah
+      // `tsx watch` supervisor tetap hidup walau anak prosesnya mati,
+      // aplikasinya tetap menjawab di port itu (dilayani proses LAIN), dan
+      // tidak ada satu pun kalimat yang menyebut kode yang sedang diuji
+      // mungkin bukan kode yang sedang berjalan. Satu putaran penuh debug
+      // pernah terbuang karenanya.
+      const cariPemegang =
+        process.platform === 'win32'
+          ? `netstat -ano | findstr :${PORT}`
+          : `lsof -i :${PORT}`;
+      console.error(
+        `
+${'='.repeat(70)}
+` +
+          `[SERVER] GAGAL MENYALA — port ${PORT} sudah dipakai proses lain.
+` +
+          `[SERVER] Server ini TIDAK berjalan.
+` +
+          `[SERVER]
+` +
+          `[SERVER] PERINGATAN: aplikasi yang masih menjawab di
+` +
+          `[SERVER] http://localhost:${PORT} dilayani proses LAIN, yang bisa
+` +
+          `[SERVER] jadi memuat versi kode LAMA. Perubahan Anda tidak akan
+` +
+          `[SERVER] terlihat, dan rute baru akan balas 404.
+` +
+          `[SERVER]
+` +
+          `[SERVER] Cari pemegang portnya:  ${cariPemegang}
+` +
+          `${'='.repeat(70)}
+`
+      );
       process.exit(1);
     } else {
       console.error("[SERVER] Fatal server error:", err);
@@ -1008,6 +1237,21 @@ app.use(errorHandler);
     // penjadwal tidak menghalangi server menerima permintaan. Bila token
     // belum dikonfigurasi, fungsinya melewat dengan pesan yang jelas.
     initWhatsAppScheduler();
+    // Item #297 — penjadwal broadcast task via email. Didaftarkan tanpa syarat:
+    // berbeda dari WhatsApp yang butuh token gateway, jalur email memakai
+    // konfigurasi yang sudah ada, dan penjadwalnya berhenti sendiri bila
+    // belum ada penerima yang dipilih dari UI.
+    initEmailBroadcastScheduler();
+    initTaskDigestEmailScheduler();
+
+    // PostgreSQL Neon Keep-Alive Warmup Engine (Mencegah Compute Node Cold-Start Sleep)
+    setInterval(async () => {
+      try {
+        await query("SELECT 1");
+      } catch (err: any) {
+        // Keep-alive heartbeat silently maintained
+      }
+    }, 4 * 60 * 1000);
   });
 }
 

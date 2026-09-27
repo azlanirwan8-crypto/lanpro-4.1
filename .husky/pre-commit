@@ -1,1 +1,40 @@
 npx lint-staged
+
+# GERBANG SEBELUM COMMIT
+#
+# Sebelumnya hook ini hanya menjalankan eslint + prettier. Artinya perubahan
+# yang merusak tema, atau papan §1 yang tidak lagi konsisten dengan dirinya
+# sendiri, ter-commit dengan MULUS dan tidak ada yang berteriak. Itulah yang
+# terjadi saat tema gelap rusak: seluruh perkakas hijau, tampilannya tidak.
+#
+# Ketiganya cepat (membaca berkas, tanpa jaringan dan tanpa build).
+#
+# Bila salah satu merah, PERBAIKI SEBABNYA. Melewati hook dengan `--no-verify`
+# berarti mematikan satu-satunya hal yang mencegah pengulangan.
+npm run audit:papan || exit 1
+npm run audit:warna || exit 1
+npm run audit:tema || exit 1
+# Item #157 — menangkap kelas warna garis yang namanya terpotong
+# (`border-subtle` alih-alih `border-border-subtle`). Kelas semacam itu tidak
+# menghasilkan CSS, dan di Tailwind v4 garisnya jatuh ke `currentColor` —
+# terbaca HITAM PEKAT, bukan hilang. Tiga gerbang di atas tidak melihatnya.
+npm run audit:kelas || exit 1
+# Item #159 — menangkap `setCurrentView("...")` yang tidak punya cabang di
+# AppRoutes. `switch`-nya berakhir `default: return null`, jadi tujuan yang
+# salah ketik merender LAYAR KOSONG tanpa melempar apa pun.
+npm run audit:navigasi || exit 1
+# Item #291 — menangkap export bernama yang tidak diimpor siapa pun (dead
+# exports). `tsc` dan eslint tidak melihatnya karena keduanya bekerja per
+# berkas. Mekanisme ratchet: jumlah hanya boleh turun, tidak boleh naik.
+npm run audit:logika || exit 1
+
+# Item #525 — ritme radius. `rounded-*` dipakai 1 749 kali di enam langkah
+# berbeda plus 13 nilai arbitrer, dan tidak ada gerbang yang melihatnya:
+# `audit:warna` hanya menghitung warna. Ratchet global jumlah langkah + arbitrer
+# per berkas, supaya "menyeragamkan sudut" tidak bisa lagi diam-diam mundur.
+npm run audit:radius || exit 1
+
+# CATATAN. Ketiga gerbang di atas TIDAK membuktikan aplikasinya benar.
+# `npm test` dan `npm run build` sengaja TIDAK dijalankan di sini agar commit
+# tidak berubah jadi menit-menitan — keduanya tetap WAJIB sebelum merge ke
+# `main`, bersama verifikasi di tab peramban yang bersih (AUDIT.md §15.3, §16).

@@ -1,5 +1,5 @@
-import { Meeting, DiscussionPoint, MasterData } from '../types';
-import { apiRequest } from '../lib/api';
+import { Meeting, DiscussionPoint } from "../types";
+import { apiRequest } from "../lib/api";
 
 const getHeaders = (userId?: string) => {
   const h: any = {};
@@ -7,12 +7,18 @@ const getHeaders = (userId?: string) => {
   return h;
 };
 
-export const createMeeting = async (projectId: string, title: string, authorId?: string, payload?: Partial<Meeting>, userId?: string) => {
+export const createMeeting = async (
+  projectId: string,
+  title: string,
+  authorId?: string,
+  payload?: Partial<Meeting>,
+  userId?: string
+) => {
   try {
     const data = await apiRequest(`/api/projects/${projectId}/meetings`, {
       method: "POST",
       headers: getHeaders(userId || authorId),
-      body: { ...payload, title, authorId }
+      body: { ...payload, title, authorId },
     });
     if (data.status === "success") {
       return data.data.id;
@@ -24,25 +30,21 @@ export const createMeeting = async (projectId: string, title: string, authorId?:
   }
 };
 
-export const getMeetings = async (projectId: string, userId?: string) => {
+export const createDiscussionPoint = async (
+  projectId: string,
+  meetingId: string,
+  point: Omit<DiscussionPoint, "id" | "meetingId" | "createdAt">,
+  userId?: string
+) => {
   try {
-    const data = await apiRequest(`/api/projects/${projectId}/meetings`, {
-      headers: getHeaders(userId)
-    });
-    return data.status === "success" ? data.data : [];
-  } catch (error) {
-    console.error("getMeetings service error:", error);
-    throw error;
-  }
-};
-
-export const createDiscussionPoint = async (projectId: string, meetingId: string, point: Omit<DiscussionPoint, 'id' | 'meetingId' | 'createdAt'>, userId?: string) => {
-  try {
-    const data = await apiRequest(`/api/projects/${projectId}/meetings/${meetingId}/discussionPoints`, {
-      method: "POST",
-      headers: getHeaders(userId || point.authorId),
-      body: point
-    });
+    const data = await apiRequest(
+      `/api/projects/${projectId}/meetings/${meetingId}/discussionPoints`,
+      {
+        method: "POST",
+        headers: getHeaders(userId || point.authorId),
+        body: point,
+      }
+    );
     if (data.status === "success") {
       return data.data.id;
     }
@@ -53,25 +55,48 @@ export const createDiscussionPoint = async (projectId: string, meetingId: string
   }
 };
 
-export const getDiscussionPoints = async (projectId: string, meetingId: string, userId?: string) => {
+export const getDiscussionPoints = async (
+  projectId: string,
+  meetingId: string,
+  userId?: string,
+  options?: { page?: number; limit?: number; search?: string }
+) => {
   try {
-    const data = await apiRequest(`/api/projects/${projectId}/meetings/${meetingId}/discussionPoints`, {
-      headers: getHeaders(userId)
-    });
-    return data.status === "success" ? data.data : [];
+    const params = new URLSearchParams();
+    if (options?.page !== undefined) params.set("page", String(options.page));
+    if (options?.limit !== undefined) params.set("limit", String(options.limit));
+    if (options?.search?.trim()) params.set("search", options.search.trim());
+    const qs = params.toString();
+    const data = await apiRequest(
+      `/api/projects/${projectId}/meetings/${meetingId}/discussionPoints${qs ? `?${qs}` : ""}`,
+      {
+        headers: getHeaders(userId),
+      }
+    );
+    if (data.status !== "success") return { data: [], meta: undefined };
+    return { data: data.data || [], meta: data.meta };
   } catch (error) {
     console.error("getDiscussionPoints service error:", error);
     throw error;
   }
 };
 
-export const updateDiscussionPoint = async (projectId: string, meetingId: string, pointId: string, updates: Partial<DiscussionPoint>, userId?: string) => {
+export const updateDiscussionPoint = async (
+  projectId: string,
+  meetingId: string,
+  pointId: string,
+  updates: Partial<DiscussionPoint>,
+  userId?: string
+) => {
   try {
-    const data = await apiRequest(`/api/projects/${projectId}/meetings/${meetingId}/discussionPoints/${pointId}`, {
-      method: "PUT",
-      headers: getHeaders(userId),
-      body: updates
-    });
+    const data = await apiRequest(
+      `/api/projects/${projectId}/meetings/${meetingId}/discussionPoints/${pointId}`,
+      {
+        method: "PUT",
+        headers: getHeaders(userId),
+        body: updates,
+      }
+    );
     if (data && data.status !== "success") {
       throw new Error(data.message || "Failed to update discussion point");
     }
@@ -82,27 +107,20 @@ export const updateDiscussionPoint = async (projectId: string, meetingId: string
   }
 };
 
-export const getMasterData = async (type: MasterData['type'], userId?: string) => {
+export const deleteDiscussionPoint = async (
+  projectId: string,
+  meetingId: string,
+  pointId: string,
+  userId?: string
+) => {
   try {
-    const data = await apiRequest("/api/master-data", {
-      headers: getHeaders(userId)
-    });
-    if (data.status === "success" && Array.isArray(data.data)) {
-      return data.data.filter((item: any) => item.type === type);
-    }
-    return [];
-  } catch (error) {
-    console.error("getMasterData error:", error);
-    throw error;
-  }
-};
-
-export const deleteDiscussionPoint = async (projectId: string, meetingId: string, pointId: string, userId?: string) => {
-  try {
-    const data = await apiRequest(`/api/projects/${projectId}/meetings/${meetingId}/discussionPoints/${pointId}`, {
-      method: "DELETE",
-      headers: getHeaders(userId)
-    });
+    const data = await apiRequest(
+      `/api/projects/${projectId}/meetings/${meetingId}/discussionPoints/${pointId}`,
+      {
+        method: "DELETE",
+        headers: getHeaders(userId),
+      }
+    );
     if (data && data.status !== "success") {
       throw new Error(data.message || "Failed to delete discussion point");
     }
@@ -116,7 +134,7 @@ export const deleteDiscussionPoint = async (projectId: string, meetingId: string
 export const getDiscussionPointComments = async (pointId: string, userId?: string) => {
   try {
     const data = await apiRequest(`/api/discussion-points/${pointId}/comments`, {
-      headers: getHeaders(userId)
+      headers: getHeaders(userId),
     });
     return data.status === "success" ? data.data : [];
   } catch (error) {
@@ -134,7 +152,7 @@ export const createDiscussionPointComment = async (
     const data = await apiRequest(`/api/discussion-points/${pointId}/comments`, {
       method: "POST",
       headers: getHeaders(userId),
-      body: payload
+      body: payload,
     });
     if (data && data.status !== "success") {
       throw new Error(data.message || "Failed to create comment");
@@ -149,7 +167,7 @@ export const createDiscussionPointComment = async (
 export const getUsers = async (userId?: string) => {
   try {
     const data = await apiRequest("/api/users", {
-      headers: getHeaders(userId)
+      headers: getHeaders(userId),
     });
     return data.status === "success" ? data.data : [];
   } catch (error) {
@@ -158,12 +176,17 @@ export const getUsers = async (userId?: string) => {
   }
 };
 
-export const updateMeeting = async (projectId: string, meetingId: string, updates: Partial<Meeting>, userId?: string) => {
+export const updateMeeting = async (
+  projectId: string,
+  meetingId: string,
+  updates: Partial<Meeting>,
+  userId?: string
+) => {
   try {
     const data = await apiRequest(`/api/projects/${projectId}/meetings/${meetingId}`, {
       method: "PUT",
       headers: getHeaders(userId),
-      body: updates
+      body: updates,
     });
     if (data && data.status !== "success") {
       throw new Error(data.message || "Failed to update meeting");
@@ -179,7 +202,7 @@ export const deleteMeeting = async (projectId: string, meetingId: string, userId
   try {
     const data = await apiRequest(`/api/projects/${projectId}/meetings/${meetingId}`, {
       method: "DELETE",
-      headers: getHeaders(userId)
+      headers: getHeaders(userId),
     });
     if (data && data.status !== "success") {
       throw new Error(data.message || "Failed to delete meeting");

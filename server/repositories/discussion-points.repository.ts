@@ -1,0 +1,297 @@
+import db from "../../src/lib/db";
+import { BATAS_DAFTAR_TANPA_PAGINATION, type PaginationParams } from "../lib/pagination";
+
+export interface DiscussionPointEntity {
+  id: string;
+  meetingId: string;
+  parentPointId?: string | null;
+  authorId?: string | null;
+  assignTo?: string | null;
+  concern?: string | null;
+  fitur?: string | null;
+  system?: string | null;
+  surrounding?: string | null;
+  keterangan?: string | null;
+  tindakanLanjut?: string | null;
+  status?: string | null;
+  targetDate?: string | null;
+  tanggalUpdateStatus?: string | null;
+  content?: string | null;
+  createdAt?: string;
+}
+
+export interface DiscussionPointCommentEntity {
+  id: string;
+  pointId: string;
+  userId: string;
+  userName: string;
+  commentText: string;
+  createdAt: string;
+}
+
+export class DiscussionPointsRepository {
+  async findByMeetingId(meetingId: string, search?: string): Promise<DiscussionPointEntity[]> {
+    const connection = await db.getConnection();
+    try {
+      const { where, params } = this.buildPointWhere(meetingId, search);
+      const [rows]: any = await connection.query(
+        `SELECT * FROM DiscussionPoints WHERE ${where} ORDER BY createdAt ASC LIMIT ${BATAS_DAFTAR_TANPA_PAGINATION}`,
+        params
+      );
+      return rows || [];
+    } finally {
+      connection.release();
+    }
+  }
+
+  async findByMeetingIdPaged(
+    meetingId: string,
+    pagination: PaginationParams,
+    search?: string
+  ): Promise<{ items: DiscussionPointEntity[]; total: number }> {
+    const connection = await db.getConnection();
+    try {
+      const { where, params } = this.buildPointWhere(meetingId, search);
+      const [countRows]: any = await connection.query(
+        `SELECT COUNT(*)::int AS total FROM DiscussionPoints WHERE ${where}`,
+        params
+      );
+      const total = countRows?.[0]?.total ?? 0;
+      const [rows]: any = await connection.query(
+        `SELECT * FROM DiscussionPoints WHERE ${where} ORDER BY createdAt ASC LIMIT ? OFFSET ?`,
+        [...params, pagination.limit, pagination.offset]
+      );
+      return { items: rows || [], total };
+    } finally {
+      connection.release();
+    }
+  }
+
+  private buildPointWhere(meetingId: string, search?: string) {
+    const params: unknown[] = [meetingId];
+    let where = "meetingId = ?";
+    if (search?.trim()) {
+      where +=
+        " AND (LOWER(COALESCE(concern, '')) LIKE ? OR LOWER(COALESCE(keterangan, '')) LIKE ? OR LOWER(COALESCE(fitur, '')) LIKE ?)";
+      const term = `%${search.trim().toLowerCase()}%`;
+      params.push(term, term, term);
+    }
+    return { where, params };
+  }
+
+  async createPoint(point: DiscussionPointEntity): Promise<DiscussionPointEntity> {
+    const connection = await db.getConnection();
+    try {
+      const contentVal = point.concern || point.keterangan || "Poin Diskusi";
+      try {
+        await connection.query(
+          'INSERT INTO DiscussionPoints (id, meetingId, "parentPointId", "authorId", "assignTo", concern, fitur, "system", surrounding, keterangan, "tindakanLanjut", status, "targetDate", "tanggalUpdateStatus", content) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [
+            point.id,
+            point.meetingId,
+            point.parentPointId || null,
+            point.authorId || "guest",
+            point.assignTo || null,
+            point.concern || null,
+            point.fitur || null,
+            point.system || null,
+            point.surrounding || null,
+            point.keterangan || null,
+            point.tindakanLanjut || null,
+            point.status || "pending",
+            point.targetDate || null,
+            point.tanggalUpdateStatus || null,
+            contentVal,
+          ]
+        );
+      } catch (insertErr: any) {
+        console.warn("[POST DiscussionPoint Resilient Retry]:", insertErr?.message);
+        await connection.query(
+          'INSERT INTO DiscussionPoints (id, meetingId, "authorId", concern, status, content) VALUES (?, ?, ?, ?, ?, ?)',
+          [
+            point.id,
+            point.meetingId,
+            point.authorId || "guest",
+            point.concern || "Poin Diskusi",
+            point.status || "pending",
+            contentVal,
+          ]
+        );
+      }
+      return point;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async updatePoint(pointId: string, updates: Partial<DiscussionPointEntity>): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      const sqlUpdates: string[] = [];
+      const values: any[] = [];
+
+      // #476 — kolom camelCase DiscussionPoints TIDAK di auto-quote db.ts;
+      // tanpa kutip PG menulis twin lowercase (parentpointid, …).
+      if (updates.parentPointId !== undefined) {
+        sqlUpdates.push('"parentPointId" = ?');
+        values.push(updates.parentPointId);
+      }
+      if (updates.assignTo !== undefined) {
+        sqlUpdates.push('"assignTo" = ?');
+        values.push(updates.assignTo);
+      }
+      if (updates.concern !== undefined) {
+        sqlUpdates.push("concern = ?");
+        values.push(updates.concern);
+      }
+      if (updates.fitur !== undefined) {
+        sqlUpdates.push("fitur = ?");
+        values.push(updates.fitur);
+      }
+      if (updates.system !== undefined) {
+        sqlUpdates.push("`system` = ?");
+        values.push(updates.system);
+      }
+      if (updates.surrounding !== undefined) {
+        sqlUpdates.push("surrounding = ?");
+        values.push(updates.surrounding);
+      }
+      if (updates.keterangan !== undefined) {
+        sqlUpdates.push("keterangan = ?");
+        values.push(updates.keterangan);
+      }
+      if (updates.tindakanLanjut !== undefined) {
+        sqlUpdates.push('"tindakanLanjut" = ?');
+        values.push(updates.tindakanLanjut);
+      }
+      if (updates.status !== undefined) {
+        sqlUpdates.push("status = ?");
+        values.push(updates.status);
+      }
+      if (updates.targetDate !== undefined) {
+        sqlUpdates.push('"targetDate" = ?');
+        values.push(updates.targetDate);
+      }
+      if (updates.tanggalUpdateStatus !== undefined) {
+        sqlUpdates.push('"tanggalUpdateStatus" = ?');
+        values.push(updates.tanggalUpdateStatus);
+      }
+
+      if (sqlUpdates.length > 0) {
+        values.push(pointId);
+        await connection.query(
+          `UPDATE DiscussionPoints SET ${sqlUpdates.join(", ")} WHERE id = ?`,
+          values
+        );
+      }
+    } finally {
+      connection.release();
+    }
+  }
+
+  async deletePoint(pointId: string): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+      // #444 — komentar thread ikut hilang; sebelumnya orphan di discussion_point_comments
+      await connection.query("DELETE FROM discussion_point_comments WHERE pointId = ?", [pointId]);
+      await connection.query("DELETE FROM DiscussionPoints WHERE id = ?", [pointId]);
+      await connection.commit();
+    } catch (err) {
+      await connection.rollback();
+      throw err;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async findCommentsByPointId(pointId: string): Promise<DiscussionPointCommentEntity[]> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        `SELECT id,
+                pointid     AS "pointId",
+                "userId"    AS "userId",
+                username    AS "userName",
+                commenttext AS "commentText",
+                "createdAt" AS "createdAt"
+           FROM discussion_point_comments
+          WHERE pointId = ?
+          ORDER BY createdAt ASC`,
+        [pointId]
+      );
+      return rows || [];
+    } finally {
+      connection.release();
+    }
+  }
+
+  async createComment(
+    comment: DiscussionPointCommentEntity
+  ): Promise<DiscussionPointCommentEntity> {
+    const connection = await db.getConnection();
+    try {
+      await connection.query(
+        "INSERT INTO discussion_point_comments (id, pointId, userId, userName, commentText, createdAt) VALUES (?, ?, ?, ?, ?, ?)",
+        [
+          comment.id,
+          comment.pointId,
+          comment.userId,
+          comment.userName,
+          comment.commentText,
+          comment.createdAt,
+        ]
+      );
+      return comment;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * Pemilik sebuah komentar — item #248.
+   *
+   * Memulangkan `userId` telanjang dan bukan seluruh barisnya, alasan yang sama
+   * seperti `findPasswordHashById()` di #241: nilai yang dipakai untuk MEMUTUSKAN
+   * otorisasi tidak boleh ikut menumpang di objek yang kelak ter-`res.json()`.
+   * Pemanggilnya cuma dua — jalur sunting dan jalur hapus — dan keduanya hanya
+   * perlu tahu satu hal: ini komentar siapa.
+   */
+  async findCommentOwnerId(commentId: string): Promise<string | null> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        'SELECT "userId" AS "userId" FROM discussion_point_comments WHERE id = ?',
+        [commentId]
+      );
+      return rows && rows.length > 0 ? rows[0].userId : null;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /** Menyunting teks satu komentar — item #248. Hanya teksnya yang boleh berubah. */
+  async updateComment(commentId: string, commentText: string): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      await connection.query("UPDATE discussion_point_comments SET commentText = ? WHERE id = ?", [
+        commentText,
+        commentId,
+      ]);
+    } finally {
+      connection.release();
+    }
+  }
+
+  /** Menghapus satu komentar — item #248. */
+  async deleteComment(commentId: string): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      await connection.query("DELETE FROM discussion_point_comments WHERE id = ?", [commentId]);
+    } finally {
+      connection.release();
+    }
+  }
+}
+
+export const discussionPointsRepository = new DiscussionPointsRepository();

@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 import React, { useState, useEffect, useCallback, createContext, useContext } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
@@ -77,7 +79,7 @@ export const AuthNotificationProvider: React.FC<AuthNotificationProviderProps> =
           // Dynamic error message for incorrect credentials or account lockout
           triggerNotification({
             type: "error",
-            title: status === 429 ? "Akun Terblokir" : "Gagal Masuk",
+            title: status === 429 ? i18n.t("auth.accountBlocked") : i18n.t("auth.signInFailed"),
             message:
               payload?.message ||
               "Kata sandi atau nama pengguna yang Anda masukkan salah. Silakan periksa kembali kredensial Anda.",
@@ -89,7 +91,7 @@ export const AuthNotificationProvider: React.FC<AuthNotificationProviderProps> =
           // Case 2: Akun Belum Aktif / Pending Approval (Kondisi Peringatan - Warning Alert)
           triggerNotification({
             type: "warning",
-            title: "Akun Belum Aktif",
+            title: i18n.t("auth.accountInactive"),
             message: payload?.message || "Akun Anda belum aktif, silakan hubungi admin.",
             actionLabel: "Lihat Instruksi Aktivasi",
             onAction: onActivationClick || (() => {}),
@@ -101,7 +103,7 @@ export const AuthNotificationProvider: React.FC<AuthNotificationProviderProps> =
           // Case 3: Berhasil Daftar Akun Baru (Kondisi Sukses - Success Alert)
           triggerNotification({
             type: "success",
-            title: "Pendaftaran Berhasil!",
+            title: i18n.t("auth.registrationOk"),
             message:
               "Akun Anda telah berhasil didaftarkan di platform LanPro. Silakan menunggu persetujuan admin untuk aktivasi.",
             duration: 8000,
@@ -112,7 +114,7 @@ export const AuthNotificationProvider: React.FC<AuthNotificationProviderProps> =
           // Fallback dynamic error alert
           triggerNotification({
             type: "error",
-            title: "Gagal Autentikasi",
+            title: i18n.t("auth.authFailed"),
             message,
             duration: 5000,
           });
@@ -154,7 +156,7 @@ export const AuthToastContainer: React.FC<AuthToastContainerProps> = ({
   const current = notifications[notifications.length - 1]; // Render latest alert
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-overlay/50 backdrop-blur-xs">
       <AnimatePresence mode="wait">
         <VelzonSweetAlertModal
           key={current.id}
@@ -453,6 +455,7 @@ const VelzonSweetAlertModal: React.FC<VelzonSweetAlertModalProps> = ({
   notification,
   onDismiss,
 }) => {
+  const { t } = useTranslation();
   const { type, title, message, actionLabel, onAction, duration } = notification;
 
   // Auto Dismiss Timer if duration provided
@@ -462,10 +465,13 @@ const VelzonSweetAlertModal: React.FC<VelzonSweetAlertModalProps> = ({
     return () => clearTimeout(timer);
   }, [duration, onDismiss]);
 
+  // Item #151 — `i18n.t()` TIDAK berlangganan perubahan bahasa. Di dalam
+  // komponen ia benar saat render pertama lalu membeku; hanya `useTranslation`
+  // yang memicu render ulang saat bahasa diganti.
   const defaultTitles = {
-    success: "Well done !",
-    error: "Oops...! Something went Wrong !",
-    warning: "Akun Belum Aktif",
+    success: t("auth.wellDone"),
+    error: t("auth.oopsWrong"),
+    warning: t("auth.accountInactive"),
   };
 
   const defaultButtonLabels = {
@@ -488,8 +494,8 @@ const VelzonSweetAlertModal: React.FC<VelzonSweetAlertModalProps> = ({
       {/* Close X Button at Top Right */}
       <button
         onClick={onDismiss}
-        className="absolute top-4 right-4 text-slate-300 hover:text-content-secondary transition-colors p-1 rounded-md"
-        title="Close"
+        className="absolute top-4 right-4 text-content-subtle hover:text-content-secondary transition-colors p-1 rounded-md"
+        title={t("ui.close")}
       >
         <X className="w-5 h-5" />
       </button>
@@ -515,7 +521,7 @@ const VelzonSweetAlertModal: React.FC<VelzonSweetAlertModalProps> = ({
           if (onAction) onAction();
           onDismiss();
         }}
-        className="px-8 py-2.5 bg-primary hover:bg-[#364574] text-white rounded-md text-sm font-medium shadow-md transition-all cursor-pointer min-w-[110px]"
+        className="px-8 py-2.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-sm font-medium shadow-md transition-all cursor-pointer min-w-[110px]"
       >
         {displayBtnLabel}
       </motion.button>

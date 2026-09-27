@@ -1,4 +1,7 @@
+import { useTranslation } from "react-i18next";
+import { StyledDropdown } from "../../components/ui/CommonComponents";
 import React from "react";
+import { katalogPeranSistem } from "../../lib/roleCatalog";
 import {
   Users,
   UserPlus,
@@ -19,10 +22,13 @@ import {
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { AppRole } from "../../types";
+import { normalkanPeran, sebagaiPeranSistem } from "../../types/roles";
 import { AdminUserPanelProps } from "./types";
 import { useAdminUsers } from "./hooks";
+import { PageHeader } from "../../components/ui/PageHeader";
 import { Button, Modal, UserAvatar } from "./styles";
 import { toast } from "sonner";
+import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { DEFAULT_PERMISSIONS as ROLE_DEFAULT_PERMISSIONS } from "../../lib/permissions";
 import {
@@ -32,6 +38,7 @@ import {
   updateUser,
   deleteUser,
 } from "./services/users.service";
+import { useMobileAction } from "../../contexts/MobileActionContext";
 
 const Input = ({ value, onChange, placeholder, type = "text", className = "", ...props }: any) => (
   <input
@@ -39,35 +46,38 @@ const Input = ({ value, onChange, placeholder, type = "text", className = "", ..
     value={value}
     onChange={onChange}
     placeholder={placeholder}
-    className={`w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium text-content-strong placeholder:text-content-subtle placeholder:font-medium focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-surface outline-none transition-all ${className}`}
+    className={`w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle placeholder:font-normal focus:ring-4 focus:ring-primary/10 focus:border-primary focus:bg-surface outline-none transition-all ${className}`}
     {...props}
   />
 );
 
 export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
+  const { t } = useTranslation();
   const { projects, tasks, masterData } = props;
+
+  // #82 — peran sistem dibaca dari Master Data, bukan ditulis di JSX.
+  const peranSistem = React.useMemo(() => katalogPeranSistem(masterData), [masterData]);
   const [isInviteModalOpen, setIsInviteModalOpen] = React.useState(false);
   const [isInviteSuccessModalOpen, setIsInviteSuccessModalOpen] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<"overview" | "settings">("overview");
+
+  // #358 — FAB navbar mobile: daftarkan aksi Tambah User
+  const { registerAction, unregisterAction } = useMobileAction();
+  React.useEffect(() => {
+    registerAction({
+      id: "users-add-person",
+      label: t("users.addUser"),
+      onClick: () => setIsInviteModalOpen(true),
+      canCreate: true,
+    });
+    return () => unregisterAction("users-add-person");
+  }, [registerAction, unregisterAction, t]);
 
   // Project Assignment State
   const [selectedAssignProjectId, setSelectedAssignProjectId] = React.useState("");
   const [selectedAssignProjectRole, setSelectedAssignProjectRole] = React.useState("member");
   const [isAssigningProject, setIsAssigningProject] = React.useState(false);
   const [selectedTeamMemberIds, setSelectedTeamMemberIds] = React.useState<string[]>([]);
-
-  // Custom confirmation modal state to avoid iframe window.confirm block
-  const [confirmModal, setConfirmModal] = React.useState<{
-    isOpen: boolean;
-    title: string;
-    message: string;
-    onConfirm: () => void;
-  }>({
-    isOpen: false,
-    title: "",
-    message: "",
-    onConfirm: () => {},
-  });
 
   // Tooltip Mouse Event Handler State
   const [hoveredTooltip, setHoveredTooltip] = React.useState<{
@@ -126,7 +136,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
 
   const handleAssignProject = async (userId: string) => {
     if (!selectedAssignProjectId) {
-      toast.error("Pilih project terlebih dahulu");
+      toast.error(t("toast.pickProjectFirst"));
       return;
     }
     setIsAssigningProject(true);
@@ -141,7 +151,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
 
       const data = await assignUserToProject(selectedAssignProjectId, props.currentUserId, payload);
       if (data.status === "success") {
-        toast.success("User berhasil ditambahkan ke Project!");
+        toast.success(t("toast.userAddedToProject"));
         setSelectedAssignProjectId("");
         setSelectedAssignProjectRole("member");
         setSelectedTeamMemberIds([]);
@@ -157,40 +167,37 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
       }
     } catch (e) {
       console.error(e);
-      toast.error("Terjadi kesalahan saat menambahkan ke project");
+      toast.error(t("toast.addToProjectFailed"));
     } finally {
       setIsAssigningProject(false);
     }
   };
 
-  const handleRemoveProject = (projectId: string, userId: string) => {
-    setConfirmModal({
-      isOpen: true,
-      title: "Keluarkan dari Project",
-      message: "Apakah Anda yakin ingin mengeluarkan user dari project ini?",
-      onConfirm: async () => {
-        setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+  const handleRemoveProject = async (projectId: string, userId: string) => {
+    const isConfirmed = await confirmDeleteAlert(
+      t("alerts.removeUserTitle"),
+      t("alerts.removeUserText")
+    );
+    if (!isConfirmed) return;
 
-        try {
-          const data = await removeUserFromProject(projectId, props.currentUserId, userId);
-          if (data.status === "success") {
-            toast.success("User berhasil dihapus dari Project");
-            if (props.onRefreshProjects) {
-              props.onRefreshProjects();
-            } else {
-              setTimeout(() => {
-                window.location.reload();
-              }, 800);
-            }
-          } else {
-            toast.error(data.message || "Gagal menghapus user dari project");
-          }
-        } catch (e) {
-          console.error(e);
-          toast.error("Terjadi kesalahan saat menghapus user dari project");
+    try {
+      const data = await removeUserFromProject(projectId, props.currentUserId, userId);
+      if (data.status === "success") {
+        showSuccessAlert(t("alerts.successTitle"), t("alerts.userRemoved"));
+        if (props.onRefreshProjects) {
+          props.onRefreshProjects();
+        } else {
+          setTimeout(() => {
+            window.location.reload();
+          }, 800);
         }
-      },
-    });
+      } else {
+        toast.error(data.message || "Gagal menghapus user dari project");
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error(t("toast.removeFromProjectFailed"));
+    }
   };
 
   const [addPeopleUsername, setAddPeopleUsername] = React.useState("");
@@ -202,15 +209,45 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
   const [addPeopleJabatan, setAddPeopleJabatan] = React.useState("");
   const [addPeopleRole, setAddPeopleRole] = React.useState<AppRole>("user");
   const [addPeopleStatus, setAddPeopleStatus] = React.useState<"approved" | "pending" | "rejected">(
-    "approved"
+    "pending"
   );
   const [successEmail, setSuccessEmail] = React.useState("");
 
   const handleAddPeople = async () => {
-    if (!addPeopleUsername || !addPeopleFullName || !addPeopleEmail || !addPeoplePassword) {
-      toast.error("Semua kolom wajib diisi");
+    /**
+     * #189 — penolakan yang TERLIHAT, bukan sekadar tidak terjadi apa-apa.
+     *
+     * Penjaga ini sudah ada sebelumnya beserta `toast.error`-nya, tetapi tidak
+     * pernah bisa berjalan: tombol "Add Person" memakai `disabled` yang
+     * mencakup keempat field kosong, sehingga `onClick` tidak pernah menyala
+     * dan toast-nya menjadi kode mati. Yang dilihat pengguna adalah tombol
+     * yang tidak bereaksi — dan tombol yang tidak bereaksi terbaca sebagai
+     * aplikasi rusak, bukan sebagai "ada yang belum Anda isi".
+     *
+     * Sekarang tombolnya menyala, penolakannya terjadi di sini, dan alasannya
+     * ditempelkan ke FIELD-nya masing-masing — pola yang sama dengan
+     * `LoginScreen.tsx`, yang juga memasangkan pesan per-field dengan satu
+     * toast ringkasan.
+     */
+    const galat: typeof addPeopleErrors = {};
+    if (!addPeopleFullName.trim()) galat.fullName = t("users.fieldRequired");
+    if (!addPeoplePassword.trim()) galat.password = t("users.fieldRequired");
+
+    // Username dan email memakai ULANG `usernameError`/`emailError` yang sudah
+    // punya tempat tampil di bawah field masing-masing. Menambah saluran pesan
+    // kedua untuk field yang sama akan memunculkan dua baris merah sekaligus.
+    const kurangUsername = !addPeopleUsername.trim();
+    const kurangEmail = !addPeopleEmail.trim();
+    if (kurangUsername) setUsernameError(t("users.fieldRequired"));
+    if (kurangEmail) setEmailError(t("users.fieldRequired"));
+
+    if (Object.keys(galat).length > 0 || kurangUsername || kurangEmail) {
+      setAddPeopleErrors(galat);
+      toast.error(t("toast.allFieldsRequired"));
       return;
     }
+
+    setAddPeopleErrors({});
 
     try {
       const normalizedUsername = addPeopleUsername.trim().toLowerCase().replace(/\s+/g, "_");
@@ -238,6 +275,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
       setSuccessEmail(addPeopleEmail);
       setIsInviteModalOpen(false);
       setIsInviteSuccessModalOpen(true);
+      void fetchUsers();
 
       setAddPeopleUsername("");
       setAddPeopleFullName("");
@@ -247,10 +285,10 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
       setAddPeopleDepartment("");
       setAddPeopleJabatan("");
       setAddPeopleRole("user");
-      setAddPeopleStatus("approved");
+      setAddPeopleStatus("pending");
     } catch (e) {
       console.error("Error adding user:", e);
-      toast.error("Failed to add user");
+      toast.error(t("toast.addUserFailed"));
     }
   };
 
@@ -268,10 +306,13 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
     setSortField,
     sortOrder,
     setSortOrder,
+    // Item #160 — `setFilterRole`/`setFilterStatus` tidak lagi diambil: nol
+    // pemakai sesudah dua dropdown-nya dihapus. Nilainya sendiri TETAP diambil
+    // karena masih jadi kebergantungan efek pembersih pilihan di bawah; hook
+    // `useAdminUsers` sengaja tidak disentuh supaya saringannya bisa dipasang
+    // kembali tanpa membongkar apa pun.
     filterRole,
-    setFilterRole,
     filterStatus,
-    setFilterStatus,
     handleDeleteUser,
     filteredUsers,
     totalPages,
@@ -295,6 +336,21 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
   // Point 5: Real-time validation errors & Password Strength Indicator
   const [usernameError, setUsernameError] = React.useState("");
   const [emailError, setEmailError] = React.useState("");
+
+  /**
+   * #189 — pesan "wajib diisi" per field pada form Add Person.
+   *
+   * `usernameError`/`emailError` di atas hanya menangani format dan duplikat.
+   * Tidak ada satu pun yang memberi tahu bahwa sebuah field WAJIB diisi, dan
+   * itulah yang dilaporkan: membuka modal lalu langsung menekan "Add Person"
+   * tidak menghasilkan apa-apa. Diam, bukan menolak.
+   */
+  const [addPeopleErrors, setAddPeopleErrors] = React.useState<{
+    username?: string;
+    fullName?: string;
+    email?: string;
+    password?: string;
+  }>({});
   const [passwordStrength, setPasswordStrength] = React.useState<"weak" | "medium" | "strong" | "">(
     ""
   );
@@ -308,7 +364,9 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
   const handleUsernameChange = (val: string) => {
     setAddPeopleUsername(val);
     if (!val) {
-      setUsernameError("Username wajib diisi");
+      // #189 — lewat i18n. Sebelumnya string harfiah, sehingga pengguna
+      // berbahasa Inggris melihat pesan Indonesia di form ini saja.
+      setUsernameError(t("users.fieldRequired"));
       return;
     }
     const clean = val.trim().toLowerCase();
@@ -328,7 +386,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
   const handleEmailChange = (val: string) => {
     setAddPeopleEmail(val);
     if (!val) {
-      setEmailError("Email wajib diisi");
+      setEmailError(t("users.fieldRequired"));
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -371,7 +429,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
   const handleExportCSV = () => {
     try {
       if (filteredUsers.length === 0) {
-        toast.error("Tidak ada data user untuk di-export");
+        toast.error(t("toast.noUserToExport"));
         return;
       }
 
@@ -418,31 +476,31 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
       link.click();
       document.body.removeChild(link);
 
-      toast.success(`Berhasil meng-export ${filteredUsers.length} user ke CSV!`);
+      toast.success(t("toast.usersExported", { count: filteredUsers.length }));
     } catch (e) {
       console.error(e);
-      toast.error("Gagal meng-export CSV");
+      toast.error(t("toast.csvExportFailed"));
     }
   };
 
   // Point 1: Bulk Action executor calling existing backend PUT/DELETE
   const handleBulkAction = async (action: "approve" | "reject" | "delete" | AppRole) => {
     if (selectedUserIds.length === 0) {
-      toast.error("Pilih setidaknya satu user");
+      toast.error(t("toast.pickAtLeastOneUser"));
       return;
     }
 
     if (action === "delete") {
       const hasAdmins = filteredUsers.some(
-        (u) => selectedUserIds.includes(u.id) && u.role === "admin"
+        (u) => selectedUserIds.includes(u.id) && normalkanPeran(u.role) === "admin"
       );
       if (hasAdmins) {
-        toast.error("Tidak dapat menghapus user dengan role Admin secara massal");
+        toast.error(t("toast.cannotBulkDeleteAdmin"));
         return;
       }
       const hasSelf = selectedUserIds.includes(props.currentUserId || "");
       if (hasSelf) {
-        toast.error("Tidak dapat menghapus akun Anda sendiri secara massal");
+        toast.error(t("toast.cannotBulkDeleteSelf"));
         return;
       }
     }
@@ -477,12 +535,19 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
         })
       );
 
-      toast.success(`Aksi Massal Selesai! Berhasil: ${successCount}, Gagal: ${failCount}`);
+      if (action === "delete") {
+        showSuccessAlert(
+          t("alerts.successTitle"),
+          t("alerts.bulkDeleteDone", { count: successCount })
+        );
+      } else {
+        toast.success(t("toast.bulkActionDone", { sukses: successCount, gagal: failCount }));
+      }
       setSelectedUserIds([]);
       fetchUsers();
     } catch (e) {
       console.error(e);
-      toast.error("Gagal menjalankan aksi massal");
+      toast.error(t("toast.bulkActionFailed"));
     } finally {
       setIsBulkActionPending(false);
     }
@@ -496,93 +561,39 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
   const totalUsersCount = users.length;
   const approvedUsersCount = users.filter((u) => u.status === "approved").length;
   const pendingUsersCount = users.filter((u) => u.status === "pending").length;
-  const adminUsersCount = users.filter((u) => u.role === "admin").length;
+  // #190 — lewat `normalkanPeran()` seperti diwajibkan `types/roles.ts`.
+  // Hitungan inilah yang tampil sebagai kartu "ADMINISTRATOR: N"; dengan
+  // perbandingan mentah, akun yang perannya tersimpan `Admin` tidak terhitung
+  // dan kartunya menunjukkan angka yang lebih kecil dari kenyataan.
+  const adminUsersCount = users.filter((u) => normalkanPeran(u.role) === "admin").length;
 
   if (loading) {
-    return <div className="p-8 text-center text-content-muted animate-pulse">Loading users...</div>;
+    return (
+      <div className="p-8 text-center text-content-muted animate-pulse">{t("users.loading")}</div>
+    );
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-surface-sunken w-full h-full">
-      <div className="flex-1 overflow-y-auto p-3 md:p-6 w-full animate-in fade-in duration-700">
-        <div className="flex flex-col space-y-6 min-h-full">
-          {/* Header & Controls */}
-          <div className="bg-surface rounded-lg shadow-soft border border-border-subtle/80 p-4 shrink-0">
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-blue-50/80 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center border border-blue-100/60 dark:border-blue-900/40 shrink-0">
-                  <Users className="w-4.5 h-4.5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-medium text-content-strong tracking-tight leading-none">
-                    User Management
-                  </h3>
-                  <p className="text-content-subtle font-medium text-xs sm:text-[11px] mt-1">
-                    Manage user access, roles, and permissions.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleExportCSV}
-                  className="bg-surface-sunken hover:bg-surface-muted text-content-body border border-border-subtle hover:border-slate-300 font-medium py-1.5 px-3 rounded text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-[0.98] shadow-2xs h-8.5"
-                >
-                  <Download className="w-3.5 h-3.5 text-content-muted" /> Export CSV
-                </button>
-                <Button
-                  onClick={() => setIsInviteModalOpen(true)}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1.5 px-3 rounded text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-[0.98] shadow-soft h-8.5"
-                >
-                  <UserPlus className="w-3.5 h-3.5" /> Add User
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-subtle" />
-                <input
-                  type="text"
-                  placeholder="Search by name, username, or email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 bg-surface-sunken/50 border border-border-subtle/80 rounded focus:bg-surface focus:ring-1 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none text-xs h-8.5 font-medium text-content-strong placeholder:text-content-subtle"
-                />
-              </div>
-              <select
-                value={filterRole}
-                onChange={(e) => setFilterRole(e.target.value)}
-                className="px-3 py-1.5 bg-surface-sunken/50 border border-border-subtle/80 rounded focus:bg-surface focus:ring-1 focus:ring-indigo-500/10 outline-none text-content-body font-medium text-xs cursor-pointer h-8.5"
-              >
-                <option value="all">All Roles</option>
-                <option value="admin">Admin</option>
-                <option value="head">Head</option>
-                <option value="manager">Manager</option>
-                <option value="user">User</option>
-                <option value="viewer">Viewer</option>
-              </select>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-3 py-1.5 bg-surface-sunken/50 border border-border-subtle/80 rounded focus:bg-surface focus:ring-1 focus:ring-indigo-500/10 outline-none text-content-body font-medium text-xs cursor-pointer h-8.5"
-              >
-                <option value="all">All Status</option>
-                <option value="approved">Approved</option>
-                <option value="pending">Pending</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </div>
-          </div>
-
+    <div className="flex-1 flex flex-col overflow-hidden bg-surface-muted w-full h-full">
+      <PageHeader
+        className="shrink-0"
+        breadcrumbs={[
+          { label: t("users.breadcrumbGroup", "ADMINISTRATION") },
+          { label: t("users.title"), current: true },
+        ]}
+        title={t("users.title")}
+      />
+      <div className="flex-1 overflow-y-auto px-3 md:px-5 pt-3 md:pt-4 pb-3 md:pb-5 w-full">
+        <div className="flex flex-col space-y-4 md:space-y-6 min-h-full">
           {/* Statistics Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
             <div className="bg-surface p-3.5 rounded-lg border border-border-subtle/60 shadow-2xs flex items-center gap-3 transition-all hover:shadow-xs">
-              <div className="w-9 h-9 bg-blue-50/80 text-blue-600 rounded-lg flex items-center justify-center border border-blue-100/40 shrink-0">
+              <div className="w-9 h-9 bg-blue-500/10 text-blue-600 rounded-lg flex items-center justify-center border border-blue-500/30 shrink-0">
                 <Users className="w-4.5 h-4.5" />
               </div>
               <div>
-                <div className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
-                  Total User
+                <div className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+                  {t("users.totalUser")}
                 </div>
                 <div className="text-lg font-medium text-content-strong leading-none mt-1">
                   {totalUsersCount}
@@ -590,12 +601,12 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               </div>
             </div>
             <div className="bg-surface p-3.5 rounded-lg border border-border-subtle/60 shadow-2xs flex items-center gap-3 transition-all hover:shadow-xs">
-              <div className="w-9 h-9 bg-emerald-50/80 text-emerald-600 rounded-lg flex items-center justify-center border border-emerald-100/40 shrink-0">
+              <div className="w-9 h-9 bg-emerald-500/10 text-emerald-600 rounded-lg flex items-center justify-center border border-emerald-500/30 shrink-0">
                 <CheckCircle className="w-4.5 h-4.5" />
               </div>
               <div>
-                <div className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
-                  Disetujui
+                <div className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+                  {t("users.approved")}
                 </div>
                 <div className="text-lg font-medium text-content-strong leading-none mt-1">
                   {approvedUsersCount}
@@ -603,12 +614,12 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               </div>
             </div>
             <div className="bg-surface p-3.5 rounded-lg border border-border-subtle/60 shadow-2xs flex items-center gap-3 transition-all hover:shadow-xs">
-              <div className="w-9 h-9 bg-amber-50/80 text-amber-500 rounded-lg flex items-center justify-center border border-amber-100/40 shrink-0">
+              <div className="w-9 h-9 bg-amber-500/10 text-amber-500 rounded-lg flex items-center justify-center border border-amber-500/30 shrink-0">
                 <Clock className="w-4.5 h-4.5" />
               </div>
               <div>
-                <div className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
-                  Menunggu
+                <div className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+                  {t("users.pending")}
                 </div>
                 <div className="text-lg font-medium text-content-strong leading-none mt-1">
                   {pendingUsersCount}
@@ -616,12 +627,12 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               </div>
             </div>
             <div className="bg-surface p-3.5 rounded-lg border border-border-subtle/60 shadow-2xs flex items-center gap-3 transition-all hover:shadow-xs">
-              <div className="w-9 h-9 bg-rose-50/80 text-rose-600 rounded-lg flex items-center justify-center border border-rose-100/40 shrink-0">
+              <div className="w-9 h-9 bg-rose-500/10 text-rose-600 rounded-lg flex items-center justify-center border border-rose-500/30 shrink-0">
                 <Shield className="w-4.5 h-4.5" />
               </div>
               <div>
-                <div className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
-                  Administrator
+                <div className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+                  {t("users.administrator")}
                 </div>
                 <div className="text-lg font-medium text-content-strong leading-none mt-1">
                   {adminUsersCount}
@@ -632,81 +643,133 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
 
           {/* User List */}
           <div className="bg-surface rounded-xl shadow-soft border border-border-subtle/50 overflow-hidden flex-1 flex flex-col">
+            <div className="px-4 py-3 border-b border-border-subtle/80 flex flex-wrap items-center justify-end gap-2 shrink-0">
+              <div className="relative min-w-0 flex-1 lg:flex-none lg:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-subtle pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder={t("users.searchPlaceholder")}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-content-strong shadow-2xs font-medium"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleExportCSV}
+                title={t("users.exportCsv")}
+                className="btn-animation waves-effect waves-light bg-surface border border-border-subtle text-content-strong hover:bg-surface-sunken h-9 px-2.5 sm:px-3.5 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
+              >
+                <Download className="w-3.5 h-3.5 text-content-muted shrink-0" />
+                <span className="hidden sm:inline">{t("users.exportCsv")}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsInviteModalOpen(true)}
+                title={t("users.addUser")}
+                className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
+              >
+                <UserPlus className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden sm:inline">{t("users.addUser")}</span>
+              </button>
+            </div>
             {selectedUserIds.length > 0 && (
-              <div className="bg-indigo-50/80 border-b border-indigo-100 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-top duration-300">
+              <div className="bg-primary/10 border-b border-primary/30 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-medium flex items-center justify-center">
+                  <span className="w-6 h-6 rounded-full bg-primary-surface text-content-inverse text-xs font-medium flex items-center justify-center">
                     {selectedUserIds.length}
                   </span>
-                  <span className="text-sm font-medium text-indigo-950">
-                    pengguna terpilih untuk Aksi Massal
+                  <span className="text-sm font-medium text-content-strong">
+                    {t("users.selectedForBulk")}
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     onClick={() => handleBulkAction("approve")}
                     disabled={isBulkActionPending}
-                    className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-content-inverse text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
                   >
-                    <CheckCircle className="w-3.5 h-3.5" /> Setujui
+                    <CheckCircle className="w-3.5 h-3.5" /> {t("users.approve")}
                   </button>
                   <button
                     onClick={() => handleBulkAction("reject")}
                     disabled={isBulkActionPending}
-                    className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-content-inverse text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
                   >
-                    <Clock className="w-3.5 h-3.5" /> Pending/Tolak
+                    <Clock className="w-3.5 h-3.5" /> {t("users.pendingReject")}
                   </button>
 
                   <div className="relative inline-block text-left">
-                    <select
+                    <StyledDropdown
+                      value=""
                       disabled={isBulkActionPending}
-                      onChange={(e) => {
-                        if (e.target.value) {
-                          handleBulkAction(e.target.value as AppRole);
-                          e.target.value = "";
-                        }
+                      onChange={(val: string) => {
+                        if (val) handleBulkAction(val as AppRole);
                       }}
-                      className="px-3.5 py-1.5 bg-surface border border-border-subtle text-slate-750 text-xs font-medium rounded-lg shadow-2xs focus:ring-2 focus:ring-indigo-500/20 outline-none cursor-pointer"
-                    >
-                      <option value="">Ubah Role Massal...</option>
-                      <option value="admin">Administrator</option>
-                      <option value="head">Department Head</option>
-                      <option value="manager">Project Manager</option>
-                      <option value="user">Standard User</option>
-                      <option value="viewer">Observer</option>
-                    </select>
+                      options={[
+                        {
+                          id: "",
+                          label: t("bulkActions.changeRole"),
+                          icon: "Users",
+                          color: "#6366F1",
+                        },
+                        ...peranSistem.map((p) => ({
+                          id: p.code,
+                          label: p.label,
+                          icon: p.icon || undefined,
+                          color: p.color || undefined,
+                        })),
+                      ]}
+                      type="project_role"
+                      masterData={masterData}
+                      buttonClassName="px-3.5 py-1.5 bg-surface border border-border-subtle text-xs font-medium rounded-lg shadow-2xs"
+                    />
                   </div>
 
                   <button
-                    onClick={() => {
-                      setConfirmModal({
-                        isOpen: true,
-                        title: "Hapus Pengguna Massal",
-                        message: `Apakah Anda yakin ingin menghapus ${selectedUserIds.length} pengguna terpilih secara massal? Tindakan ini tidak dapat dibatalkan.`,
-                        onConfirm: () => handleBulkAction("delete"),
-                      });
+                    onClick={async () => {
+                      const hasAdmins = filteredUsers.some(
+                        (u) => selectedUserIds.includes(u.id) && normalkanPeran(u.role) === "admin"
+                      );
+                      if (hasAdmins) {
+                        toast.error(t("toast.cannotBulkDeleteAdmin"));
+                        return;
+                      }
+                      const hasSelf = selectedUserIds.includes(props.currentUserId || "");
+                      if (hasSelf) {
+                        toast.error(t("toast.cannotBulkDeleteSelf"));
+                        return;
+                      }
+
+                      const isConfirmed = await confirmDeleteAlert(
+                        t("alerts.bulkDeleteUsersTitle"),
+                        t("alerts.bulkDeleteUsersText", { count: selectedUserIds.length })
+                      );
+                      if (!isConfirmed) return;
+
+                      await handleBulkAction("delete");
                     }}
                     disabled={isBulkActionPending}
-                    className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-content-inverse text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
                   >
-                    <Trash2 className="w-3.5 h-3.5" /> Hapus Massal
+                    <Trash2 className="w-3.5 h-3.5" /> {t("users.bulkDelete")}
                   </button>
                   <button
                     onClick={() => setSelectedUserIds([])}
                     disabled={isBulkActionPending}
-                    className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-705 text-xs font-medium rounded-lg transition-all cursor-pointer"
+                    className="px-3 py-1.5 bg-surface-strong hover:bg-surface-marker text-xs font-medium rounded-lg transition-all cursor-pointer"
                   >
-                    Batal
+                    {t("users.cancel")}
                   </button>
                 </div>
               </div>
             )}
 
-            <div className="overflow-x-auto flex-1">
+            {/* Desktop table — #309: kartu di bawah sm */}
+            <div className="hidden sm:block overflow-x-auto flex-1">
               <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
                 <thead>
-                  <tr className="bg-surface-sunken/80 border-b border-border-faint text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider whitespace-nowrap">
+                  <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs font-normal text-content-subtle whitespace-nowrap">
                     <th className="py-3.5 px-4 text-center w-12">
                       <input
                         type="checkbox"
@@ -728,7 +791,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                             );
                           }
                         }}
-                        className="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer"
+                        className="w-4 h-4 rounded text-primary border-border-subtle focus:ring-primary cursor-pointer"
                       />
                     </th>
                     <th
@@ -736,8 +799,8 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       className="py-3.5 px-4 w-60 cursor-pointer hover:bg-surface-muted/80 transition-colors select-none group"
                     >
                       <div className="flex items-center gap-1.5">
-                        <span>User</span>
-                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-indigo-600">
+                        <span>{t("users.user")}</span>
+                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-primary">
                           {sortField === "name" ? (sortOrder === "asc" ? "▲" : "▼") : "↕"}
                         </span>
                       </div>
@@ -747,20 +810,20 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       className="py-3.5 px-4 w-60 cursor-pointer hover:bg-surface-muted/80 transition-colors select-none group"
                     >
                       <div className="flex items-center gap-1.5">
-                        <span>Department / Position</span>
-                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-indigo-600">
+                        <span>{t("users.deptPosition")}</span>
+                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-primary">
                           {sortField === "department" ? (sortOrder === "asc" ? "▲" : "▼") : "↕"}
                         </span>
                       </div>
                     </th>
-                    <th className="py-3.5 px-4 w-40">Proyek & Tugas</th>
+                    <th className="py-3.5 px-4 w-40">{t("users.projectsTasks")}</th>
                     <th
                       onClick={() => handleSort("role")}
                       className="py-3.5 px-4 w-28 cursor-pointer hover:bg-surface-muted/80 transition-colors select-none group"
                     >
                       <div className="flex items-center gap-1.5">
-                        <span>Role</span>
-                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-indigo-600">
+                        <span>{t("users.role")}</span>
+                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-primary">
                           {sortField === "role" ? (sortOrder === "asc" ? "▲" : "▼") : "↕"}
                         </span>
                       </div>
@@ -770,13 +833,13 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       className="py-3.5 px-4 w-28 text-center cursor-pointer hover:bg-surface-muted/80 transition-colors select-none group"
                     >
                       <div className="flex items-center justify-center gap-1.5">
-                        <span>Status</span>
-                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-indigo-600">
+                        <span>{t("users.status")}</span>
+                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-primary">
                           {sortField === "status" ? (sortOrder === "asc" ? "▲" : "▼") : "↕"}
                         </span>
                       </div>
                     </th>
-                    <th className="py-3.5 px-4 w-28 text-center">Action</th>
+                    <th className="py-3.5 px-4 w-28 text-center">{t("users.action")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-faint/60">
@@ -799,7 +862,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     ).length;
 
                     return (
-                      <tr key={user.id} className="hover:bg-indigo-50/30 transition-colors group">
+                      <tr key={user.id} className="hover:bg-primary/10 transition-colors group">
                         <td className="py-3.5 px-4 text-center">
                           <input
                             type="checkbox"
@@ -811,7 +874,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                 setSelectedUserIds(selectedUserIds.filter((id) => id !== user.id));
                               }
                             }}
-                            className="w-4 h-4 rounded text-indigo-650 border-slate-300 focus:ring-indigo-500 cursor-pointer"
+                            className="w-4 h-4 rounded border-border-subtle focus:ring-primary cursor-pointer"
                           />
                         </td>
                         <td
@@ -823,7 +886,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           <div className="flex items-center gap-3.5">
                             <UserAvatar user={user} className="w-9 h-9 text-sm shrink-0" />
                             <div>
-                              <div className="font-medium text-content-strong text-xs group-hover:text-indigo-600 transition-colors">
+                              <div className="font-medium text-content-strong text-xs group-hover:text-primary transition-colors">
                                 {user?.displayName || user?.username}
                               </div>
                               <div className="text-xs sm:text-[11px] text-content-muted">
@@ -831,7 +894,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                               </div>
                               {user.phone && (
                                 <div className="text-xs sm:text-[10px] font-medium text-emerald-600 flex items-center gap-1 mt-0.5">
-                                  <span>WA/HP:</span>
+                                  <span>{t("users.waPhone")}</span>
                                   <span>{user.phone}</span>
                                 </div>
                               )}
@@ -843,7 +906,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                             <span className="text-xs font-medium text-content-body">
                               {user.department ? getDepartmentName(user.department) : "-"}
                             </span>
-                            <span className="text-xs sm:text-[10px] text-content-muted uppercase tracking-widest">
+                            <span className="text-xs sm:text-[10px] text-content-muted uppercase tracking-normal">
                               {user.position ? getPositionName(user.position) : "-"}
                             </span>
                           </div>
@@ -855,12 +918,14 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                 className={cn(
                                   "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs sm:text-[10px] font-medium border transition-colors",
                                   userProjectsCount > 0
-                                    ? "bg-indigo-50/65 text-indigo-700 border-indigo-100/70"
+                                    ? "bg-primary/10 text-primary border-primary/30"
                                     : "bg-surface-sunken/50 text-content-subtle border-border-faint"
                                 )}
                               >
-                                <Layout className="w-3 h-3 text-indigo-500" />
-                                <span>{userProjectsCount} Proyek</span>
+                                <Layout className="w-3 h-3 text-primary" />
+                                <span>
+                                  {t("users.projectsCount", { count: userProjectsCount })}
+                                </span>
                               </span>
                             </div>
                             <div className="flex items-center gap-2">
@@ -868,12 +933,12 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                 className={cn(
                                   "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs sm:text-[10px] font-medium border transition-colors",
                                   userTasksCount > 0
-                                    ? "bg-violet-50/65 text-violet-700 border-violet-100/70"
+                                    ? "bg-primary/10 text-primary border-primary/30"
                                     : "bg-surface-sunken/50 text-content-subtle border-border-faint"
                                 )}
                               >
-                                <CheckCircle className="w-3 h-3 text-violet-500" />
-                                <span>{userTasksCount} Tugas</span>
+                                <CheckCircle className="w-3 h-3 text-primary" />
+                                <span>{t("users.tasksCount", { count: userTasksCount })}</span>
                               </span>
                             </div>
                           </div>
@@ -881,14 +946,12 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                         <td className="py-3.5 px-4">
                           <span
                             className={cn(
-                              "inline-flex font-medium text-xs sm:text-[11px] sm:text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-md border",
-                              user.role === "admin"
-                                ? "bg-rose-50 text-rose-600 border-rose-200"
-                                : user.role === "head"
-                                  ? "bg-purple-50 text-purple-600 border-purple-200"
-                                  : user.role === "manager"
-                                    ? "bg-blue-50 text-blue-600 border-blue-200"
-                                    : "bg-surface-sunken text-content-secondary border-border-subtle"
+                              "inline-flex font-normal text-xs sm:text-[11px] sm:text-[9px] tracking-normal uppercase px-2 py-0.5 rounded-md border",
+                              normalkanPeran(user.role) === "admin"
+                                ? "bg-rose-500/10 text-rose-600 border-rose-500/30"
+                                : normalkanPeran(user.role) === "head"
+                                  ? "bg-primary/10 text-primary border-primary/30"
+                                  : "bg-surface-sunken text-content-secondary border-border-subtle"
                             )}
                           >
                             {user.role}
@@ -898,22 +961,22 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           <div className="flex justify-center">
                             {user.status === "approved" ? (
                               <div
-                                className="w-7 h-7 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500"
-                                title="Disetujui"
+                                className="w-7 h-7 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500"
+                                title={t("users.approved")}
                               >
                                 <CheckCircle className="w-3.5 h-3.5" />
                               </div>
                             ) : user.status === "pending" ? (
                               <div
-                                className="w-7 h-7 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 animate-pulse"
-                                title="Menunggu"
+                                className="w-7 h-7 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 animate-pulse"
+                                title={t("users.pending")}
                               >
                                 <Clock className="w-3.5 h-3.5" />
                               </div>
                             ) : (
                               <div
-                                className="w-7 h-7 rounded-full bg-rose-50 flex items-center justify-center text-rose-500"
-                                title="Ditolak"
+                                className="w-7 h-7 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-500"
+                                title={t("users.rejected")}
                               >
                                 <XCircle className="w-3.5 h-3.5" />
                               </div>
@@ -929,39 +992,65 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                               // dan fungsinya sudah digantikan UserDetailView yang lebih
                               // lengkap. Modal beserta cabangnya ikut dihapus.
                               onClick={() => props.onSelectUserForDetail?.(user)}
-                              className="p-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white border border-indigo-200/80 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer font-medium flex items-center justify-center gap-1"
-                              title="Detail Pengguna"
+                              className="p-1.5 bg-primary/10 hover:bg-primary-surface text-primary hover:text-content-inverse border border-primary/30 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer font-medium flex items-center justify-center gap-1"
+                              title={t("users.userDetail")}
                             >
                               <UserCog className="w-3.5 h-3.5 shrink-0" />
                             </button>
-                            <button
-                              onClick={() => {
-                                setConfirmModal({
-                                  isOpen: true,
-                                  title: "Hapus Pengguna",
-                                  message: `Apakah Anda yakin ingin menghapus pengguna ${user?.displayName || user?.username} secara permanen?`,
-                                  onConfirm: async () => {
-                                    setConfirmModal((prev) => ({ ...prev, isOpen: false }));
-                                    try {
-                                      const data = await deleteUser(user.id);
-                                      if (data.status !== "success") throw new Error(data.message);
-                                      toast.success("User deleted successfully");
-                                      fetchUsers(); // Refresh
-                                    } catch (error: any) {
-                                      toast.error(
-                                        "Failed to delete user: " + (error.message || "Error")
-                                      );
-                                      console.error(error);
-                                    }
-                                  },
-                                });
-                              }}
-                              disabled={user.role === "admin"}
-                              className="p-1.5 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200/80 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-1"
-                              title="Hapus Pengguna"
-                            >
-                              <Trash2 className="w-3.5 h-3.5 shrink-0" />
-                            </button>
+                            {(() => {
+                              /**
+                               * #190 — dua penjaga, dan yang pertama memperbaiki
+                               * penjaga yang SUDAH ADA tapi diam-diam tidak berlaku.
+                               *
+                               * Sebelumnya: `disabled={user.role === "admin"}`.
+                               * Perbandingan itu peka huruf besar-kecil, sedangkan
+                               * `types/roles.ts` mencatat data lama menyimpan campuran
+                               * `Admin`/`admin`/`ADMIN` dan mewajibkan SETIAP pembanding
+                               * peran lewat `normalkanPeran()` lebih dulu. Pada baris yang
+                               * perannya tersimpan `Admin`, penjaga lama menghasilkan
+                               * `false` — tombolnya aktif, dan dialog hapus muncul persis
+                               * seperti yang dilaporkan. Penjaganya terlihat ada di kode
+                               * tetapi tidak bekerja pada data yang justru paling perlu
+                               * dilindungi.
+                               *
+                               * Penjaga kedua baru: baris akun yang SEDANG LOGIN. Barisnya
+                               * berada di urutan teratas tabel, jadi salah klik pada baris
+                               * pertama adalah kesalahan yang paling mungkin terjadi. Jalur
+                               * hapus MASSAL sudah menolak keduanya sejak dulu
+                               * (`cannotBulkDeleteAdmin`, `cannotBulkDeleteSelf`); tombol
+                               * per baris ini satu-satunya yang tertinggal.
+                               *
+                               * `id` DAN `uid` sama-sama dibandingkan sebab keduanya dipakai
+                               * sebagai identitas di repo ini, dan membandingkan salah satu
+                               * saja membuat penjaganya meleset tanpa suara.
+                               */
+                              const adalahAdmin = normalkanPeran(user.role) === "admin";
+                              const adalahAkunSendiri =
+                                !!props.currentUserId &&
+                                [user.id, user.uid]
+                                  .filter(Boolean)
+                                  .map(String)
+                                  .includes(String(props.currentUserId));
+                              const terkunci = adalahAdmin || adalahAkunSendiri;
+                              return (
+                                <button
+                                  onClick={() => handleDeleteUser(user)}
+                                  disabled={terkunci}
+                                  className="p-1.5 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-1"
+                                  // Tombol mati tanpa penjelasan terbaca sebagai aplikasi
+                                  // rusak. Alasannya disebutkan di tempat kursor sudah berada.
+                                  title={
+                                    adalahAkunSendiri
+                                      ? t("users.cannotDeleteSelf")
+                                      : adalahAdmin
+                                        ? t("toast.cannotDeleteAdmin")
+                                        : t("users.deleteUser")
+                                  }
+                                >
+                                  <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                                </button>
+                              );
+                            })()}
                           </div>
                         </td>
                       </tr>
@@ -970,7 +1059,15 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   {paginatedUsers.length === 0 && (
                     <tr>
                       <td colSpan={7} className="py-12 text-center text-content-muted">
-                        No users found matching your criteria.
+                        <p>{t("users.empty")}</p>
+                        <button
+                          type="button"
+                          onClick={() => setIsInviteModalOpen(true)}
+                          className="mt-3 inline-flex items-center gap-1.5 min-h-11 px-4 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium cursor-pointer"
+                        >
+                          <UserPlus className="w-3.5 h-3.5" />
+                          {t("users.addUser")}
+                        </button>
                       </td>
                     </tr>
                   )}
@@ -978,29 +1075,184 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               </ResponsiveTable>
             </div>
 
+            {/* #309 — kartu pengguna di bawah sm */}
+            <div className="sm:hidden flex-1 overflow-y-auto divide-y divide-border-subtle/60 min-h-[200px]">
+              {paginatedUsers.length === 0 ? (
+                <div className="py-12 text-center text-content-muted text-sm space-y-3">
+                  <p>{t("users.empty")}</p>
+                  <button
+                    type="button"
+                    onClick={() => setIsInviteModalOpen(true)}
+                    className="inline-flex items-center gap-1.5 min-h-11 px-4 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium cursor-pointer"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" />
+                    {t("users.addUser")}
+                  </button>
+                </div>
+              ) : (
+                paginatedUsers.map((user) => {
+                  const userProjectsCount = (projects || []).filter(
+                    (p) =>
+                      (p.members &&
+                        (p.members.includes(user.id) || p.members.includes(user.uid))) ||
+                      p.ownerId === user.id ||
+                      p.ownerId === user.uid
+                  ).length;
+                  const userTasksCount = (tasks || []).filter(
+                    (t) =>
+                      t.assigneeId === user.id ||
+                      t.assigneeId === user.uid ||
+                      (t.assignees &&
+                        (t.assignees.includes(user.id) || t.assignees.includes(user.uid))) ||
+                      t.assigneeEmail === user?.email
+                  ).length;
+                  const adalahAdmin = normalkanPeran(user.role) === "admin";
+                  const adalahAkunSendiri =
+                    !!props.currentUserId &&
+                    [user.id, user.uid]
+                      .filter(Boolean)
+                      .map(String)
+                      .includes(String(props.currentUserId));
+                  const terkunci = adalahAdmin || adalahAkunSendiri;
+                  const isSelected = selectedUserIds.includes(user.id);
+
+                  return (
+                    <div
+                      key={user.id}
+                      className={cn(
+                        "p-3.5 flex flex-col gap-2.5 bg-surface",
+                        isSelected && "bg-primary/5"
+                      )}
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedUserIds([...selectedUserIds, user.id]);
+                            } else {
+                              setSelectedUserIds(selectedUserIds.filter((id) => id !== user.id));
+                            }
+                          }}
+                          className="mt-1 w-4 h-4 rounded border-border-subtle focus:ring-primary cursor-pointer shrink-0"
+                        />
+                        <button
+                          type="button"
+                          className="flex items-center gap-2.5 min-w-0 flex-1 text-left cursor-pointer"
+                          onClick={() => props.onSelectUserForDetail?.(user)}
+                        >
+                          <UserAvatar user={user} className="w-9 h-9 text-sm shrink-0" />
+                          <div className="min-w-0">
+                            <div className="font-medium text-content-strong text-sm truncate">
+                              {user?.displayName || user?.username}
+                            </div>
+                            <div className="text-xs text-content-muted truncate">
+                              {user?.email || "—"}
+                            </div>
+                          </div>
+                        </button>
+                        <div
+                          className="shrink-0"
+                          title={
+                            user.status === "approved"
+                              ? t("users.approved")
+                              : user.status === "pending"
+                                ? t("users.pending")
+                                : t("users.rejected")
+                          }
+                        >
+                          {user.status === "approved" ? (
+                            <CheckCircle className="w-4 h-4 text-emerald-500" />
+                          ) : user.status === "pending" ? (
+                            <Clock className="w-4 h-4 text-amber-500 animate-pulse" />
+                          ) : (
+                            <XCircle className="w-4 h-4 text-rose-500" />
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1.5 pl-7 text-[10px]">
+                        <span
+                          className={cn(
+                            "inline-flex font-normal tracking-normal uppercase px-2 py-0.5 rounded-md border",
+                            adalahAdmin
+                              ? "bg-rose-500/10 text-rose-600 border-rose-500/30"
+                              : "bg-surface-sunken text-content-secondary border-border-subtle"
+                          )}
+                        >
+                          {user.role}
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-border-faint bg-surface-sunken/50 text-content-muted">
+                          <Layout className="w-3 h-3" />
+                          {t("users.projectsCount", { count: userProjectsCount })}
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-border-faint bg-surface-sunken/50 text-content-muted">
+                          <CheckCircle className="w-3 h-3" />
+                          {t("users.tasksCount", { count: userTasksCount })}
+                        </span>
+                        <span className="text-content-muted px-1">
+                          {user.department ? getDepartmentName(user.department) : "—"}
+                          {user.position ? ` · ${getPositionName(user.position)}` : ""}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2 pl-7">
+                        <button
+                          type="button"
+                          onClick={() => props.onSelectUserForDetail?.(user)}
+                          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-primary bg-primary/10 border border-primary/30 rounded-lg cursor-pointer"
+                        >
+                          <UserCog className="w-3.5 h-3.5" />
+                          {t("users.userDetail")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteUser(user)}
+                          disabled={terkunci}
+                          title={
+                            adalahAkunSendiri
+                              ? t("users.cannotDeleteSelf")
+                              : adalahAdmin
+                                ? t("toast.cannotDeleteAdmin")
+                                : t("users.deleteUser")
+                          }
+                          className="flex items-center justify-center px-3 py-2 text-xs font-medium text-rose-600 bg-rose-500/10 border border-rose-500/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
             {/* Enterprise DataTable Pagination & Entries Controls */}
             <div className="border-t border-border-faint p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface-sunken/50 mt-auto">
               <div className="flex items-center gap-3">
-                <span className="text-xs font-medium text-content-muted">
-                  Showing {filteredUsers.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} to{" "}
-                  {Math.min(currentPage * itemsPerPage, filteredUsers.length)} of{" "}
-                  {filteredUsers.length} entries
+                <span className="text-xs sm:text-[10px] font-normal text-content-muted">
+                  {t("common.showing")}{" "}
+                  {filteredUsers.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
+                  {t("common.to")} {Math.min(currentPage * itemsPerPage, filteredUsers.length)}{" "}
+                  {t("common.of")} {filteredUsers.length} {t("common.entries")}
                 </span>
-                <div className="flex items-center gap-1.5 text-xs text-content-muted font-medium">
-                  <span>Rows per page:</span>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => {
-                      setItemsPerPage(Number(e.target.value));
+                <div className="flex items-center gap-1.5 text-xs sm:text-[10px] text-content-muted font-normal">
+                  <span>{t("users.rowsPerPage")}</span>
+                  <StyledDropdown
+                    value={String(itemsPerPage)}
+                    onChange={(val) => {
+                      setItemsPerPage(Number(val));
                       setCurrentPage(1);
                     }}
-                    className="bg-surface border border-border-subtle rounded-md px-2 py-1 text-xs font-medium text-content-body outline-none focus:border-indigo-500 cursor-pointer"
-                  >
-                    <option value={10}>10</option>
-                    <option value={25}>25</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                  </select>
+                    options={[
+                      { id: "10", label: "10" },
+                      { id: "25", label: "25" },
+                      { id: "50", label: "50" },
+                      { id: "100", label: "100" },
+                    ]}
+                    buttonClassName="bg-surface border border-border-subtle rounded-md px-2 py-1 text-xs sm:text-[10px] text-left font-normal text-content-body"
+                  />
                 </div>
               </div>
 
@@ -1010,18 +1262,18 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   size="sm"
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="rounded-lg h-8 px-2.5 text-xs font-medium"
+                  className="rounded-lg h-8 px-2.5 text-xs sm:text-[10px] font-normal"
                 >
-                  <ChevronLeft className="w-4 h-4 mr-1" /> Prev
+                  <ChevronLeft className="w-4 h-4 mr-1" /> {t("users.prev")}
                 </Button>
                 {Array.from({ length: totalPages }).map((_, i) => (
                   <button
                     key={i}
                     onClick={() => setCurrentPage(i + 1)}
                     className={cn(
-                      "w-7 h-7 rounded-lg text-xs font-medium transition-colors",
+                      "w-7 h-7 rounded-lg text-xs sm:text-[10px] font-normal transition-colors",
                       currentPage === i + 1
-                        ? "bg-indigo-600 text-white shadow-2xs"
+                        ? "bg-primary-surface text-content-inverse shadow-2xs"
                         : "bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken"
                     )}
                   >
@@ -1033,9 +1285,9 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   size="sm"
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages || totalPages === 0}
-                  className="rounded-lg h-8 px-2.5 text-xs font-medium"
+                  className="rounded-lg h-8 px-2.5 text-xs sm:text-[10px] font-normal"
                 >
-                  Next <ChevronRight className="w-4 h-4 ml-1" />
+                  {t("users.next")} <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
             </div>
@@ -1046,23 +1298,23 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
       <Modal
         isOpen={isInviteModalOpen}
         onClose={() => setIsInviteModalOpen(false)}
-        title="Add New User"
+        title={t("users.addNewUser")}
       >
         <div className="space-y-4">
-          <div className="p-4 bg-violet-50 rounded-xl border border-violet-100 mb-2">
-            <p className="text-sm font-medium text-violet-900">Registrasi Pengguna</p>
-            <p className="text-xs text-violet-700 mt-1">Register new user to the system.</p>
+          <div className="p-4 bg-primary/10 rounded-xl border border-primary/30 mb-2">
+            <p className="text-sm font-medium text-content-strong">{t("users.userRegistration")}</p>
+            <p className="text-xs text-primary mt-1">{t("users.registerNew")}</p>
           </div>
 
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                Username
+              <label className="block text-xs font-normal text-content-subtle uppercase tracking-normal mb-1">
+                {t("users.username")}
               </label>
               <Input
                 value={addPeopleUsername}
                 onChange={(e: any) => handleUsernameChange(e.target.value)}
-                placeholder="e.g. john_doe"
+                placeholder={t("users.usernamePlaceholder")}
                 className={
                   usernameError
                     ? "border-rose-500 focus:ring-rose-500/10 focus:border-rose-500"
@@ -1076,23 +1328,40 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               )}
             </div>
             <div>
-              <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                Nama Lengkap
+              <label className="block text-xs font-normal text-content-subtle uppercase tracking-normal mb-1">
+                {t("users.fullName")}
               </label>
               <Input
                 value={addPeopleFullName}
-                onChange={(e: any) => setAddPeopleFullName(e.target.value)}
-                placeholder="e.g. John Doe"
+                onChange={(e: any) => {
+                  setAddPeopleFullName(e.target.value);
+                  // #189 — pesan hilang begitu pengguna mulai memperbaikinya.
+                  // Membiarkannya menetap sampai submit berikutnya membuat
+                  // form terasa masih menolak padahal sudah benar.
+                  if (addPeopleErrors.fullName)
+                    setAddPeopleErrors((p) => ({ ...p, fullName: undefined }));
+                }}
+                placeholder={t("users.fullNamePlaceholder")}
+                className={
+                  addPeopleErrors.fullName
+                    ? "border-rose-500 focus:ring-rose-500/10 focus:border-rose-500"
+                    : ""
+                }
               />
+              {addPeopleErrors.fullName && (
+                <p className="text-xs sm:text-[10px] font-medium text-rose-500 mt-1">
+                  {addPeopleErrors.fullName}
+                </p>
+              )}
             </div>
             <div>
-              <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                Email
+              <label className="block text-xs font-normal text-content-subtle uppercase tracking-normal mb-1">
+                {t("users.email")}
               </label>
               <Input
                 value={addPeopleEmail}
                 onChange={(e: any) => handleEmailChange(e.target.value)}
-                placeholder="john@example.com"
+                placeholder={t("users.emailPlaceholder")}
                 className={
                   emailError ? "border-rose-500 focus:ring-rose-500/10 focus:border-rose-500" : ""
                 }
@@ -1104,25 +1373,39 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               )}
             </div>
             <div>
-              <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                Nomor HP / WhatsApp
+              <label className="block text-xs font-normal text-content-subtle uppercase tracking-normal mb-1">
+                {t("users.phone")}
               </label>
               <Input
                 value={addPeoplePhone}
                 onChange={(e: any) => setAddPeoplePhone(e.target.value)}
-                placeholder="e.g. 081234567890"
+                placeholder={t("users.phonePlaceholder")}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                Password
+              <label className="block text-xs font-normal text-content-subtle uppercase tracking-normal mb-1">
+                {t("users.password")}
               </label>
               <Input
                 type="password"
                 value={addPeoplePassword}
-                onChange={(e: any) => handlePasswordChange(e.target.value)}
-                placeholder="••••••••"
+                onChange={(e: any) => {
+                  handlePasswordChange(e.target.value);
+                  if (addPeopleErrors.password)
+                    setAddPeopleErrors((p) => ({ ...p, password: undefined }));
+                }}
+                placeholder={t("users.passwordPlaceholder")}
+                className={
+                  addPeopleErrors.password
+                    ? "border-rose-500 focus:ring-rose-500/10 focus:border-rose-500"
+                    : ""
+                }
               />
+              {addPeopleErrors.password && (
+                <p className="text-xs sm:text-[10px] font-medium text-rose-500 mt-1">
+                  {addPeopleErrors.password}
+                </p>
+              )}
               {passwordStrength && (
                 <div className="mt-1.5 space-y-1">
                   <div className="flex gap-1 h-1.5 w-full bg-surface-muted rounded-full overflow-hidden">
@@ -1139,7 +1422,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   </div>
                   <p
                     className={cn(
-                      "text-xs sm:text-[10px] font-medium uppercase tracking-wider",
+                      "text-xs sm:text-[10px] font-normal uppercase tracking-normal",
                       passwordStrength === "weak"
                         ? "text-rose-500"
                         : passwordStrength === "medium"
@@ -1147,7 +1430,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           : "text-emerald-500"
                     )}
                   >
-                    Kekuatan Password:{" "}
+                    {t("users.passwordStrength")}{" "}
                     {passwordStrength === "weak"
                       ? "Lemah"
                       : passwordStrength === "medium"
@@ -1158,95 +1441,78 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               )}
             </div>
             <div>
-              <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                Departemen
+              <label className="block text-xs font-normal text-content-subtle uppercase tracking-normal mb-1">
+                {t("users.department")}
               </label>
               <div className="relative group/select">
-                <select
+                <StyledDropdown
                   value={addPeopleDepartment}
-                  onChange={(e) => setAddPeopleDepartment(e.target.value)}
-                  className="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium appearance-none cursor-pointer focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 focus:bg-surface outline-none transition-all"
-                >
-                  <option value="">Pilih Departemen...</option>
-                  {masterData
-                    .filter((d) => d.type === "department")
-                    .map((dep) => (
-                      <option key={dep.id} value={dep.id}>
-                        {dep.label}
-                      </option>
-                    ))}
-                </select>
+                  onChange={(val: string) => setAddPeopleDepartment(val)}
+                  options={[
+                    { id: "", label: t("users.selectDept"), icon: "Building2", color: "#6366F1" },
+                    ...masterData
+                      .filter((d) => d.type === "department")
+                      .map((dep) => ({
+                        id: dep.id,
+                        label: dep.label,
+                        icon: dep.icon,
+                        color: dep.color,
+                      })),
+                  ]}
+                  type="department"
+                  masterData={masterData}
+                  className="w-full"
+                  buttonClassName="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium"
+                />
                 <ChevronDown className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-content-subtle" />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                Jabatan
+              <label className="block text-xs font-normal text-content-subtle uppercase tracking-normal mb-1">
+                {t("users.position")}
               </label>
               <div className="relative group/select">
-                <select
+                <StyledDropdown
                   value={addPeopleJabatan}
-                  onChange={(e) => setAddPeopleJabatan(e.target.value)}
-                  className="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium appearance-none cursor-pointer focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 focus:bg-surface outline-none transition-all"
-                >
-                  <option value="">Pilih Jabatan...</option>
-                  {masterData
-                    .filter((d) => d.type === "jabatan")
-                    .map((j) => (
-                      <option key={j.id} value={j.id}>
-                        {j.label}
-                      </option>
-                    ))}
-                </select>
+                  onChange={(val: string) => setAddPeopleJabatan(val)}
+                  options={[
+                    {
+                      id: "",
+                      label: t("users.selectPosition"),
+                      icon: "BadgeCheck",
+                      color: "#6366F1",
+                    },
+                    ...masterData
+                      .filter((d) => d.type === "jabatan")
+                      .map((j) => ({ id: j.id, label: j.label, icon: j.icon, color: j.color })),
+                  ]}
+                  type="jabatan"
+                  masterData={masterData}
+                  className="w-full"
+                  buttonClassName="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium"
+                />
                 <ChevronDown className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-content-subtle" />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                System Role
+              <label className="block text-xs font-normal text-content-subtle uppercase tracking-normal mb-1">
+                {t("users.systemRole")}
               </label>
               <div className="relative group/select">
-                <select
+                <StyledDropdown
                   value={addPeopleRole}
-                  onChange={(e) => setAddPeopleRole(e.target.value)}
-                  className="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium appearance-none cursor-pointer focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 focus:bg-surface outline-none transition-all"
-                >
-                  <option value="admin">Administrator (Full Access)</option>
-                  <option value="head">Department Head (Head)</option>
-                  <option value="manager">Project Manager (Manager)</option>
-                  <option value="user">Standard User (User)</option>
-                  <option value="viewer">Observer (Viewer - Read Only)</option>
-                  {masterData
-                    .filter(
-                      (d) =>
-                        d.type === "project_role" &&
-                        (d.roleType === "SYSTEM" || d.role_type === "SYSTEM")
-                    )
-                    .map((role) => {
-                      const roleValue = (role.label || "").toLowerCase();
-                      if (
-                        [
-                          "admin",
-                          "head",
-                          "manager",
-                          "user",
-                          "viewer",
-                          "administrator",
-                          "department head",
-                          "project manager",
-                          "standard user",
-                          "observer",
-                        ].includes(roleValue)
-                      ) {
-                        return null;
-                      }
-                      return (
-                        <option key={role.id} value={role.label}>
-                          {role.label}
-                        </option>
-                      );
-                    })}
-                </select>
+                  onChange={(val: string) => setAddPeopleRole(sebagaiPeranSistem(val))}
+                  options={peranSistem.map((p) => ({
+                    id: p.code,
+                    label: p.label,
+                    icon: p.icon || undefined,
+                    color: p.color || undefined,
+                  }))}
+                  type="project_role"
+                  masterData={masterData}
+                  className="w-full"
+                  buttonClassName="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium"
+                />
                 <ChevronDown className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-content-subtle" />
               </div>
             </div>
@@ -1258,21 +1524,21 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               onClick={() => setIsInviteModalOpen(false)}
               className="flex-1 justify-center"
             >
-              Cancel
+              {t("users.cancel")}
             </Button>
             <Button
               onClick={handleAddPeople}
-              disabled={
-                !!usernameError ||
-                !!emailError ||
-                !addPeopleUsername ||
-                !addPeopleFullName ||
-                !addPeopleEmail ||
-                !addPeoplePassword
-              }
-              className="flex-1 justify-center bg-violet-600 hover:bg-violet-700 disabled:opacity-50"
+              // #189 — keempat syarat "field kosong" DIHAPUS dari sini dengan
+              // sengaja. Selama mereka ada, tombolnya mati saat form kosong,
+              // `onClick` tidak pernah menyala, dan penolakan di
+              // `handleAddPeople` beserta pesannya tidak pernah sampai ke
+              // pengguna. `usernameError`/`emailError` tetap dipertahankan:
+              // keduanya SUDAH menampilkan alasannya di bawah field, jadi
+              // tombol matinya tidak membingungkan.
+              disabled={!!usernameError || !!emailError}
+              className="flex-1 justify-center bg-primary-surface hover:bg-primary-surface-hover disabled:opacity-50"
             >
-              <UserPlus className="w-4 h-4" /> Add Person
+              <UserPlus className="w-4 h-4" /> {t("users.addPerson")}
             </Button>
           </div>
         </div>
@@ -1284,17 +1550,18 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
           setIsInviteSuccessModalOpen(false);
           fetchUsers();
         }}
-        title="Username Registration Successful"
+        title={t("users.regSuccessTitle")}
       >
         <div className="space-y-6 text-center py-4">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-green-500/15 rounded-full flex items-center justify-center mx-auto mb-4">
             <UserPlus className="w-8 h-8 text-green-600" />
           </div>
           <div>
-            <h3 className="text-lg font-medium text-content">Username Tercatat!</h3>
+            <h3 className="text-lg font-medium text-content">{t("users.usernameRecorded")}</h3>
             <p className="text-sm text-content-muted mt-2">
-              Username <span className="font-medium text-content">{addPeopleEmail}</span> has been
-              saved in the system.
+              {t("common.username")}{" "}
+              <span className="font-medium text-content">{addPeopleEmail}</span>{" "}
+              {t("users.hasBeenSavedInThe")}
             </p>
           </div>
 
@@ -1303,11 +1570,11 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               variant="secondary"
               onClick={() => {
                 navigator.clipboard.writeText(window.location.origin);
-                toast.success("Link successfully copied!");
+                toast.success(t("toast.linkCopied"));
               }}
               className="w-full justify-center py-3"
             >
-              <Copy className="w-4 h-4" /> Salin Link Bergabung
+              <Copy className="w-4 h-4" /> {t("users.copyJoinLink")}
             </Button>
           </div>
 
@@ -1318,44 +1585,15 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
             }}
             className="text-sm font-medium text-content-subtle hover:text-content-secondary transition-colors"
           >
-            Tutup
+            {t("users.close")}
           </button>
         </div>
       </Modal>
 
-      {confirmModal.isOpen && (
-        <Modal
-          isOpen={confirmModal.isOpen}
-          onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
-          title={confirmModal.title}
-          maxWidth="max-w-md"
-        >
-          <div className="space-y-6 py-2">
-            <p className="text-sm text-content-secondary leading-relaxed">{confirmModal.message}</p>
-            <div className="flex justify-end gap-3 pt-2">
-              <Button
-                variant="outline"
-                onClick={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
-                className="px-4 py-2 text-sm"
-              >
-                Batal
-              </Button>
-              <Button
-                variant="danger"
-                onClick={confirmModal.onConfirm}
-                className="px-4 py-2 text-sm"
-              >
-                Ya, Hapus
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
-
       {/* Senior Portal-Style Hover Tooltip overlay */}
       {hoveredTooltip && (
         <div
-          className="fixed z-9999 pointer-events-none bg-slate-900/95 backdrop-blur-md border border-slate-700/80 text-white text-xs font-medium rounded-xl px-3.5 py-2.5 max-w-xs shadow-2xl transition-all duration-100 ease-out animate-in fade-in zoom-in-95"
+          className="fixed z-9999 pointer-events-none bg-overlay/95 backdrop-blur-md border border-border-inverse/80 text-content-inverse text-xs font-medium rounded-xl px-3.5 py-2.5 max-w-xs shadow-2xl transition-all duration-100 ease-out animate-dropdown"
           style={{
             left: `${hoveredTooltip.x + 14}px`,
             top: `${hoveredTooltip.y + 14}px`,
@@ -1363,8 +1601,8 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
           }}
         >
           <div className="flex items-start gap-2 max-w-[210px]">
-            <Info className="w-4 h-4 text-indigo-300 shrink-0 mt-0.5" />
-            <span className="leading-snug font-medium text-xs sm:text-[11px] text-slate-255">
+            <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+            <span className="leading-snug font-medium text-xs sm:text-[11px]">
               {hoveredTooltip.text}
             </span>
           </div>

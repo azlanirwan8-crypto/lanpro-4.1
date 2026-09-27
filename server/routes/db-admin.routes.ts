@@ -3,11 +3,13 @@
  * For global admins only - database utilities, query explorer, schema inspection
  */
 
-import { Router } from 'express';
-import { verifyGlobalAdmin } from '../middleware/auth';
-import db from '../../src/lib/db';
-import path from 'path';
-import fs from 'fs';
+import { Router } from "express";
+import { verifyGlobalAdmin } from "../middleware/auth";
+import { validasiBody } from "../middleware/validate";
+import { dbQuerySchema, dbConfigSchema } from "../schemas/system.schema";
+import path from "path";
+import fs from "fs";
+import { dbAdminRepository } from "../repositories/db-admin.repository";
 
 const router = Router();
 
@@ -20,16 +22,20 @@ const router = Router();
  * GET /api/test-db
  */
 router.get("/api/test-db", verifyGlobalAdmin, async (req, res) => {
-  let connection;
   try {
-    connection = await db.getConnection();
-    await connection.query("SELECT 1 + 1 AS solution");
-    res.json({ status: "success", message: "Koneksi ke database MySQL berhasil!" });
+    await dbAdminRepository.testConnection();
+    res.json({
+      status: "success",
+      code: "srv.koneksi_ke_database_mysql",
+      message: "Koneksi ke database MySQL berhasil!",
+    });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Database connection error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -37,53 +43,53 @@ router.get("/api/test-db", verifyGlobalAdmin, async (req, res) => {
  * Run raw database queries (read-only for explorer)
  * POST /api/db-query
  * Body: { query: "SELECT * FROM table" }
- *
- * ┌─────────────────────────────────────────────────────────────────────────┐
- * │ PERINGATAN: HANDLER INI TIDAK PERNAH DIEKSEKUSI.                        │
- * │                                                                         │
- * │ server.ts me-mount systemRoutes SEBELUM dbAdminRoutes, dan              │
- * │ system.routes.ts mendaftarkan POST /api/db-query lebih dulu. Express    │
- * │ memakai yang pertama cocok, sehingga versi inilah yang menang:          │
- * │ server/routes/system.routes.ts                                          │
- * │                                                                         │
- * │ Perbedaannya BUKAN kosmetik. Versi di bawah menerapkan penjaga          │
- * │ read-only (hanya satu statement SELECT/SHOW/DESCRIBE, memblokir         │
- * │ INSERT/UPDATE/DELETE/DROP dan sejenisnya). Versi yang benar-benar       │
- * │ berjalan TIDAK punya penjaga itu sama sekali.                           │
- * │                                                                         │
- * │ Jadi pengerasan keamanan yang ditulis di sini tidak pernah berlaku.     │
- * │                                                                         │
- * │ Mengaktifkannya bukan sekadar memindahkan urutan mount: fitur ubah dan  │
- * │ hapus baris di DB Explorer mengirim UPDATE dan DELETE lewat endpoint    │
- * │ yang sama, sehingga penjaga read-only akan mematikan fitur itu.         │
- * │ Perlu keputusan sadar pemilik repo — lihat catatan di ARCHITECTURE.md.  │
- * └─────────────────────────────────────────────────────────────────────────┘
  */
-router.post("/api/db-query", verifyGlobalAdmin, async (req, res) => {
-  let connection;
+/**
+ * Item #259 — sisa #247: `dbQuerySchema` sudah dibuat di `system.schema.ts`
+ * saat #247 dikerjakan, tetapi TIDAK PERNAH dipasang di rute ini — skema
+ * yatim, ditemukan lewat grep langsung ke berkas ini. Dipasang sekarang.
+ *
+ * Ini tidak menggantikan pemeriksaan SQL di bawah (satu statement, awalan
+ * SELECT/SHOW/DESCRIBE, tanpa kata kunci terlarang) — itu tetap baris
+ * pertahanan utamanya. Yang ditambah skema ini: batas panjang string (skema
+ * membatasi ke 5000 karakter di bawah), sehingga query raksasa tidak lolos
+ * sampai ke `dbAdminRepository.runReadOnlyQuery`.
+ */
+router.post("/api/db-query", verifyGlobalAdmin, validasiBody(dbQuerySchema), async (req, res) => {
   try {
     const { query: sqlString } = req.body;
-    if (!sqlString || typeof sqlString !== 'string') return res.status(400).json({ error: "Query is required" });
+    if (!sqlString || typeof sqlString !== "string")
+      return res.status(400).json({
+        status: "error",
+        code: "srv.query_wajib",
+        message: "Query wajib diisi.",
+      });
 
-    // DB Explorer is read-only: single SELECT/SHOW/DESCRIBE statement only, no chaining, no mutation keywords.
-    const trimmed = sqlString.trim().replace(/;+\s*$/, '');
-    const isSingleStatement = !trimmed.includes(';');
+    const trimmed = sqlString.trim().replace(/;+\s*$/, "");
+    const isSingleStatement = !trimmed.includes(";");
     const isReadOnly = /^(SELECT|SHOW|DESCRIBE)\s/i.test(trimmed);
-    const hasForbiddenKeyword = /\b(INSERT|UPDATE|DELETE|DROP|TRUNCATE|ALTER|CREATE|GRANT|REVOKE|EXEC|CALL|MERGE)\b/i.test(trimmed);
+    const hasForbiddenKeyword =
+      /\b(INSERT|UPDATE|DELETE|DROP|TRUNCATE|ALTER|CREATE|GRANT|REVOKE|EXEC|CALL|MERGE)\b/i.test(
+        trimmed
+      );
 
     if (!isSingleStatement || !isReadOnly || hasForbiddenKeyword) {
-      return res.status(400).json({ status: "error", message: "DB Explorer hanya mengizinkan satu statement SELECT/SHOW/DESCRIBE read-only." });
+      return res.status(400).json({
+        status: "error",
+        code: "srv.db_explorer_hanya_mengizinkan",
+        message: "DB Explorer hanya mengizinkan satu statement SELECT/SHOW/DESCRIBE read-only.",
+      });
     }
 
-    connection = await db.getConnection();
-    const [rows] = await connection.query(trimmed);
-
+    const rows = await dbAdminRepository.runReadOnlyQuery(trimmed);
     res.json({ status: "success", data: rows });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Database query error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -98,17 +104,17 @@ router.post("/api/db-query", verifyGlobalAdmin, async (req, res) => {
 router.get("/api/system/db-config", verifyGlobalAdmin, (req, res) => {
   try {
     const config = {
-      host: process.env.DB_HOST || 'localhost',
-      port: process.env.DB_PORT || '3306',
-      user: process.env.DB_USER || 'app_user',
-      password: process.env.DB_PASSWORD || 'app_password',
-      database: process.env.DB_NAME || 'app_database'
+      host: process.env.DB_HOST || "localhost",
+      port: process.env.DB_PORT || "3306",
+      user: process.env.DB_USER || "app_user",
+      password: process.env.DB_PASSWORD || "app_password",
+      database: process.env.DB_NAME || "app_database",
     };
 
-    const persistentPath = path.join(process.cwd(), 'database', 'db_config.json');
+    const persistentPath = path.join(process.cwd(), "database", "db_config.json");
     if (fs.existsSync(persistentPath)) {
       try {
-        const saved = JSON.parse(fs.readFileSync(persistentPath, 'utf8'));
+        const saved = JSON.parse(fs.readFileSync(persistentPath, "utf8"));
         if (saved.host) config.host = saved.host;
         if (saved.port) config.port = String(saved.port);
         if (saved.user) config.user = saved.user;
@@ -119,7 +125,7 @@ router.get("/api/system/db-config", verifyGlobalAdmin, (req, res) => {
 
     res.json({
       status: "success",
-      data: config
+      data: config,
     });
   } catch (e: any) {
     res.status(500).json({ status: "error", message: e.message });
@@ -132,12 +138,12 @@ router.get("/api/system/db-config", verifyGlobalAdmin, (req, res) => {
  */
 router.get("/api/system/db-status", verifyGlobalAdmin, async (req, res) => {
   try {
-    const { getDbMode } = await import('../../src/lib/db');
+    const { getDbMode } = await import("../../src/lib/db");
     const mode = getDbMode();
     res.json({
       status: "success",
-      mode, // "pg"
-      host: process.env.DATABASE_URL ? "Neon PostgreSQL Server" : "PostgreSQL Server"
+      mode,
+      host: process.env.DATABASE_URL ? "Neon PostgreSQL Server" : "PostgreSQL Server",
     });
   } catch (e: any) {
     res.status(500).json({ status: "error", message: e.message });
@@ -153,7 +159,8 @@ router.post("/api/system/db-status", verifyGlobalAdmin, async (req, res) => {
     res.json({
       status: "success",
       mode: "pg",
-      message: "Aplikasi terkunci pada Neon PostgreSQL Server."
+      code: "srv.aplikasi_terkunci_pada_neon",
+      message: "Aplikasi terkunci pada Neon PostgreSQL Server.",
     });
   } catch (e: any) {
     res.status(500).json({ status: "error", message: e.message });
@@ -165,42 +172,59 @@ router.post("/api/system/db-status", verifyGlobalAdmin, async (req, res) => {
  * POST /api/system/db-config
  * Body: { connectionString: "postgresql://..." }
  */
-router.post("/api/system/db-config", verifyGlobalAdmin, async (req, res) => {
-  try {
-    const { connectionString } = req.body;
-    const { Pool } = await import('pg');
-    const testPool = new Pool({
-      connectionString: connectionString || process.env.DATABASE_URL || process.env.POSTGRES_URL,
-      ssl: { rejectUnauthorized: false }
-    });
-    await testPool.query("SELECT 1");
-    await testPool.end();
-    res.json({ status: "success", message: "Koneksi PostgreSQL Berhasil!" });
-  } catch (e: any) {
-    console.error(e);
-    res.status(500).json({ status: "error", message: e.message });
+// Item #259 — sisa #247: dbConfigSchema dibuat #247 tetapi tidak pernah dipasang di sini (skema yatim).
+router.post(
+  "/api/system/db-config",
+  verifyGlobalAdmin,
+  validasiBody(dbConfigSchema),
+  async (req, res) => {
+    try {
+      const { connectionString } = req.body;
+      const { Pool } = await import("pg");
+      const testPool = new Pool({
+        connectionString: connectionString || process.env.DATABASE_URL || process.env.POSTGRES_URL,
+        ssl: { rejectUnauthorized: false },
+      });
+      await testPool.query("SELECT 1");
+      await testPool.end();
+      res.json({
+        status: "success",
+        code: "srv.koneksi_postgresql_berhasil",
+        message: "Koneksi PostgreSQL Berhasil!",
+      });
+    } catch (e: any) {
+      console.error(e);
+      res.status(500).json({ status: "error", message: e.message });
+    }
   }
-});
+);
 
 /**
  * Save and hot-swap DB config connection
  * POST /api/system/db-config/save
  * Body: { connectionString: "postgresql://..." }
  */
-router.post("/api/system/db-config/save", verifyGlobalAdmin, async (req, res) => {
-  try {
-    const { connectionString } = req.body;
-    const { updatePoolConfig } = await import('../../src/lib/db');
-    // force: permintaan admin yang eksplisit harus selalu membangun ulang pool,
-    // termasuk saat connection string-nya sama. Itulah cara mendaur ulang pool
-    // yang macet; tanpa force permintaan ini dilewati diam-diam tapi tetap
-    // dilaporkan berhasil.
-    updatePoolConfig({ connectionString, force: true });
-    res.json({ status: "success", message: "Konfigurasi PostgreSQL berhasil diperbarui!" });
-  } catch (e: any) {
-    console.error(e);
-    res.status(500).json({ status: "error", message: e.message });
+// Item #259 — sama dengan di atas: rute ini yang MENGUBAH koneksi produksi
+// (force: true), jadi lebih penting membatasi input daripada rute uji-coba.
+router.post(
+  "/api/system/db-config/save",
+  verifyGlobalAdmin,
+  validasiBody(dbConfigSchema),
+  async (req, res) => {
+    try {
+      const { connectionString } = req.body;
+      const { updatePoolConfig } = await import("../../src/lib/db");
+      updatePoolConfig({ connectionString, force: true });
+      res.json({
+        status: "success",
+        code: "srv.konfigurasi_postgresql_berhasil_diperbarui",
+        message: "Konfigurasi PostgreSQL berhasil diperbarui!",
+      });
+    } catch (e: any) {
+      console.error(e);
+      res.status(500).json({ status: "error", message: e.message });
+    }
   }
-});
+);
 
 export default router;

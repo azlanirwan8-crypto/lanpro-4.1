@@ -1,492 +1,510 @@
 /**
- * Rute obrolan antar pengguna, termasuk simulasi balasan berbantuan AI.
+ * Rute obrolan antar pengguna, termasuk asisten pribadi "LanPro AI".
  *
- * Diekstrak dari task.routes.ts. Berkas itu bukan berkas task saja: ia juga
- * menampung seluruh endpoint chat dan notifikasi — pola grab-bag yang sama
- * seperti meetings.routes.ts sebelum dipecah. Isi handler tidak diubah
- * sebaris pun; yang berpindah hanya tempatnya.
+ * Menggunakan chatRepository untuk operasi data. #551 menambah
+ * `/api/chat/assistant` (di bagian bawah berkas ini) dan menutup lubang
+ * penulisan di `/api/chat/simulate-reply`; keduanya dijelaskan di tempatnya.
  */
 import express from "express";
 import crypto from "crypto";
-import db from "../../src/lib/db";
 import { GoogleGenAI } from "@google/genai";
 import { generateContentWithFallback } from "../services/ai.service";
 import { matchesCaller } from "../services/task.service";
+import { chatRepository } from "../repositories/chat.repository";
+import { jawabAsisten, statusMesin } from "../services/asisten";
+import { validasiBody } from "../middleware/validate";
+import {
+  sendChatMessageSchema,
+  markChatReadSchema,
+  simulateReplySchema,
+  assistantSchema,
+} from "../schemas/chat.schema";
 
 const router = express.Router();
 
+/** Akun virtual asisten. Nilainya sama dengan `UserProfile` di LiveChatWidget. */
+const ID_ASISTEN = "lanpro-ai";
+
 router.get("/api/chat/last-messages", async (req: any, res) => {
-  let connection;
   try {
     const { userId } = req.query;
     if (!userId) {
-      return res.status(400).json({ status: "error", message: "userId diperlukan." });
+      return res
+        .status(400)
+        .json({ status: "error", code: "srv.userid_diperlukan", message: "userId diperlukan." });
     }
     if (!matchesCaller(req.user, userId)) {
       return res.status(403).json({
         status: "error",
+        code: "srv.akses_ditolak_anda_hanya",
         message: "Akses ditolak: Anda hanya dapat melihat percakapan Anda sendiri.",
       });
     }
-    connection = await db.getConnection();
 
-    const [rows]: any = await connection.query(
-      `SELECT m1.*, 
-                CASE WHEN m1.senderId = ? THEN m1.receiverId ELSE m1.senderId END AS partnerId
-         FROM Messages m1
-         INNER JOIN (
-             SELECT 
-                 CASE WHEN senderId = ? THEN receiverId ELSE senderId END AS partnerId,
-                 MAX(timestamp) as max_ts
-             FROM Messages
-             WHERE (senderId = ? OR receiverId = ?) AND receiverId != 'group'
-             GROUP BY partnerId
-         ) m2 ON (
-             (m1.senderId = ? AND m1.receiverId = m2.partnerId) OR 
-             (m1.receiverId = ? AND m1.senderId = m2.partnerId)
-         ) AND m1.timestamp = m2.max_ts`,
-      [userId, userId, userId, userId, userId, userId]
-    );
-
-    // Fetch last message for Group Chat
-    const [groupRows]: any = await connection.query(
-      "SELECT * FROM Messages WHERE receiverId = 'group' ORDER BY timestamp DESC LIMIT 1"
-    );
-
-    // Fetch last message for AI Assistant (lanpro-ai)
-    const [aiRows]: any = await connection.query(
-      "SELECT * FROM Messages WHERE (senderId = ? AND receiverId = 'lanpro-ai') OR (senderId = 'lanpro-ai' AND receiverId = ?) ORDER BY timestamp DESC LIMIT 1",
-      [userId, userId]
-    );
-
-    const allRows = [...rows];
-    if (groupRows && groupRows.length > 0) {
-      allRows.push({
-        ...groupRows[0],
-        partnerId: "group",
-      });
-    }
-    if (aiRows && aiRows.length > 0) {
-      allRows.push({
-        ...aiRows[0],
-        partnerId: "lanpro-ai",
-      });
-    }
-
+    const allRows = await chatRepository.findLastMessages(userId);
     res.json({ status: "success", data: allRows });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/chat/last-messages error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
 router.get("/api/chat/messages", async (req: any, res) => {
-  let connection;
   try {
     const { senderId, receiverId } = req.query;
     if (!senderId || !receiverId) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "senderId dan receiverId diperlukan." });
+      return res.status(400).json({
+        status: "error",
+        code: "srv.senderid_dan_receiverid_diperlukan",
+        message: "senderId dan receiverId diperlukan.",
+      });
     }
     if (!matchesCaller(req.user, senderId) && !matchesCaller(req.user, receiverId)) {
       return res.status(403).json({
         status: "error",
+        code: "srv.akses_ditolak_anda_bukan",
         message: "Akses ditolak: Anda bukan bagian dari percakapan ini.",
       });
     }
 
-    connection = await db.getConnection();
-    let rows;
-    if (receiverId === "group") {
-      [rows] = await connection.query(
-        "SELECT * FROM Messages WHERE receiverId = 'group' ORDER BY timestamp ASC"
-      );
-    } else {
-      [rows] = await connection.query(
-        "SELECT * FROM Messages WHERE (senderId = ? AND receiverId = ?) OR (senderId = ? AND receiverId = ?) ORDER BY timestamp ASC",
-        [senderId, receiverId, receiverId, senderId]
-      );
-    }
+    const rows = await chatRepository.findConversationMessages(senderId, receiverId);
     res.json({ status: "success", data: rows });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/chat/messages error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
 router.post("/api/chat/messages", async (req: any, res) => {
-  let connection;
   try {
-    const { senderId, receiverId, message, timestamp } = req.body;
-    if (!senderId || !receiverId || !message) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "senderId, receiverId, dan message diperlukan." });
+    const { senderId, receiverId, message } = req.body || {};
+    if (!senderId || !receiverId || typeof message !== "string" || message.trim().length === 0) {
+      return res.status(400).json({
+        status: "error",
+        code: "srv.senderid_receiverid_dan_message",
+        message: "senderId, receiverId, dan message diperlukan.",
+      });
+    }
+    if (message.length > 5000) {
+      return res.status(400).json({
+        status: "error",
+        code: "srv.pesan_terlalu_panjang",
+        message: "Pesan terlalu panjang (maksimum 5000 karakter).",
+      });
     }
     if (!matchesCaller(req.user, senderId)) {
       return res.status(403).json({
         status: "error",
+        code: "srv.akses_ditolak_anda_tidak",
         message: "Akses ditolak: Anda tidak dapat mengirim pesan mengatasnamakan pengguna lain.",
       });
     }
 
     const id = crypto.randomUUID();
-    connection = await db.getConnection();
-    await connection.query(
-      "INSERT INTO Messages (id, senderId, receiverId, message, timestamp, `read`) VALUES (?, ?, ?, ?, ?, ?)",
-      [id, senderId, receiverId, message, timestamp || new Date().toISOString(), false]
-    );
+    const finalTs = new Date().toISOString();
+
+    await chatRepository.createMessage({
+      id,
+      senderId,
+      receiverId,
+      message,
+      timestamp: finalTs,
+      read: false,
+    });
 
     res.json({
       status: "success",
-      data: { id, senderId, receiverId, message, timestamp, read: false },
+      data: { id, senderId, receiverId, message, timestamp: finalTs, read: false },
     });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: POST /api/chat/messages error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
-router.put("/api/chat/messages/read", async (req: any, res) => {
-  let connection;
+router.put("/api/chat/messages/read", validasiBody(markChatReadSchema), async (req: any, res) => {
   try {
     const { senderId, receiverId } = req.body;
-    if (!senderId || !receiverId) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "senderId dan receiverId diperlukan." });
-    }
     if (!matchesCaller(req.user, receiverId)) {
       return res.status(403).json({
         status: "error",
+        code: "srv.akses_ditolak_anda_hanya_2",
         message: "Akses ditolak: Anda hanya dapat menandai percakapan Anda sendiri sebagai dibaca.",
       });
     }
 
-    connection = await db.getConnection();
-    await connection.query("UPDATE Messages SET `read` = ? WHERE senderId = ? AND receiverId = ?", [
-      1,
-      senderId,
-      receiverId,
-    ]);
-
-    res.json({ status: "success", message: "Pesan berhasil ditandai sebagai dibaca." });
+    await chatRepository.markAsRead(senderId, receiverId);
+    res.json({
+      status: "success",
+      code: "srv.pesan_berhasil_ditandai_sebagai",
+      message: "Pesan berhasil ditandai sebagai dibaca.",
+    });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: PUT /api/chat/messages/read error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
+  }
+});
+
+/**
+ * Menghapus satu pesan — item #248.
+ *
+ * SIAPA YANG BOLEH: pengirimnya saja. Bukan penerimanya, dan bukan admin.
+ * Percakapan ini privat antar dua orang; memberi peran lain hak menghapus
+ * berarti memberi mereka hak mengubah isi percakapan yang tidak mereka ikuti.
+ * Penerima yang terganggu punya jalur lain — itu urusan moderasi, dan moderasi
+ * yang belum diputuskan lebih baik tidak ada daripada ditebak.
+ *
+ * HAPUS KERAS, bukan penanda. Setiap DELETE di repo ini menghapus barisnya
+ * (`master-data`, `milestones`, `documents`, `users`); memperkenalkan
+ * soft-delete di sini berarti melahirkan konsep baru yang harus dipahami
+ * setiap kueri `Messages` yang sudah ada — dan satu kueri yang lupa menyaring
+ * akan menampilkan pesan yang pengirimnya yakin sudah hilang.
+ */
+router.delete("/api/chat/messages/:id", async (req: any, res) => {
+  try {
+    const { id } = req.params;
+
+    const senderId = await chatRepository.findSenderIdById(id);
+    if (!senderId) {
+      return res.status(404).json({
+        status: "error",
+        code: "srv.pesan_tidak_ditemukan",
+        message: "Pesan tidak ditemukan.",
+      });
+    }
+
+    if (!matchesCaller(req.user, senderId)) {
+      return res.status(403).json({
+        status: "error",
+        code: "srv.akses_ditolak_hapus_pesan",
+        message: "Akses ditolak: Anda hanya dapat menghapus pesan yang Anda kirim sendiri.",
+      });
+    }
+
+    await chatRepository.deleteMessage(id);
+    res.json({
+      status: "success",
+      code: "srv.pesan_berhasil_dihapus",
+      message: "Pesan berhasil dihapus.",
+    });
+  } catch (error: any) {
+    console.error("LOG ANOMALI CRITICAL: DELETE /api/chat/messages/:id error:", error);
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
 router.get("/api/chat/unread-counts", async (req: any, res) => {
-  let connection;
   try {
     const { userId } = req.query;
     if (!userId) {
-      return res.status(400).json({ status: "error", message: "userId diperlukan." });
+      return res
+        .status(400)
+        .json({ status: "error", code: "srv.userid_diperlukan", message: "userId diperlukan." });
     }
     if (!matchesCaller(req.user, userId)) {
       return res.status(403).json({
         status: "error",
+        code: "srv.akses_ditolak_anda_hanya_3",
         message: "Akses ditolak: Anda hanya dapat melihat notifikasi Anda sendiri.",
       });
     }
 
-    connection = await db.getConnection();
-    const [rows] = await connection.query(
-      "SELECT senderId, COUNT(*) as count FROM Messages WHERE receiverId = ? AND `read` = false GROUP BY senderId",
-      [userId]
-    );
+    const rows = await chatRepository.getUnreadCounts(userId);
     res.json({ status: "success", data: rows });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/chat/unread-counts error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
-router.post("/api/chat/simulate-reply", async (req, res) => {
+/**
+ * Asisten pribadi (#551).
+ *
+ * Tiga hal yang bedakan rute ini dari simulate-reply (yang sejak #551 tidak
+ * pernah dipakai lagi oleh asisten, hanya oleh sakelar balasan simulasi rekan):
+ *
+ *  1. IDENTITAS DARI TOKEN, BUKAN DARI BODY. `pemanggil` dibangun dari
+ *     `req.user`, dan setiap perkakas di `services/asisten.ts` memfilter ulang
+ *     hasilnya dengan cakupan itu — jadi tidak ada jalur untuk meminta jawaban
+ *     yang menyingkap data orang lain.
+ *  2. MENULIS HANYA ATAS NAMA ASISTEN. `senderId` baris yang disimpan adalah
+ *     konstanta `ID_ASISTEN`, bukan nilai kiriman klien.
+ *  3. TANPA KUNCI API TIDAK ADA KARANGAN. `jawabAsisten` memulangkan kalimat
+ *     jujur bahwa mesinnya tidak tersambung, bukan persona rekan fiktif. Fitur
+ *     tetap jalan seperti biasa — tidak ada pintu yang tertutup karena kunci
+ *     model belum dipasang.
+ */
+router.post("/api/chat/assistant", validasiBody(assistantSchema), async (req: any, res) => {
   try {
-    const { senderId, receiverId, message, senderName, senderRole, history, screenContext } =
-      req.body;
-    if (!senderId || !receiverId || !message) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "senderId, receiverId, dan message diperlukan." });
+    const pemanggilId = String(req.user?.id ?? req.user?.uid ?? "");
+    if (!pemanggilId) {
+      return res.status(401).json({
+        status: "error",
+        code: "srv.sesi_asisten_diperlukan",
+        message: "Sesi diperlukan: asisten hanya menjawab untuk akun yang sedang masuk.",
+      });
     }
 
-    // Riwayat percakapan terakhir (opsional) agar balasan nyambung dengan konteks.
-    // Batasi 12 pesan terbaru, normalisasi tipe & panjang untuk keamanan prompt.
-    const historyList: Array<{ from: string; text: string }> = Array.isArray(history)
-      ? history
-          .slice(-12)
-          .filter(
-            (h: any) => h && typeof h.text === "string" && (h.from === "me" || h.from === "them")
-          )
-          .map((h: any) => ({ from: h.from, text: String(h.text).slice(0, 500) }))
-      : [];
-
-    // 1. Get sender info (who is replying)
-    const replySenderName = senderName || "Rekan Tim";
-    const replySenderRole = senderRole || "user";
-
-    // Konteks layar ("mata" AI): snapshot kanvas flowchart yang sedang dibuka
-    // user, divalidasi & dipangkas ketat agar tidak jadi vektor prompt-injection
-    // atau pemborosan token. Hanya dipakai untuk lanpro-ai.
-    interface ScreenNodeSummary {
-      id: string;
-      type: string;
-      label: string;
-    }
-    let safeScreen: {
-      view: string;
-      flowName: string | null;
-      nodes: ScreenNodeSummary[];
-      edges: Array<{ fromLabel: string; toLabel: string; label?: string }>;
-      selectedNodeId: string | null;
-    } | null = null;
-    if (screenContext && typeof screenContext === "object") {
-      const sc = screenContext as any;
-      const cleanText = (v: any, max = 80) =>
-        String(v ?? "")
-          .replace(/[\r\n\t]+/g, " ")
-          .trim()
-          .slice(0, max);
-      const rawNodes = Array.isArray(sc.nodes) ? sc.nodes.slice(0, 60) : [];
-      const rawEdges = Array.isArray(sc.edges) ? sc.edges.slice(0, 80) : [];
-      const nodes: ScreenNodeSummary[] = rawNodes
-        .filter((n: any) => n && typeof n.id === "string")
-        .map((n: any) => ({
-          id: cleanText(n.id, 60),
-          type: cleanText(n.type, 40),
-          label: cleanText(n.label),
-        }));
-      const edges = rawEdges
-        .filter((e: any) => e && typeof e.fromLabel === "string" && typeof e.toLabel === "string")
-        .map((e: any) => ({
-          fromLabel: cleanText(e.fromLabel),
-          toLabel: cleanText(e.toLabel),
-          label: e.label ? cleanText(e.label) : undefined,
-        }));
-      safeScreen = {
-        view: cleanText(sc.view, 40) || "unknown",
-        flowName: sc.flowName ? cleanText(sc.flowName, 120) : null,
-        nodes,
-        edges,
-        selectedNodeId: sc.selectedNodeId ? cleanText(sc.selectedNodeId, 60) : null,
-      };
-      if (nodes.length === 0 && edges.length === 0) safeScreen = null;
-    }
-
-    const formatScreenForPrompt = () => {
-      if (!safeScreen) return null;
-      const lines: string[] = [];
-      lines.push(`Kamu bisa melihat layar user. Saat ini aplikasi membuka view "${safeScreen.view}".`);
-      if (safeScreen.flowName) lines.push(`Diagram yang sedang dibuka: "${safeScreen.flowName}".`);
-      lines.push(
-        `Bentuk pada kanvas (${safeScreen.nodes.length} node, ${safeScreen.edges.length} koneksi):`
-      );
-      for (const n of safeScreen.nodes) {
-        lines.push(`- ${n.label || "(tanpa label)"} [${n.type}]`);
-      }
-      if (safeScreen.edges.length > 0) {
-        lines.push("Koneksi antar-bentuk (dari -> ke):");
-        for (const e of safeScreen.edges) {
-          lines.push(
-            `- ${e.fromLabel || "?"} -> ${e.toLabel || "?"}${e.label ? ` :"${e.label}"` : ""}`
-          );
-        }
-      }
-      if (safeScreen.selectedNodeId) {
-        const sel = safeScreen.nodes.find((n) => n.id === safeScreen.selectedNodeId);
-        if (sel) lines.push(`Node yang sedang dipilih user: "${sel.label || "?"}" [${sel.type}].`);
-      }
-      return lines.join("\n");
+    const pemanggil = {
+      id: pemanggilId,
+      role: String(req.user?.role || "user"),
+      nama: String(req.user?.displayName || req.user?.username || pemanggilId),
     };
 
-    // 2. Try using Gemini API first
-    let replyText = "";
+    // Riwayat dibaca dari percakapan yang sama dengan yang dipakai widget, jadi
+    // kata "yang tadi" punya rujukan. Batas jumlah barisnya sudah dipegang
+    // repository (BATAS_RIWAYAT_PESAN).
+    const barisRiwayat = await chatRepository.findConversationMessages(ID_ASISTEN, pemanggilId);
+    const riwayat = (barisRiwayat || []).map((r: any) => ({
+      peran: String(r.senderId) === ID_ASISTEN ? ("model" as const) : ("user" as const),
+      teks: String(r.message || ""),
+    }));
+
     const apiKey = process.env.GEMINI_API_KEY;
+    // Kunci template (`.env` kiriman berisi "MY_...") dihitung TIDAK ADA.
+    // Klien yang dibangun darinya selalu gagal, jadi lebih baik langsung
+    // menjawab dari data daripada membakar anggaran waktu pada panggilan mati.
+    const ai =
+      apiKey && statusMesin().keadaan === "siap"
+        ? new GoogleGenAI({
+            apiKey,
+            httpOptions: { headers: { "User-Agent": "aistudio-build" } },
+          })
+        : null;
 
-    if (apiKey) {
-      try {
-        const ai = new GoogleGenAI({
-          apiKey: apiKey,
-          httpOptions: {
-            headers: {
-              "User-Agent": "aistudio-build",
-            },
-          },
-        });
+    const { message, bahasa, layar } = req.body;
 
-        const isAiAssistant = senderId === "lanpro-ai";
-
-        // Bangun transcript riwayat (kalau ada) agar model tahu percakapan sebelumnya.
-        const historyTranscript = historyList.length
-          ? historyList
-              .map((h) => `${h.from === "me" ? "User" : "Teman ngobrol"}: ${h.text}`)
-              .join("\n")
-          : "";
-        // Konteks layar hanya untuk AI Assistant resmi — rekan simulasi tidak
-        // perlu (dan tidak boleh) mengklaim bisa melihat layar user.
-        const screenDesc = isAiAssistant ? formatScreenForPrompt() : null;
-        const contentsPrompt = [
-          screenDesc ? `KONTEKS LAYAR USER (apa yang sedang mereka buka sekarang):\n${screenDesc}` : "",
-          historyTranscript ? `Riwayat percakapan terakhir:\n${historyTranscript}` : "",
-          `Pesan terbaru yang masuk:\n"${message}"`,
-          screenDesc
-            ? "Kalau pesannya merujuk ke flow/diagram/layar yang sedang dibuka (mis. \"flow saya udah oke belum?\", \"kok error ya\"), jawab berdasarkan konteks layar di atas: sebutkan node/koneksi spesifik yang kamu lihat, tunjukkan masalah nyata (node tanpa koneksi, decision tanpa cabang Ya/Tidak, label kosong, start/end ganda, dan sejenisnya), lalu kasih saran konkret. Jangan mengaku melihat sesuatu yang tidak ada di daftar."
-            : "Lanjutkan obrolan dari poin terakhir, jangan mengulang jawaban yang sudah pernah diberikan.",
-          'Tulis balasan chat-mu sekarang.',
-        ]
-          .filter(Boolean)
-          .join("\n\n");
-
-        // Gaya bahasa dipisah ke systemInstruction (peran & tone), isi pesan via contents —
-        // pola yang sama dengan meetings.routes.ts & notebooklm.routes.ts.
-        const aiSystemInstruction = `Kamu adalah "LanPro AI Assistant", teman ngobrol sekaligus asisten kerja di platform manajemen proyek LanPro.
-
-CARA BICARAMU (paling penting):
-- Tulis seperti chat manusia sungguhan di Slack/WA: santai, hangat, natural. Boleh pakai sapaan "kamu", partikel luwes ("sih", "dong", "kok", "ya"), dan emoji secukupnya (maksimal 1 per pesan).
-- Jawab sesuai konteks pesan yang benar-benar dikirim user, jangan menjawab generik. Kalau user curhat atau lagi capek, rangkul dulu baru kasih solusi; kalau user tanya teknis, langsung jawab intinya.
-- Jangan terpaku 2-3 kalimat: pertanyaan sederhana jawab singkat, pertanyaan kompleks boleh lebih panjang asal tetap ringkas, pakai bullet bila membantu.
-- JANGAN menutup pesan dengan basa-basi template seperti "Semangat kerjanya!", "Jangan ragu bertanya lagi ya!", "Ada lagi yang bisa saya bantu?". Variasikan, atau tidak sama sekali.
-- JANGAN mengawali dengan "Tentu!" atau "Halo! Terima kasih atas pertanyaannya". Langsung ke jawaban.
-- Boleh bertanya balik singkat kalau pesan user ambigu (contoh: "Maksudnya task di sprint ini atau board keseluruhan?").
-- Kalau tidak tahu atau di luar kemampuan, katakan dengan santai dan jujur, jangan menggurui.
-- Bahasa Indonesia kasual-profesional gaya startup Jakarta. Tanpa tanda kutip pembungkus, tanpa kata pengantar.`;
-
-        const colleagueSystemInstruction = `Kamu berperan sebagai rekan kerja bernama "${replySenderName}" (${replySenderRole}) di tim proyek LanPro. Balas chat dari rekan setimmu secara manusiawi dan realistis, seperti orang yang benar-benar sedang mengetik di Slack/WA.
-
-Aturan gaya:
-- Bahasa Indonesia santai khas anak startup, boleh singkatan umum ("otw", "review", "merge", "deploy", "fix") dan emoji maksimal 1.
-- Tanggapi ISI pesan lawan bicara secara spesifik — jangan pakai balasan template yang cocok untuk semua pesan.
-- Sesuaikan fokus obrolan dengan profilmu: IT Head soal arsitektur/database/release; PM soal deadline/sprint/risk; Developer soal coding/debug/PR; Designer soal UI/Figma/kontras.
-- Umumnya 1-3 kalimat cukup, tapi boleh lebih kalau topiknya butuh. Jangan pernah menutup dengan kalimat motivasi klise.
-- Tanpa kata pengantar, tanpa tanda kutip pembungkus, langsung balasannya saja.`;
-
-        const response = await generateContentWithFallback(ai, {
-          model: "gemini-flash-latest",
-          contents: contentsPrompt,
-          config: {
-            systemInstruction: isAiAssistant ? aiSystemInstruction : colleagueSystemInstruction,
-            temperature: isAiAssistant ? 1.0 : 1.1,
-            topP: 0.95,
-          },
-        });
-
-        if (response && response.text) {
-          replyText = response.text.trim();
-        }
-      } catch (geminiError) {
-        console.warn(
-          "[SIMULATION_API] Gagal menggunakan Gemini API, beralih ke fallback:",
-          geminiError
+    // "Mata" asisten: render snapshot flowchart yang dikirim klien (sudah
+    // dipangkas Zod) jadi teks konteks. Kalau tidak ada/kosong -> null, dan
+    // jawabAsisten bertingkah persis seperti sebelum fitur ini ada.
+    let konteksLayar: string | null = null;
+    if (layar && (layar.nodes.length > 0 || layar.edges.length > 0)) {
+      const baris: string[] = [
+        `User sedang membuka view "${layar.view}"${layar.flowName ? ` dengan diagram "${layar.flowName}"` : ""}.`,
+        `Bentuk di kanvas (${layar.nodes.length}): ${layar.nodes.map((n: any) => `${n.label} [${n.type}]`).join(", ")}.`,
+      ];
+      if (layar.edges.length) {
+        baris.push(
+          `Koneksi (${layar.edges.length}): ${layar.edges.map((e: any) => e.label ? `${e.fromLabel} -(${e.label})-> ${e.toLabel}` : `${e.fromLabel} -> ${e.toLabel}`).join(", ")}.`
         );
       }
-    }
-
-    // 3. Fallback responses if Gemini is not available or failed.
-    // Untuk AI Assistant: jangan pakai template motivasi klise — lebih baik jujur
-    // bahwa AI-nya sedang gangguan daripada terlihat seperti bot rusak.
-    if (!replyText && senderId === "lanpro-ai") {
-      const aiFallbacks = [
-        "Waduh, otak AI-nya lagi agak lemot nih 😅 Coba kirim ulang ya, nanti aku jawab lagi.",
-        "Maaf, lagi ada gangguan koneksi ke AI-nya. Boleh dicoba sekali lagi?",
-        "Hmm, aku lagi nggak bisa mikir jernih nih kayaknya. Kirim ulang pesannya ya 🙏",
-      ];
-      replyText = aiFallbacks[Math.floor(Math.random() * aiFallbacks.length)];
-    }
-    if (!replyText) {
-      const role = String(replySenderRole).toLowerCase();
-      let options = [
-        "Halo! Terima kasih atas pesannya. Pesan Anda sudah saya terima dan akan segera saya pelajari kembali. Selamat bekerja!",
-        "Siap, dipahami. Mari kita tuntaskan sprint ini dengan baik!",
-        "Oke, nanti kita bahas detailnya saat sinkronisasi ya.",
-      ];
-
-      if (role.includes("head") || role.includes("architect") || replySenderName.includes("Siti")) {
-        options = [
-          "Halo! Saya sedang mereview skema database terbaru dan integrasi gateway. Ada hal spesifik yang ingin dikoordinasikan terkait modul core platform?",
-          "Terima kasih infonya. Terkait pipeline deployment, tolong pastikan port 3000 sudah terkonfigurasi dengan benar di nginx proxy ya.",
-          "Bagus sekali. Rencana migrasi tabel sudah aman, kita akan eksekusi setelah testing di staging selesai. Kabari jika butuh bantuan debug.",
-          "Saya sedang melihat laporan audit logs untuk aktivitas perubahan skema. Kita perlu memitigasi kemungkinan downtime pada release berikutnya.",
-        ];
-      } else if (
-        role.includes("manager") ||
-        role.includes("pm") ||
-        replySenderName.includes("Rian")
-      ) {
-        options = [
-          "Halo! Terkait sprint backlog kita minggu ini, apakah ada hambatan (blocker) yang perlu kita diskusikan bersama?",
-          "Siap, terima kasih atas updatenya. Tolong pastikan Story Points di task diupdate ya agar velocity sprint kita terpantau presisi.",
-          "Untuk milestone rilis hybrid berikutnya, saya sedang mengoordinasikan jadwal dengan stakeholders. Tetap semangat rekan-rekan!",
-          "Bisa tolong siapkan ringkasan progres untuk bahan meeting besok pagi? Cukup 3 poin utama saja.",
-        ];
-      } else if (
-        role.includes("user") ||
-        role.includes("dev") ||
-        replySenderName.includes("Budi")
-      ) {
-        options = [
-          "Siap mas/mbak! Saya sedang fokus memperbaiki bug Navbar di Safari mobile dulu ya. Setelah ini selesai, saya langsung lanjut ke task dependensi berikutnya.",
-          "Aman! Tadi saya sudah coba pull code terbaru, jalurnya lancar tanpa konflik. Ada bagian kode tertentu yang perlu saya bantu review?",
-          "Untuk integrasi REST API, saya sedang mencocokkan payload JSON-nya. Sejauh ini aman, tinggal nunggu approval pull request dari tim lead.",
-          "Waduh, tadi sempat ada error koneksi DB di lokal saya, tapi sekarang sudah teratasi setelah diswitch ke fallback JSON local. Thank you infonya!",
-        ];
-      } else if (
-        role.includes("viewer") ||
-        role.includes("design") ||
-        replySenderName.includes("Dewi")
-      ) {
-        options = [
-          "Halo! Desain mockup figma untuk flow kolaborasi dan bagan timeline waterfall sudah saya finalisasi. Silakan dicek kontras warna dan responsive layout-nya.",
-          "Terima kasih sarannya. Saya setuju, ukuran font di card details memang agak kekecilan di mobile screen. Akan segera saya sesuaikan ukuran padding-nya.",
-          "Untuk layout visual dashboard baru, saya menggunakan pendekatan monokromatik abu-abu gelap dengan aksen oranye terang agar terkesan modern dan tangguh.",
-          "Siap! Jika butuh aset SVG baru atau panduan layout bento grid, langsung colek saya saja ya.",
-        ];
+      if (layar.selectedNodeId) {
+        const dipilih = layar.nodes.find((n: any) => n.id === layar.selectedNodeId);
+        baris.push(`Node terpilih user: "${dipilih?.label ?? layar.selectedNodeId}".`);
       }
-
-      const randomIndex = Math.floor(Math.random() * options.length);
-      replyText = options[randomIndex];
+      konteksLayar = baris.join("\n");
     }
 
-    // 4. Save simulated reply to Database
+    const putusan = await jawabAsisten({
+      pesan: message,
+      riwayat,
+      pemanggil,
+      bahasa: bahasa || "id",
+      ai,
+      ...(konteksLayar ? { konteksLayar } : {}),
+    });
+
     const id = crypto.randomUUID();
     const timestamp = new Date().toISOString();
-    const connection = await db.getConnection();
-    await connection.query(
-      "INSERT INTO Messages (id, senderId, receiverId, message, timestamp, `read`) VALUES (?, ?, ?, ?, ?, ?)",
-      [id, senderId, receiverId, replyText, timestamp, false]
-    );
-    connection.release();
+    const teks = putusan.teks;
+
+    await chatRepository.createMessage({
+      id,
+      senderId: ID_ASISTEN,
+      receiverId: pemanggilId,
+      message: teks,
+      timestamp,
+      read: false,
+    });
 
     res.json({
       status: "success",
       data: {
+        id,
+        senderId: ID_ASISTEN,
+        receiverId: pemanggilId,
+        message: teks,
+        timestamp,
+        read: false,
+      },
+      meta: { perkakas: putusan.perkakas, mesin: !!ai },
+    });
+  } catch (error: any) {
+    console.error("LOG ANOMALI CRITICAL: POST /api/chat/assistant error:", error);
+    res.status(500).json({
+      status: "error",
+      code: "srv.gagal_mendapatkan_jawaban_asisten",
+      message: "Gagal mendapatkan jawaban asisten.",
+    });
+  }
+});
+
+/**
+ * Balasan otomatis untuk chat dengan REKAN (bukan asisten), sakelar "Auto reply
+ * simulation" di widget (#551 menyesuaikan, bukan menghapus).
+ *
+ * PINTU YANG DITUTUP #551: rute ini menulis baris Messages atas nama `senderId`
+ * mana pun yang dikirim klien, tanpa memeriksa siapa yang memanggil. Sebelum
+ * 26 Sep 2026 akun mana pun bisa menanam "kata orang" di percakapan siapa pun.
+ * Sekarang penjaganya `receiverId` harus si pemanggil sendiri: ia tetap boleh
+ * menyalakan balasan simulasi di threads miliknya, dan tidak lagi boleh menulis
+ * di threads orang lain.
+ *
+ * Cabang "lanpro-ai" pada prompt di bawah juga dicabut: asisten punya jalurnya
+ * sendiri (/api/chat/assistant) yang menjawab dari data nyata, jadi tidak ada
+ * lagi alasan untuk menyamar jadi rekan.
+ */
+router.post(
+  "/api/chat/simulate-reply",
+  validasiBody(simulateReplySchema),
+  async (req: any, res) => {
+    try {
+      const { senderId, receiverId, message, senderName, senderRole } = req.body;
+      if (!matchesCaller(req.user, receiverId)) {
+        return res.status(403).json({
+          status: "error",
+          code: "srv.akses_ditolak_simulasi_hanya",
+          message:
+            "Akses ditolak: balasan simulasi hanya bisa diminta untuk percakapan Anda sendiri.",
+        });
+      }
+
+      const replySenderName = senderName || "Rekan Tim";
+      const replySenderRole = senderRole || "user";
+
+      let replyText = "";
+      const apiKey = process.env.GEMINI_API_KEY;
+
+      if (apiKey) {
+        try {
+          const ai = new GoogleGenAI({
+            apiKey: apiKey,
+            httpOptions: {
+              headers: {
+                "User-Agent": "aistudio-build",
+              },
+            },
+          });
+
+          const prompt = `Anda adalah rekan kerja tim profesional bernama "${replySenderName}" dengan peran "${replySenderRole}" di tim proyek "LanPro" (sebuah Platform manajemen SDLC kelas profesional).
+Anda baru saja menerima pesan chat berikut dari rekan Anda:
+"${message}"
+
+Tolong berikan balasan chat yang sangat realistis, ramah, profesional, menggunakan Bahasa Indonesia yang santai tapi sopan (seperti bahasa profesional startup/tech Jakarta).
+Tanggapi pesan tersebut secara langsung dan relevan sesuai dengan peran Anda (${replySenderRole}).
+
+Balasan Anda harus singkat (1-3 kalimat saja) layaknya pesan instan di Slack atau WA, jangan terlalu formal atau kaku. Jangan ada kata pengantar atau tanda kutip, langsung tulis balasannya saja.`;
+
+          const response = await generateContentWithFallback(ai, {
+            model: "gemini-flash-latest",
+            contents: prompt,
+            config: {
+              temperature: 0.8,
+            },
+          });
+
+          if (response && response.text) {
+            replyText = String(response.text).trim();
+          }
+        } catch (geminiError) {
+          console.warn(
+            "[SIMULATION_API] Gagal menggunakan Gemini API, beralih ke fallback:",
+            geminiError
+          );
+        }
+      }
+
+      if (!replyText) {
+        const role = String(replySenderRole).toLowerCase();
+        let options = [
+          "Halo! Terima kasih atas pesannya. Pesan Anda sudah saya terima dan akan segera saya pelajari kembali. Selamat bekerja!",
+          "Siap, dipahami. Mari kita tuntaskan sprint ini dengan baik!",
+          "Oke, nanti kita bahas detailnya saat sinkronisasi ya.",
+        ];
+
+        if (role.includes("head") || role.includes("architect")) {
+          options = [
+            "Halo! Saya sedang mereview skema database terbaru dan integrasi gateway. Ada hal spesifik yang ingin dikoordinasikan terkait modul core platform?",
+            "Terima kasih infonya. Terkait pipeline deployment, tolong pastikan konfigurasi nginx proxy sudah benar ya.",
+            "Bagus sekali. Rencana migrasi tabel sudah aman, kita akan eksekusi setelah testing di staging selesai. Kabari jika butuh bantuan debug.",
+            "Saya sedang melihat laporan audit logs untuk aktivitas perubahan skema. Kita perlu memitigasi kemungkinan downtime pada release berikutnya.",
+          ];
+        } else if (role.includes("manager") || role.includes("pm")) {
+          options = [
+            "Halo! Terkait sprint backlog kita minggu ini, apakah ada hambatan (blocker) yang perlu kita diskusikan bersama?",
+            "Siap, terima kasih atas updatenya. Tolong pastikan Story Points di task diupdate ya agar velocity sprint kita terpantau presisi.",
+            "Untuk milestone rilis berikutnya, saya sedang mengoordinasikan jadwal dengan stakeholders. Tetap semangat rekan-rekan!",
+            "Bisa tolong siapkan ringkasan progres untuk bahan meeting besok pagi? Cukup 3 poin utama saja.",
+          ];
+        } else if (role.includes("user") || role.includes("dev")) {
+          options = [
+            "Siap mas/mbak! Saya sedang fokus memperbaiki bug yang ada di antrean dulu ya. Setelah ini selesai, saya langsung lanjut ke task dependensi berikutnya.",
+            "Aman! Tadi saya sudah coba pull code terbaru, jalurnya lancar tanpa konflik. Ada bagian kode tertentu yang perlu saya bantu review?",
+            "Untuk integrasi REST API, saya sedang mencocokkan payload JSON-nya. Sejauh ini aman, tinggal nunggu approval pull request dari tim lead.",
+            "Waduh, tadi sempat ada error koneksi DB di lokal saya, tapi sekarang sudah teratasi. Thank you infonya!",
+          ];
+        } else if (role.includes("viewer") || role.includes("design")) {
+          options = [
+            "Halo! Desain mockup untuk flow kolaborasi dan bagan timeline sudah saya finalisasi. Silakan dicek kontras warna dan responsive layout-nya.",
+            "Terima kasih sarannya. Saya setuju, ukuran font di card details memang agak kekecilan di mobile screen. Akan segera saya sesuaikan ukuran padding-nya.",
+            "Untuk layout visual dashboard baru, saya menggunakan pendekatan monokromatik dengan aksen warna primer agar terkesan modern dan bersih.",
+            "Siap! Jika butuh aset SVG baru atau panduan layout, langsung colek saya saja ya.",
+          ];
+        }
+
+        const randomIndex = Math.floor(Math.random() * options.length);
+        replyText = options[randomIndex];
+      }
+
+      const id = crypto.randomUUID();
+      const timestamp = new Date().toISOString();
+
+      await chatRepository.createMessage({
         id,
         senderId,
         receiverId,
         message: replyText,
         timestamp,
         read: false,
-      },
-    });
-  } catch (error: any) {
-    console.error("LOG ANOMALI CRITICAL: POST /api/chat/simulate-reply error:", error);
-    res
-      .status(500)
-      .json({ status: "error", message: "Gagal membuat simulasi balasan: " + error.message });
+      });
+
+      res.json({
+        status: "success",
+        data: { id, senderId, receiverId, message: replyText, timestamp, read: false },
+      });
+    } catch (error: any) {
+      console.error("LOG ANOMALI CRITICAL: POST /api/chat/simulate-reply error:", error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.gagal_membuat_simulasi_balasan",
+        message: "Gagal membuat simulasi balasan.",
+      });
+    }
   }
-});
+);
 
 export default router;

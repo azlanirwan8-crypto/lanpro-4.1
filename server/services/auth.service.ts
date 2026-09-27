@@ -38,6 +38,16 @@ export function formatUserForAuthResponse(user: any) {
     avatar_url: avatar,
     photoURL: avatar,
     avatarUrl: avatar,
+    /**
+     * Item #296 — penanda bahwa pengguna masuk memakai kata sandi sementara
+     * dan harus membuat kata sandi baru sebelum boleh memakai aplikasi.
+     *
+     * Dikirim sebagai boolean tegas (bukan nilai apa adanya dari database)
+     * supaya klien tidak perlu menebak: PostgreSQL bisa memulangkannya
+     * sebagai `true`, `"t"`, atau `1` tergantung driver, dan tebakan di sisi
+     * klien adalah cara paling mudah membuat penjaga ini diam-diam lolos.
+     */
+    mustChangePassword: user.mustChangePassword === true || user.mustChangePassword === "t",
   };
 }
 
@@ -53,8 +63,22 @@ export type AuthResultSuccess = { success: true; user: any };
 export type AuthResultFailure = {
   success: false;
   status: number;
+  /**
+   * Kode stabil untuk klien — item #150.
+   *
+   * Server tidak tahu bahasa antarmuka pengguna, jadi ia TIDAK boleh memutuskan
+   * bahasanya. Kode ini yang diterjemahkan klien; `message` tetap dikirim
+   * sebagai cadangan agar pesan tidak pernah hilang bila kodenya belum dikenal.
+   *
+   * Kode juga memperbaiki hal lain: `useAuth.ts` sebelumnya bercabang dengan
+   * mencocokkan SUBSTRING berbahasa Indonesia ("terblokir", "belum aktif").
+   * Menerjemahkan pesannya akan diam-diam mematahkan percabangan itu.
+   */
+  code: string;
   message: string;
   remainingMs?: number;
+  /** Nilai untuk disisipkan ke terjemahan di sisi klien. */
+  params?: Record<string, string | number>;
 };
 export type AuthResult = AuthResultSuccess | AuthResultFailure;
 
@@ -92,6 +116,7 @@ export async function handleUserAuthentication(
     return {
       success: false,
       status: 500,
+      code: "auth.dbError",
       message: "Terjadi kesalahan koneksi database.",
     };
   } finally {
@@ -103,6 +128,7 @@ export async function handleUserAuthentication(
     return {
       success: false,
       status: 401,
+      code: "auth.badCredentials",
       message:
         "Kata sandi atau nama pengguna yang Anda masukkan salah. Silakan periksa kembali kredensial Anda.",
     };
@@ -150,6 +176,8 @@ export async function handleUserAuthentication(
     return {
       success: false,
       status: 429,
+      code: "auth.blocked",
+      params: { nama: matchedUsername, waktu: timeStr },
       message: `halo ${matchedUsername} akun anda terblokir, Silahkan menunggu ${timeStr} lagi untuk coba kembali`,
       remainingMs,
     };
@@ -200,6 +228,8 @@ export async function handleUserAuthentication(
       return {
         success: false,
         status: 429,
+        code: "auth.blockedFive",
+        params: { nama: matchedUsername },
         message: `halo ${matchedUsername} akun anda terblokir, Silahkan menunggu 5 menit lagi untuk coba kembali`,
         remainingMs: blockDurationMs,
       };
@@ -209,12 +239,42 @@ export async function handleUserAuthentication(
     return {
       success: false,
       status: 401,
+      code: "auth.wrongPassword",
+      params: { nama: matchedUsername },
       message: `halo ${matchedUsername} password yang anda masukan salah, Silakan periksa kembali kredensial Anda.`,
     };
   }
 
   // 5. Password is correct! Reset attempt tracker
   loginAttemptsMap.delete(userKey);
+
+  /**
+   * Item #296 — kata sandi sementara punya masa berlaku.
+   *
+   * Diperiksa SESUDAH kata sandinya terbukti benar, dan itu disengaja: kalau
+   * diperiksa lebih dulu, pesan "masa berlaku habis" akan bocor kepada siapa
+   * pun yang menebak-nebak kata sandi, dan itu memberi tahu penebak bahwa akun
+   * itu sedang dalam proses reset.
+   *
+   * Kodenya juga sengaja DIBEDAKAN dari kata sandi salah. Memakai
+   * `auth.wrongPassword` untuk kasus ini menyesatkan pengguna: kata sandinya
+   * benar, yang habis adalah waktunya, dan menyuruhnya "periksa kembali
+   * kredensial" hanya membuat ia mengetik ulang hal yang sama.
+   */
+  const kedaluwarsa = user.tempPasswordExpiresAt
+    ? new Date(user.tempPasswordExpiresAt).getTime()
+    : null;
+
+  if (kedaluwarsa !== null && Number.isFinite(kedaluwarsa) && Date.now() > kedaluwarsa) {
+    return {
+      success: false,
+      status: 401,
+      code: "auth.tempPasswordExpired",
+      params: { nama: matchedUsername },
+      message:
+        "Kata sandi sementara Anda sudah lewat masa berlakunya. Silakan minta tautan lupa kata sandi sekali lagi.",
+    };
+  }
 
   return {
     success: true,

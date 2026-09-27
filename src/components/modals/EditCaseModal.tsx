@@ -1,6 +1,9 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
-import { motion, AnimatePresence } from "motion/react";
 import { QATestCase } from "../../features/qa/types";
+import { StyledDropdown } from "../ui/CommonComponents";
+import { Modal } from "../ui/Modal";
+import { Button } from "../ui/CoreUI";
 
 interface EditCaseModalProps {
   testCase: QATestCase | null;
@@ -31,86 +34,98 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({
   onPriorityChange,
   onSubmit,
 }) => {
-  if (!testCase) return null;
+  const { t } = useTranslation();
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          className="bg-surface border border-border-subtle/80 rounded-md p-6 max-w-lg w-full shadow-2xl space-y-4"
-        >
-          <h3 className="text-sm font-medium text-content-strong uppercase tracking-wider">
-            Ubah Test Case Detail
-          </h3>
-          <div className="space-y-3">
-            <div className="space-y-1">
-              <label className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block">
-                Judul Test Case
-              </label>
-              <input
-                type="text"
-                value={editTitle}
-                onChange={(e) => onTitleChange(e.target.value)}
-                className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-medium text-content-strong"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block">
-                Prioritas
-              </label>
-              <select
-                value={editPriority}
-                onChange={(e) => onPriorityChange(e.target.value as any)}
-                className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-medium text-content-strong cursor-pointer"
-              >
-                <option value="Low">Low Priority</option>
-                <option value="Medium">Medium Priority</option>
-                <option value="High">High Priority</option>
-                <option value="Critical">Critical Priority</option>
-              </select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block">
-                Langkah Pengujian
-              </label>
-              <textarea
-                rows={3}
-                value={editSteps}
-                onChange={(e) => onStepsChange(e.target.value)}
-                className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-medium text-content-strong"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block">
-                Hasil yang Diharapkan
-              </label>
-              <textarea
-                rows={2}
-                value={editExpected}
-                onChange={(e) => onExpectedChange(e.target.value)}
-                className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-medium text-content-strong"
-              />
-            </div>
-          </div>
-          <div className="flex justify-end gap-2.5 pt-2">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 bg-surface-muted text-content-secondary text-xs font-medium rounded-md cursor-pointer"
-            >
-              Batal
-            </button>
-            <button
-              onClick={onSubmit}
-              className="px-4 py-2 bg-primary text-white text-xs font-medium rounded-md cursor-pointer shadow-xs active:scale-95"
-            >
-              Simpan Perubahan
-            </button>
-          </div>
-        </motion.div>
+    <Modal
+      isOpen={!!testCase}
+      onClose={onClose}
+      title={t("editCase.title")}
+      maxWidth="max-w-lg"
+      footer={
+        <>
+          <Button type="button" variant="secondary" onClick={onClose}>
+            {t("editCase.cancel")}
+          </Button>
+          <Button type="button" onClick={onSubmit}>
+            {t("editCase.save")}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <label className="text-xs font-normal text-content-body block">
+            {t("editCase.caseTitle")}
+          </label>
+          <input
+            type="text"
+            value={editTitle}
+            onChange={(e) => onTitleChange(e.target.value)}
+            className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-normal text-content-body"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-normal text-content-body block">
+            {t("editCase.priority")}
+          </label>
+          <StyledDropdown
+            value={editPriority}
+            onChange={(val) => onPriorityChange(val as any)}
+            options={[
+              {
+                id: "Critical",
+                label: t("components.criticalPriority"),
+                icon: "Flame",
+                color: "#EF4444",
+              },
+              {
+                id: "High",
+                label: t("components.highPriority"),
+                icon: "ChevronUp",
+                color: "#F97316",
+              },
+              {
+                id: "Medium",
+                label: t("components.mediumPriority"),
+                icon: "Circle",
+                color: "#F59E0B",
+              },
+              {
+                id: "Low",
+                label: t("components.lowPriority"),
+                icon: "ChevronDown",
+                color: "#10B981",
+              },
+            ]}
+            masterData={[]}
+            className="w-full"
+            buttonClassName="h-9 bg-surface-sunken rounded-md border border-border-subtle hover:border-border-subtle px-3 text-xs font-normal text-content-body"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-normal text-content-body block">
+            {t("editCase.steps")}
+          </label>
+          <textarea
+            rows={3}
+            value={editSteps}
+            onChange={(e) => onStepsChange(e.target.value)}
+            className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-normal text-content-body"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-normal text-content-body block">
+            {t("editCase.expected")}
+          </label>
+          <textarea
+            rows={2}
+            value={editExpected}
+            onChange={(e) => onExpectedChange(e.target.value)}
+            className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-normal text-content-body"
+          />
+        </div>
       </div>
-    </AnimatePresence>
+    </Modal>
   );
 };

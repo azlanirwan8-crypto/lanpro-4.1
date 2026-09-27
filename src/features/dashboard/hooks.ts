@@ -1,11 +1,14 @@
 import { format, differenceInDays, addDays, isSameDay } from "date-fns";
 import { DashboardViewProps } from "./types";
 import { ensureDate } from "../../lib/utils";
-import { Task } from "../../types";
+import { Task, MasterData } from "../../types";
+import { statusSelesai } from "../../lib/statusSelesai";
+import { bobotTugasBurndown, metrikSprintHybrid } from "../../lib/metrikSprint";
 
 export const COLORS = ["#F97316", "#3B82F6", "#10B981", "#EC4899", "#8B5CF6"];
 
 export const useDashboard = (props: DashboardViewProps) => {
+  const masterData: MasterData[] = Array.isArray(props.masterData) ? props.masterData : [];
   const tasks = Array.isArray(props.tasks) ? props.tasks : [];
   const nonEpicTasks = tasks.filter((t) => t && String(t.type || "").toLowerCase() !== "epic");
   const sprints = Array.isArray(props.sprints) ? props.sprints : [];
@@ -15,7 +18,7 @@ export const useDashboard = (props: DashboardViewProps) => {
   const now = new Date();
 
   const dueSoonTasks = nonEpicTasks.filter((t) => {
-    if (t.status === "Done" || t.status === "Selesai") return false;
+    if (statusSelesai(t.status, masterData)) return false;
     if (!t.endDate) return false;
     const d = ensureDate(t.endDate);
     return d.getTime() > now.getTime() && d.getTime() - now.getTime() < 3 * 24 * 60 * 60 * 1000;
@@ -23,8 +26,7 @@ export const useDashboard = (props: DashboardViewProps) => {
 
   const overdueTasks = nonEpicTasks.filter(
     (t) =>
-      t.status !== "Done" &&
-      t.status !== "Selesai" &&
+      !statusSelesai(t.status, masterData) &&
       t.endDate &&
       ensureDate(t.endDate).getTime() < now.getTime()
   );
@@ -40,9 +42,9 @@ export const useDashboard = (props: DashboardViewProps) => {
       )
   );
 
-  const completedTasks = nonEpicTasks.filter((t) => t.status === "Done" || t.status === "Selesai");
+  const completedTasks = nonEpicTasks.filter((t) => statusSelesai(t.status, masterData));
   const inProgressTasks = nonEpicTasks.filter(
-    (t) => t.status !== "Done" && t.status !== "Selesai" && t.status !== "Backlog"
+    (t) => !statusSelesai(t.status, masterData) && t.status !== "Backlog"
   );
   const totalTasks = nonEpicTasks.length;
   const completionPercentage =
@@ -61,12 +63,15 @@ export const useDashboard = (props: DashboardViewProps) => {
 
   if (activeSprint) {
     const sTasks = nonEpicTasks.filter((t) => t.sprintId === activeSprint.id);
-    sprintTotalTasks = sTasks.length;
-    sprintCompletedTasks = sTasks.filter(
-      (t) => t.status === "Done" || t.status === "Selesai"
-    ).length;
-    sprintProgress =
-      sprintTotalTasks === 0 ? 0 : Math.round((sprintCompletedTasks / sprintTotalTasks) * 100);
+    const metrik = metrikSprintHybrid(
+      sTasks.map((t) => ({
+        storyPoints: t.storyPoints,
+        done: statusSelesai(t.status, masterData),
+      }))
+    );
+    sprintTotalTasks = metrik.total;
+    sprintCompletedTasks = metrik.done;
+    sprintProgress = metrik.progressPct;
     if (activeSprint.endDate) {
       sprintDaysLeft = Math.max(0, differenceInDays(ensureDate(activeSprint.endDate), now));
     }
@@ -135,7 +140,7 @@ export const useDashboard = (props: DashboardViewProps) => {
     if (!userWorkloadMap[assignee]) {
       userWorkloadMap[assignee] = { name: "Legacy User", Done: 0, Active: 0 };
     }
-    if (t.status === "Done" || t.status === "Selesai") userWorkloadMap[assignee].Done += 1;
+    if (statusSelesai(t.status, masterData)) userWorkloadMap[assignee].Done += 1;
     else userWorkloadMap[assignee].Active += 1;
 
     let teamName = "No Team";
@@ -146,7 +151,7 @@ export const useDashboard = (props: DashboardViewProps) => {
     if (!teamWorkloadMap[teamName])
       teamWorkloadMap[teamName] = { name: teamName, Done: 0, Active: 0 };
 
-    if (t.status === "Done" || t.status === "Selesai") teamWorkloadMap[teamName].Done += 1;
+    if (statusSelesai(t.status, masterData)) teamWorkloadMap[teamName].Done += 1;
     else teamWorkloadMap[teamName].Active += 1;
   });
 
@@ -176,7 +181,7 @@ export const useDashboard = (props: DashboardViewProps) => {
       if (!sprintUserWorkloadMap[assignee]) {
         sprintUserWorkloadMap[assignee] = { name: "Legacy User", Done: 0, Active: 0 };
       }
-      if (t.status === "Done" || t.status === "Selesai") sprintUserWorkloadMap[assignee].Done += 1;
+      if (statusSelesai(t.status, masterData)) sprintUserWorkloadMap[assignee].Done += 1;
       else sprintUserWorkloadMap[assignee].Active += 1;
     });
   }
@@ -192,20 +197,30 @@ export const useDashboard = (props: DashboardViewProps) => {
     if (totalDays <= 0 || totalDays > 100) return [];
 
     const sprintTasks = nonEpicTasks.filter((t) => t.sprintId === activeSprint.id);
-    const totalTaskCount = sprintTasks.length;
-    if (totalTaskCount === 0) return [];
+    if (sprintTasks.length === 0) return [];
+
+    // #464 — satuan sama dengan Planning: poin bila ada, else tugas
+    const metrik = metrikSprintHybrid(
+      sprintTasks.map((t) => ({
+        storyPoints: t.storyPoints,
+        done: statusSelesai(t.status, masterData),
+      }))
+    );
+    const totalWork = metrik.total;
+    if (totalWork === 0) return [];
+    const satuan = metrik.satuan;
 
     const data = [];
     for (let i = 0; i <= totalDays; i++) {
       const currentDate = addDays(start, i);
-      const idealRemaining = Math.max(0, totalTaskCount - (totalTaskCount / totalDays) * i);
+      const idealRemaining = Math.max(0, totalWork - (totalWork / totalDays) * i);
 
-      let completedTasksAsOfDate = 0;
+      let completedAsOfDate = 0;
       sprintTasks.forEach((t) => {
-        if (t.status === "Done" || t.status === "Selesai") {
+        if (statusSelesai(t.status, masterData)) {
           const taskDate = t.updatedAt ? ensureDate(t.updatedAt) : new Date();
           if (taskDate.getTime() <= currentDate.getTime() || isSameDay(taskDate, currentDate)) {
-            completedTasksAsOfDate++;
+            completedAsOfDate += bobotTugasBurndown(t, satuan);
           }
         }
       });
@@ -215,7 +230,7 @@ export const useDashboard = (props: DashboardViewProps) => {
       data.push({
         date: format(currentDate, "MMM d"),
         Ideal: Number(idealRemaining.toFixed(1)),
-        Actual: isFuture ? null : totalTaskCount - completedTasksAsOfDate,
+        Actual: isFuture ? null : totalWork - completedAsOfDate,
       });
     }
     return data;
@@ -238,7 +253,7 @@ export const useDashboard = (props: DashboardViewProps) => {
     }).length;
 
     const completedThatDay = nonEpicTasks.filter((t) => {
-      if ((t.status !== "Done" && t.status !== "Selesai") || !t.updatedAt) return false;
+      if (!statusSelesai(t.status, masterData) || !t.updatedAt) return false;
       const td = ensureDate(t.updatedAt);
       return (
         td.getDate() === d.getDate() &&
@@ -256,6 +271,52 @@ export const useDashboard = (props: DashboardViewProps) => {
   const last7DaysData = [...last7DaysDataRaw];
   const weeklyVelocity = last7DaysData.reduce((acc, curr) => acc + curr.Completed, 0);
 
+  /** #342 — throughput mingguan (tugas terminal per minggu), 8 minggu terakhir. */
+  const throughputWeeklyData = (() => {
+    const weeks = 8;
+    const msWeek = 7 * msInDay;
+    const end = now;
+    const data: { name: string; Completed: number }[] = [];
+    for (let w = weeks - 1; w >= 0; w--) {
+      const weekEnd = new Date(end.getTime() - w * msWeek);
+      const weekStart = new Date(weekEnd.getTime() - msWeek);
+      const completed = nonEpicTasks.filter((t) => {
+        if (!statusSelesai(t.status, masterData) || !t.updatedAt) return false;
+        const td = ensureDate(t.updatedAt).getTime();
+        return td > weekStart.getTime() && td <= weekEnd.getTime();
+      }).length;
+      data.push({
+        name: format(weekEnd, "dd MMM"),
+        Completed: completed,
+      });
+    }
+    return data;
+  })();
+
+  /**
+   * #342 — deret aktivitas/selesai untuk filter rentang (hari).
+   * ALL → 7 (sama last7Days); 1M→30; 6M→26 minggu diganti di UI jadi weekly.
+   */
+  const buildRangeActivity = (dayCount: number) => {
+    const raw: { name: string; Activity: number; Completed: number }[] = [];
+    const capped = Math.min(Math.max(dayCount, 1), 90);
+    for (let i = capped - 1; i >= 0; i--) {
+      const d = new Date(now.getTime() - i * msInDay);
+      const dateStr = format(d, capped > 14 ? "dd/MM" : "dd MMM");
+      const dayActivities = activityLogs.filter((a) => {
+        if (!a.createdAt) return false;
+        const ad = ensureDate(a.createdAt);
+        return isSameDay(ad, d);
+      }).length;
+      const completedThatDay = nonEpicTasks.filter((t) => {
+        if (!statusSelesai(t.status, masterData) || !t.updatedAt) return false;
+        return isSameDay(ensureDate(t.updatedAt), d);
+      }).length;
+      raw.push({ name: dateStr, Activity: dayActivities, Completed: completedThatDay });
+    }
+    return raw;
+  };
+
   // Velocity Data (Story points or task count completed across past sprints)
   const velocityData = sprints
     .slice() // copy array
@@ -268,9 +329,7 @@ export const useDashboard = (props: DashboardViewProps) => {
     .map((sprint) => {
       const sprintTasks = nonEpicTasks.filter((t) => t.sprintId === sprint.id);
       const plannedPoints = sprintTasks.reduce((acc, t) => acc + (t.storyPoints || 0), 0);
-      const completedTasks = sprintTasks.filter(
-        (t) => t.status === "Done" || t.status === "Selesai"
-      );
+      const completedTasks = sprintTasks.filter((t) => statusSelesai(t.status, masterData));
       const completedPoints = completedTasks.reduce((acc, t) => acc + (t.storyPoints || 0), 0);
 
       return {
@@ -378,6 +437,8 @@ export const useDashboard = (props: DashboardViewProps) => {
     burndownData,
     last7DaysData,
     weeklyVelocity,
+    throughputWeeklyData,
+    buildRangeActivity,
     velocityData,
     estimationAccuracyData,
     estimationStats,

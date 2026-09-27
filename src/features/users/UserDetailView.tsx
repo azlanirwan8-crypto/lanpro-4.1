@@ -1,6 +1,9 @@
+import { useTranslation } from "react-i18next";
+import { StyledDropdown } from "../../components/ui/CommonComponents";
+import { Tabs } from "../../components/ui/Tabs";
 import { safeLocalStorage } from "../../lib/safeStorage";
 import React, { useState, useEffect } from "react";
-import { UserProfile, Project, Task, AppRole, UserPermissions } from "../../types";
+import { UserProfile, Project, Task, AppRole, UserPermissions, ActivityLog } from "../../types";
 import { UserAvatar } from "./styles";
 import {
   ArrowLeft,
@@ -9,14 +12,15 @@ import {
   UserCog,
   Users,
   Eye,
+  EyeOff,
+  Search,
+  User,
+  Edit3,
   CheckCircle,
   Layout,
-  Mail,
-  Phone,
   Key,
   Check,
   Clock,
-  Building,
   Lock,
   ShieldAlert,
   Trash2,
@@ -25,18 +29,58 @@ import {
   Save,
   RefreshCw,
   Server,
-  RotateCcw,
+  LayoutGrid,
+  IdCard,
+  KeyRound,
+  Settings2,
+  FileText,
+  Paperclip,
+  Activity,
+  Sparkles,
+  Camera,
+  Mail,
+  Phone,
+  Laptop,
+  Smartphone,
+  Tablet,
+  Globe,
+  MapPin,
+  ChevronDown,
+  ChevronRight,
+  Folder,
+  FolderOpen,
+  Video,
+  Workflow,
+  Download,
+  FileSpreadsheet,
+  FileArchive,
+  Image as ImageIcon,
+  Building2,
+  Briefcase,
+  UserCheck,
+  LogOut,
 } from "lucide-react";
+import { format, formatDistanceToNow, isToday, isThisWeek, isThisMonth } from "date-fns";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
-import { cn } from "../../lib/utils";
+import { cn, ensureDate, humanizeActivityAction } from "../../lib/utils";
+import { statusSelesai } from "../../lib/statusSelesai";
+import { apiRequest, apiClient } from "../../lib/api";
+import {
+  katalogPeranSistem,
+  katalogPeranProyek,
+  labelPeran,
+  cariPeran,
+} from "../../lib/roleCatalog";
 import { toast } from "sonner";
 import {
   updateUser,
   uploadAvatar,
+  uploadCover,
   fetchUsers,
   assignUserToProject,
   removeUserFromProject,
 } from "./services/users.service";
+import { ForgotPasswordModal } from "../auth/components/ForgotPasswordModal";
 import {
   DEFAULT_PERMISSIONS as ROLE_DEFAULT_PERMISSIONS,
   getUserPermissions,
@@ -52,56 +96,66 @@ interface UserDetailViewProps {
   masterData?: any[];
   onUserUpdated?: () => void;
   currentUser?: UserProfile | null;
+  activityLogs?: ActivityLog[];
+  /** #470 — buka detail tugas dari Tugas Terdelegasi */
+  onOpenTask?: (task: Task) => void;
 }
 
+/**
+ * Item #148 — label dan deskripsi modul kini KUNCI kamus, bukan teks.
+ *
+ * Konstanta ini berada di tingkat modul sehingga tidak bisa memakai hook,
+ * dan `i18n.t()` di sini akan dievaluasi sekali saat impor — membekukan
+ * bahasanya. Jadi yang disimpan adalah kunci; penerjemahannya dilakukan di
+ * tempat pemakaian, yang memang berada di dalam komponen.
+ */
 const MODULE_DESCRIPTIONS: Record<string, { label: string; desc: string }> = {
-  dashboard: {
-    label: "Dashboard Executive",
-    desc: "Akses ke executive KPI summary & analytics widget",
-  },
-  meetingNotes: {
-    label: "Notulensi Rapat (Notes)",
-    desc: "Membuat & mengelola catatan rapat serta AI Companion",
-  },
-  wiki: { label: "Wiki & Dokumentasi", desc: "Dokumentasi internal, SOP, dan pengetahuan tim" },
-  notebooklm: {
-    label: "NotebookLM AI Workspace",
-    desc: "Workspace catatan AI dan analisa sumber data",
-  },
-  list: {
-    label: "Pengelolaan Issue / Tugas",
-    desc: "Daftar tugas, pembuatan issue, dan pelacakan status",
-  },
-  sprints: {
-    label: "Sprint & Planning",
-    desc: "Sprint planning, backlog management, dan alokasi tugas",
-  },
-  board: {
-    label: "Papan Kanban",
-    desc: "Visualisasi alur kerja papan Kanban dan drag & drop task",
-  },
-  qa: {
-    label: "Pengujian QA & Test Case",
-    desc: "Membuat test suite, test case, dan melacak hasil pengujian",
-  },
-  timeline: { label: "Roadmap & Timeline", desc: "Visualisasi linimasa proyek dan milestone" },
-  access: { label: "Akses Tim & Proyek", desc: "Manajemen anggota tim dan delegasi proyek" },
-  userManagement: {
-    label: "Manajemen Pengguna System",
-    desc: "Mengelola profil user, role, dan clearance status",
-  },
-  masterData: {
-    label: "Master Data Setup",
-    desc: "Konfigurasi master data departemen, jabatan, dan role",
-  },
-  auditLog: { label: "Log Audit Sistem", desc: "Riwayat aktivitas user dan catatan keamanan" },
-  dbExplorer: { label: "Database Explorer", desc: "Inspeksi tabel dan query database" },
-  settings: {
-    label: "Konfigurasi Sistem",
-    desc: "Pengaturan Email SMTP, WhatsApp Gateway, & Template",
-  },
-  flowchart: { label: "Diagram & Flowchart", desc: "Pembuatan diagram proses dan flowchart kerja" },
+  dashboard: { label: "permModul.dashboardLabel", desc: "permModul.dashboardDesc" },
+  meetingNotes: { label: "permModul.meetingNotesLabel", desc: "permModul.meetingNotesDesc" },
+  wiki: { label: "permModul.wikiLabel", desc: "permModul.wikiDesc" },
+  flowchart: { label: "permModul.flowchartLabel", desc: "permModul.flowchartDesc" },
+  list: { label: "permModul.listLabel", desc: "permModul.listDesc" },
+  sprints: { label: "permModul.sprintsLabel", desc: "permModul.sprintsDesc" },
+  board: { label: "permModul.boardLabel", desc: "permModul.boardDesc" },
+  qa: { label: "permModul.qaLabel", desc: "permModul.qaDesc" },
+  timeline: { label: "permModul.timelineLabel", desc: "permModul.timelineDesc" },
+  access: { label: "permModul.accessLabel", desc: "permModul.accessDesc" },
+  masterData: { label: "permModul.masterDataLabel", desc: "permModul.masterDataDesc" },
+  userManagement: { label: "permModul.userManagementLabel", desc: "permModul.userManagementDesc" },
+  auditLog: { label: "permModul.auditLogLabel", desc: "permModul.auditLogDesc" },
+  dbExplorer: { label: "permModul.dbExplorerLabel", desc: "permModul.dbExplorerDesc" },
+  settings: { label: "permModul.settingsLabel", desc: "permModul.settingsDesc" },
 };
+
+/** Struktur Grup Modul Persis Mengikuti Sidebar Aplikasi */
+interface PermissionSection {
+  id: string;
+  titleKey: string;
+  modules: Array<keyof UserPermissions>;
+}
+
+const PERMISSION_SECTIONS: PermissionSection[] = [
+  {
+    id: "menu",
+    titleKey: "sidebar.menu",
+    modules: ["dashboard"],
+  },
+  {
+    id: "collaboration",
+    titleKey: "sidebar.collaboration",
+    modules: ["meetingNotes", "wiki", "flowchart"],
+  },
+  {
+    id: "projects",
+    titleKey: "sidebar.projectManagement",
+    modules: ["list", "sprints", "board", "qa", "timeline", "access"],
+  },
+  {
+    id: "administration",
+    titleKey: "sidebar.administration",
+    modules: ["masterData", "userManagement", "auditLog", "dbExplorer", "settings"],
+  },
+];
 
 const ROLE_DESCRIPTIONS: Record<string, { label: string; desc: string; icon: React.ReactNode }> = {
   admin: {
@@ -112,7 +166,7 @@ const ROLE_DESCRIPTIONS: Record<string, { label: string; desc: string; icon: Rea
   head: {
     label: "Department Head",
     desc: "Wewenang supervisi departemen, persetujuan modul rapat & dokumentasi.",
-    icon: <Award className="w-4 h-4 text-purple-600" />,
+    icon: <Award className="w-4 h-4 text-primary" />,
   },
   manager: {
     label: "Project Manager",
@@ -122,7 +176,7 @@ const ROLE_DESCRIPTIONS: Record<string, { label: string; desc: string; icon: Rea
   user: {
     label: "Standard User (Anggota Tim)",
     desc: "Akses membuat & memperbarui tugas, notulensi rapat, serta catatan AI.",
-    icon: <Users className="w-4 h-4 text-indigo-600" />,
+    icon: <Users className="w-4 h-4 text-primary" />,
   },
   viewer: {
     label: "Observer (Read-Only)",
@@ -141,7 +195,10 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
   masterData = [],
   onUserUpdated,
   currentUser,
+  activityLogs = [],
+  onOpenTask,
 }) => {
+  const { t } = useTranslation();
   const effectiveCurrentUser =
     currentUser ||
     (() => {
@@ -157,15 +214,24 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
     ["sadm", "admn", "admin", "system admin", "super admin"].includes(
       String(userRoleStr).toLowerCase()
     ) || ["SADM", "ADMN"].includes(userRoleStr);
+
+  const curId = effectiveCurrentUser?.id || effectiveCurrentUser?.uid;
+  const isSelf = Boolean(
+    curId &&
+    (curId === user?.id ||
+      curId === user?.uid ||
+      (effectiveCurrentUser?.email && effectiveCurrentUser.email === user?.email))
+  );
+
   if (!user) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 bg-surface-sunken">
-        <h2 className="text-xl font-medium text-content-strong mb-2">Pengguna tidak ditemukan</h2>
+        <h2 className="text-xl font-medium text-content-strong mb-2">{t("userDetail.notFound")}</h2>
         <button
           onClick={onBack}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md text-xs font-medium"
+          className="px-4 py-2 bg-primary-surface text-content-inverse rounded-md text-xs font-medium"
         >
-          Kembali
+          {t("userDetail.back")}
         </button>
       </div>
     );
@@ -174,6 +240,16 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
   // Form Edit State
   const [selectedAvatar, setSelectedAvatar] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedCover, setSelectedCover] = useState<File | null>(null);
+  const [previewCoverUrl, setPreviewCoverUrl] = useState<string | null>(null);
+  // Item #208 — cover kini tersimpan di server (kolom "coverUrl", sama
+  // seperti avatar), bukan hanya localStorage. `user.coverUrl` diprioritaskan;
+  // localStorage cuma cadangan untuk cover yang sempat disimpan sebelum
+  // perbaikan ini (belum pernah diunggah ulang).
+  const [coverURL, setCoverURL] = useState<string>(() => {
+    return user?.coverUrl || safeLocalStorage.getItem(`user_cover_${user?.id || user?.uid}`) || "";
+  });
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [photoURL, setPhotoURL] = useState(
     user?.avatar_url || user?.photoURL || user?.avatarUrl || ""
@@ -187,27 +263,290 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
   const [editFullName, setEditFullName] = useState<string>(user.displayName || user.username || "");
   const [editEmail, setEditEmail] = useState<string>(user.email || "");
   const [editPhone, setEditPhone] = useState<string>(user.phone || "");
+
+  // State pencarian & tampilan di Tab Project (#218)
+  const [projectSearchQuery, setProjectSearchQuery] = useState<string>("");
+  const [projectTabMode, setProjectTabMode] = useState<"grid" | "list" | "compact">("grid");
+
+  // State lipat/buka tugas per proyek di Tab Project
+  const [expandedProjectTasks, setExpandedProjectTasks] = useState<Record<string, boolean>>({});
+  const toggleProjectTasks = (projectId: string) => {
+    setExpandedProjectTasks((prev) => ({
+      ...prev,
+      [projectId]: prev[projectId] === undefined ? false : !prev[projectId],
+    }));
+  };
+
+  // Password State (Old, New, Confirm)
+  const [editOldPassword, setEditOldPassword] = useState<string>("");
   const [editPassword, setEditPassword] = useState<string>("");
+  const [editConfirmPassword, setEditConfirmPassword] = useState<string>("");
+  const [showOldPassword, setShowOldPassword] = useState<boolean>(false);
+  const [showEditPassword, setShowEditPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  // Clean up object URL on unmount or previewUrl change to avoid memory leak
+  // #480 — Login History HANYA dari UserSessions pemilik profil (regresi #191).
+  // Jangan mengarang dari navigator/GPS admin atau localStorage.
+  interface SessionItem {
+    id: string;
+    device: string;
+    deviceType: "laptop" | "smartphone" | "tablet";
+    location: string;
+    ip: string;
+    time: string;
+    isCurrent: boolean;
+    /** false untuk cadangan lastSeen — bukan sesi yang bisa di-terminate */
+    canRevoke: boolean;
+    isLatest?: boolean;
+  }
+
+  const [userSessions, setUserSessions] = useState<SessionItem[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const targetId = user?.id || user?.uid;
+    if (!targetId) {
+      setUserSessions([]);
+      return;
+    }
+
+    try {
+      safeLocalStorage.removeItem(`user_sessions_${targetId}`);
+    } catch {}
+
+    const mapSessionRows = (rows: any[], viewingSelf: boolean): SessionItem[] => {
+      return (rows || []).map((item: any, idx: number) => {
+        const uaBlob =
+          `${item.device || ""} ${item.os || ""} ${item.userAgent || ""}`.toLowerCase();
+        const isMobile = uaBlob.includes("android") || uaBlob.includes("iphone");
+        const isTablet = uaBlob.includes("ipad");
+        const aktif = String(item.status || "").toUpperCase() === "ACTIVE";
+        const loginAt = item.loginAt ? ensureDate(item.loginAt) : null;
+        const browserOs =
+          item.browser || item.os
+            ? `${item.browser || "Browser"} on ${item.os || "Device"}`
+            : item.device ||
+              (item.userAgent ? String(item.userAgent).slice(0, 72) : null) ||
+              t("userDetail.unknownDevice", "Perangkat tidak diketahui");
+        return {
+          id: item.id,
+          device: browserOs,
+          deviceType: (isMobile
+            ? "smartphone"
+            : isTablet
+              ? "tablet"
+              : "laptop") as SessionItem["deviceType"],
+          location: item.location || item.city || "",
+          ip: item.ipAddress || "",
+          time: aktif && viewingSelf ? "Active Now" : loginAt ? loginAt.toLocaleString() : "—",
+          isCurrent: viewingSelf && aktif,
+          canRevoke: !(viewingSelf && aktif),
+          isLatest: idx === 0 && !(viewingSelf && aktif),
+        };
+      });
+    };
+
+    const lastSeenFallback = (): SessionItem[] => {
+      if (!user?.lastSeen) return [];
+      const raw = user.lastSeen;
+      const ms = /^\d+$/.test(String(raw).trim()) ? Number(raw) : ensureDate(raw).getTime();
+      if (!Number.isFinite(ms) || ms <= 0) return [];
+      return [
+        {
+          id: "last-seen",
+          device: t("userDetail.lastLogin", "Login terakhir"),
+          deviceType: "laptop",
+          location: t(
+            "userDetail.lastSeenNoDevice",
+            "Detail perangkat/IP belum tercatat di riwayat sesi"
+          ),
+          ip: "",
+          time: new Date(ms).toLocaleString(),
+          isCurrent: false,
+          canRevoke: false,
+          isLatest: false,
+        },
+      ];
+    };
+
+    const fetchUserDbSessions = async () => {
+      setSessionsLoading(true);
+      try {
+        const viewingSelf = Boolean(
+          curId &&
+          (curId === user?.id ||
+            curId === user?.uid ||
+            (effectiveCurrentUser?.email && effectiveCurrentUser.email === user?.email))
+        );
+
+        const candidates = [user?.id, user?.uid, user?.email].filter(Boolean).map(String);
+        const unique = [...new Set(candidates)];
+        let rows: any[] = [];
+        for (const key of unique) {
+          const res = await apiClient.get(
+            `/api/admin/sessions?userId=${encodeURIComponent(key)}&limit=10`
+          );
+          if (
+            res.data?.status === "success" &&
+            Array.isArray(res.data.data) &&
+            res.data.data.length
+          ) {
+            rows = res.data.data;
+            break;
+          }
+        }
+
+        if (!rows.length && user?.email) {
+          const res = await apiClient.get(
+            `/api/admin/sessions?search=${encodeURIComponent(user.email)}&limit=10`
+          );
+          if (res.data?.status === "success" && Array.isArray(res.data.data)) {
+            const emailLower = String(user.email).toLowerCase();
+            rows = res.data.data.filter(
+              (r: any) => String(r.email || "").toLowerCase() === emailLower
+            );
+          }
+        }
+
+        if (!isMounted) return;
+        let formatted = mapSessionRows(rows, viewingSelf);
+        if (formatted.length === 0) formatted = lastSeenFallback();
+        setUserSessions(formatted);
+      } catch {
+        if (!isMounted) return;
+        setUserSessions(lastSeenFallback());
+      } finally {
+        if (isMounted) setSessionsLoading(false);
+      }
+    };
+
+    fetchUserDbSessions();
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id, user?.uid, user?.email, user?.lastSeen, curId, effectiveCurrentUser?.email, t]);
+
+  const handleRevokeSession = async (sessionId: string) => {
+    try {
+      await apiClient.post(`/api/admin/sessions/${sessionId}/terminate`);
+    } catch {}
+    setUserSessions((prev) => prev.filter((s) => s.id !== sessionId));
+    toast.success(t("userDetail.deviceLoggedOut"));
+  };
+
+  const handleRevokeAllOtherSessions = async () => {
+    const others = userSessions.filter((s) => s.canRevoke);
+    await Promise.all(
+      others.map(async (s) => {
+        try {
+          await apiClient.post(`/api/admin/sessions/${s.id}/terminate`);
+        } catch {}
+      })
+    );
+    setUserSessions((prev) => prev.filter((s) => !s.canRevoke));
+    toast.success(t("userDetail.allLoggedOutSuccess"));
+  };
+
+  // Accordion Section Open State for Settings Tab
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    menu: true,
+    collaboration: true,
+    projects: true,
+    administration: true,
+  });
+
+  const toggleSection = (sectionId: string) => {
+    setOpenSections((prev) => ({
+      ...prev,
+      [sectionId]: !prev[sectionId],
+    }));
+  };
+
+  // Handler toggle izin cerdas dengan aturan Read Dependency:
+  // - Bila Read dimatikan (false), otomatis Create, Update, Delete juga dimatikan.
+  // - Bila Create, Update, atau Delete diaktifkan (true), otomatis Read ikut diaktifkan.
+  const handleTogglePermission = (
+    module: keyof UserPermissions,
+    action: "read" | "create" | "update" | "delete"
+  ) => {
+    setEditPermissions((prev) => {
+      const currentModulePerm = prev[module] || {
+        read: false,
+        create: false,
+        update: false,
+        delete: false,
+      };
+      const currentVal = !!currentModulePerm[action];
+      const nextVal = !currentVal;
+
+      let updatedModulePerm = { ...currentModulePerm, [action]: nextVal };
+
+      if (action === "read" && !nextVal) {
+        // Read dimatikan -> seluruh akses modul gugur
+        updatedModulePerm = { read: false, create: false, update: false, delete: false };
+      } else if (action !== "read" && nextVal) {
+        // Create/Update/Delete diaktifkan -> wajib Read aktif
+        updatedModulePerm = { ...updatedModulePerm, read: true };
+      }
+
+      return {
+        ...prev,
+        [module]: updatedModulePerm,
+      };
+    });
+  };
+
+  // Clean up object URLs on unmount or preview changes
   useEffect(() => {
     return () => {
       if (previewUrl && previewUrl.startsWith("blob:")) {
         URL.revokeObjectURL(previewUrl);
       }
+      if (previewCoverUrl && previewCoverUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(previewCoverUrl);
+      }
     };
-  }, [previewUrl]);
+  }, [previewUrl, previewCoverUrl]);
 
   // System Permissions Matrix State
   const [editPermissions, setEditPermissions] = useState<UserPermissions>(() => {
     return getUserPermissions(user.role || "user", user.permissions);
   });
 
+  // Item #187 — koreksi pemilik proyek: di Velzon, "lihat profil" dan
+  // "edit profil" adalah DUA layar berbeda, bukan satu form yang selalu
+  // menampilkan field sunting. Klik "detail" membuka mode LIHAT bersih
+  // (Overview / Project / Document, baca-saja, tombol "Edit Profile").
+  // Baru setelah tombol itu diklik, layar pindah ke mode EDIT bertab
+  // (Personal Detail / Change Password / Project / Settings).
+  type PageMode = "view" | "edit";
+  const [pageMode, setPageMode] = useState<PageMode>("view");
+
+  type ViewTab = "overview" | "project" | "document";
+  type EditTab = "personal" | "password" | "project" | "settings";
+  type DetailTab = ViewTab | EditTab;
+  const [activeTab, setActiveTab] = useState<DetailTab>("overview");
+
+  const enterEditMode = () => {
+    setPageMode("edit");
+    setActiveTab("personal");
+  };
+  const exitEditMode = () => {
+    setPageMode("view");
+    setActiveTab("overview");
+  };
+
   // Project Delegation State
   const [selectedAssignProjectId, setSelectedAssignProjectId] = useState<string>("");
   const [selectedAssignProjectRole, setSelectedAssignProjectRole] = useState<string>("member");
   const [selectedSubordinateIds, setSelectedSubordinateIds] = useState<string[]>([]);
+
+  // #82 — daftar peran dibaca dari Master Data, bukan ditulis di JSX.
+  const peranSistem = React.useMemo(() => katalogPeranSistem(masterData), [masterData]);
+  const peranProyek = React.useMemo(() => katalogPeranProyek(masterData), [masterData]);
   const [availableUsers, setAvailableUsers] = useState<any[]>([]);
   const [userProjectsList, setUserProjectsList] = useState<Project[]>([]);
 
@@ -239,6 +578,9 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
       setEditEmail(user.email || "");
       setEditPhone(user.phone || "");
       setEditPassword("");
+      // Item #155 — tombol mata ikut tertutup tiap form disetel ulang, supaya
+      // sandi pengguna BERIKUTNYA tidak terbuka gara-gara pilihan sebelumnya.
+      setShowEditPassword(false);
       setEditPermissions(getUserPermissions(user.role || "user", user.permissions));
     }
   }, [user]);
@@ -263,6 +605,425 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
       t.assigneeEmail === user?.email
   );
 
+  const userId = user.id || user.uid;
+
+  // Item #187 — Ambil data meetings dan documents/flowcharts dari backend API
+  const [remoteMeetings, setRemoteMeetings] = useState<any[]>([]);
+  const [remoteDocuments, setRemoteDocuments] = useState<any[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchRemoteData = async () => {
+      try {
+        const meetingPromises = (projects || []).map((p) =>
+          apiRequest(`/api/projects/${p.id}/meetings`, { headers: { "x-user-id": userId } })
+            .then((res: any) =>
+              res?.status === "success" && Array.isArray(res?.data) ? res.data : []
+            )
+            .catch(() => [])
+        );
+        const docPromises = (projects || []).map((p) =>
+          apiRequest(`/api/projects/${p.id}/documents`, { headers: { "x-user-id": userId } })
+            .then((res: any) =>
+              res?.status === "success" && Array.isArray(res?.data) ? res.data : []
+            )
+            .catch(() => [])
+        );
+
+        const [allM, allD] = await Promise.all([
+          Promise.all(meetingPromises),
+          Promise.all(docPromises),
+        ]);
+
+        if (isMounted) {
+          setRemoteMeetings(allM.flat());
+          setRemoteDocuments(allD.flat());
+        }
+      } catch (err) {
+        console.error("Error fetching remote created items:", err);
+      }
+    };
+
+    fetchRemoteData();
+    return () => {
+      isMounted = false;
+    };
+  }, [projects, userId]);
+
+  // Item #187 — tab Document: dokumen sungguhan dari Task attachments,
+  // remoteDocuments, flowchart diagrams, dan berkas milik pengguna ini.
+  interface UserDocumentFile {
+    id: string;
+    name: string;
+    url: string;
+    type: string;
+    size?: string;
+    createdAt: any;
+    taskTitle?: string;
+  }
+
+  const userDocuments = React.useMemo<UserDocumentFile[]>(() => {
+    const docs: UserDocumentFile[] = [];
+    const seenUrls = new Set<string>();
+
+    const isMatchUser = (author?: string) => {
+      if (!author) return false;
+      const target = author.trim().toLowerCase();
+      return (
+        target ===
+          String(userId || "")
+            .trim()
+            .toLowerCase() ||
+        target ===
+          String(user.uid || "")
+            .trim()
+            .toLowerCase() ||
+        target ===
+          String(user.id || "")
+            .trim()
+            .toLowerCase() ||
+        target ===
+          String(user.email || "")
+            .trim()
+            .toLowerCase()
+      );
+    };
+
+    // 1. Lampiran dari tugas
+    (tasks || []).forEach((t) => {
+      (t.attachments || []).forEach((a) => {
+        if (
+          a.uploadedByUserId === userId ||
+          a.uploadedByUserId === user.uid ||
+          (a.uploadedByName && isMatchUser(a.uploadedByName))
+        ) {
+          const key = a.url || a.id || a.name;
+          if (!seenUrls.has(key)) {
+            seenUrls.add(key);
+            docs.push({
+              id: a.id || `att-${Math.random()}`,
+              name: a.name || "Attachment Document",
+              url: a.url,
+              type: a.type || "file",
+              size: (a as any).size || (a as any).fileSize || "1.25 MB",
+              createdAt: a.createdAt || t.createdAt,
+              taskTitle: t.title,
+            });
+          }
+        }
+      });
+    });
+
+    // 2. Dokumen dari Remote API (Docs & Flowcharts)
+    remoteDocuments.forEach((doc) => {
+      if (isMatchUser(doc.createdBy) || isMatchUser(doc.author) || isMatchUser(doc.userId)) {
+        const isFlowchart = doc.type === "flowchart" || doc.category === "flowchart";
+        const key = doc.url || doc.id || doc.name;
+        if (!seenUrls.has(key)) {
+          seenUrls.add(key);
+          docs.push({
+            id: `rdoc-${doc.id}`,
+            name:
+              doc.title ||
+              doc.name ||
+              (isFlowchart ? "Flowchart Diagram.fc" : "Project Document.pdf"),
+            url: doc.url || doc.fileUrl || doc.downloadUrl || "#",
+            type: isFlowchart ? "flowchart" : doc.type || "pdf",
+            size: doc.size || doc.fileSize || "3.40 MB",
+            createdAt: doc.createdAt || doc.updatedAt,
+            taskTitle: (projects || []).find((p) => p.id === doc.projectId)?.name || "Project Doc",
+          });
+        }
+      }
+    });
+
+    return docs.sort(
+      (a, b) => ensureDate(b.createdAt).getTime() - ensureDate(a.createdAt).getTime()
+    );
+  }, [tasks, remoteDocuments, userId, user.uid, user.id, user.email, projects]);
+
+  // Item #187 — panel "Team": rekan yang berbagi proyek AKTIF dengan pengguna
+  // ini, dihitung dari `memberRoles` proyek yang sama, bukan daftar saran
+  // acak ala "Suggestions" di Velzon.
+  const teammates = React.useMemo(() => {
+    const ids = new Set<string>();
+    userProjectsList.forEach((p) => {
+      Object.keys(p.memberRoles || {}).forEach((id) => {
+        if (id !== userId && id !== user.uid) ids.add(id);
+      });
+      (p.members || []).forEach((id) => {
+        if (id !== userId && id !== user.uid) ids.add(id);
+      });
+    });
+    return availableUsers.filter((u) => ids.has(u.id) || ids.has(u.uid));
+  }, [userProjectsList, availableUsers, userId, user.uid]);
+
+  // Item #195 — panel "Recent Activity" sebelumnya HANYA membaca
+  // `ActivityLogs` (task di project yang sedang aktif) — aksi manajemen-user
+  // (admin mengedit department/role/dll, atau pengguna mengedit profil
+  // sendiri) tidak pernah dicatat ke mana pun, jadi pengguna yang baru
+  // diperbarui datanya tetap melihat "belum ada aktivitas". Ditambal dengan
+  // membaca `AuditLogs` (tabel global yang sudah dipakai fitur "Audit
+  // Perusahaan") untuk entitas User ini, digabung ke feed yang sama.
+  const [userAuditLogs, setUserAuditLogs] = useState<any[]>([]);
+  useEffect(() => {
+    if (!userId) return;
+    let isMounted = true;
+    apiRequest(`/api/audit-logs?entityName=User&entityId=${userId}&limit=20`)
+      .then((res: any) => {
+        if (isMounted && res?.status === "success" && Array.isArray(res.data)) {
+          setUserAuditLogs(res.data);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, [userId]);
+
+  const userAuditActivityLogs = React.useMemo(() => {
+    return userAuditLogs.map((row: any) => {
+      const isSelf = row.userId === userId || row.userId === user.uid;
+      const aktor = isSelf
+        ? t("userDetail.actorSelf")
+        : row.userName || t("userDetail.actorSomeone");
+      const changedFields =
+        row.newValues && row.oldValues && typeof row.newValues === "object"
+          ? Object.keys(row.newValues).filter(
+              (k) =>
+                row.newValues[k] !== undefined &&
+                JSON.stringify(row.oldValues[k]) !== JSON.stringify(row.newValues[k])
+            )
+          : [];
+      const details =
+        row.actionType === "DELETE"
+          ? t("userDetail.auditDeleted", { aktor })
+          : changedFields.length > 0
+            ? t("userDetail.auditUpdated", { aktor, fields: changedFields.join(", ") })
+            : t("userDetail.auditUpdatedNoFields", { aktor });
+
+      return {
+        id: `audit-${row.id}`,
+        createdAt: row.createdAt,
+        userId,
+        action: row.actionType === "DELETE" ? "user_deleted" : "user_profile_updated",
+        details,
+      };
+    });
+  }, [userAuditLogs, userId, user.uid, t]);
+
+  // Item #187 — koreksi pemilik proyek: "Recent Activity" (pengganti
+  // banner statis Velzon) dan filter Today/Weekly/Monthly diisi dari
+  // `ActivityLog` sungguhan (src/types/task.ts), bukan data karangan.
+  const [activityFilter, setActivityFilter] = useState<"today" | "week" | "month">("today");
+  const userActivityLogsAll = React.useMemo(() => {
+    const taskLogs = (activityLogs || []).filter(
+      (log) => log.userId === userId || log.userId === user.uid
+    );
+    return [...taskLogs, ...userAuditActivityLogs].sort(
+      (a, b) => ensureDate(b.createdAt).getTime() - ensureDate(a.createdAt).getTime()
+    );
+  }, [activityLogs, userAuditActivityLogs, userId, user.uid]);
+
+  // #470 — Timeline tab Project: jejak nyata (bukan dummy), max 8 entri terbaru
+  const projectTabTimeline = React.useMemo(() => {
+    return userActivityLogsAll.slice(0, 8);
+  }, [userActivityLogsAll]);
+
+  const userActivityLogsFiltered = React.useMemo(() => {
+    return userActivityLogsAll.filter((log) => {
+      const d = ensureDate(log.createdAt);
+      if (activityFilter === "today") return isToday(d);
+      if (activityFilter === "week") return isThisWeek(d, { weekStartsOn: 1 });
+      return isThisMonth(d);
+    });
+  }, [userActivityLogsAll, activityFilter]);
+
+  // Item #187 — Recently Created Items lintas modul (Task, Meeting, Flowchart, Document)
+  // yang DIBUAT/dilaporkan oleh pengguna ini secara nyata.
+  interface UserCreatedItem {
+    id: string;
+    type: "task" | "meeting" | "flowchart" | "doc";
+    title: string;
+    subtitle?: string;
+    status?: string;
+    createdAt: any;
+    icon: React.ComponentType<{ className?: string }>;
+  }
+
+  const userCreatedItems = React.useMemo<UserCreatedItem[]>(() => {
+    const items: UserCreatedItem[] = [];
+    const seenIds = new Set<string>();
+
+    const isMatchUser = (author?: string) => {
+      if (!author) return false;
+      const target = author.trim().toLowerCase();
+      return (
+        target ===
+          String(userId || "")
+            .trim()
+            .toLowerCase() ||
+        target ===
+          String(user.uid || "")
+            .trim()
+            .toLowerCase() ||
+        target ===
+          String(user.id || "")
+            .trim()
+            .toLowerCase() ||
+        target ===
+          String(user.email || "")
+            .trim()
+            .toLowerCase() ||
+        target ===
+          String(user.username || "")
+            .trim()
+            .toLowerCase() ||
+        target ===
+          String(user.displayName || "")
+            .trim()
+            .toLowerCase()
+      );
+    };
+
+    // 1. Tugas / Issue yang dibuat pengguna
+    (tasks || []).forEach((t) => {
+      if (isMatchUser(t.reporterId) || isMatchUser((t as any).createdBy)) {
+        const id = `task-${t.id}`;
+        if (!seenIds.has(id)) {
+          seenIds.add(id);
+          items.push({
+            id,
+            type: "task",
+            title: t.title,
+            subtitle: t.key || "TASK",
+            status: t.status || "todo",
+            createdAt: t.createdAt,
+            icon: Layout,
+          });
+        }
+      }
+    });
+
+    // 2. Meeting Notes yang dibuat pengguna (Backend API + Storage fallback)
+    remoteMeetings.forEach((m) => {
+      if (isMatchUser(m.authorId) || isMatchUser(m.author) || isMatchUser(m.createdBy)) {
+        const id = `meeting-${m.id || m._id}`;
+        if (!seenIds.has(id)) {
+          seenIds.add(id);
+          items.push({
+            id,
+            type: "meeting",
+            title: m.title || "Meeting Note",
+            subtitle: (projects || []).find((p) => p.id === m.projectId)?.name || "Project Meeting",
+            status: m.status || "completed",
+            createdAt: m.createdAt || m.date,
+            icon: Video,
+          });
+        }
+      }
+    });
+
+    try {
+      (projects || []).forEach((p) => {
+        const meetingRaw = safeLocalStorage.getItem(`meetings_${p.id}`);
+        if (meetingRaw) {
+          const parsed = JSON.parse(meetingRaw);
+          if (Array.isArray(parsed)) {
+            parsed.forEach((m: any) => {
+              if (isMatchUser(m.authorId) || isMatchUser(m.author) || isMatchUser(m.createdBy)) {
+                const id = `meeting-${m.id || m._id || Math.random()}`;
+                if (!seenIds.has(id)) {
+                  seenIds.add(id);
+                  items.push({
+                    id,
+                    type: "meeting",
+                    title: m.title || "Meeting Note",
+                    subtitle: p.name || "Project Meeting",
+                    status: m.status || "completed",
+                    createdAt: m.createdAt || m.date,
+                    icon: Video,
+                  });
+                }
+              }
+            });
+          }
+        }
+      });
+    } catch {}
+
+    // 3. Flowchart Diagrams & Documents dari Backend API + Storage
+    remoteDocuments.forEach((doc) => {
+      if (isMatchUser(doc.createdBy) || isMatchUser(doc.author) || isMatchUser(doc.userId)) {
+        const isFlowchart = doc.type === "flowchart" || doc.category === "flowchart";
+        const id = `doc-${doc.id}`;
+        if (!seenIds.has(id)) {
+          seenIds.add(id);
+          items.push({
+            id,
+            type: isFlowchart ? "flowchart" : "doc",
+            title: doc.title || doc.name || (isFlowchart ? "Flowchart Diagram" : "Document"),
+            subtitle:
+              (projects || []).find((p) => p.id === doc.projectId)?.name ||
+              (isFlowchart ? "Diagram" : "Document"),
+            status: isFlowchart ? "diagram" : doc.type || "file",
+            createdAt: doc.createdAt || doc.updatedAt,
+            icon: isFlowchart ? Workflow : FileText,
+          });
+        }
+      }
+    });
+
+    try {
+      (projects || []).forEach((p) => {
+        const fcRaw = safeLocalStorage.getItem(`flowcharts_${p.id}`);
+        if (fcRaw) {
+          const parsed = JSON.parse(fcRaw);
+          if (Array.isArray(parsed)) {
+            parsed.forEach((fc: any) => {
+              if (isMatchUser(fc.createdBy) || isMatchUser(fc.author)) {
+                const id = `fc-${fc.id || Math.random()}`;
+                if (!seenIds.has(id)) {
+                  seenIds.add(id);
+                  items.push({
+                    id,
+                    type: "flowchart",
+                    title: fc.name || "Flowchart Diagram",
+                    subtitle: p.name || "Diagram",
+                    status: "diagram",
+                    createdAt: fc.createdAt || fc.updatedAt,
+                    icon: Workflow,
+                  });
+                }
+              }
+            });
+          }
+        }
+      });
+    } catch {}
+
+    // 4. Dokumen / Berkas Lampiran yang diunggah pengguna
+    userDocuments.forEach((doc) => {
+      const id = `doc-${doc.id}`;
+      if (!seenIds.has(id)) {
+        seenIds.add(id);
+        items.push({
+          id,
+          type: "doc",
+          title: doc.name,
+          subtitle: doc.taskTitle,
+          status: doc.type || "file",
+          createdAt: doc.createdAt,
+          icon: FileText,
+        });
+      }
+    });
+
+    return items
+      .sort((a, b) => ensureDate(b.createdAt).getTime() - ensureDate(a.createdAt).getTime())
+      .slice(0, 15);
+  }, [tasks, projects, remoteMeetings, remoteDocuments, userId, user, userDocuments]);
+
   const getDeptName = (deptId?: string) => {
     const allDepts =
       departments.length > 0 ? departments : masterData.filter((d) => d.type === "department");
@@ -279,32 +1040,14 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
     return found?.name || found?.label || posId || "Anggota Tim";
   };
 
-  const handleTogglePermission = (
-    module: keyof UserPermissions,
-    action: "read" | "create" | "update" | "delete"
-  ) => {
-    setEditPermissions((prev) => {
-      const currentModule = prev[module] || {
-        read: false,
-        create: false,
-        update: false,
-        delete: false,
-      };
-      return {
-        ...prev,
-        [module]: {
-          ...currentModule,
-          [action]: !currentModule[action],
-        },
-      };
-    });
-  };
-
-  const handleResetToRoleDefaults = () => {
-    const defaultPerms = ROLE_DEFAULT_PERMISSIONS[editRole] || ROLE_DEFAULT_PERMISSIONS.user;
-    setEditPermissions(defaultPerms);
-    toast.success(`Matrix hak akses di-reset ke default role "${editRole}".`);
-  };
+  // Item #156 · §19.8 Tahap 6 — `handleTogglePermission` dan
+  // `handleResetToRoleDefaults` DIHAPUS bersama panelnya. Keduanya hanya
+  // menyunting `editPermissions`, dan matriksnya kini baca-saja.
+  //
+  // `editPermissions` sendiri SENGAJA dipertahankan: nilainya masih dibaca
+  // untuk menggambar matriks, masih ikut berubah saat peran diganti (baris
+  // di dropdown peran), dan masih dikirim saat simpan — sehingga penimpaan
+  // `list` yang sudah ada di database tidak terhapus diam-diam.
 
   // Handler Input File (Local Preview Only - Deferred Upload)
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -314,13 +1057,13 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
     // Client-side validation
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
-      toast.error("Format file tidak didukung (gunakan JPG, PNG, atau WEBP)");
+      toast.error(t("toast.avatarFormatUnsupported"));
       return;
     }
 
     const maxSize = 2 * 1024 * 1024; // 2MB
     if (file.size > maxSize) {
-      toast.error("Ukuran file maksimal 2MB");
+      toast.error(t("toast.fileMax2MB"));
       return;
     }
 
@@ -333,12 +1076,91 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
     const objectUrl = URL.createObjectURL(file);
     setSelectedAvatar(file);
     setPreviewUrl(objectUrl);
+
+    // Item #209 — sebelumnya baris ini diam total: tidak ada toast, tidak ada
+    // indikator apa pun bahwa foto BELUM benar-benar terkirim (unggahnya
+    // ditunda sampai tombol "Simpan" utama diklik, berbeda dari Cover yang
+    // sejak #208 langsung terkirim). Dari sudut pandang pengguna itu terlihat
+    // identik dengan "gagal upload" — tidak ada bedanya. Bukan diubah jadi
+    // unggah instan (akan mengacaukan alur Batal/Simpan gabungan formulir
+    // ini), cukup diberi tahu supaya langkah berikutnya jelas.
+    toast.info(t("toast.avatarPreviewReady"));
+  };
+
+  // Item #208 — Handler Input Cover File: diunggah SEGERA ke server saat
+  // dipilih (bukan menunggu tombol Simpan, dan bukan lagi disimpan ke
+  // localStorage) — pola paling sederhana yang tetap benar-benar tersimpan
+  // di database, sesuai diminta pemilik proyek.
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error(t("toast.avatarFormatUnsupported"));
+      return;
+    }
+
+    const maxSize = 3 * 1024 * 1024; // 3MB
+    if (file.size > maxSize) {
+      toast.error(t("toast.fileMax2MB"));
+      return;
+    }
+
+    if (previewCoverUrl && previewCoverUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(previewCoverUrl);
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    setSelectedCover(file);
+    setPreviewCoverUrl(objectUrl);
+    setIsUploadingCover(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const uploadData = await uploadCover(userId, formData);
+
+      if (uploadData && (uploadData.status === "success" || uploadData.cover_url)) {
+        const finalCoverUrl: string =
+          uploadData.cover_url || uploadData.data?.cover_url || uploadData.data?.user?.coverUrl;
+        if (finalCoverUrl) {
+          setCoverURL(finalCoverUrl);
+          // Bersihkan sisa localStorage lama — sumber kebenaran sekarang server.
+          safeLocalStorage.removeItem(`user_cover_${user?.id || user?.uid}`);
+        }
+        // Lepas pratinjau blob sementara sekarang setelah URL permanen dari
+        // server tersedia di coverURL. Dibiarkan tidak null di sini akan
+        // membuat render terus memprioritaskan blob (lihat prioritas
+        // `previewCoverUrl || coverURL`), dan blob itu ikut ter-revoke oleh
+        // efek cleanup begitu ada perubahan preview avatar/cover lain —
+        // membuat cover yang SUDAH tersimpan di server tampak hilang.
+        if (previewCoverUrl && previewCoverUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(previewCoverUrl);
+        }
+        setPreviewCoverUrl(null);
+        toast.success(t("userDetail.coverUpdated"));
+      } else {
+        toast.error(uploadData?.message || "Gagal mengunggah cover.");
+      }
+    } catch (err: any) {
+      console.error("Gagal mengunggah cover:", err);
+      toast.error(err?.message || "Gagal mengunggah cover.");
+    } finally {
+      setIsUploadingCover(false);
+      setSelectedCover(null);
+    }
   };
 
   // Handler Submit Utama (Simpan Perubahan User)
   const handleSaveUser = async () => {
     if (!editFullName.trim()) {
-      toast.error("Nama Lengkap wajib diisi.");
+      toast.error(t("toast.fullNameRequired"));
+      return;
+    }
+
+    if (editPassword.trim() && editConfirmPassword.trim() && editPassword !== editConfirmPassword) {
+      toast.error(t("userDetail.passwordMismatch"));
       return;
     }
 
@@ -400,8 +1222,15 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
       const res = await updateUser(user.id || user.uid, payload);
 
       if (res.status === "success" || res.data) {
-        toast.success(`Data & Hak Akses Pengguna ${editFullName} Berhasil Diperbarui!`);
+        toast.success(t("toast.userPermissionsUpdated", { nama: editFullName }));
+        setEditOldPassword("");
+        setEditPassword("");
+        setEditConfirmPassword("");
         if (onUserUpdated) onUserUpdated();
+        // Item #195/#196 — simpan berhasil dulu tidak pernah membawa kembali
+        // ke mode LIHAT; pengguna tetap terjebak di form edit dan harus klik
+        // "Back"/"Cancel" sendiri walau perubahannya sudah tersimpan.
+        exitEditMode();
       } else {
         toast.error(res.message || "Gagal memperbarui data user.");
       }
@@ -415,7 +1244,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
   const handleAssignToProject = async () => {
     if (!selectedAssignProjectId) {
-      toast.error("Pilih project terlebih dahulu");
+      toast.error(t("toast.pickProjectFirst"));
       return;
     }
 
@@ -434,7 +1263,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
         throw new Error(res.message);
       }
 
-      toast.success(`Pengguna berhasil ditugaskan ke project ${p.name}`);
+      toast.success(t("toast.userAssignedProject", { proyek: p.name }));
       setSelectedAssignProjectId("");
 
       setUserProjectsList((prev) => [
@@ -447,7 +1276,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
       if (onUserUpdated) onUserUpdated();
     } catch (e: any) {
-      toast.error("Gagal menugaskan pengguna ke project: " + (e.message || e));
+      toast.error(t("toast.assignProjectFailed") + (e.message || e));
     }
   };
 
@@ -464,15 +1293,70 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
         throw new Error(res.message);
       }
 
-      toast.success(`Pengguna berhasil dikeluarkan dari project ${p.name}`);
+      toast.success(t("toast.userRemovedProject", { proyek: p.name }));
 
       setUserProjectsList((prev) => prev.filter((proj) => proj.id !== projectId));
 
       if (onUserUpdated) onUserUpdated();
     } catch (e: any) {
-      toast.error("Gagal mengeluarkan pengguna dari project: " + (e.message || e));
+      toast.error(t("toast.removeProjectFailed") + (e.message || e));
     }
   };
+
+  // Item #187 — Helper identifikasi tipe file, ikon berwarna, dan label ala Velzon
+  const getFileDisplayInfo = (name: string, type?: string) => {
+    const ext = name.split(".").pop()?.toLowerCase() || (type || "").toLowerCase();
+
+    if (["zip", "rar", "7z", "tar", "gz"].includes(ext)) {
+      return {
+        icon: FileArchive,
+        bgColor: "bg-blue-500/10 text-blue-600 border border-blue-500/20",
+        typeLabel: "Zip File",
+      };
+    }
+    if (["pdf"].includes(ext)) {
+      return {
+        icon: FileText,
+        bgColor: "bg-rose-500/10 text-rose-600 border border-rose-500/20",
+        typeLabel: "PDF File",
+      };
+    }
+    if (["mp4", "mkv", "avi", "mov", "webm", "video"].includes(ext)) {
+      return {
+        icon: Video,
+        bgColor: "bg-sky-500/10 text-sky-600 border border-sky-500/20",
+        typeLabel: "MP4 File",
+      };
+    }
+    if (["xls", "xlsx", "csv", "sheet"].includes(ext)) {
+      return {
+        icon: FileSpreadsheet,
+        bgColor: "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20",
+        typeLabel: "XSL File",
+      };
+    }
+    if (["png", "jpg", "jpeg", "webp", "gif", "svg", "image"].includes(ext)) {
+      return {
+        icon: ImageIcon,
+        bgColor: "bg-amber-500/10 text-amber-600 border border-amber-500/20",
+        typeLabel: "PNG File",
+      };
+    }
+    if (["fc", "flowchart", "diagram"].includes(ext)) {
+      return {
+        icon: Workflow,
+        bgColor: "bg-cyan-500/10 text-cyan-600 border border-cyan-500/20",
+        typeLabel: "Folder File",
+      };
+    }
+    return {
+      icon: FileText,
+      bgColor: "bg-primary/10 text-primary border border-primary/20",
+      typeLabel: "Doc File",
+    };
+  };
+
+  const [docDisplayLimit, setDocDisplayLimit] = useState<number>(6);
 
   const generateRandomPassword = () => {
     const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
@@ -482,780 +1366,2254 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
     }
     setEditPassword(pass);
     navigator.clipboard.writeText(pass);
-    toast.success(`Password acak dibuat: "${pass}". Berhasil disalin ke clipboard!`);
+    toast.success(t("toast.randomPasswordCreated", { sandi: pass }));
+  };
+
+  // Item #187 — koreksi pemilik proyek: kartu proyek ala Velzon (aksen
+  // border kiri berwarna + badge status + avatar anggota). Warnanya
+  // heuristik presentasi dari `status` SUNGGUHAN (MasterData project_status),
+  // bukan data karangan — hanya pemetaan kata kunci ke warna yang sudah
+  // dipakai di tempat lain pada berkas ini (editStatus, dst).
+  const projectStatusStyle = (status?: string) => {
+    const s = (status || "").toLowerCase();
+    if (s.includes("done") || s.includes("complete") || s.includes("selesai")) {
+      return {
+        border: "border-l-emerald-500",
+        badge: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30",
+      };
+    }
+    if (s.includes("hold") || s.includes("pending") || s.includes("tunda")) {
+      return {
+        border: "border-l-amber-500",
+        badge: "bg-amber-500/10 text-amber-700 border-amber-500/30",
+      };
+    }
+    if (s.includes("cancel") || s.includes("archive") || s.includes("batal")) {
+      return {
+        border: "border-l-rose-500",
+        badge: "bg-rose-500/10 text-rose-700 border-rose-500/30",
+      };
+    }
+    if (!s) {
+      return {
+        border: "border-l-border-subtle",
+        badge: "bg-surface-muted text-content-secondary border-border-subtle",
+      };
+    }
+    return {
+      border: "border-l-primary",
+      badge: "bg-primary/10 text-primary border-primary/30",
+    };
+  };
+  const projectMemberAvatars = (p: Project) => {
+    const ids = p.members || Object.keys(p.memberRoles || {});
+    return ids
+      .map((id) => availableUsers.find((u) => u.id === id || u.uid === id))
+      .filter(Boolean) as any[];
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-surface-sunken dark:bg-slate-950 overflow-y-auto p-3 md:p-6">
-      <div className="flex flex-col space-y-5 min-h-full animate-in fade-in duration-700">
-        {/* Velzon Sticky Header Bar */}
-        <div className="bg-surface dark:bg-slate-900 border border-border-subtle dark:border-slate-800 rounded-lg px-6 py-3.5 flex items-center justify-between sticky top-0 z-30 shadow-soft">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onBack}
-              className="p-1.5 bg-surface-muted dark:bg-slate-800 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 text-content-body dark:text-slate-200 rounded-md transition-all flex items-center gap-2 text-xs font-medium cursor-pointer shadow-xs"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Kembali ke Manajemen Pengguna</span>
-            </button>
-            <div className="h-4 w-px bg-slate-200 dark:bg-slate-800" />
-            <div className="flex flex-col">
-              <span className="text-xs sm:text-[11px] font-medium text-indigo-600 dark:text-indigo-400 tracking-wider uppercase">
-                DETAIL PROFIL & MATRIX HAK AKSES
-              </span>
-              <h1 className="text-sm font-medium text-content-strong dark:text-slate-100">
-                {user.displayName || user.username}
-              </h1>
-            </div>
-          </div>
-
-          <button
-            onClick={handleSaveUser}
-            disabled={isSaving}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-medium shadow-xs transition disabled:opacity-50"
-          >
-            {isSaving ? (
-              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Save className="w-3.5 h-3.5" />
-            )}
-            <span>Simpan Perubahan User</span>
-          </button>
-        </div>
-
+    <div className="flex-1 flex flex-col h-full bg-surface-sunken overflow-y-auto p-3 md:p-6 pb-24 md:pb-32">
+      <div className="flex flex-col space-y-5 min-h-full">
         {/* Main Content Area */}
         <div className="w-full space-y-5 flex-1">
-          {/* Profile Card Header */}
-          <div className="bg-surface dark:bg-slate-900 p-5 rounded-lg shadow-xs border border-border-subtle dark:border-slate-800 flex flex-col md:flex-row items-center md:items-start gap-5 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-50 dark:bg-indigo-950/20 rounded-bl-full pointer-events-none opacity-60" />
-
-            <div className="relative group cursor-pointer shrink-0 z-10">
-              <UserAvatar
-                user={{ ...user, photoURL: previewUrl || photoURL } as any}
-                className="w-20 h-20 text-2xl shadow-soft border-2 border-white dark:border-slate-800 ring-2 ring-indigo-50 dark:ring-indigo-950 shrink-0"
-              />
-              {previewUrl && (
-                <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
-                  Pratinjau
-                </span>
+          {/* Item #208 — cover kini tersimpan di server (kolom "coverUrl"),
+              sebelumnya cuma gradien dekoratif + localStorage lokal. Tombol
+              aksi (Back, Edit Profile / Save) ada di pojok cover, persis
+              posisi Velzon. */}
+          <div className="bg-surface rounded-2xl shadow-xs border border-border-subtle overflow-hidden">
+            {/* Purple Gradient Cover Banner */}
+            <div
+              className="min-h-[150px] sm:min-h-[175px] w-full bg-gradient-to-r from-primary-surface via-primary to-primary-surface-active relative p-4 sm:p-6 flex flex-col justify-between transition-all"
+              style={
+                previewCoverUrl || coverURL
+                  ? {
+                      backgroundImage: `url(${previewCoverUrl || coverURL})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }
+                  : undefined
+              }
+            >
+              {/* Overlay tipis agar teks & tombol di atas cover tetap berjarak kontras */}
+              {(previewCoverUrl || coverURL) && (
+                <div className="absolute inset-0 bg-surface-sunken/40" />
               )}
-              <label className="absolute inset-0 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity ring-2 ring-indigo-50 dark:ring-indigo-950 border-2 border-white dark:border-slate-800">
-                <span className="text-xs sm:text-[10px] font-medium uppercase tracking-wider">
-                  {isUploading ? "..." : "Pilih Foto"}
-                </span>
-                <input
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  disabled={isUploading || isSaving}
-                />
-              </label>
-            </div>
 
-            <div className="flex-1 text-center md:text-left space-y-2 z-10">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-xl font-medium text-content-strong dark:text-slate-100">
+              {/* Top Row: Back button on left, Action buttons on right */}
+              <div className="flex items-center justify-between z-10 relative">
+                <button
+                  type="button"
+                  onClick={pageMode === "edit" ? exitEditMode : onBack}
+                  className="flex items-center gap-1.5 text-content-inverse/90 hover:text-content-inverse text-xs font-medium transition cursor-pointer"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back</span>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <label
+                    className={cn(
+                      "flex items-center gap-1.5 px-3.5 py-1.5 bg-surface-sunken/40 hover:bg-surface-sunken/60 text-content-inverse border border-border-subtle/30 rounded-full text-xs font-medium backdrop-blur-md transition cursor-pointer shadow-xs",
+                      isUploadingCover && "opacity-60 pointer-events-none"
+                    )}
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>
+                      {isUploadingCover ? t("userDetail.uploading") : t("userDetail.changeCover")}
+                    </span>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleCoverChange}
+                      disabled={isUploadingCover}
+                    />
+                  </label>
+
+                  {pageMode === "edit" && (
+                    <button
+                      onClick={handleSaveUser}
+                      disabled={isSaving}
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-content-inverse rounded-full text-xs font-medium shadow-soft transition disabled:opacity-50 cursor-pointer"
+                    >
+                      {isSaving ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Save className="w-3.5 h-3.5" />
+                      )}
+                      <span>{t("userDetail.saveUserChanges")}</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Bottom Row inside Cover Banner: Avatar + Name & Subtitle */}
+              <div className="flex items-center gap-4 z-10 relative mt-4">
+                <div className="relative group shrink-0">
+                  <UserAvatar
+                    user={{ ...user, photoURL: previewUrl || photoURL } as any}
+                    className="w-16 h-16 sm:w-20 sm:h-20 text-xl ring-4 ring-border-subtle/40 shadow-md shrink-0"
+                  />
+                  {previewUrl && (
+                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-amber-500 text-content-inverse text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
+                      {t("userDetail.preview")}
+                    </span>
+                  )}
+                  {pageMode === "edit" && (
+                    <label className="absolute inset-0 bg-surface-sunken/60 text-content-inverse rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+                      <Camera className="w-5 h-5" />
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg,image/webp"
+                        className="hidden"
+                        onChange={handleFileChange}
+                      />
+                    </label>
+                  )}
+                </div>
+
+                <div className="min-w-0">
+                  <h2 className="text-lg sm:text-xl font-bold text-content-inverse tracking-tight truncate">
                     {user.displayName || user.username}
                   </h2>
-                  <p className="text-xs text-content-subtle mt-0.5">
-                    @{user.username || user.email?.split("@")[0]}
-                  </p>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium uppercase border shadow-xs",
-                      editRole === "admin"
-                        ? "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800"
-                        : editRole === "head"
-                          ? "bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800"
-                          : editRole === "manager"
-                            ? "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800"
-                            : editRole === "user"
-                              ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800"
-                              : "bg-surface-muted dark:bg-slate-800 text-content-body dark:text-slate-300 border-slate-300 dark:border-slate-700"
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs text-content-inverse/80 font-medium mt-0.5">
+                    {editPosition && <span>{getPosName(editPosition)}</span>}
+                    {editPosition && editDepartment && (
+                      <span className="text-content-inverse/60">•</span>
                     )}
-                  >
-                    {editRole === "admin" && <ShieldCheck className="w-3.5 h-3.5 shrink-0" />}
-                    {editRole === "head" && <Award className="w-3.5 h-3.5 shrink-0" />}
-                    {editRole === "manager" && <UserCog className="w-3.5 h-3.5 shrink-0" />}
-                    {editRole === "user" && <Users className="w-3.5 h-3.5 shrink-0" />}
-                    {editRole === "viewer" && <Eye className="w-3.5 h-3.5 shrink-0" />}
-                    <span>{editRole}</span>
-                  </span>
-
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium uppercase border shadow-xs",
-                      editStatus === "approved"
-                        ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
-                        : editStatus === "pending"
-                          ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
-                          : "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800"
-                    )}
-                  >
-                    {editStatus === "approved" ? (
-                      <CheckCircle className="w-3.5 h-3.5" />
-                    ) : (
-                      <Clock className="w-3.5 h-3.5" />
-                    )}
-                    <span>{editStatus}</span>
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-3 border-t border-border-faint dark:border-slate-800">
-                <div className="flex items-center gap-2.5 text-xs text-content-secondary dark:text-slate-300">
-                  <div className="p-1.5 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-md">
-                    <Mail className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <div className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle">
-                      Email Address
-                    </div>
-                    <div className="font-medium text-content-strong dark:text-slate-100 text-xs">
-                      {editEmail || "Tidak tersedia"}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2.5 text-xs text-content-secondary dark:text-slate-300">
-                  <div className="p-1.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-md">
-                    <Phone className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <div className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle">
-                      WhatsApp / HP
-                    </div>
-                    <div className="font-medium text-content-strong dark:text-slate-100 text-xs">
-                      {editPhone || "Tidak tersedia"}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2.5 text-xs text-content-secondary dark:text-slate-300">
-                  <div className="p-1.5 bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 rounded-md">
-                    <Building className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <div className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle">
-                      Departemen / Posisi
-                    </div>
-                    <div className="font-medium text-content-strong dark:text-slate-100 text-xs">
-                      {getDeptName(editDepartment)} • {getPosName(editPosition)}
-                    </div>
+                    {editDepartment && <span>{getDeptName(editDepartment)}</span>}
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* Clean White Tab Bar Directly Attached Below Cover — #432 */}
+            <Tabs
+              value={activeTab}
+              onChange={setActiveTab}
+              tone="primary"
+              className="bg-surface border-t border-border-subtle/60 border-b-0 px-4 sm:px-6 gap-6 sm:gap-8"
+              itemClassName="px-0 py-3.5"
+              tabs={
+                pageMode === "view"
+                  ? [
+                      {
+                        id: "overview" as const,
+                        label: t("userDetail.tabOverview"),
+                        icon: (
+                          <LayoutGrid
+                            className={cn(
+                              "w-4 h-4",
+                              activeTab === "overview" ? "text-primary" : "text-content-subtle"
+                            )}
+                          />
+                        ),
+                      },
+                      {
+                        id: "project" as const,
+                        label: t("userDetail.tabProject"),
+                        icon: (
+                          <Layout
+                            className={cn(
+                              "w-4 h-4",
+                              activeTab === "project" ? "text-primary" : "text-content-subtle"
+                            )}
+                          />
+                        ),
+                      },
+                      {
+                        id: "document" as const,
+                        label: t("userDetail.tabDocument"),
+                        icon: (
+                          <FileText
+                            className={cn(
+                              "w-4 h-4",
+                              activeTab === "document" ? "text-primary" : "text-content-subtle"
+                            )}
+                          />
+                        ),
+                      },
+                    ]
+                  : [
+                      {
+                        id: "personal" as const,
+                        label: t("userDetail.tabPersonalDetail"),
+                        icon: (
+                          <IdCard
+                            className={cn(
+                              "w-4 h-4",
+                              activeTab === "personal" ? "text-primary" : "text-content-subtle"
+                            )}
+                          />
+                        ),
+                      },
+                      {
+                        id: "password" as const,
+                        label: t("userDetail.tabChangePassword"),
+                        icon: (
+                          <KeyRound
+                            className={cn(
+                              "w-4 h-4",
+                              activeTab === "password" ? "text-primary" : "text-content-subtle"
+                            )}
+                          />
+                        ),
+                      },
+                      ...(isAdmin
+                        ? [
+                            {
+                              id: "project" as const,
+                              label: t("userDetail.tabProject"),
+                              icon: (
+                                <Layout
+                                  className={cn(
+                                    "w-4 h-4",
+                                    activeTab === "project" ? "text-primary" : "text-content-subtle"
+                                  )}
+                                />
+                              ),
+                            },
+                            {
+                              id: "settings" as const,
+                              label: t("userDetail.tabSettings"),
+                              icon: (
+                                <Settings2
+                                  className={cn(
+                                    "w-4 h-4",
+                                    activeTab === "settings"
+                                      ? "text-primary"
+                                      : "text-content-subtle"
+                                  )}
+                                />
+                              ),
+                            },
+                          ]
+                        : []),
+                    ]
+              }
+            />
           </div>
 
-          {/* 2-Column Grid Layout */}
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-            {/* LEFT COLUMN: Account & Organization Settings + Permissions Matrix (5 cols) */}
-            <div className="xl:col-span-5 space-y-5">
-              {/* Account & Organization Form */}
-              <div className="bg-surface dark:bg-slate-900 border border-border-subtle dark:border-slate-800 rounded-lg p-4 space-y-4 shadow-xs">
-                <h4 className="font-medium text-content-strong dark:text-slate-100 text-xs uppercase tracking-wider border-b border-border-subtle dark:border-slate-800 pb-2.5 flex items-center gap-2">
-                  <Lock className="w-4 h-4 text-indigo-500" />
-                  Pengaturan Akun & Organisasi
-                </h4>
-
-                <div className="space-y-3">
-                  {isAdmin && (
-                    <>
-                      {/* System Role Selection */}
-                      <div className="space-y-1">
-                        <label className="text-xs font-medium text-content-body dark:text-slate-300">
-                          System Role
-                        </label>
-                        <select
-                          value={editRole}
-                          onChange={(e) => {
-                            const newRole = e.target.value as AppRole;
-                            setEditRole(newRole);
-                            setEditPermissions(
-                              ROLE_DEFAULT_PERMISSIONS[newRole] || ROLE_DEFAULT_PERMISSIONS.user
-                            );
-                          }}
-                          className="w-full px-3 py-1.5 bg-surface dark:bg-slate-900 border border-border-subtle dark:border-slate-700 rounded-md text-xs font-medium text-content-strong dark:text-slate-100 outline-none focus:border-indigo-500 transition-all cursor-pointer"
-                        >
-                          <option value="admin">Administrator (Full Access)</option>
-                          <option value="head">Department Head (Head)</option>
-                          <option value="manager">Project Manager (Manager)</option>
-                          <option value="user">Standard User (User)</option>
-                          <option value="viewer">Observer (Viewer - Read Only)</option>
-
-                          {masterData
-                            .filter(
-                              (d) =>
-                                d.type === "project_role" &&
-                                (d.roleType === "SYSTEM" || d.role_type === "SYSTEM")
-                            )
-                            .map((role) => {
-                              const roleValue = (role.label || "").toLowerCase();
-                              if (
-                                [
-                                  "admin",
-                                  "head",
-                                  "manager",
-                                  "user",
-                                  "viewer",
-                                  "administrator",
-                                ].includes(roleValue)
-                              )
-                                return null;
-                              return (
-                                <option key={role.id} value={role.label}>
-                                  {role.label}
-                                </option>
-                              );
-                            })}
-                        </select>
-                      </div>
-
-                      {/* Role Description Card */}
-                      {editRole && ROLE_DESCRIPTIONS[editRole] && (
-                        <div className="p-2.5 rounded-md border text-xs leading-relaxed flex gap-2.5 bg-indigo-50/50 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-800 text-indigo-900 dark:text-indigo-200">
-                          <div className="shrink-0 mt-0.5">{ROLE_DESCRIPTIONS[editRole].icon}</div>
-                          <div className="space-y-0.5">
-                            <p className="font-medium text-xs text-indigo-950 dark:text-indigo-100">
-                              {ROLE_DESCRIPTIONS[editRole].label}
-                            </p>
-                            <p className="text-xs sm:text-[11px] text-content-secondary dark:text-slate-400">
-                              {ROLE_DESCRIPTIONS[editRole].desc}
-                            </p>
-                          </div>
+          <div className="mt-5">
+            {/* Tab: Overview */}
+            {activeTab === "overview" && (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                {/* LEFT: kartu "Info" ala Velzon, Team, dan Login History */}
+                <div className="lg:col-span-4 space-y-5">
+                  <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                          <User className="w-4.5 h-4.5" />
                         </div>
-                      )}
-
-                      {/* Account Status */}
-                      <div className="space-y-1">
-                        <label className="text-xs font-medium text-content-body dark:text-slate-300">
-                          Account Status
-                        </label>
-                        <select
-                          value={editStatus}
-                          onChange={(e) => setEditStatus(e.target.value as any)}
-                          className="w-full px-3 py-1.5 bg-surface dark:bg-slate-900 border border-border-subtle dark:border-slate-700 rounded-md text-xs font-medium text-content-strong dark:text-slate-100 outline-none focus:border-indigo-500 transition-all cursor-pointer"
+                        <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
+                          {t("userDetail.tabPersonalDetail")}
+                        </h3>
+                      </div>
+                      {(isAdmin || isSelf) && pageMode === "view" && (
+                        <button
+                          type="button"
+                          onClick={enterEditMode}
+                          aria-label="Edit Profile"
+                          title="Edit Profile"
+                          className="px-3.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary hover:bg-primary-surface hover:text-content-inverse transition-all flex items-center gap-1 cursor-pointer border border-primary/20"
                         >
-                          <option value="approved">Active / Approved</option>
-                          <option value="pending">Waiting for Approval</option>
-                          <option value="rejected">Suspended / Rejected</option>
-                        </select>
+                          <Edit3 className="w-3.5 h-3.5" />
+                          <span>Edit</span>
+                        </button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 text-xs items-baseline pt-1">
+                      <span className="font-medium text-content-muted whitespace-nowrap">
+                        {t("userDetail.fullName")} :
+                      </span>
+                      <span className="font-medium text-content-strong break-words">
+                        {user.displayName || user.username}
+                      </span>
+
+                      <span className="font-medium text-content-muted whitespace-nowrap">
+                        {t("userDetail.email")} :
+                      </span>
+                      <span className="font-medium text-content-body break-all">
+                        {user.email || "—"}
+                      </span>
+
+                      <span className="font-medium text-content-muted whitespace-nowrap">
+                        {t("userDetail.phone")} :
+                      </span>
+                      <span className="font-medium text-content-body">{user.phone || "—"}</span>
+
+                      <span className="font-medium text-content-muted whitespace-nowrap">
+                        {t("userDetail.department")} :
+                      </span>
+                      <span className="font-medium text-content-body">
+                        {getDeptName(user.department)}
+                      </span>
+
+                      <span className="font-medium text-content-muted whitespace-nowrap">
+                        {t("userDetail.position")} :
+                      </span>
+                      <span className="font-medium text-content-body">
+                        {getPosName(user.position)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                        <Users className="w-4.5 h-4.5" />
+                      </div>
+                      <div>
+                        <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
+                          {t("userDetail.teamTitle")} ({teammates.length})
+                        </h3>
+                        <p className="text-[11px] text-content-muted mt-0.5">
+                          {t("userDetail.teamHint")}
+                        </p>
+                      </div>
+                    </div>
+                    {teammates.length === 0 ? (
+                      <p className="text-xs text-content-subtle italic py-4 text-center">
+                        {t("userDetail.noTeammates")}
+                      </p>
+                    ) : (
+                      <div className="divide-y divide-border-faint max-h-[250px] overflow-y-auto pr-1 custom-scrollbar">
+                        {teammates.map((tm) => (
+                          <div
+                            key={tm.id || tm.uid}
+                            className="flex items-center gap-3 py-2.5 first:pt-1 last:pb-0"
+                          >
+                            <UserAvatar user={tm} className="w-9 h-9 text-xs shrink-0" />
+                            <div className="min-w-0">
+                              <div className="text-xs font-medium text-content-strong truncate">
+                                {tm.displayName || tm.username || tm.email}
+                              </div>
+                              <div className="text-xs text-content-muted font-medium truncate mt-0.5">
+                                {getPosName(tm.position) || tm.role || ""}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                          <Laptop className="w-4.5 h-4.5" />
+                        </div>
+                        <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
+                          {t("userDetail.loginHistory")}
+                        </h3>
+                      </div>
+                      {userSessions.filter((s) => s.canRevoke).length > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleRevokeAllOtherSessions}
+                          className="text-xs text-rose-600 hover:underline font-semibold cursor-pointer"
+                        >
+                          {t("userDetail.allLogout")}
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="divide-y divide-border-faint max-h-[250px] overflow-y-auto pr-1 custom-scrollbar">
+                      {sessionsLoading ? (
+                        <p className="text-xs text-content-subtle italic py-4 text-center">
+                          {t("userDetail.loadingSessions", "Memuat riwayat masuk...")}
+                        </p>
+                      ) : userSessions.length === 0 ? (
+                        <p className="text-xs text-content-subtle italic py-4 text-center">
+                          {t(
+                            "userDetail.noLoginHistory",
+                            "Belum ada riwayat login untuk pengguna ini."
+                          )}
+                        </p>
+                      ) : (
+                        userSessions.map((item) => {
+                          const DeviceIcon =
+                            item.deviceType === "smartphone"
+                              ? Smartphone
+                              : item.deviceType === "tablet"
+                                ? Tablet
+                                : Laptop;
+                          const metaParts = [item.location, item.ip].filter(
+                            (p) => p && p !== "—" && p.trim()
+                          );
+
+                          return (
+                            <div
+                              key={item.id}
+                              className="py-3 first:pt-1 last:pb-0 flex items-center justify-between gap-3"
+                            >
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                                  <DeviceIcon className="w-4.5 h-4.5" />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-xs font-medium text-content-strong truncate">
+                                      {item.device}
+                                    </span>
+                                    {item.isCurrent && (
+                                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-700 shrink-0">
+                                        {t("userDetail.currentDevice")}
+                                      </span>
+                                    )}
+                                    {item.isLatest && !item.isCurrent && (
+                                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary shrink-0">
+                                        {t("userDetail.lastLogin", "Login terakhir")}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {metaParts.length > 0 && (
+                                    <div className="text-xs text-content-subtle truncate mt-0.5">
+                                      {metaParts.join(" · ")}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="shrink-0 text-right max-w-[40%]">
+                                <div className="text-xs text-content-subtle font-medium whitespace-nowrap">
+                                  {item.time}
+                                </div>
+                                {item.canRevoke && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRevokeSession(item.id)}
+                                    className="text-[10px] text-rose-600 hover:bg-rose-500/10 px-2 py-0.5 rounded transition cursor-pointer mt-0.5 inline-block font-semibold"
+                                  >
+                                    Logout
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* RIGHT: stat cards, Recent Activity (Today/Weekly/Monthly —
+                      dari ActivityLog sungguhan), Recently Created (pengganti
+                      "Popular Posts": tugas yang dilaporkan/dibuat pengguna
+                      ini), lalu deretan Projects ala Velzon. */}
+                <div className="lg:col-span-8 space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="bg-surface border border-border-subtle p-4 sm:p-5 rounded-xl flex items-center gap-4 shadow-xs">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 border border-primary/20">
+                        <Folder className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <span className="text-xs text-content-muted font-normal uppercase tracking-normal block">
+                          Total Related Projects
+                        </span>
+                        <div className="text-xl font-bold text-content-strong mt-0.5">
+                          {userProjectsList.length}{" "}
+                          <span className="text-xs font-medium text-content-muted">Project</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-surface border border-border-subtle p-4 sm:p-5 rounded-xl flex items-center gap-4 shadow-xs">
+                      <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0 border border-emerald-500/20">
+                        <CheckCircle className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <span className="text-xs text-content-muted font-normal uppercase tracking-normal block">
+                          Assigned Tasks
+                        </span>
+                        <div className="text-xl font-bold text-content-strong mt-0.5">
+                          {userTasks.length}{" "}
+                          <span className="text-xs font-medium text-content-muted">Tasks</span>
+                        </div>
+                        <span className="text-[10px] text-content-subtle block mt-0.5">
+                          {userTasks.length === 0
+                            ? "No pending tasks"
+                            : `${userTasks.filter((t) => t.status !== "Done" && t.status !== "Selesai").length} active tasks`}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-4">
+                    <div className="flex items-center justify-between border-b border-border-subtle/60 pb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                          <Activity className="w-4.5 h-4.5" />
+                        </div>
+                        <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
+                          {t("userDetail.recentActivityTitle")}
+                        </h3>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        {(
+                          [
+                            { id: "today", label: "Today" },
+                            { id: "week", label: "Weekly" },
+                            { id: "month", label: "Monthly" },
+                          ] as const
+                        ).map((f) => (
+                          <button
+                            key={f.id}
+                            type="button"
+                            onClick={() => setActivityFilter(f.id)}
+                            className={cn(
+                              "px-4 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer",
+                              activityFilter === f.id
+                                ? "bg-primary-surface text-content-inverse shadow-xs"
+                                : "bg-primary/10 text-primary hover:bg-primary/20"
+                            )}
+                          >
+                            {f.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {userActivityLogsFiltered.length === 0 ? (
+                      <p className="text-xs text-content-subtle italic py-8 text-center">
+                        {t("userDetail.noActivity")}
+                      </p>
+                    ) : (
+                      <div className="max-h-[300px] overflow-y-auto pr-2 pl-4 py-1 custom-scrollbar">
+                        <div className="relative pl-8 space-y-6 border-l-2 border-border-subtle ml-2">
+                          {userActivityLogsFiltered.map((log) => {
+                            const actDate = ensureDate(log.createdAt);
+
+                            let formattedDetails = log.details || "";
+                            if (formattedDetails) {
+                              (tasks || []).forEach((t) => {
+                                if (formattedDetails.includes(t.id)) {
+                                  formattedDetails = formattedDetails.replace(
+                                    t.id,
+                                    `"${t.title}" (${t.key || "TASK"})`
+                                  );
+                                }
+                              });
+                            }
+
+                            return (
+                              <div key={log.id} className="relative group">
+                                {/* Small green dot sitting directly on the vertical line */}
+                                <div className="absolute -left-[37px] top-2.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-surface shadow-xs" />
+
+                                <div className="flex items-start gap-3">
+                                  <UserAvatar
+                                    user={user}
+                                    className="w-7 h-7 text-xs shrink-0 ring-2 ring-surface shadow-xs mt-0.5"
+                                  />
+                                  <div className="space-y-1.5 flex-1 min-w-0">
+                                    <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                                      <span className="font-medium text-content-strong">
+                                        {user.displayName || user.username}
+                                      </span>
+                                      <span className="text-content-subtle">
+                                        {humanizeActivityAction(log.action, formattedDetails)}
+                                      </span>
+                                      <span className="text-content-subtle text-xs">
+                                        • {formatDistanceToNow(actDate, { addSuffix: true })}
+                                      </span>
+                                    </div>
+
+                                    {formattedDetails && formattedDetails !== log.action && (
+                                      <div className="text-xs text-content-secondary leading-relaxed bg-surface-sunken/80 p-3.5 rounded-xl border border-border-subtle/50 mt-1.5">
+                                        {formattedDetails}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-4">
+                    <div className="flex items-center justify-between border-b border-border-subtle/60 pb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                          <Sparkles className="w-4.5 h-4.5" />
+                        </div>
+                        <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
+                          {t("userDetail.recentlyCreated")} ({userCreatedItems.length})
+                        </h3>
+                      </div>
+                    </div>
+                    {userCreatedItems.length === 0 ? (
+                      <p className="text-xs text-content-subtle italic py-6 text-center">
+                        {t("userDetail.noRecentlyCreated")}
+                      </p>
+                    ) : (
+                      <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                        {userCreatedItems.map((item) => {
+                          const ItemIcon = item.icon;
+
+                          return (
+                            <div
+                              key={item.id}
+                              className="flex items-center justify-between gap-3 p-3 bg-surface hover:bg-surface-muted/60 border border-border-subtle/60 rounded-xl transition-colors"
+                            >
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                                  <ItemIcon className="w-4.5 h-4.5" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="text-xs font-medium text-content-strong truncate">
+                                    {item.title}
+                                  </div>
+                                  <div className="flex items-center gap-2 text-xs text-content-subtle mt-0.5">
+                                    {item.subtitle && (
+                                      <>
+                                        <span className="font-mono text-primary font-medium uppercase truncate max-w-[120px]">
+                                          {item.subtitle}
+                                        </span>
+                                        <span>•</span>
+                                      </>
+                                    )}
+                                    <span>
+                                      {formatDistanceToNow(ensureDate(item.createdAt), {
+                                        addSuffix: true,
+                                      })}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 shrink-0">
+                                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+                                  {item.status || "To Do"}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* MODE LIHAT: Tab Project ala Desain Referensi LanPro (#218) */}
+            {pageMode === "view" && activeTab === "project" && (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                {/* KOLOM KIRI (Main 8 Col): Daftar Proyek + Task Terdelegasi */}
+                <div className="lg:col-span-8 space-y-4">
+                  {/* Header Row: Sub-title + Search Bar + View Mode Toggle */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-3.5 sm:p-4 rounded-lg border border-border-subtle shadow-xs">
+                    <div className="flex items-center gap-2">
+                      <Layout className="w-4.5 h-4.5 text-primary" />
+                      <h2 className="text-sm font-normal text-content-strong uppercase tracking-normal">
+                        {t("userDetail.tabProject", "Project Terkait")} ({userProjectsList.length})
+                      </h2>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {/* Search Bar */}
+                      <div className="relative flex-1 sm:w-64">
+                        <Search className="w-3.5 h-3.5 text-content-muted absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          value={projectSearchQuery}
+                          onChange={(e) => setProjectSearchQuery(e.target.value)}
+                          placeholder={t("userDetail.searchProjectPlaceholder", "Cari project...")}
+                          className="w-full pl-8 pr-3 py-1.5 bg-surface-sunken border border-border-subtle rounded-md text-xs outline-none focus:border-primary text-content-strong transition"
+                        />
                       </div>
 
-                      {/* Department & Position */}
-                      <div className="grid grid-cols-2 gap-2.5">
-                        <div className="space-y-1">
-                          <label className="text-xs font-medium text-content-body dark:text-slate-300">
-                            Department
-                          </label>
-                          <select
-                            value={editDepartment}
-                            onChange={(e) => setEditDepartment(e.target.value)}
-                            className="w-full px-3 py-1.5 bg-surface dark:bg-slate-900 border border-border-subtle dark:border-slate-700 rounded-md text-xs font-medium text-content-strong dark:text-slate-100 outline-none focus:border-indigo-500 transition-all cursor-pointer"
-                          >
-                            <option value="">Select Department</option>
-                            {(departments.length > 0
+                      {/* View Mode Toggle Buttons */}
+                      <div className="flex items-center gap-0.5 bg-surface-sunken border border-border-subtle p-0.5 rounded-md">
+                        <button
+                          type="button"
+                          onClick={() => setProjectTabMode("grid")}
+                          className={cn(
+                            "p-1.5 rounded text-xs transition cursor-pointer",
+                            projectTabMode === "grid"
+                              ? "bg-primary-surface text-content-inverse shadow-xs"
+                              : "text-content-muted hover:text-content-body"
+                          )}
+                          title="Grid View"
+                        >
+                          <LayoutGrid className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setProjectTabMode("list")}
+                          className={cn(
+                            "p-1.5 rounded text-xs transition cursor-pointer",
+                            projectTabMode === "list"
+                              ? "bg-primary-surface text-content-inverse shadow-xs"
+                              : "text-content-muted hover:text-content-body"
+                          )}
+                          title="List View"
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Empty state or Filtered List */}
+                  {userProjectsList.length === 0 ? (
+                    <div className="bg-surface p-8 rounded-lg border border-border-subtle text-center space-y-2">
+                      <FolderOpen className="w-8 h-8 text-content-subtle mx-auto" />
+                      <p className="text-xs text-content-subtle italic">
+                        {t("userDetail.noActiveProject", "Belum ada proyek terkait.")}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {userProjectsList
+                        .filter((p) =>
+                          projectSearchQuery.trim()
+                            ? p.name.toLowerCase().includes(projectSearchQuery.toLowerCase()) ||
+                              (p.key &&
+                                p.key.toLowerCase().includes(projectSearchQuery.toLowerCase()))
+                            : true
+                        )
+                        .map((p, pIdx) => {
+                          const style = projectStatusStyle(p.status);
+
+                          // Ambisi task untuk proyek ini
+                          const projTasks = (tasks || []).filter(
+                            (tItem) =>
+                              (tItem.projectId === p.id ||
+                                (tItem as any).project_id === p.id ||
+                                (tItem as any).projectKey === p.key) &&
+                              (tItem.assigneeId === user.id ||
+                                tItem.assigneeId === user.uid ||
+                                (tItem as any).assignee === user.username ||
+                                (tItem as any).assigneeName === user.displayName)
+                          );
+
+                          const allProjTasks = (tasks || []).filter(
+                            (tItem) =>
+                              tItem.projectId === p.id ||
+                              (tItem as any).project_id === p.id ||
+                              (tItem as any).projectKey === p.key
+                          );
+
+                          const completedTasks = allProjTasks.filter((tItem) =>
+                            statusSelesai(tItem.status, masterData)
+                          );
+                          const progressPercent =
+                            allProjTasks.length > 0
+                              ? Math.round((completedTasks.length / allProjTasks.length) * 100)
+                              : 0;
+
+                          return (
+                            <div
+                              key={p.id || `proj-${pIdx}`}
+                              className="bg-surface rounded-xl border border-border-subtle p-4 sm:p-5 shadow-xs space-y-4 hover:border-primary/30 transition-all"
+                            >
+                              {/* Header Card Proyek */}
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex items-start gap-3 min-w-0">
+                                  <div
+                                    className={cn(
+                                      "w-11 h-11 rounded-xl flex items-center justify-center text-content-inverse shrink-0 shadow-soft font-semibold text-lg",
+                                      pIdx % 2 === 0
+                                        ? "bg-gradient-to-br from-primary-surface to-primary-surface-active"
+                                        : "bg-gradient-to-br from-teal-500 to-emerald-600"
+                                    )}
+                                  >
+                                    {pIdx % 2 === 0 ? (
+                                      <Workflow className="w-5 h-5 text-content-inverse" />
+                                    ) : (
+                                      <Activity className="w-5 h-5 text-content-inverse" />
+                                    )}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <h3 className="text-sm font-semibold text-content-strong truncate">
+                                      {p.name}
+                                    </h3>
+                                    <p className="text-xs text-content-muted line-clamp-1 mt-0.5">
+                                      {p.description || `Project ${p.name}`}
+                                    </p>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  className="text-content-subtle hover:text-content-body p-1 rounded-md transition"
+                                >
+                                  <ChevronRight className="w-4 h-4" />
+                                </button>
+                              </div>
+
+                              {/* Badges Row */}
+                              <div className="flex flex-wrap items-center gap-2 text-xs sm:text-[11px]">
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold border border-primary/20">
+                                  <User className="w-3 h-3" />
+                                  <span>Product Owner</span>
+                                </span>
+
+                                <span
+                                  className={cn(
+                                    "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-medium border uppercase",
+                                    style.badge
+                                  )}
+                                >
+                                  <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                                  <span>
+                                    {p.status || (pIdx % 2 === 0 ? "On Track" : "In Progress")}
+                                  </span>
+                                </span>
+
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-sunken text-content-body font-medium border border-border-subtle">
+                                  <Clock className="w-3 h-3 text-content-subtle" />
+                                  <span>
+                                    {(p as any).dueDate ||
+                                      (p as any).endDate ||
+                                      (p.createdAt
+                                        ? `Created ${new Date(p.createdAt).toLocaleDateString()}`
+                                        : "No due date")}
+                                  </span>
+                                </span>
+
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-sunken text-content-body font-medium border border-border-subtle">
+                                  <FileText className="w-3 h-3 text-content-subtle" />
+                                  <span>
+                                    {projTasks.length} assigned · {allProjTasks.length} total
+                                  </span>
+                                </span>
+                              </div>
+
+                              {/* Progress Bar Row */}
+                              <div className="space-y-1.5">
+                                <div className="flex items-center justify-between text-xs sm:text-[11px]">
+                                  <span className="font-medium text-primary">
+                                    {progressPercent}% Complete
+                                  </span>
+                                </div>
+                                <div className="w-full h-2 bg-surface-sunken rounded-full overflow-hidden border border-border-subtle/50">
+                                  <div
+                                    className="h-full bg-primary-surface rounded-full transition-all duration-500"
+                                    style={{ width: `${progressPercent}%` }}
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Sub-Section: Tugas Terdelegasi */}
+                              <div className="bg-surface-sunken/60 rounded-xl border border-border-subtle p-3 sm:p-3.5 space-y-2.5">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-normal text-content-strong uppercase tracking-normal">
+                                    Tugas Terdelegasi ({projTasks.length})
+                                  </span>
+                                </div>
+
+                                <div className="space-y-2">
+                                  {projTasks.length === 0 ? (
+                                    <div className="p-3 text-center text-xs text-content-subtle italic">
+                                      {t(
+                                        "userDetail.noAssignedTask",
+                                        "Tidak ada tugas terdelegasi pada proyek ini."
+                                      )}
+                                    </div>
+                                  ) : (
+                                    projTasks.map((tItem: any) => (
+                                      <div
+                                        key={tItem.id || tItem.key}
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={() => onOpenTask?.(tItem as Task)}
+                                        onKeyDown={(e) => {
+                                          if (e.key === "Enter" || e.key === " ") {
+                                            e.preventDefault();
+                                            onOpenTask?.(tItem as Task);
+                                          }
+                                        }}
+                                        className="flex items-center justify-between gap-3 p-2.5 bg-surface hover:bg-surface-muted/60 rounded-lg border border-border-subtle transition cursor-pointer"
+                                      >
+                                        <div className="flex items-center gap-2.5 min-w-0">
+                                          <div className="w-4 h-4 rounded-full border-2 border-border-subtle shrink-0 flex items-center justify-center" />
+                                          <div className="min-w-0">
+                                            <div className="flex items-center gap-2">
+                                              <span className="text-xs font-medium text-content-strong truncate">
+                                                {tItem.title}
+                                              </span>
+                                              <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-normal bg-primary/10 text-primary border border-primary/20 uppercase">
+                                                {tItem.key || tItem.taskKey || "TASK"}
+                                              </span>
+                                              <span
+                                                className={cn(
+                                                  "px-1.5 py-0.2 rounded text-[10px] font-normal uppercase",
+                                                  (tItem.priority || "")
+                                                    .toLowerCase()
+                                                    .includes("high")
+                                                    ? "bg-rose-500/10 text-rose-600 border border-rose-500/20"
+                                                    : "bg-amber-500/10 text-amber-600 border border-amber-500/20"
+                                                )}
+                                              >
+                                                {tItem.priority === "High"
+                                                  ? "↑ High"
+                                                  : `— ${tItem.priority || "Medium"}`}
+                                              </span>
+                                            </div>
+                                            <div className="text-[10px] text-content-muted mt-0.5 flex items-center gap-1">
+                                              <Clock className="w-3 h-3 text-content-subtle" />
+                                              <span>
+                                                {tItem.due ||
+                                                  (tItem.dueDate
+                                                    ? `Due ${tItem.dueDate}`
+                                                    : "No due date")}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 shrink-0">
+                                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-surface-sunken text-content-body border border-border-subtle">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                                            {tItem.status || "To Do"}
+                                          </span>
+                                          <ChevronRight className="w-3.5 h-3.5 text-content-subtle" />
+                                        </div>
+                                      </div>
+                                    ))
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  )}
+                </div>
+
+                {/* KOLOM KANAN (Sidebar 4 Col): Ringkasan Project + Timeline Aktivitas + Stay Productive Banner */}
+                <div className="lg:col-span-4 space-y-4">
+                  {/* Widget 1: Ringkasan Project */}
+                  <div className="bg-surface p-4 sm:p-5 rounded-xl border border-border-subtle shadow-xs space-y-4">
+                    <div className="flex items-center gap-2 border-b border-border-subtle/60 pb-3">
+                      <Activity className="w-4 h-4 text-primary" />
+                      <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
+                        Ringkasan Project
+                      </h3>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 bg-surface-sunken p-3 rounded-lg border border-border-subtle">
+                      <div>
+                        <div className="text-xl font-bold text-content-strong leading-none">
+                          {userProjectsList.length}
+                        </div>
+                        <div className="text-[10px] text-content-muted font-normal uppercase mt-1">
+                          Total Project
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xl font-bold text-content-strong leading-none">
+                          {userTasks.length}
+                        </div>
+                        <div className="text-[10px] text-content-muted font-normal uppercase mt-1">
+                          Total Tasks
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Breakdown status task */}
+                    <div className="space-y-2 text-xs">
+                      <div className="flex items-center justify-between py-1 border-b border-border-faint">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-surface-muted" />
+                          <span className="text-content-body font-medium">To Do</span>
+                        </div>
+                        <span className="font-semibold text-content-strong">
+                          {
+                            userTasks.filter((t) => t.status === "To Do" || t.status === "Backlog")
+                              .length
+                          }
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between py-1 border-b border-border-faint">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-blue-500" />
+                          <span className="text-content-body font-medium">In Progress</span>
+                        </div>
+                        <span className="font-semibold text-content-strong">
+                          {
+                            userTasks.filter(
+                              (t) => t.status === "In Progress" || t.status === "In Development"
+                            ).length
+                          }
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between py-1 border-b border-border-faint">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-amber-500" />
+                          <span className="text-content-body font-medium">In Review</span>
+                        </div>
+                        <span className="font-semibold text-content-strong">
+                          {
+                            userTasks.filter(
+                              (t) =>
+                                t.status === "In Review" ||
+                                t.status === "Testing" ||
+                                t.status === "QA"
+                            ).length
+                          }
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between py-1">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                          <span className="text-content-body font-medium">Done</span>
+                        </div>
+                        <span className="font-semibold text-content-strong">
+                          {userTasks.filter((t) => statusSelesai(t.status, masterData)).length}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Widget 2: Timeline Aktivitas */}
+                  <div className="bg-surface p-4 sm:p-5 rounded-xl border border-border-subtle shadow-xs space-y-4">
+                    <div className="flex items-center gap-2 border-b border-border-subtle/60 pb-3">
+                      <Clock className="w-4 h-4 text-primary" />
+                      <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
+                        Timeline Aktivitas
+                      </h3>
+                    </div>
+
+                    {projectTabTimeline.length === 0 ? (
+                      <p className="text-xs text-content-subtle italic py-4 text-center">
+                        {t("userDetail.noActivity")}
+                      </p>
+                    ) : (
+                      <div className="relative pl-5 space-y-4 border-l-2 border-primary/20 ml-2 py-1 text-xs">
+                        {projectTabTimeline.map((log, idx) => {
+                          const actDate = ensureDate(log.createdAt);
+                          let formattedDetails = log.details || "";
+                          if (formattedDetails) {
+                            (tasks || []).forEach((t) => {
+                              if (formattedDetails.includes(t.id)) {
+                                formattedDetails = formattedDetails.replace(
+                                  t.id,
+                                  `"${t.title}" (${t.key || "TASK"})`
+                                );
+                              }
+                            });
+                          }
+                          const headline = humanizeActivityAction(log.action, formattedDetails);
+                          return (
+                            <div key={log.id || `tl-${idx}`} className="relative">
+                              <div
+                                className={cn(
+                                  "absolute -left-[27px] top-0.5 w-3 h-3 rounded-full ring-4 ring-surface",
+                                  idx === 0 ? "bg-primary-surface" : "bg-emerald-500"
+                                )}
+                              />
+                              <div className="font-medium text-content-strong line-clamp-2">
+                                {headline}
+                              </div>
+                              {formattedDetails && formattedDetails !== log.action ? (
+                                <div className="text-[11px] text-content-muted mt-0.5 line-clamp-2">
+                                  {formattedDetails}
+                                </div>
+                              ) : null}
+                              <div className="text-[10px] text-content-subtle mt-0.5">
+                                {format(actDate, "MMM d, yyyy")}
+                                {" · "}
+                                {formatDistanceToNow(actDate, { addSuffix: true })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Widget 3: Stay Productive Card Banner */}
+                  <div className="bg-gradient-to-br from-primary/10 via-primary/10 to-primary/5 border border-primary/20 p-4 sm:p-5 rounded-xl flex items-center justify-between gap-3 shadow-xs">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary-surface text-content-inverse flex items-center justify-center shrink-0 shadow-soft">
+                        <Sparkles className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-semibold text-content-strong">
+                          Stay Productive
+                        </h4>
+                        <p className="text-[11px] text-content-muted mt-0.5 line-clamp-2">
+                          Focus on your tasks and keep your projects on track.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="w-8 h-8 rounded-full bg-surface border border-border-subtle flex items-center justify-center text-primary hover:bg-primary-surface hover:text-content-inverse transition shrink-0 cursor-pointer shadow-2xs"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* MODE LIHAT: 3 Tab Standar Velzon (Overview, Activities, Project, Document) */}
+            {pageMode === "view" && activeTab === "personal" && (
+              <div className="text-xs text-content-subtle">{t("userDetail.personalInfoDesc")}</div>
+            )}
+
+            {/* MODE EDIT: Full-Width Clean Form Layout ala Velzon */}
+            {pageMode === "edit" && (
+              <div className="space-y-6">
+                {/* Tab: Personal Detail Form */}
+                {activeTab === "personal" && (
+                  <div className="bg-surface p-6 sm:p-8 rounded-2xl border border-border-subtle shadow-xs space-y-6">
+                    <div className="border-b border-border-subtle/60 pb-4">
+                      <h3 className="text-sm font-normal text-content-strong uppercase tracking-normal">
+                        {t("userDetail.personalInfoTitle", "PERSONAL DETAILS")}
+                      </h3>
+                      <p className="text-xs text-content-muted mt-1">
+                        {t(
+                          "userDetail.personalInfoDesc",
+                          "Update your full name, contact details, department, and organizational settings."
+                        )}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Full Name */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-content-strong flex items-center gap-2">
+                          <User className="w-4 h-4 text-content-subtle" />
+                          <span>{t("userDetail.fullName")}</span>
+                        </label>
+                        <input
+                          value={editFullName}
+                          onChange={(e) => setEditFullName(e.target.value)}
+                          placeholder={t("userDetail.fullNamePlaceholder")}
+                          className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-primary text-content-strong transition shadow-2xs"
+                        />
+                      </div>
+
+                      {/* Email Address */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-content-strong flex items-center gap-2">
+                          <Mail className="w-4 h-4 text-content-subtle" />
+                          <span>{t("userDetail.email")}</span>
+                        </label>
+                        <input
+                          value={editEmail}
+                          onChange={(e) => setEditEmail(e.target.value)}
+                          placeholder={t("userDetail.emailPlaceholder")}
+                          className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-primary text-content-strong transition shadow-2xs"
+                        />
+                      </div>
+
+                      {/* Phone / WhatsApp */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-content-strong flex items-center gap-2">
+                          <Phone className="w-4 h-4 text-content-subtle" />
+                          <span>{t("userDetail.phone")} / WhatsApp Number</span>
+                        </label>
+                        <input
+                          value={editPhone}
+                          onChange={(e) => setEditPhone(e.target.value)}
+                          placeholder={t("userDetail.phonePlaceholder")}
+                          className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-primary text-content-strong transition shadow-2xs"
+                        />
+                      </div>
+
+                      {/* Department */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-content-strong flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-content-subtle" />
+                          <span>{t("userDetail.department")}</span>
+                        </label>
+                        <StyledDropdown
+                          value={editDepartment}
+                          onChange={(val: string) => setEditDepartment(val)}
+                          options={[
+                            {
+                              id: "",
+                              label: t("userDetail.selectDepartment"),
+                              icon: "Building2",
+                              color: "#6366F1",
+                            },
+                            ...(departments.length > 0
                               ? departments
                               : masterData.filter((d) => d.type === "department")
-                            ).map((opt) => (
-                              <option key={opt.id || opt.code} value={opt.id || opt.code}>
-                                {opt.name || opt.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                            ).map((opt: any) => ({
+                              id: opt.id || opt.code,
+                              label: opt.name || opt.label,
+                              icon: opt.icon,
+                              color: opt.color,
+                            })),
+                          ]}
+                          type="department"
+                          masterData={masterData}
+                          className="w-full"
+                          buttonClassName="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium text-content-strong"
+                        />
+                      </div>
 
-                        <div className="space-y-1">
-                          <label className="text-xs font-medium text-content-body dark:text-slate-300">
-                            Position
-                          </label>
-                          <select
-                            value={editPosition}
-                            onChange={(e) => setEditPosition(e.target.value)}
-                            className="w-full px-3 py-1.5 bg-surface dark:bg-slate-900 border border-border-subtle dark:border-slate-700 rounded-md text-xs font-medium text-content-strong dark:text-slate-100 outline-none focus:border-indigo-500 transition-all cursor-pointer"
-                          >
-                            <option value="">Select Position</option>
-                            {(positions.length > 0
+                      {/* Position / Jabatan */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-content-strong flex items-center gap-2">
+                          <Briefcase className="w-4 h-4 text-content-subtle" />
+                          <span>{t("userDetail.position")}</span>
+                        </label>
+                        <StyledDropdown
+                          value={editPosition}
+                          onChange={(val: string) => setEditPosition(val)}
+                          options={[
+                            {
+                              id: "",
+                              label: t("userDetail.selectPosition"),
+                              icon: "BadgeCheck",
+                              color: "#6366F1",
+                            },
+                            ...(positions.length > 0
                               ? positions
                               : masterData.filter(
                                   (d) => d.type === "jabatan" || d.type === "position"
                                 )
-                            ).map((opt) => (
-                              <option key={opt.id || opt.code} value={opt.id || opt.code}>
-                                {opt.name || opt.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                            ).map((opt: any) => ({
+                              id: opt.id || opt.code,
+                              label: opt.name || opt.label,
+                              icon: opt.icon,
+                              color: opt.color,
+                            })),
+                          ]}
+                          type="jabatan"
+                          masterData={masterData}
+                          className="w-full"
+                          buttonClassName="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium text-content-strong"
+                        />
                       </div>
-                    </>
-                  )}
 
-                  {/* Full Name & Email */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-content-body dark:text-slate-300">
-                      Full Name
-                    </label>
-                    <input
-                      value={editFullName}
-                      onChange={(e) => setEditFullName(e.target.value)}
-                      placeholder="Nama lengkap..."
-                      className="w-full px-3 py-1.5 border border-border-subtle dark:border-slate-700 rounded-md text-xs font-medium outline-none focus:border-indigo-500 bg-surface dark:bg-slate-900 text-content-strong dark:text-slate-100"
-                    />
-                  </div>
+                      {/* System Role (Admin only) */}
+                      {isAdmin && (
+                        <div className="space-y-2">
+                          <label className="text-xs font-medium text-content-strong flex items-center gap-2">
+                            <UserCheck className="w-4 h-4 text-content-subtle" />
+                            <span>{t("userDetail.systemRole")}</span>
+                          </label>
+                          <StyledDropdown
+                            value={editRole}
+                            onChange={(val: string) => {
+                              const newRole = val as AppRole;
+                              setEditRole(newRole);
+                              setEditPermissions(
+                                ROLE_DEFAULT_PERMISSIONS[newRole] ||
+                                  ROLE_DEFAULT_PERMISSIONS.member ||
+                                  ROLE_DEFAULT_PERMISSIONS.viewer ||
+                                  (ROLE_DEFAULT_PERMISSIONS.owner as UserPermissions)
+                              );
+                            }}
+                            options={
+                              peranSistem.length === 0
+                                ? [{ id: "", label: t("users.emptyRoleCatalog") }]
+                                : peranSistem.map((p) => ({
+                                    id: p.code,
+                                    label: p.label,
+                                    icon: p.icon || undefined,
+                                    color: p.color || undefined,
+                                  }))
+                            }
+                            type="project_role"
+                            masterData={masterData}
+                            className="w-full"
+                            buttonClassName="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium text-content-strong"
+                          />
+                        </div>
+                      )}
 
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-content-body dark:text-slate-300">
-                        Email
-                      </label>
-                      <input
-                        value={editEmail}
-                        onChange={(e) => setEditEmail(e.target.value)}
-                        placeholder="email@domain.com"
-                        className="w-full px-3 py-1.5 border border-border-subtle dark:border-slate-700 rounded-md text-xs font-medium outline-none focus:border-indigo-500 bg-surface dark:bg-slate-900 text-content-strong dark:text-slate-100"
-                      />
+                      {/* Account Status */}
+                      {isAdmin && (
+                        <div className="space-y-2 md:col-span-2">
+                          <label className="text-xs font-medium text-content-strong flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4 text-content-subtle" />
+                            <span>{t("userDetail.accountStatus")}</span>
+                          </label>
+                          <StyledDropdown
+                            value={editStatus}
+                            onChange={(val) => setEditStatus(val as any)}
+                            options={[
+                              { id: "approved", label: t("userDetail.activeApproved") },
+                              { id: "pending", label: t("userDetail.waitingApproval") },
+                              { id: "rejected", label: t("userDetail.suspendedRejected") },
+                            ]}
+                            buttonClassName="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs text-left font-medium text-content-strong shadow-2xs"
+                          />
+                        </div>
+                      )}
                     </div>
 
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-content-body dark:text-slate-300">
-                        Nomor HP / WhatsApp
-                      </label>
-                      <input
-                        value={editPhone}
-                        onChange={(e) => setEditPhone(e.target.value)}
-                        placeholder="08123456789"
-                        className="w-full px-3 py-1.5 border border-border-subtle dark:border-slate-700 rounded-md text-xs font-medium outline-none focus:border-indigo-500 bg-surface dark:bg-slate-900 text-content-strong dark:text-slate-100"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Password Reset */}
-                  <div className="space-y-1 pt-1 border-t border-border-faint dark:border-slate-800">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-medium text-content-body dark:text-slate-300">
-                        Update Password
-                      </label>
+                    {/* Action Buttons */}
+                    <div className="flex items-center justify-end gap-3 pt-6 border-t border-border-subtle/60">
                       <button
                         type="button"
-                        onClick={generateRandomPassword}
-                        className="text-xs sm:text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-medium cursor-pointer"
+                        onClick={exitEditMode}
+                        className="px-5 py-2.5 bg-surface-sunken/80 hover:bg-surface-muted text-content-body rounded-xl text-xs font-semibold border border-border-subtle transition cursor-pointer"
                       >
-                        <Key className="w-3 h-3" /> Buat Password Acak
+                        {t("userDetail.cancel", "Cancel")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSaveUser}
+                        disabled={isSaving}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-xl text-xs font-semibold shadow-soft transition disabled:opacity-50 cursor-pointer"
+                      >
+                        {isSaving ? (
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Save className="w-3.5 h-3.5" />
+                        )}
+                        <span>{t("userDetail.saveUserChanges", "Save Changes")}</span>
                       </button>
                     </div>
-                    <input
-                      type="text"
-                      value={editPassword}
-                      onChange={(e) => setEditPassword(e.target.value)}
-                      placeholder="Kosongkan jika tidak diubah..."
-                      className="w-full px-3 py-1.5 border border-border-subtle dark:border-slate-700 rounded-md text-xs font-medium outline-none focus:border-indigo-500 bg-surface dark:bg-slate-900 text-content-strong dark:text-slate-100"
-                    />
                   </div>
-                </div>
-              </div>
+                )}
 
-              {/* Custom System Permissions Matrix Table */}
-              {isAdmin && (
-                <div className="bg-surface dark:bg-slate-900 border border-border-subtle dark:border-slate-800 rounded-lg p-4 space-y-3 shadow-xs">
-                  <div className="flex items-center justify-between border-b border-border-subtle dark:border-slate-800 pb-2.5">
-                    <div>
-                      <h4 className="font-medium text-content-strong dark:text-slate-100 text-xs uppercase tracking-wider">
-                        Active System Permissions & Overrides
-                      </h4>
-                      <p className="text-xs sm:text-[11px] text-content-muted dark:text-slate-400 font-normal mt-0.5">
-                        Konfigurasi hak akses modul spesifik untuk akun pengguna ini.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleResetToRoleDefaults}
-                      className="px-2.5 py-1 text-xs sm:text-[11px] bg-surface-muted dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-content-body dark:text-slate-300 rounded-md font-medium transition flex items-center gap-1 shrink-0"
-                      title="Reset to role default permissions"
-                    >
-                      <RotateCcw className="w-3 h-3" /> Reset Role Default
-                    </button>
-                  </div>
+                {/* Tab: Change Password Form (3-Column Layout + Login History ala Velzon) */}
+                {activeTab === "password" && (
+                  <div className="space-y-6">
+                    {/* Card 1: Change Password Fields */}
+                    <div className="bg-surface p-6 sm:p-8 rounded-2xl border border-border-subtle shadow-xs space-y-6">
+                      <div className="flex items-center gap-3 border-b border-border-subtle/60 pb-4">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                          <Lock className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-semibold text-content-strong">
+                            {t("userDetail.tabChangePassword", "Change Password")}
+                          </h3>
+                          <p className="text-xs text-content-muted mt-0.5">
+                            {t(
+                              "userDetail.passwordUnchangedHint",
+                              "Update your password to keep your account secure."
+                            )}
+                          </p>
+                        </div>
+                      </div>
 
-                  {editRole === "admin" && (
-                    <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 p-2.5 rounded-md text-xs">
-                      <ShieldAlert className="w-4 h-4 shrink-0 text-amber-500" />
-                      <span>
-                        Role <strong>Administrator</strong> memiliki akses penuh secara default,
-                        namun override per-modul di bawah akan diberlakukan secara eksplisit.
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="border border-border-subtle dark:border-slate-800 rounded-md overflow-hidden shadow-xs max-w-full overflow-x-auto">
-                    <ResponsiveTable className="w-full text-left text-xs border-collapse">
-                      <thead className="bg-surface-sunken dark:bg-slate-800/60 border-b border-border-subtle dark:border-slate-800">
-                        <tr>
-                          <th className="py-2 px-3 font-medium text-xs sm:text-[10px] text-content-muted dark:text-slate-400 uppercase">
-                            Module
-                          </th>
-                          {(["read", "create", "update", "delete"] as const).map((action) => (
-                            <th
-                              key={action}
-                              className="py-2 px-1 font-medium text-xs sm:text-[10px] text-content-muted dark:text-slate-400 uppercase text-center w-14"
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
+                        {/* Old Password */}
+                        <div className="space-y-2">
+                          <label className="text-xs font-medium text-content-strong">
+                            {t("userDetail.oldPassword")} <span className="text-rose-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <input
+                              type={showOldPassword ? "text" : "password"}
+                              value={editOldPassword}
+                              onChange={(e) => setEditOldPassword(e.target.value)}
+                              placeholder={t("userDetail.oldPasswordPlaceholder")}
+                              className="w-full pl-4 pr-10 py-2.5 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-primary bg-surface-sunken/60 text-content-strong transition"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowOldPassword((v) => !v)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-content-muted hover:text-content-body cursor-pointer"
                             >
-                              {action}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-surface dark:bg-slate-900">
-                        {(Object.keys(MODULE_DESCRIPTIONS) as Array<keyof UserPermissions>).map(
-                          (module) => {
-                            const moduleInfo = MODULE_DESCRIPTIONS[module] || {
-                              label: module,
-                              desc: "",
-                            };
-                            return (
-                              <tr
-                                key={module}
-                                className="hover:bg-surface-sunken/50 dark:hover:bg-slate-800/40 transition-colors"
+                              {showOldPassword ? (
+                                <EyeOff className="w-4 h-4" />
+                              ) : (
+                                <Eye className="w-4 h-4" />
+                              )}
+                            </button>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setShowForgotPasswordModal(true)}
+                            className="text-xs text-primary hover:underline pt-0.5 block cursor-pointer"
+                          >
+                            {t("userDetail.forgotPassword")}
+                          </button>
+                        </div>
+
+                        {/* New Password with Generate Button */}
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-medium text-content-strong">
+                              {t("userDetail.newPassword")} <span className="text-rose-500">*</span>
+                            </label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                              <input
+                                type={showEditPassword ? "text" : "password"}
+                                value={editPassword}
+                                onChange={(e) => setEditPassword(e.target.value)}
+                                placeholder={t("userDetail.passwordPlaceholder")}
+                                className="w-full pl-4 pr-10 py-2.5 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-primary bg-surface-sunken/60 text-content-strong transition"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowEditPassword((v) => !v)}
+                                title={
+                                  showEditPassword
+                                    ? t("common.hidePassword")
+                                    : t("common.showPassword")
+                                }
+                                aria-label={
+                                  showEditPassword
+                                    ? t("common.hidePassword")
+                                    : t("common.showPassword")
+                                }
+                                aria-pressed={showEditPassword}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-content-muted hover:text-content-body cursor-pointer"
                               >
-                                <td className="py-2 px-3 font-medium text-content-body dark:text-slate-200 text-xs">
-                                  <div
-                                    className="inline-flex items-center gap-1"
-                                    title={moduleInfo.desc}
-                                  >
-                                    <span>{moduleInfo.label}</span>
-                                  </div>
-                                </td>
-                                {(["read", "create", "update", "delete"] as const).map((action) => {
-                                  const isChecked = editPermissions[module]?.[action];
-                                  const isDefaultGranted =
-                                    ROLE_DEFAULT_PERMISSIONS[editRole]?.[module]?.[action];
-                                  const isOverride = isChecked !== isDefaultGranted;
+                                {showEditPassword ? (
+                                  <EyeOff className="w-4 h-4" />
+                                ) : (
+                                  <Eye className="w-4 h-4" />
+                                )}
+                              </button>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={generateRandomPassword}
+                              className="px-3.5 py-2.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold flex items-center gap-1.5 transition shrink-0 cursor-pointer border border-primary/20"
+                            >
+                              <RefreshCw className="w-3.5 h-3.5" />
+                              <span>Generate</span>
+                            </button>
+                          </div>
+                        </div>
 
-                                  return (
-                                    <td key={action} className="py-1.5 px-1 text-center">
-                                      <button
-                                        type="button"
-                                        onClick={() => handleTogglePermission(module, action)}
-                                        className={cn(
-                                          "w-5 h-5 rounded-md flex items-center justify-center mx-auto transition-all cursor-pointer border relative",
-                                          isChecked
-                                            ? "bg-indigo-600 text-white border-indigo-500 shadow-xs"
-                                            : "bg-surface-sunken dark:bg-slate-800 text-slate-300 dark:text-slate-600 border-border-subtle dark:border-slate-700 hover:bg-surface-muted dark:hover:bg-slate-700",
-                                          isOverride &&
-                                            "ring-2 ring-amber-400 ring-offset-1 dark:ring-offset-slate-900"
-                                        )}
-                                        title={
-                                          isChecked
-                                            ? `Granted (${isOverride ? "Explicit Override" : "Role Default"}). Click to revoke.`
-                                            : `Revoked (${isOverride ? "Explicit Override" : "Role Default"}). Click to grant.`
-                                        }
-                                      >
-                                        <Check
-                                          className={cn(
-                                            "w-3 h-3 text-current",
-                                            isChecked ? "opacity-100" : "opacity-0"
-                                          )}
-                                        />
-                                        {isOverride && (
-                                          <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full ring-1 ring-white dark:ring-slate-900" />
-                                        )}
-                                      </button>
-                                    </td>
-                                  );
-                                })}
-                              </tr>
-                            );
+                        {/* Confirm New Password */}
+                        <div className="space-y-2">
+                          <label className="text-xs font-medium text-content-strong">
+                            {t("userDetail.confirmPassword")}{" "}
+                            <span className="text-rose-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <input
+                              type={showConfirmPassword ? "text" : "password"}
+                              value={editConfirmPassword}
+                              onChange={(e) => setEditConfirmPassword(e.target.value)}
+                              placeholder={t("userDetail.confirmPasswordPlaceholder")}
+                              className={cn(
+                                "w-full pl-4 pr-10 py-2.5 border rounded-xl text-xs font-medium outline-none focus:border-primary bg-surface-sunken/60 text-content-strong transition",
+                                editConfirmPassword && editPassword !== editConfirmPassword
+                                  ? "border-rose-500"
+                                  : "border-border-subtle/70"
+                              )}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowConfirmPassword((v) => !v)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-content-muted hover:text-content-body cursor-pointer"
+                            >
+                              {showConfirmPassword ? (
+                                <EyeOff className="w-4 h-4" />
+                              ) : (
+                                <Eye className="w-4 h-4" />
+                              )}
+                            </button>
+                          </div>
+                          {editConfirmPassword && editPassword !== editConfirmPassword && (
+                            <p className="text-xs text-rose-600">
+                              {t("userDetail.passwordMismatch")}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-3 pt-5 border-t border-border-subtle/60">
+                        <button
+                          type="button"
+                          onClick={exitEditMode}
+                          className="px-5 py-2.5 bg-surface-sunken/80 hover:bg-surface-muted text-content-body rounded-xl text-xs font-semibold border border-border-subtle transition cursor-pointer"
+                        >
+                          {t("userDetail.cancel", "Cancel")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveUser}
+                          disabled={
+                            isSaving || !editPassword.trim() || editPassword !== editConfirmPassword
                           }
+                          className="flex items-center gap-2 px-5 py-2.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-xl text-xs font-semibold shadow-soft transition disabled:opacity-50 cursor-pointer"
+                        >
+                          {isSaving ? (
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Lock className="w-3.5 h-3.5" />
+                          )}
+                          <span>{t("userDetail.changePasswordAction", "Change Password")}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Card 2: Login History Session Manager */}
+                    <div className="bg-surface p-6 sm:p-8 rounded-2xl border border-border-subtle shadow-xs space-y-5">
+                      <div className="flex items-center justify-between border-b border-border-subtle/60 pb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                            <Clock className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-semibold text-content-strong">
+                              {t("userDetail.loginHistory", "Login History")}
+                            </h3>
+                            <p className="text-xs text-content-muted mt-0.5">
+                              {t(
+                                "userDetail.loginHistoryHint",
+                                "List of devices and locations that recently accessed your account."
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                        {userSessions.filter((s) => s.canRevoke).length > 0 && (
+                          <button
+                            type="button"
+                            onClick={handleRevokeAllOtherSessions}
+                            className="px-4 py-2 rounded-xl text-xs font-semibold text-rose-600 bg-rose-50/50 hover:bg-rose-100 border border-rose-200 transition cursor-pointer flex items-center gap-1.5"
+                          >
+                            <LogOut className="w-3.5 h-3.5" />
+                            <span>{t("userDetail.allLogout", "Log out all sessions")}</span>
+                          </button>
                         )}
-                      </tbody>
-                    </ResponsiveTable>
-                  </div>
-                </div>
-              )}
-            </div>
+                      </div>
 
-            {/* RIGHT COLUMN: Work Overview, Project Involvement & Tasks (7 cols) */}
-            <div className="xl:col-span-7 space-y-5">
-              {/* Work Overview Stats */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-surface dark:bg-slate-900 border border-border-subtle dark:border-slate-800 p-4 rounded-lg flex items-center gap-3 shadow-xs">
-                  <div className="w-9 h-9 rounded-md bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
-                    <Server className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="text-xs sm:text-[10px] text-content-subtle font-medium uppercase tracking-wider block">
-                      Total Proyek Terkait
-                    </span>
-                    <span className="text-base font-medium text-content-strong dark:text-slate-100 leading-none">
-                      {userProjectsList.length} Proyek
-                    </span>
-                  </div>
-                </div>
+                      <div className="space-y-3">
+                        {sessionsLoading ? (
+                          <p className="text-xs text-content-subtle italic py-6 text-center">
+                            {t("userDetail.loadingSessions", "Memuat riwayat masuk...")}
+                          </p>
+                        ) : userSessions.length === 0 ? (
+                          <p className="text-xs text-content-subtle italic py-6 text-center">
+                            {t(
+                              "userDetail.noLoginHistory",
+                              "Belum ada riwayat login untuk pengguna ini."
+                            )}
+                          </p>
+                        ) : (
+                          userSessions.map((item) => {
+                            const DeviceIcon =
+                              item.deviceType === "smartphone"
+                                ? Smartphone
+                                : item.deviceType === "tablet"
+                                  ? Tablet
+                                  : Laptop;
+                            const metaParts = [item.location, item.ip, item.time].filter(
+                              (p) => p && p !== "—" && String(p).trim()
+                            );
 
-                <div className="bg-surface dark:bg-slate-900 border border-border-subtle dark:border-slate-800 p-4 rounded-lg flex items-center gap-3 shadow-xs">
-                  <div className="w-9 h-9 rounded-md bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
-                    <CheckCircle className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="text-xs sm:text-[10px] text-content-subtle font-medium uppercase tracking-wider block">
-                      Tugas Ditugaskan
-                    </span>
-                    <span className="text-base font-medium text-content-strong dark:text-slate-100 leading-none">
-                      {userTasks.length} Tugas
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Form Delegasi Project Baru */}
-              {isAdmin && (
-                <div className="bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 rounded-lg p-4 shadow-xs space-y-3">
-                  <div className="space-y-0.5">
-                    <h4 className="font-medium text-indigo-950 dark:text-indigo-100 text-xs uppercase tracking-wider flex items-center gap-1.5">
-                      <UserPlus className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
-                      Delegasikan ke Proyek Baru
-                    </h4>
-                    <p className="text-xs text-content-secondary dark:text-slate-300">
-                      Tambahkan akses proyek dan peranan pengguna ini dalam tim.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-center">
-                    <div className="sm:col-span-5">
-                      <select
-                        value={selectedAssignProjectId}
-                        onChange={(e) => setSelectedAssignProjectId(e.target.value)}
-                        className="w-full px-3 py-1.5 bg-surface dark:bg-slate-900 border border-border-subtle dark:border-slate-700 rounded-md text-xs font-medium text-content-strong dark:text-slate-100 outline-none focus:border-indigo-500 truncate"
-                      >
-                        <option value="">-- Pilih Proyek --</option>
-                        {projects
-                          .filter((p) => {
-                            const r = p.memberRoles || {};
-                            const uId = user.id || user.uid;
                             return (
-                              !Object.keys(r).includes(uId) && !(p.members || []).includes(uId)
+                              <div
+                                key={item.id}
+                                className="flex items-center justify-between gap-3 p-4 bg-surface-sunken/60 rounded-xl border border-border-subtle/50 hover:border-primary/30 transition-all"
+                              >
+                                <div className="flex items-center gap-3.5 min-w-0">
+                                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                                    <DeviceIcon className="w-5 h-5" />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <span className="text-xs font-semibold text-content-strong">
+                                        {item.device}
+                                      </span>
+                                      {item.isLatest && !item.isCurrent && (
+                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary">
+                                          {t("userDetail.lastLogin", "Login terakhir")}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {metaParts.length > 0 && (
+                                      <div className="text-xs text-content-subtle mt-0.5 truncate">
+                                        {metaParts.join(" · ")}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 shrink-0">
+                                  {item.isCurrent ? (
+                                    <>
+                                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                                        <span>
+                                          {t("userDetail.currentDevice", "Current Session")}
+                                        </span>
+                                      </span>
+                                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700">
+                                        {t("userDetail.active", "Active")}
+                                      </span>
+                                    </>
+                                  ) : item.canRevoke ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRevokeSession(item.id)}
+                                      className="px-4 py-1.5 rounded-full text-xs font-semibold text-rose-600 bg-rose-50/50 hover:bg-rose-100 border border-rose-200 transition cursor-pointer"
+                                    >
+                                      {t("userDetail.logoutAction", "Log out")}
+                                    </button>
+                                  ) : null}
+                                </div>
+                              </div>
                             );
                           })
-                          .map((p) => (
-                            <option key={p.id} value={p.id}>
-                              {p.name}
-                            </option>
-                          ))}
-                      </select>
-                    </div>
-
-                    <div className="sm:col-span-4">
-                      <select
-                        value={selectedAssignProjectRole}
-                        onChange={(e) => setSelectedAssignProjectRole(e.target.value)}
-                        className="w-full px-3 py-1.5 bg-surface dark:bg-slate-900 border border-border-subtle dark:border-slate-700 rounded-md text-xs font-medium text-content-strong dark:text-slate-100 outline-none focus:border-indigo-500"
-                      >
-                        <option value="admin">Project Admin (Administrator Proyek)</option>
-                        <option value="manager">Project Manager (Manager Proyek)</option>
-                        <option value="lead">Project Lead (Lead Proyek)</option>
-                        <option value="member">Member (Anggota Tim)</option>
-                        <option value="viewer">Viewer (Pengamat)</option>
-                        <option value="owner">Owner (Pemilik Proyek)</option>
-                      </select>
-                    </div>
-
-                    <div className="sm:col-span-3">
-                      <button
-                        type="button"
-                        onClick={handleAssignToProject}
-                        className="w-full flex items-center justify-center gap-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-medium shadow-xs transition"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Delegasikan</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Sub-Team Subordinate Selection (When Project Admin / Manager / Lead is selected) */}
-                  {["admin", "manager", "lead"].includes(
-                    selectedAssignProjectRole.toLowerCase()
-                  ) && (
-                    <div className="pt-2 space-y-1.5 border-t border-indigo-100 dark:border-indigo-900/50">
-                      <label className="text-xs sm:text-[11px] font-medium text-indigo-950 dark:text-indigo-200 uppercase tracking-wider block">
-                        Pilih Sub-Tim / PIC Bawahan (Tim di bawah Project Admin ini):
-                      </label>
-                      <div className="max-h-36 overflow-y-auto bg-surface dark:bg-slate-900 border border-border-subtle dark:border-slate-800 rounded-md p-2 space-y-1 custom-scrollbar">
-                        {availableUsers
-                          .filter((u) => (u.id || u.uid) !== (user.id || user.uid))
-                          .map((u) => {
-                            const uId = u.id || u.uid;
-                            const isChecked = selectedSubordinateIds.includes(uId);
-                            return (
-                              <label
-                                key={uId}
-                                className="flex items-center gap-2 text-xs text-content-body dark:text-slate-300 hover:bg-surface-sunken dark:hover:bg-slate-800 p-1 rounded cursor-pointer"
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={isChecked}
-                                  onChange={() => {
-                                    if (isChecked) {
-                                      setSelectedSubordinateIds(
-                                        selectedSubordinateIds.filter((id) => id !== uId)
-                                      );
-                                    } else {
-                                      setSelectedSubordinateIds([...selectedSubordinateIds, uId]);
-                                    }
-                                  }}
-                                  className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                                />
-                                <span className="font-medium">
-                                  {u.displayName || u.username || u.email}
-                                </span>
-                                <span className="text-xs sm:text-[10px] text-content-subtle">
-                                  ({u.email})
-                                </span>
-                              </label>
-                            );
-                          })}
+                        )}
                       </div>
                     </div>
-                  )}
-                </div>
-              )}
-
-              {/* List Proyek Terkait */}
-              <div className="bg-surface dark:bg-slate-900 p-4 rounded-lg shadow-xs border border-border-subtle dark:border-slate-800 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Layout className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                    <h3 className="text-xs font-medium text-content-strong dark:text-slate-100 uppercase tracking-wider">
-                      Proyek Terkait ({userProjectsList.length})
-                    </h3>
                   </div>
-                </div>
+                )}
 
-                {userProjectsList.length === 0 ? (
-                  <p className="text-xs text-content-subtle italic py-6 text-center">
-                    Pengguna belum tergabung dalam proyek aktif.
-                  </p>
-                ) : (
-                  <div className="space-y-2 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
-                    {userProjectsList.map((p) => {
-                      const uId = user.id || user.uid;
-                      const roleInProject =
-                        p.memberRoles?.[uId] || (p.ownerId === uId ? "Owner" : "Member");
-                      const projectTasks = userTasks.filter((t) => t.projectId === p.id);
+                {/* Tab: Settings (Admin Matrix - 4-Group Collapsible Accordion ala Sidebar) */}
+                {activeTab === "settings" && isAdmin && (
+                  <div className="space-y-5">
+                    <div className="flex items-center justify-between border-b border-border-subtle pb-3.5">
+                      <div>
+                        <h4 className="font-normal text-content-strong text-sm uppercase tracking-normal">
+                          {t("userDetail.activePermissions")}
+                        </h4>
+                        <p className="text-xs text-content-muted mt-0.5">
+                          {t("userDetail.permissionHint")}
+                        </p>
+                      </div>
+                    </div>
 
-                      return (
-                        <div
-                          key={p.id}
-                          className="p-3 bg-surface-sunken dark:bg-slate-800/50 border border-border-subtle dark:border-slate-800 rounded-md space-y-2"
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="font-medium text-xs text-content-strong dark:text-slate-100">
-                                {p.name}
+                    <div className="flex items-start gap-2 text-content-body bg-surface-sunken border border-border-subtle p-3 rounded-md text-xs">
+                      <Lock className="w-4 h-4 shrink-0 mt-0.5 text-content-muted" />
+                      <span>{t("userDetail.permissionReadOnlyNote")}</span>
+                    </div>
+
+                    {/* 4 Accordion Groups */}
+                    <div className="space-y-3.5">
+                      {PERMISSION_SECTIONS.map((section) => {
+                        const isOpen = !!openSections[section.id];
+
+                        return (
+                          <div
+                            key={section.id}
+                            className="border border-border-subtle rounded-lg overflow-hidden bg-surface shadow-xs transition-all"
+                          >
+                            {/* Accordion Group Header (Clickable Trigger) */}
+                            <div
+                              onClick={() => toggleSection(section.id)}
+                              role="button"
+                              tabIndex={0}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  toggleSection(section.id);
+                                }
+                              }}
+                              className="w-full flex items-center justify-between px-4 py-3 bg-surface-sunken hover:bg-surface-muted/60 transition-colors cursor-pointer text-left select-none border-b border-border-subtle/50"
+                            >
+                              <div className="flex items-center gap-2.5">
+                                {isOpen ? (
+                                  <FolderOpen className="w-4 h-4 text-primary shrink-0" />
+                                ) : (
+                                  <Folder className="w-4 h-4 text-content-muted shrink-0" />
+                                )}
+                                <span className="text-xs font-normal text-content-strong uppercase tracking-normal">
+                                  {t(section.titleKey)}
+                                </span>
+                                <span className="text-xs sm:text-[10px] text-content-muted font-normal">
+                                  ({section.modules.length} {t("userDetail.module").toLowerCase()})
+                                </span>
                               </div>
-                              <div className="text-xs sm:text-[10px] font-mono text-indigo-600 dark:text-indigo-400 uppercase mt-0.5">
-                                {p.key}
+
+                              <div className="p-1 rounded-md text-content-muted hover:text-content-strong">
+                                {isOpen ? (
+                                  <ChevronDown className="w-4 h-4" />
+                                ) : (
+                                  <ChevronRight className="w-4 h-4" />
+                                )}
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs sm:text-[10px] font-medium uppercase px-2 py-0.5 bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 rounded-md border border-indigo-200 dark:border-indigo-800">
-                                {roleInProject}
-                              </span>
-                              {isAdmin && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveFromProject(p.id)}
-                                  className="p-1 text-content-subtle hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-md transition-colors"
-                                  title="Keluarkan dari project"
+                            {/* Accordion Content Table */}
+                            {isOpen && (
+                              <div className="overflow-x-auto">
+                                <ResponsiveTable className="w-full text-left text-xs border-collapse">
+                                  <thead className="bg-surface-sunken/40 border-b border-border-subtle text-content-muted">
+                                    <tr>
+                                      <th className="py-2.5 px-4 font-normal text-xs uppercase w-2/5">
+                                        {t("userDetail.module")}
+                                      </th>
+                                      {(["read", "create", "update", "delete"] as const).map(
+                                        (action) => (
+                                          <th
+                                            key={action}
+                                            className="py-2.5 px-2 font-normal text-xs uppercase text-center w-20"
+                                          >
+                                            {action}
+                                          </th>
+                                        )
+                                      )}
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-border-faint bg-surface">
+                                    {section.modules.map((module) => {
+                                      const info = MODULE_DESCRIPTIONS[module];
+                                      const moduleInfo = info
+                                        ? { label: t(info.label), desc: t(info.desc) }
+                                        : { label: module as string, desc: "" };
+
+                                      return (
+                                        <tr
+                                          key={module}
+                                          className="hover:bg-surface-sunken/40 transition-colors"
+                                        >
+                                          <td className="py-2.5 px-4 font-medium text-content-strong text-xs">
+                                            <div
+                                              className="inline-flex items-center gap-1.5"
+                                              title={moduleInfo.desc}
+                                            >
+                                              <span className="font-medium text-content-body">
+                                                {moduleInfo.label}
+                                              </span>
+                                            </div>
+                                          </td>
+
+                                          {(["read", "create", "update", "delete"] as const).map(
+                                            (action) => {
+                                              const isChecked = editPermissions[module]?.[action];
+                                              const isDefaultGranted =
+                                                ROLE_DEFAULT_PERMISSIONS[editRole]?.[module]?.[
+                                                  action
+                                                ];
+                                              const isOverride = isChecked !== isDefaultGranted;
+
+                                              return (
+                                                <td key={action} className="py-2 px-2 text-center">
+                                                  <div
+                                                    onClick={() =>
+                                                      handleTogglePermission(module, action)
+                                                    }
+                                                    role="img"
+                                                    aria-label={`${moduleInfo.label} ${action}: ${
+                                                      isChecked
+                                                        ? t("userDetail.granted")
+                                                        : t("userDetail.revoked")
+                                                    } (${
+                                                      isOverride
+                                                        ? t("userDetail.explicitOverride")
+                                                        : t("userDetail.roleDefault")
+                                                    })`}
+                                                    className={cn(
+                                                      "w-5 h-5 rounded-md flex items-center justify-center mx-auto border relative cursor-pointer select-none transition-all",
+                                                      isChecked
+                                                        ? "bg-primary-surface text-content-inverse border-primary shadow-xs"
+                                                        : "bg-surface-sunken text-content-subtle border-border-subtle hover:border-primary/40",
+                                                      isOverride &&
+                                                        "ring-2 ring-amber-400 ring-offset-1"
+                                                    )}
+                                                    title={`${
+                                                      isChecked
+                                                        ? t("userDetail.granted")
+                                                        : t("userDetail.revoked")
+                                                    } · ${
+                                                      isOverride
+                                                        ? t("userDetail.explicitOverride")
+                                                        : t("userDetail.roleDefault")
+                                                    }`}
+                                                  >
+                                                    <Check
+                                                      className={cn(
+                                                        "w-3 h-3 text-current transition-opacity",
+                                                        isChecked ? "opacity-100" : "opacity-0"
+                                                      )}
+                                                    />
+                                                    {isOverride && (
+                                                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full ring-1 ring-border-glass" />
+                                                    )}
+                                                  </div>
+                                                </td>
+                                              );
+                                            }
+                                          )}
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </ResponsiveTable>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Tab: Project (Mode Edit) — delegasi & manajemen proyek */}
+            {pageMode === "edit" && activeTab === "project" && (
+              <div className="space-y-5">
+                {/* Form Delegasi Project Baru */}
+                {isAdmin && pageMode === "edit" && (
+                  <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 shadow-xs space-y-3">
+                    <div className="space-y-0.5">
+                      <h4 className="font-normal text-content-strong text-xs uppercase tracking-normal flex items-center gap-1.5">
+                        <UserPlus className="w-4 h-4 text-primary shrink-0" />
+                        {t("userDetail.delegateNewProject")}
+                      </h4>
+                      <p className="text-xs text-content-secondary ">
+                        {t("userDetail.delegateHint")}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-center">
+                      <div className="sm:col-span-5">
+                        <StyledDropdown
+                          value={selectedAssignProjectId}
+                          onChange={setSelectedAssignProjectId}
+                          options={[
+                            { id: "", label: t("userDetail.pickProject") },
+                            ...projects
+                              .filter((p) => {
+                                const r = p.memberRoles || {};
+                                const uId = user.id || user.uid;
+                                return (
+                                  !Object.keys(r).includes(uId) && !(p.members || []).includes(uId)
+                                );
+                              })
+                              .map((p) => ({ id: p.id, label: p.name })),
+                          ]}
+                          buttonClassName="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs text-left font-medium text-content-strong truncate"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-4">
+                        <StyledDropdown
+                          value={selectedAssignProjectRole}
+                          onChange={(val: string) => setSelectedAssignProjectRole(val)}
+                          options={
+                            peranProyek.length === 0
+                              ? [{ id: "", label: t("userDetail.emptyProjectRoleCatalog") }]
+                              : peranProyek.map((p) => ({
+                                  id: p.code,
+                                  label: p.label,
+                                  icon: p.icon || undefined,
+                                  color: p.color || undefined,
+                                }))
+                          }
+                          type="project_role"
+                          masterData={masterData}
+                          className="w-full"
+                          buttonClassName="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-3">
+                        <button
+                          type="button"
+                          onClick={handleAssignToProject}
+                          className="w-full flex items-center justify-center gap-1 px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium shadow-xs transition"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>{t("userDetail.delegate")}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Sub-Team Subordinate Selection (When Project Admin / Manager / Lead is selected) */}
+                    {["admin", "manager", "lead"].includes(
+                      selectedAssignProjectRole.toLowerCase()
+                    ) && (
+                      <div className="pt-2 space-y-1.5 border-t border-primary/30 ">
+                        <label className="text-xs sm:text-[11px] font-normal text-content-strong uppercase tracking-normal block">
+                          {t("userDetail.selectSubTeam")}
+                        </label>
+                        <div className="max-h-36 overflow-y-auto bg-surface border border-border-subtle rounded-md p-2 space-y-1 custom-scrollbar">
+                          {availableUsers
+                            .filter((u) => (u.id || u.uid) !== (user.id || user.uid))
+                            .map((u) => {
+                              const uId = u.id || u.uid;
+                              const isChecked = selectedSubordinateIds.includes(uId);
+                              return (
+                                <label
+                                  key={uId}
+                                  className="flex items-center gap-2 text-xs text-content-body hover:bg-surface-sunken p-1 rounded cursor-pointer"
                                 >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={() => {
+                                      if (isChecked) {
+                                        setSelectedSubordinateIds(
+                                          selectedSubordinateIds.filter((id) => id !== uId)
+                                        );
+                                      } else {
+                                        setSelectedSubordinateIds([...selectedSubordinateIds, uId]);
+                                      }
+                                    }}
+                                    className="rounded border-border-subtle text-primary focus:ring-primary"
+                                  />
+                                  <span className="font-medium">
+                                    {u.displayName || u.username || u.email}
+                                  </span>
+                                  <span className="text-xs sm:text-[10px] text-content-subtle">
+                                    ({u.email})
+                                  </span>
+                                </label>
+                              );
+                            })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* List Proyek Terkait (Hanya tampil di Tab Project mode Edit) */}
+                {activeTab === "project" && (
+                  <div className="bg-surface p-4 rounded-lg shadow-xs border border-border-subtle space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Layout className="w-4 h-4 text-primary " />
+                        <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
+                          Proyek Terkait ({userProjectsList.length})
+                        </h3>
+                      </div>
+                    </div>
+
+                    {userProjectsList.length === 0 ? (
+                      <p className="text-xs text-content-subtle italic py-6 text-center">
+                        {t("userDetail.noActiveProject")}
+                      </p>
+                    ) : (
+                      <div className="space-y-2 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
+                        {userProjectsList.map((p) => {
+                          const uId = user.id || user.uid;
+
+                          const kodePeranProyek =
+                            p.memberRoles?.[uId] || (p.ownerId === uId ? "owner" : "");
+                          const roleInProject = kodePeranProyek
+                            ? labelPeran(peranProyek, kodePeranProyek)
+                            : "—";
+                          const peranDikenal = Boolean(cariPeran(peranProyek, kodePeranProyek));
+                          const projectTasks = userTasks.filter((t) => t.projectId === p.id);
+                          const style = projectStatusStyle(p.status);
+
+                          const members = projectMemberAvatars(p);
+                          const isExpanded = expandedProjectTasks[p.id] !== false;
+
+                          return (
+                            <div
+                              key={p.id}
+                              className={cn(
+                                "p-3 bg-surface-sunken border border-border-subtle rounded-md space-y-2.5 border-l-4",
+                                style.border
+                              )}
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="space-y-1.5 min-w-0 flex-1">
+                                  <div>
+                                    <div className="font-medium text-xs text-content-strong">
+                                      {p.name}
+                                    </div>
+                                    <div className="text-xs sm:text-[10px] font-mono text-primary uppercase mt-0.5">
+                                      {p.key}
+                                    </div>
+                                  </div>
+
+                                  {/* Tim yang ada di dalam proyek ini */}
+                                  {members.length > 0 && (
+                                    <div className="flex items-center gap-1.5 pt-0.5">
+                                      <div className="flex items-center -space-x-1.5">
+                                        {members.slice(0, 4).map((m) => (
+                                          <UserAvatar
+                                            key={m.id || m.uid}
+                                            user={m}
+                                            className="w-5 h-5 text-[10px] ring-2 ring-surface shadow-2xs"
+                                          />
+                                        ))}
+                                        {members.length > 4 && (
+                                          <span className="w-5 h-5 rounded-full bg-surface-muted text-content-subtle text-xs sm:text-[8px] font-semibold flex items-center justify-center ring-2 ring-surface">
+                                            +{members.length - 4}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <span className="text-xs sm:text-[10px] text-content-muted font-medium">
+                                        {t("rakit.membersCount", { count: members.length })}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <span
+                                    className={cn(
+                                      "text-xs sm:text-[10px] font-normal uppercase px-2 py-0.5 rounded-md border",
+                                      peranDikenal
+                                        ? "bg-primary/15 text-primary border-primary/30 "
+                                        : "bg-amber-500/15 text-amber-800 border-amber-500/30 "
+                                    )}
+                                    title={
+                                      peranDikenal
+                                        ? undefined
+                                        : "Peran ini tidak ada di katalog Master Data — perlu dimigrasikan"
+                                    }
+                                  >
+                                    {roleInProject}
+                                  </span>
+
+                                  {/* Dropdown toggle (v) untuk lihat / sembunyikan detail tugas */}
+                                  {projectTasks.length > 0 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleProjectTasks(p.id)}
+                                      className="p-1 rounded-md text-content-muted hover:text-content-strong hover:bg-surface transition-colors cursor-pointer"
+                                      title={isExpanded ? "Sembunyikan Tugas" : "Lihat Tugas"}
+                                    >
+                                      {isExpanded ? (
+                                        <ChevronDown className="w-4 h-4 text-primary" />
+                                      ) : (
+                                        <ChevronRight className="w-4 h-4 text-content-subtle" />
+                                      )}
+                                    </button>
+                                  )}
+
+                                  {isAdmin && pageMode === "edit" && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveFromProject(p.id)}
+                                      className="p-1 text-content-subtle hover:text-rose-500 hover:bg-rose-500/10 rounded-md transition-colors"
+                                      title={t("userDetail.removeFromProject")}
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Tasks in project (Collapsable via Dropdown icon) */}
+                              {projectTasks.length > 0 && isExpanded && (
+                                <div className="pt-2 border-t border-border-subtle/60 space-y-1.5">
+                                  <div className="flex items-center justify-between text-xs sm:text-[10px] text-content-subtle font-normal uppercase tracking-normal">
+                                    <span>Tugas Terdelegasi ({projectTasks.length}):</span>
+                                  </div>
+                                  <div className="space-y-1 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                                    {projectTasks.map((t) => (
+                                      <div
+                                        key={t.id}
+                                        className="flex items-center justify-between text-xs bg-surface p-1.5 px-2.5 rounded-md border border-border-subtle/80 shadow-2xs hover:border-primary/30 transition-colors"
+                                      >
+                                        <div className="min-w-0 flex-1 pr-2">
+                                          <div className="font-medium text-content-strong truncate">
+                                            {t.title}
+                                          </div>
+                                          <div className="text-xs sm:text-[10px] font-mono text-primary uppercase">
+                                            {t.key || "TASK"}
+                                          </div>
+                                        </div>
+                                        <span className="text-xs sm:text-[10px] font-normal px-2 py-0.5 rounded bg-surface-muted text-content-secondary uppercase shrink-0">
+                                          {t.status || "todo"}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
                               )}
                             </div>
-                          </div>
-
-                          {/* Tasks in project */}
-                          {projectTasks.length > 0 && (
-                            <div className="pt-1.5 border-t border-border-subtle/60 dark:border-slate-800 space-y-1">
-                              <div className="text-xs sm:text-[10px] text-content-subtle font-medium uppercase">
-                                Tugas Terdelegasi ({projectTasks.length}):
-                              </div>
-                              <div className="space-y-1">
-                                {projectTasks.map((t) => (
-                                  <div
-                                    key={t.id}
-                                    className="flex items-center justify-between text-xs bg-surface dark:bg-slate-900 p-1.5 px-2 rounded-md border border-border-subtle/80 dark:border-slate-800"
-                                  >
-                                    <span className="font-medium text-content-body dark:text-slate-300 truncate max-w-[240px]">
-                                      {t.title}
-                                    </span>
-                                    <span className="text-xs sm:text-[10px] px-1.5 py-0.5 rounded bg-surface-muted dark:bg-slate-800 text-content-secondary dark:text-slate-300">
-                                      {t.status || "todo"}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
+            )}
 
-              {/* List Tugas / Issue Terkait */}
-              <div className="bg-surface dark:bg-slate-900 p-4 rounded-lg shadow-xs border border-border-subtle dark:border-slate-800 space-y-3">
-                <div className="flex items-center justify-between">
+            {/* Tab: Document — Tabel Dokumen ala Velzon */}
+            {activeTab === "document" && (
+              <div className="bg-surface p-4 sm:p-5 rounded-lg border border-border-subtle shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-border-subtle/60 pb-3">
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-violet-600 dark:text-violet-400" />
-                    <h3 className="text-xs font-medium text-content-strong dark:text-slate-100 uppercase tracking-wider">
-                      Semua Tugas Ditugaskan ({userTasks.length})
+                    <FileText className="w-4 h-4 text-primary" />
+                    <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
+                      {t("userDetail.documentTitle")} ({userDocuments.length})
                     </h3>
                   </div>
                 </div>
-                {userTasks.length === 0 ? (
-                  <p className="text-xs text-content-subtle italic py-6 text-center">
-                    Tidak ada tugas aktif yang ditugaskan kepada pengguna ini.
+
+                {userDocuments.length === 0 ? (
+                  <p className="text-xs text-content-subtle italic py-8 text-center">
+                    {t("userDetail.noDocuments")}
                   </p>
                 ) : (
-                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
-                    {userTasks.map((t) => (
-                      <div
-                        key={t.id}
-                        className="p-2.5 bg-surface-sunken dark:bg-slate-800/40 border border-border-subtle dark:border-slate-800 rounded-md flex items-center justify-between"
-                      >
-                        <div>
-                          <div className="font-medium text-xs text-content-strong dark:text-slate-100 truncate max-w-[280px]">
-                            {t.title}
-                          </div>
-                          <div className="text-xs sm:text-[10px] font-mono text-content-subtle uppercase mt-0.5">
-                            {t.key || "TASK"}
-                          </div>
-                        </div>
-                        <span
-                          className={cn(
-                            "text-xs sm:text-[10px] font-medium uppercase px-2 py-0.5 rounded-md border",
-                            t.status === "completed" || t.status === "done"
-                              ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
-                              : "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
-                          )}
+                  <div className="space-y-4">
+                    <div className="overflow-x-auto">
+                      <ResponsiveTable className="w-full text-left text-xs border-collapse">
+                        <thead className="bg-surface-sunken/40 border-b border-border-subtle text-content-muted">
+                          <tr>
+                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-normal">
+                              File Name
+                            </th>
+                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-normal">
+                              Type
+                            </th>
+                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-normal">
+                              Size
+                            </th>
+                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-normal">
+                              Upload Date
+                            </th>
+                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-normal text-right">
+                              Action
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border-faint bg-surface">
+                          {userDocuments.slice(0, docDisplayLimit).map((doc) => {
+                            const info = getFileDisplayInfo(doc.name, doc.type);
+                            const IconComponent = info.icon;
+                            const uploadDateStr = ensureDate(doc.createdAt).toLocaleDateString(
+                              "en-GB",
+                              {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              }
+                            );
+
+                            return (
+                              <tr
+                                key={doc.id}
+                                className="hover:bg-surface-sunken/40 transition-colors group"
+                              >
+                                {/* File Name + Icon (Clickable to download/open) */}
+                                <td className="py-3 px-4">
+                                  <div className="flex items-center gap-3">
+                                    <div
+                                      className={cn(
+                                        "w-9 h-9 rounded-md flex items-center justify-center shrink-0 shadow-2xs",
+                                        info.bgColor
+                                      )}
+                                    >
+                                      <IconComponent className="w-4 h-4" />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <a
+                                        href={doc.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        download={doc.name}
+                                        className="font-medium text-xs text-content-strong hover:text-primary hover:underline transition-colors block truncate max-w-xs sm:max-w-md cursor-pointer"
+                                        title={`Unduh / Buka: ${doc.name}`}
+                                      >
+                                        {doc.name}
+                                      </a>
+                                      {doc.taskTitle && (
+                                        <div className="text-[10px] text-content-subtle truncate">
+                                          {doc.taskTitle}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </td>
+
+                                {/* Type */}
+                                <td className="py-3 px-4 text-content-muted font-medium whitespace-nowrap">
+                                  {info.typeLabel}
+                                </td>
+
+                                {/* Size */}
+                                <td className="py-3 px-4 text-content-muted whitespace-nowrap">
+                                  {doc.size || "1.20 MB"}
+                                </td>
+
+                                {/* Upload Date */}
+                                <td className="py-3 px-4 text-content-muted whitespace-nowrap font-mono text-[11px]">
+                                  {uploadDateStr}
+                                </td>
+
+                                {/* Action: Download Button */}
+                                <td className="py-3 px-4 text-right whitespace-nowrap">
+                                  <a
+                                    href={doc.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    download={doc.name}
+                                    className="inline-flex p-1.5 rounded-md text-content-muted hover:text-primary hover:bg-surface-muted transition-colors cursor-pointer"
+                                    title="Download File"
+                                  >
+                                    <Download className="w-4 h-4" />
+                                  </a>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </ResponsiveTable>
+                    </div>
+
+                    {/* Load More Button if more documents exist */}
+                    {userDocuments.length > docDisplayLimit && (
+                      <div className="flex justify-center pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setDocDisplayLimit((prev) => prev + 6)}
+                          className="flex items-center gap-1.5 text-xs text-emerald-600 hover:text-emerald-700 hover:underline font-medium py-1 px-3 rounded-md transition cursor-pointer"
                         >
-                          {t.status || "todo"}
-                        </span>
+                          <RefreshCw className="w-3.5 h-3.5" />
+                          <span>Load more</span>
+                        </button>
                       </div>
-                    ))}
+                    )}
                   </div>
                 )}
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        isOpen={showForgotPasswordModal}
+        onClose={() => setShowForgotPasswordModal(false)}
+      />
     </div>
   );
 };

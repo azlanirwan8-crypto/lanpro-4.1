@@ -1,19 +1,21 @@
 /**
- * Dialog impor diagram: Draw.io (XML), Miro (JSON/CSV), dan format cadangan
- * bawaan aplikasi.
+ * Dialog impor diagram multi-format: Draw.io (XML/.drawio), Miro (JSON/CSV),
+ * Mermaid (.mmd/.mermaid/.txt), dan format cadangan bawaan LanPro (JSON).
  *
- * Sebelumnya berupa blok JSX di dalam FlowchartContainer. Dipindah verbatim;
- * yang berubah hanya cara ia memperoleh data — dari closure atas state induk
- * menjadi props eksplisit.
+ * Versi ini mendukung 4 kategori format:
+ * 1. draw.io   — .drawio, .xml
+ * 2. Miro      — .json, .csv
+ * 3. Mermaid   — .mmd, .mermaid, .txt
+ * 4. LanPro    — .json (backup bawaan)
  *
- * Pasangannya di lapisan lain: parser yang mengubah isi berkas menjadi node dan
- * edge ada di `lib/importers.ts`, sedangkan komponen ini hanya mengurus
- * tampilan dan interaksi. Berkasnya sendiri dibaca oleh `handleProcessImportFile`
- * di container, karena ia perlu menulis ke state hasil parse.
+ * UI mengikuti bahasa desain Miro: clean, ringan, font sans modern.
  */
+import { useTranslation } from "react-i18next";
 import React from "react";
-import { Upload, X } from "lucide-react";
+import { Upload, FileText } from "lucide-react";
 import { cn } from "../../../lib/utils";
+import { Modal } from "../../../components/ui/Modal";
+import { Button } from "../../../components/ui/CoreUI";
 
 /** Bentuk hasil parse yang ditampilkan sebagai ringkasan sebelum diterapkan. */
 type ParsedImportData = { nodes: any[]; edges: any[] } | null;
@@ -38,6 +40,50 @@ interface ImportDiagramModalProps {
   handleApplyImportReplace: () => void;
 }
 
+/** Daftar format yang didukung, lengkap dengan label, warna, dan ekstensi. */
+const FORMAT_OPTIONS = [
+  {
+    key: "drawio" as "drawio" | "miro" | "native",
+    emoji: "📊",
+    label: "Draw.io",
+    subLabel: ".drawio  ·  .xml",
+    accept: ".xml,.drawio",
+    hint: "Export dari draw.io: File → Export As → XML (.drawio). Node, edge, dan label dikonversi otomatis.",
+    activeClass: "bg-orange-500/10 border-orange-400/50 text-orange-800 ring-2 ring-orange-400/20",
+    dotClass: "bg-orange-400",
+  },
+  {
+    key: "miro" as "drawio" | "miro" | "native",
+    emoji: "🟡",
+    label: "Miro",
+    subLabel: ".json  ·  .csv",
+    accept: ".json,.csv",
+    hint: "Export dari Miro: Board → Export → JSON atau CSV Metadata. Koordinat, teks, dan konektor terbaca otomatis.",
+    activeClass: "bg-amber-500/10 border-amber-400/50 text-amber-800 ring-2 ring-amber-400/20",
+    dotClass: "bg-amber-400",
+  },
+  {
+    key: "native" as "drawio" | "miro" | "native",
+    emoji: "✏️",
+    label: "Mermaid",
+    subLabel: ".mmd  ·  .txt",
+    accept: ".mmd,.mermaid,.txt",
+    hint: "Simpan kode Mermaid (flowchart TD, graph LR, dll) ke file .mmd atau .txt. Node, diamond, oval, dan edge dipetakan otomatis.",
+    activeClass: "bg-violet-500/10 border-violet-400/50 text-violet-800 ring-2 ring-violet-400/20",
+    dotClass: "bg-violet-400",
+  },
+  {
+    key: "native" as "drawio" | "miro" | "native",
+    emoji: "🔮",
+    label: "LanPro",
+    subLabel: ".json",
+    accept: ".json",
+    hint: "Upload file backup JSON yang diunduh dari tombol Backup di aplikasi ini untuk memulihkan diagram.",
+    activeClass: "bg-primary/10 border-primary/30 text-primary ring-2 ring-primary/20",
+    dotClass: "bg-primary",
+  },
+];
+
 export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
   isImportModalOpen,
   setIsImportModalOpen,
@@ -53,245 +99,201 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
   handleApplyImportMerge,
   handleApplyImportReplace,
 }) => {
-  if (!isImportModalOpen) return null;
+  const { t } = useTranslation();
+
+  // Track which specific format tab the user clicked (to show correct hint & accept)
+  const [activeFormatIdx, setActiveFormatIdx] = React.useState(0);
+
+  const activeFormat = FORMAT_OPTIONS[activeFormatIdx];
+
+  const closeImport = () => {
+    setIsImportModalOpen(false);
+    setParsedImportData(null);
+  };
+
+  const handleSelectFormat = (idx: number) => {
+    setActiveFormatIdx(idx);
+    setImportType(FORMAT_OPTIONS[idx].key);
+    setParsedImportData(null);
+    setParsedFilename("");
+  };
+
+  const triggerFileInput = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = activeFormat.accept;
+    input.onchange = (ev) => {
+      const file = (ev.target as HTMLInputElement).files?.[0];
+      if (file) handleProcessImportFile(file);
+    };
+    input.click();
+  };
 
   return (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 select-none">
-          <div className="bg-surface border border-border-subtle w-full max-w-xl rounded-xl shadow-xl overflow-hidden flex flex-col text-content-strong animate-in fade-in zoom-in-95 duration-150 max-h-[90vh]">
-
-            {/* Modal Head */}
-            <div className="px-5 py-4 bg-surface border-b border-border-subtle flex justify-between items-center shrink-0">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                  <Upload className="w-4 h-4" />
-                </div>
-                <h3 className="font-medium text-sm text-content">
-                  Integrasi & Impor File Alur Kerja
-                </h3>
-              </div>
-              <button
-                onClick={() => {
-                  setIsImportModalOpen(false);
-                  setParsedImportData(null);
-                }}
-                className="p-1 hover:bg-slate-200 rounded-lg text-content-subtle hover:text-content-secondary transition-all active:scale-95"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-5 overflow-y-auto space-y-4 text-xs flex-1">
-              {/* Platforms Option Slider */}
-              <div className="grid grid-cols-3 gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setImportType("drawio");
-                    setParsedImportData(null);
-                    setParsedFilename("");
-                  }}
-                  className={cn(
-                    "p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5",
-                    importType === "drawio"
-                      ? "bg-orange-50/70 border-orange-200 text-orange-800 ring-2 ring-orange-500/20 font-medium"
-                      : "border-border-subtle hover:bg-surface-sunken text-slate-605 hover:border-slate-300 font-medium"
-                  )}
-                >
-                  <span className="text-xl">📊</span>
-                  <div className="text-xs sm:text-[10px] font-medium uppercase tracking-wider">Draw.io / XML</div>
-                  <div className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium">File .xml / .drawio</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setImportType("miro");
-                    setParsedImportData(null);
-                    setParsedFilename("");
-                  }}
-                  className={cn(
-                    "p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5",
-                    importType === "miro"
-                      ? "bg-amber-50/70 border-amber-200 text-amber-800 ring-2 ring-amber-500/20 font-medium"
-                      : "border-border-subtle hover:bg-surface-sunken text-slate-605 hover:border-slate-300 font-medium"
-                  )}
-                >
-                  <span className="text-xl">🟡</span>
-                  <div className="text-xs sm:text-[10px] font-medium uppercase tracking-wider">Miro Board</div>
-                  <div className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium">Miro .json / .csv</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setImportType("native");
-                    setParsedImportData(null);
-                    setParsedFilename("");
-                  }}
-                  className={cn(
-                    "p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5",
-                    importType === "native"
-                      ? "bg-indigo-50/70 border-indigo-200 text-indigo-800 ring-2 ring-indigo-500/20 font-medium"
-                      : "border-border-subtle hover:bg-surface-sunken text-slate-605 hover:border-slate-300 font-medium"
-                  )}
-                >
-                  <span className="text-xl">🔮</span>
-                  <div className="text-xs sm:text-[10px] font-medium uppercase tracking-wider">Format Cadangan</div>
-                  <div className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium">Bawaan File .json</div>
-                </button>
-              </div>
-
-              {/* Guidelines helper text */}
-              <div className="bg-surface-sunken p-3 rounded-xl border border-border-subtle text-xs sm:text-[11px] leading-relaxed text-slate-550">
-                {importType === "drawio" && (
-                  <p>
-                    💡 <strong>Petunjuk Draw.io</strong>: Anda dapat mengekspor diagram dari Draw.io sebagai berkas <strong>XML Terkompresi maupun Mentah (.xml / .drawio)</strong>. Sistem kami secara otomatis mengonversi bentuk dasar, warna, label, serta garis penghubung agar kompatibel di whiteboard.
-                  </p>
-                )}
-                {importType === "miro" && (
-                  <p>
-                    💡 <strong>Petunjuk Miro</strong>: Ekspor papan Miro Anda dalam format <strong>JSON</strong> atau <strong>Metadata CSV</strong>. Bentuk geometri, koordinat posisi, teks konten, serta panah logic (connectors) akan dipetakan secara cerdas ke bentuk alur whiteboard.
-                  </p>
-                )}
-                {importType === "native" && (
-                  <p>
-                    💡 <strong>Petunjuk Format Cadangan</strong>: Unggah file backup ruang kerja berformat <strong>JSON</strong> yang diunduh dari aplikasi ini untuk memulihkan keseluruhan kondisi kanvas (bentuk, relasi, tema, dan status).
-                  </p>
-                )}
-              </div>
-
-              {/* Drag and Drop Box */}
-              <div
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  setDragOverImport(true);
-                }}
-                onDragLeave={() => setDragOverImport(false)}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  setDragOverImport(false);
-                  const file = e.dataTransfer.files?.[0];
-                  if (file) handleProcessImportFile(file);
-                }}
-                onClick={() => {
-                  const input = document.createElement("input");
-                  input.type = "file";
-                  if (importType === "drawio") {
-                    input.accept = ".xml, .drawio";
-                  } else if (importType === "miro") {
-                    input.accept = ".json, .csv";
-                  } else {
-                    input.accept = ".json";
-                  }
-                  input.onchange = (ev) => {
-                    const file = (ev.target as HTMLInputElement).files?.[0];
-                    if (file) handleProcessImportFile(file);
-                  };
-                  input.click();
-                }}
-                className={cn(
-                  "border-2 border-dashed rounded-xl p-6 transition-all cursor-pointer flex flex-col items-center justify-center gap-3 min-h-[140px]",
-                  dragOverImport
-                    ? "border-violet-500 bg-violet-50 text-violet-700"
-                    : parsedImportData
-                    ? "border-emerald-300 bg-emerald-50/10 text-emerald-800 animate-pulse"
-                    : "border-slate-300 hover:border-indigo-400 hover:bg-surface-sunken text-content-muted font-medium"
-                )}
-              >
-                {parsedImportData ? (
-                  <span className="text-3xl animate-bounce">📦</span>
-                ) : (
-                  <Upload className="w-8 h-8 text-slate-300" />
-                )}
-
-                <div className="text-center font-medium font-sans">
-                  {parsedImportData ? (
-                    <span className="text-emerald-700 text-xs sm:text-[11px] uppercase tracking-wider font-medium block mb-1">Struktur File Berhasil Dimuat!</span>
-                  ) : (
-                    <span>Tarik & lepas file di sini atau klik untuk memilih file</span>
-                  )}
-                  {parsedFilename && (
-                    <span className="text-xs sm:text-[10px] text-content-secondary font-mono block mt-2 bg-surface-muted p-1 px-2.5 rounded-lg border border-border-subtle inline-block">
-                      📎 {parsedFilename}
-                    </span>
-                  )}
-                </div>
-
-                {!parsedImportData && (
-                  <p className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-medium">
-                    Mendukung ekstensi {importType === "drawio" ? ".xml, .drawio" : importType === "miro" ? ".json, .csv" : ".json"}
-                  </p>
-                )}
-              </div>
-
-              {/* Analytical preview result of parser */}
-              {parsedImportData && (
-                <div className="bg-emerald-50/60 border border-emerald-200 rounded-xl p-4 space-y-2 text-xs sm:text-[11px] animate-fade-in text-emerald-900 leading-relaxed font-sans font-medium">
-                  <span className="font-medium uppercase tracking-widest text-xs sm:text-[11px] sm:text-[9.5px] text-emerald-800 flex items-center gap-1.5 shadow-soft bg-surface p-1 px-2.5 w-fit rounded-full border border-emerald-100">
-                    🔍 Ulasan Kesiapan Diagram
-                  </span>
-
-                  <div className="grid grid-cols-2 gap-3 pt-1">
-                    <div className="bg-surface p-2.5 rounded-xl border border-emerald-200 flex items-center gap-2 shadow-inner">
-                      <span className="text-xl">🛠️</span>
-                      <div>
-                        <div className="font-medium text-content text-xs">{parsedImportData.nodes.length}</div>
-                        <div className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium uppercase tracking-wider">Bentuk & Ornamen (Nodes)</div>
-                      </div>
-                    </div>
-
-                    <div className="bg-surface p-2.5 rounded-xl border border-emerald-200 flex items-center gap-2 shadow-inner">
-                      <span className="text-xl">🖧</span>
-                      <div>
-                        <div className="font-medium text-content text-xs">{parsedImportData.edges.length}</div>
-                        <div className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium uppercase tracking-wider">Anak Panah Penghubung (Edges)</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <p className="text-xs sm:text-[10px] text-emerald-700 italic pt-1 font-medium leading-relaxed">
-                    Kesiapan 105%: Semua komponen berhasil dipetakan ke logic element whiteboard. Silakan klik salah satu tombol di bawah untuk mengaplikasikan.
-                  </p>
-                </div>
+    <Modal
+      isOpen={isImportModalOpen}
+      onClose={closeImport}
+      title={t("importDiagram.title")}
+      maxWidth="max-w-lg"
+      className="select-none"
+      bodyClassName="space-y-4"
+      footer={
+        <>
+          <Button type="button" variant="secondary" onClick={closeImport}>
+            {t("importDiagram.close")}
+          </Button>
+          {parsedImportData ? (
+            <>
+              <Button type="button" variant="soft" onClick={handleApplyImportMerge}>
+                {t("importDiagram.mergeCanvas")}
+              </Button>
+              <Button type="button" onClick={handleApplyImportReplace}>
+                {t("importDiagram.replaceCanvas")}
+              </Button>
+            </>
+          ) : (
+            <span className="text-xs text-content-subtle italic font-medium mr-auto">
+              {t("importDiagram.pickAbove")}
+            </span>
+          )}
+        </>
+      }
+    >
+      {/* Format selector — 4-column pill grid */}
+      <div className="grid grid-cols-4 gap-1.5">
+        {FORMAT_OPTIONS.map((fmt, idx) => {
+          const isActive = activeFormatIdx === idx;
+          return (
+            <button
+              key={`${fmt.label}-${idx}`}
+              type="button"
+              onClick={() => handleSelectFormat(idx)}
+              className={cn(
+                "p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1 relative",
+                isActive
+                  ? fmt.activeClass
+                  : "border-border-subtle hover:bg-surface-sunken hover:border-border-subtle"
               )}
-
-            </div>
-
-            {/* Modal Actions */}
-            <div className="p-4 px-5 bg-surface-sunken border-t border-border-subtle flex justify-between items-center shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsImportModalOpen(false);
-                  setParsedImportData(null);
-                }}
-                className="p-2 px-4 rounded-xl bg-slate-200/80 hover:bg-slate-300 font-medium border border-slate-300 text-content-secondary hover:text-content-strong transition-all text-xs sm:text-[11px] active:scale-95"
-              >
-                Tutup
-              </button>
-
-              {parsedImportData ? (
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleApplyImportMerge}
-                    className="p-2 px-3 bg-surface hover:bg-indigo-50 border border-indigo-200 hover:border-indigo-300 text-indigo-700 hover:text-indigo-900 font-medium rounded-xl transition-all text-xs sm:text-[11px] shadow-soft flex items-center gap-1 active:scale-95"
-                  >
-                    <span>➕ Gabungkan ke Kanvas</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleApplyImportReplace}
-                    className="p-2 px-4 bg-gradient-to-tr from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-medium rounded-xl transition-all text-xs sm:text-[11px] shadow-soft flex items-center gap-1 active:scale-95"
-                  >
-                    <span>🔥 Ganti Kanvas Aktif</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="text-xs sm:text-[10px] text-content-subtle italic font-medium">Silakan tarik / pilih diagram di atas</div>
+            >
+              {isActive && (
+                <span
+                  className={cn(
+                    "absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full",
+                    fmt.dotClass
+                  )}
+                />
               )}
+              <span className="text-lg leading-none">{fmt.emoji}</span>
+              <div className="text-[10px] font-semibold uppercase tracking-wide leading-none mt-0.5">
+                {fmt.label}
+              </div>
+              <div className="text-[9px] text-content-muted font-medium leading-tight">
+                {fmt.subLabel}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Hint box */}
+      <div className="bg-surface-sunken border border-border-subtle rounded-xl px-3.5 py-2.5 text-[11px] leading-relaxed text-content-body">
+        💡 {activeFormat.hint}
+      </div>
+
+      {/* Drag and Drop / Click to upload zone */}
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOverImport(true);
+        }}
+        onDragLeave={() => setDragOverImport(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragOverImport(false);
+          const file = e.dataTransfer.files?.[0];
+          if (file) handleProcessImportFile(file);
+        }}
+        onClick={triggerFileInput}
+        className={cn(
+          "border-2 border-dashed rounded-xl p-7 transition-all cursor-pointer flex flex-col items-center justify-center gap-3 min-h-[148px]",
+          dragOverImport
+            ? "border-primary bg-primary/5 text-primary scale-[1.01]"
+            : parsedImportData
+              ? "border-emerald-400/50 bg-emerald-500/5 text-emerald-700"
+              : "border-border-subtle hover:border-primary/40 hover:bg-surface-sunken text-content-muted"
+        )}
+      >
+        {parsedImportData ? (
+          <span className="text-3xl animate-bounce">📦</span>
+        ) : dragOverImport ? (
+          <span className="text-3xl">📂</span>
+        ) : (
+          <div className="p-3 rounded-full bg-surface-muted border border-border-subtle">
+            <Upload className="w-5 h-5 text-content-subtle" />
+          </div>
+        )}
+
+        <div className="text-center space-y-1">
+          {parsedImportData ? (
+            <p className="text-sm font-semibold text-emerald-700">File berhasil dibaca!</p>
+          ) : dragOverImport ? (
+            <p className="text-sm font-semibold text-primary">Lepaskan file di sini…</p>
+          ) : (
+            <>
+              <p className="text-sm font-semibold text-content-strong">
+                Klik atau seret file ke sini
+              </p>
+              <p className="text-[11px] text-content-muted">
+                {activeFormat.accept.replace(/\./g, "").replace(/,/g, "  ·  ").toUpperCase()}
+              </p>
+            </>
+          )}
+
+          {parsedFilename && (
+            <span className="inline-flex items-center gap-1 text-[10px] text-content-secondary font-mono mt-1.5 bg-surface-muted px-2.5 py-1 rounded-lg border border-border-subtle">
+              <FileText className="w-3 h-3 shrink-0" />
+              {parsedFilename}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Preview result after parsing */}
+      {parsedImportData && (
+        <div className="bg-emerald-500/5 border border-emerald-400/40 rounded-xl p-4 space-y-3">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-emerald-700 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-400/30 inline-block">
+            ✅ Siap Diterapkan
+          </span>
+          <div className="grid grid-cols-2 gap-2.5">
+            <div className="bg-surface rounded-lg border border-emerald-400/30 px-3 py-2.5 flex items-center gap-2.5 shadow-inner">
+              <span className="text-lg">🔷</span>
+              <div>
+                <div className="text-sm font-bold text-content-strong">
+                  {parsedImportData.nodes.length}
+                </div>
+                <div className="text-[10px] text-content-muted font-medium uppercase tracking-wide">
+                  Node / Bentuk
+                </div>
+              </div>
+            </div>
+            <div className="bg-surface rounded-lg border border-emerald-400/30 px-3 py-2.5 flex items-center gap-2.5 shadow-inner">
+              <span className="text-lg">↗️</span>
+              <div>
+                <div className="text-sm font-bold text-content-strong">
+                  {parsedImportData.edges.length}
+                </div>
+                <div className="text-[10px] text-content-muted font-medium uppercase tracking-wide">
+                  Panah / Edge
+                </div>
+              </div>
             </div>
           </div>
+          <p className="text-[10px] text-emerald-700 italic leading-relaxed">
+            Pilih <strong>Gabung ke Kanvas</strong> untuk menambahkan ke diagram yang ada, atau{" "}
+            <strong>Ganti Kanvas</strong> untuk memulai baru.
+          </p>
         </div>
+      )}
+    </Modal>
   );
 };

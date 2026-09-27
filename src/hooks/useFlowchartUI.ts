@@ -8,7 +8,7 @@ import { useState } from "react";
 export function useFlowchartUI() {
   // Popup Modal States for Creating/Editing flowchart metadata
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [editingFlowId, setEditingFlowId] = useState<string | null>(null);
 
   // Modal Fields
@@ -27,7 +27,7 @@ export function useFlowchartUI() {
   const [activeDocumentId, setActiveDocumentId] = useState<string | null>(null);
 
   // Right Side View mode ('embed' | 'canvas')
-  const [rightViewMode, setRightViewMode] = useState<'embed' | 'canvas'>('embed');
+  const [rightViewMode, setRightViewMode] = useState<"embed" | "canvas">("embed");
 
   // Collapsible Responsive Sidebars
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState<boolean>(false);
@@ -37,13 +37,14 @@ export function useFlowchartUI() {
   const [isShapeDropdownOpen, setIsShapeDropdownOpen] = useState<boolean>(false);
   const [shapeSearchQuery, setShapeSearchQuery] = useState<string>("");
   const [selectedAddColor, setSelectedAddColor] = useState<string>("indigo");
+  // #321 — hanya grup dasar terbuka agar palet tidak mendominasi kanvas
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     "Basic Shapes": true,
-    "Flowchart": true,
-    "Callouts": false,
+    Flowchart: false,
+    Callouts: false,
     "My Shapes": false,
-    "AWS": false,
-    "UML": false,
+    AWS: false,
+    UML: false,
   });
 
   // Keyboard Help & Hover Info
@@ -53,19 +54,29 @@ export function useFlowchartUI() {
   // Multi-format Importer State
   const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
   const [importType, setImportType] = useState<"native" | "drawio" | "miro">("drawio");
-  const [parsedImportData, setParsedImportData] = useState<{ nodes: any[]; edges: any[] } | null>(null);
+  const [parsedImportData, setParsedImportData] = useState<{ nodes: any[]; edges: any[] } | null>(
+    null
+  );
   const [parsedFilename, setParsedFilename] = useState<string>("");
   const [dragOverImport, setDragOverImport] = useState<boolean>(false);
 
   // Modal open/close helpers
   const openCreateFlowModal = () => {
-    setModalMode('create');
+    setModalMode("create");
     resetFlowFormFields();
     setIsModalOpen(true);
   };
 
-  const openEditFlowModal = (flowId: string, name: string, description: string, category: string, epicId: string, externalUrl: string, creator: string) => {
-    setModalMode('edit');
+  const openEditFlowModal = (
+    flowId: string,
+    name: string,
+    description: string,
+    category: string,
+    epicId: string,
+    externalUrl: string,
+    creator: string
+  ) => {
+    setModalMode("edit");
     setEditingFlowId(flowId);
     setFlowName(name);
     setFlowDescription(description);
@@ -104,17 +115,17 @@ export function useFlowchartUI() {
   };
 
   // Sidebar toggles
-  const toggleLeftSidebar = () => setIsLeftSidebarOpen(prev => !prev);
-  const toggleRightSidebar = () => setIsRightSidebarOpen(prev => !prev);
-  const toggleShapeDropdown = () => setIsShapeDropdownOpen(prev => !prev);
+  const toggleLeftSidebar = () => setIsLeftSidebarOpen((prev) => !prev);
+  const toggleRightSidebar = () => setIsRightSidebarOpen((prev) => !prev);
+  const toggleShapeDropdown = () => setIsShapeDropdownOpen((prev) => !prev);
 
   // Shape group expansion
   const toggleGroupExpanded = (title: string) => {
-    setExpandedGroups(prev => ({ ...prev, [title]: !prev[title] }));
+    setExpandedGroups((prev) => ({ ...prev, [title]: !prev[title] }));
   };
 
   // Keyboard help toggle
-  const toggleKeyboardHelp = () => setIsKeyboardHelpOpen(prev => !prev);
+  const toggleKeyboardHelp = () => setIsKeyboardHelpOpen((prev) => !prev);
 
   // Import modal helpers
   const openImportModal = () => {
@@ -214,6 +225,6 @@ export function useFlowchartUI() {
     toggleGroupExpanded,
     toggleKeyboardHelp,
     openImportModal,
-    closeImportModal
+    closeImportModal,
   };
 }

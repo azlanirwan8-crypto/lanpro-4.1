@@ -1,20 +1,13 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
-import { Play, Database, Table as TableIcon, HardDrive, Wifi, Code } from "lucide-react";
+import { Play, Database, Table as TableIcon, HardDrive, Wifi, Code, Menu, X } from "lucide-react";
 import { BackupPanel } from "../backup/BackupPanel";
 import { ConnectPanel } from "../connect/ConnectPanel";
 import { cn } from "../../lib/utils";
 import { toast } from "sonner";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
-import {
-  runQuery,
-  // Diberi alias: komponen sudah punya handler lokal deleteRow dan
-  // fetchDbStatus/fetchSchema yang membungkus state loading dan toast.
-  deleteRow as deleteRowApi,
-  updateRow as updateRowApi,
-  fetchDbStatus as fetchDbStatusApi,
-  fetchSchema as fetchSchemaApi,
-  toggleDbMode,
-} from "./services/explorer.service";
+import { runQuery, fetchSchema as fetchSchemaApi } from "./services/explorer.service";
+import { PageHeader } from "../../components/ui/PageHeader";
 
 export const DbExplorerPanel: React.FC<any> = ({
   selectedProject,
@@ -24,6 +17,7 @@ export const DbExplorerPanel: React.FC<any> = ({
   activityLogs,
   masterData,
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"explorer" | "backup" | "connect">("explorer");
   const [schema, setSchema] = useState<any>(null);
   const [tableStats, setTableStats] = useState<any[]>([]);
@@ -32,117 +26,25 @@ export const DbExplorerPanel: React.FC<any> = ({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTable, setActiveTable] = useState<string | null>(null);
-  // Tipe disesuaikan dengan kontrak backend yang sebenarnya: getDbMode() di
-  // src/lib/db.ts mengembalikan 'pg' | 'local' dan pada praktiknya selalu 'pg'.
-  // Sebelumnya dideklarasikan sebagai 'mysql' | 'local', sisa era MySQL —
-  // akibatnya perbandingan dbMode === 'mysql' di handleToggleDbMode tidak
-  // pernah benar. Lihat catatan kode mati di bawah.
-  const [dbMode, setDbMode] = useState<"pg" | "local">("pg");
-  const [dbHost, setDbHost] = useState("");
-  const [switching, setSwitching] = useState(false);
-  const [editingRow, setEditingRow] = useState<number | null>(null);
-  const [editValues, setEditValues] = useState<any>({});
-  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  // #20 — state `dbMode`, `dbHost`, dan `switching` DIBUANG 16 Agu 2026 atas
+  // keputusan pemilik proyek, bersama `fetchDbStatus` dan `handleToggleDbMode`.
+  //
+  // Sesi sebelumnya sudah menandainya KODE MATI dan meninggalkan daftar hapus
+  // yang tepat; penghapusannya sengaja ditunda agar jadi keputusan sadar, bukan
+  // efek samping refactor. Keputusan itu kini diambil.
+  //
+  // Sejalan dengan ketetapan "Postgres saja": tidak ada MySQL di LanPro, jadi
+  // toggle antar mode database tidak punya alasan untuk ada.
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
-  const deleteRow = async (pkField: string, pkValue: any) => {
-    if (!activeTable) return;
-
-    setLoading(true);
-    try {
-      const data = await deleteRowApi(activeTable, pkField, pkValue);
-      if (data.status === "success") {
-        toast.success("Baris berhasil dihapus");
-        loadTable(activeTable); // refresh
-      } else {
-        toast.error(data.message || "Gagal menghapus baris");
-      }
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const saveRowEdit = async (pkField: string, pkValue: any, index: number) => {
-    if (!activeTable) return;
-    setLoading(true);
-    try {
-      const updates = Object.keys(editValues)
-        .filter((key) => key !== pkField)
-        .map((key) => {
-          const val = editValues[key];
-          if (val === null || val === "") return `\`${key}\` = NULL`;
-          return `\`${key}\` = '${String(val).replace(/'/g, "''")}'`;
-        })
-        .join(", ");
-
-      const data = await updateRowApi(activeTable, updates, pkField, pkValue);
-      if (data.status === "success") {
-        toast.success("Baris berhasil diupdate");
-        setEditingRow(null);
-        loadTable(activeTable); // refresh
-      } else {
-        toast.error(data.message || "Gagal mengupdate baris");
-      }
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  /** #309 — laci daftar tabel di bawah md. */
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetchSchema();
-    fetchDbStatus();
+    // `fetchDbStatus()` dibuang di sini (#20): ia menembak API pada SETIAP
+    // mount dan hasilnya tidak pernah ditampilkan di mana pun.
   }, []);
-
-  const fetchDbStatus = async () => {
-    try {
-      const data = await fetchDbStatusApi();
-      if (data.status === "success") {
-        setDbMode(data.mode);
-        setDbHost(data.host);
-      }
-    } catch (e) {
-      console.error("Failed to fetch database status:", e);
-    }
-  };
-
-  /**
-   * KODE MATI — tidak ada tombol yang memanggil fungsi ini.
-   *
-   * Peninggalan era MySQL, ketika aplikasi masih bisa berpindah antara MySQL
-   * dan penyimpanan lokal. src/lib/db.ts kini Neon PostgreSQL saja dan
-   * getDbMode() selalu mengembalikan 'pg', sehingga mode target di bawah tidak
-   * lagi bermakna.
-   *
-   * Sengaja dipertahankan agar penghapusan fitur menjadi keputusan sadar
-   * pemilik repo, bukan efek samping refactor. Bila dihapus, ikut hapus juga:
-   * state dbMode, dbHost, switching, fungsi fetchDbStatus beserta
-   * pemanggilannya di useEffect (yang saat ini menembak API tiap mount tanpa
-   * hasilnya pernah ditampilkan), dan toggleDbMode di explorer.service.ts.
-   */
-  const handleToggleDbMode = async () => {
-    setSwitching(true);
-    const targetMode = dbMode === "pg" ? "local" : "pg";
-    try {
-      const data = await toggleDbMode(targetMode);
-      if (data.status === "success") {
-        toast.success(data.message);
-        setTimeout(() => {
-          window.location.reload();
-        }, 1200);
-      } else {
-        throw new Error(data.message || "Gagal mengubah mode database");
-      }
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setSwitching(false);
-    }
-  };
 
   const fetchSchema = async () => {
     try {
@@ -174,13 +76,13 @@ export const DbExplorerPanel: React.FC<any> = ({
       const data = await runQuery(sqlToRun);
 
       if (data.status === "error") {
-        setError(data.message);
+        setError(data.message || "Terjadi kesalahan kueri database.");
       } else {
         setResult(data.data);
         setCurrentPage(1);
       }
     } catch (err: any) {
-      setError(err.message);
+      setError(err?.message || "Terjadi kesalahan kueri database.");
     } finally {
       setLoading(false);
     }
@@ -194,343 +96,303 @@ export const DbExplorerPanel: React.FC<any> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-surface-muted p-4 md:p-5 gap-4 text-left animate-in fade-in duration-300">
-      {/* Header & Tabs */}
-      <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-100/60">
-              System Tools
-            </span>
-            <span className="text-xs text-content-subtle font-medium">
-              • Enterprise Control Center
-            </span>
+    <div className="flex-1 flex flex-col min-h-0 bg-surface-muted text-left">
+      <PageHeader
+        breadcrumbs={[
+          { label: t("dbExplorer.systemTools") },
+          { label: t("dbExplorer.databaseTools"), current: true },
+        ]}
+        title={t("dbExplorer.databaseTools")}
+        actions={
+          <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80 shrink-0 shadow-2xs">
+            <button
+              onClick={() => setActiveTab("backup")}
+              className={cn(
+                "px-3 py-1.5 text-xs font-medium transition-all rounded flex items-center gap-1.5 cursor-pointer",
+                activeTab === "backup"
+                  ? "bg-surface text-primary font-medium shadow-2xs"
+                  : "text-content-muted hover:text-content-strong"
+              )}
+            >
+              <HardDrive className="w-3.5 h-3.5" />
+              <span>{t("dbExplorer.backupRestore")}</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("connect")}
+              className={cn(
+                "px-3 py-1.5 text-xs font-medium transition-all rounded flex items-center gap-1.5 cursor-pointer",
+                activeTab === "connect"
+                  ? "bg-surface text-primary font-medium shadow-2xs"
+                  : "text-content-muted hover:text-content-strong"
+              )}
+            >
+              <Wifi className="w-3.5 h-3.5" />
+              <span>{t("dbExplorer.connection")}</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("explorer")}
+              className={cn(
+                "px-3 py-1.5 text-xs font-medium transition-all rounded flex items-center gap-1.5 cursor-pointer",
+                activeTab === "explorer"
+                  ? "bg-surface text-primary font-medium shadow-2xs"
+                  : "text-content-muted hover:text-content-strong"
+              )}
+            >
+              <Code className="w-3.5 h-3.5" />
+              <span>{t("dbExplorer.explorer")}</span>
+            </button>
           </div>
-          <h1 className="text-base font-medium text-content-strong tracking-tight flex items-center gap-2">
-            Database Tools
-          </h1>
-          <p className="text-xs text-content-muted font-medium mt-0.5">
-            Manage Database Explorer, Connection, and Backups.
-          </p>
-        </div>
+        }
+      >
+        <span className="text-[10px] leading-none font-medium text-primary bg-primary/10 px-2.5 py-[3px] rounded-md border border-primary/30">
+          {t("dbExplorer.systemTools")}
+        </span>
+      </PageHeader>
 
-        <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80 shrink-0">
-          <button
-            onClick={() => setActiveTab("backup")}
-            className={cn(
-              "px-3 py-1.5 text-xs font-medium transition-all rounded flex items-center gap-1.5 cursor-pointer",
-              activeTab === "backup"
-                ? "bg-surface text-indigo-700 font-medium shadow-2xs"
-                : "text-content-muted hover:text-content-strong"
-            )}
-          >
-            <HardDrive className="w-3.5 h-3.5" />
-            <span>Backup & Restore</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("connect")}
-            className={cn(
-              "px-3 py-1.5 text-xs font-medium transition-all rounded flex items-center gap-1.5 cursor-pointer",
-              activeTab === "connect"
-                ? "bg-surface text-indigo-700 font-medium shadow-2xs"
-                : "text-content-muted hover:text-content-strong"
-            )}
-          >
-            <Wifi className="w-3.5 h-3.5" />
-            <span>Connection</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("explorer")}
-            className={cn(
-              "px-3 py-1.5 text-xs font-medium transition-all rounded flex items-center gap-1.5 cursor-pointer",
-              activeTab === "explorer"
-                ? "bg-surface text-indigo-700 font-medium shadow-2xs"
-                : "text-content-muted hover:text-content-strong"
-            )}
-          >
-            <Code className="w-3.5 h-3.5" />
-            <span>DB Explorer</span>
-          </button>
-        </div>
-      </div>
-
-      {activeTab === "backup" && (
-        <div className="flex-1 overflow-hidden relative z-10 w-full h-full flex flex-col">
-          <BackupPanel
-            selectedProject={selectedProject}
-            tasks={tasks}
-            sprints={sprints}
-            projectMembers={projectMembers}
-            activityLogs={activityLogs}
-            masterData={masterData}
-          />
-        </div>
-      )}
-
-      {activeTab === "connect" && (
-        <div className="flex-1 overflow-hidden relative z-10 w-full h-full flex flex-col">
-          <ConnectPanel />
-        </div>
-      )}
-
-      {activeTab === "explorer" && (
-        <div className="flex-1 bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden flex flex-col min-h-0 relative z-10">
-          {/* Database Mode Banner */}
-          <div className="px-4 py-2.5 border-b border-border-subtle/80 flex flex-wrap items-center justify-between gap-4 shrink-0 bg-emerald-50/80 text-emerald-800">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full animate-pulse bg-emerald-500" />
-              <span className="text-xs font-medium flex items-center gap-1.5">
-                Mode Database:{" "}
-                <span className="underline font-medium">PostgreSQL (Neon Cloud)</span>
-              </span>
-              <span className="text-xs sm:text-[11px] opacity-75 hidden sm:inline">
-                (Primary Engine Active)
-              </span>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <button
-                onClick={fetchSchema}
-                title="Refresh Table Schema"
-                className="p-1 hover:bg-black/5 rounded transition-all text-content-secondary hover:text-content flex items-center gap-1 text-xs font-medium cursor-pointer"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 4.75L18 8"
-                  />
-                </svg>
-                Refresh Schema
-              </button>
-            </div>
+      <div className="flex-1 flex flex-col min-h-0 px-4 md:px-5 pt-3 md:pt-4 pb-4 md:pb-5 gap-3">
+        {activeTab === "backup" && (
+          <div className="flex-1 overflow-hidden relative z-10 w-full h-full flex flex-col">
+            <BackupPanel
+              selectedProject={selectedProject}
+              tasks={tasks}
+              sprints={sprints}
+              projectMembers={projectMembers}
+              activityLogs={activityLogs}
+              masterData={masterData}
+              hideHeader
+            />
           </div>
+        )}
 
-          <div className="flex-1 flex overflow-hidden">
-            {/* Sidebar: Table List */}
-            <div className="w-[240px] bg-surface-sunken/50 border-r border-border-subtle/80 flex flex-col overflow-y-auto shrink-0 custom-scrollbar">
-              <div className="px-3.5 py-2.5 text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider sticky top-0 bg-surface-sunken border-b border-border-subtle/80 flex justify-between items-center z-10">
-                Tables
-              </div>
-              <div className="p-2 flex flex-col gap-1">
-                {schema &&
-                  Object.keys(schema).map((tableName) => {
-                    const stats = tableStats.find((s) => s.tableName === tableName);
-                    return (
-                      <button
-                        key={tableName}
-                        onClick={() => loadTable(tableName)}
-                        className={`flex items-center justify-between gap-2 px-3 py-1.5 text-xs rounded-md transition-colors cursor-pointer ${activeTable === tableName ? "bg-indigo-50 text-indigo-700 font-medium border border-indigo-100" : "text-content-secondary hover:bg-surface-muted font-medium"}`}
-                      >
-                        <div className="flex items-center gap-2 truncate">
-                          <TableIcon className="w-3.5 h-3.5 shrink-0 text-content-subtle" />
-                          <span className="truncate">{tableName}</span>
-                        </div>
-                        {stats && (
-                          <span className="text-xs sm:text-[10px] text-content-subtle font-mono tracking-tighter shrink-0">
-                            {formatSize(stats.sizeBytes)}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                {!schema && (
-                  <div className="text-xs text-content-subtle px-3 py-2 font-medium">
-                    Loading tables...
-                  </div>
-                )}
-              </div>
-            </div>
+        {activeTab === "connect" && (
+          <div className="flex-1 overflow-hidden relative z-10 w-full h-full flex flex-col">
+            <ConnectPanel hideHeader />
+          </div>
+        )}
 
-            {/* Main Content: Query Editor and Results */}
-            <div className="flex-1 flex flex-col min-w-0">
-              {/* Query Editor */}
-              <div className="p-3.5 border-b border-border-subtle/80 bg-surface-sunken/50 shrink-0">
-                <div className="relative">
-                  <textarea
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="SELECT * FROM Users;"
-                    className="w-full text-content-strong bg-surface border border-border-subtle rounded-md p-3 font-mono text-xs min-h-[90px] focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none resize-y"
-                  />
-                  <button
-                    onClick={() => handleRunQuery(query)}
-                    disabled={loading || !query.trim()}
-                    className="absolute bottom-3 right-3 bg-indigo-600 hover:bg-indigo-700 text-white h-8 px-3.5 rounded-md shadow-2xs font-medium text-xs flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+        {activeTab === "explorer" && (
+          <div className="flex-1 bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden flex flex-col min-h-0 relative z-10">
+            {/* Database Mode Banner */}
+            <div className="px-4 py-2.5 border-b border-border-subtle/80 flex flex-wrap items-center justify-between gap-4 shrink-0 bg-emerald-500/10 text-emerald-800">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full animate-pulse bg-emerald-500" />
+                <span className="text-xs font-medium flex items-center gap-1.5">
+                  {t("dbExplorer.databaseMode")}{" "}
+                  <span className="underline font-medium">PostgreSQL (Neon Cloud)</span>
+                </span>
+                <span className="text-xs sm:text-[11px] opacity-75 hidden sm:inline">
+                  {t("dbExplorer.primaryEngineActive")}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={fetchSchema}
+                  title={t("dbExplorer.refreshSchemaTip")}
+                  className="p-1 hover:bg-surface-muted rounded transition-all text-content-secondary hover:text-content flex items-center gap-1 text-xs font-medium cursor-pointer"
+                >
+                  <svg
+                    className="w-3.5 h-3.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
                   >
-                    <Play className="w-3.5 h-3.5" />
-                    <span>Run Query</span>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 4.75L18 8"
+                    />
+                  </svg>
+                  {t("dbExplorer.refreshSchema")}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 flex overflow-hidden relative">
+              {/* #309 — overlay laci tabel */}
+              {sidebarOpen && (
+                <button
+                  type="button"
+                  aria-label={t("dbExplorer.closeTables", "Tutup daftar tabel")}
+                  className="fixed inset-0 z-40 bg-overlay/50 md:hidden cursor-pointer"
+                  onClick={() => setSidebarOpen(false)}
+                />
+              )}
+
+              {/* Sidebar: Table List — laci di bawah md */}
+              <div
+                className={cn(
+                  "w-[240px] bg-surface-sunken/50 border-r border-border-subtle/80 flex flex-col overflow-y-auto shrink-0 custom-scrollbar",
+                  "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:bg-surface max-md:shadow-xl",
+                  "max-md:transition-transform max-md:duration-200",
+                  sidebarOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full"
+                )}
+              >
+                <div className="px-3.5 py-2.5 text-xs sm:text-[11px] font-normal text-content-muted uppercase tracking-normal sticky top-0 bg-surface-sunken border-b border-border-subtle/80 flex justify-between items-center z-10">
+                  <span>{t("dbExplorer.tables")}</span>
+                  <button
+                    type="button"
+                    className="md:hidden p-1 rounded-md text-content-muted hover:bg-surface-muted cursor-pointer"
+                    onClick={() => setSidebarOpen(false)}
+                    aria-label={t("dbExplorer.closeTables", "Tutup daftar tabel")}
+                  >
+                    <X className="w-4 h-4" />
                   </button>
+                </div>
+                <div className="p-2 flex flex-col gap-1">
+                  {schema &&
+                    Object.keys(schema).map((tableName) => {
+                      const stats = tableStats.find((s) => s.tableName === tableName);
+                      return (
+                        <button
+                          key={tableName}
+                          onClick={() => {
+                            loadTable(tableName);
+                            setSidebarOpen(false);
+                          }}
+                          className={`flex items-center justify-between gap-2 px-3 py-1.5 text-xs rounded-md transition-colors cursor-pointer ${activeTable === tableName ? "bg-primary/10 text-primary font-medium border border-primary/30" : "text-content-secondary hover:bg-surface-muted font-medium"}`}
+                        >
+                          <div className="flex items-center gap-2 truncate">
+                            <TableIcon className="w-3.5 h-3.5 shrink-0 text-content-subtle" />
+                            <span className="truncate">{tableName}</span>
+                          </div>
+                          {stats && (
+                            <span className="text-xs sm:text-[10px] text-content-subtle font-mono tracking-tighter shrink-0">
+                              {formatSize(stats.sizeBytes)}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  {!schema && (
+                    <div className="text-xs text-content-subtle px-3 py-2 font-medium">
+                      {t("dbExplorer.loadingTables")}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Results Area */}
-              <div className="flex-1 overflow-auto bg-surface p-4">
-                {!loading && !result && !error && (
-                  <div className="h-full flex flex-col items-center justify-center text-content-subtle">
-                    <Database className="w-12 h-12 mb-4 opacity-20" />
-                    <p>Select a table or run a query to view data.</p>
+              {/* Main Content: Query Editor and Results */}
+              <div className="flex-1 flex flex-col min-w-0">
+                <div className="md:hidden px-3 pt-3 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setSidebarOpen(true)}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 bg-surface-sunken border border-border-subtle rounded-lg text-xs font-medium text-content-strong cursor-pointer"
+                  >
+                    <Menu className="w-4 h-4 text-primary shrink-0" />
+                    <span className="truncate">
+                      {activeTable || t("dbExplorer.openTables", "Pilih tabel")}
+                    </span>
+                  </button>
+                </div>
+                {/* Query Editor */}
+                <div className="p-3.5 border-b border-border-subtle/80 bg-surface-sunken/50 shrink-0">
+                  <div className="relative">
+                    <textarea
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder={t("dbExplorer.queryPlaceholder")}
+                      className="w-full text-content-strong bg-surface border border-border-subtle rounded-md p-3 font-mono text-xs min-h-[90px] focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none resize-y"
+                    />
+                    <button
+                      onClick={() => handleRunQuery(query)}
+                      disabled={loading || !query.trim()}
+                      className="absolute bottom-3 right-3 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse h-8 px-3.5 rounded-md shadow-2xs font-medium text-xs flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+                    >
+                      <Play className="w-3.5 h-3.5" />
+                      <span>{t("dbExplorer.runQuery")}</span>
+                    </button>
                   </div>
-                )}
+                </div>
 
-                {loading && (
-                  <div className="flex items-center gap-3 text-content-muted mt-4 ml-4">
-                    <div className="w-4 h-4 rounded-full border-2 border-indigo-600 top-border-transparent animate-spin" />
-                    Executing query...
-                  </div>
-                )}
+                {/* Results Area */}
+                <div className="flex-1 overflow-auto bg-surface p-4">
+                  {!loading && !result && !error && (
+                    <div className="h-full flex flex-col items-center justify-center text-content-subtle">
+                      <Database className="w-12 h-12 mb-4 opacity-20" />
+                      <p>{t("dbExplorer.pickTable")}</p>
+                    </div>
+                  )}
 
-                {!loading && error && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg font-mono text-sm max-w-full overflow-x-auto whitespace-pre-wrap">
-                    {error}
-                  </div>
-                )}
+                  {loading && (
+                    <div className="flex items-center gap-3 text-content-muted mt-4 ml-4">
+                      <div className="w-4 h-4 rounded-full border-2 border-primary top-border-transparent animate-spin" />
+                      {t("dbExplorer.executing")}
+                    </div>
+                  )}
 
-                {!loading && result && Array.isArray(result) && (
-                  <div className="border border-border-subtle rounded-lg overflow-x-auto">
-                    <ResponsiveTable className="w-full text-left border-collapse text-sm">
-                      <thead className="bg-primary/5 text-primary font-medium uppercase tracking-wider">
-                        <tr>
-                          {result.length > 0 && (
-                            <th className="p-3 border-b border-border-subtle font-medium w-32">
-                              Actions
-                            </th>
-                          )}
-                          {result.length > 0 ? (
-                            Object.keys(result[0]).map((key) => (
-                              <th
-                                key={key}
-                                className="p-3 border-b border-border-subtle font-medium truncate max-w-[200px]"
-                              >
-                                {key}
+                  {!loading && error && (
+                    <div className="bg-red-500/10 border border-red-500/30 text-red-700 p-4 rounded-lg font-mono text-sm max-w-full overflow-x-auto whitespace-pre-wrap">
+                      {error}
+                    </div>
+                  )}
+
+                  {!loading && result && Array.isArray(result) && (
+                    <div className="border border-border-subtle rounded-lg overflow-x-auto">
+                      <ResponsiveTable className="w-full text-left border-collapse text-sm">
+                        <thead className="bg-primary-surface/5 text-primary font-normal uppercase tracking-normal">
+                          <tr>
+                            {result.length > 0 ? (
+                              Object.keys(result[0]).map((key) => (
+                                <th
+                                  key={key}
+                                  className="p-3 border-b border-border-subtle font-medium truncate max-w-[200px]"
+                                >
+                                  {key}
+                                </th>
+                              ))
+                            ) : (
+                              <th className="p-3 border-b border-border-subtle font-medium text-content-subtle">
+                                {t("dbExplorer.result0Rows")}
                               </th>
-                            ))
-                          ) : (
-                            <th className="p-3 border-b border-border-subtle font-medium text-content-subtle">
-                              Result (0 rows)
-                            </th>
-                          )}
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border-faint">
-                        {result.length > 0 ? (
-                          result.map((row: any, i: number) => {
-                            const isEditing = editingRow === i;
-                            const pkField = Object.keys(row)[0];
-                            const hasId = pkField !== undefined;
-                            return (
+                            )}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border-faint">
+                          {result.length > 0 ? (
+                            result.map((row: any, i: number) => (
                               <tr key={i} className="hover:bg-surface-sunken">
-                                <td className="p-3">
-                                  {hasId && activeTable && (
-                                    <div className="flex items-center gap-2">
-                                      {isEditing ? (
-                                        <>
-                                          <button
-                                            onClick={() => saveRowEdit(pkField, row[pkField], i)}
-                                            className="text-emerald-600 hover:text-emerald-700 font-medium"
-                                          >
-                                            Save
-                                          </button>
-                                          <button
-                                            onClick={() => setEditingRow(null)}
-                                            className="text-content-muted hover:text-content-body font-medium"
-                                          >
-                                            Cancel
-                                          </button>
-                                        </>
-                                      ) : confirmDelete === i ? (
-                                        <>
-                                          <span className="text-xs text-red-500 mr-1">Yakin?</span>
-                                          <button
-                                            onClick={() => {
-                                              deleteRow(pkField, row[pkField]);
-                                              setConfirmDelete(null);
-                                            }}
-                                            className="text-red-600 hover:text-red-700 font-medium"
-                                          >
-                                            Ya
-                                          </button>
-                                          <button
-                                            onClick={() => setConfirmDelete(null)}
-                                            className="text-content-muted hover:text-content-body font-medium"
-                                          >
-                                            Batal
-                                          </button>
-                                        </>
-                                      ) : (
-                                        <>
-                                          <button
-                                            onClick={() => {
-                                              setEditingRow(i);
-                                              setEditValues({ ...row });
-                                            }}
-                                            className="text-indigo-600 hover:text-indigo-700 font-medium"
-                                          >
-                                            Edit
-                                          </button>
-                                          <button
-                                            onClick={() => setConfirmDelete(i)}
-                                            className="text-red-500 hover:text-red-700 font-medium"
-                                          >
-                                            Del
-                                          </button>
-                                        </>
-                                      )}
-                                    </div>
-                                  )}
-                                </td>
                                 {Object.keys(row).map((key: string, j: number) => (
                                   <td key={j} className="p-3 max-w-[300px]">
-                                    {isEditing ? (
-                                      <input
-                                        type="text"
-                                        value={editValues[key] !== null ? editValues[key] : ""}
-                                        onChange={(e) =>
-                                          setEditValues({ ...editValues, [key]: e.target.value })
-                                        }
-                                        className="w-full border border-slate-300 rounded px-2 py-1 text-sm bg-surface"
-                                        disabled={key === pkField}
-                                      />
-                                    ) : (
-                                      <div className="truncate w-full text-content-secondary">
-                                        {row[key] === null ? (
-                                          <span className="text-slate-300 italic">null</span>
-                                        ) : typeof row[key] === "object" ? (
-                                          JSON.stringify(row[key])
-                                        ) : (
-                                          String(row[key])
-                                        )}
-                                      </div>
-                                    )}
+                                    <div className="truncate w-full text-content-secondary font-mono text-xs">
+                                      {row[key] === null ? (
+                                        <span className="text-content-subtle italic">null</span>
+                                      ) : typeof row[key] === "object" ? (
+                                        JSON.stringify(row[key])
+                                      ) : (
+                                        String(row[key])
+                                      )}
+                                    </div>
                                   </td>
                                 ))}
                               </tr>
-                            );
-                          })
-                        ) : (
-                          <tr>
-                            <td className="p-4 text-center text-content-subtle italic">
-                              No rows found.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </ResponsiveTable>
-                  </div>
-                )}
+                            ))
+                          ) : (
+                            <tr>
+                              <td className="p-8 text-center text-content-subtle">
+                                {t("dbExplorer.noData")}
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </ResponsiveTable>
+                    </div>
+                  )}
 
-                {!loading && result && !Array.isArray(result) && (
-                  <div className="bg-surface-sunken border border-border-subtle text-content-body p-4 rounded-lg font-mono text-sm break-words">
-                    Query OK. <br />
-                    {JSON.stringify(result, null, 2)}
-                  </div>
-                )}
+                  {!loading && result && !Array.isArray(result) && (
+                    <div className="bg-surface-sunken border border-border-subtle text-content-body p-4 rounded-lg font-mono text-sm break-words">
+                      {t("dbExplorer.queryOk")} <br />
+                      {JSON.stringify(result, null, 2)}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

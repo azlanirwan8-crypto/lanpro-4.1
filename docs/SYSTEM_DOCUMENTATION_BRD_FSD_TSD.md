@@ -1,350 +1,963 @@
-# LANPRO ENTERPRISE PLATFORM SPECIFICATION
-## Comprehensive Business Requirements (BRD), Functional Specifications (FSD), Technical Architecture (TSD), & IT Professional Peer Review Guide
+# LanPro — Dokumen Gabungan BRD · FSD · TSD
+
+| Meta                  | Nilai                                                                                                             |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Produk**            | LanPro — manajemen proyek + kolaborasi (Issue, Sprint/Milestone, Kanban, QA, Wiki, Flowchart, Meeting AI)         |
+| **Versi dokumen**     | **3.1.0** (06 Sep 2026)                                                                                           |
+| **Status**            | **DRAFT review pemilik** — selaras kode + `AUDIT.md` §19 + papan 7 BELUM · 455 SELESAI (**#466** SELESAI dokumen) |
+| **Tiket papan**       | **#466** — dokumentasi BRD/FSD/TSD lengkap (per modul, Meeting AI, OIDC, flowchart)                               |
+| **Keputusan pemilik** | (1) setujui #466 · (2) flowchart **per modul** · (3) PDF · (4) alur Meeting AI + detail bisnis/teknis             |
+| **Sumber RBAC**       | `src/lib/matriksAkses.ts` ↔ `AUDIT.md` §19.4 / §19.5                                                              |
+| **Metodologi**        | Dual-mode Agile / Waterfall (#311, #312, #465)                                                                    |
+| **Bahasa**            | Indonesia (istilah teknis EN dipertahankan)                                                                       |
+
+> v2.5 diganti (RBAC basi). v3.0 = kerangka. **v3.1** = detail per modul + Meeting AI + Auth/OIDC + swimlane.
 
 ---
 
-**Document Details:**
-- **System Name:** LanPro - Enterprise SDLC & Engineering Excellence Management Platform
-- **Document Version:** 2.5.0-ENTERPRISE
-- **Status:** Final Draft for Executive & Technical Peer Review
-- **Target Audience:** Claude AI Evaluator, Enterprise Architects, Lead Software Engineers, Security/DevSecOps Engineers, Database Architects, Senior Product Managers.
+## Daftar isi
+
+1. [BRD — Business Requirements](#1-brd--business-requirements)
+2. [FSD — Functional Specification (ringkas lintas modul)](#2-fsd--functional-specification)
+3. [TSD — Technical Specification](#3-tsd--technical-specification)
+4. [Flowchart — Alur sistem LanPro](#4-flowchart--alur-sistem-lanpro)
+5. [Flowchart — Agile vs Waterfall](#5-flowchart--agile-vs-waterfall)
+6. [Flowchart — Per peran sistem](#6-flowchart--per-peran-sistem)
+7. [Flowchart — Per peran proyek](#7-flowchart--per-peran-proyek)
+8. [Matriks akses](#8-matriks-akses)
+9. [**Spesifikasi per modul (BRD+FSD+TSD+flow)**](#9-spesifikasi-per-modul)
+10. [**Meeting AI — spesifikasi dalam**](#10-meeting-ai--spesifikasi-dalam)
+11. [**Auth & OIDC — spesifikasi dalam**](#11-auth--oidc--spesifikasi-dalam)
+12. [Lampiran](#12-lampiran)
 
 ---
 
-# TABLE OF CONTENTS
-1. [EXECUTIVE SUMMARY & SYSTEM OVERVIEW](#1-executive-summary--system-overview)
-2. [BUSINESS REQUIREMENTS DOCUMENT (BRD)](#2-business-requirements-document-brd)
-3. [FUNCTIONAL SPECIFICATION DOCUMENT (FSD)](#3-functional-specification-document-fsd)
-4. [TECHNICAL SPECIFICATION DOCUMENT (TSD)](#4-technical-specification-document-tsd)
-5. [SECURITY & COMPLIANCE SPECIFICATION](#5-security--compliance-specification)
-6. [DATABASE SCHEMA & API CONTRACTS](#6-database-schema--api-contracts)
-7. [IT PROFESSIONAL REVIEW PANEL & CLAUDE AI PROMPT](#7-it-professional-review-panel--claude-ai-prompt)
+# 1. BRD — Business Requirements
+
+## 1.1 Masalah bisnis
+
+Organisasi engineering sering memakai **4–6 tool terpisah** (tracker, board, dokumen, QA spreadsheet, notulen, diagram). Akibatnya:
+
+1. Silo requirement ↔ development ↔ QA ↔ notulen.
+2. Hak akses tidak seragam (risiko IDOR / over-permission).
+3. Master data (status, peran, departemen) tidak kanonik — label vs code bercampur.
+4. Metodologi **Agile** dan **Waterfall** dicampur tanpa aturan navigasi yang jernih.
+5. Notulen rapat tidak otomatis menjadi poin diskusi / kandidat isu.
+
+## 1.2 Solusi produk (posisi resmi §24.2 / #346)
+
+LanPro = **pelacak agile-first** (backlog, sprint, kanban, poin, burndown) **plus** Gantt/milestone, wiki, rapat AI, QA, flowchart — **bukan** hibrida Jira + MS Project penuh.
+
+| Metodologi    | Perilaku produk                                                                    |
+| ------------- | ---------------------------------------------------------------------------------- |
+| **Agile**     | Menu Planning & Sprint; scope lock; satu sprint aktif; burndown hybrid poin\|tugas |
+| **Waterfall** | Menu Sprint **disembunyikan**; Roadmap & Milestones; create sprint API ditolak     |
+
+**Ditolak secara produk (#346):** CPM/critical path, WBS penuh, timesheet kapasitas, marketplace automation Jira-class.
+
+## 1.3 Tujuan & KPI
+
+| Tujuan                   | KPI                                   | Status / catatan                              |
+| ------------------------ | ------------------------------------- | --------------------------------------------- |
+| Satu workspace SDLC      | Modul inti dipakai 1 org              | Issues + Sprint/Roadmap + Meeting + Wiki + QA |
+| Keamanan deny-by-default | 0 rute proyek tanpa `jagaProyek`      | Two-Tier RBAC F7                              |
+| Dual-mode bersih         | Copy Sprint ≠ Phase; nav berubah      | #465 SELESAI kode                             |
+| Meeting → insight        | Pipeline sampai COMPLETED             | #320 BELUM E2E pemilik                        |
+| Durabilitas unggahan     | Storage bukan ephemeral di production | #30 terbuka                                   |
+
+## 1.4 Pemangku kepentingan & persona
+
+### Tier A — Peran sistem (`Users.role`)
+
+| Code     | Label             | Tanggung jawab bisnis                                                        |
+| -------- | ----------------- | ---------------------------------------------------------------------------- |
+| `admin`  | Administrator     | Onboarding user, master data, audit, buat proyek, **God Mode** lintas proyek |
+| `head`   | Department Head   | Baca admin terbatas; daftar proyek se-departemen                             |
+| `user`   | Standard User     | Anggota proyek sesuai `ProjectMembers`                                       |
+| `viewer` | Observer (sistem) | Baca terbatas di lingkup sistem                                              |
+
+### Tier B — Peran proyek (`ProjectMembers.role`)
+
+| Code               | Label                    | Wilayah kuasa bisnis                            |
+| ------------------ | ------------------------ | ----------------------------------------------- |
+| `owner`            | Project Owner            | Pemilik; hapus proyek; setelan                  |
+| `admin`            | Project Admin            | Administrasi proyek (**bukan** God Mode sistem) |
+| `manager`          | Project Manager          | Perencanaan, isu, board, sprint/timeline        |
+| `head`             | Department Head (proyek) | Baca seluruh modul proyek                       |
+| `system_analyst`   | System Analyst           | **CRUD** Wiki + Flowchart                       |
+| `business_analyst` | Business Analyst         | **CRUD** Meeting Notes + AI                     |
+| `developer`        | Developer                | CRU isu; RU board/QA                            |
+| `qa`               | QA                       | **CRUD** modul QA; taut bug → Task              |
+| `viewer`           | Viewer (proyek)          | Baca saja                                       |
+
+## 1.5 Ruang lingkup
+
+**In scope:** auth (email/OIDC), proyek, isu/task, sprint/milestone, kanban, roadmap/Gantt, QA, wiki, flowchart, meeting (+ AI pipeline), tim/akses, master data, audit, dual-mode, RBAC dua tingkat.
+
+**Out of scope:** CPM, WBS penuh, timesheet, marketplace automation, parity Otter.ai penuh (diarization speaker masih gap #320).
+
+## 1.6 Asumsi, risiko, ketergantungan
+
+| Item                    | Risiko / asumsi                              | Tiket      |
+| ----------------------- | -------------------------------------------- | ---------- |
+| Storage local di Vercel | File ephemeral                               | #30 · #290 |
+| Meeting recording lokal | Tidak memakai `STORAGE_DRIVER` S3            | #30 · #320 |
+| Bukti visual tab bersih | Gerbang ≠ bukti UI                           | #335       |
+| Meeting AI COMPLETED    | Butuh Gemini + ffmpeg + E2E pemilik          | #320       |
+| SSO Microsoft lapangan  | Adaptor ada; verifikasi domain               | #305       |
+| Soft-delete             | **Ditolak** — hanya hard-delete + konfirmasi | #394       |
+
+## 1.7 Aturan bisnis lintas-produk (katalog BR-*)
+
+| ID         | Aturan                                                                      | Referensi       |
+| ---------- | --------------------------------------------------------------------------- | --------------- |
+| BR-RBAC-01 | Deny-by-default; God Mode hanya `Users.role=admin` + audit                  | §19.6           |
+| BR-METH-01 | Waterfall: POST sprint ditolak; menu Sprint disembunyikan                   | #311 #465       |
+| BR-SPR-01  | Lingkup sprint aktif/selesai terkunci kecuali `unlockScope`                 | #461            |
+| BR-SPR-02  | Maksimal satu sprint `active` per proyek                                    | #462            |
+| BR-MET-01  | Burndown: poin bila totalPoints>0 else hitungan tugas                       | #464            |
+| BR-QA-01   | Bug QA: `linkedTaskId` + `linkedBugKey` tampilan                            | #463            |
+| BR-DEL-01  | Soft-delete ditolak; hard-delete + konfirmasi + cascade                     | #394 #444       |
+| BR-IRIS-01 | Tidak membangun CPM/timesheet marketplace                                   | #346            |
+| BR-MD-01   | Yang disimpan ke DB adalah **code** MasterData, bukan label                 | AGENTS.md       |
+| BR-MEET-01 | Rekaman hanya untuk analisis; hapus file setelah COMPLETED                  | #320            |
+| BR-MEET-02 | PUT/DELETE meeting: author **atau** system ADMIN (lebih ketat dari matriks) | meetings.routes |
 
 ---
 
-# 1. EXECUTIVE SUMMARY & SYSTEM OVERVIEW
+# 2. FSD — Functional Specification
 
-## 1.1 Overview
-**LanPro** is an end-to-end, enterprise-grade Software Development Life Cycle (SDLC) and Engineering Management Platform designed to streamline cross-functional collaboration, project tracking, quality assurance (QA), resource allocation, real-time communication, and data-driven governance.
+## 2.1 Modul fungsional (sidebar)
 
-Built with a modern full-stack architecture (**React 19 + TypeScript + Vite + Tailwind CSS v4** on the frontend, and **Node.js + Express + Socket.IO + PostgreSQL (Neon)** on the backend), LanPro bridges the gap between executive product vision, daily engineering execution, quality assurance validation, and security auditing.
+| Modul UI                               | Key matriks    | Fungsi utama                                 |
+| -------------------------------------- | -------------- | -------------------------------------------- |
+| Dashboard                              | `dashboard`    | KPI, burndown/velocity (Agile), ringkasan    |
+| Daftar Isu                             | `list`         | CRUD isu, History, lampiran, komentar        |
+| Perencanaan & Sprint                   | `sprints`      | Backlog ↔ sprint, start/complete, scope lock |
+| Papan Kanban                           | `board`        | DnD status MasterData, WIP lunak             |
+| Peta Jalan & Linimasa                  | `timeline`     | Gantt, milestone, garis `blocks`             |
+| Penilaian Kualitas                     | `qa`           | Suite/case, eksekusi, bug → Task             |
+| Dokumentasi                            | `wiki`         | Dokumen proyek                               |
+| Editor Diagram Alur                    | `flowchart`    | Kanvas flowchart                             |
+| Catatan Rapat                          | `meetingNotes` | Notulen + Meeting AI                         |
+| Tim                                    | `access`       | Anggota & peran proyek                       |
+| Master / Users / Audit / DB / Settings | modul sistem   | Administrasi                                 |
 
-## 1.2 Technology Stack Architecture
-```
-+-----------------------------------------------------------------------------------+
-|                                  CLIENT LAYER                                     |
-|  React 19 | TypeScript | Vite 6 | Tailwind CSS v4 | Framer Motion | Zustand | Recharts |
-+-----------------------------------------------------------------------------------+
-                                         |  HTTPS / WebSocket (Port 3000)
-                                         v
-+-----------------------------------------------------------------------------------+
-|                             NGINX REVERSE PROXY                                   |
-|                      TLS Termination & Ingress Routing                            |
-+-----------------------------------------------------------------------------------+
-                                         |
-                                         v
-+-----------------------------------------------------------------------------------+
-|                                  SERVER LAYER                                     |
-|        Node.js 22 | Express 4 | Socket.IO | JWT Auth | Prom-Client Metrics         |
-+-----------------------------------------------------------------------------------+
-       |                                |                               |
-       v                                v                               v
-+--------------+               +------------------+           +------------------+
-| POSTGRESQL   |               |  REDIS ADAPTER   |           |  GOOGLE GENAI    |
-| (Neon Pool)  |               |  (Socket.IO      |           |  (Gemini API     |
-| Connection   |               |  Scaling)        |           |  Integration)    |
-+--------------+               +------------------+           +------------------+
-```
+Detail per modul: **§9**. Meeting AI: **§10**. Auth: **§11**.
 
-### Core Stack Components:
-- **Frontend Framework:** React 19, TypeScript 5.8, Vite 6
-- **Styling & UI Components:** Tailwind CSS v4, Lucide React Icons, Framer Motion, Motion 12
-- **State Management:** Zustand 5.0 (Global Store), React Contexts
-- **Backend Runtime:** Node.js 22, Express 4 (CommonJS bundled via esbuild)
-- **Database & Persistence:** PostgreSQL (Neon Cloud) via `pg` connection pool with automatic SQL conversion and resilience
-- **Real-Time Communication:** Socket.IO 4.8 with optional Redis Adapter for horizontal scaling
-- **AI Engine:** `@google/genai` (Google Gemini 2.5 Flash / Pro) for intelligent project analysis and automated suggestions
-- **Security & Utilities:** `bcryptjs`, `jsonwebtoken`, `xss`, `dompurify`, `prom-client` (Prometheus metrics)
+## 2.2 Persyaratan non-fungsional
+
+- UI token `surface-*` / `content-*` / `border-*` (§22); gerbang `audit:tema` / `audit:warna`.
+- i18n ID/EN.
+- PostgreSQL saja (Neon pooler); identifier camelCase dikutip.
+- JWT di klien (arah httpOnly terkait #30).
+- Hard-delete saja (#394).
 
 ---
 
-# 2. BUSINESS REQUIREMENTS DOCUMENT (BRD)
+# 3. TSD — Technical Specification
 
-## 2.1 Problem Statement
-Modern software engineering organizations suffer from fragmented toolchains. Project managers use Jira/Trello, QA teams use test runners or spreadsheets, developers use separate chat platforms, and executives lack real-time visibility into developer workload, release blockers, and cross-project risks.
+## 3.1 Arsitektur runtime
 
-This fragmentation leads to:
-1. **Communication Silos:** Disconnect between product requirements, development execution, and QA test coverage.
-2. **Security & Data Exposure Risks:** Unclear role-based access controls and lack of auditing on sensitive operational endpoints.
-3. **Inconsistent Master Data:** Misalignment on department names, project roles, and job positions across teams.
-4. **Lack of Real-Time Operational Visibility:** Delayed detection of user activity, resource burnouts, and project bottlenecks.
-
-## 2.2 Business Objectives & Key Metrics
-| Objective | Target Metric | Business Value |
-| :--- | :--- | :--- |
-| **Unified SDLC Platform** | 100% integration of Kanban, QA, Wiki, and Team Management | Eliminates context switching across 4+ external tools |
-| **Granular Security & Compliance** | 0 Anti-IDOR vulnerabilities; 100% audit coverage | Ensures enterprise data governance and strict access rules |
-| **Real-Time Presence & Collaboration** | < 200ms chat & presence sync latency | Enhances team responsiveness and remote work transparency |
-| **Master Data Consistency** | Dynamic System & Project Role configuration | Adaptable to any organizational structure without code redeployment |
-
-## 2.3 User Personas & Responsibilities
-1. **System Administrator (Admin):** Manages user onboarding, custom system/project roles, department master data, global system settings, and security audit logs.
-2. **Department Head (Head):** Oversees cross-project resource utilization, team workload heatmaps, high-level roadmaps, and department velocity.
-3. **Project Manager (Manager):** Creates projects, defines sprints/backlogs, assigns tasks, schedules milestones, and tracks defect metrics.
-4. **Standard Developer / Engineer (User):** Executes tasks, updates kanban statuses, logs work hours, collaborates via context chat, and submits code reviews.
-5. **QA Engineer & Test Lead:** Builds test plans, executes test cases, logs defect reports, links bugs to specific user stories, and generates release readiness reports.
-6. **System Analyst & DBA:** Configures data schemas, designs workflows, monitors database queries, and tracks system metrics.
-7. **Observer / External Client (Viewer):** Enjoys read-only access to project progress, dashboards, and releases without modification rights.
-
----
-
-# 3. FUNCTIONAL SPECIFICATION DOCUMENT (FSD)
-
-## 3.1 Core Feature Modules
-
-### Module 1: Executive Analytics & Dashboard
-- **Key Features:**
-  - Executive KPI Cards (Total Projects, Velocity Rate, Open Defect Ratio, Team Health Index).
-  - Visual Charts powered by Recharts (Sprint Velocity Trend, Bug Severity Distribution, Workload per Department).
-  - Real-time Activity Feed tracking user actions system-wide.
-
-### Module 2: Agile Project Management & Planning
-- **Key Features:**
-  - **Kanban Board:** Multi-column (To Do, In Progress, In Review, QA, Done) with drag-and-drop capability (`@hello-pangea/dnd`).
-  - **Sprint & Backlog:** Story points estimation, backlog prioritization, active sprint commitment tracking.
-  - **Gantt & Roadmap:** Visual timeline of milestones, epic dependencies, and target delivery dates.
-  - **Task Detail Drawer:** Subtask checklists, attachment uploads (via `multer`), comment threads, reporter & assignee management.
-
-### Module 3: QA & Defect Tracking Suite
-- **Key Features:**
-  - **Test Case Repository:** Hierarchical folder structure for manual and automated test suites.
-  - **Test Execution Runs:** Pass / Fail / Blocked status recording with step-by-step validation.
-  - **Defect Management:** Direct conversion of failed test steps into linked bug tickets in the Kanban board.
-  - **QA Coverage Matrix:** Mapping test case coverage against requirements and user stories.
-
-### Module 4: Resource & Capacity Management
-- **Key Features:**
-  - **Workload Heatmap:** Visual matrix of developer allocation (Over-allocated, Optimal, Under-utilized).
-  - **Live Heartbeat & Presence Sync:** WebSocket and HTTP fallback heartbeat detecting active user sessions (`lastSeen`).
-  - **Department & Position Hierarchy:** Department-based grouping of engineers and managers.
-
-### Module 5: User Management & Fine-Grained RBAC Engine
-- **Key Features:**
-  - **User Lifecycle:** Account registration, status approval workflow (Approved, Pending, Rejected), user deactivation, password reset.
-  - **Granular Permissions Grid:** Matrix-based configuration per module (Dashboard, Projects, QA, Master Data, Audit Logs, Settings) across 4 actions: `Create`, `Read`, `Update`, `Delete`.
-  - **Dynamic Role Support:** Native system roles (`admin`, `head`, `manager`, `user`, `viewer`) alongside dynamic system roles created in Master Data (e.g., `System Analyst`, `Database Admin`).
-
-### Module 6: Master Data & Configuration Management
-- **Key Features:**
-  - Centralized management of System Roles, Project Roles, Departments, Job Positions (Jabatan), Ticket Categories, and Custom Dropdown Options.
-  - Instant synchronization across all registration forms, project team assignment dropdowns, and edit modals.
-
-### Module 7: Real-Time Communication & Anti-IDOR Notification Engine
-- **Key Features:**
-  - **LanPro Chat Widget:** Floating/embedded chat drawer supporting Direct Messages and Project Context Channels.
-  - **In-App Notifications:** Real-time push alerts for task assignments, mention tags, and status changes.
-  - **Anti-IDOR Protection:** Server-side token validation enforcing strict recipient-owner validation to prevent cross-tenant notification leaks.
-
-### Module 8: Audit Logs & System Health Monitoring
-- **Key Features:**
-  - Immutable audit trail capturing timestamp, IP address, user agent, module, action type, and payload delta.
-  - Prometheus `/metrics` telemetry endpoint monitoring HTTP request durations, active DB connections, and memory usage.
-
----
-
-## 3.2 Matrix Permission Model (RBAC Schema)
-| Module Key | Admin | Head | Manager | User | Viewer |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| `dashboard` | CRUD | R | R | R | R |
-| `planning` | CRUD | CRUD | CRUD | R | R |
-| `board` | CRUD | CRUD | CRUD | CRU | R |
-| `qaTesting` | CRUD | CRU | CRUD | CRU | R |
-| `userManagement` | CRUD | R | R | - | - |
-| `masterData` | CRUD | R | - | - | - |
-| `auditLogs` | CRUD | R | - | - | - |
-| `settings` | CRUD | CRU | CRU | U (Self) | - |
-
-*(Note: C = Create, R = Read, U = Update, D = Delete)*
-
----
-
-# 4. TECHNICAL SPECIFICATION DOCUMENT (TSD)
-
-## 4.1 Server Architecture & Request Flow
-```
-User Request
-    |
-    v
-Express HTTP Server (Port 3000)
-    |
-    +---> Static Asset Handling (Vite / Express Static)
-    |
-    +---> Middleware Pipeline:
-    |        |-- CORS & Security Headers
-    |        |-- Body Parser (JSON / URL-encoded)
-    |        |-- Rate Limiter
-    |        `-- authenticateJWT (Token Extraction & Verification)
-    |
-    +---> API Routes (/api/*):
-    |        |-- /api/auth (Login, Register, Refresh)
-    |        |-- /api/users (User CRUD, RBAC, Status)
-    |        |-- /api/projects (Project, Sprints, Kanban)
-    |        |-- /api/qa (Test Cases, Test Runs, Defects)
-    |        |-- /api/master-data (Roles, Departments, Positions)
-    |        |-- /api/notifications (Anti-IDOR Filtered Alerts)
-    |        `-- /metrics (Prometheus Telemetry)
-    |
-    `---> Socket.IO Server (Real-Time Events & Presence Sync)
-             |
-             +---> Redis Adapter (Horizontal Scaling Sync)
-             `---> Connection Pool (`pg` / Neon PostgreSQL)
+```text
+Browser (React 19 + Vite + Tailwind v4)
+        | HTTPS + Socket.IO
+Express (server.ts) :3000
+        | jagaProyek / verifyGlobalAdmin / JWT
+Routes → Controllers/Services → Repositories → PostgreSQL (Neon)
+        | optional Redis (Socket.IO adapter)
+        | Gemini (Meeting AI) · FFmpeg · local uploads · Resend/SMTP
 ```
 
-## 4.2 Production Build & Bundle Execution
-- **Dev Script:** `tsx server.ts`
-- **Build Script:** `vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs`
-- **Start Script:** `node dist/server.cjs`
-- **Port Strategy:** Binds strictly to `0.0.0.0:3000` to support containerized cloud execution (Cloud Run).
+## 3.2 Lapisan penting
 
----
+| Lapisan        | Path                                          | Catatan                                       |
+| -------------- | --------------------------------------------- | --------------------------------------------- |
+| Fitur UI       | `src/features/*`                              | Satu folder per domain                        |
+| Primif UI      | `src/components/`                             | Stateless lintas fitur                        |
+| Matriks RBAC   | `src/lib/matriksAkses.ts`                     | Sinkron AUDIT §19                             |
+| Peran          | `src/types/roles.ts`                          | Dua enum SYSTEM/PROJECT                       |
+| Metodologi     | `src/lib/methodology.ts`, `alurMetodologi.ts` |                                               |
+| Sprint lingkup | `server/lib/sprintLingkup.ts`                 | #461                                          |
+| Migrasi        | `src/lib/pg-migrate.ts`                       | **Jangan sentuh `src/lib/db.ts` sembarangan** |
+| Penjaga proyek | `server/middleware/jagaProyek.ts`             |                                               |
 
-# 5. SECURITY & COMPLIANCE SPECIFICATION
+## 3.3 Alur request otorisasi
 
-1. **Authentication & Token Governance:**
-   - Stateless JSON Web Tokens (JWT) signed with `JWT_SECRET`.
-   - Passwords salted and hashed via `bcryptjs` (salt rounds: 10).
-2. **Data Leakage & Anti-IDOR Controls:**
-   - Server-side context extraction (`req.user.id`).
-   - Notification query protection ensuring users can only read notifications specifically addressed to them or authorized role groups.
-3. **Input Sanitization & Injection Prevention:**
-   - All SQL queries execute via parameterized placeholders (`$1`, `$2` or `?` SQL dialect translator).
-   - HTML/Rich text fields sanitized with `xss` and `DOMPurify`.
-4. **Resilience & Health Failovers:**
-   - Automatic connection pool recovery handling transient cloud database reconnects.
-
----
-
-# 6. DATABASE SCHEMA & API CONTRACTS
-
-## 6.1 Core Relational Entities
-```sql
--- Users Table
-CREATE TABLE IF NOT EXISTS Users (
-  id VARCHAR(36) PRIMARY KEY,
-  username VARCHAR(100) UNIQUE NOT NULL,
-  passwordHash VARCHAR(255) NOT NULL,
-  displayName VARCHAR(150) NOT NULL,
-  email VARCHAR(150) UNIQUE NOT NULL,
-  role VARCHAR(50) NOT NULL DEFAULT 'user',
-  status ENUM('approved', 'pending', 'rejected') DEFAULT 'approved',
-  department VARCHAR(100),
-  position VARCHAR(100),
-  phone VARCHAR(50),
-  permissions TEXT,
-  lastSeen DATETIME,
-  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- MasterData Table
-CREATE TABLE IF NOT EXISTS MasterData (
-  id VARCHAR(36) PRIMARY KEY,
-  type VARCHAR(50) NOT NULL, -- 'system_role', 'project_role', 'department', 'jabatan'
-  label VARCHAR(150) NOT NULL,
-  roleType VARCHAR(20), -- 'SYSTEM' or 'PROJECT'
-  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- Notifications Table
-CREATE TABLE IF NOT EXISTS Notifications (
-  id VARCHAR(36) PRIMARY KEY,
-  recipientId VARCHAR(36) NOT NULL,
-  senderId VARCHAR(36),
-  title VARCHAR(200) NOT NULL,
-  message TEXT,
-  type VARCHAR(50) DEFAULT 'system',
-  relatedId VARCHAR(36),
-  `read` TINYINT(1) DEFAULT 0,
-  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+```mermaid
+flowchart TD
+  A[HTTP /api/...] --> B{Rute publik?}
+  B -->|Ya| C[Handler]
+  B -->|Tidak| D[authenticateJWT]
+  D --> E{God Mode admin sistem?}
+  E -->|Ya + audit| C
+  E -->|Tidak| F{Anggota proyek?}
+  F -->|Tidak| G[403]
+  F -->|Ya| H[jagaProyek modul,aksi]
+  H --> I{bolehDiProyek?}
+  I -->|Tidak| G
+  I -->|Ya| C
 ```
 
-## 6.2 Key REST Endpoints
-- `POST /api/auth/login`: Authenticates user credentials and returns JWT token + user profile.
-- `GET /api/users`: Fetches full user directory (Requires Admin/Head/Manager permission).
-- `PUT /api/users/:id`: Updates user role, permissions, status, department, or job position.
-- `GET /api/master-data`: Returns system master data (roles, departments, positions).
-- `GET /api/users/:userId/notifications`: Anti-IDOR protected notification fetch endpoint.
-- `GET /metrics`: Prometheus metrics scrape target.
+## 3.4 Stack & gerbang
+
+- Dev: `npm run dev` → `tsx watch server.ts`
+- Build: Vite FE + esbuild `dist/server.cjs`
+- Gerbang: `doctor`, `lint`, `test`, `build`, `audit:papan|warna|tema`
+- UI benar = **tab peramban bersih**, bukan hanya build hijau (§15.3)
+
+## 3.5 Integrasi
+
+| Integrasi               | Fungsi                     | Env kunci                           |
+| ----------------------- | -------------------------- | ----------------------------------- |
+| Neon PostgreSQL         | Data primer                | `DATABASE_URL` (pooler)             |
+| Google Gemini           | Meeting AI STT + LLM       | `GEMINI_API_KEY`                    |
+| OIDC Google / Microsoft | SSO                        | `OIDC_GOOGLE_*`, `OIDC_MICROSOFT_*` |
+| Resend / SMTP           | Email                      | `EMAIL_*` / IntegrationSettings     |
+| FFmpeg                  | Transcode rekaman          | binary di PATH                      |
+| Storage local           | Unggahan + rekaman meeting | `uploads/` (meeting **belum** S3)   |
 
 ---
 
-# 7. IT PROFESSIONAL REVIEW PANEL & CLAUDE AI PROMPT
+# 4. Flowchart — Alur sistem LanPro
 
-Below is the complete, self-contained prompt to be submitted to Claude AI or an Enterprise IT Peer Review Panel to evaluate this document and codebase.
+## 4.1 Peta modul end-to-end
 
----
+```mermaid
+flowchart LR
+  subgraph Auth
+    REG[Daftar] --> PEND[Pending]
+    PEND --> APPR[Approve Admin]
+    APPR --> LOGIN[Login / OIDC]
+  end
+  LOGIN --> HOME{Punya proyek?}
+  HOME -->|Tidak| WEL[WelcomeScreen]
+  HOME -->|Ya| DASH[Dashboard]
+  DASH --> ISS[Daftar Isu]
+  DASH --> PLAN[Planning / Roadmap]
+  DASH --> KAN[Kanban]
+  DASH --> QA[QA]
+  DASH --> WIKI[Wiki]
+  DASH --> FLOW[Flowchart]
+  DASH --> MEET[Meeting]
+  DASH --> TEAM[Tim]
+  ISS --> DETAIL[Detail Isu + History]
+  QA --> BUG[Bug Task linkedTaskId]
+  MEET --> AI[Pipeline AI]
+```
 
-### 📋 COPY THE PROMPT BELOW FOR CLAUDE AI & IT PROFESSIONAL REVIEW:
+## 4.2 Siklus hidup akun
 
-```markdown
-# ENTERPRISE IT PROFESSIONAL PEER REVIEW INVITATION
-**Project:** LanPro SDLC & Engineering Management Platform
-**Target Reviewers:** Enterprise Architect, Principal Backend Engineer, Lead Security/DevSecOps Engineer, Lead DBA, Senior Product Manager
+```mermaid
+stateDiagram-v2
+  [*] --> Registered: POST register
+  Registered --> Pending: status pending
+  Pending --> Approved: Admin approve + email
+  Pending --> Rejected: Admin reject
+  Approved --> ActiveSession: Login JWT
+  ActiveSession --> ForcePasswordChange: Temp password / policy
+  ForcePasswordChange --> ActiveSession: Ganti sandi
+  ActiveSession --> LoggedOut: Logout / blacklist
+```
 
-## OBJECTIVE:
-You are acting as a panel of senior IT professionals reviewing the LanPro Platform System Specification (BRD, FSD, TSD) above. Please analyze the architecture, security stance, database design, feature completeness, and enterprise readiness, then provide a rigorous peer evaluation.
+## 4.3 Siklus hidup isu
 
----
-
-## REVIEWER PERSONAS & EVALUATION CRITERIA:
-
-### 1. Enterprise Architect (Weight: 20%)
-- **Focus:** System scalability, technology stack longevity, modularity, and microservice/container readiness.
-- **Questions to Answer:**
-  1. Is the React 19 + Node.js Express + Socket.IO stack suitable for an enterprise engineering team of 500+ users?
-  2. How well does the esbuild CommonJS bundling strategy support containerized deployment (e.g., Cloud Run / Kubernetes)?
-
-### 2. Principal Backend Engineer (Weight: 20%)
-- **Focus:** Code quality, state management, API design, real-time WebSocket resilience, and concurrency.
-- **Questions to Answer:**
-  1. Are the API contracts and Socket.IO events well-structured?
-  2. How effective is the PostgreSQL connection pool error-handling and auto-recovery logic?
-
-### 3. Lead Security & DevSecOps Engineer (Weight: 25%)
-- **Focus:** Authentication, RBAC granularity, OWASP Top 10 vulnerabilities, Anti-IDOR enforcement, and auditability.
-- **Questions to Answer:**
-  1. Is the JWT authentication and Anti-IDOR notification validation logic sound?
-  2. What additional security controls (e.g., rate limiting, SQL injection defense, XSS) are properly addressed or need improvement?
-
-### 4. Lead Database Administrator / Data Architect (Weight: 20%)
-- **Focus:** Database schema design, relational integrity, connection pooling, indexing, and Master Data flexibility.
-- **Questions to Answer:**
-  1. Does the dynamic Master Data model (`system_role`, `project_role`, `department`, `jabatan`) balance flexibility and schema integrity?
-  2. Are there any bottleneck risks in the notification or chat log tables?
-
-### 5. Senior Product Manager & UX Lead (Weight: 15%)
-- **Focus:** User persona coverage, feature completeness, SDLC workflow alignment, and RBAC matrix usability.
-- **Questions to Answer:**
-  1. Does LanPro effectively replace fragmented tools (Jira, TestRail, Slack, Confluence)?
-  2. Are the user lifecycle and status approval flows intuitive for enterprise teams?
-
----
-
-## REQUIRED OUTPUT FORMAT FOR CLAUDE AI / REVIEW PANEL:
-Please structure your evaluation response as follows:
-
-1. **Executive Evaluation Summary & Overall Grade (A+ to F)**
-2. **Detailed Assessment by Role Persona:**
-   - Enterprise Architect Feedback
-   - Principal Backend Engineer Feedback
-   - Lead Security & DevSecOps Feedback
-   - Lead DBA Feedback
-   - Senior Product Manager Feedback
-3. **Identified Strengths (Top 5 Enterprise Advantages)**
-4. **Potential Risks / Architectural Recommendations (Top 3-5 Areas for Next Iteration)**
-5. **Final Sign-off Status (Approved / Approved with Conditions / Needs Revision)**
+```mermaid
+flowchart TD
+  A[Buat isu / quick create] --> B[Backlog atau Sprint/Milestone]
+  B --> C[Kanban: status MasterData code]
+  C --> D{Done / Closed?}
+  D -->|Ya| E[History + notifikasi]
+  D -->|Tidak| C
+  F[QA FAIL] --> G[Bug Task]
+  G --> H[linkedTaskId + linkedBugKey]
+  H --> I[Bug Done → QA Retest]
 ```
 
 ---
-*End of LanPro System Specification & Review Guide Document.*
+
+# 5. Flowchart — Agile vs Waterfall
+
+## 5.1 Pemilihan metodologi
+
+```mermaid
+flowchart TD
+  A[Buat / Edit Proyek] --> B[Pilih methodology]
+  B --> C{normalisasi UPPERCASE}
+  C -->|AGILE / SCRUM / ...| D[Mode Agile]
+  C -->|WATERFALL| E[Mode Waterfall]
+  D --> D1[Tampil menu Planning & Sprint]
+  D --> D2[Label Roadmap & Timeline]
+  D --> D3[Burndown + satu sprint aktif + scope lock]
+  E --> E1[Sembunyikan menu Sprint]
+  E --> E2[Label Roadmap & Milestones]
+  E --> E3[API create sprint ditolak]
+  E --> E4[Redirect view sprints → timeline]
+```
+
+## 5.2 Alur Agile
+
+```mermaid
+flowchart TD
+  A[Backlog berisi isu] --> B[Buat Sprint planned]
+  B --> C[DnD isu ke sprint planned]
+  C --> D[Start Sprint → status active]
+  D --> E[Demote sprint aktif lain → planned]
+  D --> F[Lingkup terkunci]
+  F --> G{User DnD masuk/keluar?}
+  G -->|Tanpa unlockScope| H[Tolak 400]
+  G -->|Complete + unlockScope| I[Pindah sisa: backlog / next / leave]
+  I --> J[Sprint completed terkunci]
+  D --> K[Dashboard burndown hybrid]
+```
+
+## 5.3 Alur Waterfall
+
+```mermaid
+flowchart TD
+  A[Proyek WATERFALL] --> B[Tidak ada Planning Sprint di nav]
+  B --> C[Roadmap & Milestones]
+  C --> D[CRUD Milestone]
+  D --> E[Taut isu via milestoneId]
+  E --> F[Gantt + garis blocks]
+  A --> G[POST /sprints]
+  G --> H[Error metodologi_waterfall_tidak_mendukung]
+```
+
+## 5.4 Perbandingan cepat
+
+| Aspek            | Agile LanPro          | Waterfall LanPro  | Jira (kasar)      |
+| ---------------- | --------------------- | ----------------- | ----------------- |
+| Unit perencanaan | Sprint                | Milestone + Gantt | Sprint / Version  |
+| Board            | Kanban status dinamis | Kanban sama       | Board             |
+| Scope lock       | Ya (#461)             | N/A               | Sprint incomplete |
+| Satu aktif       | Ya (#462)             | N/A               | Umum praktik      |
+| CPM / baseline   | Tidak                 | Tidak             | Add-on            |
+
+---
+
+# 6. Flowchart — Per peran sistem
+
+## 6.1 Administrator (`admin`)
+
+```mermaid
+flowchart TD
+  L[Login] --> A[God Mode semua proyek]
+  A --> B[User Management CRUD]
+  A --> C[Master Data CRUD]
+  A --> D[Audit / DB Explorer / Settings]
+  A --> E[Buat proyek]
+  E --> F[Assign anggota]
+  A --> G[Masuk modul proyek apa pun]
+```
+
+## 6.2 Department Head (`head` sistem)
+
+```mermaid
+flowchart TD
+  L[Login] --> A[Lihat user/master/audit/settings: R]
+  A --> B[Daftar proyek se-departemen]
+  B --> C[Hak di dalam proyek = peran ProjectMembers]
+```
+
+## 6.3 Standard User & Observer sistem
+
+```mermaid
+flowchart TD
+  L[Login] --> A{Anggota proyek?}
+  A -->|Tidak| W[WelcomeScreen]
+  A -->|Ya| P[Hak mengikuti peran proyek]
+```
+
+---
+
+# 7. Flowchart — Per peran proyek
+
+## 7.1 Owner / Project Admin / Manager
+
+```mermaid
+flowchart TD
+  O[Owner] --> O1[CRUD hampir semua + hapus proyek + setelan]
+  A[Project Admin] --> A1[CRUD modul + setelan + Tim CRUD]
+  A --> A2[Bukan God Mode sistem]
+  M[Manager] --> M1[CRUD operasional + Tim R+U]
+  M --> M2[Start/Complete sprint Agile]
+```
+
+## 7.2 System Analyst / Business Analyst
+
+```mermaid
+flowchart TD
+  SA[System Analyst] --> W[Wiki CRUD + Flowchart CRUD]
+  SA --> S2[List CRU · Board RU · Meeting CRU]
+  BA[Business Analyst] --> M[Meeting Notes CRUD + AI]
+  BA --> B2[Wiki/Flowchart CRU · List CRU]
+```
+
+## 7.3 Developer / QA / Head / Viewer
+
+```mermaid
+flowchart TD
+  DEV[Developer] --> D1[List CRU · Board RU · QA RU]
+  QA[QA] --> Q1[QA CRUD · List CRU · Meeting CRU]
+  QA --> Q2[Fail → Bug Task linkedTaskId]
+  H[head/viewer proyek] --> R[R semua modul]
+```
+
+---
+
+# 8. Matriks akses
+
+Sumber: `MATRIKS_PROYEK` / `MATRIKS_SISTEM`. Huruf = C R U D.
+
+### 8.1 Sistem
+
+| Modul          | admin | head | user | viewer |
+| -------------- | :---: | :--: | :--: | :----: |
+| userManagement | CRUD  |  R   |  —   |   —    |
+| masterData     | CRUD  |  R   |  —   |   —    |
+| auditLog       | CRUD  |  R   |  —   |   —    |
+| dbExplorer     | CRUD  |  —   |  —   |   —    |
+| settings       | CRUD  |  R   |  —   |   —    |
+| buat proyek    |   C   |  —   |  —   |   —    |
+
+### 8.2 Proyek (cuplikan)
+
+| Modul              | owner/admin/manager | SA       | BA       | developer | qa       | head/viewer |
+| ------------------ | ------------------- | -------- | -------- | --------- | -------- | ----------- |
+| dashboard          | R                   | R        | R        | R         | R        | R           |
+| list               | CRUD*               | CRU      | CRU      | CRU       | CRU      | R           |
+| board              | CRUD*               | RU       | RU       | RU        | RU       | R           |
+| sprints / timeline | CRUD*               | R        | R        | R         | R        | R           |
+| wiki               | CRUD*               | **CRUD** | CRU      | R         | R        | R           |
+| flowchart          | CRUD*               | **CRUD** | CRU      | R         | R        | R           |
+| meetingNotes       | CRUD*               | CRU      | **CRUD** | R         | CRU      | R           |
+| qa                 | CRUD*               | RU       | RU       | RU        | **CRUD** | R           |
+| access             | CRUD / RU†          | R        | R        | R         | R        | R           |
+
+\* manager = CRUD operasional sesuai matriks penuh.  
+† access: owner/admin CRUD; manager R+U.  
+Setelan proyek: owner + project admin. Hapus proyek: owner saja.
+
+---
+
+# 9. Spesifikasi per modul
+
+Setiap subbagian mengikuti pola: **Bisnis → Fungsional → Teknis → Swimlane → Aturan**.
+
+---
+
+## 9.1 Auth & akun
+
+**Bisnis.** Hanya akun **approved/active** yang boleh masuk. Admin menyetujui pendaftar. SSO Google/Microsoft setara password untuk domain yang dikonfigurasi.
+
+**Fungsional.** Register, approve/reject, login, logout, forgot/reset password (kata sandi sementara 2 jam — #448/#451), wajib ganti sandi, lengkapi pendaftaran OIDC.
+
+**Teknis.** `src/features/auth/` · `server/routes/auth.routes.ts` · `auth-oidc.routes.ts` · approve via `user.routes.ts` PUT status. JWT di klien; blacklist saat logout/forgot.
+
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant A as Auth API
+  participant Adm as Admin Users
+  U->>A: POST /register
+  A-->>U: pending
+  Adm->>A: PUT /users/:id approved
+  U->>A: POST /login ATAU OIDC start→callback
+  A-->>U: JWT
+```
+
+Detail penuh: **§11**.
+
+---
+
+## 9.2 Proyek (buat, setelan, metodologi)
+
+**Bisnis.** Hanya Administrator sistem yang membuat proyek. Owner/Admin proyek mengubah setelan & metodologi. Hapus proyek = hard cascade, owner saja.
+
+**Fungsional.** Create project, set `category`/methodology (code MasterData, UPPERCASE), invite anggota, dashboard layout, delete.
+
+**Teknis.** `server/routes/project.routes.ts` · `project-modules.routes.ts` · UI di `AppContainer` + chrome proyek. `bolehBuatProyek` / `bolehUbahSetelanProyek` / `bolehHapusProyek`.
+
+```mermaid
+flowchart TD
+  Admin[System admin] --> Create[POST /projects]
+  Create --> Meth[Set AGILE atau WATERFALL]
+  Meth --> Members[Invite + ProjectMembers.role]
+  Members --> Work[Masuk modul]
+  Owner --> Del[DELETE hard cascade]
+```
+
+---
+
+## 9.3 Dashboard
+
+**Bisnis.** Ringkasan kesehatan proyek: KPI isu, sprint aktif (Agile), aktivitas.
+
+**Fungsional.** Widget KPI, filter sprint, burndown hybrid (#464), layout tersimpan.
+
+**Teknis.** `src/features/dashboard/` · data agregat dari tasks/sprints/meetings · `PUT .../dashboard-layout` · guard `dashboard` R.
+
+```mermaid
+flowchart LR
+  Open[Buka proyek] --> Dash[Dashboard]
+  Dash --> Agg[Agregasi tasks/sprints/meetings]
+  Agg --> KPI[KPI]
+  Agg --> Burn{Agile + points?}
+  Burn -->|Ya| Pts[Burndown poin]
+  Burn -->|Tidak| Cnt[Burndown jumlah tugas]
+```
+
+---
+
+## 9.4 Daftar Isu / Task
+
+**Bisnis.** Sumber kebenaran pekerjaan. Status/prioritas/tipe dari MasterData **code**. History field-diff ala Jira (#452/#456). Hapus permanen (#394) + cascade (#444).
+
+**Fungsional.** List, filter, quick create, detail modal, komentar, lampiran, subtask/link, activity history, bulk delete.
+
+**Teknis.** `src/features/issues/` · `server/routes/task.routes.ts` · upload `file.routes.ts` · Soft FK sprint/milestone; scope lock berlaku saat pindah sprint aktif/selesai.
+
+```mermaid
+flowchart TD
+  List[Issue list / quick create] --> Detail[Task detail]
+  Detail --> Fields[Update field + code MasterData]
+  Detail --> Att[Attachments]
+  Detail --> Hist[Activity History]
+  Detail --> Del[Hard delete + Swal]
+  Fields --> Board[Status juga di Kanban]
+```
+
+**Swimlane peran (ringkas).**
+
+```mermaid
+flowchart LR
+  subgraph Manage[owner/admin/manager]
+    M1[CRUD penuh]
+  end
+  subgraph Build[SA/BA/dev/qa]
+    B1[CRU list]
+  end
+  subgraph Read[head/viewer]
+    R1[R saja]
+  end
+```
+
+---
+
+## 9.5 Planning & Sprint (Agile)
+
+**Bisnis.** Rencanakan iterasi; setelah start, lingkup terkunci agar burndown bermakna; hanya satu sprint aktif.
+
+**Fungsional.** Backlog, buat sprint planned, DnD, Start, Complete (backlog/next/leave), badge terkunci, hapus sprint → tugas ke backlog dengan unlock.
+
+**Teknis.** `src/features/planning/` · `sprints.routes.ts` · `sprintLingkup.ts` · Waterfall: UI disembunyikan + POST ditolak.
+
+```mermaid
+flowchart TD
+  Backlog --> Plan[Sprint planned]
+  Plan --> DnD[DnD tugas]
+  DnD --> Start[active + demote lain]
+  Start --> Lock[Scope lock]
+  Lock --> Complete[unlockScope + move sisa]
+  Complete --> Done[completed terkunci]
+```
+
+---
+
+## 9.6 Papan Kanban
+
+**Bisnis.** Visualisasi alur status kerja harian; WIP lunak sebagai sinyal overload (#455); blocker mencegah Done.
+
+**Fungsional.** Kolom dari MasterData status; DnD; WIP badge; Socket.IO refresh.
+
+**Teknis.** `src/features/kanban/` · PUT task status · normalisasi code case-insensitive (#459).
+
+```mermaid
+flowchart LR
+  Card[Kartu] --> Drag[DnD ke kolom status]
+  Drag --> Check{Blockers selesai?}
+  Check -->|Tidak + Done| Reject[Toast tolak]
+  Check -->|Ya| Save[PUT status code]
+```
+
+---
+
+## 9.7 Timeline / Roadmap / Milestone
+
+**Bisnis.** Perencanaan berbasis tanggal & milestone — permukaan utama Waterfall; tetap ada di Agile sebagai Roadmap & Timeline.
+
+**Fungsional.** CRUD milestone, taut tugas (`milestoneId`), Gantt, garis dependensi `blocks` (#457). Bukan CPM.
+
+**Teknis.** `src/features/timeline/` · `milestones.routes.ts` · label sidebar via `alurMetodologi` (#465).
+
+```mermaid
+flowchart TD
+  WF[Proyek] --> TL[Timeline]
+  TL --> MS[CRUD milestones]
+  MS --> Link[Assign milestoneId]
+  Link --> Gantt[Gantt + edges blocks]
+```
+
+---
+
+## 9.8 QA
+
+**Bisnis.** Suite uji → eksekusi → gagal menjadi bug yang dilacak sebagai Task agar Dev/QA satu rantai.
+
+**Fungsional.** Suite/case CRUD, eksekusi Pass/Fail/…, history, generate AI (opsional), create bug Task, retest.
+
+**Teknis.** `src/features/qa/` · `qa.routes.ts` · `linkedTaskId` + `linkedBugKey` (#463).
+
+```mermaid
+flowchart TD
+  Suite --> Case
+  Case --> Exec[Eksekusi]
+  Exec -->|FAIL| Bug[Create Task bug]
+  Bug --> FK[linkedTaskId + linkedBugKey]
+  FK --> Dev[Dev di Board/List]
+  Dev --> Retest[QA retest]
+```
+
+**RBAC:** peran `qa` = CRUD modul `qa`.
+
+---
+
+## 9.9 Wiki (Dokumentasi)
+
+**Bisnis.** Basis pengetahuan proyek; System Analyst pemilik domain CRUD.
+
+**Fungsional.** CRUD dokumen (teks/file/link), download, hard delete, sanitasi teks (#348).
+
+**Teknis.** `src/features/wiki/` · `documents.routes.ts` dengan guard modul **`wiki`**.
+
+```mermaid
+flowchart LR
+  List[Wiki list] --> Create[POST document]
+  Create --> Edit[PUT content/file]
+  Edit --> DL[Download]
+  Edit --> Del[DELETE hard]
+```
+
+---
+
+## 9.10 Flowchart
+
+**Bisnis.** Diagram alur requirement/proses; System Analyst pemilik CRUD.
+
+**Fungsional.** Buat diagram, edit nodes/edges, import, simpan `canvasData` JSON (#136), hapus.
+
+**Teknis.** `src/features/flowchart/` · penyimpanan lewat Documents API (`type: flowchart`).  
+**Catatan teknis (utang):** UI matriks memakai modul `flowchart`; guard server dokumen saat ini berkunci ke `wiki`. Perilaku efektif: SA tetap lolos CRUD dokumen; pemisahan guard flowchart vs wiki belum sempurna di API.
+
+```mermaid
+flowchart TD
+  Dash[Flowchart dashboard] --> New[POST type=flowchart]
+  New --> Canvas[Edit nodes/edges]
+  Canvas --> Save[PUT canvasData]
+  Save --> Del[DELETE]
+```
+
+---
+
+## 9.11 Tim / Access
+
+**Bisnis.** Siapa anggota proyek dan peran apa — mengunci seluruh matriks modul.
+
+**Fungsional.** Invite, ubah role (code MasterData `project_role`), hapus anggota.
+
+**Teknis.** `src/features/team/` · members/invites di `project.routes.ts` · modul matriks `access`.
+
+```mermaid
+flowchart TD
+  Team[Panel Tim] --> Invite
+  Invite --> Role[Set ProjectMembers.role code]
+  Role --> Matrix[jagaProyek enforce matriks]
+```
+
+---
+
+## 9.12 Administrasi sistem
+
+| Submodul    | Bisnis                                | UI                          | API                                   |
+| ----------- | ------------------------------------- | --------------------------- | ------------------------------------- |
+| Master Data | Katalog status/peran/dept/methodology | `features/master`           | `master-data.routes.ts`               |
+| Users       | Approve, CRUD user, sesi              | `features/users`            | `user.routes.ts`, `session.routes.ts` |
+| Audit       | Jejak immutable                       | `features/enterprise-audit` | `audit.routes.ts`                     |
+| Settings    | Email/WA/sistem                       | `features/settings`         | `system.routes.ts`                    |
+| DB Explorer | Baca skema/SQL admin                  | `features/explorer`         | `db-admin.routes.ts`                  |
+
+```mermaid
+flowchart TD
+  SysAdmin[Users.role=admin] --> MD[Master Data]
+  SysAdmin --> US[Users + sessions]
+  SysAdmin --> AU[Audit]
+  SysAdmin --> ST[Settings]
+  SysAdmin --> DB[DB Explorer]
+  Head[head sistem] --> R[Read-only admin surfaces]
+```
+
+---
+
+## 9.13 Catatan Rapat (modul induk Meeting AI)
+
+**Bisnis.** BA mengelola notulen; poin diskusi; AI mengubah rekaman/teks → ringkasan terstruktur. Detail pipeline: **§10**.
+
+**Fungsional.** CRUD meeting, discussion points + komentar, AI companion (live/upload/paste), unduh lampiran.
+
+**Teknis.** `src/features/meeting-notes/` · `meetings.routes.ts` · `discussion-points.routes.ts`. List **tidak** boleh import berat FFmpeg (#460).
+
+---
+
+# 10. Meeting AI — spesifikasi dalam
+
+## 10.1 BRD Meeting AI
+
+| Aspek              | Isi                                                                                          |
+| ------------------ | -------------------------------------------------------------------------------------------- |
+| **Nilai bisnis**   | Mengurangi waktu BA menulis notulen; mengekstrak keputusan/action item dari audio/video/teks |
+| **Pengguna utama** | `business_analyst` (CRUD); owner/admin/manager CRUD; SA/qa CRU; dev/head/viewer R            |
+| **Input**          | (1) rekam live mic (2) unggah audio/video ≤120MB (3) paste / `.txt` manuscript               |
+| **Output**         | Transcript + `aiSummary` terstruktur; file rekaman **dihapus** setelah sukses                |
+| **Bukan janji**    | Parity Otter (diarization speaker belum); SLA waktu real-time tetap                          |
+| **Status produk**  | Kode gelombang 1 + hardening ada; **E2E COMPLETED pemilik = #320 BELUM**                     |
+
+## 10.2 FSD — tiga jalur input
+
+| Jalur      | Langkah pengguna                                           | Hasil                                      |
+| ---------- | ---------------------------------------------------------- | ------------------------------------------ |
+| Live       | Buka detail → AiMeetingCompanion → rekam ≥5s ≥1KB → proses | Pipeline async                             |
+| Upload     | Pilih media → (opsional) FFmpeg.wasm → MP3 → chunk upload  | Pipeline auto-start                        |
+| Manuscript | Paste / `.txt` ≤5MB                                        | `analyze-transcript` sync (tanpa STT file) |
+
+**Poin diskusi:** CRUD terpisah; authorId dari JWT (#251). Hapus meeting cascade points + file (#444).
+
+**Aturan ekstra:** PUT/DELETE meeting hanya **author atau system ADMIN** (ketat vs matriks U/D).
+
+## 10.3 TSD — komponen & API
+
+| Lapisan                | Path                                                   |
+| ---------------------- | ------------------------------------------------------ |
+| List shell             | `MeetingNotes.tsx`                                     |
+| Detail + points        | `DiscussionPointsTable.tsx` (lazy #460)                |
+| AI UI                  | `AiMeetingCompanion.tsx`                               |
+| Live helpers           | `lib/liveRecording.ts`                                 |
+| Pipeline server        | `server/services/meeting.service.ts` (`runAIPipeline`) |
+| Transcode              | `server/services/meeting-transcode.ts`                 |
+| Filter anti-halusinasi | `server/services/meeting-ai-filter.ts`                 |
+| Gemini wrapper         | `server/services/ai.service.ts`                        |
+
+### API utama
+
+| Method | Path                                    | Guard          | Catatan                               |
+| ------ | --------------------------------------- | -------------- | ------------------------------------- |
+| POST   | `/api/v1/meetings/:id/upload-recording` | meetingNotes U | Chunk merge; **auto** `runAIPipeline` |
+| GET    | `/api/v1/meetings/:id/status`           | R              | Poll progress                         |
+| POST   | `/api/v1/meetings/:id/cancel`           | U              | Hapus file → IDLE                     |
+| POST   | `/api/v1/meetings/:id/analyze`          | U              | Manual 202 (jarang dipakai UI)        |
+| POST   | `.../analyze-transcript`                | U              | Paste path                            |
+| POST   | `.../analyze-video`                     | U              | Multimodal 2.5 Pro (UI belum panggil) |
+| CRUD   | `/api/projects/:pid/meetings`           | C/R/U/D        | + discussion points                   |
+
+### Env & dependensi
+
+| Var / dep                    | Fungsi                                        |
+| ---------------------------- | --------------------------------------------- |
+| `GEMINI_API_KEY`             | STT + LLM                                     |
+| `AI_PIPELINE_MAX_CONCURRENT` | Default 2 (clamp 1–4), in-process (#322)      |
+| `ffmpeg` di PATH             | Transcode server                              |
+| Disk `uploads/`              | Rekaman lokal — **bukan** `STORAGE_DRIVER` S3 |
+
+## 10.4 State machine pipeline
+
+```mermaid
+stateDiagram-v2
+  [*] --> IDLE
+  IDLE --> UPLOAD_SUCCESS: upload selesai
+  UPLOAD_SUCCESS --> EXTRACTING_AUDIO: ~15%
+  EXTRACTING_AUDIO --> TRANSCRIBING_STT: ~60%
+  TRANSCRIBING_STT --> ANALYZING_LLM: ~90%
+  ANALYZING_LLM --> COMPLETED: hapus file disk
+  ANALYZING_LLM --> FAILED: file dipertahankan
+  IDLE --> IDLE: cancel
+  EXTRACTING_AUDIO --> IDLE: cancel
+  TRANSCRIBING_STT --> IDLE: cancel
+  ANALYZING_LLM --> IDLE: cancel
+```
+
+Alias legacy: `PROCESSING_AI` → dipetakan ke EXTRACTING_AUDIO di GET status; `TRANSCRIBING` → TRANSCRIBING_STT.
+
+## 10.5 Swimlane end-to-end (live/upload)
+
+```mermaid
+sequenceDiagram
+  participant BA as BA / User
+  participant UI as AiMeetingCompanion
+  participant FE as FFmpeg.wasm
+  participant API as meetings.routes
+  participant Pipe as runAIPipeline
+  participant FF as FFmpeg CLI
+  participant G as Gemini
+  participant DB as PostgreSQL
+  participant Disk as uploads/
+
+  BA->>UI: Rekam / pilih file
+  UI->>FE: Transcode MP3 (best effort)
+  FE-->>UI: MP3 atau raw fallback #447
+  UI->>API: POST upload-recording chunks
+  API->>Disk: merge file
+  API->>DB: UPLOAD_SUCCESS + recording_url
+  API->>Pipe: fire-and-forget
+  Pipe->>FF: extract audio MP3
+  Pipe->>DB: EXTRACTING_AUDIO
+  Pipe->>G: STT
+  Pipe->>DB: TRANSCRIBING_STT
+  Pipe->>G: structured LLM
+  Pipe->>DB: ANALYZING_LLM → COMPLETED + aiSummary
+  Pipe->>Disk: delete recording
+  Pipe-->>UI: Socket meeting_ai_completed / poll status
+  BA->>UI: Baca ringkasan + transcript
+```
+
+## 10.6 Swimlane manuscript (paste)
+
+```mermaid
+sequenceDiagram
+  participant BA as BA
+  participant UI as UI
+  participant API as analyze-transcript
+  participant G as Gemini flash
+  participant DB as DB
+  BA->>UI: Paste / .txt
+  UI->>API: POST analyze-transcript
+  API->>G: analisis + filter UNVERIFIED
+  API->>DB: transcript + aiSummary
+  API-->>UI: hasil sync
+```
+
+## 10.7 Progress & kegagalan
+
+- Socket: `meeting_ai_status`, `meeting_ai_completed`, `meeting_ai_failed`
+- Fallback poll 3s pada `/status` setelah upload yang memulai pipeline
+- Cancel: hapus disk dulu, lalu `IDLE` (#441) — pipeline berhenti antar tahap
+- FAILED: file tetap untuk retry
+- COMPLETED: file dihapus (retensi #320)
+
+## 10.8 Gap & risiko (#320)
+
+| Gap                           | Dampak                                   |
+| ----------------------------- | ---------------------------------------- |
+| E2E pemilik belum COMPLETED   | Jangan klaim production-ready Meeting AI |
+| Tanpa diarization             | Speaker tidak terpisah                   |
+| Disk lokal / Vercel ephemeral | Benturan #30                             |
+| Semaphore in-process saja     | Bukan antrian durable multi-instance     |
+| `analyze-video` belum di UI   | Kapabilitas server idle                  |
+
+---
+
+# 11. Auth & OIDC — spesifikasi dalam
+
+## 11.1 BRD Auth
+
+| Aspek          | Isi                                                                     |
+| -------------- | ----------------------------------------------------------------------- |
+| **Tujuan**     | Identitas terpercaya sebelum akses proyek                               |
+| **Saluran**    | Email+password · Google OIDC · Microsoft OIDC (`bni.co.id` target #305) |
+| **Onboarding** | Self-register → pending → admin approve → email aktif (#261 terkait)    |
+| **Pemulihan**  | Forgot → kata sandi sementara berbatas waktu → wajib ganti              |
+
+## 11.2 FSD Auth
+
+1. Register → `pending`
+2. Admin set `approved`/`active`/`rejected`
+3. Login password ATAU SSO
+4. SSO user baru → lengkapi pendaftaran bila perlu
+5. Forgot password → email → login temp → force change
+6. Logout → blacklist JWT
+
+## 11.3 TSD Auth
+
+| Area         | Path                                                                                      |
+| ------------ | ----------------------------------------------------------------------------------------- |
+| UI           | `src/features/auth/` (`LoginScreen`, `RegisterScreen`, `SsoButtons`, forgot/reset modals) |
+| Password API | `server/routes/auth.routes.ts`                                                            |
+| OIDC API     | `server/routes/auth-oidc.routes.ts`                                                       |
+| Adaptor      | `server/services/oidc.service.ts` (discovery Microsoft/Google)                            |
+| Approve      | `server/routes/user.routes.ts`                                                            |
+
+### OIDC flow
+
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant FE as SsoButtons
+  participant API as auth-oidc
+  participant IdP as Google/Microsoft
+  U->>FE: Klik provider
+  FE->>API: GET /:provider/start
+  API-->>U: Redirect IdP
+  U->>IdP: Login consent
+  IdP->>API: callback + code
+  API->>IdP: token + claims
+  API->>API: upsert/link user
+  API-->>FE: sso_token / session
+  Note over API,FE: Microsoft: OIDC_MICROSOFT_* + tenant (#305 verifikasi lapangan)
+```
+
+### Password forgot (ringkas terkini)
+
+```mermaid
+flowchart TD
+  A[Forgot password] --> B[Email terdaftar?]
+  B -->|Tidak| C[404 email_tidak_terdaftar]
+  B -->|Ya| D[Set passwordHash sementara + blacklist sesi]
+  D --> E[Email kata sandi temp 2 jam]
+  E --> F[Login → wajib ganti sandi]
+```
+
+## 11.4 Gap Auth
+
+| Gap                                             | Tiket                |
+| ----------------------------------------------- | -------------------- |
+| Verifikasi login Microsoft sungguhan domain BNI | #305                 |
+| Arah httpOnly cookie vs localStorage JWT        | terkait #30 keamanan |
+
+---
+
+# 12. Lampiran
+
+## 12.1 Artefak terkait
+
+| Artefak             | Path                                       |
+| ------------------- | ------------------------------------------ |
+| Skema DB            | `docs/DATABASE_SCHEMA.md`                  |
+| API                 | `docs/API-SURFACE.md`, `docs/openapi.json` |
+| Keamanan            | `docs/security_spec.md`                    |
+| Papan               | `AUDIT.md` §1, §19, §24                    |
+| Aturan agen         | `AGENTS.md`                                |
+| PDF DRAFT           | `docs/LanPro-BRD-FSD-TSD-v3.1.pdf`         |
+| HTML (sumber cetak) | `docs/LanPro-BRD-FSD-TSD-v3.1.html`        |
+
+## 12.2 Yang dokumen ini bukan
+
+- Bukan kontrak hukum / SLA pelanggan.
+- Bukan OpenAPI penuh setiap rute.
+- Bukan janji fitur out-of-scope (#346) atau parity Otter.
+
+## 12.3 Riwayat versi
+
+| Ver     | Tanggal         | Perubahan                                                               |
+| ------- | --------------- | ----------------------------------------------------------------------- |
+| 2.5     | sebelumnya      | Draft enterprise; RBAC satu tingkat — **basi**                          |
+| 3.0     | 06 Sep 2026     | Two-Tier RBAC, dual-mode, flowchart per role                            |
+| **3.1** | **06 Sep 2026** | Per modul BRD+FSD+TSD+swimlane; Meeting AI dalam; Auth/OIDC dalam; #466 |
+
+## 12.4 Keputusan review tersisa
+
+1. Apakah utang guard Flowchart=`wiki` di API perlu tiket baru (mis. #467)?
+2. Setelah review teks: cabut watermark DRAFT pada PDF berikutnya?
+3. Tutup formal #466 di papan setelah Anda setujui isi?
+
+---
+
+_Akhir dokumen v3.1.0 — siap review pemilik · tiket #466._

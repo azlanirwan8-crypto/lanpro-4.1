@@ -5,7 +5,6 @@ import { AddCaseModal } from "../../../components/modals/AddCaseModal";
 import { EditSuiteModal } from "../../../components/modals/EditSuiteModal";
 import { EditCaseModal } from "../../../components/modals/EditCaseModal";
 import { CreateBugTicketModal } from "../../../components/modals/CreateBugTicketModal";
-import { DeleteConfirmationModal } from "../../../components/modals/DeleteConfirmationModal";
 
 interface QAModalsProps {
   // Add Suite Modal
@@ -62,16 +61,6 @@ interface QAModalsProps {
   caseEditAssignedTo: string;
   setCaseEditAssignedTo: (assignedTo: string) => void;
   submitEditTestCaseInfo: () => void;
-
-  // Delete Suite Modal
-  suiteToDelete: QATestSuite | null;
-  setSuiteToDelete: (suite: QATestSuite | null) => void;
-  handleDeleteSuite: (id: string) => void;
-
-  // Delete Case Modal
-  caseToDelete: QATestCase | null;
-  setCaseToDelete: (tc: QATestCase | null) => void;
-  handleDeleteTestCase: (id: string) => void;
 
   // Create Bug Ticket Modal
   isCreateBugModalOpen: boolean;
@@ -163,12 +152,6 @@ export const QAModals: React.FC<QAModalsProps> = ({
   caseEditAssignedTo,
   setCaseEditAssignedTo,
   submitEditTestCaseInfo,
-  suiteToDelete,
-  setSuiteToDelete,
-  handleDeleteSuite,
-  caseToDelete,
-  setCaseToDelete,
-  handleDeleteTestCase,
   isCreateBugModalOpen,
   setIsCreateBugModalOpen,
   bugModalTestCase,
@@ -282,22 +265,6 @@ export const QAModals: React.FC<QAModalsProps> = ({
         tasks={tasks}
         projectMembers={projectMembers}
         selectedProject={selectedProject}
-      />
-
-      <DeleteConfirmationModal
-        isOpen={!!suiteToDelete}
-        onClose={() => setSuiteToDelete(null)}
-        title="Hapus Modul Suite"
-        itemName={suiteToDelete?.name || ""}
-        onConfirm={() => handleDeleteSuite(suiteToDelete?.id || "")}
-      />
-
-      <DeleteConfirmationModal
-        isOpen={!!caseToDelete}
-        onClose={() => setCaseToDelete(null)}
-        title="Hapus Test Case"
-        itemName={caseToDelete?.title || ""}
-        onConfirm={() => handleDeleteTestCase(caseToDelete?.id || "")}
       />
     </>
   );

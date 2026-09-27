@@ -11,7 +11,7 @@
  * konsisten dengan service fitur lain.
  */
 
-import { apiRequest } from '../../../lib/api';
+import { apiRequest } from "../../../lib/api";
 
 /** Bentuk respons standar backend. */
 export interface ExplorerApiResponse {
@@ -24,7 +24,7 @@ export interface ExplorerApiResponse {
    * Bukan string bebas — mengetiknya longgar membuat konsumen kehilangan
    * pemeriksaan tipe pada perbandingan mode.
    */
-  mode?: 'pg' | 'local';
+  mode?: "pg" | "local";
   host?: string;
   tables?: any;
   stats?: any;
@@ -38,8 +38,8 @@ export interface ExplorerApiResponse {
  * disentuh pengguna biasa.
  */
 export async function runQuery(sql: string): Promise<ExplorerApiResponse> {
-  return apiRequest('/api/db-query', {
-    method: 'POST',
+  return apiRequest("/api/db-query", {
+    method: "POST",
     body: { query: sql },
   });
 }
@@ -52,59 +52,23 @@ export async function runQuery(sql: string): Promise<ExplorerApiResponse> {
  * aslinya. Perilaku itu sengaja dipertahankan agar ekstraksi ini tetap murni
  * refactor. Risikonya terbatas karena endpoint-nya sudah membutuhkan admin
  * global yang toh bisa menjalankan SQL apa pun — tetapi bila suatu saat
- * dibenahi, di sinilah tempatnya.
- */
-function quoteValue(value: any): string {
-  return String(value).replace(/'/g, "''");
-}
-
-/** Menghapus satu baris berdasarkan kolom kunci primernya. */
-export async function deleteRow(
-  table: string,
-  pkField: string,
-  pkValue: any,
-): Promise<ExplorerApiResponse> {
-  const sql = `DELETE FROM ${table} WHERE \`${pkField}\` = '${quoteValue(pkValue)}'`;
-  return runQuery(sql);
-}
-
-/**
- * Memperbarui satu baris.
- *
- * `assignments` sudah dalam bentuk potongan SQL `kolom = 'nilai'` yang
- * digabung koma, sama seperti sebelum diekstrak.
- */
-export async function updateRow(
-  table: string,
-  assignments: string,
-  pkField: string,
-  pkValue: any,
-): Promise<ExplorerApiResponse> {
-  const sql = `UPDATE ${table} SET ${assignments} WHERE \`${pkField}\` = '${quoteValue(pkValue)}'`;
-  return runQuery(sql);
-}
+// Note: DB Explorer is strictly read-only per Item #19. Direct row deletion and update queries have been retired.
 
 /** Mengambil status koneksi database (mode dan host). */
 export async function fetchDbStatus(): Promise<ExplorerApiResponse> {
-  return apiRequest('/api/system/db-status');
+  return apiRequest("/api/system/db-status");
 }
 
-/**
- * Mengganti mode database.
- *
- * CATATAN: mode 'local' sudah tidak didukung — src/lib/db.ts kini Neon
- * PostgreSQL saja dan getDbMode() selalu mengembalikan 'pg'. Fungsi ini
- * dipertahankan karena UI-nya masih ada, tetapi tombolnya kemungkinan besar
- * tidak lagi berguna.
- */
-export async function toggleDbMode(mode: string): Promise<ExplorerApiResponse> {
-  return apiRequest('/api/system/db-status', {
-    method: 'POST',
-    body: { mode },
-  });
-}
+// #20 — `toggleDbMode` DIBUANG 16 Agu 2026. Catatan sebelumnya sudah
+// menyatakan mode 'local' tidak didukung dan `getDbMode()` selalu 'pg'; ia
+// dipertahankan hanya karena UI-nya masih ada. UI-nya kini ikut dibuang, jadi
+// alasan terakhirnya hilang.
+//
+// Rute backend `POST /api/system/db-status` sengaja TIDAK disentuh di sini —
+// memutuskan nasibnya adalah pekerjaan tersendiri, dan menghapus pemanggil
+// tidak otomatis berarti rutenya tak punya pemakai lain.
 
 /** Mengambil skema database beserta statistik tabelnya. */
 export async function fetchSchema(): Promise<ExplorerApiResponse> {
-  return apiRequest('/api/db-schema');
+  return apiRequest("/api/db-schema");
 }

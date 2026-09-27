@@ -1,142 +1,129 @@
 /**
  * Bilah kendali melayang di atas kanvas.
  *
- * Kiri: nama diagram aktif, pengalih tema kanvas, dan pengalih snap-to-grid.
- * Kanan: tombol ekspor JPG, backup JSON, dan pengalih panel konfigurasi.
+ * #321 — chrome lebih tipis: ekspor icon-only di layar sempit; tanpa teks
+ * uppercase padat. #539 — tombol tema dan snap ikut icon-only di semua lebar:
+ * namanya dipindah ke aria-label, keadaannya tetap terbaca dari warna ikon dan
+ * tooltip, karena tulisan "Free move" memang keadaan bawaan papan.
  *
- * Sebelumnya berupa blok JSX di dalam FlowchartContainer. Dipindah verbatim;
- * yang berubah hanya cara ia memperoleh data — dari closure atas state induk
- * menjadi props eksplisit. Tanpa state sendiri.
+ * #546/#547 — dua hal dilepas dari bilah ini: kartu nama papan (namanya sudah
+ * ada di header editor dan di daftar flowchart) dan tombol tema. Papan kini
+ * ikut tema aplikasi, jadi tidak ada lagi dua sakelar yang bisa berdebat.
  */
+import { useTranslation } from "react-i18next";
 import React from "react";
-import { Workflow, Sun, Moon, LayoutGrid, Download, Database, Activity } from "lucide-react";
+import { LayoutGrid, Download, Database, Activity, Maximize2, Minimize2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "../../../lib/utils";
-import type { FlowchartData } from "../types";
 
 interface CanvasToolbarProps {
-  /** Flowchart yang sedang dibuka; hanya namanya yang ditampilkan. */
-  currentFlowMetadata: FlowchartData | undefined;
-  canvasTheme: "miro" | "blueprint";
-  setCanvasTheme: (value: "miro" | "blueprint") => void;
   isSnapToGrid: boolean;
   setIsSnapToGrid: (value: boolean) => void;
   handleExportJPG: () => void;
   handleExportJSON: () => void;
   isRightSidebarOpen: boolean;
   setIsRightSidebarOpen: (value: boolean) => void;
+  /** Papan sedang tampil layar penuh? Hanya papan, bukan seluruh aplikasi. */
+  isFullscreen: boolean;
+  onToggleFullscreen: () => void;
 }
 
 export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
-  currentFlowMetadata,
-  canvasTheme,
-  setCanvasTheme,
   isSnapToGrid,
   setIsSnapToGrid,
   handleExportJPG,
   handleExportJSON,
   isRightSidebarOpen,
   setIsRightSidebarOpen,
+  isFullscreen,
+  onToggleFullscreen,
 }) => {
+  const { t } = useTranslation();
   return (
-                  <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between pointer-events-none">
-                    <div className="flex items-center gap-3 pointer-events-auto">
-                      {/* Active Diagram Name Indicator */}
-                      <div className="flex items-center gap-2 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 px-4 py-1.5 rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.06)] pointer-events-auto transition-all duration-300">
-                        <div className="p-1.5 bg-violet-50 rounded-lg text-violet-700">
-                          <Workflow className="w-3.5 h-3.5 text-violet-600" />
-                        </div>
-                        <div className="text-left font-sans">
-                          <p className="text-xs sm:text-[10px] sm:text-[8px] font-medium text-content-subtle uppercase tracking-widest leading-none mb-0.5">Diagram Alur</p>
-                          <span className="text-xs sm:text-[11px] font-medium text-content-strong truncate max-w-[150px] block leading-tight">
-                            {currentFlowMetadata?.name || "Untitled Workspace"}
-                          </span>
-                        </div>
-                      </div>
+    <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between pointer-events-none gap-2">
+      <div className="flex items-center gap-2 pointer-events-auto min-w-0">
+        {/* Snap grid */}
+        <div className="flex items-center gap-1 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1 rounded-lg shadow-[0_6px_18px_rgba(0,0,0,0.05)] transition-all duration-300 shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              const nextSnap = !isSnapToGrid;
+              setIsSnapToGrid(nextSnap);
+              toast.success(t("toast.snapToGrid", { keadaan: nextSnap ? "AKTIF" : "NON-AKTIF" }));
+            }}
+            className={cn(
+              "min-h-11 min-w-11 p-2 rounded-md transition-all flex items-center justify-center cursor-pointer",
+              isSnapToGrid
+                ? "bg-primary/10 text-primary hover:bg-primary/15 border border-primary/30"
+                : "text-content-subtle hover:bg-surface-muted border border-transparent"
+            )}
+            title={`Snap to Grid (Saat ini: ${isSnapToGrid ? "Aktif" : "Mati"})`}
+            aria-label={isSnapToGrid ? t("flowchart.snapGrid") : t("flowchart.freeMove")}
+          >
+            <LayoutGrid
+              className={cn("w-3.5 h-3.5", isSnapToGrid ? "text-primary" : "text-content-subtle")}
+            />
+          </button>
+        </div>
+      </div>
 
-                      {/* INTEGRATIVE CANVAS SETTINGS CONTROLS (THEME & SNAPPING) */}
-                      <div className="flex items-center gap-2 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1.5 rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-300">
-                        {/* Canvas Theme Toggle */}
-                        <button
-                          onClick={() => {
-                            const nextTheme = canvasTheme === "miro" ? "blueprint" : "miro";
-                            setCanvasTheme(nextTheme);
-                            toast.success(`Tema Kanvas diubah ke: ${nextTheme === "miro" ? "Miro (Terang)" : "Blueprint (Gelap)"}`);
-                          }}
-                          className={cn(
-                            "p-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer",
-                            canvasTheme === "miro"
-                              ? "bg-surface-muted hover:bg-slate-200 text-content-body"
-                              : "bg-blue-950/40 hover:bg-blue-900/40 text-blue-400"
-                          )}
-                          title={`Ubah Tema Kanvas (Saat ini: ${canvasTheme === "miro" ? "Miro Terang" : "Blueprint Gelap"})`}
-                        >
-                          {canvasTheme === "miro" ? (
-                            <>
-                              <Sun className="w-3.5 h-3.5 text-amber-500 fill-amber-200 animate-spin-slow" />
-                              <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider hidden sm:inline px-0.5">Miro Theme</span>
-                            </>
-                          ) : (
-                            <>
-                              <Moon className="w-3.5 h-3.5 text-blue-400 fill-blue-950" />
-                              <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider hidden sm:inline px-0.5">Blueprint Theme</span>
-                            </>
-                          )}
-                        </button>
+      {/* Export + properties — icon-first; JPG/JSON juga ada di dock */}
+      <div className="flex items-center gap-1.5 pointer-events-auto shrink-0">
+        <div className="hidden sm:flex bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-0.5 rounded-lg shadow-[0_6px_18px_rgba(0,0,0,0.05)] items-center gap-0.5 transition-all duration-300">
+          <button
+            type="button"
+            onClick={handleExportJPG}
+            className="flex items-center gap-1 px-2 py-1.5 text-emerald-700 hover:bg-emerald-500/10 rounded-md text-[10px] leading-none font-medium transition-all cursor-pointer"
+            title={t("flowchart.export")}
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">{t("flowchart.export")}</span>
+          </button>
+          <button
+            type="button"
+            onClick={onToggleFullscreen}
+            aria-pressed={isFullscreen}
+            aria-label={t(isFullscreen ? "common.exitFullscreen" : "common.fullscreen")}
+            title={t(isFullscreen ? "common.exitFullscreen" : "common.fullscreen")}
+            className={cn(
+              "p-1.5 rounded-md transition-all cursor-pointer",
+              isFullscreen
+                ? "bg-primary/15 text-primary border border-primary/30"
+                : "text-content-secondary hover:bg-surface-muted hover:text-primary border border-transparent"
+            )}
+          >
+            {isFullscreen ? (
+              <Minimize2 className="w-3.5 h-3.5" />
+            ) : (
+              <Maximize2 className="w-3.5 h-3.5" />
+            )}
+          </button>
 
-                        <div className="w-px h-4 bg-slate-200/60" />
+          <button
+            type="button"
+            onClick={handleExportJSON}
+            className="flex items-center gap-1 px-2 py-1.5 text-primary hover:bg-primary/10 rounded-md text-[10px] leading-none font-medium transition-all cursor-pointer"
+            title={t("flowchart.backup")}
+          >
+            <Database className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">{t("flowchart.backup")}</span>
+          </button>
+        </div>
 
-                        {/* Snap To Grid Toggle */}
-                        <button
-                          onClick={() => {
-                            const nextSnap = !isSnapToGrid;
-                            setIsSnapToGrid(nextSnap);
-                            toast.success(`Snap to Grid: ${nextSnap ? "AKTIF" : "NON-AKTIF"}`);
-                          }}
-                          className={cn(
-                            "p-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer",
-                            isSnapToGrid
-                              ? "bg-violet-50 text-violet-700 hover:bg-violet-100 border border-violet-100"
-                              : "text-content-subtle hover:bg-surface-muted"
-                          )}
-                          title={`Snap to Grid (Saat ini: ${isSnapToGrid ? "Aktif" : "Mati"})`}
-                        >
-                          <LayoutGrid className={cn("w-3.5 h-3.5", isSnapToGrid ? "text-violet-600" : "text-content-subtle")} />
-                          <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider hidden sm:inline px-0.5">
-                            {isSnapToGrid ? "Snap Grid" : "Free Move"}
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* RIGHT SIDE EXPORT & SIDEBAR TOGGLE BUTTONS */}
-                    <div className="flex items-center gap-2 pointer-events-auto">
-                      <div className="bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1 rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.06)] flex items-center gap-1.5 transition-all duration-300">
-                        <button
-                          onClick={handleExportJPG}
-                          className="flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-xs sm:text-[10px] font-medium transition-all cursor-pointer"
-                        >
-                          <Download className="w-3 h-3" /> Ekspor
-                        </button>
-                        <button
-                          onClick={handleExportJSON}
-                          className="flex items-center gap-1 px-2.5 py-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 rounded-lg text-xs sm:text-[10px] font-medium transition-all cursor-pointer"
-                        >
-                          <Database className="w-3 h-3" /> Backup
-                        </button>
-                      </div>
-
-                      <button
-                        onClick={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
-                        className={cn(
-                          "p-2 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 shadow-[0_8px_24px_rgba(0,0,0,0.06)] rounded-xl transition-all duration-300 cursor-pointer",
-                          isRightSidebarOpen ? "bg-violet-600 text-white border-violet-600" : "text-content-secondary hover:text-violet-600"
-                        )}
-                        title="Toggle Panel Konfigurasi"
-                      >
-                        <Activity className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
+        <button
+          type="button"
+          onClick={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
+          className={cn(
+            "p-2 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 shadow-[0_6px_18px_rgba(0,0,0,0.05)] rounded-lg transition-all duration-300 cursor-pointer",
+            isRightSidebarOpen
+              ? "bg-primary-surface text-content-inverse border-primary"
+              : "text-content-secondary hover:text-primary"
+          )}
+          title={t("canvasMenu.toggleConfigPanel")}
+        >
+          <Activity className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
   );
 };

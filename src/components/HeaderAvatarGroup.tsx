@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { safeLocalStorage } from "../lib/safeStorage";
 import React from "react";
 import { usePresence } from "../contexts/PresenceContext";
@@ -13,6 +14,7 @@ export const HeaderAvatarGroup: React.FC<HeaderAvatarGroupProps> = ({
   allUsers,
   currentUserUid,
 }) => {
+  const { t } = useTranslation();
   const { onlineUsers } = usePresence();
 
   // Retain the last stable list of online users to prevent flashing/flickering back to 1 avatar
@@ -73,20 +75,20 @@ export const HeaderAvatarGroup: React.FC<HeaderAvatarGroupProps> = ({
               members={allUsers}
               className={`w-8 h-8 border-2 ${
                 isCurrentUser
-                  ? "border-indigo-400 ring-2 ring-indigo-100 z-10"
-                  : "border-white ring-1 ring-slate-100"
+                  ? "border-primary ring-2 ring-primary/20 z-10"
+                  : "border-surface ring-1 ring-border-faint"
               } relative group-hover:z-20 group-hover:scale-110 transition-all shadow-soft`}
             />
             {/* Indikator Online: Bullet hijau */}
-            <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white absolute bottom-0 right-0 z-20"></span>
+            <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-surface absolute bottom-0 right-0 z-20"></span>
 
             {/* Tooltip Nama Pengguna */}
-            <div className="absolute top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-slate-800 text-white text-xs sm:text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-30 flex flex-col items-center">
+            <div className="absolute top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-surface-inverse text-content-inverse text-xs sm:text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-30 flex flex-col items-center">
               <span className="font-medium">
                 {member.displayName || member.name || member.username || "Anggota Tim"}{" "}
-                {isCurrentUser ? "(Anda)" : ""}
+                {isCurrentUser ? t("dashboard.youSuffix") : ""}
               </span>
-              <span className="text-xs sm:text-[10px] sm:text-[8px] text-slate-300 capitalize mt-0.5">
+              <span className="text-xs sm:text-[10px] sm:text-[8px] text-content-subtle capitalize mt-0.5">
                 {member.role || "User"}
               </span>
             </div>
@@ -95,7 +97,7 @@ export const HeaderAvatarGroup: React.FC<HeaderAvatarGroupProps> = ({
       })}
 
       {displayUsers.length > 5 && (
-        <div className="w-8 h-8 rounded-full border-2 border-white bg-surface-sunken flex items-center justify-center text-xs sm:text-[10px] font-medium text-content-muted shadow-soft ring-1 ring-slate-200 z-0 relative hover:z-10 hover:bg-surface-muted transition-all cursor-default shrink-0">
+        <div className="w-8 h-8 rounded-full border-2 border-surface bg-surface-sunken flex items-center justify-center text-xs sm:text-[10px] font-medium text-content-muted shadow-soft ring-1 ring-border-subtle z-0 relative hover:z-10 hover:bg-surface-muted transition-all cursor-default shrink-0">
           +{displayUsers.length - 5}
         </div>
       )}

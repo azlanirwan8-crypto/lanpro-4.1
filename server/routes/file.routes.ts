@@ -4,6 +4,8 @@ import path from "path";
 import multer from "multer";
 import jwt from "jsonwebtoken";
 import { authenticateJWT, getJwtSecret } from "../middleware/auth";
+import { validasiQuery } from "../middleware/validate";
+import { fileSecureStreamQuerySchema } from "../schemas/file.schema";
 import {
   validateFileBuffer,
   sanitizeFilename,
@@ -22,6 +24,35 @@ const isServerless =
 const GLOBAL_UPLOADS_DIR = isServerless ? "/tmp/uploads" : path.join(process.cwd(), "uploads");
 const upload = multer({ dest: GLOBAL_UPLOADS_DIR });
 
+const MIME_TYPES: Record<string, string> = {
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  webp: "image/webp",
+  gif: "image/gif",
+  svg: "image/svg+xml",
+  pdf: "application/pdf",
+  doc: "application/msword",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  xls: "application/vnd.ms-excel",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  csv: "text/csv",
+  txt: "text/plain",
+  zip: "application/zip",
+  rar: "application/x-rar-compressed",
+  "7z": "application/x-7z-compressed",
+  mp4: "video/mp4",
+  webm: "video/webm",
+  mp3: "audio/mpeg",
+  wav: "audio/wav",
+  m4a: "audio/mp4",
+};
+
+function resolveContentType(filename: string): string {
+  const ext = path.extname(filename).toLowerCase().replace(/^\./, "");
+  return MIME_TYPES[ext] || "application/octet-stream";
+}
+
 if (!fs.existsSync(GLOBAL_UPLOADS_DIR)) {
   fs.mkdirSync(GLOBAL_UPLOADS_DIR, { recursive: true });
 }
@@ -37,6 +68,7 @@ router.post(
       if (!file) {
         return res.status(400).json({
           status: "error",
+          code: "srv.gagal_mengunggah_dokumen_file",
           message: "Gagal Mengunggah Dokumen: File tidak ditemukan dalam request.",
         });
       }
@@ -66,7 +98,8 @@ router.post(
       }
 
       const userId = req.user?.id || req.user?.uid || "guest";
-      const presignedUrl = generatePresignedUrl(safeFilename, userId, 60);
+      // #490 — masa berlaku lampiran dokumen 1 tahun (525600 menit) agar tidak kadaluarsa dalam 1 jam
+      const presignedUrl = generatePresignedUrl(safeFilename, userId, 525600);
 
       const tokenParts = presignedUrl.split("token=");
       const tokenValue = tokenParts.length > 1 ? tokenParts[1] : "";
@@ -76,6 +109,7 @@ router.post(
 
       return res.json({
         status: "success",
+        code: "srv.dokumen_berhasil_diunggah_dan",
         message: "Dokumen berhasil diunggah dan diamankan.",
         data: {
           filename: safeFilename,
@@ -89,6 +123,7 @@ router.post(
       console.error("POST /api/v1/upload-document error:", err);
       return res.status(500).json({
         status: "error",
+        code: "srv.gagal_mengunggah_dokumen_terjadi",
         message: "Gagal Mengunggah Dokumen: Terjadi kesalahan server",
       });
     }
@@ -96,67 +131,86 @@ router.post(
 );
 
 // 🔒 SECURE STREAM / PRESIGNED URL ENDPOINT
-router.get("/api/v1/files/secure-stream", async (req: any, res: any) => {
-  try {
-    const file = req.query.file as string;
-    const expires = req.query.expires as string;
-    const token = req.query.token as string;
-    const uid = req.query.uid as string;
+router.get(
+  "/api/v1/files/secure-stream",
+  validasiQuery(fileSecureStreamQuerySchema),
+  async (req: any, res: any) => {
+    try {
+      const file = req.query.file as string;
+      const expires = req.query.expires as string;
+      const token = req.query.token as string;
+      const uid = req.query.uid as string;
 
-    if (!file) {
-      return res.status(400).json({ status: "error", message: "Parameter 'file' wajib diisi." });
-    }
+      // validasiQuery sudah memastikan `file` ada; basename tetap dipakai
+      // untuk menolak traversal.
+      const safeFilename = path.basename(file);
 
-    const safeFilename = path.basename(file);
+      // Dibaca lewat lapisan penyimpanan. Pada object storage tidak ada jalur
+      // berkas lokal yang bisa dikirim lewat sendFile, sehingga isinya ditarik
+      // lebih dulu dan dikirim sebagai respons.
+      const isiBerkas = await bacaBerkas(safeFilename);
+      if (!isiBerkas) {
+        return res.status(404).json({
+          status: "error",
+          code: "srv.dokumen_tidak_ditemukan",
+          message: "Dokumen tidak ditemukan.",
+        });
+      }
 
-    // Dibaca lewat lapisan penyimpanan. Pada object storage tidak ada jalur
-    // berkas lokal yang bisa dikirim lewat sendFile, sehingga isinya ditarik
-    // lebih dulu dan dikirim sebagai respons.
-    const isiBerkas = await bacaBerkas(safeFilename);
-    if (!isiBerkas) {
-      return res.status(404).json({ status: "error", message: "Dokumen tidak ditemukan." });
-    }
+      let isAuthorized = false;
+      if (token && expires && uid) {
+        isAuthorized = verifyPresignedToken(safeFilename, uid, expires, token);
+      }
 
-    let isAuthorized = false;
-    if (token && expires && uid) {
-      isAuthorized = verifyPresignedToken(safeFilename, uid, expires, token);
-    }
-
-    if (!isAuthorized && req.headers?.authorization) {
-      const authHeader = req.headers.authorization;
-      if (authHeader.startsWith("Bearer ")) {
-        const parts = authHeader.split(" ");
-        const jwtToken = parts.length > 1 ? parts[1] : null;
-        if (jwtToken) {
-          try {
-            jwt.verify(jwtToken, getJwtSecret());
-            isAuthorized = true;
-          } catch {}
+      if (!isAuthorized && req.headers?.authorization) {
+        const authHeader = req.headers.authorization;
+        if (authHeader.startsWith("Bearer ")) {
+          const parts = authHeader.split(" ");
+          const jwtToken = parts.length > 1 ? parts[1] : null;
+          if (jwtToken) {
+            try {
+              jwt.verify(jwtToken, getJwtSecret());
+              isAuthorized = true;
+            } catch {}
+          }
         }
       }
-    }
 
-    if (!isAuthorized) {
-      return res.status(403).json({
+      if (!isAuthorized) {
+        return res.status(403).json({
+          status: "error",
+          code: "srv.akses_ditolak_presigned_url",
+          message: "Akses Ditolak: Presigned URL telah kadaluarsa atau token tidak valid.",
+        });
+      }
+
+      const contentType = resolveContentType(safeFilename);
+      const isDownload = req.query.download === "1";
+      const rawName = (req.query.name as string) || safeFilename;
+      const sanitizedName = rawName.replace(/["\r\n]/g, "_");
+
+      res.setHeader("Content-Type", contentType);
+      res.setHeader(
+        "Content-Disposition",
+        `${isDownload ? "attachment" : "inline"}; filename="${sanitizedName}"`
+      );
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.setHeader(
+        "Content-Security-Policy",
+        "default-src 'none'; media-src 'self'; image-src 'self' data:; style-src 'unsafe-inline';"
+      );
+      res.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
+      res.setHeader("X-Frame-Options", "SAMEORIGIN");
+
+      return res.end(isiBerkas);
+    } catch (err: any) {
+      return res.status(500).json({
         status: "error",
-        message: "Akses Ditolak: Presigned URL telah kadaluarsa atau token tidak valid.",
+        code: "srv.terjadi_kesalahan_saat_mengunduh",
+        message: "Terjadi kesalahan saat mengunduh dokumen.",
       });
     }
-
-    res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader(
-      "Content-Security-Policy",
-      "default-src 'none'; media-src 'self'; image-src 'self' data:; style-src 'unsafe-inline';"
-    );
-    res.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
-    res.setHeader("X-Frame-Options", "SAMEORIGIN");
-
-    return res.end(isiBerkas);
-  } catch (err: any) {
-    return res
-      .status(500)
-      .json({ status: "error", message: "Terjadi kesalahan saat mengunduh dokumen." });
   }
-});
+);
 
 export default router;

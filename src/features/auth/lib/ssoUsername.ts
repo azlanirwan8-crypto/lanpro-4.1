@@ -17,8 +17,8 @@
 /** Panjang minimum agar sebuah usulan layak ditampilkan. */
 const MINIMUM_LAYAK = 3;
 
-/** Batas panjang username, mengikuti aturan lama yang tidak berubah. */
-const MAKSIMUM = 10;
+/** Batas panjang username, diperbarui ke max 25 (#214). */
+const MAKSIMUM = 25;
 
 /**
  * Mengubah email menjadi usulan username.
