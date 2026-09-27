@@ -31,6 +31,7 @@ import { validateFileClient } from "../lib/fileSecurity";
 // eslint-disable-next-line no-restricted-imports
 import { apiRequest } from "../lib/api";
 import { UserProfile } from "../types";
+import { getScreenSnapshot, type ScreenSnapshot } from "../lib/screenContext";
 import { UserAvatar } from "./ui/UserAvatar";
 import { usePresence } from "../contexts/PresenceContext";
 
@@ -319,6 +320,9 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
     setTimeout(async () => {
       try {
+        // "Mata" AI: kalau user sedang membuka flowchart, kirim snapshot
+        // kanvasnya supaya asisten bisa mengomentari flow yang sedang dibuka.
+        const screenSnapshot: ScreenSnapshot | null = getScreenSnapshot();
         const response = await apiRequest("/api/chat/simulate-reply", {
           method: "POST",
           body: {
@@ -326,6 +330,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             receiverId: currentUser.id,
             message: userMsgText,
             history: historySnapshot,
+            screenContext: screenSnapshot,
             senderName: customPartner?.displayName || customPartner?.username,
             senderRole: customPartner.role,
           },

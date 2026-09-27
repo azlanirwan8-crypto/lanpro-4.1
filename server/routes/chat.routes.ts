@@ -216,7 +216,8 @@ router.get("/api/chat/unread-counts", async (req: any, res) => {
 
 router.post("/api/chat/simulate-reply", async (req, res) => {
   try {
-    const { senderId, receiverId, message, senderName, senderRole, history } = req.body;
+    const { senderId, receiverId, message, senderName, senderRole, history, screenContext } =
+      req.body;
     if (!senderId || !receiverId || !message) {
       return res
         .status(400)
@@ -237,6 +238,80 @@ router.post("/api/chat/simulate-reply", async (req, res) => {
     // 1. Get sender info (who is replying)
     const replySenderName = senderName || "Rekan Tim";
     const replySenderRole = senderRole || "user";
+
+    // Konteks layar ("mata" AI): snapshot kanvas flowchart yang sedang dibuka
+    // user, divalidasi & dipangkas ketat agar tidak jadi vektor prompt-injection
+    // atau pemborosan token. Hanya dipakai untuk lanpro-ai.
+    interface ScreenNodeSummary {
+      id: string;
+      type: string;
+      label: string;
+    }
+    let safeScreen: {
+      view: string;
+      flowName: string | null;
+      nodes: ScreenNodeSummary[];
+      edges: Array<{ fromLabel: string; toLabel: string; label?: string }>;
+      selectedNodeId: string | null;
+    } | null = null;
+    if (screenContext && typeof screenContext === "object") {
+      const sc = screenContext as any;
+      const cleanText = (v: any, max = 80) =>
+        String(v ?? "")
+          .replace(/[\r\n\t]+/g, " ")
+          .trim()
+          .slice(0, max);
+      const rawNodes = Array.isArray(sc.nodes) ? sc.nodes.slice(0, 60) : [];
+      const rawEdges = Array.isArray(sc.edges) ? sc.edges.slice(0, 80) : [];
+      const nodes: ScreenNodeSummary[] = rawNodes
+        .filter((n: any) => n && typeof n.id === "string")
+        .map((n: any) => ({
+          id: cleanText(n.id, 60),
+          type: cleanText(n.type, 40),
+          label: cleanText(n.label),
+        }));
+      const edges = rawEdges
+        .filter((e: any) => e && typeof e.fromLabel === "string" && typeof e.toLabel === "string")
+        .map((e: any) => ({
+          fromLabel: cleanText(e.fromLabel),
+          toLabel: cleanText(e.toLabel),
+          label: e.label ? cleanText(e.label) : undefined,
+        }));
+      safeScreen = {
+        view: cleanText(sc.view, 40) || "unknown",
+        flowName: sc.flowName ? cleanText(sc.flowName, 120) : null,
+        nodes,
+        edges,
+        selectedNodeId: sc.selectedNodeId ? cleanText(sc.selectedNodeId, 60) : null,
+      };
+      if (nodes.length === 0 && edges.length === 0) safeScreen = null;
+    }
+
+    const formatScreenForPrompt = () => {
+      if (!safeScreen) return null;
+      const lines: string[] = [];
+      lines.push(`Kamu bisa melihat layar user. Saat ini aplikasi membuka view "${safeScreen.view}".`);
+      if (safeScreen.flowName) lines.push(`Diagram yang sedang dibuka: "${safeScreen.flowName}".`);
+      lines.push(
+        `Bentuk pada kanvas (${safeScreen.nodes.length} node, ${safeScreen.edges.length} koneksi):`
+      );
+      for (const n of safeScreen.nodes) {
+        lines.push(`- ${n.label || "(tanpa label)"} [${n.type}]`);
+      }
+      if (safeScreen.edges.length > 0) {
+        lines.push("Koneksi antar-bentuk (dari -> ke):");
+        for (const e of safeScreen.edges) {
+          lines.push(
+            `- ${e.fromLabel || "?"} -> ${e.toLabel || "?"}${e.label ? ` :"${e.label}"` : ""}`
+          );
+        }
+      }
+      if (safeScreen.selectedNodeId) {
+        const sel = safeScreen.nodes.find((n) => n.id === safeScreen.selectedNodeId);
+        if (sel) lines.push(`Node yang sedang dipilih user: "${sel.label || "?"}" [${sel.type}].`);
+      }
+      return lines.join("\n");
+    };
 
     // 2. Try using Gemini API first
     let replyText = "";
@@ -261,9 +336,20 @@ router.post("/api/chat/simulate-reply", async (req, res) => {
               .map((h) => `${h.from === "me" ? "User" : "Teman ngobrol"}: ${h.text}`)
               .join("\n")
           : "";
-        const contentsPrompt = historyTranscript
-          ? `Riwayat percakapan terakhir:\n${historyTranscript}\n\nPesan terbaru yang masuk:\n"${message}"\n\nLanjutkan obrolan dari poin terakhir, jangan mengulang jawaban yang sudah pernah diberikan. Tulis balasan chat-mu sekarang.`
-          : `Pesan terbaru yang masuk:\n"${message}"\n\nTulis balasan chat-mu sekarang.`;
+        // Konteks layar hanya untuk AI Assistant resmi — rekan simulasi tidak
+        // perlu (dan tidak boleh) mengklaim bisa melihat layar user.
+        const screenDesc = isAiAssistant ? formatScreenForPrompt() : null;
+        const contentsPrompt = [
+          screenDesc ? `KONTEKS LAYAR USER (apa yang sedang mereka buka sekarang):\n${screenDesc}` : "",
+          historyTranscript ? `Riwayat percakapan terakhir:\n${historyTranscript}` : "",
+          `Pesan terbaru yang masuk:\n"${message}"`,
+          screenDesc
+            ? "Kalau pesannya merujuk ke flow/diagram/layar yang sedang dibuka (mis. \"flow saya udah oke belum?\", \"kok error ya\"), jawab berdasarkan konteks layar di atas: sebutkan node/koneksi spesifik yang kamu lihat, tunjukkan masalah nyata (node tanpa koneksi, decision tanpa cabang Ya/Tidak, label kosong, start/end ganda, dan sejenisnya), lalu kasih saran konkret. Jangan mengaku melihat sesuatu yang tidak ada di daftar."
+            : "Lanjutkan obrolan dari poin terakhir, jangan mengulang jawaban yang sudah pernah diberikan.",
+          'Tulis balasan chat-mu sekarang.',
+        ]
+          .filter(Boolean)
+          .join("\n\n");
 
         // Gaya bahasa dipisah ke systemInstruction (peran & tone), isi pesan via contents —
         // pola yang sama dengan meetings.routes.ts & notebooklm.routes.ts.
