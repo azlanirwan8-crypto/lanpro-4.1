@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { motion } from "motion/react";
 import { Task, Project } from "../../types";
 import {
   format,
@@ -410,8 +411,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                     key={task.id}
                     className="h-16 relative border-b border-border-subtle bg-transparent flex items-center"
                   >
-                    <div
-                      className="absolute top-1/2 -translate-y-1/2 h-8 rounded-full shadow-soft flex items-center transition-all bg-blue-100 border border-blue-200/50 group/bar hover:shadow-md"
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.96 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                      className="absolute top-1/2 -translate-y-1/2 h-8 rounded-full shadow-soft flex items-center bg-blue-100 border border-blue-200/50 group/bar hover:shadow-md"
                       style={{ left: `${left}%`, width: `${width}%`, minWidth: "4px" }}
                     >
                       <div
@@ -456,7 +460,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                           {task.title}
                         </span>
                       </div>
-                    </div>
+                    </motion.div>
                   </div>
                 );
               })}

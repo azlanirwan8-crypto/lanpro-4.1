@@ -30,7 +30,11 @@ export const SprintBanner: React.FC<SprintBannerProps> = ({
         </div>
 
         <h3 className="text-xl md:text-2xl font-medium tracking-tight max-w-2xl text-white leading-normal">
-          "{activeSprint ? (activeSprint.goal || "Selesaikan target sprint tepat waktu.") : "Selesaikan target sprint tepat waktu."}"
+          "
+          {activeSprint
+            ? activeSprint.goal || "Selesaikan target sprint tepat waktu."
+            : "Selesaikan target sprint tepat waktu."}
+          "
         </h3>
 
         <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-indigo-100 pt-1">
@@ -58,7 +62,7 @@ export const SprintBanner: React.FC<SprintBannerProps> = ({
       <div className="relative z-10 shrink-0 self-center md:self-auto flex items-center justify-center p-1 bg-surface/5 backdrop-blur-md rounded-xl border border-white/10 shadow-soft-lg w-28 h-28">
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-2xl font-medium text-white">{sprintProgress}%</span>
-          <span className="text-xs sm:text-[10px] sm:text-[7px] font-medium tracking-widest text-indigo-200 uppercase leading-none mt-0.5">
+          <span className="text-xs sm:text-[10px] font-medium tracking-widest text-indigo-200 uppercase leading-none mt-0.5">
             SPRINT PROGRESS
           </span>
         </div>

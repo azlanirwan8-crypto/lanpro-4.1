@@ -1388,9 +1388,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                           >
                             {task.key}
                           </button>
-                          <span className="text-xs sm:text-[10px] sm:text-[7px] text-slate-300">
-                            •
-                          </span>
+                          <span className="text-xs sm:text-[10px] text-slate-300">•</span>
                           <span
                             className={cn(
                               "text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider",

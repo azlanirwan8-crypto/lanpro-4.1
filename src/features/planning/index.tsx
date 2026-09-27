@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import { motion } from "motion/react";
 import {
   DragDropContext,
   Droppable as _Droppable,
@@ -82,53 +83,122 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
             style={{ ...provided.draggableProps.style }}
             className="outline-none"
           >
-            <div
-              onClick={() => {
-                setSelectedTaskForDetail(task);
-                setIsTaskDetailModalOpen(false);
-                useAppStore.getState().setCurrentView("issueDetail" as any);
+            {/* Bungkus motion HANYA saat tidak di-drag agar posisi drag tetap akurat */}
+            <motion.div
+              initial={snapshot.isDragging ? false : { opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.2,
+                delay: snapshot.isDragging ? 0 : Math.min(index * 0.025, 0.25),
+                ease: [0.16, 1, 0.3, 1],
               }}
-              className={cn(
-                "transition-all duration-200 ease-out select-none",
-                variant === "card"
-                  ? "group bg-surface p-3 rounded-md border border-border-subtle/80 shadow-2xs cursor-pointer hover:border-primary/40 hover:shadow-xs"
-                  : "group bg-surface flex items-center justify-between p-2.5 px-3 rounded-md border border-border-subtle/80 shadow-2xs cursor-pointer hover:bg-surface-sunken/70 hover:border-primary/40",
-                task.isBlocked && "ring-1 ring-red-500/50 bg-red-50/10 border-red-200",
-                snapshot.isDragging &&
-                  "shadow-xl ring-2 ring-primary/20 scale-[1.02] z-50 bg-surface border-primary"
-              )}
             >
-              {variant === "card" ? (
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex justify-between items-center">
-                    <div className="flex gap-2 items-center">
-                      <span className="text-xs sm:text-[11px] font-mono font-semibold text-primary bg-indigo-50/80 px-1.5 py-0.5 rounded-md border border-indigo-200/60">
-                        {task.key}
-                      </span>
-                      {task.priority && (
-                        <span
-                          className={cn(
-                            "text-xs sm:text-[10px] font-medium uppercase tracking-wider",
-                            task.priority === "Highest"
-                              ? "text-red-600"
-                              : task.priority === "High"
-                                ? "text-amber-600"
-                                : task.priority === "Medium"
-                                  ? "text-yellow-600"
-                                  : "text-content-muted"
-                          )}
-                        >
-                          {task.priority}
+              <div
+                onClick={() => {
+                  setSelectedTaskForDetail(task);
+                  setIsTaskDetailModalOpen(false);
+                  useAppStore.getState().setCurrentView("issueDetail" as any);
+                }}
+                className={cn(
+                  "transition-all duration-200 ease-out select-none",
+                  variant === "card"
+                    ? "group bg-surface p-3 rounded-md border border-border-subtle/80 shadow-2xs cursor-pointer hover:border-primary/40 hover:shadow-xs"
+                    : "group bg-surface flex items-center justify-between p-2.5 px-3 rounded-md border border-border-subtle/80 shadow-2xs cursor-pointer hover:bg-surface-sunken/70 hover:border-primary/40",
+                  task.isBlocked && "ring-1 ring-red-500/50 bg-red-50/10 border-red-200",
+                  snapshot.isDragging &&
+                    "shadow-xl ring-2 ring-primary/20 scale-[1.02] z-50 bg-surface border-primary"
+                )}
+              >
+                {variant === "card" ? (
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex justify-between items-center">
+                      <div className="flex gap-2 items-center">
+                        <span className="text-xs sm:text-[11px] font-mono font-semibold text-primary bg-indigo-50/80 px-1.5 py-0.5 rounded-md border border-indigo-200/60">
+                          {task.key}
                         </span>
-                      )}
+                        {task.priority && (
+                          <span
+                            className={cn(
+                              "text-xs sm:text-[10px] font-medium uppercase tracking-wider",
+                              task.priority === "Highest"
+                                ? "text-red-600"
+                                : task.priority === "High"
+                                  ? "text-amber-600"
+                                  : task.priority === "Medium"
+                                    ? "text-yellow-600"
+                                    : "text-content-muted"
+                            )}
+                          >
+                            {task.priority}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <h4 className="text-xs font-medium text-content-strong leading-snug line-clamp-2">
+                      {task.title}
+                    </h4>
+                    <div className="flex items-center justify-between mt-1 pt-1 border-t border-border-faint">
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded-full bg-surface-muted flex items-center justify-center shrink-0">
+                          {task.assigneeId ? (
+                            <UserAvatar
+                              uid={task.assigneeId}
+                              members={projectMembers}
+                              className="w-5 h-5"
+                            />
+                          ) : (
+                            <span className="text-xs sm:text-[10px] font-medium text-content-subtle">
+                              ?
+                            </span>
+                          )}
+                        </div>
+                        {task.dueDate && (
+                          <div
+                            className={cn(
+                              "flex items-center gap-1 text-xs sm:text-[10px] font-medium px-1.5 py-0.5 rounded-md",
+                              ensureDate(task.dueDate) < new Date(new Date().setHours(0, 0, 0, 0))
+                                ? "bg-red-50 text-red-600 border border-red-100"
+                                : "bg-surface-sunken text-content-muted border border-border-subtle/60"
+                            )}
+                          >
+                            <Clock className="w-3 h-3" />
+                            {format(ensureDate(task.dueDate), "MMM d")}
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-xs sm:text-[10px] font-medium text-primary bg-indigo-50/80 px-2 py-0.5 rounded-md border border-indigo-200/60">
+                        {task.status}
+                      </span>
                     </div>
                   </div>
-                  <h4 className="text-xs font-medium text-content-strong leading-snug line-clamp-2">
-                    {task.title}
-                  </h4>
-                  <div className="flex items-center justify-between mt-1 pt-1 border-t border-border-faint">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded-full bg-surface-muted flex items-center justify-center shrink-0">
+                ) : (
+                  <div className="flex items-center gap-3 w-full">
+                    <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                      <span className="text-xs sm:text-[11px] font-mono font-semibold text-primary bg-indigo-50/80 px-1.5 py-0.5 rounded-md border border-indigo-200/60 shrink-0">
+                        {task.key}
+                      </span>
+                      <h4 className="text-xs font-medium text-content-strong truncate">
+                        {task.title}
+                      </h4>
+                    </div>
+                    <div className="flex items-center gap-2.5 shrink-0">
+                      {task.dueDate && (
+                        <div
+                          className={cn(
+                            "flex items-center gap-1 text-xs sm:text-[10px] font-medium px-1.5 py-0.5 rounded-md border",
+                            ensureDate(task.dueDate) < new Date(new Date().setHours(0, 0, 0, 0))
+                              ? "bg-red-50 text-red-600 border-red-100"
+                              : "bg-surface-sunken text-content-muted border-border-subtle/60"
+                          )}
+                        >
+                          <Clock className="w-3 h-3" />
+                          {format(ensureDate(task.dueDate), "MMM d")}
+                        </div>
+                      )}
+                      <span className="px-2 py-0.5 bg-surface-sunken border border-border-subtle/70 rounded-md text-xs sm:text-[10px] font-medium text-content-body">
+                        {task.status}
+                      </span>
+                      <div className="w-5 h-5 rounded-full bg-surface-muted flex items-center justify-center">
                         {task.assigneeId ? (
                           <UserAvatar
                             uid={task.assigneeId}
@@ -141,69 +211,11 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                           </span>
                         )}
                       </div>
-                      {task.dueDate && (
-                        <div
-                          className={cn(
-                            "flex items-center gap-1 text-xs sm:text-[10px] font-medium px-1.5 py-0.5 rounded-md",
-                            ensureDate(task.dueDate) < new Date(new Date().setHours(0, 0, 0, 0))
-                              ? "bg-red-50 text-red-600 border border-red-100"
-                              : "bg-surface-sunken text-content-muted border border-border-subtle/60"
-                          )}
-                        >
-                          <Clock className="w-3 h-3" />
-                          {format(ensureDate(task.dueDate), "MMM d")}
-                        </div>
-                      )}
-                    </div>
-                    <span className="text-xs sm:text-[10px] font-medium text-primary bg-indigo-50/80 px-2 py-0.5 rounded-md border border-indigo-200/60">
-                      {task.status}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3 w-full">
-                  <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                    <span className="text-xs sm:text-[11px] font-mono font-semibold text-primary bg-indigo-50/80 px-1.5 py-0.5 rounded-md border border-indigo-200/60 shrink-0">
-                      {task.key}
-                    </span>
-                    <h4 className="text-xs font-medium text-content-strong truncate">
-                      {task.title}
-                    </h4>
-                  </div>
-                  <div className="flex items-center gap-2.5 shrink-0">
-                    {task.dueDate && (
-                      <div
-                        className={cn(
-                          "flex items-center gap-1 text-xs sm:text-[10px] font-medium px-1.5 py-0.5 rounded-md border",
-                          ensureDate(task.dueDate) < new Date(new Date().setHours(0, 0, 0, 0))
-                            ? "bg-red-50 text-red-600 border-red-100"
-                            : "bg-surface-sunken text-content-muted border-border-subtle/60"
-                        )}
-                      >
-                        <Clock className="w-3 h-3" />
-                        {format(ensureDate(task.dueDate), "MMM d")}
-                      </div>
-                    )}
-                    <span className="px-2 py-0.5 bg-surface-sunken border border-border-subtle/70 rounded-md text-xs sm:text-[10px] font-medium text-content-body">
-                      {task.status}
-                    </span>
-                    <div className="w-5 h-5 rounded-full bg-surface-muted flex items-center justify-center">
-                      {task.assigneeId ? (
-                        <UserAvatar
-                          uid={task.assigneeId}
-                          members={projectMembers}
-                          className="w-5 h-5"
-                        />
-                      ) : (
-                        <span className="text-xs sm:text-[10px] font-medium text-content-subtle">
-                          ?
-                        </span>
-                      )}
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            </motion.div>
           </div>
         )}
       </Draggable>

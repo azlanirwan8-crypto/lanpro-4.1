@@ -3188,7 +3188,8 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen flex flex-col lg:flex-row font-sans bg-surface-sunken overflow-x-hidden">
-        <Toaster position="top-right" richColors />
+        {/* Toaster login tetap dirender di sini; layout utama punya Toaster sendiri (lihat return logged-in) */}
+        <Toaster position="top-right" richColors closeButton duration={5000} />
         <RateLimitIndicator />
 
         {/* Visual Hero Side (Desktop) - Stationary across login/register transitions */}

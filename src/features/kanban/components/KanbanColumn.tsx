@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "motion/react";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
 import { cn } from "../../../lib/utils";
 import { RenderIcon } from "../../../components/RenderIcon";
@@ -84,14 +85,38 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
                         style={provided.draggableProps.style}
                         className="rounded-lg"
                       >
-                        <KanbanCard
-                          task={task}
-                          mArr={mArr}
-                          pArr={pArr}
-                          onClick={() => onTaskClick(task)}
-                          isDragging={snapshot.isDragging}
-                          shakingTaskId={shakingTaskId}
-                        />
+                        {/* Bungkus motion HANYA saat tidak sedang di-drag.
+                            Saat drag, DOM harus identik dengan estimasi posisi dnd-kit/hello-pangea
+                            supaya tidak terjadi lompatan/offset. */}
+                        {snapshot.isDragging ? (
+                          <KanbanCard
+                            task={task}
+                            mArr={mArr}
+                            pArr={pArr}
+                            onClick={() => onTaskClick(task)}
+                            isDragging={snapshot.isDragging}
+                            shakingTaskId={shakingTaskId}
+                          />
+                        ) : (
+                          <motion.div
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{
+                              duration: 0.25,
+                              delay: Math.min(index * 0.03, 0.3),
+                              ease: [0.16, 1, 0.3, 1],
+                            }}
+                          >
+                            <KanbanCard
+                              task={task}
+                              mArr={mArr}
+                              pArr={pArr}
+                              onClick={() => onTaskClick(task)}
+                              isDragging={snapshot.isDragging}
+                              shakingTaskId={shakingTaskId}
+                            />
+                          </motion.div>
+                        )}
                       </div>
                     )}
                   </Draggable>
