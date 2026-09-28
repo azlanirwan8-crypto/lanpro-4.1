@@ -815,6 +815,10 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                   const hasChildren = tasks.some((t) => t.parentId === task.id);
                   const expanded = expandedEpics[task.id] !== false;
                   const isEpic = (task.type || "").toLowerCase() === "epic";
+                  // Label status selalu ikut statusnya, bukan ikut jenis barisnya:
+                  // `getStatusColors(x, true)` memaksa ungu untuk epic, padahal yang
+                  // dibaca orang di label itu statusnya. Jenis tetap terwakili ikon.
+                  const statusWarna = getStatusColors(task.status, false);
 
                   return (
                     <motion.div
@@ -882,23 +886,21 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                         <div className="w-[22px] shrink-0" />
                       )}
 
-                      {/* Task type icon */}
-                      <div className="shrink-0 flex items-center justify-center">
-                        {isEpic ? (
-                          <div className="p-1 rounded-md bg-purple-500/10 text-purple-600 shadow-soft border border-purple-500/30">
-                            <Zap className="w-3.5 h-3.5" />
-                          </div>
-                        ) : (
-                          <div className="p-1 rounded-md bg-primary/10 text-primary border border-primary/30">
-                            <ListTodo className="w-3.5 h-3.5" />
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex flex-col min-w-0 flex-1">
+                      {/* Satu baris: judul + label status berikon. Kode tugas
+                          sengaja tidak ditampilkan lagi (permintaan pemilik
+                          proyek 28 Sep) dan pembuka detailnya pindah ke judul. */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedTaskForDetail(task);
+                          setIsTaskDetailModalOpen(true);
+                        }}
+                        title={task.title}
+                        className="flex items-center gap-2 min-w-0 flex-1 text-left group/row"
+                      >
                         <span
                           className={cn(
-                            "text-xs sm:text-[11px] truncate leading-tight tracking-tight select-none",
+                            "text-xs sm:text-[11px] truncate leading-tight tracking-tight select-none group-hover/row:text-content-strong",
                             isChild
                               ? "font-medium text-content-secondary"
                               : "font-medium text-content"
@@ -906,32 +908,22 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                         >
                           {task.title}
                         </span>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedTaskForDetail(task);
-                              setIsTaskDetailModalOpen(true);
-                            }}
-                            className="text-xs sm:text-[9px] font-semibold text-primary bg-indigo-50/80 hover:bg-indigo-100 border border-indigo-200/60 rounded-md px-1 py-0.5 tracking-tight text-left uppercase transition-colors"
-                          >
-                            {task.key}
-                          </button>
-                          <span className="text-xs sm:text-[10px] text-content-muted">•</span>
-                          <span
-                            className={cn(
-                              "text-[10px] font-normal uppercase tracking-tight shrink-0",
-                              task.status === "Done"
-                                ? "text-emerald-600"
-                                : task.status === "In Progress"
-                                  ? "text-blue-600"
-                                  : "text-content-muted"
-                            )}
-                          >
-                            {task.status}
-                          </span>
-                        </div>
-                      </div>
+                        <span
+                          className={cn(
+                            "ml-auto shrink-0 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-tight",
+                            statusWarna.bg,
+                            statusWarna.border,
+                            statusWarna.text
+                          )}
+                        >
+                          {isEpic ? (
+                            <Zap className="w-3 h-3 shrink-0" />
+                          ) : (
+                            <ListTodo className="w-3 h-3 shrink-0" />
+                          )}
+                          {task.status}
+                        </span>
+                      </button>
                     </motion.div>
                   );
                 })}
