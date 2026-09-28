@@ -816,7 +816,6 @@ export const id = {
     dbExplorer: "Penjelajah Basis Data",
     settingIntegration: "Pengaturan Integrasi",
     newProject: "Buat Proyek Baru",
-    badgeNew: "Baru",
     activeProjects: "Proyek Aktif",
     new: "Baru",
     collapse: "Ciutkan Bilah Sisi",

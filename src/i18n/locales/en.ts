@@ -805,7 +805,6 @@ export const en = {
     dbExplorer: "DB Explorer",
     settingIntegration: "Settings & Integration",
     newProject: "Create New Project",
-    badgeNew: "New",
     activeProjects: "Active Projects",
     new: "New",
     collapse: "Collapse Sidebar",

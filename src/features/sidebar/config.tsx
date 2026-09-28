@@ -100,8 +100,6 @@ export const sidebarSections: SidebarSectionConfig[] = [
         icon: <Workflow className="w-4 h-4" />,
         butuhProyek: true,
         module: "flowchartEditor",
-        badge: "sidebar.badgeNew",
-        badgeColor: "emerald",
       },
     ],
   },
