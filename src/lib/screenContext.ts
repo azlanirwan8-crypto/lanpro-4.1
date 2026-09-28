@@ -52,14 +52,13 @@ export function clearScreenSnapshot(): void {
 }
 
 /** Ambil snapshot layar aktif; null jika tidak ada atau sudah basi. */
-export function getScreenSnapshot(): ScreenSnapshot | null {
+function getScreenSnapshot(): ScreenSnapshot | null {
   if (!current) return null;
   if (Date.now() - current.updatedAt > STALE_MS) return null;
   return current;
 }
 
-const clampLabel = (s: string) =>
-  (s || "").replace(/\s+/g, " ").trim().slice(0, MAX_LABEL_LEN);
+const clampLabel = (s: string) => (s || "").replace(/\s+/g, " ").trim().slice(0, MAX_LABEL_LEN);
 
 /**
  * Render snapshot jadi teks deskriptif untuk prompt Gemini.

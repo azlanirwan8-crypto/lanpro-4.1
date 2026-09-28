@@ -32,6 +32,7 @@ import { apiRequest } from "../lib/api";
 import { UserProfile } from "../types";
 import { UserAvatar } from "./ui/UserAvatar";
 import { usePresence } from "../contexts/PresenceContext";
+import { formatScreenContextForAI } from "../lib/screenContext";
 
 interface ChatMessage {
   id: string;
@@ -276,7 +277,11 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             {
               method: "POST",
               body: isAsisten
-                ? { message: userMsgText, bahasa: i18n.language === "id" ? "id" : "en" }
+                ? {
+                    message: userMsgText,
+                    bahasa: i18n.language === "id" ? "id" : "en",
+                    screenContext: formatScreenContextForAI() || undefined,
+                  }
                 : {
                     senderId: customPartner.id,
                     receiverId: currentUser.id,
