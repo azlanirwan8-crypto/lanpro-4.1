@@ -5,10 +5,29 @@ node_modules/
 dist/
 build/
 
-# Environment variables
+# Environment variables — SEMUA varian. Aturan lama `.env` saja menyisakan
+# .env.development / .env.production tanpa sengaja ter-commit berisi kunci asli.
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+
+# Artefak yang dihasilkan ulang: cakupan uji dan SBOM (di CI diunggah sebagai artefak)
+coverage/
+sbom.cyclonedx.json
+
+# Folder kerja sementara sesi AI (skrip sekali-pakai, dump, screenshot debug) —
+# lihat #180 di AUDIT.md: 138 berkas macam ini pernah ter-commit tanpa sengaja.
+scratch/
+tmp/
+
+# Isi produksi di mesin: unggahan pengguna (STORAGE_DRIVER=local) dan dump basis
+# data. Keduanya berisi data pengguna, jadi tidak pernah boleh masuk git.
+uploads/
+database/backups/
+*.docx
+
+# Berkas izin mesin lokal
+.claude/settings.local.json
 
 # Logs
 *.log

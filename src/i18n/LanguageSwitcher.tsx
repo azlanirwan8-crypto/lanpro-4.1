@@ -18,7 +18,7 @@
  * dan akan tampil sebagai dua huruf ("ID"/"GB") di mesin pemilik proyek.
  */
 import { useTranslation } from "react-i18next";
-import { simpanBahasa, type Bahasa } from "./index";
+import { praMuatKamus, simpanBahasa, type Bahasa } from "./index";
 
 const BenderaIndonesia = () => (
   <svg viewBox="0 0 20 14" className="w-5 h-[14px] rounded-[2px] shadow-2xs" aria-hidden="true">
@@ -53,6 +53,12 @@ export const LanguageSwitcher = () => {
   return (
     <button
       onClick={ganti}
+      // #559 — kamus tujuan sudah harus mendarat SEBELUM jari angkat. Kamus
+      // Indonesia tidak ikut potongan awal (#515), dan kalau berkasnya gagal
+      // datang, klik hanya akan berpindah bahasa di atas kertas: yang tampil
+      // tetap kalimat Inggris, dan tombolnya terlihat mati.
+      onPointerEnter={() => praMuatKamus(tujuan)}
+      onFocus={() => praMuatKamus(tujuan)}
       className="p-2.5 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-content-strong hover:bg-surface-sunken rounded-full transition-all cursor-pointer relative"
       title={judul}
       aria-label={judul}

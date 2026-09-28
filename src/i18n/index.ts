@@ -46,18 +46,40 @@ export const simpanBahasa = (b: Bahasa) => {
  * Hanya bahasa bawaan — Inggris sejak 26 Sep 2026 — yang ikut potongan awal.
  * Kamus Indonesia berukuran 154 kB mentah dan tidak lagi dibaca setiap
  * pengunjung, jadi ia diimpor saat diperlukan: lewat `siapBahasa` di bawah
- * (bahasa pilihan sudah tersimpan) atau lewat pembungkus `changeLanguage`
- * (pengguna baru saja menekan bendera).
+ * (bahasa pilihan sudah tersimpan), lewat `praMuatKamus` saat kursor mendekati
+ * bendera, atau lewat pembungkus `changeLanguage` (pengguna sudah menekan).
  *
  * SENGAJA tidak diekspor: jalan masuk yang benar ke sebuah kamus adalah
  * menukar bahasa, dan pembungkus di bawah sudah menjaganya.
  */
-async function muatKamus(bahasa: Bahasa): Promise<void> {
-  if (i18n.hasResourceBundle(bahasa, "translation")) return;
-  const kamus =
-    bahasa === "en" ? (await import("./locales/en")).en : (await import("./locales/id")).id;
-  i18n.addResourceBundle(bahasa, "translation", kamus, true, true);
+async function muatKamus(bahasa: Bahasa): Promise<boolean> {
+  if (i18n.hasResourceBundle(bahasa, "translation")) return true;
+  try {
+    const kamus =
+      bahasa === "en" ? (await import("./locales/en")).en : (await import("./locales/id")).id;
+    i18n.addResourceBundle(bahasa, "translation", kamus, true, true);
+    return true;
+  } catch (error) {
+    // Kenapa baris ini ada: `fallbackLng` membuat kegagalan ini TANPA GEJALA.
+    // Kamus tujuan tidak pernah tiba, bahasa tetap "id", tapi yang tampil
+    // tetap kalimat Inggris — di layar itu terbaca sebagai "tombol benderanya
+    // mati". Penyebab paling umum: peramban memegang HTML build lama yang
+    // menunjuk berkas kamus build lama yang sudah tidak ada.
+    console.warn(`[I18N] kamus ${bahasa} gagal dimuat — layar akan tetap Inggris:`, error);
+    return false;
+  }
 }
+
+/**
+ * #559 — panggil saat kursor/fokus menyentuh bendera.
+ *
+ * Mengubah "klik lalu tunggu jaringan" jadi "klik dan langsung tukar". Kalau
+ * berkas kamusnya memang tidak ada (build basi), kegagalannya sudah tercatat
+ * di log SEBELUM pengguna menekan, bukan sesudah.
+ */
+export const praMuatKamus = (bahasa: Bahasa) => {
+  void muatKamus(bahasa);
+};
 
 const bahasaDikenal = new Set<string>(BAHASA_TERSEDIA);
 const bahasaAwal = bacaBahasaTersimpan();
@@ -79,9 +101,7 @@ i18n.use(initReactI18next).init({
  */
 const gantiBahasaDasar = i18n.changeLanguage.bind(i18n);
 i18n.changeLanguage = (async (lng?: string, callback?: (err: unknown, t: unknown) => void) => {
-  if (lng && bahasaDikenal.has(lng)) {
-    await muatKamus(lng as Bahasa).catch(() => undefined);
-  }
+  if (lng && bahasaDikenal.has(lng)) await muatKamus(lng as Bahasa);
   return gantiBahasaDasar(lng, callback);
 }) as typeof i18n.changeLanguage;
 
@@ -101,7 +121,7 @@ i18n.changeLanguage = (async (lng?: string, callback?: (err: unknown, t: unknown
 export const siapBahasa: Promise<void> = i18n.hasResourceBundle(bahasaAwal, "translation")
   ? Promise.resolve()
   : Promise.race([
-      muatKamus(bahasaAwal).catch(() => undefined),
+      muatKamus(bahasaAwal).then(() => undefined),
       new Promise<void>((resolve) => setTimeout(resolve, 2000)),
     ]);
 
