@@ -149,6 +149,7 @@ export const en = {
     "srv.tidak_bisa_hapus_akun_sendiri": "You cannot delete your own account.",
     "srv.tidak_bisa_hapus_admin_terakhir": "Cannot delete the last remaining administrator.",
     "srv.sesi_tidak_valid": "Invalid session.",
+    "srv.gagal_mengambil_tenggat_saya": "Could not load your task deadlines.",
     "srv.password_lama_yang_anda": "The old password you entered is incorrect.",
     "srv.profile_updated": "Profile updated",
     "srv.akses_ditolak_token_autentikasi": "Access denied: no authentication token found.",
@@ -310,6 +311,14 @@ export const en = {
       "Hello {{nama}}, your account is locked. Please wait 5 minutes before trying again.",
     "auth.wrongPassword":
       "Hello {{nama}}, the password you entered is incorrect. Please check your credentials.",
+  },
+  tenggat: {
+    judul: "{{jumlah}} tasks waiting — {{terlambat}} already overdue",
+    lewat: "{{hari}} d overdue",
+    hariIni: "today",
+    sisa: "{{hari}} d left",
+    danLainnya: "…and {{jumlah}} more",
+    mengerti: "Got it",
   },
   notif: {
     nBugRetest: "BUG RETEST",

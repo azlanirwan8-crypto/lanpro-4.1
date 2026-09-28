@@ -27,10 +27,12 @@ import {
 } from "../schemas/task.schema";
 import { AuthenticatedRequest } from "../types/express";
 import { taskRepository } from "../repositories/task.repository";
+import { projectRepository } from "../repositories/project.repository";
 import { userRepository } from "../repositories/user.repository";
 import { qaRepository } from "../repositories/qa.repository";
 import { adalahWaterfall } from "../lib/methodology";
 import { statusSelesai } from "../lib/statusSelesai";
+import { hitungTenggat } from "../lib/tenggat";
 import { cekPindahLingkupSprint } from "../lib/sprintLingkup";
 import { sprintRepository } from "../repositories/sprint.repository";
 import { masterDataRepository } from "../repositories/master-data.repository";
@@ -1510,5 +1512,46 @@ router.post(
     }
   }
 );
+
+/**
+ * #563 — daftar tenggat milik pemanggil, untuk modal saat login pertama.
+ *
+ * Dua hal yang menentukan bentuknya:
+ *  - Jatuh tempo = `endDate`, dan hanya kalau itu kosong dipakai `startDate`.
+ *    (Keputusan pemilik proyek 28 Sep. `dueDate` TIDAK dipakai di sini karena
+ *    kartu jumlah di dasbor juga tidak memakainya — dua angka yang berdampingan
+ *    harus lahir dari kolom yang sama.)
+ *  - Yang dihitung cuma yang BELUM selesai menurut `statusSelesai` (master data),
+ *    dan miliknya: assignee ATAU reporter, di proyek yang boleh ia lihat.
+ * Balasannya tanpa `taskKey`: pemilik proyek dua kali minta kode tugas tidak
+ * ditampilkan di daftar.
+ */
+router.get("/api/tasks/tenggat-saya", async (req: any, res) => {
+  const idOrang = req.user?.id || req.user?.uid;
+  if (!idOrang) {
+    return res
+      .status(401)
+      .json({ status: "error", code: "srv.sesi_tidak_valid", message: "Sesi tidak valid." });
+  }
+  try {
+    const proyek = await projectRepository.findProjectsForCaller(
+      String(idOrang),
+      req.user?.role || "viewer"
+    );
+    const baris = await taskRepository.findTenggatOlehOrang(
+      String(idOrang),
+      (proyek || []).map((p: any) => String(p.id))
+    );
+
+    res.json({ status: "success", data: hitungTenggat(baris) });
+  } catch (error: any) {
+    console.error("GET /api/tasks/tenggat-saya error:", error);
+    res.status(500).json({
+      status: "error",
+      code: "srv.gagal_mengambil_tenggat_saya",
+      message: "Gagal mengambil tenggat tugas Anda.",
+    });
+  }
+});
 
 export default router;

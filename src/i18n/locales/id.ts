@@ -153,6 +153,7 @@ export const id = {
     "srv.tidak_bisa_hapus_admin_terakhir":
       "Tidak bisa menghapus administrator terakhir yang tersisa.",
     "srv.sesi_tidak_valid": "Sesi tidak valid.",
+    "srv.gagal_mengambil_tenggat_saya": "Gagal mengambil tenggat tugas Anda.",
     "srv.password_lama_yang_anda": "Kata sandi lama yang Anda masukkan salah.",
     "srv.profile_updated": "Profil diperbarui",
     "srv.akses_ditolak_token_autentikasi": "Akses ditolak: token autentikasi tidak ditemukan.",
@@ -320,6 +321,14 @@ export const id = {
       "Halo {{nama}}, akun Anda terkunci. Silakan tunggu 5 menit lagi untuk mencoba kembali.",
     "auth.wrongPassword":
       "Halo {{nama}}, kata sandi yang Anda masukkan salah. Silakan periksa kembali kredensial Anda.",
+  },
+  tenggat: {
+    judul: "{{jumlah}} tugas menunggu — {{terlambat}} sudah lewat tenggat",
+    lewat: "lewat {{hari}} hari",
+    hariIni: "hari ini",
+    sisa: "sisa {{hari}} hari",
+    danLainnya: "…dan {{jumlah}} lainnya",
+    mengerti: "Mengerti",
   },
   notif: {
     nBugRetest: "BUG RETEST",

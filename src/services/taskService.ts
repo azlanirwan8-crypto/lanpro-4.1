@@ -113,6 +113,13 @@ export const deleteTaskLink = (projectId: string, taskId: string, linkId: string
 export const fetchTaskWorkLogs = (projectId: string, taskId: string) =>
   apiRequest(`/api/projects/${projectId}/tasks/${taskId}/work-logs`);
 
+/**
+ * #563 — tenggat milik pemanggil untuk modal saat login pertama. Server yang
+ * menyaring (assignee ATAU reporter, proyek yang terlihat, `endDate` lalu
+ * `startDate`); komponen hanya menampilkan.
+ */
+export const fetchTenggatSaya = () => apiRequest("/api/tasks/tenggat-saya");
+
 /** #343 — catat jam kerja. */
 export const createTaskWorkLog = (
   projectId: string,

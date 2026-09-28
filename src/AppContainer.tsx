@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./i18n/LanguageSwitcher";
+import { ModalTenggatLogin } from "./components/ModalTenggatLogin";
 import { WebAppsDropdown } from "./components/navigation/WebAppsDropdown";
 import {
   shouldSuppressSprintDataRefresh,
@@ -3889,6 +3890,8 @@ function AppContainer() {
     <PresenceProvider currentUser={currentUser} socket={socket} allUsers={allUsers}>
       <Toaster position="top-right" richColors closeButton duration={5000} />
       <RateLimitIndicator />
+      {/* #563 — sambutan pertama: tugas sendiri yang lewat atau hampir tenggat. */}
+      <ModalTenggatLogin sudahLogin={isLoggedIn} />
       <div className="min-h-dvh flex h-dvh bg-surface-sunken text-content transition-colors duration-200">
         {/* Backdrop Overlay for Mobile Sidebar */}
         <AnimatePresence>

@@ -250,6 +250,35 @@ export class TaskRepository {
     }
   }
 
+  /**
+   * #563 — tugas milik SATU ORANG yang jatuh temponya sudah lewat atau tinggal
+   * beberapa hari, di proyek yang boleh ia lihat.
+   *
+   * Status sengaja TIDAK disaring di SQL: "sudah selesai" ditentukan `statusSelesai`
+   * dari master data, dan daftar kunci terminal bisa berubah tanpa deploy.
+   * Menyaring kata status di sini akan melahirkan definisi kedua — persis penyakit
+   * yang sudah dua kali kita berantas (kartu dasbor vs daftar, asisten vs dasbor).
+   */
+  async findTenggatOlehOrang(idOrang: string, idProyekTerlihat: string[]): Promise<any[]> {
+    if (!idOrang || !idProyekTerlihat.length) return [];
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        `SELECT t.id, t."taskKey", t.title, t.status, t.type, t."startDate", t."endDate", t."dueDate", t."projectId", t."assigneeId", t."reporterId", p.name AS "projectName"
+           FROM "Tasks" t
+           LEFT JOIN "Projects" p ON p.id = t."projectId"
+          WHERE (t."assigneeId" = ? OR t."reporterId" = ?)
+            AND t."projectId" IN (?)
+            AND ((t."endDate" IS NOT NULL AND t."endDate" <> '') OR (t."startDate" IS NOT NULL AND t."startDate" <> ''))
+          LIMIT 400`,
+        [idOrang, idOrang, idProyekTerlihat]
+      );
+      return rows || [];
+    } finally {
+      connection.release();
+    }
+  }
+
   async validateTimeline(
     projectId: string,
     sprintId: string | null,
