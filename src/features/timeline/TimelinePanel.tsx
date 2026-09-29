@@ -828,7 +828,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
 
           <div
             className={cn(
-              "w-64 md:w-80 shrink-0 border-r border-border-subtle/80 flex flex-col z-20 bg-surface relative",
+              "w-64 md:w-80 2xl:w-96 shrink-0 border-r border-border-subtle/80 flex flex-col z-20 bg-surface relative",
               "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:w-[min(80vw,20rem)] max-md:shadow-xl max-md:border-y-0 max-md:border-l-0",
               "max-md:transition-transform max-md:duration-200",
               hierarchyOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full"
@@ -848,7 +848,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               </button>
             </div>
             <div
-              className="flex-1 overflow-y-auto no-scrollbar pb-10 pt-4 border-t border-border-subtle"
+              className="flex-1 overflow-y-auto overflow-x-auto no-scrollbar pb-10 pt-4 border-t border-border-subtle"
               ref={timelineListRef}
               onScroll={handleTimelineVerticalScroll}
             >
@@ -860,6 +860,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                   // #564 — label status DAN batang Gantt memakai hex yang sama:
                   // warna labelnya sendiri (master data, lalu tabel baku).
                   const hexStatus = warnaDariMaster(masterData, "status", task.status);
+                  const hexPrioritas = warnaDariMaster(masterData, "priority", task.priority);
 
                   return (
                     <motion.div
@@ -869,7 +870,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
                       className={cn(
-                        "h-14 flex items-center gap-2 border-b border-border-faint transition-colors relative z-10 overflow-hidden",
+                        "h-14 w-max min-w-full flex items-center gap-2 border-b border-border-faint transition-colors relative z-10 overflow-hidden",
                         rowIdx % 2 === 1
                           ? "bg-surface-sunken/40 hover:bg-surface-sunken/80"
                           : "bg-surface hover:bg-surface-sunken/40",
@@ -927,9 +928,11 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                         <div className="w-[22px] shrink-0" />
                       )}
 
-                      {/* Satu baris: judul + label status berikon. Kode tugas
-                          sengaja tidak ditampilkan lagi (permintaan pemilik
-                          proyek 28 Sep) dan pembuka detailnya pindah ke judul. */}
+                      {/* #565 — urutannya dibaca seperti baris tabel: status,
+                          prioritas, baru namanya. Kode tugas sengaja dibuang
+                          (28 Sep) dan pembuka detailnya tinggal di judul. Judul
+                          TIDAK dipotong lagi: barisnya yang melebar, dan panel
+                          ini digulir mendatar -- bukan teksnya yang hilang. */}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -940,18 +943,8 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                         className="flex items-center gap-2 min-w-0 flex-1 text-left group/row"
                       >
                         <span
-                          className={cn(
-                            "text-xs sm:text-[11px] truncate leading-tight tracking-tight select-none group-hover/row:text-content-strong",
-                            isChild
-                              ? "font-medium text-content-secondary"
-                              : "font-medium text-content"
-                          )}
-                        >
-                          {task.title}
-                        </span>
-                        <span
                           style={gayaLabel(hexStatus)}
-                          className="label-chip ml-auto shrink-0 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-tight"
+                          className="label-chip shrink-0 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-tight"
                         >
                           {isEpic ? (
                             <Zap className="w-3 h-3 shrink-0" />
@@ -959,6 +952,24 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             <ListTodo className="w-3 h-3 shrink-0" />
                           )}
                           {task.status}
+                        </span>
+                        {!!task.priority && (
+                          <span
+                            style={gayaLabel(hexPrioritas)}
+                            className="label-chip shrink-0 rounded-md border px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-tight"
+                          >
+                            {task.priority}
+                          </span>
+                        )}
+                        <span
+                          className={cn(
+                            "text-xs sm:text-[11px] whitespace-nowrap leading-tight tracking-tight select-none group-hover/row:text-content-strong",
+                            isChild
+                              ? "font-medium text-content-secondary"
+                              : "font-medium text-content"
+                          )}
+                        >
+                          {task.title}
                         </span>
                       </button>
                     </motion.div>

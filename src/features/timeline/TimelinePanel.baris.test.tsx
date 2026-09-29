@@ -12,6 +12,7 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react";
 import { TimelinePanel } from "./TimelinePanel";
+import { BAKU } from "../../lib/warnaLabel";
 
 const epic = {
   id: "p-1",
@@ -27,6 +28,7 @@ const tugas = {
   title: "Enhancement homepage",
   key: "WMIR-168",
   status: "In Progress",
+  priority: "High",
   type: "Task",
   projectId: "proj-1",
   parentId: "p-1",
@@ -77,5 +79,52 @@ describe("TimelinePanel — baris pohon tanpa kode tugas (#562)", () => {
 
     // Label status = ikon + teks, satu kesatuan di dalam baris yang sama.
     expect(judul.querySelectorAll("svg").length).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * #565 — permintaan pemilik proyek 29 Sep, dengan contoh layar judul terpotong
+ * "Pengaturan kasir di wo…": "tidak ada tulisan kepotong, buat responsive kolom
+ * table nya" dan "tulisan to do bukan disana tapi di depan", formatnya
+ * `status (label)  prioritas (label)  nama task`.
+ */
+describe("TimelinePanel — urutan label dan judul tanpa potongan (#565)", () => {
+  const barisTugas = (container: HTMLElement) => {
+    const judul = Array.from(container.querySelectorAll("button")).find((b) =>
+      (b.textContent || "").includes("Enhancement homepage")
+    ) as HTMLElement;
+    return { baris: judul.closest("div") as HTMLElement, sel: Array.from(judul.children) };
+  };
+
+  it("status dulu, lalu prioritas, lalu namanya", () => {
+    const { container } = renderPanel();
+    const { sel } = barisTugas(container);
+
+    expect(sel.map((s) => (s.textContent || "").trim())).toEqual([
+      "In Progress",
+      "High",
+      "Enhancement homepage",
+    ]);
+  });
+
+  it("namanya tidak dipotong: nowrap, tanpa truncate, panelnya yang menggulir", () => {
+    const { container } = renderPanel();
+    const { baris, sel } = barisTugas(container);
+    const nama = sel[sel.length - 1] as HTMLElement;
+
+    expect(nama.className).toContain("whitespace-nowrap");
+    expect(nama.className).not.toContain("truncate");
+    expect(baris.className).toContain("w-max");
+    // Gulir mendatar ada di wadah baris, bukan di dalam teksnya.
+    expect(container.querySelector(".overflow-x-auto")).toBeTruthy();
+  });
+
+  it("chip prioritas ikut warna labelnya (#564)", () => {
+    const { container } = renderPanel();
+    const { sel } = barisTugas(container);
+    const chip = sel[1] as HTMLElement;
+
+    expect(chip.className).toContain("label-chip");
+    expect(chip.style.getPropertyValue("--lbr")).toBe(BAKU.priority.high);
   });
 });
