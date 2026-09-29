@@ -828,7 +828,10 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
 
           <div
             className={cn(
-              "w-64 md:w-80 2xl:w-96 shrink-0 border-r border-border-subtle/80 flex flex-col z-20 bg-surface relative",
+              // #565 — panelnya yang ikut panjang isi, bukan teksnya yang
+              // dipotong: `w-max` melebar sampai batas di bawah ini, dan hanya
+              // judul yang lebih panjang dari batas itu yang menggulir.
+              "w-max min-w-[16rem] max-w-[min(45vw,34rem)] md:min-w-[20rem] shrink-0 border-r border-border-subtle/80 flex flex-col z-20 bg-surface relative",
               "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:w-[min(80vw,20rem)] max-md:shadow-xl max-md:border-y-0 max-md:border-l-0",
               "max-md:transition-transform max-md:duration-200",
               hierarchyOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full"

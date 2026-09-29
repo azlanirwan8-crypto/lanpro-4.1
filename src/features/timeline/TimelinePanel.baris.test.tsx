@@ -119,6 +119,20 @@ describe("TimelinePanel — urutan label dan judul tanpa potongan (#565)", () =>
     expect(container.querySelector(".overflow-x-auto")).toBeTruthy();
   });
 
+  it("panel hierarki ikut panjang isinya, dengan batas atas", () => {
+    const { container } = renderPanel();
+    const panel = Array.from(container.querySelectorAll("div")).find(
+      (d) => /shrink-0/.test(d.className) && /border-r/.test(d.className)
+    ) as HTMLElement;
+
+    expect(panel).toBeTruthy();
+    // Lebar tetap punya lantai dan batas -- tanpa batas, satu judul 200 karakter
+    // akan memakan seluruh papan Gantt.
+    expect(panel.className).toContain("w-max");
+    expect(panel.className).toMatch(/min-w-\[/);
+    expect(panel.className).toMatch(/max-w-\[/);
+  });
+
   it("chip prioritas ikut warna labelnya (#564)", () => {
     const { container } = renderPanel();
     const { sel } = barisTugas(container);
