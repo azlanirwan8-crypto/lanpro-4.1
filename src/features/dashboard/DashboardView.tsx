@@ -38,6 +38,7 @@ import { useDashboard, COLORS } from "./hooks";
 import { styles } from "./styles";
 import { ensureDate } from "../../lib/utils";
 import { cn } from "../../lib/utils";
+import { warnaDariMaster } from "../../lib/warnaLabel";
 import {
   loadProjectMeetings,
   loadProjectDocuments,
@@ -486,39 +487,42 @@ export function DashboardView(props: DashboardViewProps) {
 
     const totalScopeCount = Object.values(counts).reduce((a, b) => a + b, 0);
 
+    /** #564 — legenda ikut warna label di layar lain; dulu hex lokal di sini. */
+    const hexJenis = (nama: string) => warnaDariMaster(props.masterData, "issue_type", nama);
+
     return [
       {
         name: "Epic",
         value: counts.epic || 0,
-        color: "#8b5cf6",
+        color: hexJenis("Epic"),
         pct: totalScopeCount ? Math.round(((counts.epic || 0) / totalScopeCount) * 100) : 0,
       },
       {
         name: "Story",
         value: counts.story || 0,
-        color: "#10b981",
+        color: hexJenis("Story"),
         pct: totalScopeCount ? Math.round(((counts.story || 0) / totalScopeCount) * 100) : 0,
       },
       {
         name: "Task",
         value: counts.task || 0,
-        color: "#3b82f6",
+        color: hexJenis("Task"),
         pct: totalScopeCount ? Math.round(((counts.task || 0) / totalScopeCount) * 100) : 0,
       },
       {
         name: "Bug",
         value: counts.bug || 0,
-        color: "#ef4444",
+        color: hexJenis("Bug"),
         pct: totalScopeCount ? Math.round(((counts.bug || 0) / totalScopeCount) * 100) : 0,
       },
       {
         name: "Subtask",
         value: counts.subtask || 0,
-        color: "#06b6d4",
+        color: hexJenis("Subtask"),
         pct: totalScopeCount ? Math.round(((counts.subtask || 0) / totalScopeCount) * 100) : 0,
       },
     ];
-  }, [filteredTasks]);
+  }, [filteredTasks, props.masterData]);
 
   const statusBreakdown = useMemo(() => {
     const scopeTasks = filteredTasks;
@@ -541,18 +545,11 @@ export function DashboardView(props: DashboardViewProps) {
       name,
       value,
       pct: totalScopeCount ? Math.round((value / totalScopeCount) * 100) : 0,
-      color:
-        name === "Done" || name === "Selesai"
-          ? "#10b981"
-          : name === "In Progress"
-            ? "#3b82f6"
-            : name === "In Review"
-              ? "#8b5cf6"
-              : name === "Blocked"
-                ? "#ef4444"
-                : "#64748b",
+      /** #564 — dulu "In Progress" biru dan "In Review" ungu di sini, sementara
+       *  daftar isu memperlihatkan warna lain untuk label yang sama. */
+      color: warnaDariMaster(props.masterData, "status", name),
     }));
-  }, [filteredTasks]);
+  }, [filteredTasks, props.masterData]);
 
   const epicsList = useMemo(() => {
     const epicTasks = tasks.filter(

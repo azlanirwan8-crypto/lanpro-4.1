@@ -64,6 +64,7 @@ import { format, formatDistanceToNow, isToday, isThisWeek, isThisMonth } from "d
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { cn, ensureDate, humanizeActivityAction } from "../../lib/utils";
 import { statusSelesai } from "../../lib/statusSelesai";
+import { gayaLabel, warnaDariMaster } from "../../lib/warnaLabel";
 import { apiRequest, apiClient } from "../../lib/api";
 import {
   katalogPeranSistem,
@@ -3447,7 +3448,12 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                             {t.key || "TASK"}
                                           </div>
                                         </div>
-                                        <span className="text-xs sm:text-[10px] font-normal px-2 py-0.5 rounded bg-surface-muted text-content-secondary uppercase shrink-0">
+                                        <span
+                                          style={gayaLabel(
+                                            warnaDariMaster(masterData, "status", t.status)
+                                          )}
+                                          className="label-chip text-xs sm:text-[10px] font-normal px-2 py-0.5 rounded border uppercase shrink-0"
+                                        >
                                           {t.status || "todo"}
                                         </span>
                                       </div>

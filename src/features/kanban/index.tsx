@@ -8,64 +8,12 @@ import { RenderIcon } from "../../components/RenderIcon";
 import { useAppStore } from "../../store/useAppStore";
 import { cn } from "../../lib/utils";
 import { statusColumnKey, tasksForStatusLane, taskMatchesStatus } from "../../lib/statusKolom";
+import { warnaLabel } from "../../lib/warnaLabel";
 import { Layers } from "lucide-react";
 import { UserAvatar } from "../../components/ui/UserAvatar";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { Card } from "../../components/ui/CoreUI";
-
-/** #417 — status chrome pakai token soft, bukan hex keras. */
-const getStatusStyle = (label: string) => {
-  const lower = label.toLowerCase();
-  if (
-    lower.includes("done") ||
-    lower.includes("selesai") ||
-    lower.includes("closed") ||
-    lower.includes("resolved")
-  ) {
-    return {
-      bg: "bg-success/10",
-      border: "border-t-success",
-      borderColor: "var(--color-success)",
-      text: "text-success-text",
-      indicatorBg: "bg-success/15",
-      indicatorText: "text-success-text",
-    };
-  }
-  if (lower.includes("uat") || lower.includes("review") || lower.includes("code review")) {
-    return {
-      bg: "bg-primary/10",
-      border: "border-t-primary",
-      borderColor: "var(--color-primary)",
-      text: "text-primary",
-      indicatorBg: "bg-primary/15",
-      indicatorText: "text-primary",
-    };
-  }
-  if (
-    lower.includes("progress") ||
-    lower.includes("doing") ||
-    lower.includes("in progress") ||
-    lower.includes("active")
-  ) {
-    return {
-      bg: "bg-warning/10",
-      border: "border-t-warning",
-      borderColor: "var(--color-warning)",
-      text: "text-warning-text",
-      indicatorBg: "bg-warning/15",
-      indicatorText: "text-warning-text",
-    };
-  }
-  return {
-    bg: "bg-info/10",
-    border: "border-t-info",
-    borderColor: "var(--color-info)",
-    text: "text-info-text",
-    indicatorBg: "bg-info/15",
-    indicatorText: "text-info-text",
-  };
-};
 
 export const BoardView: React.FC<KanbanBoardProps> = (props) => {
   const { t } = useTranslation();
@@ -223,7 +171,13 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
           {/* Bagian B Header - Scrollable */}
           <div className="flex items-center px-4 py-2 gap-3 sm:gap-4 bg-surface snap-x snap-mandatory md:snap-none">
             {boardStatuses.map((status, index) => {
-              const statusStyle = getStatusStyle(status.label || status.code || "");
+              /** #564 — warna kepala kolom = warna labelnya sendiri, bukan tebakan kata kunci. */
+              const hexStatus = warnaLabel({
+                kelompok: "status",
+                label: status.label,
+                kode: status.code,
+                warnaMaster: status.color,
+              });
               const taskCount = tArr.filter((t: any) => taskMatchesStatus(t.status, status)).length;
               return (
                 <div
@@ -239,12 +193,12 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                         <RenderIcon
                           iconName={status.icon}
                           className="w-3 h-3 shrink-0"
-                          style={{ color: statusStyle.borderColor }}
+                          style={{ color: hexStatus }}
                         />
                       ) : (
                         <div
                           className="w-2 h-2 rounded-full shrink-0"
-                          style={{ backgroundColor: statusStyle.borderColor }}
+                          style={{ backgroundColor: hexStatus }}
                         />
                       )}
                       <span className="text-[10px] font-normal uppercase tracking-normal text-content-strong truncate">

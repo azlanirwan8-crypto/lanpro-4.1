@@ -6,6 +6,7 @@ import { Input, Button } from "../ui/CoreUI";
 import { StyledDropdown } from "../ui/CommonComponents";
 import { LanproDatePicker } from "../ui/LanproDatePicker";
 import { validateFileClient } from "../../lib/fileSecurity";
+import { BAKU } from "../../lib/warnaLabel";
 import { MasterData, Sprint, Task, UserProfile, Project } from "../../types";
 
 interface NewTaskModalProps {
@@ -124,14 +125,30 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
         color: t.color,
       }));
     }
+    /** #564 — cadangan tanpa master data memakai tabel baku yang sama. */
     return [
-      { id: "epic", label: "Epic", icon: "Layers", color: "#8B5CF6" },
-      { id: "task", label: "Task", icon: "CheckSquare", color: "#3B82F6" },
-      { id: "subtask", label: "Subtask", icon: "GitCommit", color: "#06B6D4" },
-      { id: "bug", label: "Bug", icon: "AlertCircle", color: "#EF4444" },
-      { id: "meeting", label: t("newTask.linkMeeting"), icon: "Calendar", color: "#F59E0B" },
-      { id: "document", label: t("newTask.linkDocument"), icon: "FileText", color: "#10B981" },
-      { id: "approval", label: t("newTask.linkApproval"), icon: "ShieldCheck", color: "#EC4899" },
+      { id: "epic", label: "Epic", icon: "Layers", color: BAKU.issue_type.epic },
+      { id: "task", label: "Task", icon: "CheckSquare", color: BAKU.issue_type.task },
+      { id: "subtask", label: "Subtask", icon: "GitCommit", color: BAKU.issue_type.subtask },
+      { id: "bug", label: "Bug", icon: "AlertCircle", color: BAKU.issue_type.bug },
+      {
+        id: "meeting",
+        label: t("newTask.linkMeeting"),
+        icon: "Calendar",
+        color: BAKU.issue_type.meeting,
+      },
+      {
+        id: "document",
+        label: t("newTask.linkDocument"),
+        icon: "FileText",
+        color: BAKU.issue_type.document,
+      },
+      {
+        id: "approval",
+        label: t("newTask.linkApproval"),
+        icon: "ShieldCheck",
+        color: BAKU.issue_type.approval,
+      },
     ];
   }, [masterData]);
 

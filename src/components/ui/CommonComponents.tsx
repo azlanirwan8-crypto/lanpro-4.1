@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { MasterData, UserProfile } from "../../types";
+import { cariMaster, gayaLabel, warnaLabel, WARNA_NETRAL } from "../../lib/warnaLabel";
 import { RenderIcon } from "../RenderIcon";
 
 import { UserAvatar } from "./UserAvatar";
@@ -62,32 +63,33 @@ export const PriorityIcon = ({
   className?: string;
   masterData?: MasterData[];
 }) => {
-  const p = masterData?.find(
-    (d) => d.type === "priority" && d.label?.toLowerCase() === priority?.toLowerCase()
-  );
+  const p = cariMaster(masterData, "priority", priority);
   const iconProps = { className: cn("w-4 h-4", className) };
+  /** #564 — bentuknya menyampaikan tingkatan, warnanya tidak lagi sendiri-sendiri. */
+  const hex = warnaLabel({
+    kelompok: "priority",
+    label: p?.label ?? priority,
+    kode: p?.code,
+    warnaMaster: p?.color,
+  });
 
   if (p?.icon) {
-    return (
-      <RenderIcon iconName={p.icon} className={iconProps.className} style={{ color: p.color }} />
-    );
+    return <RenderIcon iconName={p.icon} className={iconProps.className} style={{ color: hex }} />;
   }
 
   const pLowerCase = priority?.toLowerCase() || "";
   if (pLowerCase.includes("blocker") || pLowerCase.includes("highest"))
-    return <ChevronsUp {...iconProps} className="text-red-600 font-medium" />;
+    return <ChevronsUp {...iconProps} style={{ color: hex }} />;
   if (pLowerCase.includes("critical") || pLowerCase.includes("high"))
-    return <ChevronUp {...iconProps} className="text-orange-600 font-medium" />;
+    return <ChevronUp {...iconProps} style={{ color: hex }} />;
   if (pLowerCase.includes("major") || pLowerCase.includes("medium"))
-    return <Equal {...iconProps} className="text-amber-500" />;
+    return <Equal {...iconProps} style={{ color: hex }} />;
   if (pLowerCase.includes("minor") || pLowerCase.includes("low"))
-    return <ChevronDownIcon {...iconProps} className="text-blue-500" />;
-  if (pLowerCase.includes("lowest"))
-    return <ChevronsDown {...iconProps} className="text-sky-400" />;
-  if (pLowerCase.includes("hold"))
-    return <MinusCircle {...iconProps} className="text-content-subtle" />;
+    return <ChevronDownIcon {...iconProps} style={{ color: hex }} />;
+  if (pLowerCase.includes("lowest")) return <ChevronsDown {...iconProps} style={{ color: hex }} />;
+  if (pLowerCase.includes("hold")) return <MinusCircle {...iconProps} style={{ color: hex }} />;
 
-  return <Equal {...iconProps} className="text-content-subtle" />;
+  return <Equal {...iconProps} style={{ color: hex }} />;
 };
 
 export const TypeIcon = ({
@@ -99,87 +101,63 @@ export const TypeIcon = ({
   className?: string;
   masterData?: MasterData[];
 }) => {
-  const t = masterData?.find(
-    (d) => d.type === "issue_type" && d.label?.toLowerCase() === type?.toLowerCase()
-  );
+  const t = cariMaster(masterData, "issue_type", type);
   const iconProps = { className: cn("w-4 h-4", className) };
+  /** #564 — satu hex untuk ikon DAN chip jenis; tidak ada lagi ungu lokal. */
+  const hex = warnaLabel({
+    kelompok: "issue_type",
+    label: t?.label ?? type,
+    kode: t?.code,
+    warnaMaster: t?.color,
+  });
 
   if (t?.icon) {
-    return (
-      <RenderIcon iconName={t.icon} className={iconProps.className} style={{ color: t.color }} />
-    );
+    return <RenderIcon iconName={t.icon} className={iconProps.className} style={{ color: hex }} />;
   }
 
   const tLowerCase = type?.toLowerCase() || "";
-  switch (true) {
-    case tLowerCase === "epic":
-      return <Zap {...iconProps} className="text-purple-500" />;
-    case tLowerCase === "task":
-      return <CheckCircle2 {...iconProps} className="text-blue-500" />;
-    case tLowerCase === "subtask":
-      return <CircleDot {...iconProps} className="text-sky-500" />;
-    case tLowerCase === "bug":
-      return <Bug {...iconProps} className="text-red-500" />;
-    case tLowerCase === "meeting":
-      return <Users {...iconProps} className="text-amber-500" />;
-    case tLowerCase === "document":
-      return <FileText {...iconProps} className="text-content-muted" />;
-    default:
-      return <CircleDot {...iconProps} className="text-content-subtle" />;
-  }
+  const Ikon =
+    tLowerCase === "epic"
+      ? Zap
+      : tLowerCase === "task"
+        ? CheckCircle2
+        : tLowerCase === "subtask"
+          ? CircleDot
+          : tLowerCase === "bug"
+            ? Bug
+            : tLowerCase === "meeting"
+              ? Users
+              : tLowerCase === "document"
+                ? FileText
+                : CircleDot;
+  return <Ikon {...iconProps} style={{ color: hex }} />;
 };
 
-const getStatusClasses = (val: string) => {
-  if (!val) return "bg-surface-sunken text-content-secondary border-border-subtle";
-  const normalized = val.toLowerCase().trim();
-  if (
-    normalized.includes("to do") ||
-    normalized.includes("rencana") ||
-    normalized.includes("backlog")
-  ) {
-    return "bg-info/10 text-info-text border-info/20 hover:bg-info/15";
-  }
-  if (
-    normalized.includes("in progress") ||
-    normalized.includes("dikerjakan") ||
-    normalized.includes("doing") ||
-    normalized.includes("progress") ||
-    normalized.includes("uji")
-  ) {
-    return "bg-warning/10 text-warning-text border-warning/20 hover:bg-warning/15";
-  }
-  if (
-    normalized.includes("done") ||
-    normalized.includes("selesai") ||
-    normalized.includes("completed") ||
-    normalized.includes("closed") ||
-    normalized.includes("ready")
-  ) {
-    return "bg-success/10 text-success-text border-success/20 hover:bg-success/15";
-  }
-  return "bg-primary-surface/10 text-primary border-primary/20 hover:bg-primary-surface/15";
-};
+/**
+ * #564 — geometri chip label. Warnanya milik `.label-chip` (src/index.css),
+ * yang menurunkannya dari `--lbr`; di sini hanya bentuknya. Terpisah supaya
+ * ritme radius/padding tetap jadi keputusan pemanggilnya.
+ */
+const CHIP_KECIL = "px-2 py-0.5 border rounded-md font-normal text-[10px] tracking-tight uppercase";
+const CHIP_BIASA = "px-1.5 py-0.5 border rounded font-normal text-xs tracking-tight";
 
-const getPriorityClasses = (val: string) => {
-  if (!val) return "bg-surface-sunken text-content-secondary border-border-subtle";
-  const normalized = val.toLowerCase().trim();
-  if (
-    normalized.includes("high") ||
-    normalized.includes("critical") ||
-    normalized.includes("tinggi") ||
-    normalized.includes("mendesak")
-  ) {
-    return "bg-danger/10 text-danger-text border-danger/20 hover:bg-danger/15";
-  }
-  if (normalized.includes("medium") || normalized.includes("sedang")) {
-    return "bg-warning/10 text-warning-text border-warning/20 hover:bg-warning/15";
-  }
-  if (normalized.includes("low") || normalized.includes("rendah")) {
-    return "bg-surface-muted text-content-body border-border-subtle hover:bg-surface-sunken";
-  }
-  return "bg-surface-sunken text-content-secondary border-border-subtle hover:bg-surface-muted";
-};
-
+/**
+ * Hex sebuah chip dari nilai terpilih. Warna master data menang; tanpa itu
+ * tabel baku; tanpa keduanya netral — dan pemanggil boleh memilih tetap abu
+ * daripada menyamar berwarna (`berwarna`).
+ */
+const hexChip = (
+  kelompok: string | undefined,
+  baris: MasterData | undefined,
+  opsi: { label?: string; color?: string } | undefined,
+  nilai: string
+) =>
+  warnaLabel({
+    kelompok: kelompok || "",
+    label: baris?.label ?? opsi?.label ?? nilai,
+    kode: baris?.code,
+    warnaMaster: baris?.color ?? opsi?.color,
+  });
 export const StyledDropdown = ({
   value,
   onChange,
@@ -259,6 +237,12 @@ export const StyledDropdown = ({
   const isStatus = type === "status";
   const isPriority = type === "priority";
 
+  const baris = cariMaster(masterData, type || "", selected?.label || value);
+  const hex = hexChip(type, baris, selected, value);
+  /** Pemilih anggota/kosong tetap abu: labelnya memang tidak punya warna. */
+  const berwarna = isStatus || isPriority || hex !== WARNA_NETRAL;
+  const gaya = berwarna ? gayaLabel(hex) : undefined;
+
   return (
     <div className={cn("relative", className)}>
       {customButton ? (
@@ -281,18 +265,13 @@ export const StyledDropdown = ({
             !disabled && setIsOpen(!isOpen);
           }}
           disabled={disabled}
+          style={gaya}
           className={cn(
             "flex items-center gap-1.5 group/dd transition-all cursor-pointer w-full justify-between focus:ring-1 focus:ring-primary/20",
-            isStatus
-              ? cn(
-                  "px-2 py-0.5 border rounded-md font-normal text-[10px] tracking-tight uppercase transition-colors",
-                  getStatusClasses(selected?.label || value)
-                )
-              : isPriority
-                ? cn(
-                    "px-2 py-0.5 border rounded-md font-normal text-[10px] tracking-tight uppercase transition-colors",
-                    getPriorityClasses(selected?.label || value)
-                  )
+            isStatus || isPriority
+              ? cn(CHIP_KECIL, "label-chip transition-colors")
+              : berwarna
+                ? cn(CHIP_BIASA, "label-chip transition-colors")
                 : "px-1.5 py-0.5 bg-surface border border-transparent hover:border-border-subtle rounded text-xs font-normal",
             disabled && "opacity-50 cursor-not-allowed",
             buttonClassName
@@ -313,12 +292,12 @@ export const StyledDropdown = ({
                 <RenderIcon
                   iconName={selected.icon}
                   className="w-3.5 h-3.5 flex-shrink-0"
-                  style={{ color: selected?.color || "#cbd5e1" }}
+                  style={{ color: hex }}
                 />
               ) : (
                 <div
                   className="w-2 h-2 rounded-full shrink-0 shadow-inner border border-border-subtle"
-                  style={{ backgroundColor: selected?.color || "#cbd5e1" }}
+                  style={{ backgroundColor: hex }}
                 />
               )
             ) : isPriority ? (
@@ -331,7 +310,7 @@ export const StyledDropdown = ({
               <RenderIcon
                 iconName={selected.icon}
                 className="w-3.5 h-3.5 flex-shrink-0"
-                style={{ color: selected.color }}
+                style={{ color: selected.color || hex }}
               />
             ) : null}
             <span
@@ -386,6 +365,12 @@ export const StyledDropdown = ({
               <div className="min-h-0 overflow-y-auto p-1.5 custom-scrollbar">
                 {safeOptions.map((opt, optIdx) => {
                   const isActive = opt.id === value;
+                  /** Titik/ikon daftar ikut warna label yang sama dengan chipnya. */
+                  const hexOpt = warnaLabel({
+                    kelompok: type || "",
+                    label: opt.label,
+                    warnaMaster: opt.color,
+                  });
                   return (
                     <button
                       type="button"
@@ -421,12 +406,12 @@ export const StyledDropdown = ({
                             <RenderIcon
                               iconName={opt.icon}
                               className="w-4 h-4 flex-shrink-0"
-                              style={{ color: opt.color || "#cbd5e1" }}
+                              style={{ color: hexOpt }}
                             />
                           ) : (
                             <div
                               className="w-2.5 h-2.5 rounded-full shrink-0 shadow-inner border border-border-faint"
-                              style={{ backgroundColor: opt.color || "#cbd5e1" }}
+                              style={{ backgroundColor: hexOpt }}
                             />
                           )
                         ) : isPriority ? (
@@ -439,7 +424,7 @@ export const StyledDropdown = ({
                           <RenderIcon
                             iconName={opt.icon}
                             className="w-4 h-4 flex-shrink-0"
-                            style={{ color: opt.color }}
+                            style={{ color: opt.color || hexOpt }}
                           />
                         ) : null}
                         <span className="text-xs font-normal truncate text-content-body tracking-tight">

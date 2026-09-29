@@ -404,6 +404,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
             setSelectedTaskForDetail={setSelectedTaskForDetail}
             setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
             currentUser={currentUserProfile || currentUser}
+            masterData={masterData}
           />
         </div>
       );

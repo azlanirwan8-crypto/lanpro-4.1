@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import React, { useState, useEffect, useRef } from "react";
-import { Task, Project } from "../../types";
+import { Task, Project, MasterData } from "../../types";
 import {
   format,
   startOfMonth,
@@ -36,6 +36,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { MilestonePanel } from "./MilestonePanel";
 import { GANTT_ROW_PX, kumpulkanEdgeBlocks, pathSikuDep } from "./ganttDependencyEdges";
 import { can } from "../../lib/permissions";
+import { gayaLabel, nadaLabel, warnaDariMaster, type NadaLabel } from "../../lib/warnaLabel";
 import { PageHeader } from "../../components/ui/PageHeader";
 
 interface TimelineProps {
@@ -45,57 +46,82 @@ interface TimelineProps {
   setSelectedTaskForDetail: (task: Task) => void;
   setIsTaskDetailModalOpen: (open: boolean) => void;
   currentUser?: any;
+  /** #564 — warna status dibaca dari master data, sama seperti layar lain. */
+  masterData?: MasterData[];
 }
 
 // Provide default helpers for mapping status and priorities to Tailwind colors
-const getStatusColors = (status: string = "", isEpic: boolean) => {
-  if (isEpic) {
-    return {
-      bg: "bg-gradient-to-r from-purple-100 to-purple-50/50",
-      border: "border-purple-500/30 hover:border-purple-500/30",
-      text: "text-purple-900",
-      activeBg: "bg-purple-950 ring-2 ring-purple-400 border-purple-800",
-      handle: "hover:bg-purple-600/15 active:bg-purple-600/25 group/l-handle",
-      handleBar: "bg-purple-400/80 border-purple-400/20 group-hover/l-handle:bg-purple-600",
-      handleR: "hover:bg-purple-600/15 active:bg-purple-600/25 group/r-handle",
-      handleBarR: "bg-purple-400/80 border-purple-400/20 group-hover/r-handle:bg-purple-600",
-      tooltipText: "text-purple-300",
-      tooltipBadge: "bg-purple-500/30 text-purple-200",
-    };
-  }
-
-  const s = status.toLowerCase();
-  if (s.includes("done") || s.includes("complete")) {
-    return {
-      bg: "bg-gradient-to-r from-emerald-50 to-white",
-      border: "border-emerald-500/30 hover:border-emerald-500/30",
-      text: "text-emerald-900",
-      activeBg: "bg-emerald-950 ring-2 ring-emerald-400 border-emerald-800",
-      handle: "hover:bg-emerald-600/15 active:bg-emerald-600/25 group/l-handle",
-      handleBar: "bg-emerald-400/80 border-emerald-400/20 group-hover/l-handle:bg-emerald-600",
-      handleR: "hover:bg-emerald-600/15 active:bg-emerald-600/25 group/r-handle",
-      handleBarR: "bg-emerald-400/80 border-emerald-400/20 group-hover/r-handle:bg-emerald-600",
-      tooltipText: "text-emerald-300",
-      tooltipBadge: "bg-emerald-500/30 text-emerald-200",
-    };
-  }
-  if (s.includes("progress") || s.includes("active") || s.includes("review") || s.includes("uat")) {
-    return {
-      bg: "bg-gradient-to-r from-primary/10 to-surface",
-      border: "border-primary/30 hover:border-primary/30",
-      text: "text-primary",
-      activeBg: "bg-primary-surface ring-2 ring-primary/40 border-primary",
-      handle: "hover:bg-primary-surface/15 active:bg-primary-surface/25 group/l-handle",
-      handleBar: "bg-primary/50 border-primary/20 group-hover/l-handle:bg-primary-surface",
-      handleR: "hover:bg-primary-surface/15 active:bg-primary-surface/25 group/r-handle",
-      handleBarR: "bg-primary/50 border-primary/20 group-hover/r-handle:bg-primary-surface",
-      tooltipText: "text-primary",
-      tooltipBadge: "bg-primary/20 text-content-inverse",
-    };
-  }
-
-  // Default (To Do / Backlog) — #339 token surface, tanpa silang kosakata §22
-  return {
+/**
+ * #564 — batang Gantt tidak bisa diwarnai dari hex (ia gradien + pegangan
+ * geser, semuanya kelas), jadi ia memilih SALAH SATU dari enam set lewat rona
+ * yang sama yang dipakai chipnya: `nadaLabel(warnaDariMaster(...))`.
+ *
+ * Sebelum ini pemetaannya membaca kata kunci sendiri dan kehilangan "Selesai"
+ * — label yang aplikasi ini cetak di layar Indonesia — sehingga tugas selesai
+ * bergambar seperti tugas yang belum dimulai.
+ */
+const SET_GANTT: Record<NadaLabel | "epic", Record<string, string>> = {
+  epic: {
+    bg: "bg-gradient-to-r from-purple-100 to-purple-50/50",
+    border: "border-purple-500/30 hover:border-purple-500/30",
+    text: "text-purple-900",
+    activeBg: "bg-purple-950 ring-2 ring-purple-400 border-purple-800",
+    handle: "hover:bg-purple-600/15 active:bg-purple-600/25 group/l-handle",
+    handleBar: "bg-purple-400/80 border-purple-400/20 group-hover/l-handle:bg-purple-600",
+    handleR: "hover:bg-purple-600/15 active:bg-purple-600/25 group/r-handle",
+    handleBarR: "bg-purple-400/80 border-purple-400/20 group-hover/r-handle:bg-purple-600",
+    tooltipText: "text-purple-300",
+    tooltipBadge: "bg-purple-500/30 text-purple-200",
+  },
+  selesai: {
+    bg: "bg-gradient-to-r from-emerald-50 to-white",
+    border: "border-emerald-500/30 hover:border-emerald-500/30",
+    text: "text-emerald-900",
+    activeBg: "bg-emerald-950 ring-2 ring-emerald-400 border-emerald-800",
+    handle: "hover:bg-emerald-600/15 active:bg-emerald-600/25 group/l-handle",
+    handleBar: "bg-emerald-400/80 border-emerald-400/20 group-hover/l-handle:bg-emerald-600",
+    handleR: "hover:bg-emerald-600/15 active:bg-emerald-600/25 group/r-handle",
+    handleBarR: "bg-emerald-400/80 border-emerald-400/20 group-hover/r-handle:bg-emerald-600",
+    tooltipText: "text-emerald-300",
+    tooltipBadge: "bg-emerald-500/30 text-emerald-200",
+  },
+  berjalan: {
+    bg: "bg-gradient-to-r from-purple-100 to-purple-50/50",
+    border: "border-purple-500/30 hover:border-purple-500/30",
+    text: "text-purple-900",
+    activeBg: "bg-purple-950 ring-2 ring-purple-400 border-purple-800",
+    handle: "hover:bg-purple-600/15 active:bg-purple-600/25 group/l-handle",
+    handleBar: "bg-purple-400/80 border-purple-400/20 group-hover/l-handle:bg-purple-600",
+    handleR: "hover:bg-purple-600/15 active:bg-purple-600/25 group/r-handle",
+    handleBarR: "bg-purple-400/80 border-purple-400/20 group-hover/r-handle:bg-purple-600",
+    tooltipText: "text-purple-300",
+    tooltipBadge: "bg-purple-500/30 text-purple-200",
+  },
+  tinjau: {
+    bg: "bg-gradient-to-r from-primary/10 to-surface",
+    border: "border-primary/30 hover:border-primary/30",
+    text: "text-primary",
+    activeBg: "bg-primary-surface ring-2 ring-primary/40 border-primary",
+    handle: "hover:bg-primary-surface/15 active:bg-primary-surface/25 group/l-handle",
+    handleBar: "bg-primary/50 border-primary/20 group-hover/l-handle:bg-primary-surface",
+    handleR: "hover:bg-primary-surface/15 active:bg-primary-surface/25 group/r-handle",
+    handleBarR: "bg-primary/50 border-primary/20 group-hover/r-handle:bg-primary-surface",
+    tooltipText: "text-primary",
+    tooltipBadge: "bg-primary/20 text-content-inverse",
+  },
+  terhenti: {
+    bg: "bg-gradient-to-r from-danger/10 to-surface",
+    border: "border-danger/30 hover:border-danger/30",
+    text: "text-danger-text",
+    activeBg: "bg-danger-surface ring-2 ring-danger/40 border-danger",
+    handle: "hover:bg-danger/15 active:bg-danger/25 group/l-handle",
+    handleBar: "bg-danger/50 border-danger/20 group-hover/l-handle:bg-danger",
+    handleR: "hover:bg-danger/15 active:bg-danger/25 group/r-handle",
+    handleBarR: "bg-danger/50 border-danger/20 group-hover/r-handle:bg-danger",
+    tooltipText: "text-danger-text",
+    tooltipBadge: "bg-danger/20 text-content-inverse",
+  },
+  awal: {
     bg: "bg-gradient-to-r from-surface-muted to-surface",
     border: "border-border-subtle/80 hover:border-border-subtle",
     text: "text-content",
@@ -106,8 +132,23 @@ const getStatusColors = (status: string = "", isEpic: boolean) => {
     handleBarR: "bg-surface-marker border-border-subtle group-hover/r-handle:bg-surface-strong",
     tooltipText: "text-content-subtle",
     tooltipBadge: "bg-surface-marker/30 text-content-inverse-muted",
-  };
+  },
+  netral: {
+    bg: "bg-gradient-to-r from-surface-muted to-surface",
+    border: "border-border-subtle/80 hover:border-border-subtle",
+    text: "text-content",
+    activeBg: "bg-surface-inverse-strong ring-2 ring-border-strong border-border-inverse",
+    handle: "hover:bg-surface-muted/80 active:bg-surface-strong group/l-handle",
+    handleBar: "bg-surface-marker border-border-subtle group-hover/l-handle:bg-surface-strong",
+    handleR: "hover:bg-surface-muted/80 active:bg-surface-strong group/r-handle",
+    handleBarR: "bg-surface-marker border-border-subtle group-hover/r-handle:bg-surface-strong",
+    tooltipText: "text-content-subtle",
+    tooltipBadge: "bg-surface-marker/30 text-content-inverse-muted",
+  },
 };
+
+const getStatusColors = (hexStatus: string, isEpic: boolean) =>
+  SET_GANTT[isEpic ? "epic" : nadaLabel(hexStatus)];
 
 const getPriorityColor = (priority: string = "") => {
   const p = priority.toLowerCase();
@@ -127,6 +168,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
   setSelectedTaskForDetail,
   setIsTaskDetailModalOpen,
   currentUser,
+  masterData = [],
 }) => {
   const { t } = useTranslation();
   const canWriteMilestone = can("C", "timeline", {
@@ -815,10 +857,9 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                   const hasChildren = tasks.some((t) => t.parentId === task.id);
                   const expanded = expandedEpics[task.id] !== false;
                   const isEpic = (task.type || "").toLowerCase() === "epic";
-                  // Label status selalu ikut statusnya, bukan ikut jenis barisnya:
-                  // `getStatusColors(x, true)` memaksa ungu untuk epic, padahal yang
-                  // dibaca orang di label itu statusnya. Jenis tetap terwakili ikon.
-                  const statusWarna = getStatusColors(task.status, false);
+                  // #564 — label status DAN batang Gantt memakai hex yang sama:
+                  // warna labelnya sendiri (master data, lalu tabel baku).
+                  const hexStatus = warnaDariMaster(masterData, "status", task.status);
 
                   return (
                     <motion.div
@@ -909,12 +950,8 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                           {task.title}
                         </span>
                         <span
-                          className={cn(
-                            "ml-auto shrink-0 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-tight",
-                            statusWarna.bg,
-                            statusWarna.border,
-                            statusWarna.text
-                          )}
+                          style={gayaLabel(hexStatus)}
+                          className="label-chip ml-auto shrink-0 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-tight"
                         >
                           {isEpic ? (
                             <Zap className="w-3 h-3 shrink-0" />
@@ -1132,6 +1169,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                       ((differenceInDays(end, start) + 1) / (totalDays || 1)) * 100
                     );
                     const isEpic = (task.type || "").toLowerCase() === "epic";
+                    const hexStatus = warnaDariMaster(masterData, "status", task.status);
 
                     return (
                       <motion.div
@@ -1157,9 +1195,9 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                           }
                           className={cn(
                             "absolute top-1/2 -translate-y-1/2 h-8 rounded-lg shadow-soft flex items-center border overflow-hidden",
-                            getStatusColors(task.status, isEpic).bg,
-                            getStatusColors(task.status, isEpic).border,
-                            getStatusColors(task.status, isEpic).text,
+                            getStatusColors(hexStatus, isEpic).bg,
+                            getStatusColors(hexStatus, isEpic).border,
+                            getStatusColors(hexStatus, isEpic).text,
                             getPriorityColor(task.priority),
                             !isEpic && "border-l-[3.5px]",
                             isEpic && "border-l-[3.5px]",
@@ -1167,7 +1205,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             timelineInteraction?.taskId === task.id
                               ? cn(
                                   "scale-[1.01] shadow-md z-30",
-                                  getStatusColors(task.status, isEpic).activeBg
+                                  getStatusColors(hexStatus, isEpic).activeBg
                                 )
                               : "transition-all"
                           )}
@@ -1191,7 +1229,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             <span
                               className={cn(
                                 "font-medium",
-                                getStatusColors(task.status, isEpic).tooltipText
+                                getStatusColors(hexStatus, isEpic).tooltipText
                               )}
                             >
                               {format(start, "dd MMM yyyy")}
@@ -1200,7 +1238,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             <span
                               className={cn(
                                 "font-medium",
-                                getStatusColors(task.status, isEpic).tooltipText
+                                getStatusColors(hexStatus, isEpic).tooltipText
                               )}
                             >
                               {format(end, "dd MMM yyyy")}
@@ -1208,7 +1246,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             <span
                               className={cn(
                                 "font-medium px-1.5 py-0.5 rounded text-xs sm:text-[11px] sm:text-[9px] ml-1",
-                                getStatusColors(task.status, isEpic).tooltipBadge
+                                getStatusColors(hexStatus, isEpic).tooltipBadge
                               )}
                             >
                               {t("rakit.daysCount", { count: differenceInDays(end, start) + 1 })}
@@ -1221,7 +1259,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             className={cn(
                               "absolute left-0 top-0 bottom-0 w-3 flex items-center justify-center cursor-ew-resize z-25",
                               "transition-colors",
-                              getStatusColors(task.status, isEpic).handle
+                              getStatusColors(hexStatus, isEpic).handle
                             )}
                             onMouseDown={(e) => {
                               e.stopPropagation();
@@ -1238,7 +1276,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             <div
                               className={cn(
                                 "w-[3px] h-3.5 border-l border-r rounded-full transition-colors shadow-soft",
-                                getStatusColors(task.status, isEpic).handleBar
+                                getStatusColors(hexStatus, isEpic).handleBar
                               )}
                             />
                           </div>
@@ -1265,7 +1303,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             <span
                               className={cn(
                                 "text-xs sm:text-[10.5px] font-semibold truncate tracking-tight select-none pr-1",
-                                getStatusColors(task.status, isEpic).text
+                                getStatusColors(hexStatus, isEpic).text
                               )}
                             >
                               {task.title}
@@ -1280,7 +1318,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             className={cn(
                               "absolute right-0 top-0 bottom-0 w-3 flex items-center justify-center cursor-ew-resize z-25 rounded-r-lg",
                               "transition-colors",
-                              getStatusColors(task.status, isEpic).handleR
+                              getStatusColors(hexStatus, isEpic).handleR
                             )}
                             onMouseDown={(e) => {
                               e.stopPropagation();
@@ -1297,7 +1335,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             <div
                               className={cn(
                                 "w-[3px] h-3.5 border-l border-r rounded-full transition-colors shadow-soft",
-                                getStatusColors(task.status, isEpic).handleBarR
+                                getStatusColors(hexStatus, isEpic).handleBarR
                               )}
                             />
                           </div>

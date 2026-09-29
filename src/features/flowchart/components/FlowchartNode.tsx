@@ -19,6 +19,7 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Plus, User, ExternalLink } from "lucide-react";
 import { cn } from "../../../lib/utils";
+import { gayaLabel, warnaLabel } from "../../../lib/warnaLabel";
 import { customSvgTypes, renderCustomSvgShape } from "../lib/shapes";
 import { getShapeThemeClasses } from "../lib/nodeTheme";
 import { colorPaletteHex } from "../constants";
@@ -392,14 +393,8 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
           {linkedTask && (
             <div className="mt-1 flex flex-col items-center gap-0.5 w-full">
               <div
-                className={cn(
-                  "flex items-center gap-1 text-xs sm:text-[10px]  font-normal uppercase tracking-normal px-1.5 py-0.5 rounded border shadow-soft cursor-pointer whitespace-nowrap",
-                  linkedTask.status === "Done" || linkedTask.status === "Selesai"
-                    ? "bg-emerald-500/15 text-emerald-800 border-emerald-500/30"
-                    : linkedTask.status === "In Progress" || linkedTask.status === "Dikerjakan"
-                      ? " text-indigo-800 border-indigo-500/30"
-                      : "bg-surface-muted text-content-strong "
-                )}
+                style={gayaLabel(warnaLabel({ kelompok: "status", label: linkedTask.status }))}
+                className="label-chip flex items-center gap-1 text-xs sm:text-[10px] font-normal uppercase tracking-normal px-1.5 py-0.5 rounded border shadow-soft cursor-pointer whitespace-nowrap"
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedTaskForDetail(linkedTask);

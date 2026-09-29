@@ -1,16 +1,35 @@
 import i18n from "../i18n";
 import { apiRequest } from "../lib/api";
+import { BAKU } from "../lib/warnaLabel";
 import { toast } from "sonner";
 
 export const masterDataService = {
   restore: async () => {
+    /**
+     * #564 — warna cadangan diambil dari tabel baku yang sama dengan yang
+     * dipakai chip di layar (`src/lib/warnaLabel.ts`), bukan daftar hex kedua.
+     * Sebelum ini "In Progress" amber di sini sementara seed server dan seluruh
+     * aplikasi mengenalnya ungu.
+     */
     const statuses = [
-      { type: "status", label: "Backlog", color: "#6B7280", order: 0, isTerminal: false },
-      { type: "status", label: "To Do", color: "#3B82F6", order: 1, isTerminal: false },
-      { type: "status", label: "In Progress", color: "#F59E0B", order: 2, isTerminal: false },
-      { type: "status", label: "Code Review", color: "#8B5CF6", order: 3, isTerminal: false },
-      { type: "status", label: "UAT", color: "#EC4899", order: 4, isTerminal: true },
-      { type: "status", label: "Done", color: "#10B981", order: 5, isTerminal: true },
+      { type: "status", label: "Backlog", color: BAKU.status.backlog, order: 0, isTerminal: false },
+      { type: "status", label: "To Do", color: BAKU.status.todo, order: 1, isTerminal: false },
+      {
+        type: "status",
+        label: "In Progress",
+        color: BAKU.status.inprogress,
+        order: 2,
+        isTerminal: false,
+      },
+      {
+        type: "status",
+        label: "Code Review",
+        color: BAKU.status.codereview,
+        order: 3,
+        isTerminal: false,
+      },
+      { type: "status", label: "UAT", color: BAKU.status.uat, order: 4, isTerminal: true },
+      { type: "status", label: "Done", color: BAKU.status.done, order: 5, isTerminal: true },
     ];
     const priorities = [
       {
@@ -59,21 +78,21 @@ export const masterDataService = {
       {
         type: "issue_type",
         label: "Task",
-        color: "#3b82f6",
+        color: BAKU.issue_type.task,
         icon: "CheckCircle2",
         order: 0,
       },
       {
         type: "issue_type",
         label: "Epic",
-        color: "#9333ea",
+        color: BAKU.issue_type.epic,
         icon: "Zap",
         order: 1,
       },
       {
         type: "issue_type",
         label: "Bug",
-        color: "#ef4444",
+        color: BAKU.issue_type.bug,
         icon: "Bug",
         order: 2,
       },

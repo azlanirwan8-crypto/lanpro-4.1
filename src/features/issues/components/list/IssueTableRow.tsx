@@ -6,20 +6,21 @@ import {
   Plus,
   ChevronDown,
   MoreVertical,
-  Zap,
-  CircleDot,
   Trash,
   ShieldAlert,
   LayoutGrid,
   Eye,
-  CheckCircle2,
   X,
 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { cn, ensureDate } from "../../../../lib/utils";
-import { StyledDropdown, UncontrolledInput } from "../../../../components/ui/CommonComponents";
+import {
+  StyledDropdown,
+  TypeIcon,
+  UncontrolledInput,
+} from "../../../../components/ui/CommonComponents";
 import { LanproDatePicker } from "../../../../components/ui/LanproDatePicker";
-import { RenderIcon } from "../../../../components/RenderIcon";
+import { gayaLabel, warnaDariMaster } from "../../../../lib/warnaLabel";
 import { Task, MasterData, UserProfile, Sprint } from "../../../../types";
 import { styles } from "../../styles";
 import { IssueTableInlineAddRow } from "./IssueTableInlineAddRow";
@@ -295,10 +296,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
 
             switch (col.id) {
               case "work":
-                const typeData = mArr.find(
-                  (m) =>
-                    m.type === "issue_type" && m.label?.toLowerCase() === task.type?.toLowerCase()
-                );
+                const hexJenis = warnaDariMaster(mArr, "issue_type", task.type);
                 content = (
                   <div
                     className="flex items-center gap-2"
@@ -323,19 +321,11 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     </button>
 
                     <div className="w-4 h-4 flex items-center justify-center shrink-0">
-                      {typeData?.icon ? (
-                        <RenderIcon
-                          iconName={typeData.icon}
-                          className="w-3.5 h-3.5 saturate-150"
-                          style={{ color: typeData.color }}
-                        />
-                      ) : task.type === "epic" ? (
-                        <Zap className="w-3.5 h-3.5 text-purple-600" />
-                      ) : task.type === "task" ? (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
-                      ) : (
-                        <CircleDot className="w-3.5 h-3.5 text-content-subtle" />
-                      )}
+                      <TypeIcon
+                        type={task.type || ""}
+                        className="w-3.5 h-3.5 saturate-150"
+                        masterData={mArr}
+                      />
                     </div>
 
                     {!!task.isBlocked && (
@@ -355,7 +345,10 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     </span>
 
                     {!!task.parentId && (
-                      <span className="text-xs sm:text-[10px] text-content-subtle font-normal bg-surface-muted px-1.5 py-0.5 rounded border border-border-subtle shrink-0">
+                      <span
+                        style={gayaLabel(hexJenis)}
+                        className="label-chip text-xs sm:text-[10px] font-normal px-1.5 py-0.5 rounded border shrink-0"
+                      >
                         {t(
                           `issueRow.type${
                             task.type

@@ -4,7 +4,8 @@ import { motion } from "motion/react";
 import { ChevronDown, Zap, CheckCircle2, X } from "lucide-react";
 import { cn } from "../../../../lib/utils";
 import { RenderIcon } from "../../../../components/RenderIcon";
-import { StyledDropdown } from "../../../../components/ui/CommonComponents";
+import { StyledDropdown, TypeIcon } from "../../../../components/ui/CommonComponents";
+import { gayaLabel, warnaDariMaster, warnaLabel } from "../../../../lib/warnaLabel";
 import { MasterData, UserProfile } from "../../../../types";
 import { styles } from "../../styles";
 
@@ -88,25 +89,15 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
                     onClick={() =>
                       setIsInlineTypeOpen(isInlineTypeOpen === "inline" ? null : "inline")
                     }
-                    className="flex items-center gap-1.5 p-1 bg-surface-sunken border border-border-subtle rounded text-content-secondary hover:border-blue-500/30 hover:bg-blue-500/10 transition-all font-medium text-[10px] leading-none"
+                    style={gayaLabel(warnaDariMaster(mArr, "issue_type", inlineAddType))}
+                    className="label-chip flex items-center gap-1.5 p-1 rounded border transition-all font-medium text-[10px] leading-none"
                   >
-                    {(() => {
-                      const typeData = mArr.find(
-                        (m) =>
-                          m.type === "issue_type" &&
-                          m.label?.toLowerCase() === inlineAddType?.toLowerCase()
-                      );
-                      if (typeData?.icon)
-                        return (
-                          <RenderIcon
-                            iconName={typeData.icon}
-                            className="w-3.5 h-3.5"
-                            style={{ color: typeData.color }}
-                          />
-                        );
-                      return <Zap className="w-3.5 h-3.5 text-blue-600" />;
-                    })()}
-                    <ChevronDown className="w-3 h-3 text-content-subtle ml-0.5" />
+                    <TypeIcon
+                      type={inlineAddType || ""}
+                      className="w-3.5 h-3.5"
+                      masterData={mArr}
+                    />
+                    <ChevronDown className="w-3 h-3 opacity-70 ml-0.5" />
                   </button>
                   {isInlineTypeOpen === "inline" && (
                     <div className="absolute left-0 top-full mt-2 w-48 bg-surface border border-border-subtle rounded-lg shadow-xl z-[100] overflow-hidden">
@@ -125,7 +116,14 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
                               <RenderIcon
                                 iconName={t.icon}
                                 className="w-3.5 h-3.5"
-                                style={{ color: t.color }}
+                                style={{
+                                  color: warnaLabel({
+                                    kelompok: "issue_type",
+                                    label: t.label,
+                                    kode: t.code,
+                                    warnaMaster: t.color,
+                                  }),
+                                }}
                               />
                             ) : (
                               <Zap className="w-3.5 h-3.5" style={{ color: t.color }} />

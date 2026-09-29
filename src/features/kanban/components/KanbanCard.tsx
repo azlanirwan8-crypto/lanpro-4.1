@@ -7,6 +7,7 @@ import { UserAvatar } from "../../../components/ui/UserAvatar";
 import { RenderIcon } from "../../../components/RenderIcon";
 import { useAppStore } from "../../../store/useAppStore";
 import { statusSelesai } from "../../../lib/statusSelesai";
+import { cariMaster, gayaLabel, warnaDariMaster } from "../../../lib/warnaLabel";
 import {
   AlertTriangle,
   ChevronDown,
@@ -35,9 +36,10 @@ export const KanbanCard = React.memo<KanbanCardProps>(
     // shakingTaskId === task.id && "animate-shake"
     const { density, updateTask } = useAppStore();
     const [isExpanded, setIsExpanded] = useState(false);
-    const statusColor =
-      mArr.find((m) => m.type === "status" && m.label === task.status)?.color || "#e2e8f0";
-    const priorityInfo = mArr.find((m) => m.type === "priority" && m.label === task.priority);
+    /** #564 — satu hex untuk titik, teks dan ikon: warna labelnya sendiri. */
+    const statusColor = warnaDariMaster(mArr, "status", task.status);
+    const priorityInfo = cariMaster(mArr, "priority", task.priority);
+    const priorityColor = warnaDariMaster(mArr, "priority", task.priority);
     const isCompact = density === "compact";
 
     const subtasks = task.subtasks || [];
@@ -218,39 +220,36 @@ export const KanbanCard = React.memo<KanbanCardProps>(
           <div className="flex items-center gap-1.5 flex-wrap">
             {task.priority && (
               <div
+                style={gayaLabel(priorityColor)}
                 className={cn(
-                  "flex items-center gap-1 rounded border text-[10px] font-normal",
-                  isCompact ? "px-1.5 py-0" : "px-1.5 py-0.5",
-                  task.priority === "Highest" || task.priority === "High"
-                    ? "bg-danger/10 text-danger-text border-danger/20"
-                    : task.priority === "Medium"
-                      ? "bg-warning/10 text-warning-text border-warning/20"
-                      : "bg-surface-sunken text-content-secondary border-border-subtle"
+                  "label-chip flex items-center gap-1 rounded border text-[10px] font-normal",
+                  isCompact ? "px-1.5 py-0" : "px-1.5 py-0.5"
                 )}
               >
-                {priorityInfo && (
+                {priorityInfo?.icon && (
                   <RenderIcon
                     iconName={priorityInfo.icon}
                     className={cn(
                       "transition-transform duration-200",
                       isCompact ? "w-2.5 h-2.5" : "w-3 h-3"
                     )}
-                    style={{ color: priorityInfo.color }}
+                    style={{ color: priorityColor }}
                   />
                 )}
                 <span>{task.priority}</span>
               </div>
             )}
             <div
+              style={gayaLabel(statusColor)}
               className={cn(
-                "flex items-center gap-1 bg-surface-sunken border border-border-faint group-hover:bg-primary-surface/5 group-hover:border-primary/20 transition-colors duration-300 rounded-full",
+                "label-chip flex items-center gap-1 border transition-colors duration-300 rounded-full",
                 isCompact ? "px-1.5 py-0" : "px-2 py-0.5"
               )}
             >
               <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusColor }} />
               <span
                 className={cn(
-                  "font-normal text-content-muted group-hover:text-primary transition-colors duration-300",
+                  "font-normal transition-colors duration-300",
                   isCompact ? "text-[10px]" : "text-xs"
                 )}
               >

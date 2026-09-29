@@ -771,3 +771,28 @@ html.dark .shadow-soft-lg {
   background-color: color-mix(in srgb, var(--color-primary-surface) 20%, transparent);
   color: var(--color-primary);
 }
+
+/*
+ * #564 — chip label bekerja (status / jenis isu / prioritas).
+ *
+ * Seluruh aplikasi ini punya 16 pemetaan status→warna yang berbeda, dan yang
+ * hilang adalah hal paling sederhana: chip ikut warna labelnya sendiri. Kelas
+ * ini hanya mengurus WARNA; geometri (padding, radius, ukuran huruf, besar
+ * ikon) tetap milik pemanggilnya, supaya ritme yang dijaga `audit:radius` dan
+ * `audit:warna` tidak ikut berubah.
+ *
+ * `--lbr` diisi per elemen dari hex master data (`gayaLabel()` di
+ * src/lib/warnaLabel.ts) — warna yang sama dengan titik/ikon di sebelahnya.
+ * Warna TEKS diturunkan dari hex itu dengan `color-mix` terhadap
+ * `--color-content`, yang bernilai gelap di mode terang dan terang di mode
+ * gelap. Karena itu kelas ini kontras di kedua mode TANPA override `dark:`,
+ * dan teks chip tidak bisa lagi bertengkar dengan titik di sebelahnya.
+ */
+.label-chip {
+  background-color: color-mix(in srgb, var(--lbr, var(--color-surface-marker)) 13%, transparent);
+  border-color: color-mix(in srgb, var(--lbr, var(--color-surface-marker)) 34%, transparent);
+  color: color-mix(in srgb, var(--lbr, var(--color-content-subtle)) 55%, var(--color-content));
+}
+.label-chip:hover {
+  background-color: color-mix(in srgb, var(--lbr, var(--color-surface-marker)) 20%, transparent);
+}

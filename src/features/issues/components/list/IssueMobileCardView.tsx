@@ -1,18 +1,11 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
-import {
-  ChevronRight,
-  MoreVertical,
-  Zap,
-  CircleDot,
-  CheckCircle2,
-  Clock,
-  Layers,
-} from "lucide-react";
+import { ChevronRight, MoreVertical, CheckCircle2, Clock, Layers } from "lucide-react";
 import { format } from "date-fns";
 import { cn, ensureDate } from "../../../../lib/utils";
-import { RenderIcon } from "../../../../components/RenderIcon";
+import { TypeIcon } from "../../../../components/ui/CommonComponents";
+import { cariMaster, gayaLabel, warnaDariMaster } from "../../../../lib/warnaLabel";
 import { Task, MasterData, UserProfile, Sprint } from "../../../../types";
 
 interface IssueMobileCardViewProps {
@@ -69,27 +62,12 @@ export const IssueMobileCardView: React.FC<IssueMobileCardViewProps> = ({
         const assignee = projectMembers.find(
           (m) => m.id === task.assigneeId || (m as any).uid === task.assigneeId
         );
-        const statusMeta = masterData.find(
-          (m) =>
-            m.type === "status" &&
-            (m.code?.toLowerCase() === task.status?.toLowerCase() ||
-              m.label?.toLowerCase() === task.status?.toLowerCase() ||
-              m.id === task.status)
-        );
-        const priorityMeta = masterData.find(
-          (m) =>
-            m.type === "priority" &&
-            (m.code?.toLowerCase() === task.priority?.toLowerCase() ||
-              m.label?.toLowerCase() === task.priority?.toLowerCase() ||
-              m.id === task.priority)
-        );
-        const typeMeta = masterData.find(
-          (m) =>
-            (m.type === "issue_type" || m.type === "issueType") &&
-            (m.code?.toLowerCase() === task.type?.toLowerCase() ||
-              m.label?.toLowerCase() === task.type?.toLowerCase() ||
-              m.id === task.type)
-        );
+        /** #564 — satu hex untuk titik DAN chip; lookup toleran code/label/id. */
+        const statusMeta = cariMaster(masterData, "status", task.status);
+        const priorityMeta = cariMaster(masterData, "priority", task.priority);
+        const typeMeta = cariMaster(masterData, "issue_type", task.type);
+        const hexStatus = warnaDariMaster(masterData, "status", task.status);
+        const hexPrioritas = warnaDariMaster(masterData, "priority", task.priority);
         const sprint = sprints.find((s) => s.id === task.sprintId);
 
         return (
@@ -108,13 +86,7 @@ export const IssueMobileCardView: React.FC<IssueMobileCardViewProps> = ({
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 min-w-0">
                 <div className="shrink-0">
-                  {typeMeta?.icon ? (
-                    <RenderIcon iconName={typeMeta.icon} className="w-4 h-4 text-primary" />
-                  ) : task.type === "epic" ? (
-                    <Zap className="w-4 h-4 text-primary" />
-                  ) : (
-                    <CircleDot className="w-4 h-4 text-primary" />
-                  )}
+                  <TypeIcon type={task.type || ""} className="w-4 h-4" masterData={masterData} />
                 </div>
 
                 {sprint && (
@@ -131,10 +103,13 @@ export const IssueMobileCardView: React.FC<IssueMobileCardViewProps> = ({
                     {task.storyPoints} pts
                   </span>
                 )}
-                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border border-border-subtle/80 bg-surface-sunken text-content-body inline-flex items-center gap-1">
+                <span
+                  style={gayaLabel(hexStatus)}
+                  className="label-chip text-[10px] font-medium px-2 py-0.5 rounded-full border inline-flex items-center gap-1"
+                >
                   <span
                     className="w-1.5 h-1.5 rounded-full"
-                    style={{ backgroundColor: statusMeta?.color || "#405189" }}
+                    style={{ backgroundColor: hexStatus }}
                   />
                   {statusMeta?.label || task.status}
                 </span>
@@ -153,7 +128,7 @@ export const IssueMobileCardView: React.FC<IssueMobileCardViewProps> = ({
                 <span className="text-[11px] font-medium inline-flex items-center gap-1 text-content-body">
                   <span
                     className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: priorityMeta?.color || "#94a3b8" }}
+                    style={{ backgroundColor: hexPrioritas }}
                   />
                   {priorityMeta?.label || task.priority || "Normal"}
                 </span>
