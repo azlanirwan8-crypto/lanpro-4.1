@@ -53,12 +53,19 @@ export class ProjectRepository {
       let params: any[] = [];
 
       if (role !== "admin") {
+        /**
+         * #574 — batas yang sama dengan cabang admin. Sebelumnya `LIMIT` hanya
+         * dipasang di jalur admin (`:52`), jadi justru SEMUA pengguna non-admin
+         * menarik seluruh tabel Projects — yang kemudian dipakai lagi untuk
+         * mengambil ProjectMembers semua proyek itu.
+         */
         query = `
           SELECT p.* FROM Projects p
           LEFT JOIN ProjectMembers pm ON p.id = pm.projectId
           WHERE p.ownerId = ? OR pm.userId = ?
           GROUP BY p.id
           ORDER BY p.createdAt DESC
+          LIMIT ${BATAS_PROYEK}
         `;
         params = [resolvedCallerId, resolvedCallerId];
       }

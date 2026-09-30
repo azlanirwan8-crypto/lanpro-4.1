@@ -107,6 +107,44 @@ describe("FlowchartView — autosave papan (#538)", () => {
     expect(updateFlowchart).toHaveBeenCalledTimes(1);
   });
 
+  /**
+   * #569 — `sinkronSaatKeluar` dulu hanya dipanggil tombol "kembali ke daftar"
+   * di panel. Keluar lewat menu samping me-unmount view ini dan efek muatnya
+   * memakai salinan SERVER, jadi perubahan yang masih berada di dalam jeda
+   * autosave 4 detik hilang tanpa jejak.
+   */
+  it("papan yang ditutup sebelum autosave berbunyi tetap terkirim (#569)", async () => {
+    const hasil = renderView();
+    fireEvent.click((await screen.findAllByText("Alur Autosave"))[0]);
+    fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
+    await screen.findByTitle(/Snap to Grid|Snapping/i);
+
+    const jalur = hasil.container.querySelector("path[marker-end]") as Element;
+    fireEvent.click(jalur);
+    fireEvent.click(await screen.findByTitle(/putus-putus|dashed/i));
+
+    // Salinan perangkat menulis penanda "belum tersinkron" pada 1,5 detik —
+    // sebelum sempat terburu-buru, papan ini BELUM menulis apa pun ke server.
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 1800));
+    });
+    expect(updateFlowchart).not.toHaveBeenCalled();
+
+    act(() => hasil.unmount());
+
+    await waitFor(
+      () =>
+        expect(updateFlowchart).toHaveBeenCalledWith(
+          "p1",
+          "fw9",
+          expect.objectContaining({
+            edges: [expect.objectContaining({ id: "e1", strokeStyle: "dashed" })],
+          })
+        ),
+      { timeout: 3000 }
+    );
+  });
+
   it("pengunjung baca-saja yang menyeret bentuk tidak menulis papan orang lain", async () => {
     const hasil = renderView({
       currentUserProfile: { id: "u9", name: "Orang Lain", role: "viewer" } as never,

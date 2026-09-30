@@ -140,3 +140,65 @@ describe("flowchart.service — kategori benar-benar tersimpan (#144)", () => {
     expect(hasil[0].category).toBe("");
   });
 });
+
+/**
+ * #570 — `canvasTheme` ikut ke dalam `isiPapan` autosave, jadi menggantinya
+ * memicu pengiriman dan bilah status bilang "Tersimpan" — padahal payload PUT
+ * hanya berisi name/nodes/edges/description/category, dan pembacanya mengeraskan
+ * `theme: "miro"`. Muat ulang kembali ke tema awal. `epicTaskId` sama: dikirim
+ * saat membuat di layar, tidak pernah pulang.
+ *
+ * Yang dijaga di sini adalah ROUND-TRIP: nilai yang ditulis harus nilai yang
+ * dibaca kembali. Mengetes sisi kirim saja akan hijau walau pembacanya masih
+ * mengeraskan "miro".
+ */
+describe("flowchart.service — tema dan tautan epic pulang-pergi (#570)", () => {
+  it("menulis tema dan epicTaskId ke payload kanvas", async () => {
+    panggil.mockResolvedValue({ status: "success" });
+
+    await updateFlowchart("p-1", "f-1", {
+      name: "Alur",
+      nodes: [],
+      edges: [],
+      theme: "blueprint",
+      epicTaskId: "epic-7",
+    });
+
+    const payload = JSON.parse(panggil.mock.calls[0][1].body.canvasData);
+    expect(payload.theme).toBe("blueprint");
+    expect(payload.epicTaskId).toBe("epic-7");
+  });
+
+  it("membaca kembali tema dan epicTaskId yang barusan ditulis", async () => {
+    panggil.mockResolvedValue({ status: "success" });
+    await updateFlowchart("p-1", "f-1", {
+      name: "Alur",
+      nodes: [{ id: "n1" }],
+      edges: [],
+      theme: "blueprint",
+      epicTaskId: "epic-7",
+    });
+    const body = panggil.mock.calls[0][1].body;
+
+    panggil.mockResolvedValue({
+      status: "success",
+      data: [{ id: "f-1", title: "Alur", type: "flowchart", canvasData: body.canvasData }],
+    });
+    const hasil = await fetchFlowcharts("p-1");
+
+    expect(hasil[0].theme).toBe("blueprint");
+    expect(hasil[0].epicTaskId).toBe("epic-7");
+  });
+
+  it("diagram lama tanpa tema di payload tetap terbaca, tidak hilang", async () => {
+    panggil.mockResolvedValue({
+      status: "success",
+      data: [{ id: "f-1", title: "Alur", type: "flowchart", canvasData: PAYLOAD }],
+    });
+
+    const hasil = await fetchFlowcharts("p-1");
+    expect(hasil[0].nodes).toHaveLength(1);
+    expect(hasil[0].theme).toBe("miro");
+    expect(hasil[0].epicTaskId).toBeUndefined();
+  });
+});

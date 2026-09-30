@@ -41,23 +41,43 @@ function isCanvasPayload(nilai?: string): boolean {
   return s.startsWith("{") && s.includes('"nodes"');
 }
 
+/** Isi payload kolom `canvasData` — milik kami sendiri, jadi boleh bertambah tanpa migrasi. */
+interface IsiKanvas {
+  nodes: any[];
+  edges: any[];
+  theme?: string;
+  epicTaskId?: string;
+}
+
 /** Membongkar node/edge dari payload kanvas. */
-function parseFlowPayload(payloadMentah?: string): { nodes: any[]; edges: any[] } {
+function parseFlowPayload(payloadMentah?: string): IsiKanvas {
   try {
     const payload = JSON.parse(payloadMentah || "{}");
-    return { nodes: payload.nodes || [], edges: payload.edges || [] };
+    return {
+      nodes: payload.nodes || [],
+      edges: payload.edges || [],
+      theme: typeof payload.theme === "string" ? payload.theme : undefined,
+      epicTaskId: typeof payload.epicTaskId === "string" ? payload.epicTaskId : undefined,
+    };
   } catch {
     return { nodes: [], edges: [] };
   }
 }
 
-/** Mengubah baris Documents menjadi FlowchartData yang dipakai UI. */
+/**
+ * Mengubah baris Documents menjadi FlowchartData yang dipakai UI.
+ *
+ * #570 — `theme` dulu dikeraskan "miro" di sini padahal `canvasTheme` ikut ke
+ * dalam `isiPapan` autosave: mengganti tema memicu kiriman, server menyimpan,
+ * dan muat berikutnya kembali ke "miro". Status "Tersimpan" saat itu bohong.
+ * Tema dan tautan epic kini ikut tersimpan di payload kanvas.
+ */
 function toFlowchartData(doc: DocumentRow): FlowchartData {
   // Baris yang belum tersentuh migrasi #136 masih menyimpan payload di
   // `description`. Dibaca sebagai cadangan supaya diagram lama tetap terbuka
   // walau backfill belum sempat berjalan di lingkungan itu.
   const payloadLama = isCanvasPayload(doc.description) ? doc.description : undefined;
-  const { nodes, edges } = parseFlowPayload(doc.canvasData || payloadLama);
+  const { nodes, edges, theme, epicTaskId } = parseFlowPayload(doc.canvasData || payloadLama);
   return {
     id: doc.id,
     name: doc.title,
@@ -70,7 +90,8 @@ function toFlowchartData(doc: DocumentRow): FlowchartData {
     description: payloadLama ? "" : (doc.description ?? ""),
     nodes,
     edges,
-    theme: "miro",
+    theme: theme === "blueprint" ? "blueprint" : "miro",
+    epicTaskId: epicTaskId || undefined,
     createdAt: doc.createdAt
       ? new Date(doc.createdAt).toLocaleDateString("id-ID")
       : new Date().toLocaleDateString("id-ID"),
@@ -83,9 +104,19 @@ function toFlowchartData(doc: DocumentRow): FlowchartData {
   };
 }
 
-/** Menyandikan node/edge menjadi payload kolom canvasData. */
-function encodeFlowPayload(flow: Pick<FlowchartData, "nodes" | "edges">): string {
-  return JSON.stringify({ nodes: flow.nodes, edges: flow.edges });
+/** Menyandikan isi papan menjadi payload kolom canvasData. */
+function encodeFlowPayload(flow: {
+  nodes: any[];
+  edges: any[];
+  theme?: string;
+  epicTaskId?: string;
+}): string {
+  return JSON.stringify({
+    nodes: flow.nodes,
+    edges: flow.edges,
+    theme: flow.theme || "miro",
+    ...(flow.epicTaskId ? { epicTaskId: flow.epicTaskId } : {}),
+  });
 }
 
 /**
@@ -103,7 +134,15 @@ export async function createFlowchart(
   projectId: string,
   flow: Pick<
     FlowchartData,
-    "name" | "nodes" | "edges" | "externalUrl" | "createdBy" | "description" | "category"
+    | "name"
+    | "nodes"
+    | "edges"
+    | "externalUrl"
+    | "createdBy"
+    | "description"
+    | "category"
+    | "theme"
+    | "epicTaskId"
   >
 ): Promise<string | null> {
   const res: any = await apiRequest(`/api/projects/${projectId}/documents`, {
@@ -132,6 +171,8 @@ export async function updateFlowchart(
     externalUrl?: string;
     description?: string;
     category?: string;
+    theme?: string;
+    epicTaskId?: string;
   }
 ): Promise<void> {
   await apiRequest(`/api/projects/${projectId}/documents/${flowId}`, {
@@ -139,7 +180,7 @@ export async function updateFlowchart(
     body: {
       title: data.name,
       description: data.description ?? null,
-      canvasData: encodeFlowPayload({ nodes: data.nodes, edges: data.edges }),
+      canvasData: encodeFlowPayload(data),
       category: data.category ?? null,
       link: data.externalUrl || null,
     },

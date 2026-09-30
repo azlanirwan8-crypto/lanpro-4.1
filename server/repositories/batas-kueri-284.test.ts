@@ -25,6 +25,7 @@ jest.mock("../../src/lib/db", () => ({
 }));
 
 import { chatRepository } from "./chat.repository";
+import { projectRepository } from "./project.repository";
 import { userRepository } from "./user.repository";
 
 beforeEach(() => {
@@ -69,5 +70,31 @@ describe("#284 batas atas kueri yang tumbuh tanpa batas", () => {
     // pemanggilan, dan daftar yang berubah tanpa sebab lebih membingungkan
     // daripada daftar yang terpotong.
     expect(sql).toContain("ORDER BY createdAt DESC");
+  });
+});
+
+/**
+ * #574 — cabang non-admin `findProjectsForCaller` adalah satu-satunya kueri
+ * daftar papan yang TIDAK diberi batas: `LIMIT ${BATAS_PROYEK}` hanya dipasang
+ * di cabang admin (`project.repository.ts:52`). Jadi justru setiap pengguna
+ * non-admin — mayoritas pemakai — menarik seluruh tabel Projects tiap login,
+ * dan hasilnya dipakai lagi untuk mengambil ProjectMembers semua proyek itu.
+ */
+describe("#574 daftar papan juga dibatasi untuk non-admin", () => {
+  it("cabang non-admin punya LIMIT dan urutan yang PASTI", async () => {
+    await projectRepository.findProjectsForCaller("u-biasa", "member");
+    const sql = kueriTerakhir();
+
+    expect(sql).toContain("p.ownerId = ? OR pm.userId = ?");
+    expect(sql).toMatch(/LIMIT \d+$/);
+    expect(sql).toContain("ORDER BY p.createdAt DESC");
+  });
+
+  it("cabang admin tetap dibatasi", async () => {
+    mockKueri.mockResolvedValueOnce([[{ id: "u-bos", role: "admin" }]]);
+    await projectRepository.findProjectsForCaller("u-bos", "member");
+    const sql = kueriTerakhir();
+
+    expect(sql).toMatch(/FROM Projects ORDER BY createdAt DESC LIMIT \d+$/);
   });
 });

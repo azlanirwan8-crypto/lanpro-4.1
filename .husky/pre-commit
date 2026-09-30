@@ -34,6 +34,13 @@ npm run audit:logika || exit 1
 # per berkas, supaya "menyeragamkan sudut" tidak bisa lagi diam-diam mundur.
 npm run audit:radius || exit 1
 
+# Item #564/#565/#566 → gerbang #581. Standar warna label SATU sumber
+# (`src/lib/warnaLabel.ts`) dan sel tabel tidak memotong teks. Sebelumnya ada
+# 16 pemetaan status→warna yang berbeda dan tidak satu pun gerbang yang
+# melihatnya; yang tersisa (43 pemetaan + 33 potongan) dikunci per berkas supaya
+# hanya boleh menyusut.
+npm run audit:label || exit 1
+
 # CATATAN. Ketiga gerbang di atas TIDAK membuktikan aplikasinya benar.
 # `npm test` dan `npm run build` sengaja TIDAK dijalankan di sini agar commit
 # tidak berubah jadi menit-menitan — keduanya tetap WAJIB sebelum merge ke

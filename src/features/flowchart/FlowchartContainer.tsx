@@ -1425,6 +1425,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         externalUrl: alur?.externalUrl ?? flowExternalUrl,
         description: alur?.description ?? flowDescription,
         category: alur?.category ?? flowCategory,
+        // #570 — keduanya ikut ke dalam `isiPapan` autosave. Kalau tidak ikut
+        // dikirim, status "Tersimpan" jadi bohong dan nilainya kembali ke
+        // bawaan setelah muat ulang.
+        theme: canvasTheme,
+        epicTaskId: alur?.epicTaskId ?? flowEpicId,
       });
       bersihkanTandaBelumTersinkron(projId, selectedFlowId);
       if (!opts.senyap) {
@@ -1554,6 +1559,34 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     if (!(selectedFlowId in bacaBelumTersinkron(projId))) return;
     void handleSaveWorkspace();
   };
+
+  /**
+   * #569 — fungsi di atas dulu hanya dipanggil SATU tombol ("kembali ke daftar"
+   * di panel, :2983). Keluar lewat menu samping me-unmount view ini, dan efek
+   * muatnya memakai salinan server — jadi sampai jeda autosave 4 detik, kerja
+   * terakhir hilang tanpa jejak. Sekarang tiga jalan keluar sekaligus dijaga:
+   * unmount (navigasi dalam aplikasi), tab disembunyikan, dan penutupan tab.
+   *
+   * Ref ditulis di dalam efek tanpa daftar dependensi: penutupnya harus memakai
+   * `sinkronSaatKeluar` render TERAKHIR, bukan yang pertama kali dipasang.
+   */
+  const sinkronRef = useRef(sinkronSaatKeluar);
+  useEffect(() => {
+    sinkronRef.current = sinkronSaatKeluar;
+  });
+  useEffect(() => {
+    const saatTutup = () => sinkronRef.current();
+    const saatSembunyi = () => {
+      if (document.visibilityState === "hidden") saatTutup();
+    };
+    window.addEventListener("beforeunload", saatTutup);
+    document.addEventListener("visibilitychange", saatSembunyi);
+    return () => {
+      window.removeEventListener("beforeunload", saatTutup);
+      document.removeEventListener("visibilitychange", saatSembunyi);
+      saatTutup();
+    };
+  }, []);
 
   // Delete an entire flowchart diagram
   const handleDeleteFlowchart = async (id: string, e: React.MouseEvent) => {
