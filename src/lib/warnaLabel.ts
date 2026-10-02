@@ -172,7 +172,7 @@ export function cariMaster(
 /** Versi satu panggilan untuk pemanggil yang punya daftar master di scope. */
 export function warnaDariMaster(
   daftar: MasterData[] | undefined,
-  kelompok: KelompokLabel,
+  kelompok: string,
   nilai?: string | null
 ): string {
   const baris = cariMaster(daftar, kelompok, nilai);

@@ -10,6 +10,7 @@
 import { useTranslation } from "react-i18next";
 import React from "react";
 import { CircleAlert, Lightbulb, Target, TrendingUp, Workflow } from "lucide-react";
+import { LabelChip } from "../../../components/ui/CommonComponents";
 import type { KonteksFlowchart } from "../types";
 import { adaKonteks } from "../types";
 
@@ -38,11 +39,7 @@ export const FlowchartDetail: React.FC<FlowchartDetailProps> = ({
   return (
     <div className="p-4 md:p-6 space-y-4">
       <div className="flex flex-wrap items-center gap-2 text-[11px]">
-        {kategori && (
-          <span className="px-2.5 py-1 rounded-md bg-primary/10 text-primary border border-primary/30 font-medium uppercase">
-            {kategori}
-          </span>
-        )}
+        {kategori && <LabelChip kelompok="jenis_dokumen" nilai={kategori} />}
         {judulEpic && (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-sunken border border-border-subtle text-content-body font-medium">
             <Workflow className="w-3 h-3 text-primary" />

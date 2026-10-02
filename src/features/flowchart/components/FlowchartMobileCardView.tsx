@@ -4,6 +4,7 @@ import { Workflow, Calendar, Edit3, Trash2, ArrowRight, Layers } from "lucide-re
 import type { FlowchartData } from "../types";
 import type { Task } from "../../../types";
 import { tampilanNamaPembuat } from "../lib/authorIdentity";
+import { LabelChip } from "../../../components/ui/CommonComponents";
 
 interface FlowchartMobileCardViewProps {
   flowcharts: FlowchartData[];
@@ -123,11 +124,7 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
 
             {/* Category badge & Linked Epic */}
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              {flow.category && (
-                <span className="inline-flex items-center gap-1 text-[10px] leading-none font-normal px-2 py-1 rounded-md bg-primary/10 text-primary border border-primary/30 uppercase tracking-normal">
-                  {flow.category}
-                </span>
-              )}
+              {flow.category && <LabelChip kelompok="jenis_dokumen" nilai={flow.category} />}
 
               {epicName && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-sunken border border-border-subtle text-content-muted text-[11px] font-medium truncate max-w-[200px]">

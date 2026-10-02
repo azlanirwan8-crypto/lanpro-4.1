@@ -44,7 +44,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
     currentUserProfile,
   } = props;
 
-  const { canEditPlanning, priorityColorMap } = usePlanning(props);
+  const { canEditPlanning } = usePlanning(props);
 
   const { registerAction, unregisterAction } = useMobileAction();
 

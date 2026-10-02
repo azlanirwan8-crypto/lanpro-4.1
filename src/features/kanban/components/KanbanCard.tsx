@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { cn, ensureDate } from "../../../lib/utils";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
 import { RenderIcon } from "../../../components/RenderIcon";
+import { LabelChip } from "../../../components/ui/CommonComponents";
 import { useAppStore } from "../../../store/useAppStore";
 import { statusSelesai } from "../../../lib/statusSelesai";
 import { cariMaster, gayaLabel, warnaDariMaster } from "../../../lib/warnaLabel";
@@ -115,17 +116,14 @@ export const KanbanCard = React.memo<KanbanCardProps>(
             }
           : {})}
         onClick={onClick}
+        style={task.isBlocked ? undefined : { borderLeftColor: priorityColor }}
         className={cn(
           "bg-surface rounded-lg shadow-2xs border cursor-pointer group flex flex-col overflow-hidden",
           "transition-all duration-200 ease-out select-none border-l-4",
           isCompact ? "p-2 gap-1.5" : "p-3 gap-2",
           task.isBlocked
             ? "border-l-danger border-danger/30 bg-danger/5 hover:border-danger shadow-xs"
-            : task.priority === "Highest" || task.priority === "High"
-              ? "border-l-danger border-border-subtle/80 hover:border-danger/60 hover:shadow-xs"
-              : task.priority === "Medium"
-                ? "border-l-warning border-border-subtle/80 hover:border-warning/60 hover:shadow-xs"
-                : "border-l-primary border-border-subtle/80 hover:border-primary/60 hover:shadow-xs",
+            : "border-border-subtle/80",
           hasUnfinishedSubtasks && "border-danger/30 bg-danger/5",
           isDragging &&
             "z-[9999] cursor-grabbing opacity-90 shadow-xl ring-2 ring-primary !transition-none pointer-events-none",
@@ -151,29 +149,14 @@ export const KanbanCard = React.memo<KanbanCardProps>(
                 </div>
               )}
               {qaStatus && (
-                <span
-                  className={cn(
-                    "font-normal uppercase rounded tracking-normal",
-                    isCompact
-                      ? "text-xs sm:text-[10px] sm:text-[7.5px] px-1 py-0.5"
-                      : "text-xs sm:text-[10px] sm:text-[8.5px] px-1.5 py-0.5",
-                    qaStatus === "passed"
-                      ? "bg-success/10 text-success-text border border-success/20"
-                      : qaStatus === "failed"
-                        ? "bg-danger/10 text-danger-text border border-danger/20 animate-pulse"
-                        : qaStatus === "blocked"
-                          ? "bg-warning/10 text-warning-text border border-warning/20"
-                          : "bg-surface-muted text-content-muted border border-border-subtle"
-                  )}
-                >
-                  QA:{" "}
-                  {qaStatus === "passed"
-                    ? "PASS ✅"
-                    : qaStatus === "failed"
-                      ? "FAIL ❌"
-                      : qaStatus === "blocked"
-                        ? "BLOCKED ⚠️"
-                        : "UNTESTED"}
+                <span className="inline-flex items-center gap-1">
+                  <span className="text-[10px] font-normal text-content-subtle">QA:</span>
+                  <LabelChip
+                    kelompok="qa_status"
+                    nilai={qaStatus}
+                    masterData={mArr}
+                    className={isCompact ? "text-[8px] px-1 py-0" : undefined}
+                  />
                 </span>
               )}
             </div>
@@ -257,14 +240,12 @@ export const KanbanCard = React.memo<KanbanCardProps>(
               </span>
             </div>
             {task.category && (
-              <span
-                className={cn(
-                  "font-medium text-content-subtle capitalize px-1",
-                  isCompact ? "text-xs sm:text-[10px] sm:text-[8px]" : "text-xs sm:text-[10px]"
-                )}
-              >
-                {task.category}
-              </span>
+              <LabelChip
+                kelompok="category"
+                nilai={task.category}
+                masterData={mArr}
+                className={isCompact ? "text-[8px] sm:px-1.5 sm:py-0" : undefined}
+              />
             )}
           </div>
           <div className="flex items-center gap-1.5 shrink-0">

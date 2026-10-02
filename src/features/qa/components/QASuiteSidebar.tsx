@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { QATestSuite } from "../types";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
-import { StyledDropdown } from "../../../components/ui/CommonComponents";
+import { LabelChip, StyledDropdown } from "../../../components/ui/CommonComponents";
 
 interface QASuiteSidebarProps {
   suitesForFilter: QATestSuite[];
@@ -180,17 +180,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
 
                   {/* Phase Pill Badge */}
                   <div className="flex items-center gap-1.5">
-                    <span
-                      className={`px-2 py-0.2 text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase rounded-full tracking-normal ${
-                        suite.phase === "SIT"
-                          ? "bg-amber-500/10 text-amber-700 border border-amber-500/30"
-                          : suite.phase === "UAT"
-                            ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30"
-                            : "bg-purple-500/10 text-purple-700 border border-purple-500/30"
-                      }`}
-                    >
-                      {suite.phase}
-                    </span>
+                    <LabelChip kelompok="qa_phase" nilai={suite.phase} />
                     <span className="text-xs sm:text-[11px] sm:text-[9px] font-normal text-content-subtle">
                       {new Date(suite.uploadedAt).toLocaleDateString("id-ID")}
                     </span>

@@ -20,7 +20,14 @@ import {
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { MasterData, UserProfile } from "../../types";
-import { cariMaster, gayaLabel, warnaLabel, WARNA_NETRAL } from "../../lib/warnaLabel";
+import {
+  cariMaster,
+  gayaLabel,
+  warnaDariMaster,
+  warnaLabel,
+  WARNA_NETRAL,
+} from "../../lib/warnaLabel";
+import { useAppStore } from "../../store/useAppStore";
 import { RenderIcon } from "../RenderIcon";
 
 import { UserAvatar } from "./UserAvatar";
@@ -140,6 +147,47 @@ export const TypeIcon = ({
  */
 const CHIP_KECIL = "px-2 py-0.5 border rounded-md font-normal text-[10px] tracking-tight uppercase";
 const CHIP_BIASA = "px-1.5 py-0.5 border rounded font-normal text-xs tracking-tight";
+
+/** Warna chip selalu milik baris MasterData - satu komponen supaya panel tidak bisa menulis chip-nya sendiri lagi (#590). */
+export const LabelChip = ({
+  kelompok,
+  nilai,
+  masterData,
+  kosong,
+  ikon,
+  className,
+}: {
+  /** `type` baris MasterData, mis. "jenis_dokumen" | "category" | "qa_status". */
+  kelompok: string;
+  nilai?: string | null;
+  masterData?: MasterData[];
+  kosong?: string;
+  /** Ikut tampilkan ikon yang dipilih di Master Data untuk label ini. */
+  ikon?: boolean;
+  className?: string;
+}) => {
+  const dariStore = useAppStore((s) => s.masterData);
+  const daftar = masterData ?? dariStore ?? [];
+  const baris = cariMaster(daftar, kelompok, nilai);
+  const teks = baris?.label ?? nilai ?? "";
+  const hex = warnaDariMaster(daftar, kelompok, nilai);
+
+  if (!teks) {
+    return kosong ? <span className="text-content-subtle text-[10px]">{kosong}</span> : null;
+  }
+
+  return (
+    <span
+      className={cn(CHIP_KECIL, "label-chip inline-flex items-center gap-1.5", className)}
+      style={gayaLabel(hex)}
+    >
+      {ikon && baris?.icon ? (
+        <RenderIcon iconName={baris.icon} className="w-3 h-3 shrink-0" style={{ color: hex }} />
+      ) : null}
+      {teks}
+    </span>
+  );
+};
 
 /**
  * Hex sebuah chip dari nilai terpilih. Warna master data menang; tanpa itu
@@ -441,134 +489,6 @@ export const StyledDropdown = ({
                   </div>
                 )}
               </div>
-            </div>
-          </>,
-          document.body
-        )}
-    </div>
-  );
-};
-
-export const TableStatusBadge = ({
-  value,
-  onChange,
-  statuses,
-}: {
-  value: string;
-  onChange: (val: string) => void;
-  statuses: any[];
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const [dropdownPos, setDropdownPos] = useState<{
-    top?: number;
-    bottom?: number;
-    left: number;
-    placement: "bottom" | "top";
-  }>({ left: 0, placement: "bottom" });
-  const current = (statuses || []).find((s) => s.label === value);
-
-  /**
-   * `useLayoutEffect`, BUKAN `useEffect` (#294).
-   *
-   * Posisi panel diukur dari `getBoundingClientRect()` pemicunya, jadi ia baru
-   * bisa dihitung sesudah panel ada di DOM. Dengan `useEffect`, pengukuran itu
-   * berjalan SESUDAH browser melukis — dan karena nilai awal state-nya
-   * `left: 0` tanpa `top`, bingkai pertama benar-benar tergambar di sudut
-   * kiri-atas layar sebelum melompat ke tempatnya. Digabung animasi masuk,
-   * gerakannya terbaca sebagai panel yang meluncur dari sudut.
-   *
-   * `useLayoutEffect` berjalan sesudah DOM berubah tapi SEBELUM paint, jadi
-   * bingkai salah posisi itu tidak pernah sampai ke mata.
-   */
-  useLayoutEffect(() => {
-    if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const dropdownHeight = (statuses || []).length * 36 + 20;
-      const spaceBelow = viewportHeight - rect.bottom;
-
-      if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
-        setDropdownPos({
-          bottom: viewportHeight - rect.top + 4,
-          left: rect.left,
-          placement: "top",
-        });
-      } else {
-        setDropdownPos({
-          top: rect.bottom + 4,
-          left: rect.left,
-          placement: "bottom",
-        });
-      }
-    }
-  }, [isOpen, statuses?.length]);
-
-  return (
-    <div className="relative">
-      <button
-        type="button"
-        ref={buttonRef}
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsOpen(!isOpen);
-        }}
-        className="flex items-center gap-1.5 px-1.5 py-0.5 bg-surface hover:bg-surface-sunken rounded border border-border-subtle transition-colors group shadow-soft"
-      >
-        {current?.icon ? (
-          <RenderIcon
-            iconName={current.icon}
-            className="w-3 h-3"
-            style={{ color: current.color }}
-          />
-        ) : (
-          <div
-            className="w-2 h-2 rounded-full"
-            style={{ backgroundColor: current?.color || "#cbd5e1" }}
-          />
-        )}
-        <span className="text-[10px] font-normal text-content-body tracking-tight">{value}</span>
-        <ChevronDown className="w-3 h-3 text-content-subtle group-hover:text-content-secondary transition-colors" />
-      </button>
-      {isOpen &&
-        createPortal(
-          <>
-            <div
-              className="fixed inset-0 z-[9999]"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsOpen(false);
-              }}
-            />
-            <div
-              style={{
-                position: "fixed",
-                top: dropdownPos.placement === "bottom" ? dropdownPos.top : undefined,
-                bottom: dropdownPos.placement === "top" ? dropdownPos.bottom : undefined,
-                left: dropdownPos.left,
-                zIndex: 10000,
-              }}
-              className="bg-surface rounded-lg shadow-xl border border-border-subtle p-1 min-w-[140px] animate-dropdown"
-            >
-              {(statuses || []).map((s, index) => (
-                <button
-                  type="button"
-                  key={`${s.id || s.label}-${index}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onChange(s.label);
-                    setIsOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-surface-sunken rounded-md transition-colors text-xs font-normal text-content-body text-left"
-                >
-                  {s.icon ? (
-                    <RenderIcon iconName={s.icon} className="w-3 h-3" style={{ color: s.color }} />
-                  ) : (
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
-                  )}
-                  {s.label}
-                </button>
-              ))}
             </div>
           </>,
           document.body

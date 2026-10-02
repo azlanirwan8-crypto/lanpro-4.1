@@ -25,7 +25,7 @@ import {
 import { QATestCase, QATestSuite } from "../types";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
 import { ResponsiveTable } from "../../../components/ResponsiveTable";
-import { StyledDropdown } from "../../../components/ui/CommonComponents";
+import { LabelChip, StyledDropdown } from "../../../components/ui/CommonComponents";
 import { QATestCaseMobileCardView } from "./QATestCaseMobileCardView";
 
 interface QATestCaseTableProps {
@@ -83,7 +83,7 @@ interface QATestCaseTableProps {
 }
 
 /** Dipakai hanya bila MasterData belum memuat tipe qa_status. */
-const CADANGAN_STATUS_QA = [
+export const CADANGAN_STATUS_QA = [
   { id: "Passed", label: "Passed", icon: "CheckCircle2", color: "#10B981" },
   { id: "Failed", label: "Failed", icon: "XCircle", color: "#EF4444" },
   { id: "Blocked", label: "Blocked", icon: "AlertOctagon", color: "#F59E0B" },
@@ -617,17 +617,11 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
 
                       {/* Velzon Priority Compact Pill Badge */}
                       <td className="py-2.5 px-3 text-center">
-                        <span
-                          className={`px-2 py-0.5 rounded text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-normal inline-block ${
-                            tc.priority === "Critical" || tc.priority === "High"
-                              ? "bg-rose-500/10 text-danger-text border border-rose-500/30"
-                              : tc.priority === "Low"
-                                ? "bg-surface-muted text-content-secondary border border-border-subtle/60"
-                                : "bg-amber-500/10 text-warning-text border border-amber-500/30"
-                          }`}
-                        >
-                          {tc.priority || "Medium"}
-                        </span>
+                        <LabelChip
+                          kelompok="priority"
+                          nilai={tc.priority || "Medium"}
+                          className="text-[9px] sm:text-[11px]"
+                        />
                       </td>
 
                       {/* STATUS & PIC ASSIGNEE (COMPACT SMOOTH PILL LAYOUT) */}
@@ -637,41 +631,10 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                           <StyledDropdown
                             value={tc.status}
                             onChange={(val) => handleStatusChange(tc.id, val as any)}
-                            options={[
-                              {
-                                id: "Passed",
-                                label: "Passed",
-                                icon: "CheckCircle2",
-                                color: "#10B981",
-                              },
-                              { id: "Failed", label: "Failed", icon: "XCircle", color: "#EF4444" },
-                              {
-                                id: "Blocked",
-                                label: "Blocked",
-                                icon: "AlertOctagon",
-                                color: "#F59E0B",
-                              },
-                              {
-                                id: "Retest",
-                                label: "Retest",
-                                icon: "RefreshCw",
-                                color: "#6366F1",
-                              },
-                              { id: "Pending", label: "Pending", icon: "Clock", color: "#64748B" },
-                            ]}
-                            masterData={[]}
+                            options={opsiStatusQa}
+                            type="qa_status"
                             className="min-w-[100px]"
-                            buttonClassName={`py-1 px-2.5 rounded-md text-xs sm:text-[10px] font-normal uppercase tracking-normal border shadow-2xs ${
-                              tc.status === "Passed"
-                                ? "bg-emerald-500/10 text-success-text border-emerald-500/30"
-                                : tc.status === "Failed"
-                                  ? "bg-rose-500/10 text-danger-text border-rose-500/30"
-                                  : tc.status === "Blocked"
-                                    ? "bg-amber-500/10 text-warning-text border-amber-500/30"
-                                    : tc.status === "Retest"
-                                      ? "bg-primary/10 text-primary border-primary/30"
-                                      : "bg-surface-muted text-content-secondary border-border-subtle"
-                            }`}
+                            buttonClassName="py-1 px-2.5 rounded-md text-xs sm:text-[10px] font-normal uppercase tracking-normal border shadow-2xs"
                           />
 
                           {/* 2. Sleek PIC Avatar Icon Button NEXT TO STATUS */}

@@ -11,7 +11,11 @@ import {
   Bug,
 } from "lucide-react";
 import { QATestCase } from "../types";
-import { StyledDropdown } from "../../../components/ui/CommonComponents";
+import { LabelChip, StyledDropdown } from "../../../components/ui/CommonComponents";
+import { useMasterOptionItems } from "../../../hooks/useMasterOptions";
+import { useAppStore } from "../../../store/useAppStore";
+import { warnaDariMaster } from "../../../lib/warnaLabel";
+import { CADANGAN_STATUS_QA } from "./QATestCaseTable";
 
 interface QADetailDrawerProps {
   selectedTestCase: QATestCase | null;
@@ -51,6 +55,8 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
   handleStatusChange,
 }) => {
   const { t } = useTranslation();
+  const mArr = useAppStore((s) => s.masterData) || [];
+  const opsiStatusQa = useMasterOptionItems("qa_status", CADANGAN_STATUS_QA);
   if (!selectedTestCase) return null;
 
   return (
@@ -71,15 +77,11 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
               <span className="px-2 py-0.5 bg-primary-surface text-content-inverse font-medium text-xs sm:text-[10px] rounded-md">
                 TC #{selectedTestCase.rowNum}
               </span>
-              <span
-                className={`px-2 py-0.5 text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase rounded-md ${
-                  selectedTestCase.priority === "Critical" || selectedTestCase.priority === "High"
-                    ? "bg-rose-500/10 text-danger-text border border-rose-500/30"
-                    : "bg-surface-muted text-content-body border border-border-subtle/60"
-                }`}
-              >
-                {t("rakit.priorityOf", { nama: selectedTestCase.priority || "Medium" })}
-              </span>
+              <LabelChip
+                kelompok="priority"
+                nilai={selectedTestCase.priority || "Medium"}
+                className="text-[9px] sm:text-[11px]"
+              />
             </div>
 
             {/* STATUS UPDATE SELECTOR INTEGRATED DIRECTLY IN TOP HEADER */}
@@ -90,26 +92,10 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                   handleStatusChange(selectedTestCase.id, val as any);
                   setSelectedTestCase({ ...selectedTestCase, status: val as any });
                 }}
-                options={[
-                  { id: "Passed", label: "Passed", icon: "CheckCircle2", color: "#10B981" },
-                  { id: "Failed", label: "Failed", icon: "XCircle", color: "#EF4444" },
-                  { id: "Blocked", label: "Blocked", icon: "AlertOctagon", color: "#F59E0B" },
-                  { id: "Retest", label: "Retest", icon: "RefreshCw", color: "#6366F1" },
-                  { id: "Pending", label: "Pending", icon: "Clock", color: "#64748B" },
-                ]}
-                masterData={[]}
+                options={opsiStatusQa}
+                type="qa_status"
                 className="w-full"
-                buttonClassName={`py-1 px-2.5 rounded-md text-xs sm:text-[11px] font-normal uppercase tracking-normal border shadow-2xs ${
-                  selectedTestCase.status === "Passed"
-                    ? "bg-emerald-500/10 text-success-text border-emerald-500/30"
-                    : selectedTestCase.status === "Failed"
-                      ? "bg-rose-500/10 text-danger-text border-rose-500/30"
-                      : selectedTestCase.status === "Blocked"
-                        ? "bg-amber-500/10 text-warning-text border-amber-500/30"
-                        : selectedTestCase.status === "Retest"
-                          ? "bg-primary/10 text-primary border-primary/30"
-                          : "bg-surface-muted text-content-secondary border-border-subtle"
-                }`}
+                buttonClassName="py-1 px-2.5 rounded-md text-xs sm:text-[11px] font-normal uppercase tracking-normal border shadow-2xs"
               />
 
               <button
@@ -201,19 +187,16 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                 <div className="relative pl-3.5 border-l-2 border-primary/20 space-y-3 my-2">
                   {executionLogs.map((log: any, idx: number) => {
                     const st = (log.executionStatus || log.status || "PENDING").toUpperCase();
+                    /** Riwayat jalannya memakai hex status QA yang sama dengan chipnya. */
+                    const hexJalan = warnaDariMaster(mArr, "qa_status", st);
                     return (
                       <div
                         key={log.id ? `run-log-${log.id}-${idx}` : `run-log-${idx}`}
                         className="relative group"
                       >
                         <div
-                          className={`absolute -left-[19px] top-1.5 w-2.5 h-2.5 rounded-full border-2 ${
-                            st === "PASSED"
-                              ? "border-success bg-success-surface"
-                              : st === "FAILED"
-                                ? "border-danger bg-danger-surface"
-                                : "border-border-subtle bg-surface-marker"
-                          }`}
+                          className="absolute -left-[19px] top-1.5 w-2.5 h-2.5 rounded-full border-2"
+                          style={{ borderColor: hexJalan, backgroundColor: hexJalan }}
                         />
                         <div className="bg-surface-sunken p-2.5 rounded-md border border-border-faint space-y-1">
                           <div className="flex items-center justify-between">
@@ -226,17 +209,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                               ).toLocaleString("id-ID")}
                             </span>
                           </div>
-                          <span
-                            className={`px-2 py-0.5 text-xs sm:text-[11px] sm:text-[9px] font-medium rounded ${
-                              st === "PASSED"
-                                ? "bg-emerald-500/15 text-success-text"
-                                : st === "FAILED"
-                                  ? "bg-rose-500/15 text-danger-text"
-                                  : "bg-surface-strong text-content-body"
-                            }`}
-                          >
-                            {st}
-                          </span>
+                          <LabelChip kelompok="qa_status" nilai={st} masterData={mArr} />
                           {log.evaluationNotes && (
                             <p className="text-xs text-content-secondary bg-surface p-2 rounded-md border border-border-faint">
                               {log.evaluationNotes}

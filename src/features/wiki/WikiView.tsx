@@ -36,7 +36,7 @@ import Markdown from "react-markdown";
 import { cn } from "../../lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
-import { StyledDropdown } from "../../components/ui/CommonComponents";
+import { LabelChip, StyledDropdown } from "../../components/ui/CommonComponents";
 import { Card } from "../../components/ui/CoreUI";
 import { DetailViewChrome } from "../../components/ui/DetailViewChrome";
 import { PageHeader } from "../../components/ui/PageHeader";
@@ -861,47 +861,6 @@ export const WikiView: React.FC<WikiViewProps> = ({
     }
   };
 
-  // Color classes map for document categories
-  const getCategoryStyles = (type: string) => {
-    switch (type?.toUpperCase()) {
-      case "PRD":
-        return {
-          bg: "bg-primary/10 border-primary/20 text-primary hover:bg-primary/15",
-          badge:
-            "bg-primary/10 text-primary border border-primary/20 text-[10px] leading-none font-normal px-2.5 py-[3px] rounded-md tracking-normal uppercase whitespace-nowrap inline-block",
-          accent: "border-primary",
-        };
-      case "PANDUAN":
-        return {
-          bg: "bg-blue-500/10 border-blue-500/30 text-blue-700 hover:bg-blue-500/15",
-          badge:
-            "bg-blue-500/10 text-blue-700 border border-blue-500/30 text-[10px] leading-none font-normal px-2.5 py-[3px] rounded-md tracking-normal uppercase whitespace-nowrap inline-block",
-          accent: "border-blue-500",
-        };
-      case "LAPORAN":
-        return {
-          bg: "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 hover:bg-emerald-500/15",
-          badge:
-            "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 text-[10px] leading-none font-normal px-2.5 py-[3px] rounded-md tracking-normal uppercase whitespace-nowrap inline-block",
-          accent: "border-emerald-500",
-        };
-      case "SPESIFIKASI":
-        return {
-          bg: "bg-purple-500/10 border-purple-500/30 text-purple-700 hover:bg-purple-500/15",
-          badge:
-            "bg-purple-500/10 text-purple-700 border border-purple-500/30 text-[10px] leading-none font-normal px-2.5 py-[3px] rounded-md tracking-normal uppercase whitespace-nowrap inline-block",
-          accent: "border-purple-500",
-        };
-      default:
-        return {
-          bg: "bg-surface-sunken border-border-faint text-content-body hover:bg-surface-muted/50",
-          badge:
-            "bg-surface-sunken text-content-body border border-border-subtle text-xs sm:text-[10px] font-normal px-2.5 py-0.5 rounded-md tracking-normal uppercase whitespace-nowrap inline-block",
-          accent: "border-border-subtle",
-        };
-    }
-  };
-
   const getCategoryIcon = (type: string) => {
     switch (type?.toUpperCase()) {
       case "PRD":
@@ -1008,7 +967,6 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   currentDocs.map((doc, index) => {
                     const srNo = (currentPage - 1) * itemsPerPage + index + 1;
                     const creatorName = getUserName(doc.createdBy);
-                    const style = getCategoryStyles(doc.type);
                     const lastEdited = doc.updatedAt
                       ? new Date(doc.updatedAt).toLocaleDateString("id-ID", {
                           day: "numeric",
@@ -1033,9 +991,11 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           <div className="line-clamp-1">{doc.title}</div>
                         </td>
                         <td className="py-2.5 px-4">
-                          <span className={style.badge}>
-                            {doc.type ? doc.type.toUpperCase() : "PRD"}
-                          </span>
+                          <LabelChip
+                            kelompok="jenis_dokumen"
+                            nilai={doc.type}
+                            kosong={t("wiki.uncategorized")}
+                          />
                         </td>
                         <td className="py-2.5 px-4" onClick={(e) => e.stopPropagation()}>
                           {doc.fileName ? (
@@ -1176,9 +1136,11 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   deleteTitle={t("wiki.deleteDoc")}
                   meta={
                     <>
-                      <span className={getCategoryStyles(activeDoc.type).badge}>
-                        {activeDoc.type}
-                      </span>
+                      <LabelChip
+                        kelompok="jenis_dokumen"
+                        nilai={activeDoc.type}
+                        kosong={t("wiki.uncategorized")}
+                      />
                       <span className="text-xs text-content-subtle font-medium flex items-center gap-1">
                         <User className="w-3 h-3 text-content-subtle" />{" "}
                         {getUserName(activeDoc.createdBy)}

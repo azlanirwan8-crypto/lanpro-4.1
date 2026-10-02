@@ -47,10 +47,6 @@
     "r1": 0,
     "r2": 2
   },
-  "src/features/kanban/components/KanbanCard.tsx": {
-    "r1": 3,
-    "r2": 0
-  },
   "src/features/meeting-notes/components/DiscussionPointMobileCardView.tsx": {
     "r1": 0,
     "r2": 2
@@ -71,17 +67,9 @@
     "r1": 1,
     "r2": 0
   },
-  "src/features/qa/components/QADetailDrawer.tsx": {
-    "r1": 2,
-    "r2": 0
-  },
   "src/features/qa/components/QASuiteSidebar.tsx": {
-    "r1": 1,
+    "r1": 0,
     "r2": 2
-  },
-  "src/features/qa/components/QATestCaseTable.tsx": {
-    "r1": 3,
-    "r2": 0
   },
   "src/features/users/AdminUserPanel.tsx": {
     "r1": 2,

@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useMasterOptionItems } from "../../hooks/useMasterOptions";
-import { StyledDropdown } from "../../components/ui/CommonComponents";
+import { LabelChip, StyledDropdown } from "../../components/ui/CommonComponents";
 import { safeLocalStorage, safeSessionStorage } from "../../lib/safeStorage";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useFlowchartCanvas } from "../../hooks/useFlowchartCanvas";
@@ -3181,26 +3181,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                   deleteTitle={t("flowchart.deleteFlowchart")}
                   meta={
                     <>
-                      {currentFlowMetadata?.category === "PRD" && (
-                        <span className="px-2.5 py-1 text-[10px] font-normal uppercase tracking-normal bg-surface-muted text-content-body border border-border-subtle/80 rounded-full">
-                          {t("flowchart.prd")}
-                        </span>
-                      )}
-                      {currentFlowMetadata?.category === "Panduan" && (
-                        <span className="px-2.5 py-1 text-[10px] font-normal uppercase tracking-normal bg-blue-500/10 text-blue-700 border border-blue-500/30 rounded-full">
-                          {t("flowchart.guideline")}
-                        </span>
-                      )}
-                      {currentFlowMetadata?.category === "Laporan" && (
-                        <span className="px-2.5 py-1 text-[10px] font-normal uppercase tracking-normal bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 rounded-full">
-                          {t("flowchart.report")}
-                        </span>
-                      )}
-                      {!currentFlowMetadata?.category && (
-                        <span className="px-2.5 py-1 text-[10px] font-normal uppercase tracking-normal bg-primary/10 text-primary border border-primary/30 rounded-full">
-                          {t("flowchart.general")}
-                        </span>
-                      )}
+                      {/* Rantai tiga cabang lama hanya mengenali nilai cadangan, jadi papan berkategori asli master data tidak menampilkan chip apa pun. */}
+                      <LabelChip
+                        kelompok="jenis_dokumen"
+                        nilai={currentFlowMetadata?.category}
+                        kosong={t("flowchart.general")}
+                      />
 
                       <span className="text-xs text-content-muted font-medium flex items-center gap-1">
                         <User className="w-3 h-3" /> {t("flowchart.by")}{" "}

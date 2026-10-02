@@ -19,6 +19,7 @@ import { tampilanNamaPembuat } from "../lib/authorIdentity";
 import { FlowchartMobileCardView } from "./FlowchartMobileCardView";
 import { useMobileAction } from "../../../contexts/MobileActionContext";
 import { PageHeader } from "../../../components/ui/PageHeader";
+import { LabelChip } from "../../../components/ui/CommonComponents";
 import {
   ListPageShell,
   LIST_SEARCH_INPUT_CLASS,
@@ -192,9 +193,11 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                       {fw.name}
                     </td>
                     <td className="py-3 px-4 whitespace-nowrap">
-                      <span className="inline-block px-2.5 py-1 bg-primary/10 text-primary border border-primary/30 text-[10px] leading-none font-normal rounded-md uppercase">
-                        {fw.category || t("flowchart.uncategorized")}
-                      </span>
+                      <LabelChip
+                        kelompok="jenis_dokumen"
+                        nilai={fw.category}
+                        kosong={t("flowchart.uncategorized")}
+                      />
                     </td>
                     <td className="py-3 px-4 text-content-muted font-medium max-w-[260px] truncate whitespace-nowrap">
                       {fw.description ? (

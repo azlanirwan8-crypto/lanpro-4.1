@@ -14,6 +14,7 @@ import {
   FileCheck,
 } from "lucide-react";
 import { Card } from "../../../components/ui/CoreUI";
+import { LabelChip } from "../../../components/ui/CommonComponents";
 import type { DocumentModel } from "../types";
 
 interface WikiMobileCardViewProps {
@@ -40,36 +41,6 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
   onOpenCreate,
 }) => {
   const { t } = useTranslation();
-
-  const getCategoryBadgeClass = (type: string) => {
-    switch (type?.toUpperCase()) {
-      case "PRD":
-        return "bg-primary/10 text-primary border border-primary/20";
-      case "PANDUAN":
-        return "bg-blue-500/10 text-blue-700 border border-blue-500/30";
-      case "LAPORAN":
-        return "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30";
-      case "SPESIFIKASI":
-        return "bg-primary/10 text-primary border border-primary/30";
-      default:
-        return "bg-surface-sunken text-content-body border border-border-subtle";
-    }
-  };
-
-  const getCategoryIcon = (type: string) => {
-    switch (type?.toUpperCase()) {
-      case "PRD":
-        return <Layers className="w-3 h-3" />;
-      case "PANDUAN":
-        return <BookOpen className="w-3 h-3" />;
-      case "LAPORAN":
-        return <FileSpreadsheet className="w-3 h-3" />;
-      case "SPESIFIKASI":
-        return <FileCheck className="w-3 h-3" />;
-      default:
-        return <FileText className="w-3 h-3" />;
-    }
-  };
 
   const formatDate = (date: any) => {
     if (!date) return "-";
@@ -110,7 +81,6 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
       {documents.map((doc, index) => {
         const canModify = canModifyDoc(doc);
         const authorName = getUserName(doc.createdBy);
-        const badgeClass = getCategoryBadgeClass(doc.type);
 
         return (
           <Card
@@ -171,12 +141,12 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
 
             {/* Category badge, Attachment, External Link */}
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span
-                className={`inline-flex items-center gap-1 text-[10px] leading-none font-normal px-2 py-1 rounded-md uppercase tracking-normal ${badgeClass}`}
-              >
-                {getCategoryIcon(doc.type)}
-                {doc.type || "DOC"}
-              </span>
+              <LabelChip
+                kelompok="jenis_dokumen"
+                nilai={doc.type}
+                ikon
+                kosong={t("wiki.uncategorized")}
+              />
 
               {doc.fileName && (
                 <button

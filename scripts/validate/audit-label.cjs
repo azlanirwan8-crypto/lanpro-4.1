@@ -62,8 +62,23 @@ const DIKECUALIKAN = [
   path.join("lib", "statusKolom.ts"),
 ];
 
+/**
+ * #590 — kosakata dokumen/QA ikut dijaga.
+ *
+ * Gerbang ini dulu hanya melihat status, jenis isu, dan prioritas. Akibatnya
+ * kolom KATEGORI (jenis_dokumen) dan phase/status QA bisa menulis warnanya
+ * sendiri tanpa satu pun peringatan - dan memang itu yang terjadi: pemilik
+ * proyek menemukan "TEST PLAN" dan "FLOWCHART" sewarna, padahal master data
+ * menyimpan hex berbeda untuk keduanya.
+ *
+ * Yang TIDAK ikut dimasukkan: `failed` dan `pending`. Dua kata itu memang milik
+ * status QA, tapi dipakai juga oleh keadaan yang bukan label master data -
+ * pekerjaan backup (`item.status === "failed"`) dan status akun
+ * (`user.status === "pending"`) - sehingga memasukkannya hanya menambah
+ * positif palsu, bukan menemukan pelanggaran.
+ */
 const POLA_LABEL =
-  /(?:includes|indexOf|===|==|!==)\s*\(?\s*["'](done|selesai|completed|closed|in progress|in_progress|inprogress|dikerjakan|progress|doing|blocked|terhalang|blokir|cancelled|batal|ditolak|to do|todo|backlog|rencana|in review|in_review|review|tinjau|testing|uji|uat|epic|story|task|subtask|bug|highest|high|medium|low|critical|blocker|major|minor)["']/i;
+  /(?:includes|indexOf|===|==|!==)\s*\(?\s*["'](done|selesai|completed|closed|in progress|in_progress|inprogress|dikerjakan|progress|doing|blocked|terhalang|blokir|cancelled|batal|ditolak|to do|todo|backlog|rencana|in review|in_review|review|tinjau|testing|uji|uat|epic|story|task|subtask|bug|highest|high|medium|low|critical|blocker|major|minor|passed|retest|sit|prd|panduan|laporan|spesifikasi|test plan|flowchart|brd|fsd|tsd)["']/i;
 
 // Heks harus bersanding dengan tanda kutip. Tanpa itu `#582` di dalam komentar
 // terbaca sebagai warna - dan gerbang ini menjegal baris yang justru menyebut
