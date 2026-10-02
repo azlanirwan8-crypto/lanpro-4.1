@@ -1,4 +1,6 @@
 import { useState } from "react";
+import type { KonteksFlowchart } from "../features/flowchart/types";
+import { KONTEKS_KOSONG } from "../features/flowchart/types";
 
 /**
  * useFlowchartUI
@@ -18,16 +20,17 @@ export function useFlowchartUI() {
   const [flowCategory, setFlowCategory] = useState<string>("Panduan");
   const [flowCreator, setFlowCreator] = useState<string>("");
   const [flowExternalUrl, setFlowExternalUrl] = useState<string>("");
+  // #583 — empat blok detail dokumen; satu-satunya tempat ia diedit.
+  const [flowKonteks, setFlowKonteks] = useState<KonteksFlowchart>(KONTEKS_KOSONG);
 
-  // Upload Document Modal States
+  // Add Document Modal States (#583: tautan, bukan unggah berkas)
   const [isUploadDocModalOpen, setIsUploadDocModalOpen] = useState(false);
   const [uploadDocName, setUploadDocName] = useState("");
-  const [uploadDocFile, setUploadDocFile] = useState<File | null>(null);
-  const [uploadDocBase64, setUploadDocBase64] = useState("");
+  const [uploadDocLink, setUploadDocLink] = useState("");
   const [activeDocumentId, setActiveDocumentId] = useState<string | null>(null);
 
-  // Right Side View mode ('embed' | 'canvas')
-  const [rightViewMode, setRightViewMode] = useState<"embed" | "canvas">("embed");
+  // Right Side View mode ('detail' | 'embed' | 'canvas')
+  const [rightViewMode, setRightViewMode] = useState<"detail" | "embed" | "canvas">("embed");
 
   // Collapsible Responsive Sidebars
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState<boolean>(false);
@@ -110,8 +113,7 @@ export function useFlowchartUI() {
   const closeUploadDocumentModal = () => {
     setIsUploadDocModalOpen(false);
     setUploadDocName("");
-    setUploadDocFile(null);
-    setUploadDocBase64("");
+    setUploadDocLink("");
   };
 
   // Sidebar toggles
@@ -161,16 +163,16 @@ export function useFlowchartUI() {
     setFlowCreator,
     flowExternalUrl,
     setFlowExternalUrl,
+    flowKonteks,
+    setFlowKonteks,
 
-    // Upload Document Modal
+    // Add Document Modal
     isUploadDocModalOpen,
     setIsUploadDocModalOpen,
     uploadDocName,
     setUploadDocName,
-    uploadDocFile,
-    setUploadDocFile,
-    uploadDocBase64,
-    setUploadDocBase64,
+    uploadDocLink,
+    setUploadDocLink,
     activeDocumentId,
     setActiveDocumentId,
 

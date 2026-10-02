@@ -202,3 +202,95 @@ describe("flowchart.service — tema dan tautan epic pulang-pergi (#570)", () =>
     expect(hasil[0].epicTaskId).toBeUndefined();
   });
 });
+
+describe("flowchart.service - empat blok detail dokumen ikut pulang-pergi (#583)", () => {
+  const KONTEKS = {
+    masalah: "Merchant harus mengecek transaksi QRIS manual",
+    titikNyeri: "Aplikasi harus dibuka tiap transaksi masuk",
+    cara: "Voice notification otomatis menyebut nominal",
+    manfaat: "Konfirmasi pembayaran lebih cepat untuk merchant",
+  };
+
+  it("menulis keempat blok ke payload kanvas saat membuat", async () => {
+    panggil.mockResolvedValue({ status: "success", data: { id: "f-1" } });
+
+    await createFlowchart("p-1", {
+      name: "Alur QRIS",
+      nodes: [],
+      edges: [],
+      externalUrl: "",
+      createdBy: "admin",
+      description: KONTEKS.masalah,
+      konteks: KONTEKS,
+    } as never);
+
+    const body = panggil.mock.calls[0][1].body;
+    expect(JSON.parse(body.canvasData).konteks).toEqual(KONTEKS);
+    // description tetap teks manusia - bukan payload (pelajaran #136).
+    expect(body.description).toBe(KONTEKS.masalah);
+  });
+
+  it("kiriman papan yang hanya membawa nodes/edges TIDAK menghapus detail dokumen", async () => {
+    panggil.mockResolvedValue({ status: "success" });
+
+    await updateFlowchart("p-1", "f-1", {
+      name: "Alur QRIS",
+      nodes: [{ id: "n1" }],
+      edges: [],
+      konteks: KONTEKS,
+    });
+
+    const payload = JSON.parse(panggil.mock.calls[0][1].body.canvasData);
+    expect(payload.konteks.cara).toBe(KONTEKS.cara);
+  });
+
+  it("membaca kembali keempat blok dari baris yang tersimpan", async () => {
+    panggil.mockResolvedValue({
+      status: "success",
+      data: [
+        {
+          id: "f-1",
+          title: "Alur QRIS",
+          type: "flowchart",
+          canvasData: JSON.stringify({ nodes: [], edges: [], konteks: KONTEKS }),
+        },
+      ],
+    });
+
+    const hasil = await fetchFlowcharts("p-1");
+    expect(hasil[0].konteks).toEqual(KONTEKS);
+  });
+
+  it("diagram lama tanpa blok detail tetap terbuka, nilainya tidak dikarang", async () => {
+    panggil.mockResolvedValue({
+      status: "success",
+      data: [{ id: "f-1", title: "Lama", type: "flowchart", canvasData: PAYLOAD }],
+    });
+
+    const hasil = await fetchFlowcharts("p-1");
+    expect(hasil[0].konteks).toBeUndefined();
+    expect(hasil[0].nodes).toHaveLength(1);
+  });
+
+  it("blok yang isinya bukan teks dibuang, tidak ikut tersimpan sebagai objek", async () => {
+    panggil.mockResolvedValue({
+      status: "success",
+      data: [
+        {
+          id: "f-1",
+          title: "Aneh",
+          type: "flowchart",
+          canvasData: JSON.stringify({
+            nodes: [],
+            edges: [],
+            konteks: { masalah: { berbahaya: true }, cara: "tetap teks" },
+          }),
+        },
+      ],
+    });
+
+    const hasil = await fetchFlowcharts("p-1");
+    expect(hasil[0].konteks?.masalah).toBe("");
+    expect(hasil[0].konteks?.cara).toBe("tetap teks");
+  });
+});

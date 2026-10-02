@@ -18,7 +18,8 @@
  */
 
 import { apiRequest } from "../../../lib/api";
-import type { FlowchartData } from "../types";
+import type { KonteksFlowchart, FlowchartData } from "../types";
+import { adaKonteks } from "../types";
 
 /** Bentuk baris Documents yang dikembalikan backend. */
 interface DocumentRow {
@@ -47,6 +48,7 @@ interface IsiKanvas {
   edges: any[];
   theme?: string;
   epicTaskId?: string;
+  konteks?: Record<string, unknown>;
 }
 
 /** Membongkar node/edge dari payload kanvas. */
@@ -58,10 +60,24 @@ function parseFlowPayload(payloadMentah?: string): IsiKanvas {
       edges: payload.edges || [],
       theme: typeof payload.theme === "string" ? payload.theme : undefined,
       epicTaskId: typeof payload.epicTaskId === "string" ? payload.epicTaskId : undefined,
+      konteks: payload.konteks && typeof payload.konteks === "object" ? payload.konteks : undefined,
     };
   } catch {
     return { nodes: [], edges: [] };
   }
+}
+
+/** Hanya menerima empat blok teks; apa pun yang bukan string dibuang, bukan ditebak. */
+function bacaKonteks(mentah?: Record<string, unknown>): KonteksFlowchart | undefined {
+  if (!mentah) return undefined;
+  const teks = (v: unknown) => (typeof v === "string" ? v : "");
+  const hasil: KonteksFlowchart = {
+    masalah: teks(mentah.masalah),
+    titikNyeri: teks(mentah.titikNyeri),
+    cara: teks(mentah.cara),
+    manfaat: teks(mentah.manfaat),
+  };
+  return adaKonteks(hasil) ? hasil : undefined;
 }
 
 /**
@@ -77,7 +93,9 @@ function toFlowchartData(doc: DocumentRow): FlowchartData {
   // `description`. Dibaca sebagai cadangan supaya diagram lama tetap terbuka
   // walau backfill belum sempat berjalan di lingkungan itu.
   const payloadLama = isCanvasPayload(doc.description) ? doc.description : undefined;
-  const { nodes, edges, theme, epicTaskId } = parseFlowPayload(doc.canvasData || payloadLama);
+  const { nodes, edges, theme, epicTaskId, konteks } = parseFlowPayload(
+    doc.canvasData || payloadLama
+  );
   return {
     id: doc.id,
     name: doc.title,
@@ -92,6 +110,7 @@ function toFlowchartData(doc: DocumentRow): FlowchartData {
     edges,
     theme: theme === "blueprint" ? "blueprint" : "miro",
     epicTaskId: epicTaskId || undefined,
+    konteks: bacaKonteks(konteks),
     createdAt: doc.createdAt
       ? new Date(doc.createdAt).toLocaleDateString("id-ID")
       : new Date().toLocaleDateString("id-ID"),
@@ -110,12 +129,17 @@ function encodeFlowPayload(flow: {
   edges: any[];
   theme?: string;
   epicTaskId?: string;
+  konteks?: KonteksFlowchart;
 }): string {
   return JSON.stringify({
     nodes: flow.nodes,
     edges: flow.edges,
     theme: flow.theme || "miro",
     ...(flow.epicTaskId ? { epicTaskId: flow.epicTaskId } : {}),
+    // #583 — empat blok detail ikut tersimpan di payload yang sama supaya
+    // SETIAP jalur tulis (tombol Simpan, autosave, kirim-saat-keluar) membawanya.
+    // Yang tidak ikut terkirim akan hilang saat jalur lain menimpa barisnya.
+    ...(adaKonteks(flow.konteks) ? { konteks: flow.konteks } : {}),
   });
 }
 
@@ -143,6 +167,7 @@ export async function createFlowchart(
     | "category"
     | "theme"
     | "epicTaskId"
+    | "konteks"
   >
 ): Promise<string | null> {
   const res: any = await apiRequest(`/api/projects/${projectId}/documents`, {
@@ -173,6 +198,7 @@ export async function updateFlowchart(
     category?: string;
     theme?: string;
     epicTaskId?: string;
+    konteks?: KonteksFlowchart;
   }
 ): Promise<void> {
   await apiRequest(`/api/projects/${projectId}/documents/${flowId}`, {

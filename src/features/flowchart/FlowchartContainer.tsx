@@ -35,7 +35,7 @@ import {
   RefreshCw,
   Upload,
   Image as ImageIcon,
-  CheckCircle,
+  Link as LinkIcon,
   ChevronLeft,
 } from "lucide-react";
 import { toJpeg } from "html-to-image";
@@ -55,8 +55,10 @@ import { FlowchartEdges } from "./components/FlowchartEdges";
 import { FlowchartMinimap } from "./components/FlowchartMinimap";
 import { NodeContextMenu } from "./components/NodeContextMenu";
 import { CanvasContextMenu } from "./components/CanvasContextMenu";
+import { FlowchartDetail } from "./components/FlowchartDetail";
 import { hasilTempel, kumpulkanSalinan } from "./lib/salinTempel";
 import type { FlowNode, FlowEdge, FlowchartDocument, FlowchartData } from "./types";
+import { KONTEKS_KOSONG } from "./types";
 import { setScreenSnapshot, clearScreenSnapshot } from "../../lib/screenContext";
 import { parseUniversalDiagram } from "./lib/importers";
 import { apakahPembuat, tampilanNamaPembuat } from "./lib/authorIdentity";
@@ -227,14 +229,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setFlowCreator,
     flowExternalUrl,
     setFlowExternalUrl,
+    flowKonteks,
+    setFlowKonteks,
     isUploadDocModalOpen,
     setIsUploadDocModalOpen,
     uploadDocName,
     setUploadDocName,
-    uploadDocFile,
-    setUploadDocFile,
-    uploadDocBase64,
-    setUploadDocBase64,
+    uploadDocLink,
+    setUploadDocLink,
     activeDocumentId,
     setActiveDocumentId,
     rightViewMode,
@@ -1332,59 +1334,36 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setFlowCategory("Panduan");
     setFlowCreator(resolvedCreator);
     setFlowExternalUrl("");
+    setFlowKonteks(KONTEKS_KOSONG);
     setIsModalOpen(true);
   };
 
-  // Upload Document Modal Handlers
+  // Add Document Modal Handlers (#583 — tautan dokumen menggantikan unggah berkas)
   const openUploadDocumentModal = (e: React.MouseEvent) => {
     e.stopPropagation();
     setUploadDocName("");
-    setUploadDocFile(null);
-    setUploadDocBase64("");
+    setUploadDocLink("");
     setIsUploadDocModalOpen(true);
   };
 
   const closeUploadDocumentModal = () => {
     setIsUploadDocModalOpen(false);
     setUploadDocName("");
-    setUploadDocFile(null);
-    setUploadDocBase64("");
-  };
-
-  const handleDocumentFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-
-      // Validasi Tipe File (Excel, Word, PDF)
-      const allowedExtensions = ["pdf", "doc", "docx", "xls", "xlsx"];
-      const fileExtension = file.name.split(".").pop()?.toLowerCase();
-
-      if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
-        toast.error(t("toast.docFormatInvalid"));
-        return;
-      }
-
-      // Validasi max 5MB
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error(t("toast.docTooLarge"));
-        return;
-      }
-      setUploadDocFile(file);
-      if (!uploadDocName) {
-        setUploadDocName(file.name);
-      }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUploadDocBase64(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+    setUploadDocLink("");
   };
 
   const handleSaveDocument = () => {
-    if (!uploadDocName.trim() || !uploadDocFile || !uploadDocBase64) {
-      toast.error(t("toast.docNameFileRequired"));
+    const nama = uploadDocName.trim();
+    const tautan = uploadDocLink.trim();
+
+    if (!nama || !tautan) {
+      toast.error(t("toast.docLinkRequired"));
+      return;
+    }
+    // Tanpa ini `href={doc.link}` bisa berisi "javascript:" dan tersentuh siapa pun
+    // yang membuka daftar dokumen.
+    if (!/^https?:\/\//i.test(tautan)) {
+      toast.error(t("toast.docLinkInvalid"));
       return;
     }
 
@@ -1397,11 +1376,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
     const newDoc: FlowchartDocument = {
       id: `doc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      name: uploadDocName.trim(),
-      fileName: uploadDocFile.name,
-      fileType: uploadDocFile.type,
-      fileSize: uploadDocFile.size,
-      fileData: uploadDocBase64,
+      name: nama,
+      link: tautan,
       createdAt: new Date().toLocaleString("id-ID"),
       createdBy: getResolvedAuthor(),
     };
@@ -1425,7 +1401,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       return updatedList;
     });
 
-    toast.success(t("toast.docUploaded"));
+    toast.success(t("toast.docLinkSaved"));
     closeUploadDocumentModal();
   };
 
@@ -1440,6 +1416,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setFlowCategory(flow.category || "Panduan");
     setFlowCreator(tampilanNamaPembuat(flow, getResolvedAuthor()));
     setFlowExternalUrl(flow.externalUrl || "");
+    setFlowKonteks({ ...KONTEKS_KOSONG, ...(flow.konteks || {}) });
     setIsModalOpen(true);
   };
 
@@ -1487,6 +1464,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         // bawaan setelah muat ulang.
         theme: canvasTheme,
         epicTaskId: alur?.epicTaskId ?? flowEpicId,
+        // #583 — empat blok detail hidup di payload yang sama dengan isi papan.
+        // Jalur tulis mana pun yang tidak membawanya akan menghapusnya saat
+        // autosave menimpa baris (pelajaran yang sama dengan #570).
+        konteks: alur?.konteks ?? flowKonteks,
       });
       bersihkanTandaBelumTersinkron(projId, selectedFlowId);
       if (!opts.senyap) {
@@ -1697,6 +1678,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     const currentAuthor = getResolvedAuthor();
     const currentTimestamp = new Date().toLocaleString("id-ID");
 
+    // #583 — kolom `description` tetap terisi satu teks manusia (daftar
+    // Dokumentasi memakainya sebagai subjudul, lihat #136). Sumbernya sekarang
+    // Problem Statement; flow lama yang belum punya blok baru tetap menyimpan
+    // deskripsi yang sudah ada.
+    const deskripsi = flowKonteks.masalah.trim() || flowDescription;
+
     if (modalMode === "create") {
       const newId = "flow_" + Date.now();
       const newFlow: FlowchartData = {
@@ -1704,7 +1691,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         name: flowName.trim(),
         category: flowCategory,
         epicTaskId: flowEpicId,
-        description: flowDescription,
+        description: deskripsi,
+        konteks: flowKonteks,
         nodes: [
           {
             id: "node_start",
@@ -1768,7 +1756,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             name: flowName.trim(),
             category: flowCategory,
             epicTaskId: flowEpicId,
-            description: flowDescription,
+            description: deskripsi,
+            konteks: flowKonteks,
             createdBy: flowCreator,
             externalUrl: flowExternalUrl,
             lastEditedAt: currentTimestamp,
@@ -1790,7 +1779,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             nodes: foundFlow?.nodes || [],
             edges: foundFlow?.edges || [],
             externalUrl: flowExternalUrl,
-            description: flowDescription,
+            description: deskripsi,
+            konteks: flowKonteks,
             // Item #144 — tanpa baris ini kategorinya hanya bertahan di
             // localStorage dan hilang begitu cache dibersihkan.
             category: flowCategory,
@@ -3145,6 +3135,18 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                     <div className="bg-surface-muted p-1 rounded-md flex items-center border border-border-subtle/60 shadow-inner">
                       <button
                         type="button"
+                        onClick={() => setRightViewMode("detail")}
+                        className={cn(
+                          "px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
+                          rightViewMode === "detail"
+                            ? "bg-surface text-content shadow-2xs font-semibold"
+                            : "text-content-muted hover:text-content-strong"
+                        )}
+                      >
+                        <Layers className="w-3.5 h-3.5" /> {t("flowchart.tabDetail")}
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => setRightViewMode("embed")}
                         className={cn(
                           "px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
@@ -3171,9 +3173,23 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                   }
                 />
 
-                {/* Main Viewport (Canvas / Viewer) */}
+                {/* Main Viewport (Detail / Dokumen / Canvas) */}
                 <div className="bg-surface border border-border-subtle rounded-lg shadow-soft flex-1 min-h-[600px] relative flex flex-col overflow-hidden">
-                  {rightViewMode === "embed" ? (
+                  {rightViewMode === "detail" ? (
+                    <div className="flex-1 overflow-y-auto">
+                      <FlowchartDetail
+                        konteks={currentFlowMetadata?.konteks}
+                        kategori={currentFlowMetadata?.category}
+                        judulEpic={linkedEpic?.title}
+                        onEdit={() =>
+                          currentFlowMetadata &&
+                          openEditModal(currentFlowMetadata, {
+                            stopPropagation: () => {},
+                          } as React.MouseEvent)
+                        }
+                      />
+                    </div>
+                  ) : rightViewMode === "embed" ? (
                     /* 1. EMBED VIEWER (SPLIT PANE) */
                     <div className="flex-1 flex flex-col min-h-0 bg-surface">
                       {/* LEFT PANE: Daftar Dokumen */}
@@ -3207,11 +3223,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                       <FileText className="w-5 h-5" />
                                     </div>
                                     <div className="flex flex-col flex-1 min-w-0">
-                                      <span className="text-sm font-medium text-content-strong truncate">
+                                      <span className="text-sm font-medium text-content-strong whitespace-nowrap">
                                         {doc.name}
                                       </span>
-                                      <span className="text-xs text-content-muted font-medium truncate mt-0.5">
-                                        {doc.fileName}
+                                      <span className="text-xs text-content-muted font-medium whitespace-nowrap mt-0.5">
+                                        {doc.link || doc.fileName}
                                       </span>
                                       {doc.fileSize && (
                                         <span className="text-xs sm:text-[10px] text-content-subtle mt-1">
@@ -3223,13 +3239,26 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                     </div>
                                   </div>
                                   <div className="pt-3 border-t border-border-faint flex items-center justify-end">
-                                    <a
-                                      href={doc.fileData}
-                                      download={doc.fileName}
-                                      className="flex items-center gap-2 text-xs font-medium text-primary hover:text-primary bg-primary/10 hover:bg-primary/15 px-3 py-1.5 rounded-lg transition-colors"
-                                    >
-                                      <Download className="w-3.5 h-3.5" /> {t("flowchart.download")}
-                                    </a>
+                                    {doc.link ? (
+                                      <a
+                                        href={doc.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 text-xs font-medium text-primary hover:text-primary bg-primary/10 hover:bg-primary/15 px-3 py-1.5 rounded-lg transition-colors"
+                                      >
+                                        <LinkIcon className="w-3.5 h-3.5" />{" "}
+                                        {t("flowchart.bukaTautan")}
+                                      </a>
+                                    ) : (
+                                      <a
+                                        href={doc.fileData}
+                                        download={doc.fileName}
+                                        className="flex items-center gap-2 text-xs font-medium text-primary hover:text-primary bg-primary/10 hover:bg-primary/15 px-3 py-1.5 rounded-lg transition-colors"
+                                      >
+                                        <Download className="w-3.5 h-3.5" />{" "}
+                                        {t("flowchart.download")}
+                                      </a>
+                                    )}
                                   </div>
                                 </div>
                               ))}
@@ -4155,13 +4184,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         flowCategory={flowCategory}
         setFlowCategory={setFlowCategory}
         opsiKategoriDokumen={opsiKategoriDokumen}
-        flowExternalUrl={flowExternalUrl}
-        setFlowExternalUrl={setFlowExternalUrl}
         flowEpicId={flowEpicId}
         setFlowEpicId={setFlowEpicId}
         availableEpics={availableEpics}
-        flowDescription={flowDescription}
-        setFlowDescription={setFlowDescription}
+        flowKonteks={flowKonteks}
+        setFlowKonteks={setFlowKonteks}
       />
 
       {nodeContextMenu && (
@@ -4222,7 +4249,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                   <FileText className="w-4 h-4" />
                 </div>
                 <h3 className="text-sm font-medium text-content">
-                  {t("flowchart.uploadNewDocument")}
+                  {t("flowchart.tambahTautanDokumen")}
                 </h3>
               </div>
               <button
@@ -4247,43 +4274,26 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 />
               </div>
 
-              <div>
-                <label className="block text-xs sm:text-[11px] font-medium text-content-body mb-1.5">
-                  {t("flowchart.uploadFileMax")}
+              {/* #583 — tautan dokumen menggantikan unggah berkas. Berkas base64
+                  dulu ikut tersimpan di payload papan, dan itu membuat satu
+                  lampiran 5 MB menjadi ~6,7 MB teks di kolom canvasData. */}
+              <div className="space-y-1.5">
+                <label className="block text-xs sm:text-[11px] font-medium text-content-body">
+                  {t("flowchart.linkDokumen")} <span className="text-rose-500">*</span>
                 </label>
-                <div className="border border-dashed border-border-subtle rounded-md p-6 flex flex-col items-center justify-center bg-surface-sunken/50 relative overflow-hidden group hover:border-primary transition-colors">
+                <div className="relative">
+                  <LinkIcon className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
-                    type="file"
-                    onChange={handleDocumentFileChange}
-                    accept=".pdf,.doc,.docx,.xls,.xlsx"
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    type="url"
+                    value={uploadDocLink}
+                    onChange={(e) => setUploadDocLink(e.target.value)}
+                    placeholder={t("flowchart.docLinkPlaceholder")}
+                    className="w-full pl-9 pr-3 py-2 bg-surface-sunken border border-border-subtle rounded-md text-xs focus:bg-surface focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all placeholder:text-content-subtle text-content-strong font-medium"
                   />
-                  <div className="w-10 h-10 bg-surface shadow-2xs border border-border-subtle rounded-full flex items-center justify-center mb-2.5 group-hover:scale-105 transition-all text-primary">
-                    <Upload className="w-4 h-4" />
-                  </div>
-                  <p className="text-xs font-medium text-content-body mb-0.5">
-                    {t("flowchart.pickOrDrag")}
-                  </p>
-                  <p className="text-xs sm:text-[10px] text-content-subtle font-medium">
-                    {t("flowchart.supportsPdfWordExcelMax")}
-                  </p>
-
-                  {uploadDocFile && (
-                    <div className="mt-3 p-2.5 bg-primary/10 border border-primary/30 rounded-md w-full flex items-center justify-between">
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-xs font-medium text-primary truncate">
-                          {uploadDocFile.name}
-                        </span>
-                        <span className="text-xs sm:text-[10px] text-content-muted font-medium">
-                          {t("rakit.sizeMb", {
-                            ukuran: (uploadDocFile.size / 1024 / 1024).toFixed(2),
-                          })}
-                        </span>
-                      </div>
-                      <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                    </div>
-                  )}
                 </div>
+                <p className="text-[10px] text-content-subtle leading-normal">
+                  {t("flowchart.linkDokumenHint")}
+                </p>
               </div>
             </div>
 
@@ -4296,10 +4306,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               </button>
               <button
                 onClick={handleSaveDocument}
-                disabled={!uploadDocName || !uploadDocFile}
+                disabled={!uploadDocName || !uploadDocLink}
                 className="px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-50 text-content-inverse text-xs font-medium rounded-md transition-all shadow-xs active:scale-95 cursor-pointer"
               >
-                {t("flowchart.uploadAndSave")}
+                {t("flowchart.simpanTautan")}
               </button>
             </div>
           </div>

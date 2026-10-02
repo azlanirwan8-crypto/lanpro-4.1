@@ -41,6 +41,14 @@ const alur = {
   theme: "miro",
   createdBy: "u1",
   createdByName: "Administrator",
+  // #583 — detail dokumen hidup di payload yang sama dengan isi papan, jadi
+  // setiap jalur kirim harus membawanya atau ia terhapus diam-diam.
+  konteks: {
+    masalah: "Merchant mengecek transaksi manual",
+    titikNyeri: "Aplikasi harus dibuka tiap transaksi",
+    cara: "Voice notification menyebut nominal",
+    manfaat: "Konfirmasi lebih cepat",
+  },
 };
 
 const renderView = (over: Partial<React.ComponentProps<typeof FlowchartView>> = {}) =>
@@ -90,6 +98,9 @@ describe("FlowchartView — autosave papan (#538)", () => {
           "fw9",
           expect.objectContaining({
             edges: [expect.objectContaining({ id: "e1", strokeStyle: "dashed" })],
+            // #583 — kirim (autosave maupun kirim-saat-keluar) tidak boleh
+            // menulis ulang papan sambil meninggalkan detail dokumen.
+            konteks: alur.konteks,
           })
         ),
       { timeout: 9000 }
@@ -139,6 +150,9 @@ describe("FlowchartView — autosave papan (#538)", () => {
           "fw9",
           expect.objectContaining({
             edges: [expect.objectContaining({ id: "e1", strokeStyle: "dashed" })],
+            // #583 — kirim (autosave maupun kirim-saat-keluar) tidak boleh
+            // menulis ulang papan sambil meninggalkan detail dokumen.
+            konteks: alur.konteks,
           })
         ),
       { timeout: 3000 }

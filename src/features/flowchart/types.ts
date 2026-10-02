@@ -110,9 +110,33 @@ export interface FlowEdge {
   strokeStyle?: "solid" | "dashed" | "dotted";
 }
 
+/**
+ * Empat blok detail dokumen flowchart (#583), diambil dari struktur slide BRD
+ * yang dipakai pemilik proyek: masalah -> titik nyeri -> cara -> manfaat.
+ */
+export interface KonteksFlowchart {
+  masalah: string;
+  titikNyeri: string;
+  cara: string;
+  manfaat: string;
+}
+
+export const KONTEKS_KOSONG: KonteksFlowchart = {
+  masalah: "",
+  titikNyeri: "",
+  cara: "",
+  manfaat: "",
+};
+
+export const adaKonteks = (k?: KonteksFlowchart) =>
+  !!k && Boolean(k.masalah || k.titikNyeri || k.cara || k.manfaat);
+
 export interface FlowchartDocument {
   id: string;
   name: string;
+  /** Tautan dokumen (#583) — jalur baru menggantikan unggah berkas. */
+  link?: string;
+  /** Berkas base64 dari jalur lama; tetap dibaca supaya lampiran lama tidak hilang. */
   fileData?: string;
   fileName?: string;
   fileType?: string;
@@ -129,6 +153,8 @@ export interface FlowchartData {
   documents?: FlowchartDocument[];
   epicTaskId?: string;
   description: string;
+  /** Disimpan di payload `canvasData`, bukan kolom baru (#583). */
+  konteks?: KonteksFlowchart;
   nodes: FlowNode[];
   edges: FlowEdge[];
   theme: CanvasTheme;

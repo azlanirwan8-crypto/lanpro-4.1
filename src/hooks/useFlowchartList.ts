@@ -1,31 +1,10 @@
 import { useState } from "react";
 
-export interface FlowchartDocument {
-  id: string;
-  name: string;
-  fileData?: string;
-  fileName?: string;
-  fileType?: string;
-  fileSize?: number;
-  createdAt: string;
-  createdBy: string;
-}
-
-export interface FlowchartData {
-  id: string;
-  name: string;
-  category?: string;
-  externalUrl?: string;
-  documents?: FlowchartDocument[];
-  epicTaskId?: string;
-  description: string;
-  nodes: any[];
-  edges: any[];
-  theme: "miro" | "blueprint";
-  createdAt: string;
-  createdBy?: string;
-  lastEditedAt?: string;
-}
+// Berkas ini dulu MENYIMPAN SALINAN sendiri dari FlowchartData/FlowchartDocument
+// (dengan `nodes: any[]`), jadi menambah satu field berarti dua deklarasi harus
+// diubah dan yang terlupa berubah jadi tipe hantu. Satu sumber: types.ts.
+export type { FlowchartData, FlowchartDocument } from "../features/flowchart/types";
+import type { FlowchartData, FlowchartDocument } from "../features/flowchart/types";
 
 /**
  * useFlowchartList
@@ -42,7 +21,7 @@ export function useFlowchartList() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(5);
-  const [sortBy, setSortBy] = useState<'name' | 'createdAt' | 'lastEditedAt'>('lastEditedAt');
+  const [sortBy, setSortBy] = useState<"name" | "createdAt" | "lastEditedAt">("lastEditedAt");
 
   // Confirmation modal for deletion
   const [confirmModal, setConfirmModal] = useState<{
@@ -54,29 +33,31 @@ export function useFlowchartList() {
     isOpen: false,
     title: "",
     message: "",
-    onConfirm: () => {}
+    onConfirm: () => {},
   });
 
   // Get current selected flowchart metadata
   const getCurrentFlowchart = (): FlowchartData | null => {
-    return flowcharts.find(f => f.id === selectedFlowId) || null;
+    return flowcharts.find((f) => f.id === selectedFlowId) || null;
   };
 
   // Add new flowchart to list
   const addFlowchart = (flowchart: FlowchartData) => {
-    setFlowcharts(prev => [flowchart, ...prev]);
+    setFlowcharts((prev) => [flowchart, ...prev]);
   };
 
   // Update existing flowchart
   const updateFlowchart = (flowId: string, updates: Partial<FlowchartData>) => {
-    setFlowcharts(prev =>
-      prev.map(f => f.id === flowId ? { ...f, ...updates, lastEditedAt: new Date().toISOString() } : f)
+    setFlowcharts((prev) =>
+      prev.map((f) =>
+        f.id === flowId ? { ...f, ...updates, lastEditedAt: new Date().toISOString() } : f
+      )
     );
   };
 
   // Delete flowchart with confirmation
   const deleteFlowchart = (flowId: string, onConfirm: () => void) => {
-    const flowchart = flowcharts.find(f => f.id === flowId);
+    const flowchart = flowcharts.find((f) => f.id === flowId);
     if (!flowchart) return;
 
     setConfirmModal({
@@ -84,19 +65,19 @@ export function useFlowchartList() {
       title: "Hapus Diagram Alur",
       message: `Apakah Anda yakin ingin menghapus diagram "${flowchart.name}"? Aksi ini tidak dapat dibatalkan.`,
       onConfirm: () => {
-        setFlowcharts(prev => prev.filter(f => f.id !== flowId));
+        setFlowcharts((prev) => prev.filter((f) => f.id !== flowId));
         if (selectedFlowId === flowId) {
           setSelectedFlowId(null);
         }
-        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        setConfirmModal((prev) => ({ ...prev, isOpen: false }));
         onConfirm();
-      }
+      },
     });
   };
 
   // Close confirmation modal
   const closeConfirmModal = () => {
-    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+    setConfirmModal((prev) => ({ ...prev, isOpen: false }));
   };
 
   // Filter and sort flowcharts
@@ -106,23 +87,26 @@ export function useFlowchartList() {
     // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(f =>
-        f.name.toLowerCase().includes(query) ||
-        f.description?.toLowerCase().includes(query) ||
-        f.category?.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        (f) =>
+          f.name.toLowerCase().includes(query) ||
+          f.description?.toLowerCase().includes(query) ||
+          f.category?.toLowerCase().includes(query)
       );
     }
 
     // Apply sort
     const sorted = [...filtered].sort((a, b) => {
       switch (sortBy) {
-        case 'name':
+        case "name":
           return a.name.localeCompare(b.name);
-        case 'createdAt':
+        case "createdAt":
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        case 'lastEditedAt':
-          return new Date(b.lastEditedAt || b.createdAt).getTime() -
-                 new Date(a.lastEditedAt || a.createdAt).getTime();
+        case "lastEditedAt":
+          return (
+            new Date(b.lastEditedAt || b.createdAt).getTime() -
+            new Date(a.lastEditedAt || a.createdAt).getTime()
+          );
         default:
           return 0;
       }
@@ -169,30 +153,30 @@ export function useFlowchartList() {
 
   // Toggle editor state
   const toggleEditor = () => {
-    setIsEditorActive(prev => !prev);
+    setIsEditorActive((prev) => !prev);
   };
 
   // Reset search and pagination
   const resetFilters = () => {
     setSearchQuery("");
     setCurrentPage(1);
-    setSortBy('lastEditedAt');
+    setSortBy("lastEditedAt");
   };
 
   // Add document to flowchart
   const addDocumentToFlowchart = (flowId: string, doc: FlowchartDocument) => {
     updateFlowchart(flowId, {
-      documents: [...(flowcharts.find(f => f.id === flowId)?.documents || []), doc]
+      documents: [...(flowcharts.find((f) => f.id === flowId)?.documents || []), doc],
     });
   };
 
   // Remove document from flowchart
   const removeDocumentFromFlowchart = (flowId: string, docId: string) => {
-    const flowchart = flowcharts.find(f => f.id === flowId);
+    const flowchart = flowcharts.find((f) => f.id === flowId);
     if (!flowchart) return;
 
     updateFlowchart(flowId, {
-      documents: (flowchart.documents || []).filter(d => d.id !== docId)
+      documents: (flowchart.documents || []).filter((d) => d.id !== docId),
     });
   };
 
@@ -237,6 +221,6 @@ export function useFlowchartList() {
 
     // Document management
     addDocumentToFlowchart,
-    removeDocumentFromFlowchart
+    removeDocumentFromFlowchart,
   };
 }
