@@ -55,6 +55,7 @@ import { FlowchartEdges } from "./components/FlowchartEdges";
 import { FlowchartMinimap } from "./components/FlowchartMinimap";
 import { NodeContextMenu } from "./components/NodeContextMenu";
 import { CanvasContextMenu } from "./components/CanvasContextMenu";
+import { hasilTempel, kumpulkanSalinan } from "./lib/salinTempel";
 import type { FlowNode, FlowEdge, FlowchartDocument, FlowchartData } from "./types";
 import { setScreenSnapshot, clearScreenSnapshot } from "../../lib/screenContext";
 import { parseUniversalDiagram } from "./lib/importers";
@@ -335,6 +336,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     completeConnection,
     copyNodesToClipboard,
     getClipboardNodes,
+    getClipboard,
     clearClipboard,
     setMarqueeSelection,
     updateMarqueeBox,
@@ -946,6 +948,80 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   // Filter Tasks which are "epics" to hook them up
   const availableEpics = tasks.filter((t) => t.type === "epic");
 
+  /**
+   * #582 — salin-tempel papan.
+   *
+   * Posisi kursor hidup di REF, bukan state: #520 sudah mengukur bahwa satu
+   * kibasan mouse yang menulis state memaksa SELURUH kanvas render ulang
+   * (298 ms untuk 25 bentuk / 35 garis). Konversi ke koordinat papan dilakukan
+   * saat menempel, jadi `getBoundingClientRect` dibayar sekali per tempelan.
+   */
+  const titikKursorRef = useRef<{ x: number; y: number } | null>(null);
+
+  const koordinatPapan = (clientX: number, clientY: number) => {
+    const rect = canvasContainerRef.current?.getBoundingClientRect();
+    if (!rect) return null;
+    return {
+      x: Math.round((clientX - rect.left - panOffset.x) / zoomLevel),
+      y: Math.round((clientY - rect.top - panOffset.y) / zoomLevel),
+    };
+  };
+
+  const salinSeleksi = (kandidat?: FlowNode[]) => {
+    const terpilih =
+      kandidat && kandidat.length > 0
+        ? kandidat
+        : copiedNodes.length > 0
+          ? copiedNodes
+          : nodes.filter((n) => n.id === selectedNodeId);
+    if (terpilih.length === 0) {
+      toast.info(t("flowchart.copyNothingSelected"));
+      return;
+    }
+    const salinan = kumpulkanSalinan(terpilih, edges);
+    copyNodesToClipboard(salinan.nodes, salinan.edges);
+    toast.success(
+      t("flowchart.copiedShapes", { bentuk: salinan.nodes.length, panah: salinan.edges.length })
+    );
+  };
+
+  const tempelSalinan = (diTitik?: { x: number; y: number } | null) => {
+    const isi = getClipboard();
+    if (isi.nodes.length === 0) {
+      toast.info(t("flowchart.pasteNothing"));
+      return;
+    }
+    const posisi =
+      diTitik ??
+      (titikKursorRef.current
+        ? koordinatPapan(titikKursorRef.current.x, titikKursorRef.current.y)
+        : null);
+    const hasil = hasilTempel(isi, posisi);
+    const mergedNodes = [...nodes, ...hasil.nodes];
+    const mergedEdges = [...edges, ...hasil.edges];
+
+    setNodes(mergedNodes);
+    setEdges(mergedEdges);
+    recordHistory(mergedNodes, mergedEdges);
+
+    // Hasil tempel langsung terseleksi, sama seperti di Miro: satu tarikan
+    // berikutnya memindahkan seluruh kelompok, bukan satu bentuk.
+    setCopiedNodes(hasil.nodes);
+    setSelectedNodeId(hasil.nodes.length === 1 ? hasil.nodes[0].id : null);
+    toast.success(
+      t("flowchart.pastedShapes", { bentuk: hasil.nodes.length, panah: hasil.edges.length })
+    );
+  };
+
+  // Pintasan papan dipasang sekali di window; ref ini yang menjamin Ctrl+C/V
+  // memakai closure render TERAKHIR (pola yang sama dengan #569). Tanpa ref,
+  // menyalin lalu langsung menempel akan membaca clipboard yang basi karena
+  // `copiedNodes` tidak berubah saat salinan ditulis.
+  const aksiKlipboardRef = useRef({ salin: salinSeleksi, tempel: tempelSalinan });
+  useEffect(() => {
+    aksiKlipboardRef.current = { salin: salinSeleksi, tempel: tempelSalinan };
+  });
+
   // Canvas Native Event Listeners for smooth Wheel Zoom/Pan prevention of page scroll
   // Keyboard Shortcuts for extreme flexibility & high-speed diagramming
   useEffect(() => {
@@ -1038,37 +1114,18 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         toast.info(t("toast.nodesSelectedCopy", { count: nodes.length }));
       }
 
-      // Add: Ctrl+C / Cmd+C - Copy
+      // Add: Ctrl+C / Cmd+C - Copy seleksi (bentuk + panah di antaranya)
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c") {
-        if (selectedNodeId) {
+        if (selectedNodeId || copiedNodes.length > 0) {
           e.preventDefault();
-          const nodeToCopy = nodes.find((n) => n.id === selectedNodeId);
-          if (nodeToCopy) {
-            setCopiedNodes([nodeToCopy]);
-            toast.success(t("toast.objectCopied"));
-          }
-        } else if (copiedNodes.length > 0) {
-          e.preventDefault();
-          toast.success(copiedNodes.length + " objek disalin!");
+          aksiKlipboardRef.current.salin();
         }
       }
 
-      // Add: Ctrl+V / Cmd+V - Paste
+      // Add: Ctrl+V / Cmd+V - Paste di bawah kursor
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v") {
         e.preventDefault();
-        if (copiedNodes.length > 0) {
-          const newNodes = copiedNodes.map((n) => ({
-            ...n,
-            id: `node_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-            x: n.x + 30, // offset pasted copies
-            y: n.y + 30,
-          }));
-          setNodes((prev) => [...prev, ...newNodes]);
-          toast.success(newNodes.length + " objek ditempel!");
-          if (newNodes.length === 1) {
-            setSelectedNodeId(newNodes[0].id);
-          }
-        }
+        aksiKlipboardRef.current.tempel();
       }
 
       // 5. Ctrl+Z or Cmd+Z for undo
@@ -2495,6 +2552,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   const handleCanvasMouseMove = (e: React.MouseEvent) => {
+    // #582 — sekadar mencatat posisi di ref: tidak ada state yang ditulis, jadi
+    // tidak ada render tambahan seperti yang dihindari #520 di atas.
+    titikKursorRef.current = { x: e.clientX, y: e.clientY };
+
     // Item #520 — posisi kursor hanya dibutuhkan garis bantu penghubung, yaitu
     // saat pengguna SEDANG menarik koneksi. Sebelumnya state ini disetel pada
     // SETIAP event mousemove; karena <FlowchartEdges> menerimanya sebagai props,
@@ -4114,6 +4175,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           onEditProperties={handleContextMenuEditProperties}
           onChangeColor={handleContextMenuChangeColor}
           onDuplicate={handleContextMenuDuplicate}
+          onCopy={(nodeId) =>
+            salinSeleksi(
+              copiedNodes.some((n) => n.id === nodeId)
+                ? copiedNodes
+                : nodes.filter((n) => n.id === nodeId)
+            )
+          }
         />
       )}
 
@@ -4137,6 +4205,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           onUndo={handleUndoClick}
           onRedo={handleRedoClick}
           onClear={handleClearWhiteboard}
+          onPaste={(klienX, klienY) => tempelSalinan(koordinatPapan(klienX, klienY))}
+          bolehTempel={hasClipboardContent()}
           canUndo={historyIndex > 0}
           canRedo={historyIndex < historyStack.length - 1}
         />

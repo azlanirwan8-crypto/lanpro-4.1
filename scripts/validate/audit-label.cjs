@@ -65,8 +65,11 @@ const DIKECUALIKAN = [
 const POLA_LABEL =
   /(?:includes|indexOf|===|==|!==)\s*\(?\s*["'](done|selesai|completed|closed|in progress|in_progress|inprogress|dikerjakan|progress|doing|blocked|terhalang|blokir|cancelled|batal|ditolak|to do|todo|backlog|rencana|in review|in_review|review|tinjau|testing|uji|uat|epic|story|task|subtask|bug|highest|high|medium|low|critical|blocker|major|minor)["']/i;
 
+// Heks harus bersanding dengan tanda kutip. Tanpa itu `#582` di dalam komentar
+// terbaca sebagai warna - dan gerbang ini menjegal baris yang justru menyebut
+// nomor papan (dialami sendiri saat mengerjakan #582).
 const POLA_WARNA =
-  /(?:#[0-9a-fA-F]{3,8}\b|\b(?:bg|text|border|ring|from|to|via|fill|stroke)-(?:success|danger|warning|info|primary|secondary|emerald|rose|violet|purple|sky|cyan|amber|green|red|blue|indigo|teal)\b)/;
+  /(?:["'`]#[0-9a-fA-F]{3,8}\b|\b(?:bg|text|border|ring|from|to|via|fill|stroke)-(?:success|danger|warning|info|primary|secondary|emerald|rose|violet|purple|sky|cyan|amber|green|red|blue|indigo|teal)\b)/;
 
 const POLA_POTONG =
   /\btruncate\b[^"'`]*\bmax-w-\[\d+px\]|\bmax-w-\[\d+px\][^"'`]*\btruncate\b/;

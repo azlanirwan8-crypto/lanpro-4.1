@@ -17,6 +17,7 @@ import {
   Redo,
   Trash2,
   MapPin,
+  ClipboardPaste,
 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 
@@ -31,6 +32,8 @@ interface CanvasContextMenuProps {
   onUndo: () => void;
   onRedo: () => void;
   onClear: () => void;
+  onPaste: (x: number, y: number) => void;
+  bolehTempel: boolean;
   canUndo: boolean;
   canRedo: boolean;
 }
@@ -46,6 +49,8 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
   onUndo,
   onRedo,
   onClear,
+  onPaste,
+  bolehTempel,
   canUndo,
   canRedo,
 }) => {
@@ -54,7 +59,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
 
   // Keep menu on screen bounds
   const adjustedX = Math.min(x, window.innerWidth - 240);
-  const adjustedY = Math.min(y, window.innerHeight - 440);
+  const adjustedY = Math.min(y, window.innerHeight - 480);
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -185,6 +190,27 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
           );
         })}
       </div>
+
+      <div className="h-px my-1" />
+
+      {/* Tempel di titik ini (#582) — papan dulu hanya bisa menempel lewat
+          Ctrl+V, dan Ctrl+V itu sendiri diam ketika clipboard kosong. */}
+      <button
+        onClick={() => {
+          onPaste(x, y);
+          onClose();
+        }}
+        disabled={!bolehTempel}
+        className={cn(
+          "w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl transition-colors text-left",
+          bolehTempel
+            ? "text-content-body hover:text-primary hover:bg-primary/10"
+            : "text-content-subtle cursor-not-allowed"
+        )}
+      >
+        <ClipboardPaste className="w-3.5 h-3.5 text-content-subtle" />
+        <span>{t("canvasMenu.pasteHere")}</span>
+      </button>
 
       <div className="h-px my-1" />
 

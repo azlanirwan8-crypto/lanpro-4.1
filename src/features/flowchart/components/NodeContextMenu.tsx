@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import React, { useEffect, useRef } from "react";
 import { motion } from "motion/react";
-import { Trash2, Edit3, Palette, Copy, Check } from "lucide-react";
+import { Trash2, Edit3, Palette, Copy, Check, ClipboardCopy } from "lucide-react";
 import { cn } from "../../../lib/utils";
 
 interface NodeContextMenuProps {
@@ -14,6 +14,7 @@ interface NodeContextMenuProps {
   onEditProperties: (nodeId: string) => void;
   onChangeColor: (nodeId: string, color: string) => void;
   onDuplicate: (nodeId: string) => void;
+  onCopy: (nodeId: string) => void;
 }
 
 export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
@@ -26,6 +27,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
   onEditProperties,
   onChangeColor,
   onDuplicate,
+  onCopy,
 }) => {
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -46,7 +48,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
 
   // Adjust coordinates so it doesn't overflow screen boundaries
   const adjustedX = Math.min(x, window.innerWidth - 210);
-  const adjustedY = Math.min(y, window.innerHeight - 340);
+  const adjustedY = Math.min(y, window.innerHeight - 380);
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -103,6 +105,18 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
       >
         <Edit3 className="w-3.5 h-3.5 text-content-subtle group-hover:text-primary" />
         <span>{t("nodeMenu.editProperties")}</span>
+      </button>
+
+      {/* Copy Button (#582 — dulu menu ini hanya punya Duplikat, tidak ada Salin) */}
+      <button
+        onClick={() => {
+          onCopy(nodeId);
+          onClose();
+        }}
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-content-body hover:text-primary hover:bg-primary/10 transition-colors text-left"
+      >
+        <ClipboardCopy className="w-3.5 h-3.5 text-content-subtle" />
+        <span>{t("nodeMenu.copy")}</span>
       </button>
 
       {/* Duplicate Button */}

@@ -3,7 +3,8 @@ import { useState } from "react";
 // FlowNode dulu didefinisikan ulang di sini dengan `type: string` yang longgar.
 // Kini memakai satu sumber di features/flowchart/types.ts, sehingga node hasil
 // salin-tempel tetap bertipe ketat saat diserahkan ke setNodes.
-import type { FlowNode } from "../features/flowchart/types";
+import type { FlowEdge as TepiPapan, FlowNode } from "../features/flowchart/types";
+import type { SalinanPapan } from "../features/flowchart/lib/salinTempel";
 export type { FlowNode };
 
 export interface FlowEdge {
@@ -31,7 +32,7 @@ export function useFlowchartSelection() {
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
 
   // Tool mode: select (pointer), hand (pan), connect (draw edges)
-  const [activeTool, setActiveTool] = useState<'select' | 'hand' | 'connect'>('select');
+  const [activeTool, setActiveTool] = useState<"select" | "hand" | "connect">("select");
 
   // Connection mode: when drawing edges, track source node
   const [connectSourceId, setConnectSourceId] = useState<string | null>(null);
@@ -43,8 +44,12 @@ export function useFlowchartSelection() {
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
 
-  // Clipboard: nodes copied for paste operations
+  // Seleksi aktif (marquee + multi-drag). BUKAN clipboard — lihat #582.
   const [copiedNodes, setCopiedNodes] = useState<FlowNode[]>([]);
+
+  // Clipboard papan (#582). Dulu salinan menumpang `copiedNodes`, jadi klik di
+  // mana pun menghapus "yang sudah disalin" dan Ctrl+V diam tanpa pesan.
+  const [salinan, setSalinan] = useState<SalinanPapan>({ nodes: [], edges: [] });
 
   // Marquee selection: drag to select multiple nodes
   const [marqueeBox, setMarqueeBox] = useState<MarqueeBox | null>(null);
@@ -55,7 +60,7 @@ export function useFlowchartSelection() {
     setSelectedEdgeId(null);
     setConnectSourceId(null);
     setCopiedNodes([]);
-    setActiveTool('select');
+    setActiveTool("select");
     setMarqueeBox(null);
   };
 
@@ -75,9 +80,9 @@ export function useFlowchartSelection() {
   };
 
   // Toggle tool mode
-  const switchTool = (tool: 'select' | 'hand' | 'connect') => {
+  const switchTool = (tool: "select" | "hand" | "connect") => {
     setActiveTool(tool);
-    if (tool === 'connect') {
+    if (tool === "connect") {
       // Prepare for connection mode
       setMarqueeBox(null);
     }
@@ -86,28 +91,29 @@ export function useFlowchartSelection() {
   // Start connection: set source node
   const startConnection = (nodeId: string) => {
     setConnectSourceId(nodeId);
-    setActiveTool('connect');
+    setActiveTool("connect");
   };
 
   // Complete connection: reset connection state
   const completeConnection = () => {
     setConnectSourceId(null);
-    setActiveTool('select');
+    setActiveTool("select");
   };
 
   // Copy nodes to clipboard
-  const copyNodesToClipboard = (nodes: FlowNode[]) => {
-    setCopiedNodes(JSON.parse(JSON.stringify(nodes)));
+  const copyNodesToClipboard = (nodes: FlowNode[], edges: TepiPapan[] = []) => {
+    // Disalin matang: papan boleh digeset setelahnya tanpa mengubah clipboard.
+    setSalinan(JSON.parse(JSON.stringify({ nodes, edges })));
   };
 
   // Get clipboard contents
-  const getClipboardNodes = (): FlowNode[] => {
-    return copiedNodes;
-  };
+  const getClipboardNodes = (): FlowNode[] => salinan.nodes;
+
+  const getClipboard = (): SalinanPapan => salinan;
 
   // Clear clipboard
   const clearClipboard = () => {
-    setCopiedNodes([]);
+    setSalinan({ nodes: [], edges: [] });
   };
 
   // Set marquee selection box (for drag-to-select)
@@ -117,9 +123,7 @@ export function useFlowchartSelection() {
 
   // Update marquee box during drag
   const updateMarqueeBox = (clientX: number, clientY: number) => {
-    setMarqueeBox(prev =>
-      prev ? { ...prev, currentX: clientX, currentY: clientY } : null
-    );
+    setMarqueeBox((prev) => (prev ? { ...prev, currentX: clientX, currentY: clientY } : null));
   };
 
   // Check if node is selected
@@ -135,16 +139,16 @@ export function useFlowchartSelection() {
   const isEdgeHovered = (edgeId: string): boolean => hoveredEdgeId === edgeId;
 
   // Check if in connection mode
-  const isInConnectMode = (): boolean => activeTool === 'connect' && connectSourceId !== null;
+  const isInConnectMode = (): boolean => activeTool === "connect" && connectSourceId !== null;
 
   // Check if in panning mode
-  const isInPanMode = (): boolean => activeTool === 'hand' || isSpacePressed;
+  const isInPanMode = (): boolean => activeTool === "hand" || isSpacePressed;
 
   // Has selection
   const hasSelection = (): boolean => selectedNodeId !== null || selectedEdgeId !== null;
 
   // Has copied nodes
-  const hasClipboardContent = (): boolean => copiedNodes.length > 0;
+  const hasClipboardContent = (): boolean => salinan.nodes.length > 0;
 
   // Count marquee selected nodes
   const getMarqueeSelectionCount = (): number => copiedNodes.length;
@@ -191,6 +195,7 @@ export function useFlowchartSelection() {
     completeConnection,
     copyNodesToClipboard,
     getClipboardNodes,
+    getClipboard,
     clearClipboard,
     setMarqueeSelection,
     updateMarqueeBox,
@@ -204,6 +209,6 @@ export function useFlowchartSelection() {
     isInPanMode,
     hasSelection,
     hasClipboardContent,
-    getMarqueeSelectionCount
+    getMarqueeSelectionCount,
   };
 }
