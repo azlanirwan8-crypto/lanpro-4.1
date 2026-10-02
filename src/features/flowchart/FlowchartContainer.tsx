@@ -58,7 +58,7 @@ import { CanvasContextMenu } from "./components/CanvasContextMenu";
 import { FlowchartDetail } from "./components/FlowchartDetail";
 import { hasilTempel, kumpulkanSalinan } from "./lib/salinTempel";
 import type { FlowNode, FlowEdge, FlowchartDocument, FlowchartData } from "./types";
-import { KONTEKS_KOSONG } from "./types";
+import { adaKonteks, KONTEKS_KOSONG } from "./types";
 import { dataUnduhAman, tautanAman } from "../../lib/tautanAman";
 import { setScreenSnapshot, clearScreenSnapshot } from "../../lib/screenContext";
 import { parseUniversalDiagram } from "./lib/importers";
@@ -1406,6 +1406,46 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     closeUploadDocumentModal();
   };
 
+  /**
+   * Hapus satu lampiran (#587).
+   *
+   * Tombolnya belum pernah ada: daftar dokumen hanya bisa ditambah, jadi
+   * tautan yang salah ketik menumpuk selamanya. Sama seperti penambahan,
+   * lampiran hidup di daftar perangkat — kolom `documents` tidak ikut ke
+   * basis data (tercatat sebagai #588).
+   */
+  const hapusTautanDokumen = async (docId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!selectedFlowId) return;
+
+    const isConfirmed = await confirmDeleteAlert(
+      t("alerts.deleteDocumentTitle"),
+      t("alerts.deleteDocumentText")
+    );
+    if (!isConfirmed) return;
+
+    const projId = selectedProject?.id || selectedProject?.key || "default";
+    setFlowcharts((currentFlowcharts) => {
+      const updatedList = currentFlowcharts.map((f) =>
+        f.id === selectedFlowId
+          ? {
+              ...f,
+              documents: (f.documents || []).filter((d) => d.id !== docId),
+              lastEditedAt: new Date().toLocaleString("id-ID"),
+            }
+          : f
+      );
+      try {
+        safeLocalStorage.setItem(`lanpro_flowcharts_${projId}`, JSON.stringify(updatedList));
+      } catch (err) {
+        console.warn("Storage quota exceeded, could not save locally:", err);
+      }
+      return updatedList;
+    });
+
+    showSuccessAlert(t("alerts.successTitle"), t("alerts.docDeleted"));
+  };
+
   // Open edit description modal
   const openEditModal = (flow: FlowchartData, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -1680,10 +1720,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     const currentTimestamp = new Date().toLocaleString("id-ID");
 
     // #583 — kolom `description` tetap terisi satu teks manusia (daftar
-    // Dokumentasi memakainya sebagai subjudul, lihat #136). Sumbernya sekarang
-    // Problem Statement; flow lama yang belum punya blok baru tetap menyimpan
-    // deskripsi yang sudah ada.
-    const deskripsi = flowKonteks.masalah.trim() || flowDescription;
+    // Dokumentasi memakainya sebagai subjudul, lihat #136). Sejak ada empat
+    // blok, Problem Statement-lah pemilik kolom itu: kalau ia dikosongkan,
+    // subjudulnya ikut kosong, bukan kembali menampilkan teks lama yang sudah
+    // dibuang pengguna. Flow lama yang belum punya blok tetap menyimpan
+    // deskripsinya sendiri.
+    const asal = flowcharts.find((f) => f.id === editingFlowId);
+    const punyaBlok = adaKonteks(flowKonteks) || adaKonteks(asal?.konteks);
+    const deskripsi = punyaBlok ? flowKonteks.masalah.trim() : flowDescription;
 
     if (modalMode === "create") {
       const newId = "flow_" + Date.now();
@@ -1759,7 +1803,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             epicTaskId: flowEpicId,
             description: deskripsi,
             konteks: flowKonteks,
-            createdBy: flowCreator,
+            // `createdBy` sengaja TIDAK ikut ditulis ulang: modal ini hanya
+            // punya nama tampilan penulis, bukan id-nya. Menyalinkannya ke
+            // `createdBy` membuat pemeriksaan kepemilikan (#268) membaca nama
+            // sebagai id, dan pemiliknya kehilangan hak sunting/hapus begitu
+            // daftar disegarkan dari server.
             externalUrl: flowExternalUrl,
             lastEditedAt: currentTimestamp,
           };
@@ -1775,13 +1823,20 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       if (selectedProject?.id && editingFlowId && !editingFlowId.startsWith("flow_")) {
         try {
           const foundFlow = updated.find((f) => f.id === editingFlowId);
+          // Papan yang SEDANG dibuka di layar: kirim state hidup, bukan salinan
+          // daftar yang bisa tertinggal, dan bawa tema + tautan epic sekalian.
+          // Tanpa keduanya PUT di sini menghapusnya dari payload — persis kelas
+          // #570: nilainya kembali ke bawaan setelah muat ulang.
+          const papanTerbuka = editingFlowId === selectedFlowId;
           await updateFlowchartApi(selectedProject.id, editingFlowId, {
             name: flowName.trim(),
-            nodes: foundFlow?.nodes || [],
-            edges: foundFlow?.edges || [],
+            nodes: papanTerbuka ? nodes : foundFlow?.nodes || [],
+            edges: papanTerbuka ? edges : foundFlow?.edges || [],
             externalUrl: flowExternalUrl,
             description: deskripsi,
             konteks: flowKonteks,
+            theme: papanTerbuka ? canvasTheme : foundFlow?.theme,
+            epicTaskId: flowEpicId,
             // Item #144 — tanpa baris ini kategorinya hanya bertahan di
             // localStorage dan hilang begitu cache dibersihkan.
             category: flowCategory,
@@ -3074,7 +3129,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                     currentFlowMetadata && handleDeleteFlowchart(currentFlowMetadata.id, e)
                   }
                   editTitle={t("flowchart.editMetadata")}
-                  deleteTitle={t("flowchart.deleteDocument")}
+                  deleteTitle={t("flowchart.deleteFlowchart")}
                   meta={
                     <>
                       {currentFlowMetadata?.category === "PRD" && (
@@ -3246,7 +3301,16 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                         )}
                                       </div>
                                     </div>
-                                    <div className="pt-3 border-t border-border-faint flex items-center justify-end">
+                                    <div className="pt-3 border-t border-border-faint flex items-center justify-end gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={(e) => hapusTautanDokumen(doc.id, e)}
+                                        title={t("flowchart.deleteDocument")}
+                                        aria-label={t("flowchart.deleteDocument")}
+                                        className="p-2 rounded-lg text-content-subtle hover:text-content-strong hover:bg-surface-muted transition-colors cursor-pointer"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
                                       {tautan ? (
                                         <a
                                           href={tautan}

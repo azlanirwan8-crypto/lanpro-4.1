@@ -1573,7 +1573,7 @@ export const en = {
     linkedEpicLabel: "Linked Epic",
     connectWithEpic: "-- Connect with an Epic --",
     linkedEpicHint:
-      "Connect it to a main epic from the workspace backlog so the flowchart documentation stays tied to the team milestone.",
+      "Every row in this list is an epic ({{jumlah}} epics in this project's backlog) - pick the parent epic for this diagram.",
     createDocument: "Create Document",
     saveChanges: "Save Changes",
     addDocument: "Add Document",
@@ -1825,6 +1825,9 @@ export const en = {
     deleteFlowchartTitle: "Delete Flowchart?",
     deleteFlowchartText:
       "Are you sure you want to permanently delete this flowchart documentation?",
+    deleteDocumentTitle: "Delete Attachment?",
+    deleteDocumentText:
+      "This attachment is removed from the board's document list. The board itself is not changed.",
     canvasCleared: "Canvas cleared successfully.",
     flowchartDeleted: "Flowchart deleted successfully.",
     docDeleted: "Document deleted successfully.",

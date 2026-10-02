@@ -1585,7 +1585,7 @@ export const id = {
     linkedEpicLabel: "Link Epic Terkait",
     connectWithEpic: "-- Hubungkan dengan Epic --",
     linkedEpicHint:
-      "Hubungkan dengan epic utama dari backlog workspace agar dokumentasi diagram alur berkaitan erat dengan milestone tim.",
+      "Semua baris di daftar ini berjenis epic ({{jumlah}} epic pada backlog proyek ini) — pilih epic induk diagram ini.",
     createDocument: "Buat Dokumen",
     saveChanges: "Simpan Perubahan",
     addDocument: "Tambah Dokumen",
@@ -1840,6 +1840,9 @@ export const id = {
     deleteFlowchartTitle: "Hapus Diagram Alur?",
     deleteFlowchartText:
       "Apakah Anda yakin ingin menghapus dokumentasi diagram alur ini secara permanen?",
+    deleteDocumentTitle: "Hapus Lampiran?",
+    deleteDocumentText:
+      "Lampiran ini hilang dari daftar dokumen papan tersebut. Isi papannya tidak ikut berubah.",
     canvasCleared: "Kanvas berhasil dikosongkan.",
     flowchartDeleted: "Diagram alur berhasil dihapus.",
     docDeleted: "Data dokumen berhasil dihapus.",

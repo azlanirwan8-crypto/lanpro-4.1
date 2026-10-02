@@ -80,4 +80,47 @@ describe("FlowchartDocumentModal — empat blok detail (#583)", () => {
       });
     }
   });
+
+  // #587 — pemilik proyek: "terlalu kecil ui modal nya... document category nya
+  // juga tidak sama besar desainnya". `cn()` hanya merangkai kelas (tanpa
+  // tailwind-merge) dan pemicu StyledDropdown selalu membawa px-1.5 py-0.5
+  // bawaannya, jadi yang bisa dikunci hanyalah tingginya.
+  it("semua kontrol satu-baris memakai tinggi yang sama, termasuk kedua dropdown", () => {
+    const { container } = render(<FlowchartDocumentModal {...props()} />);
+
+    const pemicu = Array.from(container.querySelectorAll("button")).filter((b) =>
+      /Panduan|Hubungkan dengan Epic/i.test(b.textContent || "")
+    );
+    expect(pemicu.length).toBe(2);
+
+    const nama = container.querySelector('input[type="text"]') as HTMLElement;
+    for (const kendali of [nama, ...pemicu]) {
+      expect(kendali.className).toContain("h-10");
+      expect(kendali.className).toContain("text-sm");
+    }
+  });
+
+  it("baris epic membawa penanda jenis dan jumlahnya disebut di petunjuk", async () => {
+    render(
+      <FlowchartDocumentModal
+        {...props({
+          availableEpics: [
+            { id: "e1", key: "PRJ-3", title: "Pembayaran QRIS" },
+            { id: "e2", key: "WMIR-166", title: "Onboarding EDC" },
+          ],
+        })}
+      />
+    );
+
+    expect(screen.getByText(/2 epic/i)).toBeTruthy();
+
+    fireEvent.click(
+      screen.getAllByText(/Hubungkan dengan Epic/i)[0].closest("button") as HTMLElement
+    );
+    const baris = (await screen.findByText("[PRJ-3] Pembayaran QRIS")).closest(
+      "button"
+    ) as HTMLElement;
+    // Ikon jenis di kiri baris — pembedanya, bukan hanya kata "epic".
+    expect(baris.querySelector("svg")).toBeTruthy();
+  });
 });

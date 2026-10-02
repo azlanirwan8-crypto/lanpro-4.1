@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import React from "react";
 import { CircleAlert, Layers, Lightbulb, Target, TrendingUp, Workflow, X } from "lucide-react";
 import { StyledDropdown } from "../../../components/ui/CommonComponents";
+import { warnaLabel } from "../../../lib/warnaLabel";
 import type { KonteksFlowchart } from "../types";
 
 interface EpicOption {
@@ -36,10 +37,34 @@ interface FlowchartDocumentModalProps {
   setFlowKonteks: (v: KonteksFlowchart) => void;
 }
 
-const INPUT =
-  "w-full text-xs font-normal bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong placeholder:text-content-subtle focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all";
+/**
+ * SATU kelas untuk semua kontrol satu-baris (#587).
+ *
+ * Ukurannya diambil dari modal terbesar aplikasi ini (`NewTaskModal`): `h-10`
+ * dengan `text-sm px-3`. Dua hal yang membuat form ini dulu tampak tidak
+ * seragam:
+ *
+ * 1. `cn()` di `lib/utils.ts` hanya MERANTAI kelas — tidak ada tailwind-merge.
+ *    Pemicu `StyledDropdown` selalu membawa `px-1.5 py-0.5` dari cabang bawaannya,
+ *    dan di stylesheet Tailwind `px-*`/`py-*` dicetak SETELAH `p-*`, jadi
+ *    padding yang ditulis pemanggil kalah. Karena itu tingginya dikunci lewat
+ *    `h-10`, bukan lewat padding.
+ * 2. Kelas kontrol didefinisikan ulang di setiap field, sehingga dropdown bisa
+ *    berbeda dari kolom di sebelahnya tanpa ada yang menyentuhnya.
+ */
+const KONTROL_DASAR =
+  "w-full text-left text-sm font-normal bg-surface border border-border-subtle rounded-lg px-3 text-content-strong placeholder:text-content-subtle focus:bg-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all";
 
-const LABEL = "flex items-center gap-1.5 text-[11px] font-medium text-content-body";
+const KONTROL = `${KONTROL_DASAR} h-10`;
+
+/** Kotak teks multi-baris: sama ratanya, tingginya mengikuti isi. */
+const KOTAK = `${KONTROL_DASAR} py-2 resize-y leading-relaxed`;
+
+const LABEL = "flex items-center gap-1.5 text-xs font-medium text-content-body";
+
+/** Ikon dan warna jenis "epic" — standar yang sama dipakai tabel Isu (#564). */
+const IKON_EPIC = "Zap";
+const WARNA_EPIC = warnaLabel({ kelompok: "issue_type", label: "Epic" });
 
 export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
   open,
@@ -94,21 +119,19 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-      <div className="bg-surface border border-border-subtle w-full max-w-2xl rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[88vh] text-content-strong">
-        <div className="px-5 py-4 bg-surface border-b border-border-subtle flex justify-between items-center shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-              <Layers className="w-4 h-4" />
+      <div className="bg-surface border border-border-subtle w-full max-w-3xl rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[88vh] text-content-strong">
+        <div className="px-6 py-4 bg-surface border-b border-border-subtle flex justify-between items-center shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+              <Layers className="w-5 h-5" />
             </div>
             <div className="flex flex-col">
-              <h3 className="font-medium text-sm text-content">
+              <h3 className="font-medium text-base text-content">
                 {modalMode === "create"
                   ? t("flowchart.addFlowchartData")
                   : t("flowchart.editDocDetail")}
               </h3>
-              <span className="text-[11px] text-content-subtle">
-                {t("flowchart.modalSubtitle")}
-              </span>
+              <span className="text-xs text-content-subtle">{t("flowchart.modalSubtitle")}</span>
             </div>
           </div>
           <button
@@ -122,7 +145,7 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
         </div>
 
         <form onSubmit={onSubmit} className="flex flex-col min-h-0 flex-1">
-          <div className="p-5 space-y-5 overflow-y-auto flex-1">
+          <div className="p-6 space-y-5 overflow-y-auto flex-1">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className={LABEL}>
@@ -134,7 +157,7 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
                   placeholder={t("flowchart.docNamePlaceholder")}
                   value={flowName}
                   onChange={(e) => setFlowName(e.target.value)}
-                  className={INPUT}
+                  className={KONTROL}
                 />
               </div>
 
@@ -149,14 +172,14 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
                   type="jenis_dokumen"
                   masterData={[]}
                   className="w-full"
-                  buttonClassName="w-full text-xs font-normal bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong"
+                  buttonClassName={KONTROL}
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
               <label className={LABEL}>
-                <Workflow className="w-3.5 h-3.5 text-primary" />
+                <Workflow className="w-4 h-4 text-primary" />
                 {t("flowchart.linkedEpicLabel")}
               </label>
               <StyledDropdown
@@ -167,34 +190,37 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
                   ...availableEpics.map((epic) => ({
                     id: epic.id,
                     label: `[${epic.key}] ${epic.title}`,
+                    icon: IKON_EPIC,
+                    color: WARNA_EPIC,
                   })),
                 ]}
-                buttonClassName="w-full text-xs font-normal bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-left text-content-strong"
+                className="w-full"
+                buttonClassName={KONTROL}
               />
-              <p className="text-[10px] text-content-subtle leading-normal">
+              <p className="text-[11px] text-content-subtle leading-normal">
                 {availableEpics.length > 0
-                  ? t("flowchart.linkedEpicHint")
+                  ? t("flowchart.linkedEpicHint", { jumlah: availableEpics.length })
                   : t("flowchart.linkedEpicKosong")}
               </p>
             </div>
 
-            <div className="border-t border-border-faint pt-4 space-y-3">
-              <h4 className="text-[11px] font-medium uppercase tracking-wide text-content-subtle">
+            <div className="border-t border-border-faint pt-5 space-y-4">
+              <h4 className="text-xs font-medium uppercase tracking-wide text-content-subtle">
                 {t("flowchart.detailDokumen")}
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {blok.map(({ isi, judul, petunjuk, Ikon }) => (
                   <div key={isi} className="space-y-1.5">
                     <label className={LABEL}>
-                      <Ikon className="w-3.5 h-3.5 text-primary" />
+                      <Ikon className="w-4 h-4 text-primary" />
                       {judul}
                     </label>
                     <textarea
-                      rows={3}
+                      rows={4}
                       placeholder={petunjuk}
                       value={flowKonteks[isi]}
                       onChange={(e) => setFlowKonteks({ ...flowKonteks, [isi]: e.target.value })}
-                      className={`${INPUT} resize-y leading-relaxed`}
+                      className={KOTAK}
                     />
                   </div>
                 ))}
@@ -202,19 +228,19 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
             </div>
           </div>
 
-          <div className="px-5 py-4 flex justify-between items-center gap-2 border-t border-border-subtle bg-surface-sunken/50 shrink-0">
-            <span className="text-[10px] text-content-subtle">{t("flowchart.requiredNote")}</span>
+          <div className="px-6 py-4 flex justify-between items-center gap-2 border-t border-border-subtle bg-surface-sunken/50 shrink-0">
+            <span className="text-[11px] text-content-subtle">{t("flowchart.requiredNote")}</span>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-lg bg-surface-muted hover:bg-surface-strong font-medium text-content-body transition-all text-xs"
+                className="px-4 py-2 rounded-lg bg-surface-muted hover:bg-surface-strong font-medium text-content-body transition-all text-sm"
               >
                 {t("flowchart.cancel")}
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium rounded-lg text-xs shadow-xs transition-all"
+                className="px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium rounded-lg text-sm shadow-xs transition-all"
               >
                 {modalMode === "create"
                   ? t("flowchart.createDocument")
