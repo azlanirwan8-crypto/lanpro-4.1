@@ -59,6 +59,7 @@ import { FlowchartDetail } from "./components/FlowchartDetail";
 import { hasilTempel, kumpulkanSalinan } from "./lib/salinTempel";
 import type { FlowNode, FlowEdge, FlowchartDocument, FlowchartData } from "./types";
 import { KONTEKS_KOSONG } from "./types";
+import { dataUnduhAman, tautanAman } from "../../lib/tautanAman";
 import { setScreenSnapshot, clearScreenSnapshot } from "../../lib/screenContext";
 import { parseUniversalDiagram } from "./lib/importers";
 import { apakahPembuat, tampilanNamaPembuat } from "./lib/authorIdentity";
@@ -3213,55 +3214,67 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           {currentFlowMetadata?.documents &&
                           currentFlowMetadata.documents.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                              {currentFlowMetadata.documents.map((doc, idx) => (
-                                <div
-                                  key={doc.id}
-                                  className="p-4 rounded-xl border border-border-subtle bg-surface flex flex-col gap-4 shadow-soft hover:shadow hover:border-primary/30 transition-all group"
-                                >
-                                  <div className="flex items-start justify-between gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                                      <FileText className="w-5 h-5" />
+                              {currentFlowMetadata.documents.map((doc) => {
+                                // Nilai ini datang dari `canvasData` yang ditulis
+                                // klien, jadi keamanannya diputuskan tepat sebelum
+                                // dipakai — validasi saat menyimpan tidak melindungi
+                                // baris yang sudah ada (#584).
+                                const tautan = tautanAman(doc.link);
+                                const unduh = dataUnduhAman(doc.fileData);
+                                return (
+                                  <div
+                                    key={doc.id}
+                                    className="p-4 rounded-xl border border-border-subtle bg-surface flex flex-col gap-4 shadow-soft hover:shadow hover:border-primary/30 transition-all group"
+                                  >
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                                        <FileText className="w-5 h-5" />
+                                      </div>
+                                      <div className="flex flex-col flex-1 min-w-0">
+                                        <span className="text-sm font-medium text-content-strong whitespace-nowrap">
+                                          {doc.name}
+                                        </span>
+                                        <span className="text-xs text-content-muted font-medium whitespace-nowrap mt-0.5">
+                                          {doc.link || doc.fileName}
+                                        </span>
+                                        {doc.fileSize && (
+                                          <span className="text-xs sm:text-[10px] text-content-subtle mt-1">
+                                            {t("rakit.sizeMb", {
+                                              ukuran: (doc.fileSize / 1024 / 1024).toFixed(2),
+                                            })}
+                                          </span>
+                                        )}
+                                      </div>
                                     </div>
-                                    <div className="flex flex-col flex-1 min-w-0">
-                                      <span className="text-sm font-medium text-content-strong whitespace-nowrap">
-                                        {doc.name}
-                                      </span>
-                                      <span className="text-xs text-content-muted font-medium whitespace-nowrap mt-0.5">
-                                        {doc.link || doc.fileName}
-                                      </span>
-                                      {doc.fileSize && (
-                                        <span className="text-xs sm:text-[10px] text-content-subtle mt-1">
-                                          {t("rakit.sizeMb", {
-                                            ukuran: (doc.fileSize / 1024 / 1024).toFixed(2),
-                                          })}
+                                    <div className="pt-3 border-t border-border-faint flex items-center justify-end">
+                                      {tautan ? (
+                                        <a
+                                          href={tautan}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="flex items-center gap-2 text-xs font-medium text-primary hover:text-primary bg-primary/10 hover:bg-primary/15 px-3 py-1.5 rounded-lg transition-colors"
+                                        >
+                                          <LinkIcon className="w-3.5 h-3.5" />{" "}
+                                          {t("flowchart.bukaTautan")}
+                                        </a>
+                                      ) : unduh ? (
+                                        <a
+                                          href={unduh}
+                                          download={doc.fileName}
+                                          className="flex items-center gap-2 text-xs font-medium text-primary hover:text-primary bg-primary/10 hover:bg-primary/15 px-3 py-1.5 rounded-lg transition-colors"
+                                        >
+                                          <Download className="w-3.5 h-3.5" />{" "}
+                                          {t("flowchart.download")}
+                                        </a>
+                                      ) : (
+                                        <span className="text-[11px] text-content-subtle">
+                                          {t("flowchart.tautanDitolak")}
                                         </span>
                                       )}
                                     </div>
                                   </div>
-                                  <div className="pt-3 border-t border-border-faint flex items-center justify-end">
-                                    {doc.link ? (
-                                      <a
-                                        href={doc.link}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-2 text-xs font-medium text-primary hover:text-primary bg-primary/10 hover:bg-primary/15 px-3 py-1.5 rounded-lg transition-colors"
-                                      >
-                                        <LinkIcon className="w-3.5 h-3.5" />{" "}
-                                        {t("flowchart.bukaTautan")}
-                                      </a>
-                                    ) : (
-                                      <a
-                                        href={doc.fileData}
-                                        download={doc.fileName}
-                                        className="flex items-center gap-2 text-xs font-medium text-primary hover:text-primary bg-primary/10 hover:bg-primary/15 px-3 py-1.5 rounded-lg transition-colors"
-                                      >
-                                        <Download className="w-3.5 h-3.5" />{" "}
-                                        {t("flowchart.download")}
-                                      </a>
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
+                                );
+                              })}
                             </div>
                           ) : (
                             <div className="flex flex-col items-center justify-center py-20 px-4 text-center">

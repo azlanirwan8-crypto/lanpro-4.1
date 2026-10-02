@@ -1589,6 +1589,7 @@ export const en = {
       "Paste a Google Docs / Sheets / Slides / Confluence / drive link. Files are no longer uploaded into the app.",
     simpanTautan: "Save Link",
     bukaTautan: "Open Link",
+    tautanDitolak: "Unrecognised link - it cannot be opened from here.",
     download: "Download",
     editMetadata: "Edit document metadata",
     deleteDocument: "Delete document",

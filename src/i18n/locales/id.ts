@@ -1601,6 +1601,7 @@ export const id = {
       "Tempel tautan Google Docs / Sheets / Slides / Confluence / berkas di drive. Berkas tidak lagi diunggah ke dalam aplikasi.",
     simpanTautan: "Simpan Tautan",
     bukaTautan: "Buka Tautan",
+    tautanDitolak: "Tautan tidak dikenal - tidak bisa dibuka dari sini.",
     download: "Unduh",
     editMetadata: "Ubah metadata dokumen",
     deleteDocument: "Hapus dokumen",
