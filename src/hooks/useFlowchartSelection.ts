@@ -147,9 +147,6 @@ export function useFlowchartSelection() {
   // Has selection
   const hasSelection = (): boolean => selectedNodeId !== null || selectedEdgeId !== null;
 
-  // Has copied nodes
-  const hasClipboardContent = (): boolean => salinan.nodes.length > 0;
-
   // Count marquee selected nodes
   const getMarqueeSelectionCount = (): number => copiedNodes.length;
 
@@ -208,7 +205,6 @@ export function useFlowchartSelection() {
     isInConnectMode,
     isInPanMode,
     hasSelection,
-    hasClipboardContent,
     getMarqueeSelectionCount,
   };
 }

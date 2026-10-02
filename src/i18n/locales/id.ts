@@ -1523,6 +1523,10 @@ export const id = {
     copiedShapes: "{{bentuk}} bentuk dan {{panah}} panah disalin ke clipboard papan.",
     pasteNothing: "Clipboard papan kosong - salin dulu bentuknya (Ctrl+C).",
     pastedShapes: "{{bentuk}} bentuk dan {{panah}} panah ditempel.",
+    tempelTidakTerbaca:
+      "Clipboard papan kosong dan peramban tidak mengizinkan isinya dibaca - salin di dalam papan (Ctrl+C), atau pakai menu Impor untuk berkas draw.io/Miro.",
+    tempelBukanDiagram:
+      "Isi clipboard peramban bukan diagram yang dikenali - salin bentuknya di draw.io/Miro, atau pakai menu Impor untuk berkas aslinya.",
     moveGroupWide: "Geser Kelompok Lebar",
     cancelSelection: "Batalkan Pilihan / Alat",
     deleteSelected: "Hapus Elemen Terpilih",

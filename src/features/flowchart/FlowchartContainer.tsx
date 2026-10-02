@@ -57,11 +57,13 @@ import { NodeContextMenu } from "./components/NodeContextMenu";
 import { CanvasContextMenu } from "./components/CanvasContextMenu";
 import { FlowchartDetail } from "./components/FlowchartDetail";
 import { hasilTempel, kumpulkanSalinan } from "./lib/salinTempel";
+import type { SalinanPapan } from "./lib/salinTempel";
 import type { FlowNode, FlowEdge, FlowchartDocument, FlowchartData } from "./types";
 import { adaKonteks, KONTEKS_KOSONG } from "./types";
 import { dataUnduhAman, tautanAman } from "../../lib/tautanAman";
 import { setScreenSnapshot, clearScreenSnapshot } from "../../lib/screenContext";
 import { parseUniversalDiagram } from "./lib/importers";
+import type { ParsedDiagram } from "./lib/importers";
 import { apakahPembuat, tampilanNamaPembuat } from "./lib/authorIdentity";
 import { colorPalettes, UKURAN_BENTUK } from "./constants";
 // Diberi akhiran Api karena useFlowchartList() juga mengekspos updateFlowchart
@@ -350,7 +352,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     isInConnectMode,
     isInPanMode,
     hasSelection,
-    hasClipboardContent,
     getMarqueeSelectionCount,
   } = selectionHook;
 
@@ -988,17 +989,64 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     );
   };
 
-  const tempelSalinan = (diTitik?: { x: number; y: number } | null) => {
-    const isi = getClipboard();
-    if (isi.nodes.length === 0) {
-      toast.info(t("flowchart.pasteNothing"));
-      return;
+  /**
+   * Baca clipboard PERAMBAN dan ubah isinya jadi bentuk papan (#589).
+   *
+   * Ini separuh yang dulu ditunda: Ctrl+C di Miro atau draw.io tidak pernah
+   * sampai ke LanPro sama sekali, jadi "paste flow" dari aplikasi lain tetap
+   * mati sementara salin-tempel di dalam papan sudah jalan (#582). Yang datang
+   * dari clipboard peramban adalah TULISAN ASING — ia tidak langsung masuk ke
+   * state papan, ia dilewatkan ke penyanding yang sama dengan menu Impor
+   * (`parseUniversalDiagram`), dan hanya bentuk yang benar-benar terbaca yang
+   * dipakai. Tidak ada yang ditebak: nol bentuk = ditolak dengan pesan.
+   *
+   * `null` berarti sudah ada pesan dibunyikan; pemanggil tidak perlu menambah
+   * pesan kedua.
+   */
+  const salinanDariPeramban = async (): Promise<SalinanPapan | null> => {
+    let teks = "";
+    try {
+      if (!navigator.clipboard?.readText) throw new Error("tanpa API clipboard");
+      teks = (await navigator.clipboard.readText()).trim();
+    } catch {
+      // Peramban menolak, atau halaman tidak di语境 aman (http). Papan sendiri
+      // masih bisa dipakai: Ctrl+C lalu Ctrl+V di dalam papan.
+      toast.info(t("flowchart.tempelTidakTerbaca"));
+      return null;
     }
+
+    if (!teks) {
+      toast.info(t("flowchart.pasteNothing"));
+      return null;
+    }
+
+    let diagram: ParsedDiagram;
+    try {
+      diagram = parseUniversalDiagram(teks);
+    } catch {
+      diagram = { nodes: [], edges: [] };
+    }
+    if (diagram.nodes.length === 0) {
+      toast.info(t("flowchart.tempelBukanDiagram"));
+      return null;
+    }
+    return kumpulkanSalinan(diagram.nodes, diagram.edges);
+  };
+
+  const tempelSalinan = async (diTitik?: { x: number; y: number } | null) => {
     const posisi =
       diTitik ??
       (titikKursorRef.current
         ? koordinatPapan(titikKursorRef.current.x, titikKursorRef.current.y)
         : null);
+
+    let isi = getClipboard();
+    if (isi.nodes.length === 0) {
+      const dariPeramban = await salinanDariPeramban();
+      if (!dariPeramban) return;
+      isi = dariPeramban;
+    }
+    if (isi.nodes.length === 0) return;
     const hasil = hasilTempel(isi, posisi);
     const mergedNodes = [...nodes, ...hasil.nodes];
     const mergedEdges = [...edges, ...hasil.edges];
@@ -1119,10 +1167,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
       // Add: Ctrl+C / Cmd+C - Copy seleksi (bentuk + panah di antaranya)
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c") {
-        if (selectedNodeId || copiedNodes.length > 0) {
-          e.preventDefault();
-          aksiKlipboardRef.current.salin();
-        }
+        // Tanpa seleksi sekalipun handler harus bicara: penjaga di luar dulu
+        // membuat Ctrl+C diam total, dan satu-satunya petunjuk bahwa tidak ada
+        // yang tersalin baru muncul saat korban menekan Ctrl+V.
+        e.preventDefault();
+        aksiKlipboardRef.current.salin();
       }
 
       // Add: Ctrl+V / Cmd+V - Paste di bawah kursor
@@ -4310,7 +4359,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           onRedo={handleRedoClick}
           onClear={handleClearWhiteboard}
           onPaste={(klienX, klienY) => tempelSalinan(koordinatPapan(klienX, klienY))}
-          bolehTempel={hasClipboardContent()}
+          bolehTempel
           canUndo={historyIndex > 0}
           canRedo={historyIndex < historyStack.length - 1}
         />

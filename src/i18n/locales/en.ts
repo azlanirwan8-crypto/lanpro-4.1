@@ -1512,6 +1512,10 @@ export const en = {
     copiedShapes: "Copied {{bentuk}} shapes and {{panah}} arrows to the canvas clipboard.",
     pasteNothing: "The canvas clipboard is empty - copy a shape first (Ctrl+C).",
     pastedShapes: "Pasted {{bentuk}} shapes and {{panah}} arrows.",
+    tempelTidakTerbaca:
+      "The canvas clipboard is empty and the browser refused to share its contents - copy inside the board (Ctrl+C), or use Import for a draw.io/Miro file.",
+    tempelBukanDiagram:
+      "The browser clipboard does not hold a recognisable diagram - copy the shapes in draw.io/Miro, or use Import for the original file.",
     moveGroupWide: "Move Group Wide",
     cancelSelection: "Cancel selection / tool",
     deleteSelected: "Delete Selected Element",
