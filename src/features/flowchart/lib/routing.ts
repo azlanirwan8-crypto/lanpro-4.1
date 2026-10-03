@@ -45,7 +45,16 @@ export function isSegmentIntersectingSegment(p1: Point, p2: Point, q1: Point, q2
   return false;
 }
 
-/** Apakah sebuah ruas garis memotong atau berada di dalam sebuah persegi. */
+/**
+ * Apakah sebuah ruas garis memotong ATAU MENYENGGOL sebuah persegi.
+ *
+ * #544 meninggalkan fungsi ini tanpa pemanggil produksi: perutean dan penanda
+ * "terganggu" pindah ke `memotongInteriorKotak`. Ia tetap ada (dan tetap
+ * diekspor) karena `routing.test.ts` memakainya sebagai PENGGARIS YANG LEBIH
+ * KETAT untuk pertanyaan "apakah garis yang digambar menutupi bentuk?" — sebuah
+ * garis yang berjalan tepat di tepi bentuk adalah cacat visual, walau secara
+ * geometri tidak masuk ke dalamnya. Jangan dihapus sebagai "dead code".
+ */
 export function isSegmentIntersectingRect(
   p1: Point,
   p2: Point,
@@ -87,6 +96,61 @@ export function isSegmentIntersectingRect(
 }
 
 /**
+ * #544 — apakah ruas itu MEMOTONG INTERIOR sebuah kotak.
+ *
+ * Bedanya dengan `isSegmentIntersectingRect` di atas: MENYENGGOL tidak dihitung.
+ * Ruas yang berakhir tepat di sudut, atau yang merapat di sepanjang tepi, boleh
+ * lewat - dan itu bukan kompromi visual, sebab kotak yang dipakai perutean sudah
+ * diperlebar 26 px dari bentuknya, jadi "menyenggol sudut" berarti lewat 26 px
+ * dari sudut bentuk aslinya.
+ *
+ * KENAPA HARUS TERPISAH. Graf keterlihatan di `findSmartRoute` dibangun DARI
+ * titik sudut rintangan itu. Selama menyenggol sudut dianggap terhalang, setiap
+ * simpul graf tidak terjangkau dari mana pun, Dijkstra selalu berakhir
+ * `dist === Infinity`, dan tidak pernah ada satu pun garis yang memutar -
+ * terukur delapan dari delapan geometri terhalang memulangkan garis lurus tembus
+ * bentuk (#572). Predikat lama tetap dipakai apa adanya oleh pemanggil yang
+ * memang ingin tahu soal sentuhan; yang pindah ke sini hanya perutean dan
+ * penanda "terganggu" di FlowchartEdges, sebab rute yang sah sekarang memang
+ * menyentuh sudut dan tidak boleh dianggap rusak setiap render.
+ */
+export function memotongInteriorKotak(
+  p1: Point,
+  p2: Point,
+  rect: { x1: number; y1: number; x2: number; y2: number }
+): boolean {
+  const buffer = 1;
+  const diDalam = (p: Point) =>
+    p.x > rect.x1 + buffer &&
+    p.x < rect.x2 - buffer &&
+    p.y > rect.y1 + buffer &&
+    p.y < rect.y2 - buffer;
+
+  if (diDalam(p1) || diDalam(p2)) return true;
+
+  const silangSejati = (a1: Point, a2: Point, b1: Point, b2: Point) => {
+    const arah = (o: Point, p: Point, q: Point) =>
+      (p.x - o.x) * (q.y - o.y) - (p.y - o.y) * (q.x - o.x);
+    const lawan = (a: number, b: number) => (a > 0.001 && b < -0.001) || (a < -0.001 && b > 0.001);
+    return lawan(arah(a1, a2, b1), arah(a1, a2, b2)) && lawan(arah(b1, b2, a1), arah(b1, b2, a2));
+  };
+
+  const tl = { x: rect.x1, y: rect.y1 };
+  const tr = { x: rect.x2, y: rect.y1 };
+  const br = { x: rect.x2, y: rect.y2 };
+  const bl = { x: rect.x1, y: rect.y2 };
+
+  if (silangSejati(p1, p2, tl, tr)) return true;
+  if (silangSejati(p1, p2, tr, br)) return true;
+  if (silangSejati(p1, p2, br, bl)) return true;
+  if (silangSejati(p1, p2, bl, tl)) return true;
+
+  // Ruas yang kedua ujungnya jatuh tepat di tepi tapi melintas di tengah kotak
+  // (misalnya sudut ke sudut seberang) tidak tertangkap uji di atas.
+  return diDalam({ x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 });
+}
+
+/**
  * Mencari jalur terpendek antar dua titik sambil menghindari node lain.
  * Memakai Dijkstra di atas graf sudut-sudut rintangan, dengan penalti belokan
  * agar garis tetap rapi dan tidak bergelombang.
@@ -122,16 +186,47 @@ export function findSmartRoute(
   const obX2: number[] = [];
   const obY2: number[] = [];
 
+  // #544 — koridor. Hanya rintangan di sekitar lintasan yang ikut membangun
+  // graf. Tanpa ini graf selalu punya 4N simpul dan setiap pasangan simpul
+  // diuji terhadap semua N rintangan: begitu grafnya benar-benar terhubung
+  // (bukan menyerah seperti sebelum #544), papan 100 bentuk butuh 63 detik
+  // untuk satu lintasan. Uji "ikut koridor" dipakai dua kali lipat lebar dari
+  // yang dipakai memotong, supaya ruas antar simpul yang terpilih tidak pernah
+  // bisa menyentuh rintangan yang tidak ikut diuji.
+  const margin = 200;
+  const x1Koridor = Math.min(start.x, end.x) - margin;
+  const x2Koridor = Math.max(start.x, end.x) + margin;
+  const y1Koridor = Math.min(start.y, end.y) - margin;
+  const y2Koridor = Math.max(start.y, end.y) + margin;
+
   for (const n of nodes) {
     if (n.id === fromNodeId || n.id === toNodeId) continue;
     const w = n.width || 130;
     const h = n.height || 70;
-    obX1.push(n.x - padding);
-    obY1.push(n.y - padding);
-    obX2.push(n.x + w + padding);
-    obY2.push(n.y + h + padding);
+    const x1 = n.x - padding;
+    const y1 = n.y - padding;
+    const x2 = n.x + w + padding;
+    const y2 = n.y + h + padding;
+    if (x2 < x1Koridor || x1 > x2Koridor || y2 < y1Koridor || y1 > y2Koridor) continue;
+    obX1.push(x1);
+    obY1.push(y1);
+    obX2.push(x2);
+    obY2.push(y2);
   }
   const jumlahRintangan = obX1.length;
+
+  /**
+   * #544 — anggaran uji keterlihatan per rute, dihitung dalam satuan "ruas ×
+   * rintangan". Sekali grafnya benar-benar terhubung, pencariannya bisa
+   * menyinggung SEMUA simpul: pada kisi rapat 200 bentuk satu lintasan penuh
+   * pernah terukur 25 detik, dan itu berjalan di thread utama setiap kali garis
+   * dianggap terganggu. Dengan batas ini rute yang sederhana tetap memutar
+   * (delapan dari delapan kasus uji, lihat #572) sementara rute yang paling
+   * sulit di papan paling padat berhenti dan memakai garis lurus - penurunan
+   * mutu yang terlihat, bukan pembekuan layar yang tidak terlihat.
+   */
+  const ANGGARAN_UJI = 4000;
+  let ujiTerpakai = 0;
 
   const isBlocked = (p1: Point, p2: Point) => {
     const segX1 = p1.x < p2.x ? p1.x : p2.x;
@@ -140,10 +235,9 @@ export function findSmartRoute(
     const segY2 = p1.y < p2.y ? p2.y : p1.y;
 
     for (let i = 0; i < jumlahRintangan; i++) {
+      ujiTerpakai++;
       if (segX2 < obX1[i] || segX1 > obX2[i] || segY2 < obY1[i] || segY1 > obY2[i]) continue;
-      if (
-        isSegmentIntersectingRect(p1, p2, { x1: obX1[i], y1: obY1[i], x2: obX2[i], y2: obY2[i] })
-      ) {
+      if (memotongInteriorKotak(p1, p2, { x1: obX1[i], y1: obY1[i], x2: obX2[i], y2: obY2[i] })) {
         return true;
       }
     }
@@ -200,6 +294,12 @@ export function findSmartRoute(
     }
 
     if (u === -1 || u === idxEnd) {
+      break;
+    }
+
+    // #544 — anggaran habis di tengah pencarian: biarkan jalur lurus yang
+    // menang, jangan buat papan membeku.
+    if (ujiTerpakai >= ANGGARAN_UJI) {
       break;
     }
 

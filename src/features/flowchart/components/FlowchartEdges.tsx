@@ -14,7 +14,7 @@
  */
 import React, { useRef } from "react";
 import { motion } from "framer-motion";
-import { findSmartRoute, isSegmentIntersectingRect } from "../lib/routing";
+import { findSmartRoute, memotongInteriorKotak } from "../lib/routing";
 import { colorPaletteHex } from "../constants";
 import { EdgeStyleBar } from "./EdgeStyleBar";
 import type { FlowNode, FlowEdge, Point } from "../types";
@@ -36,10 +36,21 @@ const kotakBentuk = (n: FlowNode): Kotak => ({
   y2: n.y + (n.height || 70) + MARGIN_RUTE,
 });
 
-/** Apakah salah satu patahan jalur memotong kotak ini? */
-function jalurMenyentuhKotak(path: Point[], k: Kotak): boolean {
+/**
+ * Apakah salah satu patahan jalur MEMOTONG INTERIOR kotak ini?
+ *
+ * #544: sejak perutean boleh menyentuh sudut rintangan, rute yang sah memang
+ * berjalan di sepanjang tepi kotak pelebaran ini. Dengan predikat lama
+ * (`isSegmentIntersectingRect`, yang menghitung sentuhan sebagai halangan)
+ * setiap rute memutar akan dianggap "terganggu", `kotakBerubah` tidak pernah
+ * kosong lagi, dan rute dihitung ulang di SETIAP render — cache #521 tadi
+ * persis yang dibuang. Pertanyaan yang mau dijawab pemanggil ini adalah
+ * "apakah garisnya sekarang salah lewat?", dan itu sama dengan memotong, bukan
+ * dengan menyenggol.
+ */
+function jalurMemotongKotak(path: Point[], k: Kotak): boolean {
   for (let i = 1; i < path.length; i++) {
-    if (isSegmentIntersectingRect(path[i - 1], path[i], k)) return true;
+    if (memotongInteriorKotak(path[i - 1], path[i], k)) return true;
   }
   return false;
 }
@@ -193,7 +204,7 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
     ? (edge: FlowEdge, points: Point[]) =>
         kotakBerubah.some(
           (c) =>
-            c.id !== edge.fromNodeId && c.id !== edge.toNodeId && jalurMenyentuhKotak(points, c.k)
+            c.id !== edge.fromNodeId && c.id !== edge.toNodeId && jalurMemotongKotak(points, c.k)
         )
     : null;
 

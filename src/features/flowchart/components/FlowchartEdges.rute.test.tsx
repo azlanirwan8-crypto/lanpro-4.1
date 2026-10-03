@@ -191,10 +191,42 @@ describe("FlowchartEdges — cache rute (#521)", () => {
     // seretan (keduanya menyentuh r3) dan tidak dibayar ulang di sini.
     expect(dipasangi).toEqual(["r1>r2"]);
 
-    // Koreksi itu benar-benar sampai ke layar. (Kualitas belokannya bukan
-    // tanggapan test ini: `findSmartRoute` sendiri masih sering menyerah dan
-    // memulangkan garis lurus — itu tercatat terpisah di papan.)
+    // Koreksi itu benar-benar sampai ke layar.
     expect((findSmartRoute as jest.Mock).mock.results[0].value).not.toEqual(ruteSebelumE1);
     expect(jalurLayar()).not.toBe(dSebelum);
+  });
+
+  /**
+   * #544 — sisi lain dari koreksi berbasis jalur.
+   *
+   * Rute yang BENAR sekarang menempel di kotak rintangan: dia berjalan di
+   * sepanjang tepi hasil pelebaran 26 px dan berhenti tepat di sudutnya. Predikat
+   * lama (memotong ATAU menyenggol) membaca itu sebagai "jalur lama terhalang",
+   * jadi setiap frame pelepasan seretan membayar ulang garis yang sebenarnya masih
+   * persis sama. Yang boleh dipanggil ulang hanyalah garis yang ujungnya benar-
+   * benar bergerak; yang hanya disenggol sudutnya harus diam.
+   */
+  it("melepas seretan bentuk yang hanya disenggol rute tidak menghitung ulang rute itu", () => {
+    const awal = [bentuk("r1", 60), bentuk("r2", 620), bentuk("r3", 300), bentuk("r4", 1200)];
+    const { rerender } = render(<FlowchartEdges {...propsUntuk(awal, null, null, TIGA_GARIS)} />);
+
+    const ruteE1 = (findSmartRoute as jest.Mock).mock.results[0].value as Point[];
+    // Bukti bahwa rute e1 memang MENYENGGOL kotak r3, bukan hanya kebetulan jauh:
+    // sudut kiri atas r3 setelah pelebaran = (300 - 26, 40 - 26).
+    expect(ruteE1.some((p) => p.x === 274 && p.y === 14)).toBe(true);
+    (findSmartRoute as jest.Mock).mockClear();
+
+    // r3 digeser 5 px KE BAWAH tanpa interaksi (pelepasan seretan): kotak lama
+    // dan barunya masuk daftar yang diubah, kedua ujung e1 tidak bergerak, dan
+    // rute e1 memang tetap sah — dia berjalan di y=14, di atas kedua kotak itu.
+    // (Ke samping tidak bisa dipakai sebagai uji: menggeser r3 ke samping
+    // menyodorkan kotaknya sendiri ke dalam rute lama, dan hitung ulang justru
+    // yang benar.)
+    const geser = [awal[0], awal[1], { ...bentuk("r3", 300), y: 45 }, awal[3]];
+    rerender(<FlowchartEdges {...propsUntuk(geser, null, null, TIGA_GARIS)} />);
+
+    const dipasangi = (findSmartRoute as jest.Mock).mock.calls.map((c) => `${c[2]}>${c[3]}`).sort();
+    // Hanya e2 dan e3, dan itu pun karena ujungnya sendiri ikut berpindah.
+    expect(dipasangi).toEqual(["r2>r3", "r3>r4"]);
   });
 });
