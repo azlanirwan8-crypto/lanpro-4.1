@@ -17,7 +17,14 @@ export const styles = {
   tableWrapper:
     "overflow-auto w-full custom-scrollbar relative flex-1 min-h-0 max-h-[calc(100vh-220px)]",
   table: "w-full text-left border-collapse flex-none",
-  tableHeader: "bg-primary-surface/5 border-b border-primary/15 sticky top-0 z-10 shadow-2xs",
+  // #606 — kepala ini `sticky`, jadi latarnya WAJIB tertutup. `bg-primary-surface/5`
+  // terukur `oklab(... / 0.05)`: baris yang lewat di bawahnya terlihat tembus dan
+  // teksnya bertumpuk (laporan pemilik proyek 03 Okt: "lihat header nya tabrakan
+  // dengan isi data"). `bg-surface-sunken` adalah token yang sama yang sudah dipakai
+  // sel reorder di kepala yang sama — selama ini hanya kolom itu yang tidak tembus.
+  // `z-30` di atas `z-20` milik sel baris tambah, supaya tidak ada sel baris yang
+  // bisa menggambar di atas kepala.
+  tableHeader: "bg-surface-sunken border-b border-primary/15 sticky top-0 z-30 shadow-2xs",
   tableHeaderCell:
     "group relative px-4 py-2.5 text-[10px] font-normal text-content-subtle whitespace-nowrap border-r border-primary/10",
   tableRow:
