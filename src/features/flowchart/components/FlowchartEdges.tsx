@@ -215,6 +215,22 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
 
   const garisTerpilih = selectedEdgeId ? edges.find((e) => e.id === selectedEdgeId) : null;
 
+  /**
+   * #533 — garis kembar: semua garis yang menggabungkan PASANGAN bentuk yang
+   * sama, apa pun arahnya. Tanpa pengetahuan ini, `getClosestPortsPoint` di
+   * bawah memilih port yang sama persis untuk keduanya, jadi dua relasi
+   * digambar tepat di atas satu sama lain: hanya satu kepala panah yang
+   * terlihat dan hanya garis terakhir yang bisa diklik.
+   */
+  const kembar = new Map<string, string[]>();
+  const kunciPasangan = (a: string, b: string) => (a < b ? a + "|" + b : b + "|" + a);
+  for (const e of edges) {
+    const k = kunciPasangan(e.fromNodeId, e.toNodeId);
+    const daftar = kembar.get(k);
+    if (daftar) daftar.push(e.id);
+    else kembar.set(k, [e.id]);
+  }
+
   return (
     <>
       <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
@@ -339,8 +355,20 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                   target: { x: endCenter.x, y: endCenter.y, dir: { x: 0, y: -1 } },
                 };
 
-          const start = startPort;
-          const end = endPort;
+          // #533 — kembar digeser berlawanan arah sepanjang tepi bentuknya,
+          // dengan langkah yang sama di kedua ujungnya, sehingga dua garis
+          // tetap sejajar dan tidak bersilang di tengah.
+          const daftar = kembar.get(kunciPasangan(edge.fromNodeId, edge.toNodeId)) || [];
+          const urutan = daftar.indexOf(edge.id);
+          const langkah = daftar.length > 1 ? (urutan - (daftar.length - 1) / 2) * 18 : 0;
+          const geserPort = <T extends { x: number; y: number; dir?: { x: number; y: number } }>(
+            p: T,
+            d: number
+          ): T =>
+            d === 0 ? p : p.dir && p.dir.x !== 0 ? { ...p, y: p.y + d } : { ...p, x: p.x + d };
+
+          const start = geserPort(startPort, langkah);
+          const end = geserPort(endPort, langkah);
 
           // Bentuk jalur per garis: hasilnya disimpan per garis dan hanya
           // dihitung ulang bila salah satu ujungnya bergerak, atau bila ada
@@ -349,8 +377,11 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
           const tandaTangan =
             `${start.x},${start.y},${start.dir?.x},${start.dir?.y}|` +
             `${end.x},${end.y},${end.dir?.x},${end.dir?.y}`;
+          // #533 — kunci simpanan ikut indeks kembar: dua garis searah pada
+          // pasangan yang sama dulu berebut satu entri, jadi yang kedua
+          // menimpa yang pertama dan keduanya menggambar rute identik.
           const pathPoints = ruteDenganCache(
-            `${edge.fromNodeId}>${edge.toNodeId}`,
+            `${edge.fromNodeId}>${edge.toNodeId}#${urutan}`,
             tandaTangan,
             terganggu,
             edge,

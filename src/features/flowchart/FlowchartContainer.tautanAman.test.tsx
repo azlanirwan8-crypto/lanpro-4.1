@@ -86,6 +86,11 @@ const hrefTerpasang = (container: HTMLElement) =>
   Array.from(container.querySelectorAll("a")).map((a) => a.getAttribute("href") || "");
 
 describe("FlowchartView — tautan lampiran disaring saat dirender (#584)", () => {
+  // #588 membuat muat papan menyatukan lampiran warisan dari salinan perangkat,
+  // jadi penyimpanan yang tertinggal dari test sebelumnya ikut menyuntik DOM-nya
+  // ke test berikutnya. Setiap test harus berangkat dari perangkat kosong.
+  beforeEach(() => localStorage.clear());
+
   it("baris javascript: tidak memasang tautan sama sekali", async () => {
     const container = await bukaDaftarDokumen([
       dokumen({ link: "javascript:alert(1)" }),

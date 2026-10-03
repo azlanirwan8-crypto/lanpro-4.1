@@ -18,7 +18,7 @@
  */
 
 import { apiRequest } from "../../../lib/api";
-import type { KonteksFlowchart, FlowchartData } from "../types";
+import type { KonteksFlowchart, FlowchartData, FlowchartDocument } from "../types";
 import { adaKonteks } from "../types";
 
 /**
@@ -56,22 +56,73 @@ interface IsiKanvas {
   theme?: string;
   epicTaskId?: string;
   konteks?: Record<string, unknown>;
+  documents?: FlowchartDocument[];
+  /**
+   * #567 — `false` berarti "kosong karena memang kosong". `true` berarti kolomnya
+   * ada tapi tidak bisa dibaca, dan papan seperti itu TIDAK BOLEH ditulis balik:
+   * satu muat yang rusak cukup untuk menghapus diagram yang benar lewat autosave.
+   */
+  muatGagal: boolean;
 }
 
-/** Membongkar node/edge dari payload kanvas. */
+/**
+ * Membongkar node/edge dari payload kanvas.
+ *
+ * #567 — dulu SEMUA kegagalan JSON ditelan dan dipulangkan sebagai 0 node, jadi
+ * baris yang rusak terasa seperti "papan kosong yang berhasil dimuat" dan lolos
+ * sebagai muatan autosave. Kini tiga keadaan dibedakan di lapisan ini, bukan
+ * dengan `try` tambahan di pemanggil: kosong (kolomnya tidak ada), terbaca,
+ * dan tidak terbaca.
+ */
 function parseFlowPayload(payloadMentah?: string): IsiKanvas {
+  const mentah = (payloadMentah || "").trim();
+  if (!mentah) return { nodes: [], edges: [], muatGagal: false };
+
+  let payload: any;
   try {
-    const payload = JSON.parse(payloadMentah || "{}");
-    return {
-      nodes: payload.nodes || [],
-      edges: payload.edges || [],
-      theme: typeof payload.theme === "string" ? payload.theme : undefined,
-      epicTaskId: typeof payload.epicTaskId === "string" ? payload.epicTaskId : undefined,
-      konteks: payload.konteks && typeof payload.konteks === "object" ? payload.konteks : undefined,
-    };
+    payload = JSON.parse(mentah);
   } catch {
-    return { nodes: [], edges: [] };
+    return { nodes: [], edges: [], muatGagal: true };
   }
+  if (!payload || typeof payload !== "object" || !Array.isArray(payload.nodes)) {
+    return { nodes: [], edges: [], muatGagal: true };
+  }
+
+  return {
+    nodes: payload.nodes,
+    edges: Array.isArray(payload.edges) ? payload.edges : [],
+    theme: typeof payload.theme === "string" ? payload.theme : undefined,
+    epicTaskId: typeof payload.epicTaskId === "string" ? payload.epicTaskId : undefined,
+    konteks: payload.konteks && typeof payload.konteks === "object" ? payload.konteks : undefined,
+    documents: Array.isArray(payload.documents)
+      ? payload.documents.filter(
+          (d: any) => d && typeof d.id === "string" && typeof d.name === "string"
+        )
+      : undefined,
+    muatGagal: false,
+  };
+}
+
+/**
+ * #588 — yang ikut ke basis data HANYA tautan.
+ *
+ * `fileData` adalah base64 jalur unggah lama: berkas 5 MB menjadi ~6,7 MB teks,
+ * dan batas 8 MB #584 akan menolak SELURUH papan — papan itu lalu tidak bisa
+ * disimpan lagi di perangkat mana pun. Karena tautannya (mis. SharePoint) sudah
+ * bisa dibuka siapa pun yang punya akses, tidak ada alasan mengunggah byte-nya.
+ */
+function sandiLampiran(dokumen?: FlowchartDocument[]) {
+  const tautan = (dokumen || []).filter(
+    (d) => d && typeof d.link === "string" && /^https?:\/\//i.test(d.link)
+  );
+  if (!tautan.length) return undefined;
+  return tautan.map((d) => ({
+    id: d.id,
+    name: d.name,
+    link: d.link,
+    createdAt: d.createdAt,
+    createdBy: d.createdBy,
+  }));
 }
 
 /** Hanya menerima empat blok teks; apa pun yang bukan string dibuang, bukan ditebak. */
@@ -100,7 +151,7 @@ function toFlowchartData(doc: DocumentRow): FlowchartData {
   // `description`. Dibaca sebagai cadangan supaya diagram lama tetap terbuka
   // walau backfill belum sempat berjalan di lingkungan itu.
   const payloadLama = isCanvasPayload(doc.description) ? doc.description : undefined;
-  const { nodes, edges, theme, epicTaskId, konteks } = parseFlowPayload(
+  const { nodes, edges, theme, epicTaskId, konteks, documents, muatGagal } = parseFlowPayload(
     doc.canvasData || payloadLama
   );
   return {
@@ -115,6 +166,8 @@ function toFlowchartData(doc: DocumentRow): FlowchartData {
     description: payloadLama ? "" : (doc.description ?? ""),
     nodes,
     edges,
+    documents,
+    muatGagal: muatGagal || undefined,
     theme: theme === "blueprint" ? "blueprint" : "miro",
     epicTaskId: epicTaskId || undefined,
     konteks: bacaKonteks(konteks),
@@ -137,7 +190,9 @@ function encodeFlowPayload(flow: {
   theme?: string;
   epicTaskId?: string;
   konteks?: KonteksFlowchart;
+  documents?: FlowchartDocument[];
 }): string {
+  const lampiran = sandiLampiran(flow.documents);
   return JSON.stringify({
     nodes: flow.nodes,
     edges: flow.edges,
@@ -147,6 +202,9 @@ function encodeFlowPayload(flow: {
     // SETIAP jalur tulis (tombol Simpan, autosave, kirim-saat-keluar) membawanya.
     // Yang tidak ikut terkirim akan hilang saat jalur lain menimpa barisnya.
     ...(adaKonteks(flow.konteks) ? { konteks: flow.konteks } : {}),
+    // #588 — tanpa ini, daftar "Tautan Dokumen" hanya hidup di localStorage
+    // perangkat: berpindah laptop atau membersihkan cache menghapusnya.
+    ...(lampiran ? { documents: lampiran } : {}),
   });
 }
 
@@ -183,6 +241,7 @@ export async function createFlowchart(
     | "theme"
     | "epicTaskId"
     | "konteks"
+    | "documents"
   >
 ): Promise<string | null> {
   const res: any = await apiRequest(`/api/projects/${projectId}/documents`, {
@@ -214,6 +273,7 @@ export async function updateFlowchart(
     theme?: string;
     epicTaskId?: string;
     konteks?: KonteksFlowchart;
+    documents?: FlowchartDocument[];
   }
 ): Promise<void> {
   await apiRequest(`/api/projects/${projectId}/documents/${flowId}`, {

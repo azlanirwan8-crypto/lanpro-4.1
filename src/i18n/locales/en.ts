@@ -1510,6 +1510,11 @@ export const en = {
     saveNoServerRow:
       "This diagram has no row on the server yet, so its content is only stored on this device.",
     readOnlyMode: "Read Only Mode",
+    kunciMuatGagal:
+      "This board could not be read — saving is locked; the copy on this device is shown",
+    pulihkanPapan: "Recover this board",
+    pulihkanSelesai: "Board recovered — changes can be saved again",
+    lampiranPerangkatSaja: "This older attachment exists only on this device",
     clearCanvas: "Clear all canvas shapes and lines",
     zoomOut: "Zoom out (-)",
     zoomReset: "Reset zoom (100%)",

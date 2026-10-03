@@ -388,8 +388,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     selectFlowchart,
     exitEditor,
     toggleEditor,
-    addDocumentToFlowchart,
-    removeDocumentFromFlowchart,
   } = listHook;
 
   // Node & Edge Management
@@ -436,6 +434,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const isWorkspaceEditable = useMemo(() => {
     if (!selectedFlowId) return true;
     if (!currentFlowMetadata) return true;
+    // #567 — isi yang tidak terbaca tampil sebagai papan kosong. Kalau jalur
+    // tulis tetap boleh jalan, satu muat yang cukup rusak menghapus diagram
+    // yang benar lewat autosave.
+    if (currentFlowMetadata.muatGagal) return false;
     return canModifyFlowchart(currentFlowMetadata);
   }, [selectedFlowId, currentFlowMetadata, canModifyFlowchart]);
 
@@ -1403,6 +1405,33 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     safeLocalStorage.setItem(kunciBelumTersinkron(projId), JSON.stringify(peta));
   };
 
+  /**
+   * Rangkai satu papan dari salinan server + salinan perangkat.
+   *
+   * #567 — baris yang kolom kanvasnya tidak terbaca TIDAK BOLEH menang atas
+   * perangkat: papan 0 bentuk akan tampil sebagai "kosong" dan pekerjaan
+   * pengguna hilang. Yang dipakai: salinan perangkat terakhir, kalau ada.
+   * #588 — lampiran lama tanpa tautan (base64 jalur unggah lama) memang sengaja
+   * tidak pernah diunggah; jangan dianggap hilang hanya karena barisnya dimuat.
+   */
+  const gabungSatuPapan = (
+    dariServer: FlowchartData,
+    dariPerangkat?: FlowchartData
+  ): FlowchartData => {
+    if (!dariPerangkat) return dariServer;
+    // Penanda rusak TETAP menempel walau isinya diambil dari perangkat: papan
+    // ini butuh pemulihan, dan keputusan itu milik pengguna, bukan kita.
+    if (dariServer.muatGagal) return { ...dariPerangkat, muatGagal: true };
+    const punyaServer = dariServer.documents || [];
+    const idSudah = new Set(punyaServer.map((d) => d.id));
+    const hanyaPerangkat = (dariPerangkat.documents || []).filter(
+      (d) => !d.link && !idSudah.has(d.id)
+    );
+    return hanyaPerangkat.length
+      ? { ...dariServer, documents: [...punyaServer, ...hanyaPerangkat] }
+      : dariServer;
+  };
+
   // Load flowcharts list scoped by project ID on load
   useEffect(() => {
     const projId = selectedProject?.id || selectedProject?.key || "default";
@@ -1432,9 +1461,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           // membuat diagram yang sudah dibuat "hilang". Yang belum
           // tersinkron dipertahankan; sisanya ikut server.
           const tertunda = bacaBelumTersinkron(projId);
+          const cadangan = new Map(initialList.map((f) => [f.id, f]));
           const gabungan = [
             ...initialList.filter((f) => f.id in tertunda),
-            ...apiFlowcharts.filter((f) => !(f.id in tertunda)),
+            ...apiFlowcharts
+              .filter((f) => !(f.id in tertunda))
+              .map((f) => gabungSatuPapan(f, cadangan.get(f.id))),
           ];
           if (gabungan.length > 0) {
             setFlowcharts(gabungan);
@@ -1637,6 +1669,25 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
    * Papan ini punya baris di basis data? Flow yang baru dibuat di daftar perangkat
    * memakai id "flow_..." dan belum pernah di-POST, jadi tidak ada yang bisa di-PUT.
    */
+  /**
+   * #567 — jalan keluar dari kunci. Papan yang tidak terbaca sengaja dikunci,
+   * tapi kunci tanpa palang adalah cara lain untuk menghapus kerja orang:
+   * pengguna yang sudah melihat isi peralatannya utuh harus bisa memutuskan
+   * untuk mempercayainya dan mengirimnya balik.
+   */
+  const pulihkanPapanMuat = () => {
+    if (!selectedFlowId) return;
+    const projId = selectedProject?.id || selectedProject?.key || "default";
+    setFlowcharts((daftar) => {
+      const berikutnya = daftar.map((f) =>
+        f.id === selectedFlowId ? { ...f, muatGagal: undefined } : f
+      );
+      safeLocalStorage.setItem(`lanpro_flowcharts_${projId}`, JSON.stringify(berikutnya));
+      return berikutnya;
+    });
+    toast.success(t("flowchart.pulihkanSelesai"));
+  };
+
   const papanPunyaBarisServer = () =>
     Boolean(selectedProject?.id) && !!selectedFlowId && !selectedFlowId.startsWith("flow_");
 
@@ -1657,6 +1708,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       return;
     }
     const alur = flowcharts.find((f) => f.id === selectedFlowId);
+    // #567 — dicek DI SINI, bukan di pemanggilnya, supaya tombol Simpan,
+    // autosave (#538) dan kirim-saat-keluar tidak bisa mengambil keputusan
+    // berbeda. Melempar, bukan mengembalikan, agar pemanggil tidak menandai
+    // "tersimpan" atas papan yang justru sedang dikunci.
+    if (alur?.muatGagal) {
+      if (!opts.senyap) toast.error(t("flowchart.kunciMuatGagal"));
+      throw new Error("flowchart-muat-gagal");
+    }
     try {
       await updateFlowchartApi(idProyek, selectedFlowId, {
         name: alur?.name ?? flowName,
@@ -1674,6 +1733,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         // Jalur tulis mana pun yang tidak membawanya akan menghapusnya saat
         // autosave menimpa baris (pelajaran yang sama dengan #570).
         konteks: alur?.konteks ?? flowKonteks,
+        // #588 — tanpa baris ini daftar "Tautan Dokumen" tetap tidak pernah
+        // sampai ke server, padahal tombol hapusnya (#587) sudah ada.
+        documents: alur?.documents,
       });
       bersihkanTandaBelumTersinkron(projId, selectedFlowId);
       if (!opts.senyap) {
@@ -1711,6 +1773,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       description: currentFlowMetadata?.description ?? flowDescription,
       category: currentFlowMetadata?.category ?? flowCategory,
       externalUrl: currentFlowMetadata?.externalUrl ?? flowExternalUrl,
+      // #588 — menambah/menghapus satu tautan adalah perubahan papan, bukan
+      // sekadar perubahan daftar di layar; tanpa ini autosave menganggap isinya
+      // sama dan tidak pernah mengirimnya.
+      documents: currentFlowMetadata?.documents,
     }),
     [
       nodes,
@@ -2005,6 +2071,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             // Item #144 — tanpa baris ini kategorinya hanya bertahan di
             // localStorage dan hilang begitu cache dibersihkan.
             category: flowCategory,
+            // #588 — PUT yang tidak membawa daftar lampiran akan menghapusnya
+            // dari payload begitu pengguna menyunting deskripsi.
+            documents: foundFlow?.documents,
           });
           // PUT di atas ikut mendorong kanvas yang ada di state, jadi salinan
           // server kini sama dengan yang di perangkat ini.
@@ -3443,6 +3512,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                         <span className="text-xs text-content-muted font-medium whitespace-nowrap mt-0.5">
                                           {doc.link || doc.fileName}
                                         </span>
+                                        {!tautan && (
+                                          <span className="text-[10px] text-content-subtle mt-1">
+                                            {t("flowchart.lampiranPerangkatSaja")}
+                                          </span>
+                                        )}
                                         {doc.fileSize && (
                                           <span className="text-xs sm:text-[10px] text-content-subtle mt-1">
                                             {t("rakit.sizeMb", {
@@ -3945,11 +4019,29 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               )}
                             </>
                           ) : (
-                            <div className="px-2.5 py-1.5 bg-amber-500/10 text-amber-700 border border-amber-500/30 rounded-xl flex items-center gap-1 text-[10px] leading-none font-medium shadow-2xs">
+                            <div
+                              className="px-2.5 py-1.5 bg-amber-500/10 text-amber-700 border border-amber-500/30 rounded-xl flex items-center gap-1 text-[10px] leading-none font-medium shadow-2xs"
+                              title={
+                                currentFlowMetadata?.muatGagal
+                                  ? t("flowchart.kunciMuatGagal")
+                                  : undefined
+                              }
+                            >
                               <Eye className="w-3.5 h-3.5 text-amber-500" />
                               <span className="hidden sm:inline">
-                                {t("flowchart.readOnlyMode")}
+                                {currentFlowMetadata?.muatGagal
+                                  ? t("flowchart.kunciMuatGagal")
+                                  : t("flowchart.readOnlyMode")}
                               </span>
+                              {currentFlowMetadata?.muatGagal && (
+                                <button
+                                  type="button"
+                                  onClick={pulihkanPapanMuat}
+                                  className="font-medium underline underline-offset-2"
+                                >
+                                  {t("flowchart.pulihkanPapan")}
+                                </button>
+                              )}
                             </div>
                           )}
 

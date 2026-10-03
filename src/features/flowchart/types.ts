@@ -158,6 +158,11 @@ export interface FlowchartData {
   nodes: FlowNode[];
   edges: FlowEdge[];
   theme: CanvasTheme;
+  /**
+   * #567 — kolom kanvasnya ADA tetapi tidak bisa dibaca. Ini BUKAN papan kosong:
+   * bedanya menentukan jalur tulis boleh jalan atau tidak.
+   */
+  muatGagal?: boolean;
   createdAt: string;
   /** Id pembuat — menentukan siapa yang boleh mengedit (Item #268). */
   createdBy?: string;

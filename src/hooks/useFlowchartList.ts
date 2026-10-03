@@ -163,23 +163,6 @@ export function useFlowchartList() {
     setSortBy("lastEditedAt");
   };
 
-  // Add document to flowchart
-  const addDocumentToFlowchart = (flowId: string, doc: FlowchartDocument) => {
-    updateFlowchart(flowId, {
-      documents: [...(flowcharts.find((f) => f.id === flowId)?.documents || []), doc],
-    });
-  };
-
-  // Remove document from flowchart
-  const removeDocumentFromFlowchart = (flowId: string, docId: string) => {
-    const flowchart = flowcharts.find((f) => f.id === flowId);
-    if (!flowchart) return;
-
-    updateFlowchart(flowId, {
-      documents: (flowchart.documents || []).filter((d) => d.id !== docId),
-    });
-  };
-
   return {
     // State
     flowcharts,
@@ -220,7 +203,5 @@ export function useFlowchartList() {
     toggleEditor,
 
     // Document management
-    addDocumentToFlowchart,
-    removeDocumentFromFlowchart,
   };
 }

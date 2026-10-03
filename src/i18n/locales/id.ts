@@ -1521,6 +1521,11 @@ export const id = {
     saveNoServerRow:
       "Diagram ini belum punya baris di server, jadi isinya baru tersimpan di perangkat ini.",
     readOnlyMode: "Mode Baca Saja",
+    kunciMuatGagal:
+      "Isi papan tidak terbaca — menyimpan dikunci, salinan perangkat ini yang dipakai",
+    pulihkanPapan: "Pulihkan papan ini",
+    pulihkanSelesai: "Papan dipulihkan — perubahan bisa disimpan lagi",
+    lampiranPerangkatSaja: "Berkas lama ini hanya ada di perangkat ini",
     clearCanvas: "Bersihkan Semua Bentuk dan Garis Kanvas",
     zoomOut: "Perkecil (-)",
     zoomReset: "Setel Ulang Zoom (100%)",
