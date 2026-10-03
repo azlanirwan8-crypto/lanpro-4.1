@@ -1026,7 +1026,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       if (!navigator.clipboard?.readText) throw new Error("tanpa API clipboard");
       teks = (await navigator.clipboard.readText()).trim();
     } catch {
-      // Peramban menolak, atau halaman tidak di语境 aman (http). Papan sendiri
+      // Peramban menolak, atau halaman tidak dalam konteks aman (http). Papan sendiri
       // masih bisa dipakai: Ctrl+C lalu Ctrl+V di dalam papan.
       toast.info(t("flowchart.tempelTidakTerbaca"));
       return null;
