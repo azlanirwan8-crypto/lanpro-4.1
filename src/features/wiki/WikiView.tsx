@@ -47,6 +47,7 @@ import {
   LIST_THEAD_ROW_CLASS,
 } from "../../components/ui/ListPageShell";
 import { WikiMobileCardView } from "./components/WikiMobileCardView";
+import { urlSematanGoogle } from "./embedUrl";
 import { hasPermission } from "../../lib/permissions";
 import { useMobileAction } from "../../contexts/MobileActionContext";
 import { loadProjectDocuments, peekProjectDocuments } from "../../lib/moduleDataCache";
@@ -813,29 +814,10 @@ export const WikiView: React.FC<WikiViewProps> = ({
     );
   };
 
-  const getEmbedUrl = (url?: string): string => {
-    if (!url) return "";
-    const trimmed = url.trim();
-    if (trimmed.includes("docs.google.com/document")) {
-      if (trimmed.includes("/edit")) {
-        return trimmed.split("/edit")[0] + "/preview";
-      }
-      return trimmed;
-    }
-    if (trimmed.includes("docs.google.com/spreadsheets")) {
-      if (trimmed.includes("/edit")) {
-        return trimmed.split("/edit")[0] + "/preview?widget=true&headers=false";
-      }
-      return trimmed;
-    }
-    if (trimmed.includes("docs.google.com/presentation")) {
-      if (trimmed.includes("/edit")) {
-        return trimmed.split("/edit")[0] + "/embed?start=false&loop=false&delayms=3000";
-      }
-      return trimmed;
-    }
-    return trimmed;
-  };
+  // Bentuk URL yang boleh dibingkai Google dipindah ke ./embedUrl.ts (#600):
+  // fungsi lama di sini hanya mengenali URL yang mengandung "/edit", jadi
+  // bentuk tautan lainnya dipasang apa adanya ke <iframe> dan Google membalas
+  // dengan halaman "This content is blocked".
 
   // Drag and drop events for file uploading
   const handleDrag = (e: React.DragEvent) => {
@@ -1252,6 +1234,18 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           })}
                         </span>
                       )}
+                      {activeDoc.link && !activeDoc.fileName && (
+                        <a
+                          href={activeDoc.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={t("wiki.linkBlockedHint")}
+                          className="inline-flex items-center gap-1.5 px-2 py-1 text-[10px] font-normal uppercase tracking-normal rounded-md border border-border-subtle text-content-muted hover:text-content-strong hover:bg-surface-sunken transition-colors whitespace-nowrap"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          {t("wiki.openNewTab")}
+                        </a>
+                      )}
                     </div>
 
                     {/* Left Pane Workspace View State */}
@@ -1314,9 +1308,13 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           </div>
                         </div>
                       ) : activeDoc.link ? (
-                        /* Embed Google Doc Preview */
+                        /* Sematan Google — URL-nya dibetulkan dulu (#600), dan
+                           judul panel ini menyediakan "Buka di Tab Baru" sebab
+                           iframe tidak ikut membawa sesi login Google pengguna:
+                           berkas yang tidak dibagi publik akan tetap ditolak
+                           Google, dan tanpa itu panelnya jadi jalan buntu. */
                         <iframe
-                          src={getEmbedUrl(activeDoc.link)}
+                          src={urlSematanGoogle(activeDoc.link)}
                           className="w-full h-full border-none absolute inset-0 bg-surface"
                           title={activeDoc.title}
                           referrerPolicy="no-referrer"

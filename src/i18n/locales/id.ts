@@ -1698,6 +1698,8 @@ export const id = {
       "Tuliskan spesifikasi detail, instruksi instalasi, atau memo kerja di sini...",
     pdfBlockedHint:
       "Keamanan peramban memblokir pratinjau PDF blob langsung. Klik tombol di samping untuk membuka atau mengunduh.",
+    linkBlockedHint:
+      "Isinya tidak muncul? Bingkai ini tidak ikut membawa login Google Anda, jadi berkas yang belum dibagi ke 'Siapa pun dengan tautan' tetap ditolak Google.",
     subtitle: "Kelola dokumentasi proyek, PRD, spesifikasi teknis, dan panduan tim.",
     emptyTitle: "Dokumen tidak ditemukan",
     emptyHint: "Buat dokumen baru atau sesuaikan kata kunci pencarian Anda.",

@@ -1685,6 +1685,8 @@ export const en = {
     summaryPlaceholder: "Write detailed specs, installation steps, or working memos here...",
     pdfBlockedHint:
       "Browser security blocks direct blob PDF preview. Use the button beside it to open or download.",
+    linkBlockedHint:
+      "Nothing showing? This frame does not carry your Google sign-in, so a file not shared with 'Anyone with the link' stays blocked by Google.",
     subtitle: "Manage project documentation, PRDs, technical specs, and team guides.",
     emptyTitle: "No documents found",
     emptyHint: "Create a new document or adjust your search keyword.",
