@@ -1,10 +1,11 @@
 import { useTranslation } from "react-i18next";
-import React, { useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { Zap, ChevronDown, CheckCircle2 } from "lucide-react";
 import { RenderIcon } from "../../../../components/RenderIcon";
 import { StyledDropdown } from "../../../../components/ui/CommonComponents";
 import { MasterData, UserProfile, Sprint } from "../../../../types";
 import { enterUntukSimpan } from "../../../../lib/enterSimpan";
+import { tipeBoleDitawarkan, tipeBawaan } from "../../hierarkiTipe";
 
 interface IssueQuickCreateBarProps {
   quickCreateTitle: string;
@@ -64,6 +65,24 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
 
   const simpanEnter = enterUntukSimpan(() => void createGlobalIssue());
 
+  /**
+   * #604 — baris bawah ini membuat isu DI PUNCAK pohon, jadi tipe bawaannya
+   * Epic, bukan Task seperti sebelumnya. Yang ditulis ulang hanyalah nilai yang
+   * tidak legal di puncak (mis. "Sub-task" sisa baris anak tadi, atau "Task"
+   * bawaan lama) — pilihan yang masih legal dibiarkan apa adanya.
+   */
+  const labelTipe = useMemo(
+    () => mArr.filter((m) => m.type === "issue_type").map((m) => m.label),
+    [mArr]
+  );
+  const legal = useMemo(() => tipeBoleDitawarkan(null, labelTipe).join("|"), [labelTipe]);
+  useEffect(() => {
+    if (!legal) return;
+    if (legal.split("|").includes(inlineAddType)) return;
+    setInlineAddType(tipeBawaan(null, labelTipe) || "");
+    // `legal` dibaca supaya efek ini bangun lagi saat daftar tipe master berubah.
+  }, [legal, inlineAddType]);
+
   return (
     <div className="p-2 bg-surface border-t border-border-subtle shrink-0 shadow-[0_-2px_4px_-1px_rgba(0,0,0,0.03)] z-20">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 border border-border-subtle rounded-xl bg-surface-sunken shadow-soft p-1.5 sm:p-1">
@@ -99,6 +118,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
               <div className="absolute left-0 bottom-full mb-2 w-48 bg-surface border border-border-subtle rounded-lg shadow-xl z-[100] overflow-hidden animate-dropdown">
                 {mArr
                   .filter((m) => m.type === "issue_type")
+                  .filter((m) => legal.split("|").includes(m.label))
                   .map((t) => (
                     <button
                       key={t.id}

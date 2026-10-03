@@ -1828,6 +1828,7 @@ export const en = {
     sending: "Sending...",
     saving: "Saving...",
     saveChanges2: "Save changes",
+    save: "Save",
     hidePassword: "Hide password",
     showPassword: "Show password",
     yesDeleteBang: "Yes, delete!",

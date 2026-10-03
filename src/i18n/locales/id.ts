@@ -1844,6 +1844,7 @@ export const id = {
     sending: "Mengirim...",
     saving: "Menyimpan...",
     saveChanges2: "Simpan Perubahan",
+    save: "Simpan",
     hidePassword: "Sembunyikan kata sandi",
     showPassword: "Tampilkan kata sandi",
     yesDeleteBang: "Ya, Hapus!",

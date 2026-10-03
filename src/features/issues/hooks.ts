@@ -67,7 +67,10 @@ export const useIssueList = (props: IssueListViewProps) => {
   // Inline add state
   const [inlineAddingTaskId, setInlineAddingTaskId] = useState<string | null>(null);
   const [inlineAddTitle, setInlineAddTitle] = useState("");
-  const [inlineAddType, setInlineAddType] = useState("Task");
+  // #604 — isu baru dari bilah cepat lahir di PUNCAK pohon, jadi Epic yang
+  // benar sebagai bawaan; "Task" adalah nilai lama yang membuat setiap entri
+  // pertama pengguna selalu jadi tugas biasa.
+  const [inlineAddType, setInlineAddType] = useState("Epic");
   const [inlineAddPriority, setInlineAddPriority] = useState("Medium");
   const [inlineAddStatus, setInlineAddStatus] = useState("To Do");
   const [inlineAddAssigneeId, setInlineAddAssigneeId] = useState("");
@@ -411,7 +414,7 @@ export const useIssueList = (props: IssueListViewProps) => {
       if (customTitle === undefined) {
         setInlineAddTitle("");
       }
-      setInlineAddType("Task");
+      setInlineAddType("Epic");
       setInlineAddPriority("Medium");
       setInlineAddStatus("To Do");
       setInlineAddAssigneeId("");

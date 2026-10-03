@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import React, { useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { motion } from "motion/react";
 import { ChevronDown, Zap, CheckCircle2, X } from "lucide-react";
 import { cn } from "../../../../lib/utils";
@@ -9,6 +9,7 @@ import { gayaLabel, warnaDariMaster, warnaLabel } from "../../../../lib/warnaLab
 import { MasterData, UserProfile } from "../../../../types";
 import { styles } from "../../styles";
 import { enterUntukSimpan } from "../../../../lib/enterSimpan";
+import { kunciTipe, tipeBoleDitawarkan } from "../../hierarkiTipe";
 
 interface IssueTableInlineAddRowProps {
   taskId: string;
@@ -31,6 +32,12 @@ interface IssueTableInlineAddRowProps {
   createSubtask: (parentId: string) => Promise<void>;
   masterData: MasterData[];
   projectMembers: UserProfile[];
+  /**
+   * #604 — tipe baris induk (null = baris puncak). Menentukan tipe apa yang
+   * boleh dipilih di sini, supaya Epic tidak bisa lahir di bawah Task dan
+   * Sub-task tidak berdiri tanpa induk.
+   */
+  tipeInduk?: string | null;
 }
 
 export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
@@ -54,10 +61,34 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
   createSubtask,
   masterData,
   projectMembers,
+  tipeInduk = null,
 }) => {
   const { t } = useTranslation();
   const mArr = masterData || [];
   const judulRef = useRef<HTMLInputElement>(null);
+
+  // #604 — hanya tipe yang legal untuk baris ini yang boleh dipilih, dan kalau
+  // nilai yang tersimpan di state bukan salah satunya (mis. baris sebelumnya
+  // dipakai membuat Bug di puncak, lalu baris ini anak dari Task), bawa ke tipe
+  // legal PERTAMA. Anak Task karena itu otomatis Sub-task; anak Epic otomatis
+  // Story; baris puncak otomatis Epic.
+  const labelTipe = useMemo(
+    () => mArr.filter((m) => m.type === "issue_type").map((m) => m.label),
+    [mArr]
+  );
+  const tipeLegalList = useMemo(
+    () => tipeBoleDitawarkan(tipeInduk, labelTipe),
+    [tipeInduk, labelTipe]
+  );
+  const daftarLegal = tipeLegalList.map(kunciTipe).join("|");
+
+  useEffect(() => {
+    if (!tipeLegalList.length) return;
+    if (tipeLegalList.map(kunciTipe).includes(kunciTipe(inlineAddType))) return;
+    setInlineAddType(tipeLegalList[0]);
+    // `daftarLegal` ikut dibaca supaya efek ini bangun ulang saat induknya
+    // berubah, tanpa bergantung pada identitas array yang baru tiap render.
+  }, [daftarLegal, inlineAddType]);
 
   // Sama seperti IssueQuickCreateBar (#592): memilih nilai di dropdown menutup
   // panelnya dan fokus hilang ke <body>, jadi Enter tidak menyentuh apa pun.
@@ -72,8 +103,9 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
 
   return (
     <motion.tr
-      layout
-      transition={{ type: "spring", stiffness: 350, damping: 30 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.12, ease: [0.16, 1, 0.3, 1] }}
       className={styles.inlineAddRow}
     >
       {canReorder && (
@@ -97,6 +129,45 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
                 className="flex items-center gap-2 p-2 bg-surface h-full"
                 style={{ paddingLeft: `${(depth + 1) * 24}px` }}
               >
+                {/*
+                  #604 — Simpan/Batal pindah ke DEPAN. Keduanya dulu duduk di sel
+                  TERAKHIR baris, yang pada layar sempit baru terlihat setelah
+                  menggulir tabel ke kanan — jadi aksi yang paling sering dipakai
+                  justru yang paling jauh. Di sini keduanya selalu terlihat, dan
+                  Enter tetap menyimpan (#592).
+                */}
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => void createSubtask(taskId)}
+                    disabled={isCreating}
+                    title={t("common.save")}
+                    aria-label={t("common.save")}
+                    className="p-1 px-2 bg-blue-600 text-content-inverse rounded text-xs sm:text-[10px] font-medium hover:bg-blue-700 disabled:opacity-50 transition-all"
+                  >
+                    {isCreating ? (
+                      <div className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="w-4 h-4" />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setInlineAddingTaskId(null);
+                      setInlineTitleMap((prev) => {
+                        const next = { ...prev };
+                        delete next[taskId];
+                        return next;
+                      });
+                    }}
+                    title={t("common.cancel")}
+                    aria-label={t("common.cancel")}
+                    className="p-1 px-2 bg-surface-muted text-content-subtle rounded text-xs sm:text-[10px] font-medium hover:bg-surface-strong transition-all"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
                 <div className="relative">
                   <button
                     onClick={() =>
@@ -112,10 +183,19 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
                     />
                     <ChevronDown className="w-3 h-3 opacity-70 ml-0.5" />
                   </button>
+                  {/*
+                    #604 — panelnya dulu muncul SEKETIKA, tanpa gerakan masuk.
+                    Itu yang terasa "patah-patah" di caret tipe. Sekarang memakai
+                    `animate-dropdown` — kelas yang sama dengan panel StyledDropdown
+                    (#403, velzon-in 120 ms cubic-bezier(0.16,1,0.3,1)) — supaya satu
+                    aplikasi hanya punya SATU rasa gerakan, dan `prefers-reduced-motion`
+                    ikut hormat (blok di index.css mematikan kelas itu).
+                  */}
                   {isInlineTypeOpen === "inline" && (
-                    <div className="absolute left-0 top-full mt-2 w-48 bg-surface border border-border-subtle rounded-lg shadow-xl z-[100] overflow-hidden">
+                    <div className="absolute left-0 top-full mt-2 w-48 bg-surface border border-border-subtle rounded-lg shadow-xl z-[100] overflow-hidden animate-dropdown">
                       {mArr
                         .filter((m) => m.type === "issue_type")
+                        .filter((m) => tipeLegalList.includes(m.label))
                         .map((t) => (
                           <button
                             key={t.id}
@@ -204,34 +284,9 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
             )}
           </td>
         ))}
-      <td className="px-2 py-3 border-y-2 border-blue-500 bg-surface">
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => createSubtask(taskId)}
-            disabled={isCreating}
-            className="p-1 px-2 bg-blue-600 text-content-inverse rounded text-xs sm:text-[10px] font-medium hover:bg-blue-700 disabled:opacity-50 transition-all"
-          >
-            {isCreating ? (
-              <div className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />
-            ) : (
-              <CheckCircle2 className="w-4 h-4" />
-            )}
-          </button>
-          <button
-            onClick={() => {
-              setInlineAddingTaskId(null);
-              setInlineTitleMap((prev) => {
-                const next = { ...prev };
-                delete next[taskId];
-                return next;
-              });
-            }}
-            className="p-1 px-2 bg-surface-muted text-content-subtle rounded text-xs sm:text-[10px] font-medium hover:bg-surface-strong transition-all"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      </td>
+      {/* Sel penutup kolom aksi: isinya sudah pindah ke depan, tapi jumlah sel
+          baris ini harus tetap sama dengan header tabel. */}
+      <td className="border-y-2 border-blue-500 bg-surface" />
     </motion.tr>
   );
 };

@@ -246,13 +246,21 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
 
   return (
     <React.Fragment key={task.id ? `tr-${task.id}-${depth}` : `tr-rnd-${Math.random()}`}>
+      {/*
+        #604 — `layout` dilepas. Dengan 50 baris per halaman (itemsPerPage di
+        hooks.ts) setiap baris terdaftar sebagai node proyeksi motion, dan satu
+        baris masuk/keluar memaksa framer mengukur ulang SEMUA baris itu.
+        Ditambah lagi `scale` pada <tr>: baris tabel bukan containing block,
+        jadi penskalaan menyayat sel-sel di dalamnya — itulah "patah-patah"
+        yang dilaporkan, bukan kurva animasinya. Yang tersisa hanya opacity +
+        geser 6px selama 120 ms, sama persis rasanya dengan animate-dropdown.
+      */}
       <motion.tr
-        layout
-        initial={{ opacity: 0, y: -8, scale: 0.99 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: -8, scale: 0.99 }}
+        initial={{ opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -6 }}
         transition={{
-          duration: 0.22,
+          duration: 0.12,
           ease: [0.16, 1, 0.3, 1],
         }}
         className={cn(
@@ -302,6 +310,29 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     className="flex items-center gap-2"
                     style={{ paddingLeft: `${depth * 24}px` }}
                   >
+                    {/*
+                      #604 — Hapus dulu duduk di sel PALING UJUNG baris, jadi pada
+                      layar sempit ia baru terlihat setelah tabel digulir ke kanan:
+                      aksi yang paling sering justru yang paling jauh. Sekarang di
+                      DEPAN judul dan baru muncul saat baris di-hover (sama seperti
+                      tombol "+" di ujung cell ini). Wadahnya selalu dipesan
+                      (w-6 shrink-0) supaya judul tidak bergeser saat hover.
+                    */}
+                    {canDelete && (
+                      <span className="w-6 h-6 flex items-center justify-center shrink-0">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteTask?.(task.id);
+                          }}
+                          className="p-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-lg transition-all cursor-pointer shadow-xs font-medium"
+                          title={t("issueRow.deleteIssue")}
+                          aria-label={t("issueRow.deleteIssue")}
+                        >
+                          <Trash className="w-3.5 h-3.5 shrink-0" />
+                        </button>
+                      </span>
+                    )}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -672,18 +703,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
 
         <td className={cn("px-2 relative", isCompact ? "py-0.5" : "py-1.5")}>
           <div className="flex items-center justify-center gap-1.5">
-            {canDelete && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  deleteTask?.(task.id);
-                }}
-                className="p-1 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-lg transition-all cursor-pointer shadow-xs font-medium"
-                title={t("issueRow.deleteIssue")}
-              >
-                <Trash className="w-3.5 h-3.5 shrink-0" />
-              </button>
-            )}
+            {/* #604 — tombol Hapus pindah ke DEPAN judul (sel "work"). */}
             <div className="relative">
               <button
                 onClick={(e) => {
@@ -742,6 +762,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
       {expandedTasks.has(task.id) && inlineAddingTaskId === task.id && (
         <IssueTableInlineAddRow
           taskId={task.id}
+          tipeInduk={task.type}
           depth={depth}
           canReorder={canReorder}
           isCompact={isCompact}
