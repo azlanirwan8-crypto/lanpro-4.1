@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { ChevronDown, Zap, CheckCircle2, X } from "lucide-react";
 import { cn } from "../../../../lib/utils";
@@ -20,8 +20,6 @@ interface IssueTableInlineAddRowProps {
   inlineTitleMap: Record<string, string>;
   setInlineTitleMap: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   setInlineAddingTaskId: (id: string | null) => void;
-  inlineAddType: string;
-  setInlineAddType: (type: string) => void;
   isInlineTypeOpen: string | null;
   setIsInlineTypeOpen: (open: string | null) => void;
   inlineAddPriority: string;
@@ -29,7 +27,8 @@ interface IssueTableInlineAddRowProps {
   inlineAddAssigneeId: string;
   setInlineAddAssigneeId: (val: string) => void;
   isCreating: boolean;
-  createSubtask: (parentId: string) => Promise<void>;
+  /** #605 — tipe yang dipilih baris ini ikut dikirim, bukan dibaca dari state bersama. */
+  createSubtask: (parentId: string, tipe?: string) => Promise<void>;
   masterData: MasterData[];
   projectMembers: UserProfile[];
   /**
@@ -49,8 +48,6 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
   inlineTitleMap,
   setInlineTitleMap,
   setInlineAddingTaskId,
-  inlineAddType,
-  setInlineAddType,
   isInlineTypeOpen,
   setIsInlineTypeOpen,
   inlineAddPriority,
@@ -67,11 +64,14 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
   const mArr = masterData || [];
   const judulRef = useRef<HTMLInputElement>(null);
 
-  // #604 — hanya tipe yang legal untuk baris ini yang boleh dipilih, dan kalau
-  // nilai yang tersimpan di state bukan salah satunya (mis. baris sebelumnya
-  // dipakai membuat Bug di puncak, lalu baris ini anak dari Task), bawa ke tipe
-  // legal PERTAMA. Anak Task karena itu otomatis Sub-task; anak Epic otomatis
-  // Story; baris puncak otomatis Epic.
+  // #604 — hanya tipe yang legal untuk baris ini yang boleh dipilih.
+  //
+  // #605 — nilainya MILIK BARIS INI SENDIRI, bukan state bersama milik bilah
+  // cepat. Sebelumnya keduanya menulis ke `inlineAddType` yang sama sambil
+  // "mengoreksi" nilai ke bawaan masing-masing (puncak minta Epic, anak Task
+  // minta Sub-task), jadi kedua efek saling menimpa tanpa henti: chip tipe
+  // berkedik dan ikonnya jatuh ke bentuk cadangan. Itu laporan pemilik proyek
+  // 03 Okt: "kok label[i]nya ini error gerak aja, cek di icon jenis task".
   const labelTipe = useMemo(
     () => mArr.filter((m) => m.type === "issue_type").map((m) => m.label),
     [mArr]
@@ -82,13 +82,13 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
   );
   const daftarLegal = tipeLegalList.map(kunciTipe).join("|");
 
+  const [tipe, setTipe] = useState("");
   useEffect(() => {
     if (!tipeLegalList.length) return;
-    if (tipeLegalList.map(kunciTipe).includes(kunciTipe(inlineAddType))) return;
-    setInlineAddType(tipeLegalList[0]);
-    // `daftarLegal` ikut dibaca supaya efek ini bangun ulang saat induknya
-    // berubah, tanpa bergantung pada identitas array yang baru tiap render.
-  }, [daftarLegal, inlineAddType]);
+    if (tipeLegalList.map(kunciTipe).includes(kunciTipe(tipe))) return;
+    // Anak Task karena itu otomatis Sub-task; anak Epic otomatis Story.
+    setTipe(tipeLegalList[0]);
+  }, [daftarLegal, tipe]);
 
   // Sama seperti IssueQuickCreateBar (#592): memilih nilai di dropdown menutup
   // panelnya dan fokus hilang ke <body>, jadi Enter tidak menyentuh apa pun.
@@ -99,7 +99,7 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
       judulRef.current?.focus();
     };
 
-  const simpanEnter = enterUntukSimpan(() => void createSubtask(taskId));
+  const simpanEnter = enterUntukSimpan(() => void createSubtask(taskId, tipe));
 
   return (
     <motion.tr
@@ -139,7 +139,7 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
                 <div className="flex items-center gap-1 shrink-0">
                   <button
                     type="button"
-                    onClick={() => void createSubtask(taskId)}
+                    onClick={() => void createSubtask(taskId, tipe)}
                     disabled={isCreating}
                     title={t("common.save")}
                     aria-label={t("common.save")}
@@ -173,14 +173,16 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
                     onClick={() =>
                       setIsInlineTypeOpen(isInlineTypeOpen === "inline" ? null : "inline")
                     }
-                    style={gayaLabel(warnaDariMaster(mArr, "issue_type", inlineAddType))}
-                    className="label-chip flex items-center gap-1.5 p-1 rounded border transition-all font-medium text-[10px] leading-none"
+                    style={gayaLabel(warnaDariMaster(mArr, "issue_type", tipe))}
+                    className="label-chip flex items-center gap-1.5 px-1.5 py-1 rounded border transition-all font-medium text-[10px] leading-none whitespace-nowrap"
                   >
-                    <TypeIcon
-                      type={inlineAddType || ""}
-                      className="w-3.5 h-3.5"
-                      masterData={mArr}
-                    />
+                    <TypeIcon type={tipe || ""} className="w-3.5 h-3.5" masterData={mArr} />
+                    {/* #605 — chip ini dulu HANYA ikon. Kalau labelnya tidak ada
+                        di Master Data (mis. bawaan "Epic" padahal data pemilik
+                        proyek tidak punya Epic), yang tampil cuma lingkaran
+                        cadangan tanpa penjelasan — "labelnya error". Nama tipe
+                        kini ikut ditulis, sama seperti chip di baris task. */}
+                    <span>{tipe}</span>
                     <ChevronDown className="w-3 h-3 opacity-70 ml-0.5" />
                   </button>
                   {/*
@@ -200,7 +202,7 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
                           <button
                             key={t.id}
                             onClick={() => {
-                              pilihLaluFokus(setInlineAddType)(t.label);
+                              pilihLaluFokus(setTipe)(t.label);
                               setIsInlineTypeOpen(null);
                             }}
                             className="w-full text-left px-3 py-2 text-xs sm:text-[11px] font-medium text-content-secondary hover:bg-surface-sunken flex items-center gap-2"

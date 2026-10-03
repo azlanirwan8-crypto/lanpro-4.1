@@ -339,7 +339,14 @@ export const useIssueList = (props: IssueListViewProps) => {
     setExpandedTasks(next);
   };
 
-  const handleInlineAdd = async (parentId: string | null = null, customTitle?: string) => {
+  const handleInlineAdd = async (
+    parentId: string | null = null,
+    customTitle?: string,
+    tipe?: string
+  ) => {
+    // #605 — tipe baris anak dipegang baris itu sendiri dan dikirim ke sini; yang
+    // tidak mengirim apa pun (bilah cepat) tetap memakai state bersama.
+    const tipeDipakai = tipe || inlineAddType;
     if (createInFlightRef.current) return;
     const activeUid = user?.uid;
     const titleToUse = customTitle !== undefined ? customTitle : inlineAddTitle;
@@ -361,7 +368,7 @@ export const useIssueList = (props: IssueListViewProps) => {
       projectId: selectedProject.id,
       title: titleToUse,
       status: inlineAddStatus || "To Do",
-      type: inlineAddType.toLowerCase() as Task["type"],
+      type: tipeDipakai.toLowerCase() as Task["type"],
       parentId: parentId || undefined,
       priority: inlineAddPriority || "Medium",
       assigneeId: inlineAddAssigneeId || undefined,
@@ -383,7 +390,7 @@ export const useIssueList = (props: IssueListViewProps) => {
 
     suppressTaskDataRefresh(8000);
 
-    const taskType = inlineAddType.toLowerCase();
+    const taskType = tipeDipakai.toLowerCase();
 
     try {
       const response = await createTask(selectedProject.id, effectiveUserId, {
@@ -414,7 +421,7 @@ export const useIssueList = (props: IssueListViewProps) => {
       if (customTitle === undefined) {
         setInlineAddTitle("");
       }
-      setInlineAddType("Epic");
+      if (parentId === null) setInlineAddType("Epic");
       setInlineAddPriority("Medium");
       setInlineAddStatus("To Do");
       setInlineAddAssigneeId("");

@@ -187,14 +187,14 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
   const [inlineTitleMap, setInlineTitleMap] = useState<Record<string, string>>({});
   const [quickCreateTitle, setQuickCreateTitle] = useState("");
 
-  const createSubtask = async (parentId: string) => {
+  const createSubtask = async (parentId: string, tipe?: string) => {
     const title = inlineTitleMap[parentId] || "";
     if (!title.trim()) {
       toast.error(t("toast.bulkTitleEmpty"));
       return;
     }
     setInlineTitleMap((prev) => ({ ...prev, [parentId]: "" }));
-    await handleInlineAdd(parentId, title);
+    await handleInlineAdd(parentId, title, tipe);
   };
 
   const createGlobalIssue = async () => {
@@ -482,8 +482,6 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                                     setInlineAddingTaskId={setInlineAddingTaskId}
                                     inlineTitleMap={inlineTitleMap}
                                     setInlineTitleMap={setInlineTitleMap}
-                                    inlineAddType={inlineAddType}
-                                    setInlineAddType={setInlineAddType}
                                     isInlineTypeOpen={isInlineTypeOpen}
                                     setIsInlineTypeOpen={setIsInlineTypeOpen}
                                     inlineAddPriority={inlineAddPriority}

@@ -40,8 +40,6 @@ interface IssueTableRowProps {
   setInlineAddingTaskId: (id: string | null) => void;
   inlineTitleMap: Record<string, string>;
   setInlineTitleMap: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  inlineAddType: string;
-  setInlineAddType: (type: string) => void;
   isInlineTypeOpen: string | null;
   setIsInlineTypeOpen: (open: string | null) => void;
   inlineAddPriority: string;
@@ -49,7 +47,7 @@ interface IssueTableRowProps {
   inlineAddAssigneeId: string;
   setInlineAddAssigneeId: (val: string) => void;
   isCreating: boolean;
-  createSubtask: (parentId: string) => Promise<void>;
+  createSubtask: (parentId: string, tipe?: string) => Promise<void>;
   tasks: Task[];
   masterData: MasterData[];
   projectMembers: UserProfile[];
@@ -100,8 +98,6 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
     setInlineAddingTaskId,
     inlineTitleMap,
     setInlineTitleMap,
-    inlineAddType,
-    setInlineAddType,
     isInlineTypeOpen,
     setIsInlineTypeOpen,
     inlineAddPriority,
@@ -770,8 +766,6 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
           inlineTitleMap={inlineTitleMap}
           setInlineTitleMap={setInlineTitleMap}
           setInlineAddingTaskId={setInlineAddingTaskId}
-          inlineAddType={inlineAddType}
-          setInlineAddType={setInlineAddType}
           isInlineTypeOpen={isInlineTypeOpen}
           setIsInlineTypeOpen={setIsInlineTypeOpen}
           inlineAddPriority={inlineAddPriority}

@@ -147,7 +147,10 @@ describe("IssueTableInlineAddRow — Enter subtask (#592)", () => {
       </table>
     );
     expect(fireEvent.keyDown(kolomSubtask(), { key: "Enter" })).toBe(false);
-    expect(props.createSubtask).toHaveBeenCalledWith("induk-1");
+    // Argumen kedua: tipe baris ini (#605). Daftar master di atas cuma punya
+    // "Task", dan pemakai tidak punya "Epic" di Master Data-nya — justru
+    // keadaan yang membuat chip dulu kosong.
+    expect(props.createSubtask).toHaveBeenCalledWith("induk-1", "Task");
   });
 
   it("Enter dari komposisi IME tidak membuat subtask", () => {

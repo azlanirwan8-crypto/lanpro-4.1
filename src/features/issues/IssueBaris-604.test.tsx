@@ -72,8 +72,6 @@ describe("IssueTableInlineAddRow — hierarki tipe baris anak (#604)", () => {
     inlineTitleMap: { "induk-1": "Anak tugas" },
     setInlineTitleMap: jest.fn(),
     setInlineAddingTaskId: jest.fn(),
-    inlineAddType: "Task",
-    setInlineAddType: jest.fn(),
     isInlineTypeOpen: null as string | null,
     setIsInlineTypeOpen: jest.fn(),
     inlineAddPriority: "Medium",
@@ -99,32 +97,52 @@ describe("IssueTableInlineAddRow — hierarki tipe baris anak (#604)", () => {
     return { props, container };
   };
 
-  it("anak Task tidak menawarkan Epic — dan membawa pilihan ke Sub-task", () => {
-    const { props } = renderBaris({ tipeInduk: "Task", isInlineTypeOpen: "inline" });
+  /** Label yang ditawarkan PANEL tipe (bukan chip-nya, yang isinya juga sebuah label). */
+  const opsiPanel = (container: HTMLElement) =>
+    Array.from(container.querySelectorAll(".animate-dropdown button")).map((b) =>
+      b.textContent?.trim()
+    );
 
-    expect(screen.queryByRole("button", { name: /^Epic$/ })).toBeNull();
-    expect(screen.queryByRole("button", { name: /^Story$/ })).toBeNull();
-    expect(screen.getByRole("button", { name: /^Sub-task$/ })).toBeTruthy();
-    // "Task" bukan anak yang sah dari Task, jadi nilai bawaan dikoreksi.
-    expect(props.setInlineAddType).toHaveBeenCalledWith("Sub-task");
+  /** Teks pada chip tipe baris ini. */
+  const chipTipe = (container: HTMLElement) =>
+    container.querySelector(".label-chip")?.textContent?.trim();
+
+  it("anak Task hanya menawarkan Sub-task, dan chip-nya membaca Sub-task", () => {
+    const { container } = renderBaris({ tipeInduk: "Task", isInlineTypeOpen: "inline" });
+
+    expect(opsiPanel(container)).toEqual(["Sub-task"]);
+    expect(chipTipe(container)).toBe("Sub-task");
   });
 
   it("anak Epic menawarkan Story/Task/Bug/Sub-task, tapi tidak Epic lagi", () => {
-    renderBaris({ tipeInduk: "Epic", isInlineTypeOpen: "inline" });
+    const { container } = renderBaris({ tipeInduk: "Epic", isInlineTypeOpen: "inline" });
 
-    expect(screen.queryByRole("button", { name: /^Epic$/ })).toBeNull();
-    for (const label of ["Story", "Task", "Bug", "Sub-task"]) {
-      expect(
-        screen.getAllByRole("button", { name: new RegExp(`^${label}$`) }).length
-      ).toBeGreaterThan(0);
-    }
+    expect(opsiPanel(container)).toEqual(["Story", "Task", "Bug", "Sub-task"]);
+    expect(chipTipe(container)).toBe("Story");
   });
 
   it("baris puncak tidak menawarkan Sub-task karena tidak ada induk", () => {
-    renderBaris({ tipeInduk: null, isInlineTypeOpen: "inline" });
+    const { container } = renderBaris({ tipeInduk: null, isInlineTypeOpen: "inline" });
 
-    expect(screen.queryByRole("button", { name: /^Sub-task$/ })).toBeNull();
-    expect(screen.getByRole("button", { name: /^Epic$/ })).toBeTruthy();
+    expect(opsiPanel(container)).toEqual(["Epic", "Story", "Task", "Bug"]);
+    expect(chipTipe(container)).toBe("Epic");
+  });
+
+  it("chip menampilkan NAMA tipe, bukan hanya ikon (#605)", () => {
+    const { container } = renderBaris({ tipeInduk: "Task" });
+    expect(chipTipe(container)).toBe("Sub-task");
+  });
+
+  it("memilih dari panel mengubah chip baris ini sendiri", () => {
+    const { container } = renderBaris({
+      tipeInduk: "Epic",
+      isInlineTypeOpen: "inline",
+    });
+    const opsi = Array.from(container.querySelectorAll(".animate-dropdown button")).find(
+      (b) => b.textContent?.trim() === "Bug"
+    ) as HTMLButtonElement;
+    fireEvent.click(opsi);
+    expect(chipTipe(container)).toBe("Bug");
   });
 
   it("Simpan dan Batal duduk di DEPAN kolom judul, bukan di sel terakhir", () => {
@@ -163,13 +181,20 @@ describe("IssueTableInlineAddRow — hierarki tipe baris anak (#604)", () => {
     expect(panel?.getAttribute("style")).toBeNull();
   });
 
-  it("Enter tetap menyimpan lewat tombol Simpan yang sekarang di depan", async () => {
-    const { props } = renderBaris();
+  it("Enter menyimpan beserta tipe yang dipilih baris ini", async () => {
+    const { props } = renderBaris({ tipeInduk: "Task" });
     fireEvent.keyDown(screen.getByPlaceholderText("Apa yang perlu dikerjakan?"), {
       key: "Enter",
     });
     await Promise.resolve();
-    expect(props.createSubtask).toHaveBeenCalledWith("induk-1");
+    expect(props.createSubtask).toHaveBeenCalledWith("induk-1", "Sub-task");
+  });
+
+  it("tombol Simpan di depan menyimpan beserta tipe yang dipilih baris ini", async () => {
+    const { props } = renderBaris({ tipeInduk: "Task" });
+    fireEvent.click(screen.getByRole("button", { name: "Simpan" }));
+    await Promise.resolve();
+    expect(props.createSubtask).toHaveBeenCalledWith("induk-1", "Sub-task");
   });
 });
 
@@ -255,8 +280,6 @@ describe("IssueTableRow — Hapus di depan (#604)", () => {
       setInlineAddingTaskId: jest.fn(),
       inlineTitleMap: {},
       setInlineTitleMap: jest.fn(),
-      inlineAddType: "Epic",
-      setInlineAddType: jest.fn(),
       isInlineTypeOpen: null,
       setIsInlineTypeOpen: jest.fn(),
       inlineAddPriority: "Medium",
