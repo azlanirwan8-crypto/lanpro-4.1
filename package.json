@@ -39,7 +39,8 @@
     "audit:radius": "node scripts/validate/audit-radius.cjs",
     "audit:label": "node scripts/validate/audit-label.cjs",
     "openapi:generate": "tsx scripts/generate-openapi.ts",
-    "test:load": "node scripts/test/load-baseline-322.cjs"
+    "test:load": "node scripts/test/load-baseline-322.cjs",
+    "sapu:teks": "node scripts/validate/sapu-teks-ui.cjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1111.0",

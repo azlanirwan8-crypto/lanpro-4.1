@@ -1,0 +1,712 @@
+{
+  "AppContainer.tsx:Tanggal task (${format(tStart,": {
+    "berkas": "AppContainer.tsx",
+    "teks": "Tanggal task (${format(tStart,",
+    "jenis": "ternary"
+  },
+  "AppContainer.tsx:Waktu mulai task (${format(tStart,": {
+    "berkas": "AppContainer.tsx",
+    "teks": "Waktu mulai task (${format(tStart,",
+    "jenis": "ternary"
+  },
+  "AppContainer.tsx:Eksekusi task melebih timeline fase ini (${format(sprintStart,": {
+    "berkas": "AppContainer.tsx",
+    "teks": "Eksekusi task melebih timeline fase ini (${format(sprintStart,",
+    "jenis": "ternary"
+  },
+  "AppContainer.tsx:Ada task yang melewati timeline fase ini (${format(sprintStart,": {
+    "berkas": "AppContainer.tsx",
+    "teks": "Ada task yang melewati timeline fase ini (${format(sprintStart,",
+    "jenis": "ternary"
+  },
+  "AppContainer.tsx:Waktu mulai task di luar periode fase ini (${format(sprintStart,": {
+    "berkas": "AppContainer.tsx",
+    "teks": "Waktu mulai task di luar periode fase ini (${format(sprintStart,",
+    "jenis": "ternary"
+  },
+  "AppContainer.tsx:Ready for Retest": {
+    "berkas": "AppContainer.tsx",
+    "teks": "Ready for Retest",
+    "jenis": "ternary"
+  },
+  "AppContainer.tsx:Range tanggal tugas (${format(tStart,": {
+    "berkas": "AppContainer.tsx",
+    "teks": "Range tanggal tugas (${format(tStart,",
+    "jenis": "ternary"
+  },
+  "AppContainer.tsx:Waktu mulai tugas (${format(tStart,": {
+    "berkas": "AppContainer.tsx",
+    "teks": "Waktu mulai tugas (${format(tStart,",
+    "jenis": "ternary"
+  },
+  "AppContainer.tsx:Eksekusi tugas melebihi timeline fase ini (${format(sprintStart,": {
+    "berkas": "AppContainer.tsx",
+    "teks": "Eksekusi tugas melebihi timeline fase ini (${format(sprintStart,",
+    "jenis": "ternary"
+  },
+  "AppContainer.tsx:${authorName} me-mention Anda di komentar tugas": {
+    "berkas": "AppContainer.tsx",
+    "teks": "${authorName} me-mention Anda di komentar tugas",
+    "jenis": "ternary"
+  },
+  "components/LiveChatWidget.tsx:[IMAGE: ${base64Data} | ${file.name}]": {
+    "berkas": "components/LiveChatWidget.tsx",
+    "teks": "[IMAGE: ${base64Data} | ${file.name}]",
+    "jenis": "ternary"
+  },
+  "components/LiveChatWidget.tsx:[FILE: ${base64Data} | ${file.name}]": {
+    "berkas": "components/LiveChatWidget.tsx",
+    "teks": "[FILE: ${base64Data} | ${file.name}]",
+    "jenis": "ternary"
+  },
+  "components/LiveChatWidget.tsx:🖼️ Mengirim gambar...": {
+    "berkas": "components/LiveChatWidget.tsx",
+    "teks": "🖼️ Mengirim gambar...",
+    "jenis": "ternary"
+  },
+  "components/LiveChatWidget.tsx:📂 Mengirim lampiran...": {
+    "berkas": "components/LiveChatWidget.tsx",
+    "teks": "📂 Mengirim lampiran...",
+    "jenis": "ternary"
+  },
+  "components/LiveChatWidget.tsx:📂 Lampiran file": {
+    "berkas": "components/LiveChatWidget.tsx",
+    "teks": "📂 Lampiran file",
+    "jenis": "ternary"
+  },
+  "components/LiveChatWidget.tsx:Sedang Aktif": {
+    "berkas": "components/LiveChatWidget.tsx",
+    "teks": "Sedang Aktif",
+    "jenis": "ternary"
+  },
+  "components/LiveChatWidget.tsx:LanPro AI Assistant": {
+    "berkas": "components/LiveChatWidget.tsx",
+    "teks": "LanPro AI Assistant",
+    "jenis": "ternary"
+  },
+  "components/LiveChatWidget.tsx:Rekan Kerja": {
+    "berkas": "components/LiveChatWidget.tsx",
+    "teks": "Rekan Kerja",
+    "jenis": "ternary"
+  },
+  "components/LiveChatWidget.tsx:LanPro AI sedang mengetik": {
+    "berkas": "components/LiveChatWidget.tsx",
+    "teks": "LanPro AI sedang mengetik",
+    "jenis": "ternary"
+  },
+  "components/modals/AddCaseModal.tsx:Critical Priority": {
+    "berkas": "components/modals/AddCaseModal.tsx",
+    "teks": "Critical Priority",
+    "jenis": "definisi"
+  },
+  "components/modals/AddCaseModal.tsx:High Priority": {
+    "berkas": "components/modals/AddCaseModal.tsx",
+    "teks": "High Priority",
+    "jenis": "definisi"
+  },
+  "components/modals/AddCaseModal.tsx:Medium Priority": {
+    "berkas": "components/modals/AddCaseModal.tsx",
+    "teks": "Medium Priority",
+    "jenis": "definisi"
+  },
+  "components/modals/AddCaseModal.tsx:Low Priority": {
+    "berkas": "components/modals/AddCaseModal.tsx",
+    "teks": "Low Priority",
+    "jenis": "definisi"
+  },
+  "components/modals/AddCaseModal.tsx:Contoh: dev@company.com": {
+    "berkas": "components/modals/AddCaseModal.tsx",
+    "teks": "Contoh: dev@company.com",
+    "jenis": "atribut"
+  },
+  "components/modals/CreateBugTicketModal.tsx:[${selectedParentTask.key || selectedParentTask.taskKey ||": {
+    "berkas": "components/modals/CreateBugTicketModal.tsx",
+    "teks": "[${selectedParentTask.key || selectedParentTask.taskKey ||",
+    "jenis": "ternary"
+  },
+  "components/ModalTenggatLogin.tsx:${item.judul} — ${item.proyek}": {
+    "berkas": "components/ModalTenggatLogin.tsx",
+    "teks": "${item.judul} — ${item.proyek}",
+    "jenis": "ternary"
+  },
+  "components/navigation/MobileBottomNav.tsx:Mobile Bottom Navigation": {
+    "berkas": "components/navigation/MobileBottomNav.tsx",
+    "teks": "Mobile Bottom Navigation",
+    "jenis": "atribut"
+  },
+  "components/navigation/WebAppsDropdown.tsx:Sistem Peta & Lokasi Cabang": {
+    "berkas": "components/navigation/WebAppsDropdown.tsx",
+    "teks": "Sistem Peta & Lokasi Cabang",
+    "jenis": "definisi"
+  },
+  "components/RenderIcon.tsx:Zap Off": {
+    "berkas": "components/RenderIcon.tsx",
+    "teks": "Zap Off",
+    "jenis": "definisi"
+  },
+  "components/ui/CommonComponents.tsx:opt-${opt.id}-${optIdx}": {
+    "berkas": "components/ui/CommonComponents.tsx",
+    "teks": "opt-${opt.id}-${optIdx}",
+    "jenis": "ternary"
+  },
+  "components/ui/LanproDatePicker.tsx:Pilih tanggal...": {
+    "berkas": "components/ui/LanproDatePicker.tsx",
+    "teks": "Pilih tanggal...",
+    "jenis": "ternary"
+  },
+  "components/ui/LanproDatePicker.tsx:Hapus tanggal": {
+    "berkas": "components/ui/LanproDatePicker.tsx",
+    "teks": "Hapus tanggal",
+    "jenis": "ternary"
+  },
+  "components/ui/LanproDatePicker.tsx:Hari Ini": {
+    "berkas": "components/ui/LanproDatePicker.tsx",
+    "teks": "Hari Ini",
+    "jenis": "ternary"
+  },
+  "components/ui/LanproTimePicker.tsx:Hapus jam": {
+    "berkas": "components/ui/LanproTimePicker.tsx",
+    "teks": "Hapus jam",
+    "jenis": "ternary"
+  },
+  "components/ui/LanproTimePicker.tsx:Pilih Waktu": {
+    "berkas": "components/ui/LanproTimePicker.tsx",
+    "teks": "Pilih Waktu",
+    "jenis": "ternary"
+  },
+  "features/dashboard/components/SidebarWidgetsStack.tsx:${hours} jam lagi": {
+    "berkas": "features/dashboard/components/SidebarWidgetsStack.tsx",
+    "teks": "${hours} jam lagi",
+    "jenis": "ternary"
+  },
+  "features/dashboard/components/SidebarWidgetsStack.tsx:segera jatuh tempo": {
+    "berkas": "features/dashboard/components/SidebarWidgetsStack.tsx",
+    "teks": "segera jatuh tempo",
+    "jenis": "ternary"
+  },
+  "features/dashboard/DashboardView.tsx:${timeTrackingStats.diff} ${t(": {
+    "berkas": "features/dashboard/DashboardView.tsx",
+    "teks": "${timeTrackingStats.diff} ${t(",
+    "jenis": "ternary"
+  },
+  "features/explorer/DbExplorerPanel.tsx:PostgreSQL (Neon Cloud)": {
+    "berkas": "features/explorer/DbExplorerPanel.tsx",
+    "teks": "PostgreSQL (Neon Cloud)",
+    "jenis": "jsx"
+  },
+  "features/flowchart/components/FlowchartDocumentModal.tsx:[${epic.key}] ${epic.title}": {
+    "berkas": "features/flowchart/components/FlowchartDocumentModal.tsx",
+    "teks": "[${epic.key}] ${epic.title}",
+    "jenis": "definisi"
+  },
+  "features/flowchart/components/FlowchartMinimap.tsx:radial-gradient(circle, #94a3b8 1px, transparent 1px)": {
+    "berkas": "features/flowchart/components/FlowchartMinimap.tsx",
+    "teks": "radial-gradient(circle, #94a3b8 1px, transparent 1px)",
+    "jenis": "ternary"
+  },
+  "features/flowchart/components/FlowchartNode.tsx:linear-gradient(135deg, ${colorPaletteHex[node.color]?.bg ||": {
+    "berkas": "features/flowchart/components/FlowchartNode.tsx",
+    "teks": "linear-gradient(135deg, ${colorPaletteHex[node.color]?.bg ||",
+    "jenis": "ternary"
+  },
+  "features/flowchart/components/FlowchartNode.tsx:Langkah Alur Baru": {
+    "berkas": "features/flowchart/components/FlowchartNode.tsx",
+    "teks": "Langkah Alur Baru",
+    "jenis": "definisi"
+  },
+  "features/flowchart/components/ImportDiagramModal.tsx:Gabung ke Kanvas": {
+    "berkas": "features/flowchart/components/ImportDiagramModal.tsx",
+    "teks": "Gabung ke Kanvas",
+    "jenis": "jsx"
+  },
+  "features/flowchart/components/ImportDiagramModal.tsx:Ganti Kanvas": {
+    "berkas": "features/flowchart/components/ImportDiagramModal.tsx",
+    "teks": "Ganti Kanvas",
+    "jenis": "jsx"
+  },
+  "features/flowchart/components/ImportDiagramModal.tsx:Draw.io": {
+    "berkas": "features/flowchart/components/ImportDiagramModal.tsx",
+    "teks": "Draw.io",
+    "jenis": "definisi"
+  },
+  "features/flowchart/components/NodePropertiesOverlay.tsx:Curly Left {": {
+    "berkas": "features/flowchart/components/NodePropertiesOverlay.tsx",
+    "teks": "Curly Left {",
+    "jenis": "definisi"
+  },
+  "features/flowchart/components/NodePropertiesOverlay.tsx:Curly Right }": {
+    "berkas": "features/flowchart/components/NodePropertiesOverlay.tsx",
+    "teks": "Curly Right }",
+    "jenis": "definisi"
+  },
+  "features/flowchart/FlowchartContainer.tsx:Miro Sticky Note": {
+    "berkas": "features/flowchart/FlowchartContainer.tsx",
+    "teks": "Miro Sticky Note",
+    "jenis": "ternary"
+  },
+  "features/flowchart/FlowchartContainer.tsx:Ide Baru Miro 🤔": {
+    "berkas": "features/flowchart/FlowchartContainer.tsx",
+    "teks": "Ide Baru Miro 🤔",
+    "jenis": "definisi"
+  },
+  "features/flowchart/FlowchartContainer.tsx:${node.label} (Salinan)": {
+    "berkas": "features/flowchart/FlowchartContainer.tsx",
+    "teks": "${node.label} (Salinan)",
+    "jenis": "definisi"
+  },
+  "features/flowchart/FlowchartContainer.tsx:Jalankan Simulasi Alur Kerja Visual": {
+    "berkas": "features/flowchart/FlowchartContainer.tsx",
+    "teks": "Jalankan Simulasi Alur Kerja Visual",
+    "jenis": "ternary"
+  },
+  "features/flowchart/FlowchartContainer.tsx:Stop Sim": {
+    "berkas": "features/flowchart/FlowchartContainer.tsx",
+    "teks": "Stop Sim",
+    "jenis": "ternary"
+  },
+  "features/flowchart/FlowchartContainer.tsx:[${task.key}] ${task.title} (${task.status})": {
+    "berkas": "features/flowchart/FlowchartContainer.tsx",
+    "teks": "[${task.key}] ${task.title} (${task.status})",
+    "jenis": "definisi"
+  },
+  "features/flowchart/FlowchartContainer.tsx:Sistem menelusuri alur kerja dari titik awal hingga akhir.": {
+    "berkas": "features/flowchart/FlowchartContainer.tsx",
+    "teks": "Sistem menelusuri alur kerja dari titik awal hingga akhir.",
+    "jenis": "definisi"
+  },
+  "features/flowchart/lib/shapes.tsx:drop-shadow(0 12px 20px rgba(244, 63, 94, 0.45))": {
+    "berkas": "features/flowchart/lib/shapes.tsx",
+    "teks": "drop-shadow(0 12px 20px rgba(244, 63, 94, 0.45))",
+    "jenis": "ternary"
+  },
+  "features/flowchart/lib/shapes.tsx:drop-shadow(0 12px 20px rgba(139, 92, 246, 0.3))": {
+    "berkas": "features/flowchart/lib/shapes.tsx",
+    "teks": "drop-shadow(0 12px 20px rgba(139, 92, 246, 0.3))",
+    "jenis": "ternary"
+  },
+  "features/flowchart/lib/shapes.tsx:drop-shadow(0 10px 15px rgba(0,0,0,0.12))": {
+    "berkas": "features/flowchart/lib/shapes.tsx",
+    "teks": "drop-shadow(0 10px 15px rgba(0,0,0,0.12))",
+    "jenis": "ternary"
+  },
+  "features/flowchart/lib/shapes.tsx:drop-shadow(0 3px 6px rgba(0,0,0,0.06))": {
+    "berkas": "features/flowchart/lib/shapes.tsx",
+    "teks": "drop-shadow(0 3px 6px rgba(0,0,0,0.06))",
+    "jenis": "ternary"
+  },
+  "features/flowchart/lib/shapes.tsx:drop-shadow(0 20px 25px rgba(0,0,0,0.18)) drop-shadow(0 10px 10px rgba(0,0,0,0.12))": {
+    "berkas": "features/flowchart/lib/shapes.tsx",
+    "teks": "drop-shadow(0 20px 25px rgba(0,0,0,0.18)) drop-shadow(0 10px 10px rgba(0,0,0,0.12))",
+    "jenis": "ternary"
+  },
+  "features/issues/components/list/IssueTableRow.tsx:tr-${task.id}-${depth}": {
+    "berkas": "features/issues/components/list/IssueTableRow.tsx",
+    "teks": "tr-${task.id}-${depth}",
+    "jenis": "ternary"
+  },
+  "features/issues/components/modal/TaskAttachmentsSection.tsx:${att.id}-${attIdx}": {
+    "berkas": "features/issues/components/modal/TaskAttachmentsSection.tsx",
+    "teks": "${att.id}-${attIdx}",
+    "jenis": "ternary"
+  },
+  "features/issues/components/modal/TaskAttachmentsSection.tsx:${formatBytes(att.size)} •": {
+    "berkas": "features/issues/components/modal/TaskAttachmentsSection.tsx",
+    "teks": "${formatBytes(att.size)} •",
+    "jenis": "ternary"
+  },
+  "features/issues/components/modal/TaskAttachmentsSection.tsx:• ${att.uploadedByName}": {
+    "berkas": "features/issues/components/modal/TaskAttachmentsSection.tsx",
+    "teks": "• ${att.uploadedByName}",
+    "jenis": "ternary"
+  },
+  "features/issues/components/modal/TaskCommentsSection.tsx:${root.id}-${i}": {
+    "berkas": "features/issues/components/modal/TaskCommentsSection.tsx",
+    "teks": "${root.id}-${i}",
+    "jenis": "ternary"
+  },
+  "features/issues/components/modal/TaskCommentsSection.tsx:${reply.id}-${rIdx}": {
+    "berkas": "features/issues/components/modal/TaskCommentsSection.tsx",
+    "teks": "${reply.id}-${rIdx}",
+    "jenis": "ternary"
+  },
+  "features/issues/components/modal/TaskCommentsSection.tsx:${log.id}-${i}": {
+    "berkas": "features/issues/components/modal/TaskCommentsSection.tsx",
+    "teks": "${log.id}-${i}",
+    "jenis": "ternary"
+  },
+  "features/issues/components/modal/TaskLinksSection.tsx:${link.id}-${linkIdx}": {
+    "berkas": "features/issues/components/modal/TaskLinksSection.tsx",
+    "teks": "${link.id}-${linkIdx}",
+    "jenis": "ternary"
+  },
+  "features/issues/IssueListView.tsx:drag-${root.id}-${index}": {
+    "berkas": "features/issues/IssueListView.tsx",
+    "teks": "drag-${root.id}-${index}",
+    "jenis": "ternary"
+  },
+  "features/kanban/components/KanbanCard.tsx:Terlambat! Tugas telah melewati tanggal jatuh tempo.": {
+    "berkas": "features/kanban/components/KanbanCard.tsx",
+    "teks": "Terlambat! Tugas telah melewati tanggal jatuh tempo.",
+    "jenis": "ternary"
+  },
+  "features/kanban/components/KanbanCard.tsx:line-through text-content-subtle": {
+    "berkas": "features/kanban/components/KanbanCard.tsx",
+    "teks": "line-through text-content-subtle",
+    "jenis": "ternary"
+  },
+  "features/kanban/components/KanbanColumn.tsx:${tasks.length}/${wipLimit}": {
+    "berkas": "features/kanban/components/KanbanColumn.tsx",
+    "teks": "${tasks.length}/${wipLimit}",
+    "jenis": "ternary"
+  },
+  "features/master/MasterDataPanel.tsx:Project Role (Tim Proyek)": {
+    "berkas": "features/master/MasterDataPanel.tsx",
+    "teks": "Project Role (Tim Proyek)",
+    "jenis": "ternary"
+  },
+  "features/master/MasterDataPanel.tsx:Peran anggota dalam tim proyek (cth: BA, Lead, QA, Developer)": {
+    "berkas": "features/master/MasterDataPanel.tsx",
+    "teks": "Peran anggota dalam tim proyek (cth: BA, Lead, QA, Developer)",
+    "jenis": "ternary"
+  },
+  "features/master/MasterDataPanel.tsx:cth: Business Analyst, Project Lead, QA Specialist, Senior Developer": {
+    "berkas": "features/master/MasterDataPanel.tsx",
+    "teks": "cth: Business Analyst, Project Lead, QA Specialist, Senior Developer",
+    "jenis": "ternary"
+  },
+  "features/master/MasterDataPanel.tsx:Data master": {
+    "berkas": "features/master/MasterDataPanel.tsx",
+    "teks": "Data master",
+    "jenis": "ternary"
+  },
+  "features/master/MasterDataPanel.tsx:${mod.namaModul} (Modul)": {
+    "berkas": "features/master/MasterDataPanel.tsx",
+    "teks": "${mod.namaModul} (Modul)",
+    "jenis": "definisi"
+  },
+  "features/meeting-notes/AiMeetingCompanion.tsx:${transcript.split(/\\s+/).length} Kata": {
+    "berkas": "features/meeting-notes/AiMeetingCompanion.tsx",
+    "teks": "${transcript.split(/\\s+/).length} Kata",
+    "jenis": "ternary"
+  },
+  "features/meeting-notes/AiMeetingCompanion.tsx:Contoh: AI kurang detail menangkap argumen teknis bagian API Hashing. Tolong jelaskan lebih rinci arsitektur keamanan datanya di rapat berikutnya.": {
+    "berkas": "features/meeting-notes/AiMeetingCompanion.tsx",
+    "teks": "Contoh: AI kurang detail menangkap argumen teknis bagian API Hashing. Tolong jelaskan lebih rinci arsitektur keamanan datanya di rapat berikutnya.",
+    "jenis": "atribut"
+  },
+  "features/meeting-notes/AiMeetingCompanion.tsx:ai-analyze-toast": {
+    "berkas": "features/meeting-notes/AiMeetingCompanion.tsx",
+    "teks": "ai-analyze-toast",
+    "jenis": "notifikasi"
+  },
+  "features/meeting-notes/AiMeetingCompanion.tsx:\\n\\n**Bukti cuplikan:**\\n": {
+    "berkas": "features/meeting-notes/AiMeetingCompanion.tsx",
+    "teks": "\\n\\n**Bukti cuplikan:**\\n",
+    "jenis": "ternary"
+  },
+  "features/meeting-notes/AiMeetingCompanion.tsx:${item.bukti_cuplikan}": {
+    "berkas": "features/meeting-notes/AiMeetingCompanion.tsx",
+    "teks": "${item.bukti_cuplikan}",
+    "jenis": "ternary"
+  },
+  "features/meeting-notes/DiscussionPointsTable.tsx:Meeting Discussion": {
+    "berkas": "features/meeting-notes/DiscussionPointsTable.tsx",
+    "teks": "Meeting Discussion",
+    "jenis": "definisi"
+  },
+  "features/planning/SprintSection/index.tsx:${format(ensureDate(sprint.startDate),": {
+    "berkas": "features/planning/SprintSection/index.tsx",
+    "teks": "${format(ensureDate(sprint.startDate),",
+    "jenis": "ternary"
+  },
+  "features/planning/SprintSection/index.tsx:(${Math.ceil((ensureDate(sprint.endDate).getTime() - ensureDate(sprint.startDate).getTime()) / (1000 * 60 * 60 * 24))} days)": {
+    "berkas": "features/planning/SprintSection/index.tsx",
+    "teks": "(${Math.ceil((ensureDate(sprint.endDate).getTime() - ensureDate(sprint.startDate).getTime()) / (1000 * 60 * 60 * 24))} days)",
+    "jenis": "ternary"
+  },
+  "features/planning/SprintSection/index.tsx:Sprint Goal": {
+    "berkas": "features/planning/SprintSection/index.tsx",
+    "teks": "Sprint Goal",
+    "jenis": "jsx"
+  },
+  "features/qa/components/QADetailDrawer.tsx:run-log-${log.id}-${idx}": {
+    "berkas": "features/qa/components/QADetailDrawer.tsx",
+    "teks": "run-log-${log.id}-${idx}",
+    "jenis": "ternary"
+  },
+  "features/qa/components/QASuiteSidebar.tsx:${suite.id}-${sIdx}": {
+    "berkas": "features/qa/components/QASuiteSidebar.tsx",
+    "teks": "${suite.id}-${sIdx}",
+    "jenis": "ternary"
+  },
+  "features/qa/components/QATestCaseTable.tsx:Migrate to UAT": {
+    "berkas": "features/qa/components/QATestCaseTable.tsx",
+    "teks": "Migrate to UAT",
+    "jenis": "ternary"
+  },
+  "features/qa/components/QATestCaseTable.tsx:PIC Task: ${matchedMember?.displayName || matchedMember?.username || tc.assignedTo}": {
+    "berkas": "features/qa/components/QATestCaseTable.tsx",
+    "teks": "PIC Task: ${matchedMember?.displayName || matchedMember?.username || tc.assignedTo}",
+    "jenis": "ternary"
+  },
+  "features/qa/components/QATestCaseTable.tsx:PIC Task": {
+    "berkas": "features/qa/components/QATestCaseTable.tsx",
+    "teks": "PIC Task",
+    "jenis": "ternary"
+  },
+  "features/settings/components/BroadcastMonitor.tsx:Nomor WhatsApp belum terdaftar di profil pengguna": {
+    "berkas": "features/settings/components/BroadcastMonitor.tsx",
+    "teks": "Nomor WhatsApp belum terdaftar di profil pengguna",
+    "jenis": "ternary"
+  },
+  "features/settings/components/BroadcastMonitor.tsx:Berhasil diperbarui": {
+    "berkas": "features/settings/components/BroadcastMonitor.tsx",
+    "teks": "Berhasil diperbarui",
+    "jenis": "notifikasi"
+  },
+  "features/settings/components/EmailConfigForm.tsx:Konfigurasi email berhasil disimpan ke database.": {
+    "berkas": "features/settings/components/EmailConfigForm.tsx",
+    "teks": "Konfigurasi email berhasil disimpan ke database.",
+    "jenis": "notifikasi"
+  },
+  "features/settings/components/EmailConfigForm.tsx:SMTP Server": {
+    "berkas": "features/settings/components/EmailConfigForm.tsx",
+    "teks": "SMTP Server",
+    "jenis": "ternary"
+  },
+  "features/settings/components/EmailConfigForm.tsx:SMTP Host Server": {
+    "berkas": "features/settings/components/EmailConfigForm.tsx",
+    "teks": "SMTP Host Server",
+    "jenis": "jsx"
+  },
+  "features/settings/components/EmailConfigForm.tsx:admin@lanpro.my.id": {
+    "berkas": "features/settings/components/EmailConfigForm.tsx",
+    "teks": "admin@lanpro.my.id",
+    "jenis": "atribut"
+  },
+  "features/settings/components/EmailConfigForm.tsx:•••••••••••• (Ketik untuk ganti)": {
+    "berkas": "features/settings/components/EmailConfigForm.tsx",
+    "teks": "•••••••••••• (Ketik untuk ganti)",
+    "jenis": "ternary"
+  },
+  "features/settings/components/EmailConfigForm.tsx:LanPro System": {
+    "berkas": "features/settings/components/EmailConfigForm.tsx",
+    "teks": "LanPro System",
+    "jenis": "atribut"
+  },
+  "features/settings/components/EmailConfigForm.tsx:Resend API Key": {
+    "berkas": "features/settings/components/EmailConfigForm.tsx",
+    "teks": "Resend API Key",
+    "jenis": "jsx"
+  },
+  "features/settings/components/EmailConfigForm.tsx:LanPro <noreply@domain-anda.com>": {
+    "berkas": "features/settings/components/EmailConfigForm.tsx",
+    "teks": "LanPro <noreply@domain-anda.com>",
+    "jenis": "atribut"
+  },
+  "features/settings/components/EmailConfigForm.tsx:Tautan di Dalam Email": {
+    "berkas": "features/settings/components/EmailConfigForm.tsx",
+    "teks": "Tautan di Dalam Email",
+    "jenis": "jsx"
+  },
+  "features/settings/components/EmailConfigForm.tsx:URL Aplikasi": {
+    "berkas": "features/settings/components/EmailConfigForm.tsx",
+    "teks": "URL Aplikasi",
+    "jenis": "jsx"
+  },
+  "features/settings/components/EmailConfigForm.tsx:masukkan-email-anda@gmail.com": {
+    "berkas": "features/settings/components/EmailConfigForm.tsx",
+    "teks": "masukkan-email-anda@gmail.com",
+    "jenis": "atribut"
+  },
+  "features/settings/components/SystemConfigForm.tsx:rajonet.com, bni.co.id, gmail.com, outlook.com": {
+    "berkas": "features/settings/components/SystemConfigForm.tsx",
+    "teks": "rajonet.com, bni.co.id, gmail.com, outlook.com",
+    "jenis": "atribut"
+  },
+  "features/settings/components/TemplateEditorModal.tsx:Type your email content here (supports HTML)...": {
+    "berkas": "features/settings/components/TemplateEditorModal.tsx",
+    "teks": "Type your email content here (supports HTML)...",
+    "jenis": "ternary"
+  },
+  "features/settings/components/WhatsAppConfigForm.tsx:Test Connection": {
+    "berkas": "features/settings/components/WhatsAppConfigForm.tsx",
+    "teks": "Test Connection",
+    "jenis": "jsx"
+  },
+  "features/team/TeamManagementPanel.tsx:Project Owner & Manager": {
+    "berkas": "features/team/TeamManagementPanel.tsx",
+    "teks": "Project Owner & Manager",
+    "jenis": "ternary"
+  },
+  "features/team/TeamManagementPanel.tsx:Project Owner": {
+    "berkas": "features/team/TeamManagementPanel.tsx",
+    "teks": "Project Owner",
+    "jenis": "ternary"
+  },
+  "features/users/AdminUserPanel.tsx:· ${getPositionName(user.position)}": {
+    "berkas": "features/users/AdminUserPanel.tsx",
+    "teks": "· ${getPositionName(user.position)}",
+    "jenis": "ternary"
+  },
+  "features/users/UserDetailView.tsx:Administrator (Super User)": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Administrator (Super User)",
+    "jenis": "definisi"
+  },
+  "features/users/UserDetailView.tsx:Edit Profile": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Edit Profile",
+    "jenis": "atribut"
+  },
+  "features/users/UserDetailView.tsx:Department Head": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Department Head",
+    "jenis": "definisi"
+  },
+  "features/users/UserDetailView.tsx:Project Manager": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Project Manager",
+    "jenis": "definisi"
+  },
+  "features/users/UserDetailView.tsx:Standard User (Anggota Tim)": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Standard User (Anggota Tim)",
+    "jenis": "definisi"
+  },
+  "features/users/UserDetailView.tsx:Observer (Read-Only)": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Observer (Read-Only)",
+    "jenis": "definisi"
+  },
+  "features/users/UserDetailView.tsx:No pending tasks": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "No pending tasks",
+    "jenis": "ternary"
+  },
+  "features/users/UserDetailView.tsx:${userTasks.filter((t) => t.status !==": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "${userTasks.filter((t) => t.status !==",
+    "jenis": "ternary"
+  },
+  "features/users/UserDetailView.tsx:Grid View": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Grid View",
+    "jenis": "atribut"
+  },
+  "features/users/UserDetailView.tsx:List View": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "List View",
+    "jenis": "atribut"
+  },
+  "features/users/UserDetailView.tsx:Product Owner": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Product Owner",
+    "jenis": "jsx"
+  },
+  "features/users/UserDetailView.tsx:Created ${new Date(p.createdAt).toLocaleDateString()}": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Created ${new Date(p.createdAt).toLocaleDateString()}",
+    "jenis": "ternary"
+  },
+  "features/users/UserDetailView.tsx:— ${tItem.priority ||": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "— ${tItem.priority ||",
+    "jenis": "ternary"
+  },
+  "features/users/UserDetailView.tsx:Due ${tItem.dueDate}": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Due ${tItem.dueDate}",
+    "jenis": "ternary"
+  },
+  "features/users/UserDetailView.tsx:${item.browser ||": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "${item.browser ||",
+    "jenis": "ternary"
+  },
+  "features/users/UserDetailView.tsx:Peran ini tidak ada di katalog Master Data — perlu dimigrasikan": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Peran ini tidak ada di katalog Master Data — perlu dimigrasikan",
+    "jenis": "ternary"
+  },
+  "features/users/UserDetailView.tsx:Active Now": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Active Now",
+    "jenis": "ternary"
+  },
+  "features/users/UserDetailView.tsx:Sembunyikan Tugas": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Sembunyikan Tugas",
+    "jenis": "ternary"
+  },
+  "features/users/UserDetailView.tsx:Download File": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Download File",
+    "jenis": "atribut"
+  },
+  "features/users/UserDetailView.tsx:Load more": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Load more",
+    "jenis": "jsx"
+  },
+  "features/users/UserDetailView.tsx:Flowchart Diagram.fc": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Flowchart Diagram.fc",
+    "jenis": "ternary"
+  },
+  "features/users/UserDetailView.tsx:Flowchart Diagram": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Flowchart Diagram",
+    "jenis": "ternary"
+  },
+  "features/users/UserSessionsPanel.tsx:${session.city}, ${session.country}": {
+    "berkas": "features/users/UserSessionsPanel.tsx",
+    "teks": "${session.city}, ${session.country}",
+    "jenis": "ternary"
+  },
+  "features/wiki/WikiView.tsx:Business Requirements Document (BRD)": {
+    "berkas": "features/wiki/WikiView.tsx",
+    "teks": "Business Requirements Document (BRD)",
+    "jenis": "definisi"
+  },
+  "features/wiki/WikiView.tsx:Functional Spec (FSD)": {
+    "berkas": "features/wiki/WikiView.tsx",
+    "teks": "Functional Spec (FSD)",
+    "jenis": "definisi"
+  },
+  "features/wiki/WikiView.tsx:Technical Spec (TSD)": {
+    "berkas": "features/wiki/WikiView.tsx",
+    "teks": "Technical Spec (TSD)",
+    "jenis": "definisi"
+  },
+  "features/wiki/WikiView.tsx:Test Plan": {
+    "berkas": "features/wiki/WikiView.tsx",
+    "teks": "Test Plan",
+    "jenis": "definisi"
+  },
+  "features/wiki/WikiView.tsx:UAT Sign-off Report": {
+    "berkas": "features/wiki/WikiView.tsx",
+    "teks": "UAT Sign-off Report",
+    "jenis": "definisi"
+  },
+  "features/wiki/WikiView.tsx:Architecture Diagram": {
+    "berkas": "features/wiki/WikiView.tsx",
+    "teks": "Architecture Diagram",
+    "jenis": "definisi"
+  },
+  "features/wiki/WikiView.tsx:Meeting Minutes": {
+    "berkas": "features/wiki/WikiView.tsx",
+    "teks": "Meeting Minutes",
+    "jenis": "definisi"
+  },
+  "i18n/LanguageSwitcher.tsx:Switch to English / Ganti ke Bahasa Inggris": {
+    "berkas": "i18n/LanguageSwitcher.tsx",
+    "teks": "Switch to English / Ganti ke Bahasa Inggris",
+    "jenis": "ternary"
+  },
+  "i18n/LanguageSwitcher.tsx:Ganti ke Bahasa Indonesia": {
+    "berkas": "i18n/LanguageSwitcher.tsx",
+    "teks": "Ganti ke Bahasa Indonesia",
+    "jenis": "ternary"
+  }
+}

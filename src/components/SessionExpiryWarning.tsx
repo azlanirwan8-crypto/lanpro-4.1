@@ -190,7 +190,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
     setSimulatedTimeLeft(60);
     setIsPopoverOpen(false);
     toast.success(t("toast.sessionWarnSimulated"), {
-      description: "Sesi akan berakhir otomatis jika Anda tidak merespons dalam 60 detik.",
+      description: t("toast.sessionWarnSimulatedDesc"),
     });
   };
 

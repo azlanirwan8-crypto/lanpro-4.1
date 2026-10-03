@@ -235,13 +235,13 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
 
         <div className="text-center space-y-1">
           {parsedImportData ? (
-            <p className="text-sm font-semibold text-emerald-700">File berhasil dibaca!</p>
+            <p className="text-sm font-semibold text-emerald-700">{t("flowchart.importReadOk")}</p>
           ) : dragOverImport ? (
-            <p className="text-sm font-semibold text-primary">Lepaskan file di sini…</p>
+            <p className="text-sm font-semibold text-primary">{t("flowchart.importDropHere")}</p>
           ) : (
             <>
               <p className="text-sm font-semibold text-content-strong">
-                Klik atau seret file ke sini
+                {t("flowchart.importClickOrDrop")}
               </p>
               <p className="text-[11px] text-content-muted">
                 {activeFormat.accept.replace(/\./g, "").replace(/,/g, "  ·  ").toUpperCase()}

@@ -1346,9 +1346,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                 {t("wiki.noAttachment")}
                               </h4>
                               <p className="text-xs sm:text-[10px] text-content-subtle font-medium leading-normal mt-1 max-w-xs mx-auto">
-                                {canUpdate
-                                  ? "Seret & lepaskan file PDF spesifikasi teknis di sini, atau klik untuk memilih file dari komputer Anda."
-                                  : "Pengguna dengan akses edit dapat mengunggah dokumen PDF spesifikasi di sini."}
+                                {canUpdate ? t("wiki.dropPdfHint") : t("wiki.dropPdfHintBacaSaja")}
                               </p>
                             </div>
 

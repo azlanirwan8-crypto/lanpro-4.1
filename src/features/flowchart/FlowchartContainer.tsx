@@ -584,7 +584,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           toast.error(`File "${file.name}" tidak mengandung bentuk yang dapat dibaca.`);
         }
       } catch (err: any) {
-        toast.error(`Gagal memuat "${file.name}": ${err.message || err}`);
+        toast.error(
+          t("flowchart.importLoadFailed", { name: file.name, reason: err.message || err })
+        );
       }
     };
     reader.readAsText(file);
@@ -3536,7 +3538,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             <div className="bg-surface/90 backdrop-blur-md border border-border-subtle rounded-2xl px-6 py-5 shadow-xl flex flex-col items-center gap-2 select-none">
                               <Upload className="w-8 h-8 text-primary" aria-hidden="true" />
                               <p className="text-sm font-semibold text-content-strong">
-                                Lepaskan untuk Impor Diagram
+                                {t("flowchart.importReleaseHint")}
                               </p>
                               <p className="text-xs text-content-muted text-center">
                                 .drawio &nbsp;·&nbsp; .xml &nbsp;·&nbsp; .json &nbsp;·&nbsp; .csv

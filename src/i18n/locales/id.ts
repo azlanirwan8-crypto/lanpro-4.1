@@ -483,6 +483,10 @@ export const id = {
     resolution: "Resolusi",
   },
   toast: {
+    sessionWarnSimulatedDesc:
+      "Sesi akan berakhir otomatis jika Anda tidak merespons dalam 60 detik.",
+    loginFillRequired: "Username dan Password wajib diisi terlebih dahulu.",
+    tasksBulkDeleted: "{{count}} tugas terpilih berhasil dihapus.",
     cannotCompleteBlocked:
       "Tidak dapat menyelesaikan {{kunci}}: tugas ini terblokir oleh {{pemblokir}} ({{status}}).",
     subtaskBlocker:
@@ -1461,6 +1465,11 @@ export const id = {
     wipCount: "{{count}} / {{limit}} WIP",
   },
   flowchart: {
+    importReadOk: "File berhasil dibaca!",
+    importDropHere: "Lepaskan file di sini…",
+    importClickOrDrop: "Klik atau seret file ke sini",
+    importReleaseHint: "Lepaskan untuk Impor Diagram",
+    importLoadFailed: 'Gagal memuat "{{name}}": {{reason}}',
     breadcrumbGroup: "PROYEK",
     addModalTitle: "Buat Diagram Baru",
     mulaiDenganWarna: "Mulai dengan warna {{warna}}",
@@ -1677,6 +1686,10 @@ export const id = {
     yesRestoreNow: "Ya, Restore Sekarang",
   },
   wiki: {
+    dropPdfHint:
+      "Seret & lepaskan file PDF spesifikasi teknis di sini, atau klik untuk memilih file dari komputer Anda.",
+    dropPdfHintBacaSaja:
+      "Pengguna dengan akses edit dapat mengunggah dokumen PDF spesifikasi di sini.",
     uncategorized: "Tanpa Kategori",
     breadcrumbGroup: "PROYEK",
     clearSearch: "Bersihkan Pencarian",

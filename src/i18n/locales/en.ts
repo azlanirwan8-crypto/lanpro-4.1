@@ -473,6 +473,10 @@ export const en = {
     resolution: "Resolution",
   },
   toast: {
+    sessionWarnSimulatedDesc:
+      "The session ends automatically if you do not respond within 60 seconds.",
+    loginFillRequired: "Username and Password must be filled in first.",
+    tasksBulkDeleted: "{{count}} selected tasks deleted.",
     cannotCompleteBlocked:
       "Cannot complete {{kunci}}: it is blocked by {{pemblokir}} ({{status}}).",
     subtaskBlocker:
@@ -1450,6 +1454,11 @@ export const en = {
     wipCount: "{{count}} / {{limit}} WIP",
   },
   flowchart: {
+    importReadOk: "File read successfully!",
+    importDropHere: "Drop the file here…",
+    importClickOrDrop: "Click or drag a file here",
+    importReleaseHint: "Release to import diagram",
+    importLoadFailed: 'Failed to load "{{name}}": {{reason}}',
     breadcrumbGroup: "PROJECT",
     addModalTitle: "Create New Diagram",
     mulaiDenganWarna: "Start with the colour {{warna}}",
@@ -1665,6 +1674,9 @@ export const en = {
     yesRestoreNow: "Yes, restore now",
   },
   wiki: {
+    dropPdfHint:
+      "Drag & drop a technical specification PDF here, or click to choose a file from your computer.",
+    dropPdfHintBacaSaja: "Users with edit access can upload specification PDFs here.",
     uncategorized: "No Category",
     breadcrumbGroup: "PROJECT",
     clearSearch: "Clear Search",

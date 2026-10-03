@@ -3724,7 +3724,7 @@ function AppContainer() {
       if (data.status !== "success") throw new Error(data.message);
 
       const deletedSet = new Set(data.deletedIds || taskIds);
-      toast.success(`Berhasil menghapus ${deletedSet.size} tugas terpilih.`);
+      toast.success(t("toast.tasksBulkDeleted", { count: deletedSet.size }));
     } catch (e: any) {
       setTasks(previousTasks);
       setAllProjectTasksForStats(previousStats);
