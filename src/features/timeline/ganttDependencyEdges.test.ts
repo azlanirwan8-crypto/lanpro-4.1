@@ -45,7 +45,24 @@ describe("ganttDependencyEdges #457", () => {
     expect(pathSikuDep(10, 20, 40, 80)).toContain("V ");
   });
 
-  it("GANTT_ROW_PX = 56 selaras h-14", () => {
-    expect(GANTT_ROW_PX).toBe(56);
+  it("tinggi baris roadmap 40 px, bukan 56 px lagi (#608)", () => {
+    // 56 px itu 1,5x kerapatan daftar isu aplikasi ini sendiri; pemilik proyek
+    // minta standar tabel yang bersih. Angka ini SATU-SATUNYA sumber tinggi
+    // baris — lihat test berikutnya.
+    expect(GANTT_ROW_PX).toBe(40);
+    // Batang Gantt (h-6 = 24 px) harus tetap punya ruang napas di dalam baris.
+    expect(GANTT_ROW_PX).toBeGreaterThanOrEqual(24 + 8);
+  });
+
+  it("TimelinePanel tidak lagi menulis tinggi baris dengan angka sendiri (#608)", () => {
+    const sumber = require("fs").readFileSync(
+      require("path").join(__dirname, "TimelinePanel.tsx"),
+      "utf8"
+    );
+    expect(sumber).not.toMatch(/height:\s*56/);
+    expect(sumber).not.toMatch(/\bh-14\b/);
+    // Tiga baris (hierarki + dua varian lajur Gantt) membaca konstanta yang sama,
+    // termasuk geometri pohon yang dulu memakai top-7 / h-7.
+    expect(sumber.match(/GANTT_ROW_PX/g)!.length).toBeGreaterThanOrEqual(5);
   });
 });

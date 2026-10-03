@@ -869,11 +869,11 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                     <motion.div
                       key={task.id}
                       initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 56, opacity: 1 }}
+                      animate={{ height: GANTT_ROW_PX, opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
                       className={cn(
-                        "h-14 w-max min-w-full flex items-center gap-2 border-b border-border-faint transition-colors relative z-10 overflow-hidden",
+                        "w-max min-w-full flex items-center gap-2 border-b border-border-faint transition-colors relative z-10 overflow-hidden",
                         rowIdx % 2 === 1
                           ? "bg-surface-sunken/40 hover:bg-surface-sunken/80"
                           : "bg-surface hover:bg-surface-sunken/40",
@@ -896,14 +896,19 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                                 <div
                                   className={cn(
                                     "absolute top-0 w-[2px] bg-surface-strong/80",
-                                    isCurrentDepth && isLastChild ? "h-7 rounded-bl-lg" : "h-full"
+                                    isCurrentDepth && isLastChild && "rounded-bl-lg"
                                   )}
-                                  style={{ left: `${14 + i * 20}px` }}
+                                  style={{
+                                    left: `${14 + i * 20}px`,
+                                    // Garis vertikal anak terakhir berhenti di tengah baris.
+                                    height:
+                                      isCurrentDepth && isLastChild ? GANTT_ROW_PX / 2 : "100%",
+                                  }}
                                 />
                                 {isCurrentDepth && (
                                   <div
-                                    className="absolute top-7 w-[20px] h-[2px] bg-surface-strong/80 rounded-tr-lg"
-                                    style={{ left: `${14 + i * 20}px` }}
+                                    className="absolute w-[20px] h-[2px] bg-surface-strong/80 rounded-tr-lg"
+                                    style={{ left: `${14 + i * 20}px`, top: GANTT_ROW_PX / 2 - 1 }}
                                   />
                                 )}
                               </React.Fragment>
@@ -1150,10 +1155,10 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                         <motion.div
                           key={task.id}
                           initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 56, opacity: 1 }}
+                          animate={{ height: GANTT_ROW_PX, opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ duration: 0.2, ease: "easeInOut" }}
-                          className="h-14 relative border-b border-border-faint bg-transparent flex items-center group/row hover:bg-surface-sunken/50 transition-colors overflow-hidden"
+                          className="relative border-b border-border-faint bg-transparent flex items-center group/row hover:bg-surface-sunken/50 transition-colors overflow-hidden"
                           style={{ willChange: "transform, opacity, height" }}
                         >
                           <motion.button
@@ -1167,7 +1172,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                               setSelectedTaskForDetail(task);
                               setIsTaskDetailModalOpen(true);
                             }}
-                            className="absolute left-6 h-8 px-4 rounded-xl flex items-center bg-surface-sunken/60 border border-border-subtle border-dashed hover:border-primary hover:bg-surface group-hover/row:bg-surface text-xs sm:text-[10px] font-medium text-content-subtle hover:text-primary hover:shadow-soft transition-all cursor-pointer gap-2"
+                            className="absolute left-6 h-6 px-4 rounded-xl flex items-center bg-surface-sunken/60 border border-border-subtle border-dashed hover:border-primary hover:bg-surface group-hover/row:bg-surface text-xs sm:text-[10px] font-medium text-content-subtle hover:text-primary hover:shadow-soft transition-all cursor-pointer gap-2"
                           >
                             <span className="w-1.5 h-1.5 rounded-full bg-surface-marker group-hover/row:bg-primary/100 animate-pulse transition-colors" />
                             {t("roadmap.notPlotted")}
@@ -1189,10 +1194,10 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                       <motion.div
                         key={task.id}
                         initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 56, opacity: 1 }}
+                        animate={{ height: GANTT_ROW_PX, opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2, ease: "easeInOut" }}
-                        className="h-14 relative border-b border-border-faint bg-transparent flex items-center group/row hover:bg-surface-sunken/50 transition-colors overflow-hidden"
+                        className="relative border-b border-border-faint bg-transparent flex items-center group/row hover:bg-surface-sunken/50 transition-colors overflow-hidden"
                         style={{ willChange: "transform, opacity, height" }}
                       >
                         <motion.div
@@ -1208,7 +1213,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                               : { type: "spring", stiffness: 350, damping: 25 }
                           }
                           className={cn(
-                            "absolute top-1/2 -translate-y-1/2 h-8 rounded-lg shadow-soft flex items-center border overflow-hidden",
+                            "absolute top-1/2 -translate-y-1/2 h-6 rounded-lg shadow-soft flex items-center border overflow-hidden",
                             getStatusColors(hexStatus, isEpic).bg,
                             getStatusColors(hexStatus, isEpic).border,
                             getStatusColors(hexStatus, isEpic).text,

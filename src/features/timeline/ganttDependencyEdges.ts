@@ -80,7 +80,21 @@ export function kumpulkanEdgeBlocks(
   return edges;
 }
 
-export const GANTT_ROW_PX = 56;
+/**
+ * Tinggi satu baris roadmap. SATU-SATUNYA angka yang boleh dipakai untuk
+ * tinggi baris — panel membacanya lewat inline style, bukan kelas Tailwind,
+ * supaya lajur kiri (Item & Hierarki), lajur Gantt, dan geometri garis
+ * dependensi tidak bisa berbeda pendapat lagi.
+ *
+ * #608 — dulu 56 px. Pemilik proyek 04 Okt: "bisa didekatkan lagi nggak jarak
+ * barisnya, ini masih kelihatan jauh, coba standarnya table gimana agar clean
+ * dan enak, cek di project management roadmap lain". 56 px itu 1,4x–1,75x
+ * kerapatan daftar isu di aplikasi ini sendiri (baris `py-1.5` ≈ 34-38 px) dan
+ * di atas kerapatan roadmap Jira/Linear/ClickUp yang duduk di 32-44 px. 40 px
+ * masih menampung dua chip label setinggi 20 px dengan ruang 10 px di atas dan
+ * bawahnya, dan tetap terbaca satu baris per isu.
+ */
+export const GANTT_ROW_PX = 40;
 
 /** Path siku orthogonal dalam viewBox x=0..100 (%), y=px. */
 export function pathSikuDep(x1: number, y1: number, x2: number, y2: number): string {
