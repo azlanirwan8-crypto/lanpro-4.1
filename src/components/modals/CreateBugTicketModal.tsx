@@ -5,6 +5,7 @@ import { QATestCase } from "../../features/qa/types";
 import { StyledDropdown } from "../ui/CommonComponents";
 import { Modal } from "../ui/Modal";
 import { Button } from "../ui/CoreUI";
+import { enterUntukSimpan } from "../../lib/enterSimpan";
 
 interface CreateBugTicketModalProps {
   isOpen: boolean;
@@ -126,7 +127,16 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
           </label>
 
           <div
+            role="button"
+            tabIndex={0}
+            aria-expanded={isDropdownOpen}
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setIsDropdownOpen(!isDropdownOpen);
+              }
+            }}
             className="w-full text-xs p-3 bg-surface-sunken border border-border-subtle rounded-md font-medium text-content-strong flex items-center justify-between cursor-pointer hover:border-primary"
           >
             <span className="truncate">
@@ -143,12 +153,17 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
               <div className="absolute left-0 right-0 top-full mt-1 bg-surface border border-border-subtle rounded-md shadow-2xl p-2 z-50 animate-dropdown">
                 <div className="relative mb-2">
                   <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-content-subtle" />
+                  {/* Kolom ini duduk di dalam <form id="create-bug-ticket-form">, jadi
+                      Enter-nya mengirim form = tiket bug jadi dibuat (#593). */}
                   <input
                     autoFocus
                     type="text"
                     placeholder={t("bugTicket.searchTarget")}
                     value={parentSearchTerm}
                     onChange={(e) => onSearchTermChange(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.nativeEvent.isComposing) e.preventDefault();
+                    }}
                     className="w-full text-xs pl-8 pr-3 py-1.5 bg-surface-sunken border border-border-subtle rounded-md focus:outline-none"
                   />
                 </div>

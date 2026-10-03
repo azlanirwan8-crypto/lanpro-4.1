@@ -5,6 +5,7 @@ import { Modal } from "../ui/Modal";
 import { Input, Button } from "../ui/CoreUI";
 import { StyledDropdown } from "../ui/CommonComponents";
 import { Project, PeranEfektif, UserProfile, MasterData } from "../../types";
+import { enterUntukSimpan } from "../../lib/enterSimpan";
 
 interface EditProjectModalProps {
   isOpen: boolean;
@@ -102,6 +103,9 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
                   name: e.target.value,
                 })
               }
+              onKeyDown={enterUntukSimpan(() => {
+                if (!isSubmitting && (editingProject.name ?? "").trim()) onSubmit();
+              })}
             />
           </div>
           <div>

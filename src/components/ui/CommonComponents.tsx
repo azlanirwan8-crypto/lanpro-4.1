@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
-import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
+import React, { useState, useEffect, useId, useRef, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import {
   ChevronDown,
@@ -232,6 +232,9 @@ export const StyledDropdown = ({
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLDivElement>(null);
+  const [aktif, setAktif] = useState(0);
+  const dariPapanKetik = useRef(false);
+  const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
   const [dropdownPos, setDropdownPos] = useState<{
     top?: number;
     bottom?: number;
@@ -243,6 +246,65 @@ export const StyledDropdown = ({
   // De-duplicate options to prevent duplicate key errors
   const safeOptions = Array.from(new Map((options || []).map((o) => [o.id, o])).values());
   const selected = safeOptions.find((o) => o.id === value);
+  const idDaftar = `dd-${uid}`;
+  const idOpsi = (i: number) => `${idDaftar}-${i}`;
+
+  /**
+   * Papan ketik penuh (#594) lewat FOKUS NYATA ke opsi, bukan
+   * `aria-activedescendant`.
+   *
+   * `role="combobox"` + activedescendant sempat dicoba dan menghemat nol baris,
+   * tapi menghapus NAMA aksesibel pemicunya: nama sebuah <button> datang dari
+   * isinya, dan role combobox tidak mengambil nama dari konten — tes #268b
+   * langsung melaporkan `Name ""`. Dengan memindahkan fokus ke tombol opsi,
+   * semua itu tetap bawaan peramban: panah memindah fokus, Enter/Space ya klik
+   * tombolnya, dan pembaca layar menyebutkan opsi yang sedang disorot.
+   */
+  const geserFokusOpsi = (i: number) => {
+    const akhir = safeOptions.length - 1;
+    const target = Math.min(Math.max(i, 0), akhir);
+    setAktif(target);
+    dariPapanKetik.current = true;
+    const el = document.getElementById(idOpsi(target));
+    if (el && typeof el.focus === "function") el.focus();
+  };
+  const tutupKembaliKePemicu = () => {
+    setIsOpen(false);
+    if (dariPapanKetik.current && buttonRef.current) {
+      const b = buttonRef.current as unknown as HTMLElement;
+      if (typeof b.focus === "function") b.focus();
+    }
+  };
+  const tombolPapanKetik = (e: React.KeyboardEvent) => {
+    if (disabled) return;
+    const k = e.key;
+    if (k === "ArrowDown" || k === "ArrowUp" || k === "Home" || k === "End") {
+      e.preventDefault();
+      dariPapanKetik.current = true;
+      const terpilih = safeOptions.findIndex((o) => o.id === value);
+      if (!isOpen) {
+        /* Konvensi daftar pilihan: panah bawah membuka di nilai yang terpilih
+           (atau baris pertama), panah ATAS membuka di baris terakhir. */
+        setAktif(k === "ArrowUp" ? safeOptions.length - 1 : terpilih < 0 ? 0 : terpilih);
+        setIsOpen(true);
+        return;
+      }
+      geserFokusOpsi(
+        k === "Home"
+          ? 0
+          : k === "End"
+            ? safeOptions.length - 1
+            : k === "ArrowDown"
+              ? aktif + 1
+              : aktif - 1
+      );
+      return;
+    }
+    if (k === "Escape" && isOpen) {
+      e.preventDefault();
+      tutupKembaliKePemicu();
+    }
+  };
 
   /**
    * `useLayoutEffect`, BUKAN `useEffect` (#294).
@@ -282,6 +344,20 @@ export const StyledDropdown = ({
     }
   }, [isOpen, safeOptions.length]);
 
+  /**
+   * Sorotan papan ketik ikut menggulir (#594). Daftarnya bisa 27 baris di dalam
+   * panel 300px, jadi tanpa ini opsi yang sedang dipilih dengan panah berada di
+   * luar pandangan dan pengguna menebak-nebak. jsdom tidak punya scrollIntoView,
+   * jadi metodenya diperiksa dulu.
+   */
+  useEffect(() => {
+    if (!isOpen || !dariPapanKetik.current) return;
+    const el = document.getElementById(idOpsi(aktif));
+    if (!el) return;
+    if (typeof el.focus === "function") el.focus();
+    if (typeof el.scrollIntoView === "function") el.scrollIntoView({ block: "nearest" });
+  }, [aktif, isOpen]);
+
   const isStatus = type === "status";
   const isPriority = type === "priority";
 
@@ -308,10 +384,21 @@ export const StyledDropdown = ({
         <button
           type="button"
           ref={buttonRef as any}
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
           onClick={(e) => {
             e.stopPropagation();
-            !disabled && setIsOpen(!isOpen);
+            if (disabled) return;
+            /* e.detail === 0 artinya klik ini hasil Enter/Space pada tombol. */
+            dariPapanKetik.current = e.detail === 0;
+            const bukaSekarang = !isOpen;
+            if (bukaSekarang) {
+              const terpilih = safeOptions.findIndex((o) => o.id === value);
+              setAktif(terpilih < 0 ? 0 : terpilih);
+            }
+            setIsOpen(bukaSekarang);
           }}
+          onKeyDown={tombolPapanKetik}
           disabled={disabled}
           style={gaya}
           className={cn(
@@ -410,9 +497,14 @@ export const StyledDropdown = ({
                 induknya DAN tidak bisa digulir sama sekali. Paling terasa di
                 pemilih bentuk flowchart yang punya 27 opsi (~810px).
               */}
-              <div className="min-h-0 overflow-y-auto p-1.5 custom-scrollbar">
+              <div
+                id={idDaftar}
+                role="listbox"
+                className="min-h-0 overflow-y-auto p-1.5 custom-scrollbar"
+              >
                 {safeOptions.map((opt, optIdx) => {
                   const isActive = opt.id === value;
+                  const adalahAktif = optIdx === aktif;
                   /** Titik/ikon daftar ikut warna label yang sama dengan chipnya. */
                   const hexOpt = warnaLabel({
                     kelompok: type || "",
@@ -422,17 +514,57 @@ export const StyledDropdown = ({
                   return (
                     <button
                       type="button"
+                      role="option"
+                      aria-selected={isActive}
+                      id={idOpsi(optIdx)}
+                      data-aktif={adalahAktif ? "" : undefined}
                       key={opt.id ? `opt-${opt.id}-${optIdx}` : `opt-idx-${optIdx}`}
                       onClick={(e) => {
                         e.stopPropagation();
+                        dariPapanKetik.current = e.detail === 0;
+                        const sebelum = document.activeElement;
                         onChange(opt.id);
                         setIsOpen(false);
+                        /* Fokus dikembalikan ke pemicu HANYA bila tidak ada yang
+                           memindahkannya: pemanggil seperti baris buat-cepat isu
+                           (#592) sengaja mengembalikannya ke kolom judul supaya
+                           Enter berikutnya hidup. */
+                        if (
+                          dariPapanKetik.current &&
+                          document.activeElement === sebelum &&
+                          buttonRef.current
+                        ) {
+                          const b = buttonRef.current as unknown as HTMLElement;
+                          if (typeof b.focus === "function") b.focus();
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        const k = e.key;
+                        if (k === "ArrowDown" || k === "ArrowUp" || k === "Home" || k === "End") {
+                          e.preventDefault();
+                          geserFokusOpsi(
+                            k === "Home"
+                              ? 0
+                              : k === "End"
+                                ? safeOptions.length - 1
+                                : k === "ArrowDown"
+                                  ? optIdx + 1
+                                  : optIdx - 1
+                          );
+                          return;
+                        }
+                        if (k === "Escape") {
+                          e.preventDefault();
+                          tutupKembaliKePemicu();
+                        }
                       }}
                       className={cn(
                         "w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md transition-all text-left group/opt",
                         isActive
                           ? "bg-primary/10 text-primary"
-                          : "hover:bg-surface-sunken text-content-secondary"
+                          : adalahAktif
+                            ? "bg-surface-strong text-content-strong"
+                            : "hover:bg-surface-sunken text-content-secondary"
                       )}
                     >
                       <div className="flex items-center gap-2 truncate">

@@ -4,6 +4,7 @@ import { QATestCase } from "../../features/qa/types";
 import { StyledDropdown } from "../ui/CommonComponents";
 import { Modal } from "../ui/Modal";
 import { Button } from "../ui/CoreUI";
+import { enterUntukSimpan } from "../../lib/enterSimpan";
 
 interface EditCaseModalProps {
   testCase: QATestCase | null;
@@ -62,6 +63,9 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({
             type="text"
             value={editTitle}
             onChange={(e) => onTitleChange(e.target.value)}
+            onKeyDown={enterUntukSimpan(() => {
+              if (editTitle.trim()) onSubmit();
+            })}
             className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-normal text-content-body"
           />
         </div>

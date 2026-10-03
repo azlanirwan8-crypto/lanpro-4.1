@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import { CalendarClock, Loader2, Send, Save, Users } from "lucide-react";
 import { toast } from "sonner";
 import { LanproTimePicker } from "../../../components/ui/LanproTimePicker";
+import { enterUntukSimpan } from "../../../lib/enterSimpan";
 import {
   fetchUsers,
   fetchEmailBroadcastConfig,
@@ -187,6 +188,9 @@ export const TaskBroadcastForm: React.FC = () => {
         <input
           value={subjek}
           onChange={(e) => setSubjek(e.target.value)}
+          onKeyDown={enterUntukSimpan(() => {
+            if (!menyimpan) simpan();
+          })}
           placeholder={t("taskBroadcast.subjekPlaceholder")}
           className="w-full px-3 py-2 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none shadow-2xs"
         />

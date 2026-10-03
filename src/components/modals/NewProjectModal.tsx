@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import React from "react";
 import { Modal } from "../ui/Modal";
 import { Input, Button } from "../ui/CoreUI";
+import { enterUntukSimpan } from "../../lib/enterSimpan";
 
 interface NewProjectModalProps {
   isOpen: boolean;
@@ -49,6 +50,9 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
             value={newProjectName}
             onChange={(e: any) => setNewProjectName(e.target.value)}
             placeholder={t("newProject.namePlaceholder")}
+            onKeyDown={enterUntukSimpan(() => {
+              if (!isSubmitting && newProjectName.trim()) onSubmit();
+            })}
           />
         </div>
         <div>

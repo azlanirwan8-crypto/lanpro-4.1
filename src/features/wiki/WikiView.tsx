@@ -52,6 +52,7 @@ import { useMobileAction } from "../../contexts/MobileActionContext";
 import { loadProjectDocuments, peekProjectDocuments } from "../../lib/moduleDataCache";
 
 import type { DocumentModel, WikiViewProps } from "./types";
+import { enterUntukSimpan } from "../../lib/enterSimpan";
 import {
   resolveUserId,
   createDocument as createDocumentApi,
@@ -1578,6 +1579,9 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     type="text"
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
+                    onKeyDown={enterUntukSimpan(() => {
+                      if (!loading && editTitle.trim()) handleSave();
+                    })}
                     placeholder={t("wiki.titlePlaceholder")}
                     className="w-full bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 py-2 rounded-md text-xs font-normal text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
                   />

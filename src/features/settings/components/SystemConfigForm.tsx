@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Save, Loader2, Globe, Shield, Radio, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { enterUntukSimpan } from "../../../lib/enterSimpan";
 import {
   fetchSystemConfig,
   saveSystemConfig,
@@ -116,6 +117,9 @@ export const SystemConfigForm: React.FC = () => {
             type="text"
             value={config.ssoAllowedDomains}
             onChange={(e) => setConfig({ ...config, ssoAllowedDomains: e.target.value })}
+            onKeyDown={enterUntukSimpan(() => {
+              if (!isSaving) handleSave();
+            })}
             placeholder="rajonet.com, bni.co.id, gmail.com, outlook.com"
             className={inputStyle}
           />

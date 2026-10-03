@@ -8,6 +8,7 @@ import { ensureDate } from "../../lib/utils";
 import { Modal } from "../ui/Modal";
 import { Input, Textarea, Button } from "../ui/CoreUI";
 import { Sprint } from "../../types";
+import { enterUntukSimpan } from "../../lib/enterSimpan";
 
 interface EditSprintModalProps {
   isOpen: boolean;
@@ -69,6 +70,9 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
             <Input
               value={editingSprint.name}
               onChange={(e: any) => setEditingSprint({ ...editingSprint, name: e.target.value })}
+              onKeyDown={enterUntukSimpan(() => {
+                if (!isSubmitting && editingSprint.name.trim()) onSubmit();
+              })}
             />
           </div>
           <div>

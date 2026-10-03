@@ -6,6 +6,7 @@ import { PasswordInput } from "./PasswordInput";
 import { StyledDropdown } from "../../../components/ui/CommonComponents";
 import { LanproTimePicker } from "../../../components/ui/LanproTimePicker";
 import { TemplateEditorModal } from "./TemplateEditorModal";
+import { enterUntukSimpan } from "../../../lib/enterSimpan";
 import {
   fetchUsers,
   fetchWhatsAppBroadcastConfig,
@@ -283,6 +284,9 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
           <input
             value={formData.endpoint}
             onChange={(e) => setFormData({ ...formData, endpoint: e.target.value })}
+            onKeyDown={enterUntukSimpan(() => {
+              if (!isSaving && !isBroadcasting) handleSaveConfig();
+            })}
             placeholder={t("whatsapp.baseUrlPlaceholder")}
             className={inputStyle}
           />

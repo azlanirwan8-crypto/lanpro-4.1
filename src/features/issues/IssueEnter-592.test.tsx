@@ -84,7 +84,7 @@ describe("IssueQuickCreateBar — Enter (#592)", () => {
     const pemicu = screen.getByRole("button", { name: /Backlog/ });
     fireEvent.click(pemicu);
     pemicu.focus();
-    const opsi = screen.getByRole("button", { name: /Sprint 1/ });
+    const opsi = screen.getByRole("option", { name: /Sprint 1/ });
     opsi.focus();
     fireEvent.click(opsi);
 
@@ -177,7 +177,7 @@ describe("IssueTableInlineAddRow — Enter subtask (#592)", () => {
     const pemicu = screen.getByRole("button", { name: /Medium/ });
     fireEvent.click(pemicu);
     pemicu.focus();
-    const opsi = screen.getByRole("button", { name: /High/ });
+    const opsi = screen.getByRole("option", { name: /High/ });
     opsi.focus();
     fireEvent.click(opsi);
 

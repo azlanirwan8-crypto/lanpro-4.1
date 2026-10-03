@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import React, { useState, useRef, useEffect } from "react";
 import { X, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List } from "lucide-react";
+import { enterUntukSimpan } from "../../../lib/enterSimpan";
 
 interface TemplateEditorModalProps {
   isOpen: boolean;
@@ -170,6 +171,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
               <input
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
+                onKeyDown={enterUntukSimpan(() => onSave(subject, body))}
                 className="w-full px-3 py-1.5 border border-border-subtle rounded-md shadow-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-mono text-xs bg-surface text-content-strong"
                 placeholder={t("template.subjectPlaceholder")}
               />

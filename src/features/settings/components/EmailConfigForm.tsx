@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { TemplateEditorModal } from "./TemplateEditorModal";
+import { enterUntukSimpan } from "../../../lib/enterSimpan";
 import {
   fetchEmailSettings,
   fetchEmailConfig,
@@ -284,6 +285,9 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
                 <input
                   value={smtpHost}
                   onChange={(e) => setSmtpHost(e.target.value)}
+                  onKeyDown={enterUntukSimpan(() => {
+                    if (!isSaving) handleSaveConfig();
+                  })}
                   placeholder="mail.lanpro.my.id"
                   className={inputStyle}
                 />

@@ -29,6 +29,7 @@ import { RenderIcon, AVAILABLE_ICONS } from "../../components/RenderIcon";
 import { cn } from "../../lib/utils";
 import { useMobileAction } from "../../contexts/MobileActionContext";
 import { PageHeader } from "../../components/ui/PageHeader";
+import { enterUntukSimpan } from "../../lib/enterSimpan";
 import {
   fetchProjectModules as fetchProjectModulesApi,
   createProjectModule,
@@ -1251,6 +1252,9 @@ export const MasterDataPanel = ({
               <Input
                 value={newMasterLabel}
                 onChange={(e: any) => setNewMasterLabel(e.target.value)}
+                onKeyDown={enterUntukSimpan(() => {
+                  if (!isSaving && newMasterLabel.trim()) handleCreateMasterData();
+                })}
                 placeholder={
                   selectedType === "project_role"
                     ? "cth: Business Analyst, Project Lead, QA Specialist, Senior Developer"
@@ -1517,6 +1521,9 @@ export const MasterDataPanel = ({
                   onChange={(e: any) =>
                     setEditingMaster({ ...editingMaster, label: e.target.value })
                   }
+                  onKeyDown={enterUntukSimpan(() => {
+                    if (!isSaving && editingMaster.label.trim()) handleUpdateMasterData();
+                  })}
                   className="!bg-surface border-border-subtle"
                 />
               </div>
@@ -1706,6 +1713,9 @@ export const MasterDataPanel = ({
             <Input
               value={newModuleNamaModul}
               onChange={(e: any) => setNewModuleNamaModul(e.target.value)}
+              onKeyDown={enterUntukSimpan(() => {
+                if (!isSaving && newModuleNamaModul.trim()) handleCreateModule();
+              })}
               placeholder={t("master.moduleNamePlaceholder")}
               className="!bg-surface border-border-subtle"
             />
@@ -1773,6 +1783,9 @@ export const MasterDataPanel = ({
             <Input
               value={editingModuleNamaModul}
               onChange={(e: any) => setEditingModuleNamaModul(e.target.value)}
+              onKeyDown={enterUntukSimpan(() => {
+                if (!isSaving && editingModuleNamaModul.trim()) handleUpdateModule();
+              })}
               placeholder={t("master.moduleNamePlaceholder")}
               className="!bg-surface border-border-subtle"
             />

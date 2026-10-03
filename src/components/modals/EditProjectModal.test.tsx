@@ -63,8 +63,10 @@ const nilaiOpsi = (penanda: RegExp) => {
   const tombol = screen.getAllByRole("button").find((b) => penanda.test(b.textContent || ""));
   if (!tombol) throw new Error("tombol dropdown tidak ditemukan: " + String(penanda));
   fireEvent.click(tombol);
+  /* #594: isinya role="option" (dulu <button> tanpa peran) supaya bisa
+     dinavigasi panah dan diumumkan pembaca layar sebagai daftar pilihan. */
   return screen
-    .getAllByRole("button")
+    .getAllByRole("option")
     .map((b) => (b.textContent || "").trim())
     .filter(Boolean);
 };
