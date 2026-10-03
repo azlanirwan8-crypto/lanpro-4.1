@@ -10,14 +10,17 @@
  * `praMuatKamus(bahasa tujuan)` dipanggil, dan klik -> pilihan disimpan.
  */
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
 const praMuatKamus = jest.fn();
 const simpanBahasa = jest.fn();
+/** #603 — komponen kini memverifikasi hasil tukar lewat fungsi ini. */
+const tukarBahasa = jest.fn().mockResolvedValue(true);
 
 jest.mock("../index", () => ({
   praMuatKamus: (b: string) => praMuatKamus(b),
   simpanBahasa: (b: string) => simpanBahasa(b),
+  tukarBahasa: (b: string) => tukarBahasa(b),
 }));
 
 import { LanguageSwitcher } from "../LanguageSwitcher";
@@ -29,6 +32,8 @@ describe("LanguageSwitcher — pra-muat kamus tujuan (#559)", () => {
   beforeEach(() => {
     praMuatKamus.mockClear();
     simpanBahasa.mockClear();
+    tukarBahasa.mockClear();
+    tukarBahasa.mockResolvedValue(true);
     i18n.changeLanguage("en");
   });
 
@@ -42,13 +47,16 @@ describe("LanguageSwitcher — pra-muat kamus tujuan (#559)", () => {
     expect(praMuatKamus).toHaveBeenCalledWith("id");
   });
 
-  it("klik menyimpan bahasa tujuan, bukan bahasa yang sedang tampil", () => {
+  it("klik menyimpan bahasa tujuan, bukan bahasa yang sedang tampil", async () => {
     render(<LanguageSwitcher />);
     const btn = screen.getByTestId("language-switcher");
 
     fireEvent.click(btn);
 
     // Bendera yang tampil = bahasa SEKARANG (Inggris), jadi tujuannya Indonesia.
-    expect(simpanBahasa).toHaveBeenCalledWith("id");
+    // #603: pilihan baru disimpan SESUDAH tukarnya terbukti berhasil, jadi
+    // tunggu satu tick.
+    expect(tukarBahasa).toHaveBeenCalledWith("id");
+    await waitFor(() => expect(simpanBahasa).toHaveBeenCalledWith("id"));
   });
 });

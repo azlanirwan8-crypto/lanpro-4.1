@@ -17,8 +17,10 @@
  * Benderanya SVG inline, bukan emoji: emoji bendera tidak dirender di Windows
  * dan akan tampil sebagai dua huruf ("ID"/"GB") di mesin pemilik proyek.
  */
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { praMuatKamus, simpanBahasa, type Bahasa } from "./index";
+import { toast } from "sonner";
+import { praMuatKamus, simpanBahasa, tukarBahasa, type Bahasa } from "./index";
 
 const BenderaIndonesia = () => (
   <svg viewBox="0 0 20 14" className="w-5 h-[14px] rounded-[2px] shadow-2xs" aria-hidden="true">
@@ -41,10 +43,28 @@ export const LanguageSwitcher = () => {
   const { i18n, t } = useTranslation();
   const aktif = (i18n.resolvedLanguage === "en" ? "en" : "id") as Bahasa;
   const tujuan: Bahasa = aktif === "id" ? "en" : "id";
+  /** Menjaga agar klik berkala tidak menumpuk permintaan yang sama. */
+  const [sedangBertukar, setSedangBertukar] = useState(false);
 
-  const ganti = () => {
-    i18n.changeLanguage(tujuan);
-    simpanBahasa(tujuan);
+  /**
+   * #603 — hasil tukar diverifikasi, dan kegagalannya DIUCAPKAN. Sebelum ini
+   * `changeLanguage` dibiarkan tanpa tanggapan: kalau berkas kamus tidak datang
+   * (build lama di peramban, jaringan hotspot putus), bahasa berpindah di atas
+   * kertas sementara layar tetap Inggris — dan tombolnya terlihat mati untuk
+   * kedua kalinya, persis keluhan yang dilaporkan lagi hari ini.
+   */
+  const ganti = async () => {
+    if (sedangBertukar) return;
+    setSedangBertukar(true);
+    try {
+      const berhasil = await tukarBahasa(tujuan);
+      // Pilihan hanya disimpan kalau benar-benar terpakai; menyimpan bahasa yang
+      // kamusnya tidak ada berarti muat berikutnya ikut rusak.
+      if (berhasil) simpanBahasa(tujuan);
+      else toast.error(t("language.gagalMuat"));
+    } finally {
+      setSedangBertukar(false);
+    }
   };
 
   const judul =

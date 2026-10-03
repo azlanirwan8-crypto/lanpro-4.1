@@ -81,6 +81,35 @@ export const praMuatKamus = (bahasa: Bahasa) => {
   void muatKamus(bahasa);
 };
 
+/**
+ * #603 — menukar bahasa yang MEMASTIKAN hasilnya.
+ *
+ * `changeLanguage` tidak pernah memantul kalau kamusnya tidak datang:
+ * `fallbackLng: "en"` membuat layar tetap berbahasa Inggris padahal namanya
+ * sudah berpindah. Bagi pengguna itu tombol benderanya "mati" — gejala yang sama
+ * persis dengan #559, dan satu-satunya jejaknya `console.warn` yang tidak dibaca
+ * siapa pun. Yang dipulangkan di sini `false` kalau bahasa tujuan benar-benar
+ * tidak terpakai, supaya pemanggil boleh berkata jujur ke layar.
+ *
+ * Anggaran waktunya bukan hiasan: potongan kamus bisa menggantung di jaringan
+ * hotspot, dan menunggu selamanya lebih buruk daripada gagal dalam empat detik
+ * lalu menawarkan muat ulang.
+ */
+export const tukarBahasa = async (bahasa: Bahasa, anggaranMs = 4000): Promise<boolean> => {
+  let batas: ReturnType<typeof setTimeout> | undefined;
+  const kamusTiba = await Promise.race([
+    muatKamus(bahasa),
+    new Promise<false>((resolve) => {
+      batas = setTimeout(() => resolve(false), anggaranMs);
+    }),
+  ]);
+  if (batas) clearTimeout(batas);
+  if (!kamusTiba) return false;
+
+  await i18n.changeLanguage(bahasa);
+  return i18n.resolvedLanguage === bahasa && i18n.hasResourceBundle(bahasa, "translation");
+};
+
 const bahasaDikenal = new Set<string>(BAHASA_TERSEDIA);
 const bahasaAwal = bacaBahasaTersimpan();
 

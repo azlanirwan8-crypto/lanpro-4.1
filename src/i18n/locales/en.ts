@@ -3173,6 +3173,8 @@ export const en = {
   },
   language: {
     switchTo: "Switch to Indonesian",
+    gagalMuat:
+      "The language could not be switched — its language file could not be downloaded. Reload the page (Ctrl+Shift+R) and try again.",
     indonesian: "Indonesian",
     english: "English",
   },
