@@ -11,10 +11,6 @@
     "r1": 0,
     "r2": 2
   },
-  "src/components/UserProfileDropdown.tsx": {
-    "r1": 0,
-    "r2": 2
-  },
   "src/features/backup/BackupPanel.tsx": {
     "r1": 3,
     "r2": 0

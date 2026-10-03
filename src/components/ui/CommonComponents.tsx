@@ -400,6 +400,10 @@ export const StyledDropdown = ({
           }}
           onKeyDown={tombolPapanKetik}
           disabled={disabled}
+          /* Pemicu boleh tetap memotong kalau wadangnya sempit (itu keputusan
+             tata letak pemanggil), tapi nilai utuhnya harus tinggal satu
+             kibasan kursor — dan muncul penuh begitu daftarnya dibuka. */
+          title={selected?.label || value || undefined}
           style={gaya}
           className={cn(
             "flex items-center gap-1.5 group/dd transition-all cursor-pointer w-full justify-between focus:ring-1 focus:ring-primary/20",
@@ -484,7 +488,16 @@ export const StyledDropdown = ({
                 top: dropdownPos.placement === "bottom" ? dropdownPos.top : undefined,
                 bottom: dropdownPos.placement === "top" ? dropdownPos.bottom : undefined,
                 left: dropdownPos.left,
-                width: dropdownPos.width,
+                /*
+                  #601 — daftar pernah selebar pemicunya SAJA, jadi nama panjang
+                  terpotong dua kali: di pemicu dan di dalam daftar yang terbuka
+                  (padahal di situlah pengguna sedang memilih namanya). Sekarang
+                  daftar boleh melebar mengikuti isinya sampai batas layar; yang
+                  tetap adalah sisi kirinya, supaya tidak melompat dari pemicunya.
+                */
+                minWidth: dropdownPos.width,
+                width: "max-content",
+                maxWidth: "min(28rem, 92vw)",
                 zIndex: 10000,
               }}
               className="bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden ring-1 ring-border-faint flex flex-col max-h-[300px] animate-dropdown"
@@ -567,7 +580,7 @@ export const StyledDropdown = ({
                             : "hover:bg-surface-sunken text-content-secondary"
                       )}
                     >
-                      <div className="flex items-center gap-2 truncate">
+                      <div className="flex items-center gap-2 whitespace-nowrap">
                         {type === "member" &&
                         opt.id &&
                         opt.id !== "Unassigned" &&
@@ -607,7 +620,7 @@ export const StyledDropdown = ({
                             style={{ color: opt.color || hexOpt }}
                           />
                         ) : null}
-                        <span className="text-xs font-normal truncate text-content-body tracking-tight">
+                        <span className="text-xs font-normal whitespace-nowrap text-content-body tracking-tight">
                           {opt.label}
                         </span>
                       </div>

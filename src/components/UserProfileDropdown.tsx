@@ -95,11 +95,20 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
         title={displayName}
       >
         <UserAvatar user={activeUser} className="w-7 h-7 shrink-0 ring-1 ring-border-subtle" />
+        {/*
+          #601 — nama pengguna tidak boleh dipotong. Yang lama `truncate
+          max-w-[120px]`: "Mohamad Rifky Prasetyo" jadi "Mohamad Rifky Pra…",
+          dan satu-satunya tempat nama itu bisa dibaca utuh adalah tooltip yang
+          tidak muncul di layar sentuh. Aturan papan (#565/#566): satu baris,
+          tanpa elipsis — yang menyesuaikan diri adalah wadahnya, bukan namanya.
+          Label ini memang hanya dirender mulai `md` (≥768px), jadi ruang untuk
+          satu nama lengkap selalu ada.
+        */}
         <div className="hidden md:flex flex-col text-left leading-tight">
-          <span className="text-[12px] font-semibold text-content-strong truncate max-w-[120px]">
+          <span className="text-[12px] font-semibold text-content-strong whitespace-nowrap">
             {displayName}
           </span>
-          <span className="text-[10px] font-normal text-content-muted capitalize truncate max-w-[120px]">
+          <span className="text-[10px] font-normal text-content-muted capitalize whitespace-nowrap">
             {roleDisplay}
           </span>
         </div>
@@ -119,12 +128,12 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: -4 }}
             transition={{ duration: 0.12, ease: "easeOut" }}
-            className="absolute right-0 mt-1.5 w-52 bg-surface rounded-md shadow-soft-lg border border-border-subtle z-50 py-1 overflow-hidden origin-top-right"
+            className="absolute right-0 mt-1.5 w-auto min-w-52 max-w-[min(22rem,90vw)] bg-surface rounded-md shadow-soft-lg border border-border-subtle z-50 py-1 overflow-hidden origin-top-right"
             role="menu"
           >
             {/* Header Greeting ala Velzon (hanya Welcome nama lengkap, tanpa background/border tebal) */}
             <div className="px-4 pt-2.5 pb-1.5">
-              <p className="text-xs font-semibold text-content-subtle truncate">
+              <p className="text-xs font-semibold text-content-subtle whitespace-nowrap">
                 {t("userMenu.welcome", { name: displayName })}
               </p>
             </div>
