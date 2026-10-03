@@ -11,6 +11,7 @@ import {
   parseUniversalDiagram,
   autoCenterAndNormalizeDiagram,
   decodeHtmlEntity,
+  uraikanHtmlDrawio,
 } from "./importers";
 
 describe("decodeHtmlEntity", () => {
@@ -262,5 +263,59 @@ describe("parseUniversalDiagram & autoCenterAndNormalizeDiagram", () => {
     expect(centered.nodes[0].x).toBe(100);
     expect(centered.nodes[0].y).toBe(100);
     expect(centered.nodes[1].x).toBe(300);
+  });
+});
+
+/**
+ * #607 — draw.io tidak menaruh modelnya di teks polos. Ctrl+C menulis
+ * `<div class="mxgraph" data-mxgraph="{&quot;xml&quot;:&quot;<mxfile…&quot;}">`:
+ * XML di dalam JSON di dalam atribut HTML yang di-escape. Sebelum ini dibuka,
+ * tempel dari draw.io selalu berujung papan kosong.
+ */
+describe("uraikanHtmlDrawio (#607)", () => {
+  const XML = `<mxGraphModel><root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+    <mxCell id="2" value="Ajukan" vertex="1" parent="1"><mxGeometry x="40" y="40" width="140" height="60" /></mxCell>
+    <mxCell id="3" value="Verifikasi" vertex="1" parent="1"><mxGeometry x="40" y="200" width="140" height="60" /></mxCell>
+    <mxCell id="e" value="" edge="1" source="2" target="3" parent="1" />
+  </root></mxGraphModel>`;
+
+  const divDrawio = (isi: string) =>
+    `<div class="mxgraph" style="max-width:100%;" data-mxgraph="${isi
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")}"></div>`;
+
+  it("mengambil XML dari atribut data-mxgraph", () => {
+    const html = divDrawio(JSON.stringify({ highlight: "#0000ff", nav: true, xml: XML }));
+    expect(uraikanHtmlDrawio(html)).toContain("<mxGraphModel");
+  });
+
+  it("bukan HTML draw.io dibiarkan apa adanya", () => {
+    expect(uraikanHtmlDrawio(XML)).toBe(XML);
+    expect(uraikanHtmlDrawio("rapatkan jadwal sprint")).toBe("rapatkan jadwal sprint");
+  });
+
+  it("atribut yang rusak tidak melempar — pesan datang dari penjerafnya", () => {
+    expect(uraikanHtmlDrawio('<div data-mxgraph="{tidak valid"></div>')).toContain("tidak valid");
+  });
+
+  it("satu tempelan HTML jadi dua bentuk dan satu panah, bukan nol", () => {
+    const hasil = parseUniversalDiagram(
+      divDrawio(JSON.stringify({ xml: `<mxfile><diagram>${XML}</diagram></mxfile>` }))
+    );
+    expect(hasil.nodes).toHaveLength(2);
+    expect(hasil.edges).toHaveLength(1);
+    expect(hasil.nodes.map((n) => n.label)).toEqual(["Ajukan", "Verifikasi"]);
+  });
+
+  it("XML yang masih ter-encode URI di dalam atribut ikut dilepas (#595)", () => {
+    const hasil = parseUniversalDiagram(
+      divDrawio(JSON.stringify({ xml: encodeURIComponent(XML) }))
+    );
+    expect(hasil.nodes).toHaveLength(2);
+    expect(hasil.nodes[0].label).not.toContain("%3C");
   });
 });

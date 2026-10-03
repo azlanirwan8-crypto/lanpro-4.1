@@ -4,12 +4,21 @@
  * Keluhan pemilik proyek (30 Sep lalu diulang 02 Okt dengan tangkapan layar
  * toast "The canvas clipboard is empty"): "saya melakukan copy flow dari
  * (miro, drawio) terus paste ke papan flowchart, kenapa tidak bisa ya".
+ * Diulang 03 Okt dengan tangkapan layar papan kosong: "ketika saya paste kok ngk
+ * ada gambar nya ... tadi saya copy flow yang dari drawio" (#607).
  *
  * #582 memperbaiki salin-tempel DI DALAM papan; yang ini separuh yang lain:
  * clipboard peramban. Isinya adalah tulisan asing, jadi jalur masuknya lewat
  * penyanding yang sama dengan menu Impor dan hanya bentuk yang benar-benar
  * terbaca yang boleh mendarat di papan. Yang tidak terbaca harus berkata
  * tidak terbaca — bukan menambah bentuk kosong, dan bukan diam.
+ *
+ * CATATAN #607, dan ini sebab tes-nya berubah bentuk: draw.io TIDAK menaruh
+ * modelnya di `text/plain`. Ctrl+C menulis `<div class="mxgraph"
+ * data-mxgraph="{…xml…}">` di rasa `text/html`, sementara `readText()` hanya
+ * melihat teks polos — dan div itu tidak punya teks, jadi yang terbaca kosong.
+ * Test di bawah karena itu menembak peristiwa `paste` sungguhan, sama seperti
+ * yang dilakukan peramban, bukan lagi `readText`.
  */
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
@@ -107,38 +116,88 @@ beforeEach(() => {
   spyToast(toast.success).mockClear();
 });
 
-describe("FlowchartView — tempel dari clipboard peramban (#589)", () => {
-  it("Ctrl+V atas salinan draw.io memindahkan bentuk dan panahnya ke papan", async () => {
-    readText.mockResolvedValue(XML_DRAWIO);
+/**
+ * #607 — peramban mengirim isi clipboard lewat peristiwa `paste` dengan SATU
+ * RASA PER RASA (`text/html`, `text/plain`, `image/png`…). `readText()` hanya
+ * melihat yang terakhir, jadi test menembak peristiwanya, bukan API-nya.
+ */
+const tempelPeramban = (isi: Record<string, string>) => {
+  const e = new Event("paste", { bubbles: true, cancelable: true }) as Event & {
+    clipboardData?: unknown;
+  };
+  e.clipboardData = {
+    getData: (jenis: string) => isi[jenis] || "",
+    types: Object.keys(isi),
+  };
+  fireEvent(window, e);
+  return e;
+};
+
+/** Persis `<div class="mxgraph" data-mxgraph="…">` yang ditulis draw.io saat Ctrl+C. */
+const htmlDrawio = (xml: string) => {
+  const json = JSON.stringify({
+    highlight: "#0000ff",
+    nav: true,
+    resize: true,
+    "dark-mode": "auto",
+    toolbar: "zoom layers tags lightbox",
+    edit: "_blank",
+    xml,
+  });
+  const lup = json
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+  return `<div class="mxgraph" style="max-width:100%;border:1px solid transparent;" data-mxgraph="${lup}"></div>`;
+};
+
+const geserKursor = (container: Element) =>
+  fireEvent.mouseMove(container.querySelector(".grid-dots-light") as HTMLElement, {
+    clientX: 620,
+    clientY: 320,
+  });
+
+describe("FlowchartView — tempel dari clipboard peramban (#589, #607)", () => {
+  it("salinan draw.io yang SESUNGGUHNYA dikirim Ctrl+C mendarat sebagai flow", async () => {
+    // Inilah bentuk nyata app.diagrams.net: XML duduk di atribut data-mxgraph
+    // di dalam rasa text/html. Sebelum #607 hasilnya nol bentuk dan papan tetap
+    // kosong — "tadi saya copy flow yang dari drawio, paste kok ngak muncul".
     const container = await bukaPapan();
     expect(jumlahBentuk(container)).toBe(1);
+    geserKursor(container);
 
-    fireEvent.mouseMove(container.querySelector(".grid-dots-light") as HTMLElement, {
-      clientX: 620,
-      clientY: 320,
-    });
-    fireEvent.keyDown(window, { key: "v", ctrlKey: true });
+    tempelPeramban({ "text/html": htmlDrawio(XML_DRAWIO) });
 
     await waitFor(() => expect(jumlahBentuk(container)).toBe(3));
     expect(jumlahPanah(container)).toBe(1);
-    // Labelnya ikut terbaca, bukan jadi kotak kosong.
     expect(container.textContent).toContain("Verifikasi");
     expect(spyToast(toast.success)).toHaveBeenCalledWith(
       expect.stringMatching(/2 bentuk dan 1 panah|2 shapes and 1 arrows?/i)
     );
   });
 
+  it("Ctrl+V atas salinan draw.io memindahkan bentuk dan panahnya ke papan", async () => {
+    readText.mockResolvedValue(XML_DRAWIO);
+    const container = await bukaPapan();
+    expect(jumlahBentuk(container)).toBe(1);
+    geserKursor(container);
+
+    // Peramban juga menempelkan `text/plain` untuk salinan yang sama.
+    tempelPeramban({ "text/plain": XML_DRAWIO });
+
+    await waitFor(() => expect(jumlahBentuk(container)).toBe(3));
+    expect(jumlahPanah(container)).toBe(1);
+    expect(container.textContent).toContain("Verifikasi");
+  });
+
   it("clipboard draw.io yang TER-ENCODE URI ikut terbaca, bukan jadi kotak %3C… (#595)", async () => {
-    // Inilah bentuk nyata yang dikirim draw.io ke text/plain clipboard.
     readText.mockResolvedValue(encodeURIComponent(XML_DRAWIO));
     const container = await bukaPapan();
     expect(jumlahBentuk(container)).toBe(1);
+    geserKursor(container);
 
-    fireEvent.mouseMove(container.querySelector(".grid-dots-light") as HTMLElement, {
-      clientX: 620,
-      clientY: 320,
-    });
-    fireEvent.keyDown(window, { key: "v", ctrlKey: true });
+    tempelPeramban({ "text/plain": encodeURIComponent(XML_DRAWIO) });
 
     await waitFor(() => expect(jumlahBentuk(container)).toBe(3));
     expect(jumlahPanah(container)).toBe(1);
@@ -147,10 +206,10 @@ describe("FlowchartView — tempel dari clipboard peramban (#589)", () => {
   });
 
   it("clipboard berisi teks biasa tidak menambah apa pun dan mengatakannya", async () => {
-    readText.mockResolvedValue("rapatkan jadwal sprint minggu depan ya");
     const container = await bukaPapan();
+    geserKursor(container);
 
-    fireEvent.keyDown(window, { key: "v", ctrlKey: true });
+    tempelPeramban({ "text/plain": "rapatkan jadwal sprint minggu depan ya" });
 
     await waitFor(() =>
       expect(spyToast(toast.info)).toHaveBeenCalledWith(
@@ -161,11 +220,32 @@ describe("FlowchartView — tempel dari clipboard peramban (#589)", () => {
     expect(spyToast(toast.success)).not.toHaveBeenCalled();
   });
 
-  it("peramban yang menolak dibacakan tidak membuat papan berubah diam-diam", async () => {
+  it("yang disalin hanya GAMBAR dikatakan begitu, bukan didiamkan (#607)", async () => {
+    // draw.io "Copy as Image" -> cuma PNG. Tidak ada yang bisa disunting, dan
+    // diam total dulu membuat pengguna mengira fitur ini rusak.
+    const container = await bukaPapan();
+    const e = tempelPeramban({ "image/png": "" });
+
+    expect(e.defaultPrevented).toBe(true);
+    await waitFor(() =>
+      expect(spyToast(toast.info)).toHaveBeenCalledWith(
+        expect.stringMatching(/hanya GAMBAR|Only an IMAGE/i)
+      )
+    );
+    expect(jumlahBentuk(container)).toBe(1);
+  });
+
+  it("peramban yang menolak dibacakan lewat menu klik kanan tetap berkata jujur", async () => {
     readText.mockRejectedValue(new Error("NotAllowedError"));
     const container = await bukaPapan();
 
-    fireEvent.keyDown(window, { key: "v", ctrlKey: true });
+    // Jalur menu tidak memicu peristiwa `paste`, jadi ia satu-satunya pemakai
+    // navigator.clipboard.readText() yang tersisa.
+    fireEvent.contextMenu(container.querySelector(".grid-dots-light") as HTMLElement, {
+      clientX: 620,
+      clientY: 320,
+    });
+    fireEvent.click(await screen.findByText(/Tempel di Titik Ini|Paste at This Point/));
 
     await waitFor(() =>
       expect(spyToast(toast.info)).toHaveBeenCalledWith(
@@ -186,5 +266,52 @@ describe("FlowchartView — tempel dari clipboard peramban (#589)", () => {
       )
     );
     expect(readText).not.toHaveBeenCalled();
+  });
+
+  it("Ctrl+V tidak lagi membunuh peristiwa paste saat papan tidak punya salinan (#607)", async () => {
+    // Inilah pembunuh diam-diamnya: `e.preventDefault()` tanpa syarat pada
+    // Ctrl+V membatalkan perintah peramban, jadi peristiwa `paste` TIDAK PERNAH
+    // terjadi dan draw.io tidak pernah bisa sampai ke papan sama sekali.
+    const container = await bukaPapan();
+    geserKursor(container);
+
+    const ketik = fireEvent.keyDown(window, { key: "v", ctrlKey: true });
+    expect(ketik).toBe(true); // tidak dicegah -> peramban lanjut membunyikan `paste`
+
+    tempelPeramban({ "text/html": htmlDrawio(XML_DRAWIO) });
+    await waitFor(() => expect(jumlahBentuk(container)).toBe(3));
+  });
+
+  it("salinan papan sendiri tetap menang dan peristiwa paste dicegah (#582)", async () => {
+    const container = await bukaPapan();
+    const kanvas = container.querySelector(".grid-dots-light") as HTMLElement;
+
+    // Seleksi lewat marquee, sama seperti test #582: mengklik bentuk saja tidak
+    // enough untuk masuk clipboard papan.
+    fireEvent.mouseDown(kanvas, { clientX: 20, clientY: 20, button: 0, shiftKey: true });
+    fireEvent.mouseMove(window, { clientX: 500, clientY: 300, shiftKey: true });
+    fireEvent.mouseUp(window);
+    fireEvent.keyDown(window, { key: "c", ctrlKey: true });
+    expect(spyToast(toast.success)).toHaveBeenCalled();
+
+    // Sekarang papan punya isi sendiri: Ctrl+V harus memakainya dan MENCEGAH
+    // peristiwa `paste`, supaya isi peramban tidak menimpa salinan papan.
+    const ketik = fireEvent.keyDown(window, { key: "v", ctrlKey: true });
+    expect(ketik).toBe(false);
+    await waitFor(() => expect(jumlahBentuk(container)).toBe(2));
+  });
+
+  it("menempel di dalam kolom teks tidak merampas paste pengguna", async () => {
+    // Peristiwa `paste` dipasang di window; mengetik di textarea dokumen harus
+    // tetap menempelkan teks ke textarea itu, bukan menambah bentuk papan.
+    const container = await bukaPapan();
+    const kolom = document.createElement("textarea");
+    document.body.appendChild(kolom);
+    kolom.focus();
+
+    const e = tempelPeramban({ "text/plain": XML_DRAWIO });
+    expect(e.defaultPrevented).toBe(false);
+    expect(jumlahBentuk(container)).toBe(1);
+    kolom.remove();
   });
 });

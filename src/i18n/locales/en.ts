@@ -1525,6 +1525,8 @@ export const en = {
       "The canvas clipboard is empty and the browser refused to share its contents - copy inside the board (Ctrl+C), or use Import for a draw.io/Miro file.",
     tempelBukanDiagram:
       "The browser clipboard does not hold a recognisable diagram - copy the shapes in draw.io/Miro, or use Import for the original file.",
+    tempelHanyaGambar:
+      "Only an IMAGE (PNG) was copied, so there is nothing to paste as a flow. In draw.io use Edit > Copy (not Copy as Image), or Extras > Copy as XML.",
     moveGroupWide: "Move Group Wide",
     cancelSelection: "Cancel selection / tool",
     deleteSelected: "Delete Selected Element",

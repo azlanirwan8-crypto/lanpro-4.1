@@ -1009,64 +1009,35 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   /**
-   * Baca clipboard PERAMBAN dan ubah isinya jadi bentuk papan (#589).
-   *
-   * Ini separuh yang dulu ditunda: Ctrl+C di Miro atau draw.io tidak pernah
-   * sampai ke LanPro sama sekali, jadi "paste flow" dari aplikasi lain tetap
-   * mati sementara salin-tempel di dalam papan sudah jalan (#582). Yang datang
-   * dari clipboard peramban adalah TULISAN ASING — ia tidak langsung masuk ke
-   * state papan, ia dilewatkan ke penyanding yang sama dengan menu Impor
-   * (`parseUniversalDiagram`), dan hanya bentuk yang benar-benar terbaca yang
-   * dipakai. Tidak ada yang ditebak: nol bentuk = ditolak dengan pesan.
+   * Cadangan untuk jalur yang TIDAK memicu peristiwa `paste` (klik-kanan
+   * "Tempel di sini"). Hanya `text/plain` yang bisa didapat dari sini — rasa
+   * HTML milik draw.io tidak terjangkau, dan itu justru sebabnya peristiwa
+   * `paste` di atas jadi jalur utama (#607).
    *
    * `null` berarti sudah ada pesan dibunyikan; pemanggil tidak perlu menambah
    * pesan kedua.
    */
-  const salinanDariPeramban = async (): Promise<SalinanPapan | null> => {
-    let teks = "";
+  const bacaTeksPeramban = async (): Promise<string | null> => {
     try {
       if (!navigator.clipboard?.readText) throw new Error("tanpa API clipboard");
-      teks = (await navigator.clipboard.readText()).trim();
+      const teks = (await navigator.clipboard.readText()).trim();
+      if (!teks) {
+        toast.info(t("flowchart.pasteNothing"));
+        return null;
+      }
+      return teks;
     } catch {
-      // Peramban menolak, atau halaman tidak dalam konteks aman (http). Papan sendiri
-      // masih bisa dipakai: Ctrl+C lalu Ctrl+V di dalam papan.
+      // Peramban menolak, atau halaman tidak dalam konteks aman (http). Papan
+      // sendiri masih bisa dipakai: Ctrl+C lalu Ctrl+V di dalam papan.
       toast.info(t("flowchart.tempelTidakTerbaca"));
       return null;
     }
-
-    if (!teks) {
-      toast.info(t("flowchart.pasteNothing"));
-      return null;
-    }
-
-    let diagram: ParsedDiagram;
-    try {
-      diagram = parseUniversalDiagram(teks);
-    } catch {
-      diagram = { nodes: [], edges: [] };
-    }
-    if (diagram.nodes.length === 0) {
-      toast.info(t("flowchart.tempelBukanDiagram"));
-      return null;
-    }
-    return kumpulkanSalinan(diagram.nodes, diagram.edges);
   };
 
-  const tempelSalinan = async (diTitik?: { x: number; y: number } | null) => {
-    const posisi =
-      diTitik ??
-      (titikKursorRef.current
-        ? koordinatPapan(titikKursorRef.current.x, titikKursorRef.current.y)
-        : null);
-
-    let isi = getClipboard();
-    if (isi.nodes.length === 0) {
-      const dariPeramban = await salinanDariPeramban();
-      if (!dariPeramban) return;
-      isi = dariPeramban;
-    }
+  /** Menulis hasil tempel ke papan: satu jalur untuk semua sumber. */
+  const komitTempel = (isi: SalinanPapan, posisi: { x: number; y: number } | null) => {
     if (isi.nodes.length === 0) return;
-    const hasil = hasilTempel(isi, posisi);
+    const hasil = hasilTempel(isi, posisi ?? undefined);
     const mergedNodes = [...nodes, ...hasil.nodes];
     const mergedEdges = [...edges, ...hasil.edges];
 
@@ -1083,13 +1054,110 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     );
   };
 
+  /**
+   * #607 — teks apa pun yang datang dari luar papan (peristiwa `paste` atau
+   * `readText`) dilewatkan ke penyanding yang sama dengan menu Impor.
+   * `true` = sudah ada pesan dibunyikan, pemanggil tidak perlu mengulang.
+   */
+  const tempelTeksPeramban = (teks: string, posisi: { x: number; y: number } | null): boolean => {
+    let diagram: ParsedDiagram;
+    try {
+      diagram = parseUniversalDiagram(teks);
+    } catch {
+      diagram = { nodes: [], edges: [] };
+    }
+    if (diagram.nodes.length === 0) {
+      toast.info(t("flowchart.tempelBukanDiagram"));
+      return false;
+    }
+    komitTempel(kumpulkanSalinan(diagram.nodes, diagram.edges), posisi);
+    return true;
+  };
+
+  /**
+   * #607 — jalur SUNGGUH dari aplikasi lain: peristiwa `paste` bawaan peramban.
+   *
+   * `navigator.clipboard.readText()` hanya melihat `text/plain`, padahal draw.io
+   * menyimpan modelnya di atribut `data-mxgraph` pada rasa `text/html` — dan
+   * karena div itu tidak punya teks, yang terbaca malah string kosong. Peristiwa
+   * `paste` membawa SEMUA rasa tanpa izin apa pun dan jalan di semua peramban,
+   * jadi ia yang dipakai duluan; `readText` tinggal jadi cadangan untuk jalur
+   * klik-kanan "Tempel di sini" yang tidak memicu peristiwa ini.
+   */
+  const tempelDariPeristiwa = (e: ClipboardEvent): boolean => {
+    const aktif = document.activeElement;
+    if (
+      aktif &&
+      (aktif.tagName === "TEXTAREA" ||
+        aktif.tagName === "INPUT" ||
+        aktif.tagName === "SELECT" ||
+        (aktif as HTMLElement).isContentEditable)
+    ) {
+      return false; // sedang mengetik di kolom teks: paste bukan untuk papan
+    }
+    if (!isWorkspaceEditable) return false;
+    const data = e.clipboardData;
+    if (!data) return false;
+
+    const teks = (data.getData("text/html") || data.getData("text/plain") || "").trim();
+    const posisi = titikKursorRef.current
+      ? koordinatPapan(titikKursorRef.current.x, titikKursorRef.current.y)
+      : null;
+
+    if (teks) {
+      if (tempelTeksPeramban(teks, posisi)) e.preventDefault();
+      return true;
+    }
+
+    // draw.io juga bisa "Copy as Image": yang datang cuma PNG, dan itu memang
+    // tidak bisa jadi bentuk yang disunting. Dibilang, bukan didiamkan.
+    const types = Array.from(data.types || []);
+    e.preventDefault();
+    if (types.some((ty) => ty.startsWith("image/"))) {
+      toast.info(t("flowchart.tempelHanyaGambar"));
+      return true;
+    }
+    // Clipboard benar-benar kosong: tetap harus bicara (#582 — dulu nol bentuk
+    // DAN nol pesan, persis "kenapa tidak bisa" yang dilaporkan 30 Sep).
+    toast.info(t("flowchart.pasteNothing"));
+    return true;
+  };
+
+  const tempelSalinan = async (diTitik?: { x: number; y: number } | null) => {
+    const posisi =
+      diTitik ??
+      (titikKursorRef.current
+        ? koordinatPapan(titikKursorRef.current.x, titikKursorRef.current.y)
+        : null);
+
+    const isi = getClipboard();
+    if (isi.nodes.length > 0) {
+      komitTempel(isi, posisi);
+      return;
+    }
+
+    const teks = await bacaTeksPeramban();
+    if (teks === null) return;
+    tempelTeksPeramban(teks, posisi);
+  };
+
   // Pintasan papan dipasang sekali di window; ref ini yang menjamin Ctrl+C/V
   // memakai closure render TERAKHIR (pola yang sama dengan #569). Tanpa ref,
   // menyalin lalu langsung menempel akan membaca clipboard yang basi karena
   // `copiedNodes` tidak berubah saat salinan ditulis.
-  const aksiKlipboardRef = useRef({ salin: salinSeleksi, tempel: tempelSalinan });
+  const aksiKlipboardRef = useRef({
+    salin: salinSeleksi,
+    tempel: tempelSalinan,
+    adaSalinanPapan: () => getClipboard().nodes.length > 0,
+    tempelPeristiwa: tempelDariPeristiwa,
+  });
   useEffect(() => {
-    aksiKlipboardRef.current = { salin: salinSeleksi, tempel: tempelSalinan };
+    aksiKlipboardRef.current = {
+      salin: salinSeleksi,
+      tempel: tempelSalinan,
+      adaSalinanPapan: () => getClipboard().nodes.length > 0,
+      tempelPeristiwa: tempelDariPeristiwa,
+    };
   });
 
   // Canvas Native Event Listeners for smooth Wheel Zoom/Pan prevention of page scroll
@@ -1204,8 +1272,16 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
       // Add: Ctrl+V / Cmd+V - Paste di bawah kursor
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v") {
-        e.preventDefault();
-        aksiKlipboardRef.current.tempel();
+        // #607 — dua jalur, dan urutannya penting. Kalau papan ini punya salinan
+        // sendiri (baru saja Ctrl+C di dalam papan), ia menang dan peristiwa
+        // `paste` dicegah. Kalau tidak, JANGAN dicegah: biar peramban yang
+        // membunyikan `paste`, karena hanya peristiwa itu yang membawa rasa
+        // `text/html` tempat draw.io menyimpan modelnya. `preventDefault()` buta
+        // di sini dulu MEMBUNUH jalur draw.io — itulah "kok ngak ada gambarnya".
+        if (aksiKlipboardRef.current.adaSalinanPapan()) {
+          e.preventDefault();
+          aksiKlipboardRef.current.tempel();
+        }
       }
 
       // 5. Ctrl+Z or Cmd+Z for undo
@@ -1244,11 +1320,18 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   useEffect(() => {
     const saatKetik = (e: KeyboardEvent) => papanKetikRef.current(e);
     const saatLepas = (e: KeyboardEvent) => papanLepasRef.current(e);
+    // #607 — satu-satunya jalur yang bisa membaca clipboard aplikasi lain di SEMUA
+    // peramban tanpa minta izin: peristiwa `paste` bawaan. `navigator.clipboard
+    // .readText()` hanya melihat text/plain, jadi rasa HTML draw.io tidak pernah
+    // sampai padanya.
+    const saatTempel = (e: Event) => aksiKlipboardRef.current.tempelPeristiwa(e as ClipboardEvent);
     window.addEventListener("keydown", saatKetik);
     window.addEventListener("keyup", saatLepas);
+    window.addEventListener("paste", saatTempel);
     return () => {
       window.removeEventListener("keydown", saatKetik);
       window.removeEventListener("keyup", saatLepas);
+      window.removeEventListener("paste", saatTempel);
     };
   }, []);
 

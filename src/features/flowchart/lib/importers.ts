@@ -19,6 +19,48 @@ export const uraikanSandiwara = (teks: string): string => {
 };
 
 /**
+ * draw.io menyimpan modelnya di ATRIBUT, bukan di teks yang terlihat.
+ *
+ * Ctrl+C di app.diagrams.net menulis `<div class="mxgraph"
+ * data-mxgraph="{&quot;xml&quot;:&quot;<mxfile…&quot;}">` ke rasa `text/html`
+ * clipboard. XML-nya duduk di dalam JSON di dalam atribut HTML yang
+ * di-escape — jadi `readText()` (yang hanya melihat `text/plain`) tidak pernah
+ * sampai ke isinya, dan peramban malah menyisakan string kosong karena div itu
+ * tidak punya teks sama sekali. Itulah sebabnya tempel dari draw.io diam-diam
+ * menghasilkan papan kosong (#607).
+ *
+ * Berkas itu sendiri juga bisa ditempel/diimpor sebagai teks, jadi penjeraf ini
+ * dipakai dua jalur. DOMParser dipakai, BUKAN innerHTML: dokumennya inert, tidak
+ * ada skrip yang berjalan, dan hanya satu atribut yang dibaca.
+ */
+export const uraikanHtmlDrawio = (teks: string): string => {
+  const t = (teks || "").trim();
+  if (!t.includes("data-mxgraph")) return t;
+  try {
+    const doc = new DOMParser().parseFromString(t, "text/html");
+    for (const simpul of Array.from(doc.querySelectorAll("[data-mxgraph]"))) {
+      const mentah = simpul.getAttribute("data-mxgraph");
+      if (!mentah) continue;
+      const isi = JSON.parse(mentah);
+      const xml = typeof isi === "string" ? isi : isi?.xml;
+      // Dikenali baik sebagai XML mentah maupun sebagai bentuk URI-encoded
+      // (#595) — sebagian salinan draw.io masih meng-encode sebelum menulis
+      // atributnya, dan kalau hanya "<mx" yang diterima, salinan itu lolos
+      // senyap menjadi nol bentuk.
+      if (typeof xml === "string" && (xml.includes("<mx") || /%3C(?:mx|root)/i.test(xml))) {
+        // Isi <diagram> pada sebagian berkas dikompresi (deflate+base64). Tidak
+        // ada penjeraf inflate di repo ini, jadi bentuk itu sengaja dikembalikan
+        // apa adanya agar pesannya jujur ("bukan diagram"), bukan papan kosong.
+        return uraikanSandiwara(xml);
+      }
+    }
+  } catch {
+    // HTML-nya rusak/berbeda dari dugaan: biarkan penjeraf lain yang bicara.
+  }
+  return t;
+};
+
+/**
  * Hex asli dari draw.io dipetakan ke NAMA warna palet LanPro yang paling dekat,
  * supaya papan yang ditempel tetap mirip aslinya dan tetap bisa disunting dengan
  * palet yang ada. Warna nyaris putih/abu bawaan draw.io (#ffffff, #f5f5f5) sengaja
@@ -723,7 +765,9 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
  * Mendeteksi format file secara otomatis (Draw.io, Miro JSON/CSV, Mermaid, LanPro JSON).
  */
 export const parseUniversalDiagram = (content: string, filename = ""): ParsedDiagram => {
-  const cleanContent = uraikanSandiwara(content);
+  // #607 — clipboard draw.io menyimpan XML di dalam atribut `data-mxgraph`, jadi
+  // rasa HTML itu harus dibuka lebih dulu sebelum bentuknya dikenali.
+  const cleanContent = uraikanSandiwara(uraikanHtmlDrawio(content));
   const lowerName = filename.toLowerCase();
 
   // 1. Ekstensi eksplisit

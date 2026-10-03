@@ -102,6 +102,23 @@ async function bukaPapan() {
 const jumlahBentuk = (c: Element) => c.querySelectorAll('[id^="val-node-"]').length;
 const jumlahPanah = (c: Element) => c.querySelectorAll("path[marker-end]").length;
 
+/**
+ * #607 — meniru peristiwa `paste` peramban: isi clipboard datang lewat
+ * `clipboardData` dengan SATU RASA PER RASA (text/html, text/plain, image/…),
+ * bukan lewat `navigator.clipboard.readText()` yang hanya melihat teks polos.
+ */
+const tempelPeramban = (isi: Record<string, string>) => {
+  const e = new Event("paste", { bubbles: true, cancelable: true }) as Event & {
+    clipboardData?: unknown;
+  };
+  e.clipboardData = {
+    getData: (jenis: string) => isi[jenis] || "",
+    types: Object.keys(isi),
+  };
+  fireEvent(window, e);
+  return e;
+};
+
 beforeEach(() => {
   (fetchFlowcharts as jest.Mock).mockResolvedValue([papanDuaBentuk]);
   spyToast(toast.info).mockClear();
@@ -159,6 +176,10 @@ describe("FlowchartView — salin-tempel papan (#582)", () => {
     expect(jumlahBentuk(container)).toBe(2);
 
     fireEvent.keyDown(window, { key: "v", ctrlKey: true });
+    // #607 — di peramban sungguhan Ctrl+V selalu diikuti peristiwa `paste`, dan
+    // hanya peristiwa itu yang membawa isi clipboard aplikasi lain. Test meniru
+    // urutannya: keydown (papan kosong, tidak mencegah apa pun) lalu paste kosong.
+    tempelPeramban({});
 
     // Dulu: nol bentuk bertambah DAN nol pesan - pengguna tidak tahu apa yang
     // terjadi, persis "kenapa tidak bisa" yang dilaporkan 30 Sep.

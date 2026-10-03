@@ -1536,6 +1536,8 @@ export const id = {
       "Clipboard papan kosong dan peramban tidak mengizinkan isinya dibaca - salin di dalam papan (Ctrl+C), atau pakai menu Impor untuk berkas draw.io/Miro.",
     tempelBukanDiagram:
       "Isi clipboard peramban bukan diagram yang dikenali - salin bentuknya di draw.io/Miro, atau pakai menu Impor untuk berkas aslinya.",
+    tempelHanyaGambar:
+      "Yang disalin hanya GAMBAR (PNG), jadi tidak ada yang bisa ditempel sebagai flow. Di draw.io pakai Edit > Copy (bukan Copy as Image), atau Extras > Copy as XML.",
     moveGroupWide: "Geser Kelompok Lebar",
     cancelSelection: "Batalkan Pilihan / Alat",
     deleteSelected: "Hapus Elemen Terpilih",
