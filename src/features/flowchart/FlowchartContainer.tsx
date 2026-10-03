@@ -475,6 +475,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const [seretSambung, setSeretSambung] = useState<string | null>(null);
   const awalSeretSambung = useRef<{ x: number; y: number } | null>(null);
 
+  /**
+   * #599 — satu sumber kebenaran untuk "jari/papan ketik sedang menggerakkan
+   * sesuatu di kanvas". Tiga pemakai: pendengar mousemove global (ia pemilik
+   * pergerakan selama interaksi, jadi div kanvas tidak boleh menjalankan handler
+   * yang kedua kalinya), efek snapshot asisten, dan bilah kecil di bawah.
+   */
+  const berinteraksi =
+    draggingNodeId !== null || resizingNodeId !== null || isPanning || marqueeBox !== null;
+
   // Canvas-level drag-drop overlay state (file drop directly onto canvas)
   const [canvasDragOver, setCanvasDragOver] = useState(false);
 
@@ -594,7 +603,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   // "Mata" untuk LanPro AI Assistant: publish snapshot kanvas yang sedang
   // dibuka supaya chat AI bisa menjawab pertanyaan terkait flow user
   // (mis. "flow saya sudah ok belum?"). Snapshot dibersihkan saat keluar editor.
+  //
+  // #599 — snapshot disusun ulang saat papan BERHENTI bergerak, bukan saat ia
+  // digerakkan. Membaca posisi kursor saja sudah memicu satu publikasi per
+  // gerakan: terukur 10 publikasi (masing-masing membangun Map atas seluruh
+  // bentuk + dua slice) untuk sepuluh gerakan menyeret satu bentuk. Chat AI
+  // membaca snapshot ini saat pengguna mengirim pesan — selambat-lambatnya
+  // satu commit setelah mouse dilepas tetap cukup.
   useEffect(() => {
+    if (berinteraksi) return;
     const nodeLabelById = new Map(nodes.map((n) => [n.id, n.label]));
     setScreenSnapshot({
       view: "flowchart",
@@ -612,7 +629,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       selectedNodeId,
       updatedAt: Date.now(),
     });
-  }, [nodes, edges, selectedNodeId, currentFlowMetadata?.name]);
+  }, [nodes, edges, selectedNodeId, currentFlowMetadata?.name, berinteraksi]);
 
   useEffect(() => {
     return () => clearScreenSnapshot();
@@ -1075,6 +1092,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
   // Canvas Native Event Listeners for smooth Wheel Zoom/Pan prevention of page scroll
   // Keyboard Shortcuts for extreme flexibility & high-speed diagramming
+  //
+  // #599 — badan pintasannya tetap closure render TERAKHIR (dibaca lewat ref,
+  // pola `aksiKlipboardRef` / #569), tetapi `window` hanya dipasangi SEKALI.
+  // Sebelumnya efek ini bergantung pada `nodes`, `historyStack` dan
+  // `historyIndex`, jadi setiap commit — terukur 10 kali per sepuluh gerakan
+  // menyeret bentuk — membongkar dan memasang ulang dua pendengar.
+  const papanKetikRef = useRef<(e: KeyboardEvent) => void>(() => {});
+  const papanLepasRef = useRef<(e: KeyboardEvent) => void>(() => {});
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore keyboard shortcuts when the user is typing in a textarea or input field
@@ -1209,13 +1235,20 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
+    papanKetikRef.current = handleKeyDown;
+    papanLepasRef.current = handleKeyUp;
+  });
+
+  useEffect(() => {
+    const saatKetik = (e: KeyboardEvent) => papanKetikRef.current(e);
+    const saatLepas = (e: KeyboardEvent) => papanLepasRef.current(e);
+    window.addEventListener("keydown", saatKetik);
+    window.addEventListener("keyup", saatLepas);
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("keydown", saatKetik);
+      window.removeEventListener("keyup", saatLepas);
     };
-  }, [selectedNodeId, selectedEdgeId, nodes, historyIndex, historyStack, copiedNodes]);
+  }, []);
 
   // Global mousemove and mouseup listeners for incredibly smooth dragging, resizing, and panning
   const mouseMoveHandlerRef = useRef<((e: MouseEvent) => void) | null>(null);
@@ -1231,9 +1264,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   });
 
   useEffect(() => {
-    const isInteractionActive =
-      draggingNodeId !== null || resizingNodeId !== null || isPanning || marqueeBox !== null;
-    if (!isInteractionActive) return;
+    if (!berinteraksi) return;
 
     const onGlobalMouseMove = (e: MouseEvent) => {
       if (mouseMoveHandlerRef.current) {
@@ -1255,7 +1286,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       window.removeEventListener("mousemove", onGlobalMouseMove, { capture: true });
       window.removeEventListener("mouseup", onGlobalMouseUp, { capture: true });
     };
-  }, [draggingNodeId !== null, resizingNodeId !== null, isPanning, marqueeBox !== null]);
+  }, [berinteraksi]);
 
   // Item #519 — peta kanvas yang isinya belum sampai ke basis data.
   //
@@ -3439,8 +3470,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           canvasTheme === "miro" ? "grid-dots-light" : "grid-blueprint-dark"
                         )}
                         onMouseDown={handleCanvasMouseDown}
-                        onMouseMove={handleCanvasMouseMove}
-                        onMouseUp={handleCanvasMouseUp}
+                        onMouseMove={berinteraksi ? undefined : handleCanvasMouseMove}
+                        onMouseUp={berinteraksi ? undefined : handleCanvasMouseUp}
                         onDoubleClick={handleCanvasDoubleClick}
                         onContextMenu={(e) => {
                           const targetElement = e.target as HTMLElement;

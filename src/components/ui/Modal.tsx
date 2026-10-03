@@ -36,15 +36,20 @@ export const Modal = ({
   hideHeader = false,
 }: ModalProps) => {
   React.useEffect(() => {
+    // #599 — modal yang tertutup tidak punya apa pun untuk dipasang ATAU dibongkar.
+    // Sebelumnya pembersihnya tetap jalan tiap commit (dep `onClose` hampir selalu
+    // panah inline), jadi satu gerakan kursor di papan flowchart memicu
+    // removeEventListener + penulisan ulang `body.style.overflow` per modal yang
+    // ada di pohon — terukur 11 kali untuk sepuluh gerakan. Penulisan "unset" itu
+    // juga bisa membuka kembali gulungan halaman yang sedang dikunci modal LAIN.
+    if (!isOpen) return;
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
       }
     };
-    if (isOpen) {
-      window.addEventListener("keydown", handleEscape);
-      document.body.style.overflow = "hidden";
-    }
+    window.addEventListener("keydown", handleEscape);
+    document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "unset";
