@@ -9,6 +9,7 @@ import { jagaProyek } from "../middleware/jagaProyek";
 import { documentRepository } from "../repositories/document.repository";
 import { validasiBody, validasiQuery } from "../middleware/validate";
 import { createDocumentSchema, updateDocumentSchema } from "../schemas/document.schema";
+import { tabrakanVersi } from "../lib/versiDokumen";
 import { documentListQuerySchema } from "../schemas/pagination.schema";
 import { respondWithProjectList } from "../lib/listResponse";
 import { sanitizeUserText } from "../lib/sanitizeText";
@@ -180,10 +181,32 @@ router.put(
         });
       }
 
-      const { title, description, type, link, fileData, fileName, fileType, canvasData, category } =
-        req.body;
+      const {
+        title,
+        description,
+        type,
+        link,
+        fileData,
+        fileName,
+        fileType,
+        canvasData,
+        category,
+        versiDibaca,
+      } = req.body;
 
-      await documentRepository.update(id, {
+      // #568 — dua tab yang membuka papan yang sama dulu ditulis last-write-wins.
+      // Yang mengirim stempel kini dapat jawaban 409 dan diminta memuat ulang,
+      // bukan menghapus kerja tab lain tanpa suara.
+      if (tabrakanVersi(versiDibaca, item.updatedAt)) {
+        return res.status(409).json({
+          status: "error",
+          code: "srv.dokumen_berubah",
+          message: "Dokumen ini sudah diubah di tempat lain. Muat ulang sebelum menyimpan.",
+          data: { updatedAt: item.updatedAt ?? null },
+        });
+      }
+
+      const updatedAt = await documentRepository.update(id, {
         title: title !== undefined ? sanitizeUserText(title) : title,
         description:
           description !== undefined
@@ -200,7 +223,14 @@ router.put(
         category,
       });
 
-      res.json({ status: "success", code: "srv.document_updated", message: "Document updated" });
+      res.json({
+        status: "success",
+        code: "srv.document_updated",
+        message: "Document updated",
+        // #568 — stempel baru ikut dipulangkan supaya penulis berikutnya punya
+        // versi yang benar; tanpa ini tab yang sama akan menabrak dirinya sendiri.
+        data: { updatedAt: updatedAt ?? null },
+      });
     } catch (error: any) {
       console.error(error);
       res.status(500).json({

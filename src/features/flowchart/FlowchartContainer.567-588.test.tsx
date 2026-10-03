@@ -241,3 +241,34 @@ describe("#588 — tautan dokumen benar-benar sampai ke server", () => {
     expect(hasil.container.textContent).toMatch(/hanya ada di perangkat ini/i);
   });
 });
+describe("#568 — dua tab yang menyimpan papan yang sama", () => {
+  it("tab yang memegang versi basi ditolak, papanya dikunci, dan autosave berhenti menekan", async () => {
+    (fetchFlowcharts as jest.Mock).mockResolvedValue([
+      papan({ versiMuat: "2026-10-04T01:00:00.000Z" }),
+    ]);
+    (updateFlowchart as jest.Mock).mockRejectedValue(
+      Object.assign(new Error("basi"), { status: 409 })
+    );
+
+    const hasil = await bukaEditor();
+    const jalur = hasil.container.querySelector("path[marker-end]") as Element;
+    fireEvent.click(jalur);
+    fireEvent.click(await screen.findByTitle(/putus-putus|dashed/i));
+
+    // Yang ditolak harus BICARA, bukan jadi toast yang lewat lalu hilang.
+    await waitFor(
+      () => expect(screen.getAllByText(/berubah di tab lain/i).length).toBeGreaterThan(0),
+      { timeout: 9000 }
+    );
+    expect(screen.getByText(/muat ulang papan/i)).toBeTruthy();
+    expect(screen.queryByTitle(/Simpan seluruh diagram/i)).toBeNull();
+
+    // Dan kunci itu nyata: setelah ditolak, tidak ada lagi kiriman yang menekan
+    // server yang sama dengan stempel yang sama basi.
+    const sesudah = (updateFlowchart as jest.Mock).mock.calls.length;
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 5000));
+    });
+    expect((updateFlowchart as jest.Mock).mock.calls.length).toBe(sesudah);
+  });
+});

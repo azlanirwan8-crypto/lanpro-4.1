@@ -39,7 +39,9 @@ describe("document.repository.update — kolom yang tidak dikirim tidak boleh di
     kueriPalsu.mockResolvedValue([[]]);
     await repo.update("d-1", { canvasData: '{"nodes":[],"edges":[]}' });
 
-    expect(kueri()).toBe("UPDATE Documents SET canvasData = ? WHERE id = ?");
+    expect(kueri()).toBe(
+      'UPDATE Documents SET canvasData = ?, "updatedAt" = NOW() WHERE id = ? RETURNING "updatedAt"'
+    );
     expect(parameter()).toEqual(['{"nodes":[],"edges":[]}', "d-1"]);
   });
 
@@ -48,7 +50,7 @@ describe("document.repository.update — kolom yang tidak dikirim tidak boleh di
     await repo.update("d-1", { title: "Alur", canvasData: "{}", category: "PRD" });
 
     expect(kueri()).toBe(
-      "UPDATE Documents SET title = ?, canvasData = ?, category = ? WHERE id = ?"
+      'UPDATE Documents SET title = ?, canvasData = ?, category = ?, "updatedAt" = NOW() WHERE id = ? RETURNING "updatedAt"'
     );
     expect(parameter()).toEqual(["Alur", "{}", "PRD", "d-1"]);
   });
@@ -67,19 +69,25 @@ describe("document.repository.update — kolom yang tidak dikirim tidak boleh di
 });
 
 /**
- * KUNCI ATAS KEHILANGAN. `WHERE id = ?` saja berarti penulis kedua selalu
- * menang walau ia memegang versi yang lebih lama. #568 akan menambah penjaga
- * (nomor versi atau perbandingan updatedAt) — dan test inilah yang akan
- * memaksa perubahan itu disadari, bukan diselipkan.
+ * #568 menutup kunci ini. Perbandingan versi TIDAK hidup di `WHERE` repository
+ * (satu jalur tulis untuk semua klien, tanpa migrasi kolom versi): rute yang
+ * menolak penulis basi lewat 409, dan repository hanya wajib (a) menstempel
+ * baris dengan waktu baru dan (b) MEMULANGKAN stempel itu — tanpa (b) tab yang
+ * sama akan menabrak dirinya sendiri pada kiriman berikutnya.
  */
-describe("document.repository.update — tidak ada penjaga tab ganda hari ini (#568)", () => {
-  it("klausul WHERE hanya id: tanpa versi, tanpa updatedAt", async () => {
-    kueriPalsu.mockResolvedValue([[]]);
-    await repo.update("d-1", { canvasData: "{}" });
+describe("document.repository.update — stempel baru ditulis dan dipulangkan (#568)", () => {
+  it("baris diberi stempel waktu dan stempelnya ikut kembali", async () => {
+    kueriPalsu.mockResolvedValue([[{ updatedAt: new Date("2026-10-04T01:00:05Z") }]]);
+    const hasil = await repo.update("d-1", { canvasData: "{}" });
 
-    expect(kueri()).toMatch(/WHERE id = \?$/);
-    expect(kueri()).not.toMatch(/updatedAt/i);
-    expect(kueri()).not.toMatch(/version/i);
-    expect(parameter()).toHaveLength(2);
+    expect(kueri()).toMatch(/"updatedAt" = NOW\(\)/);
+    expect(kueri()).toMatch(/RETURNING "updatedAt"$/);
+    expect(parameter()).toEqual(["{}", "d-1"]);
+    expect(hasil).toBeInstanceOf(Date);
+  });
+
+  it("pembaruan kosong tidak mengarang stempel", async () => {
+    expect(await repo.update("d-1", {})).toBeNull();
+    expect(kueriPalsu).not.toHaveBeenCalled();
   });
 });

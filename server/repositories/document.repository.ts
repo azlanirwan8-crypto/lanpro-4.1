@@ -167,7 +167,14 @@ export class DocumentRepository {
     }
   }
 
-  async update(id: string, updates: Partial<DocumentEntity>): Promise<void> {
+  /**
+   * #568 — menulis stempel waktu baru dan MENGEMBALIKANNYA.
+   *
+   * Tanpa stempel baru pemanggil tidak pernah punya tanda tangan versi berikutnya,
+   * dan tanpa stempel sama sekali kolom `updatedAt` diam di nilai pembuatan baris
+   * (tidak ada trigger di skema) — itu #613.
+   */
+  async update(id: string, updates: Partial<DocumentEntity>): Promise<string | null> {
     const connection = await db.getConnection();
     try {
       const sqlUpdates: string[] = [];
@@ -212,11 +219,13 @@ export class DocumentRepository {
 
       if (sqlUpdates.length > 0) {
         values.push(id);
-        await connection.query(
-          `UPDATE Documents SET ${sqlUpdates.join(", ")} WHERE id = ?`,
+        const [rows]: any = await connection.query(
+          `UPDATE Documents SET ${sqlUpdates.join(", ")}, "updatedAt" = NOW() WHERE id = ? RETURNING "updatedAt"`,
           values
         );
+        return rows?.[0]?.updatedAt ?? null;
       }
+      return null;
     } finally {
       connection.release();
     }

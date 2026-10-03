@@ -166,6 +166,30 @@ describe("#588 — tautan ikut ke server, byte tidak", () => {
     expect(papan[0].documents).toEqual([dokumenLama]);
   });
 
+  it("papan membawa stempel yang dibacanya dan menyimpan stempel balasan (#568)", async () => {
+    panggil.mockResolvedValue({
+      status: "success",
+      data: { updatedAt: "2026-10-04T01:00:05.000Z" },
+    });
+
+    const hasil = await updateFlowchart("p1", "f1", {
+      name: "Alur Bayar",
+      nodes: [],
+      edges: [],
+      versiDibaca: "2026-10-04T01:00:00.000Z",
+    });
+
+    expect(panggil.mock.calls[0][1].body.versiDibaca).toBe("2026-10-04T01:00:00.000Z");
+    expect(hasil).toBe("2026-10-04T01:00:05.000Z");
+  });
+
+  it("stempel baris ikut terbaca ke papan, jadi muat berikutnya tahu versinya (#568)", async () => {
+    await muat({ canvasData: JSON.stringify({ nodes: [], edges: [] }) });
+
+    const papan = await fetchFlowcharts("p1");
+    expect(papan[0].versiMuat).toBe("2026-10-02T00:00:00.000Z");
+  });
+
   it("entri rusak di dalam documents tidak merembet ke layar", async () => {
     await muat({
       canvasData: JSON.stringify({

@@ -72,4 +72,7 @@ export const updateDocumentSchema = z.object({
   fileType: z.string().max(100).optional().nullable(),
   canvasData: payload("Isi papan"),
   category: z.string().max(255).optional().nullable(),
+  // #568 — stempel yang dibaca klien tadi; kalau barisnya sudah bergeser, PUT
+  // ini ditolak 409 alih-alih menimpa diam-diam.
+  versiDibaca: z.string().max(64).optional().nullable(),
 });

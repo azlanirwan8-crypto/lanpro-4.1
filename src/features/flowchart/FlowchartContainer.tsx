@@ -431,6 +431,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     return getCurrentFlowchart();
   }, [flowcharts, selectedFlowId]);
 
+  /**
+   * #568 — stempel `updatedAt` yang TERAKHIR KITA LIHAT, per papan. Diisi dari
+   * baris saat muat dan diganti setiap kali server memulangkan stempel baru;
+   * tanpa stempel baru itu tab yang sama akan menabrak dirinya sendiri.
+   */
+  const versiPapan = useRef(new Map<string, string>());
+  /** Papan yang ditolak server karena berubah di tempat lain — tulis dikunci. */
+  const [papanKonflik, setPapanKonflik] = useState<string | null>(null);
+
   const isWorkspaceEditable = useMemo(() => {
     if (!selectedFlowId) return true;
     if (!currentFlowMetadata) return true;
@@ -438,8 +447,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     // tulis tetap boleh jalan, satu muat yang cukup rusak menghapus diagram
     // yang benar lewat autosave.
     if (currentFlowMetadata.muatGagal) return false;
+    // #568 — tab yang memegang versi basi tidak boleh menulis lagi.
+    if (papanKonflik === selectedFlowId) return false;
     return canModifyFlowchart(currentFlowMetadata);
-  }, [selectedFlowId, currentFlowMetadata, canModifyFlowchart]);
+  }, [selectedFlowId, currentFlowMetadata, canModifyFlowchart, papanKonflik]);
 
   // Right-click context menu state for flowchart nodes
   const [nodeContextMenu, setNodeContextMenu] = useState<{
@@ -1716,8 +1727,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       if (!opts.senyap) toast.error(t("flowchart.kunciMuatGagal"));
       throw new Error("flowchart-muat-gagal");
     }
+    const dibaca = versiPapan.current.get(selectedFlowId) ?? alur?.versiMuat ?? null;
     try {
-      await updateFlowchartApi(idProyek, selectedFlowId, {
+      const stempel = await updateFlowchartApi(idProyek, selectedFlowId, {
+        // #568 — tanpa ini server tidak bisa membedakan "tab ini basi" dari
+        // "tab ini yang terbaru".
+        versiDibaca: dibaca,
         name: alur?.name ?? flowName,
         nodes,
         edges,
@@ -1737,17 +1752,26 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         // sampai ke server, padahal tombol hapusnya (#587) sudah ada.
         documents: alur?.documents,
       });
+      if (stempel) versiPapan.current.set(selectedFlowId, stempel);
       bersihkanTandaBelumTersinkron(projId, selectedFlowId);
       if (!opts.senyap) {
         toast.success(t("flowchart.savedToDb", { shapes: nodes.length, arrows: edges.length }));
       }
     } catch (apiErr) {
       console.warn("Could not save flowchart canvas to API:", apiErr);
+      const konflik = (apiErr as any)?.status === 409;
+      if (konflik) {
+        // #568 — penolakan tidak boleh jadi toast yang lewat: kerja pengguna
+        // sedang ditolak, dan autosave akan mengulang kegagalan yang sama.
+        setPapanKonflik(selectedFlowId);
+      }
       if (!opts.senyap) {
         toast.error(
-          t("flowchart.saveToDbFailed", {
-            penyebab: apiErr instanceof Error ? apiErr.message : String(apiErr),
-          })
+          konflik
+            ? t("flowchart.kunciKonflik")
+            : t("flowchart.saveToDbFailed", {
+                penyebab: apiErr instanceof Error ? apiErr.message : String(apiErr),
+              })
         );
       }
       throw apiErr;
@@ -2059,7 +2083,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           // Tanpa keduanya PUT di sini menghapusnya dari payload — persis kelas
           // #570: nilainya kembali ke bawaan setelah muat ulang.
           const papanTerbuka = editingFlowId === selectedFlowId;
-          await updateFlowchartApi(selectedProject.id, editingFlowId, {
+          const stempelEdit = await updateFlowchartApi(selectedProject.id, editingFlowId, {
+            versiDibaca: versiPapan.current.get(editingFlowId) ?? foundFlow?.versiMuat ?? null,
             name: flowName.trim(),
             nodes: papanTerbuka ? nodes : foundFlow?.nodes || [],
             edges: papanTerbuka ? edges : foundFlow?.edges || [],
@@ -2075,6 +2100,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             // dari payload begitu pengguna menyunting deskripsi.
             documents: foundFlow?.documents,
           });
+          if (stempelEdit) versiPapan.current.set(editingFlowId, stempelEdit);
           // PUT di atas ikut mendorong kanvas yang ada di state, jadi salinan
           // server kini sama dengan yang di perangkat ini.
           bersihkanTandaBelumTersinkron(projId, editingFlowId);
@@ -4024,14 +4050,18 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               title={
                                 currentFlowMetadata?.muatGagal
                                   ? t("flowchart.kunciMuatGagal")
-                                  : undefined
+                                  : papanKonflik === selectedFlowId
+                                    ? t("flowchart.kunciKonflik")
+                                    : undefined
                               }
                             >
                               <Eye className="w-3.5 h-3.5 text-amber-500" />
                               <span className="hidden sm:inline">
                                 {currentFlowMetadata?.muatGagal
                                   ? t("flowchart.kunciMuatGagal")
-                                  : t("flowchart.readOnlyMode")}
+                                  : papanKonflik === selectedFlowId
+                                    ? t("flowchart.kunciKonflik")
+                                    : t("flowchart.readOnlyMode")}
                               </span>
                               {currentFlowMetadata?.muatGagal && (
                                 <button
@@ -4042,6 +4072,16 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                   {t("flowchart.pulihkanPapan")}
                                 </button>
                               )}
+                              {papanKonflik === selectedFlowId &&
+                                !currentFlowMetadata?.muatGagal && (
+                                  <button
+                                    type="button"
+                                    onClick={() => window.location.reload()}
+                                    className="font-medium underline underline-offset-2"
+                                  >
+                                    {t("flowchart.muatUlangPapan")}
+                                  </button>
+                                )}
                             </div>
                           )}
 

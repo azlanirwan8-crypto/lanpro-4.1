@@ -168,6 +168,7 @@ function toFlowchartData(doc: DocumentRow): FlowchartData {
     edges,
     documents,
     muatGagal: muatGagal || undefined,
+    versiMuat: doc.updatedAt,
     theme: theme === "blueprint" ? "blueprint" : "miro",
     epicTaskId: epicTaskId || undefined,
     konteks: bacaKonteks(konteks),
@@ -267,6 +268,8 @@ export async function updateFlowchart(
     name: string;
     nodes: any[];
     edges: any[];
+    /** #568 — stempel yang dibaca terakhir kali; dikirim agar server bisa menolak tab basi. */
+    versiDibaca?: string | null;
     externalUrl?: string;
     description?: string;
     category?: string;
@@ -275,10 +278,11 @@ export async function updateFlowchart(
     konteks?: KonteksFlowchart;
     documents?: FlowchartDocument[];
   }
-): Promise<void> {
-  await apiRequest(`/api/projects/${projectId}/documents/${flowId}`, {
+): Promise<string | null> {
+  const res: any = await apiRequest(`/api/projects/${projectId}/documents/${flowId}`, {
     method: "PUT",
     body: {
+      versiDibaca: data.versiDibaca ?? null,
       title: data.name,
       description: data.description ?? null,
       canvasData: encodeFlowPayload(data),
@@ -286,6 +290,9 @@ export async function updateFlowchart(
       link: data.externalUrl || null,
     },
   });
+  // #568 — stempel baru dari server; tanpa ini tab yang sama akan menabrak
+  // dirinya sendiri pada kiriman berikutnya.
+  return res?.data?.updatedAt ?? null;
 }
 
 /** Menghapus flowchart di backend. */

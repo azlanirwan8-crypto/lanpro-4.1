@@ -163,6 +163,12 @@ export interface FlowchartData {
    * bedanya menentukan jalur tulis boleh jalan atau tidak.
    */
   muatGagal?: boolean;
+  /**
+   * #568 — stempel `updatedAt` baris ini saat papan terakhir dibaca. Kalau
+   * basis data sudah bergeser, kiriman berikutnya ditolak 409 dan pengguna
+   * diminta memuat ulang, bukan menimpa kerja tab lain.
+   */
+  versiMuat?: string;
   createdAt: string;
   /** Id pembuat — menentukan siapa yang boleh mengedit (Item #268). */
   createdBy?: string;
