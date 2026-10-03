@@ -1,6 +1,9 @@
 import db from "../../src/lib/db";
 import { BATAS_DAFTAR_TANPA_PAGINATION, type PaginationParams } from "../lib/pagination";
 
+/** Penanda baris papan flowchart di tabel Documents. Bukan jenis dokumen manusia. */
+export const JENIS_PAPAN = "flowchart";
+
 export interface DocumentEntity {
   id: string;
   projectId: string;
@@ -28,12 +31,32 @@ export class DocumentRepository {
   private documentListSelect =
     'id, projectId, title, description, type, link, fileName, fileType, canvasData, category, createdBy, "createdByName", downloadCount, createdAt, updatedAt';
 
+  /**
+   * Saringan daftar dokumen sebuah proyek.
+   *
+   * Papan flowchart MENUMPANG tabel ini — `type: "flowchart"`, isinya di kolom
+   * `canvasData` — sementara menu Dokumentasi memanggil endpoint yang sama.
+   * Tanpa penjaga di bawah, setiap papan baru otomatis bertambah sebagai kartu
+   * dokumen (#598). #136 sudah membereskan GEJALANYA di kolom `description`
+   * (payload JSON bocor ke subjudul); ini membereskan barisnya.
+   *
+   * Aturan pemisahnya persis satu hal: bila penanya tidak menyebut jenis, ia
+   * sedang meminta katalog dokumen dan baris papan tidak ikut. Yang menyebut
+   * `type = "flowchart"` — yaitu menu Flowchart — justru hanya ingin baris itu.
+   * Perbandingannya `=`, bukan `ILIKE`, dan itu disengaja: dokumen yang jenisnya
+   * dipilih dari master data bisa berlabel "Flowchart" (huruf besar), dan label
+   * itu tetap milik Dokumentasi, bukan papan.
+   */
   private buildDocumentWhere(projectId: string, search?: string, type?: string) {
     const params: unknown[] = [projectId];
     let where = "projectId = ?";
-    if (type?.trim() && type.trim() !== "Semua") {
+    const jenisDiminta = type?.trim();
+    if (jenisDiminta && jenisDiminta !== "Semua") {
       where += " AND type = ?";
-      params.push(type.trim());
+      params.push(jenisDiminta);
+    } else {
+      where += " AND COALESCE(type, '') <> ?";
+      params.push(JENIS_PAPAN);
     }
     if (search?.trim()) {
       where +=

@@ -21,6 +21,13 @@ import { apiRequest } from "../../../lib/api";
 import type { KonteksFlowchart, FlowchartData } from "../types";
 import { adaKonteks } from "../types";
 
+/**
+ * Penanda baris papan di tabel Documents — sama dengan `JENIS_PAPAN` di
+ * `server/repositories/document.repository.ts`. `src/` tidak bisa mengimpor
+ * dari `server/`, jadi keduanya dijaga test `flowchart.service.papan-598.test.ts`.
+ */
+const JENIS_PAPAN = "flowchart";
+
 /** Bentuk baris Documents yang dikembalikan backend. */
 interface DocumentRow {
   id: string;
@@ -146,11 +153,19 @@ function encodeFlowPayload(flow: {
 /**
  * Mengambil seluruh flowchart milik sebuah proyek.
  * Mengembalikan array kosong bila backend tidak mengirim data yang valid.
+ *
+ * `type=flowchart` diminta KE SERVER, bukan disaring di sini saja: katalog
+ * Dokumentasi kini mengecualikan baris papan (#598), jadi permintaan tanpa
+ * jenis tidak akan pernah memulangkan papan. Efek sampingnya enak — daftar ini
+ * tidak lagi menarik seluruh dokumen proyek beserta kolom `canvasData`-nya
+ * yang berukuran papan.
  */
 export async function fetchFlowcharts(projectId: string): Promise<FlowchartData[]> {
-  const res: any = await apiRequest(`/api/projects/${projectId}/documents`);
+  const res: any = await apiRequest(
+    `/api/projects/${projectId}/documents?type=${encodeURIComponent(JENIS_PAPAN)}`
+  );
   if (!res?.data || !Array.isArray(res.data)) return [];
-  return res.data.filter((doc: DocumentRow) => doc.type === "flowchart").map(toFlowchartData);
+  return res.data.filter((doc: DocumentRow) => doc.type === JENIS_PAPAN).map(toFlowchartData);
 }
 
 /** Membuat flowchart baru di backend. Mengembalikan id server bila sukses. */
@@ -177,7 +192,7 @@ export async function createFlowchart(
       description: flow.description || null,
       canvasData: encodeFlowPayload(flow),
       category: flow.category || null,
-      type: "flowchart",
+      type: JENIS_PAPAN,
       link: flow.externalUrl || null,
       createdBy: flow.createdBy,
     },
