@@ -128,6 +128,24 @@ describe("FlowchartView — tempel dari clipboard peramban (#589)", () => {
     );
   });
 
+  it("clipboard draw.io yang TER-ENCODE URI ikut terbaca, bukan jadi kotak %3C… (#595)", async () => {
+    // Inilah bentuk nyata yang dikirim draw.io ke text/plain clipboard.
+    readText.mockResolvedValue(encodeURIComponent(XML_DRAWIO));
+    const container = await bukaPapan();
+    expect(jumlahBentuk(container)).toBe(1);
+
+    fireEvent.mouseMove(container.querySelector(".grid-dots-light") as HTMLElement, {
+      clientX: 620,
+      clientY: 320,
+    });
+    fireEvent.keyDown(window, { key: "v", ctrlKey: true });
+
+    await waitFor(() => expect(jumlahBentuk(container)).toBe(3));
+    expect(jumlahPanah(container)).toBe(1);
+    expect(container.textContent).toContain("Verifikasi");
+    expect(container.textContent).not.toContain("%3C");
+  });
+
   it("clipboard berisi teks biasa tidak menambah apa pun dan mengatakannya", async () => {
     readText.mockResolvedValue("rapatkan jadwal sprint minggu depan ya");
     const container = await bukaPapan();

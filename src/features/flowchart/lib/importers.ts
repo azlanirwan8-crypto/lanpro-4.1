@@ -1,5 +1,68 @@
 import i18n from "../../../i18n";
+import { colorPaletteHex } from "../constants";
 import type { FlowNode, FlowEdge } from "../types";
+
+/**
+ * Clipboard draw.io menaruh XML-nya TER-ENCODE URI: "%3CmxGraphModel%3E%3Croot%3E…".
+ * Tanpa dilepas dulu, tidak satu pun penjeraf mengenali bentuknya — dan teks itu
+ * lalu berakhir menjadi SATU kotak berisi "%3CmxGraphModel%3E…" (#595).
+ */
+export const uraikanSandiwara = (teks: string): string => {
+  const t = (teks || "").trim();
+  if (!/%3C(?:mxGraphModel|mxfile|mxCell|root)/i.test(t)) return t;
+  try {
+    const keluar = decodeURIComponent(t).trim();
+    return keluar.startsWith("<") ? keluar : t;
+  } catch {
+    return t;
+  }
+};
+
+/**
+ * Hex asli dari draw.io dipetakan ke NAMA warna palet LanPro yang paling dekat,
+ * supaya papan yang ditempel tetap mirip aslinya dan tetap bisa disunting dengan
+ * palet yang ada. Warna nyaris putih/abu bawaan draw.io (#ffffff, #f5f5f5) sengaja
+ * TIDAK dipetakan — bentuknya sudah punya warna sendiri dari jenisnya.
+ */
+export const warnaPaletTerdekat = (hex?: string | null): string | null => {
+  const m = /^#?([0-9a-f]{6})$/i.exec((hex || "").trim());
+  if (!m) return null;
+  const angka = (n: string) => parseInt(n, 16);
+  const hsl = (r: number, g: number, b: number) => {
+    const maks = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const d = maks - min;
+    const l = (maks + min) / 510;
+    if (d === 0) return { h: 0, s: 0, l };
+    const h =
+      maks === r
+        ? 60 * (((g - b) / d) % 6)
+        : maks === g
+          ? 60 * ((b - r) / d + 2)
+          : 60 * ((r - g) / d + 4);
+    return { h: (h + 360) % 360, s: d / (255 * (1 - Math.abs(2 * l - 1))), l };
+  };
+  const target = hsl(angka(m[1].slice(0, 2)), angka(m[1].slice(2, 4)), angka(m[1].slice(4, 6)));
+  // Putih, abu, dan hitam bawaan draw.io: bentuknya sudah punya warna sendiri.
+  if (target.s < 0.12) return null;
+
+  let nama: string | null = null;
+  let jarak = Number.POSITIVE_INFINITY;
+  for (const [k, palet] of Object.entries(colorPaletteHex)) {
+    for (const kandidat of [palet.bgGrad, palet.stroke]) {
+      const x = /^#([0-9a-f]{6})$/i.exec(kandidat);
+      if (!x) continue;
+      const w = hsl(angka(x[1].slice(0, 2)), angka(x[1].slice(2, 4)), angka(x[1].slice(4, 6)));
+      const dh = Math.min(Math.abs(w.h - target.h), 360 - Math.abs(w.h - target.h));
+      const d = dh * 1.5 + Math.abs(w.s - target.s) * 60 + Math.abs(w.l - target.l) * 40;
+      if (d < jarak) {
+        jarak = d;
+        nama = k;
+      }
+    }
+  }
+  return nama;
+};
 
 /** Hasil parse yang sama bentuknya untuk semua format asal. */
 export interface ParsedDiagram {
@@ -169,6 +232,11 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
         type = "sticky";
         color = "yellow";
       }
+
+      const dariGambar =
+        warnaPaletTerdekat(/fillcolor=([^;]+)/i.exec(style)?.[1]) ||
+        warnaPaletTerdekat(/strokecolor=([^;]+)/i.exec(style)?.[1]);
+      if (dariGambar) color = dariGambar;
 
       extractedNodes.push({
         id: `drawio-${id}`,
@@ -655,7 +723,7 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
  * Mendeteksi format file secara otomatis (Draw.io, Miro JSON/CSV, Mermaid, LanPro JSON).
  */
 export const parseUniversalDiagram = (content: string, filename = ""): ParsedDiagram => {
-  const cleanContent = content.trim();
+  const cleanContent = uraikanSandiwara(content);
   const lowerName = filename.toLowerCase();
 
   // 1. Ekstensi eksplisit
@@ -703,10 +771,18 @@ export const parseUniversalDiagram = (content: string, filename = ""): ParsedDia
     }
   }
 
-  // Fallback terakhir: coba Mermaid atau Draw.io
-  try {
-    return parseMermaid(cleanContent);
-  } catch {
-    return parseDrawIoXML(cleanContent);
+  // Fallback terakhir: HANYA bila teks itu sungguh berisi sintaks Mermaid.
+  // Sebelumnya cabang ini menelan apa saja: satu tempelan teks bebas berubah
+  // menjadi satu kotak kosong di papan dengan toast hijau "1 bentuk ditempel",
+  // jadi pengguna tidak pernah tahu yang ditempel itu rusak (#595).
+  const miripMermaid =
+    /(^|\n)\s*(flowchart|graph|subgraph)\b/i.test(cleanContent) || /-->/.test(cleanContent);
+  if (miripMermaid) {
+    try {
+      return parseMermaid(cleanContent);
+    } catch {
+      return { nodes: [], edges: [] };
+    }
   }
+  return { nodes: [], edges: [] };
 };
