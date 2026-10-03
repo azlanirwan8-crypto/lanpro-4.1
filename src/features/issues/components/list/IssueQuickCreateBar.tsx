@@ -1,9 +1,10 @@
 import { useTranslation } from "react-i18next";
-import React from "react";
+import React, { useRef } from "react";
 import { Zap, ChevronDown, CheckCircle2 } from "lucide-react";
 import { RenderIcon } from "../../../../components/RenderIcon";
 import { StyledDropdown } from "../../../../components/ui/CommonComponents";
 import { MasterData, UserProfile, Sprint } from "../../../../types";
+import { enterUntukSimpan } from "../../../../lib/enterSimpan";
 
 interface IssueQuickCreateBarProps {
   quickCreateTitle: string;
@@ -46,6 +47,22 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
 }) => {
   const { t } = useTranslation();
   const mArr = masterData || [];
+  const judulRef = useRef<HTMLInputElement>(null);
+
+  /**
+   * Semua pilihan di baris ini mengembalikan fokus ke kolom judul (#592):
+   * pemicu dropdown adalah <button>, dan setelah nilainya dipilih panelnya
+   * unmount — fokus jatuh ke <body> dan Enter tidak menyentuh apa pun,
+   * padahal pengguna sudah selesai mengisi baris dan tinggal menekan Enter.
+   */
+  const pilihLaluFokus =
+    <T,>(setter: (val: T) => void) =>
+    (val: T) => {
+      setter(val);
+      judulRef.current?.focus();
+    };
+
+  const simpanEnter = enterUntukSimpan(() => void createGlobalIssue());
 
   return (
     <div className="p-2 bg-surface border-t border-border-subtle shrink-0 shadow-[0_-2px_4px_-1px_rgba(0,0,0,0.03)] z-20">
@@ -86,7 +103,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
                     <button
                       key={t.id}
                       onClick={() => {
-                        setInlineAddType(t.label);
+                        pilihLaluFokus(setInlineAddType)(t.label);
                         setIsInlineTypeOpen(null);
                       }}
                       className="w-full text-left px-3 py-2 text-xs sm:text-[11px] font-medium text-content-secondary hover:bg-surface-sunken flex items-center gap-2"
@@ -108,12 +125,14 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
           </div>
 
           <input
+            ref={judulRef}
             type="text"
             value={quickCreateTitle}
             onChange={(e) => setQuickCreateTitle(e.target.value)}
             placeholder={t("issueQuick.placeholder")}
             aria-label={t("issueQuick.placeholder")}
-            onKeyDown={(e) => e.key === "Enter" && createGlobalIssue()}
+            enterKeyHint="enter"
+            onKeyDown={simpanEnter}
             className="flex-1 min-w-0 bg-transparent border-none text-xs font-normal text-content-body placeholder:text-content-subtle focus:ring-0 outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded px-2"
           />
         </div>
@@ -122,7 +141,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
           <div className="w-[120px] sm:w-[130px] shrink-0">
             <StyledDropdown
               value={inlineAddSprintId || ""}
-              onChange={(val) => setInlineAddSprintId(val)}
+              onChange={pilihLaluFokus(setInlineAddSprintId)}
               options={[
                 { id: "", label: "Backlog", icon: "Box" },
                 ...(sprints?.map((s) => ({
@@ -140,7 +159,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
           <div className="w-[120px] sm:w-[130px] shrink-0">
             <StyledDropdown
               value={inlineAddAssigneeId || ""}
-              onChange={(val) => setInlineAddAssigneeId(val)}
+              onChange={pilihLaluFokus(setInlineAddAssigneeId)}
               options={[
                 { id: "", label: t("newTask.unassigned") },
                 ...(projectMembers || []).map((m) => ({
@@ -158,7 +177,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
           <div className="w-[90px] sm:w-[100px] shrink-0">
             <StyledDropdown
               value={inlineAddPriority || "Medium"}
-              onChange={(val) => setInlineAddPriority(val)}
+              onChange={pilihLaluFokus(setInlineAddPriority)}
               options={mArr
                 .filter((m) => m.type === "priority")
                 .map((p) => ({

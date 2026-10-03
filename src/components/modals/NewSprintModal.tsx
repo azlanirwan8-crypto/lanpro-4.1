@@ -3,6 +3,7 @@ import React from "react";
 import { Modal } from "../ui/Modal";
 import { Input, Textarea, Button } from "../ui/CoreUI";
 import { LanproDatePicker } from "../ui/LanproDatePicker";
+import { enterUntukSimpan } from "../../lib/enterSimpan";
 
 interface NewSprintModalProps {
   isOpen: boolean;
@@ -54,9 +55,9 @@ export const NewSprintModal: React.FC<NewSprintModalProps> = ({
             value={newSprintName}
             onChange={(e: any) => setNewSprintName(e.target.value)}
             placeholder={t("newSprint.namePlaceholder")}
-            onKeyDown={(e: any) => {
-              if (e.key === "Enter" && !isSubmitting && newSprintName.trim()) onSubmit();
-            }}
+            onKeyDown={enterUntukSimpan(() => {
+              if (!isSubmitting && newSprintName.trim()) onSubmit();
+            })}
           />
         </div>
         <div>

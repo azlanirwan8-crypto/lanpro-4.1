@@ -7,6 +7,7 @@ import { StyledDropdown } from "../ui/CommonComponents";
 import { LanproDatePicker } from "../ui/LanproDatePicker";
 import { validateFileClient } from "../../lib/fileSecurity";
 import { BAKU } from "../../lib/warnaLabel";
+import { enterUntukSimpan } from "../../lib/enterSimpan";
 import { MasterData, Sprint, Task, UserProfile, Project } from "../../types";
 
 interface NewTaskModalProps {
@@ -236,9 +237,9 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               value={newTaskTitle}
               onChange={(e: any) => setNewTaskTitle(e.target.value)}
               placeholder={t("newTask.titlePlaceholder")}
-              onKeyDown={(e: any) => {
-                if (e.key === "Enter" && !isSubmitting && newTaskTitle.trim()) onSubmit();
-              }}
+              onKeyDown={enterUntukSimpan(() => {
+                if (!isSubmitting && newTaskTitle.trim()) onSubmit();
+              })}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">

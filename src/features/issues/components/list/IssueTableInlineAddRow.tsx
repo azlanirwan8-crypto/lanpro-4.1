@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import React from "react";
+import React, { useRef } from "react";
 import { motion } from "motion/react";
 import { ChevronDown, Zap, CheckCircle2, X } from "lucide-react";
 import { cn } from "../../../../lib/utils";
@@ -8,6 +8,7 @@ import { StyledDropdown, TypeIcon } from "../../../../components/ui/CommonCompon
 import { gayaLabel, warnaDariMaster, warnaLabel } from "../../../../lib/warnaLabel";
 import { MasterData, UserProfile } from "../../../../types";
 import { styles } from "../../styles";
+import { enterUntukSimpan } from "../../../../lib/enterSimpan";
 
 interface IssueTableInlineAddRowProps {
   taskId: string;
@@ -56,6 +57,18 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
 }) => {
   const { t } = useTranslation();
   const mArr = masterData || [];
+  const judulRef = useRef<HTMLInputElement>(null);
+
+  // Sama seperti IssueQuickCreateBar (#592): memilih nilai di dropdown menutup
+  // panelnya dan fokus hilang ke <body>, jadi Enter tidak menyentuh apa pun.
+  const pilihLaluFokus =
+    <T,>(setter: (val: T) => void) =>
+    (val: T) => {
+      setter(val);
+      judulRef.current?.focus();
+    };
+
+  const simpanEnter = enterUntukSimpan(() => void createSubtask(taskId));
 
   return (
     <motion.tr
@@ -107,7 +120,7 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
                           <button
                             key={t.id}
                             onClick={() => {
-                              setInlineAddType(t.label);
+                              pilihLaluFokus(setInlineAddType)(t.label);
                               setIsInlineTypeOpen(null);
                             }}
                             className="w-full text-left px-3 py-2 text-xs sm:text-[11px] font-medium text-content-secondary hover:bg-surface-sunken flex items-center gap-2"
@@ -137,13 +150,15 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
                 <div className="flex-1 relative">
                   <input
                     autoFocus
+                    ref={judulRef}
+                    enterKeyHint="enter"
                     value={inlineTitleMap[taskId] || ""}
                     onChange={(e) => {
                       const val = e.target.value;
                       setInlineTitleMap((prev) => ({ ...prev, [taskId]: val }));
                     }}
                     placeholder={t("subtasks.whatToDo")}
-                    onKeyDown={(e) => e.key === "Enter" && createSubtask(taskId)}
+                    onKeyDown={simpanEnter}
                     className={styles.inlineAddInput}
                   />
                 </div>
@@ -152,7 +167,7 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
               <div className="p-2 bg-surface h-full min-w-[150px] flex items-center">
                 <StyledDropdown
                   value={inlineAddAssigneeId}
-                  onChange={(val) => setInlineAddAssigneeId(val)}
+                  onChange={pilihLaluFokus(setInlineAddAssigneeId)}
                   options={[
                     { id: "", label: t("newTask.unassigned") },
                     ...projectMembers.map((m) => ({
@@ -170,7 +185,7 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
               <div className="flex items-center p-2 bg-surface h-full min-w-[120px]">
                 <StyledDropdown
                   value={inlineAddPriority || "Medium"}
-                  onChange={(val) => setInlineAddPriority(val)}
+                  onChange={pilihLaluFokus(setInlineAddPriority)}
                   options={mArr
                     .filter((m) => m.type === "priority")
                     .map((p) => ({
