@@ -12,13 +12,27 @@
  */
 import { useTranslation } from "react-i18next";
 import React from "react";
-import { LayoutGrid, Download, Database, Activity, Maximize2, Minimize2 } from "lucide-react";
+import {
+  LayoutGrid,
+  Download,
+  Database,
+  Activity,
+  Maximize2,
+  Minimize2,
+  Dot,
+  Grid3x3,
+  Square,
+} from "lucide-react";
+import type { PolaPapan } from "../types";
 import { toast } from "sonner";
 import { cn } from "../../../lib/utils";
 
 interface CanvasToolbarProps {
   isSnapToGrid: boolean;
   setIsSnapToGrid: (value: boolean) => void;
+  /** #613 — pola latar papan: polos / bertitik (bawaan ala Miro) / berkisi. */
+  polaPapan: PolaPapan;
+  setPolaPapan: (value: PolaPapan) => void;
   handleExportJPG: () => void;
   handleExportJSON: () => void;
   isRightSidebarOpen: boolean;
@@ -31,6 +45,8 @@ interface CanvasToolbarProps {
 export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   isSnapToGrid,
   setIsSnapToGrid,
+  polaPapan,
+  setPolaPapan,
   handleExportJPG,
   handleExportJSON,
   isRightSidebarOpen,
@@ -49,7 +65,9 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             onClick={() => {
               const nextSnap = !isSnapToGrid;
               setIsSnapToGrid(nextSnap);
-              toast.success(t("toast.snapToGrid", { keadaan: nextSnap ? "AKTIF" : "NON-AKTIF" }));
+              toast.success(
+                t("toast.snapToGrid", { keadaan: t(nextSnap ? "common.aktif" : "common.mati") })
+              );
             }}
             className={cn(
               "min-h-11 min-w-11 p-2 rounded-md transition-all flex items-center justify-center cursor-pointer",
@@ -57,7 +75,10 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
                 ? "bg-primary/10 text-primary hover:bg-primary/15 border border-primary/30"
                 : "text-content-subtle hover:bg-surface-muted border border-transparent"
             )}
-            title={`Snap to Grid (Saat ini: ${isSnapToGrid ? "Aktif" : "Mati"})`}
+            aria-pressed={isSnapToGrid}
+            title={t("flowchart.snapGridJudul", {
+              keadaan: t(isSnapToGrid ? "common.aktif" : "common.mati"),
+            })}
             aria-label={isSnapToGrid ? t("flowchart.snapGrid") : t("flowchart.freeMove")}
           >
             <LayoutGrid
@@ -65,6 +86,45 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             />
           </button>
         </div>
+      </div>
+
+      {/* #613 — pola papan. Strip tiga ikon, bukan satu tombol siklus:
+          pilihan yang sedang aktif terlihat tanpa perlu mengklik. */}
+      <div className="flex items-center gap-1 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1 rounded-lg shadow-[0_6px_18px_rgba(0,0,0,0.05)] transition-all duration-300 shrink-0 pointer-events-auto">
+        {(
+          [
+            ["polos", Square, "flowchart.polaPolos"],
+            ["titik", Dot, "flowchart.polaTitik"],
+            ["kisi", Grid3x3, "flowchart.polaKisi"],
+          ] as const
+        ).map(([nilai, Ikon, kunci]) => (
+          <button
+            key={nilai}
+            type="button"
+            aria-pressed={polaPapan === nilai}
+            aria-label={t(kunci)}
+            title={t(kunci)}
+            onClick={() => {
+              if (polaPapan === nilai) return;
+              setPolaPapan(nilai);
+              toast.success(t("flowchart.polaDiubah", { pola: t(kunci) }));
+            }}
+            className={cn(
+              "min-h-11 min-w-11 p-2 rounded-md transition-all flex items-center justify-center cursor-pointer border",
+              polaPapan === nilai
+                ? "bg-primary/10 text-primary hover:bg-primary/15 border-primary/30"
+                : "text-content-subtle hover:bg-surface-muted border-transparent"
+            )}
+          >
+            <Ikon
+              className={cn(
+                polaPapan === nilai ? "w-4 h-4 text-primary" : "w-4 h-4 text-content-subtle",
+                nilai === "titik" && "fill-current",
+                nilai === "kisi" && "[&_path]:stroke-[1.2]"
+              )}
+            />
+          </button>
+        ))}
       </div>
 
       {/* Export + properties — icon-first; JPG/JSON juga ada di dock */}

@@ -80,6 +80,16 @@ export type FlowNodeType =
 /** Tema kanvas yang tersedia. */
 export type CanvasTheme = "miro" | "blueprint";
 
+/**
+ * Pola latar papan — pilihan pengguna, TERPISAH dari warna. Warna papan ikut
+ * tema aplikasi (#547); pola ini yang decides whether the board is blank,
+ * bertitik (bawaan ala Miro), atau berkisi.
+ */
+export type PolaPapan = "polos" | "titik" | "kisi";
+
+export const POLA_PAPAN: PolaPapan[] = ["polos", "titik", "kisi"];
+export const POLA_BAWAAN: PolaPapan = "titik";
+
 export interface FlowNode {
   id: string;
   type: FlowNodeType;
@@ -158,6 +168,8 @@ export interface FlowchartData {
   nodes: FlowNode[];
   edges: FlowEdge[];
   theme: CanvasTheme;
+  /** Disimpan di payload `canvasData` seperti `theme` (#613). */
+  polaPapan?: PolaPapan;
   /**
    * #567 — kolom kanvasnya ADA tetapi tidak bisa dibaca. Ini BUKAN papan kosong:
    * bedanya menentukan jalur tulis boleh jalan atau tidak.

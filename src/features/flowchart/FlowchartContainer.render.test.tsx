@@ -379,7 +379,7 @@ describe("FlowchartView", () => {
     fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
     await screen.findByTitle(/Snap to Grid|Snapping/i);
 
-    const kanvas = container.querySelector(".grid-dots-light") as Element;
+    const kanvas = container.querySelector(".kanvas-papan") as Element;
     expect(kanvas).toBeTruthy();
     const persen = () => screen.getByTitle(/Setel Ulang Zoom/i).textContent;
     const sebelum = persen();
@@ -496,7 +496,7 @@ describe("FlowchartView", () => {
     fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
     await screen.findByTitle(/Snap to Grid|Snapping/i);
 
-    const kanvas = container.querySelector(".grid-dots-light") as HTMLElement;
+    const kanvas = container.querySelector(".kanvas-papan") as HTMLElement;
     const kotakSeleksi = () => container.querySelector(".z-\\[100\\]");
     const awal = kanvas.style.backgroundPosition;
     expect(awal).toBe("50px 50px");
@@ -579,7 +579,7 @@ describe("FlowchartView", () => {
     expect(Number(titik!.getAttribute("cy"))).toBeCloseTo(95, 0);
 
     // Klik di kanvas kosong membatalkan mode sambung.
-    fireEvent.mouseDown(container.querySelector(".grid-dots-light") as Element, {
+    fireEvent.mouseDown(container.querySelector(".kanvas-papan") as Element, {
       clientX: 900,
       clientY: 500,
       button: 0,
@@ -703,11 +703,12 @@ describe("FlowchartView", () => {
     expect(container.querySelector("circle.animate-ping")).toBeNull();
   });
 
-  // Item #547 — papan tidak lagi punya tombol tema; ia mengikuti tema aplikasi.
-  // Yang diuji RANTAI-NYA (kelas `dark` di <html> -> MutationObserver ->
-  // canvasTheme -> kelas kisi papan), karena tanpa rantai itu papan membeku
-  // terang walau aplikasinya gelap.
-  it("papan berpindah kisi saat aplikasi menjadi gelap, dan kembali saat terang", async () => {
+  // #547 dulu merantai kelas `dark` aplikasi ke POLA kisi papan. #613 memisahkan
+  // dua hal yang berkelahi itu: POLA jadi pilihan pengguna per papan, WARNA papan
+  // tetap ikut tema aplikasi lewat token `bg-surface`. Rantai yang diuji karena itu
+  // berganti wajah — bukan dilonggarkan: yang harus tetap benar adalah papan tidak
+  // pernah menulis warna keras, baik terang maupun gelap.
+  it("warna papan ikut tema aplikasi tanpa warna keras, pola tetap pilihan pengguna", async () => {
     (fetchFlowcharts as jest.Mock).mockResolvedValue([
       {
         id: "fw9d",
@@ -727,22 +728,28 @@ describe("FlowchartView", () => {
     fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
     await screen.findByTitle(/Snap to Grid|Snapping/i);
 
-    expect(container.querySelector(".grid-dots-light")).toBeTruthy();
-    expect(container.querySelector(".grid-blueprint-dark")).toBeNull();
+    const kelasSemula = container.querySelector(".kanvas-papan")?.getAttribute("class") || "";
+    expect(kelasSemula).toContain("papan-titik");
+    expect(kelasSemula).toContain("bg-surface");
 
     act(() => {
       document.documentElement.classList.add("dark");
     });
-    await waitFor(() => expect(container.querySelector(".grid-blueprint-dark")).toBeTruthy());
-    expect(container.querySelector(".grid-dots-light")).toBeNull();
-    // Yang berubah hanya POLA kisi; latar papan tidak lagi menulis warna keras.
-    const papanGelap = container.querySelector(".grid-blueprint-dark") as Element;
-    expect(papanGelap.getAttribute("class")).not.toMatch(/#0a1124|sky-100/);
+    await waitFor(() =>
+      expect(container.querySelector(".kanvas-papan")?.getAttribute("class")).toContain(
+        "bg-surface"
+      )
+    );
+    const papanGelap = container.querySelector(".kanvas-papan") as Element;
+    // POLA tidak ikut berpindah karena tema — itu pilihan pengguna (#613).
+    expect(papanGelap.getAttribute("class")).toContain("papan-titik");
+    // Yang diwarisi #547: latar papan tidak pernah menulis warna keras.
+    expect(papanGelap.getAttribute("class")).not.toMatch(/#0a1124|sky-100|slate-\d|gray-\d/);
 
     act(() => {
       document.documentElement.classList.remove("dark");
     });
-    await waitFor(() => expect(container.querySelector(".grid-dots-light")).toBeTruthy());
+    await waitFor(() => expect(container.querySelector(".kanvas-papan")).toBeTruthy());
   });
 
   // Item #541 — pencarian palet dulu hanya membaca nama/keterangan bentuk, jadi

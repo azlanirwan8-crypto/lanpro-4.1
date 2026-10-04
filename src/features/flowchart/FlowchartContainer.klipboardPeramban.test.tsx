@@ -153,7 +153,7 @@ const htmlDrawio = (xml: string) => {
 };
 
 const geserKursor = (container: Element) =>
-  fireEvent.mouseMove(container.querySelector(".grid-dots-light") as HTMLElement, {
+  fireEvent.mouseMove(container.querySelector(".kanvas-papan") as HTMLElement, {
     clientX: 620,
     clientY: 320,
   });
@@ -241,7 +241,7 @@ describe("FlowchartView — tempel dari clipboard peramban (#589, #607)", () => 
 
     // Jalur menu tidak memicu peristiwa `paste`, jadi ia satu-satunya pemakai
     // navigator.clipboard.readText() yang tersisa.
-    fireEvent.contextMenu(container.querySelector(".grid-dots-light") as HTMLElement, {
+    fireEvent.contextMenu(container.querySelector(".kanvas-papan") as HTMLElement, {
       clientX: 620,
       clientY: 320,
     });
@@ -284,7 +284,7 @@ describe("FlowchartView — tempel dari clipboard peramban (#589, #607)", () => 
 
   it("salinan papan sendiri tetap menang dan peristiwa paste dicegah (#582)", async () => {
     const container = await bukaPapan();
-    const kanvas = container.querySelector(".grid-dots-light") as HTMLElement;
+    const kanvas = container.querySelector(".kanvas-papan") as HTMLElement;
 
     // Seleksi lewat marquee, sama seperti test #582: mengklik bentuk saja tidak
     // enough untuk masuk clipboard papan.

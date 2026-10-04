@@ -128,7 +128,7 @@ beforeEach(() => {
 describe("FlowchartView — salin-tempel papan (#582)", () => {
   it("seleksi marquee yang disalin lalu diklik tetap bisa ditempel, lengkap dengan panahnya", async () => {
     const container = await bukaPapan();
-    const kanvas = container.querySelector(".grid-dots-light") as HTMLElement;
+    const kanvas = container.querySelector(".kanvas-papan") as HTMLElement;
     expect(jumlahBentuk(container)).toBe(2);
     expect(jumlahPanah(container)).toBe(1);
 

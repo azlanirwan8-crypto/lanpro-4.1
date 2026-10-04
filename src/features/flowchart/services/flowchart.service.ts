@@ -18,7 +18,8 @@
  */
 
 import { apiRequest } from "../../../lib/api";
-import type { KonteksFlowchart, FlowchartData, FlowchartDocument } from "../types";
+import type { KonteksFlowchart, FlowchartData, FlowchartDocument, PolaPapan } from "../types";
+import { POLA_PAPAN } from "../types";
 import { adaKonteks } from "../types";
 
 /**
@@ -57,6 +58,7 @@ interface IsiKanvas {
   epicTaskId?: string;
   konteks?: Record<string, unknown>;
   documents?: FlowchartDocument[];
+  pola?: string;
   /**
    * #567 — `false` berarti "kosong karena memang kosong". `true` berarti kolomnya
    * ada tapi tidak bisa dibaca, dan papan seperti itu TIDAK BOLEH ditulis balik:
@@ -94,6 +96,7 @@ function parseFlowPayload(payloadMentah?: string): IsiKanvas {
     theme: typeof payload.theme === "string" ? payload.theme : undefined,
     epicTaskId: typeof payload.epicTaskId === "string" ? payload.epicTaskId : undefined,
     konteks: payload.konteks && typeof payload.konteks === "object" ? payload.konteks : undefined,
+    pola: POLA_PAPAN.includes(payload.pola) ? payload.pola : undefined,
     documents: Array.isArray(payload.documents)
       ? payload.documents.filter(
           (d: any) => d && typeof d.id === "string" && typeof d.name === "string"
@@ -151,7 +154,7 @@ function toFlowchartData(doc: DocumentRow): FlowchartData {
   // `description`. Dibaca sebagai cadangan supaya diagram lama tetap terbuka
   // walau backfill belum sempat berjalan di lingkungan itu.
   const payloadLama = isCanvasPayload(doc.description) ? doc.description : undefined;
-  const { nodes, edges, theme, epicTaskId, konteks, documents, muatGagal } = parseFlowPayload(
+  const { nodes, edges, theme, epicTaskId, konteks, documents, pola, muatGagal } = parseFlowPayload(
     doc.canvasData || payloadLama
   );
   return {
@@ -170,6 +173,7 @@ function toFlowchartData(doc: DocumentRow): FlowchartData {
     muatGagal: muatGagal || undefined,
     versiMuat: doc.updatedAt,
     theme: theme === "blueprint" ? "blueprint" : "miro",
+    polaPapan: pola as PolaPapan | undefined,
     epicTaskId: epicTaskId || undefined,
     konteks: bacaKonteks(konteks),
     createdAt: doc.createdAt
@@ -192,6 +196,7 @@ function encodeFlowPayload(flow: {
   epicTaskId?: string;
   konteks?: KonteksFlowchart;
   documents?: FlowchartDocument[];
+  polaPapan?: PolaPapan;
 }): string {
   const lampiran = sandiLampiran(flow.documents);
   return JSON.stringify({
@@ -206,6 +211,9 @@ function encodeFlowPayload(flow: {
     // #588 — tanpa ini, daftar "Tautan Dokumen" hanya hidup di localStorage
     // perangkat: berpindah laptop atau membersihkan cache menghapusnya.
     ...(lampiran ? { documents: lampiran } : {}),
+    // #613 — pilihan pola papan harus ikut SEMUA jalur tulis; yang tidak ikut
+    // terkirim akan hilang saat jalur lain menimpa barisnya (#570).
+    ...(flow.polaPapan ? { pola: flow.polaPapan } : {}),
   });
 }
 
@@ -243,6 +251,7 @@ export async function createFlowchart(
     | "epicTaskId"
     | "konteks"
     | "documents"
+    | "polaPapan"
   >
 ): Promise<string | null> {
   const res: any = await apiRequest(`/api/projects/${projectId}/documents`, {
@@ -277,6 +286,7 @@ export async function updateFlowchart(
     epicTaskId?: string;
     konteks?: KonteksFlowchart;
     documents?: FlowchartDocument[];
+    polaPapan?: PolaPapan;
   }
 ): Promise<string | null> {
   const res: any = await apiRequest(`/api/projects/${projectId}/documents/${flowId}`, {

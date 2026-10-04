@@ -163,6 +163,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     panStart,
     setPanStart,
     canvasTheme,
+    polaPapan,
+    setPolaPapan,
     isSnapToGrid,
     setIsSnapToGrid,
     canvasContainerRef,
@@ -1511,6 +1513,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     const found = list.find((f) => f.id === id);
     if (found) {
       setSelectedFlowId(id);
+      // #613 — pola papan adalah pilihan per papan, jadi ia ikut berpindah
+      // bersama papan yang dibuka, bukan tertinggal dari papan sebelumnya.
+      setPolaPapan(found.polaPapan || "titik");
       const loadedNodes = found.nodes || [];
       const loadedEdges = found.edges || [];
       setNodes(loadedNodes);
@@ -1743,6 +1748,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         // dikirim, status "Tersimpan" jadi bohong dan nilainya kembali ke
         // bawaan setelah muat ulang.
         theme: canvasTheme,
+        polaPapan,
         epicTaskId: alur?.epicTaskId ?? flowEpicId,
         // #583 — empat blok detail hidup di payload yang sama dengan isi papan.
         // Jalur tulis mana pun yang tidak membawanya akan menghapusnya saat
@@ -1793,6 +1799,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       nodes,
       edges,
       canvasTheme,
+      polaPapan,
       name: currentFlowMetadata?.name ?? flowName,
       description: currentFlowMetadata?.description ?? flowDescription,
       category: currentFlowMetadata?.category ?? flowCategory,
@@ -1806,6 +1813,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       nodes,
       edges,
       canvasTheme,
+      polaPapan,
       currentFlowMetadata,
       flowName,
       flowDescription,
@@ -1853,6 +1861,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             nodes,
             edges,
             theme: canvasTheme,
+            polaPapan,
             lastEditedAt: new Date().toLocaleString("id-ID"),
           };
         }
@@ -2092,6 +2101,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             description: deskripsi,
             konteks: flowKonteks,
             theme: papanTerbuka ? canvasTheme : foundFlow?.theme,
+            polaPapan: papanTerbuka ? polaPapan : foundFlow?.polaPapan,
             epicTaskId: flowEpicId,
             // Item #144 — tanpa baris ini kategorinya hanya bertahan di
             // localStorage dan hilang begitu cache dibersihkan.
@@ -3617,6 +3627,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       <CanvasToolbar
                         isSnapToGrid={isSnapToGrid}
                         setIsSnapToGrid={setIsSnapToGrid}
+                        polaPapan={polaPapan}
+                        setPolaPapan={setPolaPapan}
                         handleExportJPG={handleExportJPG}
                         handleExportJSON={handleExportJSON}
                         isRightSidebarOpen={isRightSidebarOpen}
@@ -3651,8 +3663,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           // + `text-sky-100` di atas token, dan dua sumber itu
                           // bertabrakan (keluhan pemilik papan 26 Sep). Yang tersisa
                           // di sini hanya POLA kisi, bukan warna.
-                          "absolute inset-0 w-full h-full overflow-hidden z-0 transition-colors duration-300 rounded-xl bg-surface/95",
-                          canvasTheme === "miro" ? "grid-dots-light" : "grid-blueprint-dark"
+                          "kanvas-papan absolute inset-0 w-full h-full overflow-hidden z-0 transition-colors duration-300 rounded-xl bg-surface/95",
+                          // #613 — POLA dipilih pengguna; WARNA papan tetap ikut
+                          // tema aplikasi lewat `bg-surface/95` di atas (#547).
+                          polaPapan === "polos" ? "" : `papan-${polaPapan}`
                         )}
                         onMouseDown={handleCanvasMouseDown}
                         onMouseMove={berinteraksi ? undefined : handleCanvasMouseMove}
@@ -3734,13 +3748,21 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         <style
                           dangerouslySetInnerHTML={{
                             __html: `
-              .grid-dots-light {
-                background-image: radial-gradient(circle, rgba(148, 163, 184, 0.15) 1.5px, transparent 1.5px);
+              /* #613 — kedua pola papan TIDAK PERNAH punya background-size, jadi
+                 gradients-nya hanya digambar sekali untuk seluruh elemen: satu titik
+                 di tengah, bukan kisi titik; dan dua garis di tepi kiri-atas, bukan
+                 kisi kotak. Ukuran ubin 20 px = langkah snap "titik" yang sudah ada
+                 (:2946), jadi titik yang terlihat sekarang benar-benar menunjukkan
+                 tempat bentuk mendarat. */
+              .papan-titik {
+                background-image: radial-gradient(circle, rgba(148, 163, 184, 0.45) 1px, transparent 1px);
+                background-size: 20px 20px;
               }
-              .grid-blueprint-dark {
-                background-image: 
-                  linear-gradient(to right, rgba(30, 58, 138, 0.15) 1px, transparent 1px),
-                  linear-gradient(to bottom, rgba(30, 58, 138, 0.15) 1px, transparent 1px);
+              .papan-kisi {
+                background-image:
+                  linear-gradient(to right, rgba(148, 163, 184, 0.28) 1px, transparent 1px),
+                  linear-gradient(to bottom, rgba(148, 163, 184, 0.28) 1px, transparent 1px);
+                background-size: 20px 20px;
               }
               .sticky-handwriting {
                 font-family: 'Georgia', 'Georgia Ref', serif;

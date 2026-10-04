@@ -1648,6 +1648,11 @@ export const id = {
     clickAShapeStickyNote:
       "Klik satu bentuk, catatan tempel, atau anak panah di kanvas untuk mengubah propertinya.",
     snapGrid: "Snap Grid",
+    snapGridJudul: "Snap to Grid ({{keadaan}})",
+    polaPolos: "Papan polos",
+    polaTitik: "Papan bertitik",
+    polaKisi: "Papan berkisi",
+    polaDiubah: "Pola papan diubah ke {{pola}}",
     freeMove: "Free Move",
     stopSim: "Hentikan Simulasi",
     jsonUnreadable: "File JSON tidak dapat dibaca atau rusak.",
@@ -1829,6 +1834,8 @@ export const id = {
     delete: "Hapus",
   },
   common: {
+    aktif: "aktif",
+    mati: "mati",
     unknown: "Tidak Diketahui",
     language: "Bahasa",
     loading: "Memuat...",

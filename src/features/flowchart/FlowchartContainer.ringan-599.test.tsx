@@ -111,7 +111,7 @@ async function masukKanvas(container: HTMLElement) {
   fireEvent.click((await screen.findAllByText("Alur Ukur"))[0]);
   fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
   await screen.findByTitle(/Snap to Grid|Snapping/i);
-  return container.querySelector(".grid-dots-light") as HTMLElement;
+  return container.querySelector(".kanvas-papan") as HTMLElement;
 }
 
 const GERAKAN = 10;

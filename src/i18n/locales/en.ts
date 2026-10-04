@@ -1636,6 +1636,11 @@ export const en = {
     clickAShapeStickyNote:
       "Click a shape, sticky note, or arrow on the canvas to change its properties.",
     snapGrid: "Snap grid",
+    snapGridJudul: "Snap to Grid ({{keadaan}})",
+    polaPolos: "Plain board",
+    polaTitik: "Dotted board",
+    polaKisi: "Grid board",
+    polaDiubah: "Board pattern set to {{pola}}",
     freeMove: "Free move",
     stopSim: "Stop simulation",
     jsonUnreadable: "The JSON file could not be read or is corrupt.",
@@ -1814,6 +1819,8 @@ export const en = {
     delete: "Delete",
   },
   common: {
+    aktif: "on",
+    mati: "off",
     unknown: "Unknown",
     language: "Language",
     loading: "Loading...",

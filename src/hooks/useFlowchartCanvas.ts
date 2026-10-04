@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTemaAplikasi } from "./useTemaAplikasi";
+import { POLA_BAWAAN, type PolaPapan } from "../features/flowchart/types";
 
 /**
  * useFlowchartCanvas
@@ -25,6 +26,11 @@ export function useFlowchartCanvas() {
   // yang bisa menyimpang dari terang/gelapnya aplikasi.
   const canvasTheme = useTemaAplikasi();
   const [isSnapToGrid, setIsSnapToGrid] = useState<boolean>(true);
+  /**
+   * #613 — pola latar dipilih pengguna per papan; warna tetap ikut tema
+   * aplikasi, jadi dua hal yang dulu berkelahi (#547) tidak bersatu lagi.
+   */
+  const [polaPapan, setPolaPapan] = useState<PolaPapan>(POLA_BAWAAN);
 
   // Canvas container ref for event listeners
   const canvasContainerRef = useRef<HTMLDivElement>(null);
@@ -178,6 +184,8 @@ export function useFlowchartCanvas() {
     // untuk menghitung selisih posisi.
     panStart,
     canvasTheme,
+    polaPapan,
+    setPolaPapan,
     isSnapToGrid,
 
     // Refs
