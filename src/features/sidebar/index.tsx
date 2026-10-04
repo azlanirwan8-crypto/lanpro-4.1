@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { ChevronRight, ChevronLeft, ChevronDown, Kanban, Plus } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../../lib/utils";
 import { SidebarProps } from "./types";
 import { useSidebar } from "./hooks";

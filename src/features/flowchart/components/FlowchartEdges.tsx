@@ -13,7 +13,7 @@
  * yang menerima klik.
  */
 import React, { useRef } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { findSmartRoute, memotongInteriorKotak } from "../lib/routing";
 import { colorPaletteHex } from "../constants";
 import { EdgeStyleBar } from "./EdgeStyleBar";

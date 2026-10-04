@@ -4,6 +4,7 @@
  * Diekstrak dari FlowchartContainer.tsx (Fase 3 — Anti-God-Object).
  * Berisi tipe murni: tanpa React, tanpa efek samping, tanpa dependensi runtime.
  */
+import type { TipeBentukEkstra } from "./lib/tipeBentukEkstra";
 
 export type FlowNodeType =
   | "oval"
@@ -75,7 +76,14 @@ export type FlowNodeType =
   | "bpmnGateway"
   | "bpmnDataStore"
   | "bpmnDataObject"
-  | "bpmnEventEnd";
+  | "bpmnEventEnd"
+  /**
+   * #620 — 147 bentuk tambahan (AWS/Swimlane/gerbang logika/BPMN/ER/P&ID dan
+   * seluruh turunan geometri). Dulu tidak ada di union ini sama sekali: palet
+   * memasukkan mereka lewat `as FlowNode["type"]`, jadi sistem tipe kebal
+   * terhadap bentuk yang tidak punya gambar.
+   */
+  | TipeBentukEkstra;
 
 /** Tema kanvas yang tersedia. */
 export type CanvasTheme = "miro" | "blueprint";

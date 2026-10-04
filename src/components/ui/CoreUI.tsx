@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { format, differenceInDays } from "date-fns";
 import { Calendar } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 type Task = any;
 

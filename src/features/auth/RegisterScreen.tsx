@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import React, { useState, useMemo } from "react";
 import { ArrowRight, Eye, EyeOff, AlertCircle, X } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { cn } from "../../components/ui/CoreUI";
 import { registrationSchema, evaluatePasswordStrength } from "../../lib/registrationSchema";
 import { VelzonSuccessIcon } from "../../components/AuthToastContainer";

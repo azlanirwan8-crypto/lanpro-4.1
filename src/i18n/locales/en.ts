@@ -3148,6 +3148,11 @@ export const en = {
     duplicate: "Duplicate Component",
     changeColor: "Change Colour",
     delete: "Delete Component",
+    tataLayers: "Layer Order",
+    zDepan: "Bring to front",
+    zNaik: "Bring forward",
+    zTurun: "Send backward",
+    zBelakang: "Send to back",
   },
   editSuite: {
     title: "Edit Suite Document Info",

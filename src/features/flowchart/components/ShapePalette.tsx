@@ -28,7 +28,7 @@ interface ShapePaletteProps {
   setShapeSearchQuery: (value: string) => void;
   expandedGroups: Record<string, boolean>;
   toggleGroupExpanded: (title: string) => void;
-  handleAddNewNode: (type: FlowNode["type"], customColor?: string) => void;
+  handleAddNewNode: (type: FlowNode["type"], customColor?: string, labelAwal?: string) => void;
   /** Dipanggil saat membuka palet (mis. tutup panel properti di HP). */
   onOpenPalette?: () => void;
 }
@@ -204,7 +204,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                       key={item.type}
                       type="button"
                       onClick={() => {
-                        handleAddNewNode(item.type as FlowNode["type"], selectedAddColor);
+                        handleAddNewNode(item.type, selectedAddColor, item.name);
                         // Di HP tutup setelah pilih agar kanvas kembali fokus
                         if (
                           typeof window !== "undefined" &&

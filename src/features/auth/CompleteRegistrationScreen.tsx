@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useState, useEffect, useCallback } from "react";
 import { ArrowRight, AlertCircle, CheckCircle2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { kirimLengkapiPendaftaran } from "./services/sso.service";
 import { usulkanUsername } from "./lib/ssoUsername";
 import type { CompleteRegistrationScreenProps } from "./types";

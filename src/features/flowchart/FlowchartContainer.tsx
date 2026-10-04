@@ -38,7 +38,6 @@ import {
   Link as LinkIcon,
   ChevronLeft,
 } from "lucide-react";
-import { toJpeg } from "html-to-image";
 import { Task, Project } from "../../types";
 import { cn } from "../../lib/utils";
 import { toast } from "sonner";
@@ -91,6 +90,20 @@ interface FlowchartViewProps {
  * Isinya sengaja tiga nilai lama (PRD/Panduan/Laporan) supaya diagram yang
  * terlanjur menyimpan salah satunya tetap punya pilihan yang cocok.
  */
+/** #614 — delapan pegangan kotak seleksi bersama, sama seperti editor diagram lain. */
+type SudutGrup = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
+
+const PEGANGAN_GRUP: { arah: SudutGrup; gaya: React.CSSProperties; kursor: string }[] = [
+  { arah: "nw", gaya: { left: -5, top: -5 }, kursor: "nwse-resize" },
+  { arah: "n", gaya: { left: "50%", top: -5, marginLeft: -5 }, kursor: "ns-resize" },
+  { arah: "ne", gaya: { right: -5, top: -5 }, kursor: "nesw-resize" },
+  { arah: "e", gaya: { right: -5, top: "50%", marginTop: -5 }, kursor: "ew-resize" },
+  { arah: "se", gaya: { right: -5, bottom: -5 }, kursor: "nwse-resize" },
+  { arah: "s", gaya: { left: "50%", bottom: -5, marginLeft: -5 }, kursor: "ns-resize" },
+  { arah: "sw", gaya: { left: -5, bottom: -5 }, kursor: "nesw-resize" },
+  { arah: "w", gaya: { left: -5, top: "50%", marginTop: -5 }, kursor: "ew-resize" },
+];
+
 const CADANGAN_KATEGORI_DOKUMEN = [
   { id: "PRD", label: "PRD", icon: "FileText", color: "#8B5CF6" },
   { id: "Panduan", label: "Panduan", icon: "BookOpen", color: "#3B82F6" },
@@ -482,6 +495,23 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   // Drag and Drop (Node moving)
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  /**
+   * #614 — kelompok yang terseleksi sekarang punya SATU kotak pemilih bersama.
+   * State ini menyimpan kotak pada saat tarikan dimulai plus letur tiap
+   * anggotanya, sehingga satu pegangan mengubah ukuran semua anggota dengan
+   * skala yang sama alih-alih satu per satu.
+   */
+  const [ubahGrup, setUbahGrup] = useState<null | {
+    arah: SudutGrup;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    clientX: number;
+    clientY: number;
+    anggota: { id: string; x: number; y: number; width: number; height: number }[];
+  }>(null);
 
   /**
    * #548 — bentuk asal dari sambungan yang SEDANG ditarik. Null berarti tidak ada
@@ -906,6 +936,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     if (!canvasContainerRef.current) return;
     try {
       toast.info(t("toast.preparingImage"));
+      // Dimuat saat tombol ditekan, bukan saat papan dibuka: `html-to-image`
+      // adalah 26% dari chunk papan (#621) padahal hanya satu tombol yang
+      // memakainya.
+      const { toJpeg } = await import("html-to-image");
       const dataUrl = await toJpeg(canvasContainerRef.current, {
         backgroundColor: "#f4f7f9",
         quality: 0.95,
@@ -2134,10 +2168,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   // Add flow symbol/shape to workspace
-  const handleAddNewNode = (type: FlowNode["type"], customColor?: string) => {
+  const handleAddNewNode = (type: FlowNode["type"], customColor?: string, labelAwal?: string) => {
     const id = "node_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
 
-    let defaultLabel = "Teks Baru";
+    // #620 — 138 bentuk tambahan tidak punya kasus di `switch` di bawah, jadi
+    // semuanya lahir berlabel "Teks Baru": papan berisi 206 bentuk yang semuanya
+    // bernama sama sampai pengguna sempat mengetik. Nama dari palet dipakai
+    // lebih dulu sebagai label awal — masih bisa disunting seperti biasa.
+    let defaultLabel = labelAwal || "Teks Baru";
     let defaultColor = customColor || "indigo";
     let width = 140;
     let height = 70;
@@ -2748,6 +2786,25 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       return;
     }
 
+    // #614 — Shift+klik menambah atau mengeluarkan SATU bentuk dari kelompok.
+    // Sebelum item ini kelompok hanya bisa lahir dari Shift+seret, jadi ingin
+    // menambah satu bentuk ke seleksi yang sudah ada berarti harus menggambar
+    // kotak baru yang menelan semuanya.
+    if (e.shiftKey) {
+      const sudahAnggota = copiedNodes.some((n) => n.id === node.id);
+      const dasar = copiedNodes.length ? copiedNodes : nodes.filter((n) => n.id === selectedNodeId);
+      const kelompok = sudahAnggota ? dasar.filter((n) => n.id !== node.id) : [...dasar, node];
+      setCopiedNodes(kelompok);
+      setSelectedEdgeId(null);
+      // Satu anggota masih terhitung seleksi tunggal; nol berarti tidak ada.
+      setSelectedNodeId(sudahAnggota ? (kelompok.length === 1 ? kelompok[0].id : null) : node.id);
+      // Bentuk yang baru dikeluarkan tidak ikut diseret — dia bukan seleksi lagi.
+      if (sudahAnggota) return;
+      setDraggingNodeId(node.id);
+      setDragOffset({ x: e.clientX / zoomLevel - node.x, y: e.clientY / zoomLevel - node.y });
+      return;
+    }
+
     if (!copiedNodes.some((n) => n.id === node.id)) {
       setCopiedNodes([]);
     }
@@ -2926,6 +2983,45 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       return;
     }
 
+    // #614 — satu tarikan pada pegangan kotak bersama mengubah ukuran SEMUA
+    // anggota dengan skala yang sama. Tepi yang digerakkan menentukan titik
+    // asal, jadi sisi kanan/bawah bergerak tanpa menggeser kiri/atas.
+    if (ubahGrup) {
+      const dx = (e.clientX - ubahGrup.clientX) / zoomLevel;
+      const dy = (e.clientY - ubahGrup.clientY) / zoomLevel;
+      const keKiri = ubahGrup.arah.includes("w");
+      const keAtas = ubahGrup.arah.includes("n");
+      const lebarBaru = Math.max(
+        40,
+        ubahGrup.width + (keKiri ? -dx : ubahGrup.arah.includes("e") ? dx : 0)
+      );
+      const tinggiBaru = Math.max(
+        30,
+        ubahGrup.height + (keAtas ? -dy : ubahGrup.arah.includes("s") ? dy : 0)
+      );
+      const asalX = keKiri ? ubahGrup.x + ubahGrup.width - lebarBaru : ubahGrup.x;
+      const asalY = keAtas ? ubahGrup.y + ubahGrup.height - tinggiBaru : ubahGrup.y;
+      const skalaX = lebarBaru / ubahGrup.width;
+      const skalaY = tinggiBaru / ubahGrup.height;
+      const langkah = isSnapToGrid ? (canvasTheme === "miro" ? 20 : 15) : 1;
+      const pasang = (v: number) => Math.round(v / langkah) * langkah;
+
+      setNodes((prev) =>
+        prev.map((n) => {
+          const awal = ubahGrup.anggota.find((a) => a.id === n.id);
+          if (!awal) return n;
+          return {
+            ...n,
+            x: pasang(asalX + (awal.x - ubahGrup.x) * skalaX),
+            y: pasang(asalY + (awal.y - ubahGrup.y) * skalaY),
+            width: Math.max(50, pasang(awal.width * skalaX)),
+            height: Math.max(40, pasang(awal.height * skalaY)),
+          };
+        })
+      );
+      return;
+    }
+
     // 1. Handle Canvas Panning
     if (isPanning) {
       const newX = e.clientX - panStart.x;
@@ -3013,6 +3109,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   const handleCanvasMouseUp = () => {
+    if (ubahGrup) {
+      // Ukuran kelompok selesai: satu langkah riwayat, bukan satu per bentuk.
+      setUbahGrup(null);
+      recordHistory(nodes, edges);
+    }
     if (marqueeBox && canvasContainerRef.current) {
       if (copiedNodes.length > 0) {
         toast.info(t("toast.nodesSelected", { count: copiedNodes.length }));
@@ -3252,6 +3353,30 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     toast.success(t("toast.symbolDuplicated"));
   };
 
+  /**
+   * #615 — urutan array `nodes` ADALAH urutan lukis: yang terakhir digambar
+   * paling depan (semua bentuk memakai `z-20` yang sama, jadi tidak ada
+   * tingkatan lain yang bisa ditabrakkan). Sebelum item ini bentuk yang
+   * menutupi bentuk lain tidak bisa ditata sama sekali — satu-satunya jalan
+   * adalah hapus lalu gambar ulang.
+   */
+  const ubahTataLayers = (nodeId: string, arah: "depan" | "naik" | "turun" | "belakang") => {
+    const asal = nodes.findIndex((n) => n.id === nodeId);
+    if (asal < 0) return;
+    const tujuan =
+      arah === "depan"
+        ? nodes.length - 1
+        : arah === "belakang"
+          ? 0
+          : Math.min(nodes.length - 1, Math.max(0, asal + (arah === "naik" ? 1 : -1)));
+    if (tujuan === asal) return;
+    const nextNodes = nodes.slice();
+    const [pindah] = nextNodes.splice(asal, 1);
+    nextNodes.splice(tujuan, 0, pindah);
+    setNodes(nextNodes);
+    recordHistory(nextNodes, edges);
+  };
+
   // Right-click context menu specific handlers
   const handleContextMenuDeleteNode = (nodeId: string) => {
     const updatedNodes = nodes.filter((n) => n.id !== nodeId);
@@ -3335,6 +3460,92 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = sortedFlowcharts.slice(indexOfFirstItem, indexOfLastItem);
+
+  /**
+   * #621 — bentuk dibungkus `React.memo`, tetapi tujuh penangan di atas adalah
+   * closure baru pada setiap render, sehingga memo tidak pernah lolos dan satu
+   * gerakan kursor tetap membangunkan seluruh papan. Ref ini memegang closure
+   * render TERAKHIR (pola `aksiKlipboardRef` #582), jadi identitas yang dikirim
+   * ke bentuk stabil dan hanya bentuk yang benar-benar berubah yang dirender.
+   */
+  const aksiBentukRef = useRef({
+    handleNodeMouseDown,
+    handleResizeMouseDown,
+    handleConnectPortClick,
+    handleUpdateActiveNode,
+    handleDuplicateNode,
+    handleDeleteSelected,
+    getLinkedTaskDetails,
+  });
+  aksiBentukRef.current = {
+    handleNodeMouseDown,
+    handleResizeMouseDown,
+    handleConnectPortClick,
+    handleUpdateActiveNode,
+    handleDuplicateNode,
+    handleDeleteSelected,
+    getLinkedTaskDetails,
+  };
+  const aksiBentuk = useMemo(
+    () => ({
+      handleNodeMouseDown: (e: React.MouseEvent, node: FlowNode) =>
+        aksiBentukRef.current.handleNodeMouseDown(e, node),
+      handleResizeMouseDown: (e: React.MouseEvent, nodeId: string, direction: "se" | "e" | "s") =>
+        aksiBentukRef.current.handleResizeMouseDown(e, nodeId, direction),
+      handleConnectPortClick: (
+        nodeId: string,
+        portName: string,
+        e?: { clientX: number; clientY: number }
+      ) => aksiBentukRef.current.handleConnectPortClick(nodeId, portName, e),
+      handleUpdateActiveNode: (props: Partial<FlowNode>) =>
+        aksiBentukRef.current.handleUpdateActiveNode(props),
+      handleDuplicateNode: (node: FlowNode) => aksiBentukRef.current.handleDuplicateNode(node),
+      handleDeleteSelected: () => aksiBentukRef.current.handleDeleteSelected(),
+      getLinkedTaskDetails: (taskId?: string) => aksiBentukRef.current.getLinkedTaskDetails(taskId),
+    }),
+    []
+  );
+  const idSalinan = useMemo(() => new Set(copiedNodes.map((n) => n.id)), [copiedNodes]);
+
+  /**
+   * #614 — kotak pemilih bersama untuk kelompok. Anggotanya dibaca dari `nodes`
+   * (bukan dari snapshot `copiedNodes`) supaya kotaknya ikut bergerak saat
+   * kelompok diseret, dan posisinya ikut terbarukan setelah z-order (#615).
+   */
+  const batasGrup = useMemo(() => {
+    const id = new Set(copiedNodes.map((n) => n.id));
+    if (selectedNodeId) id.add(selectedNodeId);
+    if (id.size < 2) return null;
+    const anggota = nodes.filter((n) => id.has(n.id));
+    if (anggota.length < 2) return null;
+    const x1 = Math.min(...anggota.map((n) => n.x));
+    const y1 = Math.min(...anggota.map((n) => n.y));
+    const x2 = Math.max(...anggota.map((n) => n.x + (n.width || 130)));
+    const y2 = Math.max(...anggota.map((n) => n.y + (n.height || 70)));
+    return { x: x1, y: y1, width: x2 - x1, height: y2 - y1, anggota };
+  }, [nodes, copiedNodes, selectedNodeId]);
+
+  const mulaiUbahUkuranGrup = (e: React.MouseEvent, arah: SudutGrup) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!batasGrup || !isWorkspaceEditable) return;
+    setUbahGrup({
+      arah,
+      x: batasGrup.x,
+      y: batasGrup.y,
+      width: batasGrup.width,
+      height: batasGrup.height,
+      clientX: e.clientX,
+      clientY: e.clientY,
+      anggota: batasGrup.anggota.map((n) => ({
+        id: n.id,
+        x: n.x,
+        y: n.y,
+        width: n.width || 130,
+        height: n.height || 70,
+      })),
+    });
+  };
 
   return (
     <div className="flex-1 flex flex-col h-full min-h-0 w-full overflow-hidden relative">
@@ -3845,34 +4056,65 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             <FlowchartNode
                               key={node.id}
                               node={node}
-                              selectedNodeId={selectedNodeId}
+                              isSelected={selectedNodeId === node.id || idSalinan.has(node.id)}
                               setSelectedNodeId={setSelectedNodeId}
                               setSelectedEdgeId={setSelectedEdgeId}
-                              copiedNodes={copiedNodes}
-                              connectSourceId={connectSourceId}
+                              isSourceOfConnect={connectSourceId === node.id}
+                              adaSumberSambung={connectSourceId !== null}
                               setConnectSourceId={setConnectSourceId}
-                              hoveredNodeId={hoveredNodeId}
+                              isHovered={hoveredNodeId === node.id}
                               setHoveredNodeId={setHoveredNodeId}
-                              draggingNodeId={draggingNodeId}
-                              activeSimNodeId={activeSimNodeId}
+                              isDragging={draggingNodeId === node.id}
+                              isActiveSim={activeSimNodeId === node.id}
                               canvasTheme={canvasTheme}
                               isWorkspaceEditable={isWorkspaceEditable}
                               setActiveTool={setActiveTool}
                               setNodes={setNodes}
                               setEdges={setEdges}
                               setNodeContextMenu={setNodeContextMenu}
-                              handleNodeMouseDown={handleNodeMouseDown}
-                              handleResizeMouseDown={handleResizeMouseDown}
-                              handleConnectPortClick={handleConnectPortClick}
-                              handleUpdateActiveNode={handleUpdateActiveNode}
-                              handleDuplicateNode={handleDuplicateNode}
-                              handleDeleteSelected={handleDeleteSelected}
-                              getLinkedTaskDetails={getLinkedTaskDetails}
+                              handleNodeMouseDown={aksiBentuk.handleNodeMouseDown}
+                              handleResizeMouseDown={aksiBentuk.handleResizeMouseDown}
+                              handleConnectPortClick={aksiBentuk.handleConnectPortClick}
+                              handleUpdateActiveNode={aksiBentuk.handleUpdateActiveNode}
+                              handleDuplicateNode={aksiBentuk.handleDuplicateNode}
+                              handleDeleteSelected={aksiBentuk.handleDeleteSelected}
+                              getLinkedTaskDetails={aksiBentuk.getLinkedTaskDetails}
                               setSelectedTaskForDetail={setSelectedTaskForDetail}
                               setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
                               suppressNodeOverlay={isRightSidebarOpen}
                             />
                           ))}
+
+                          {/*
+                            #614 — satu kotak pemilih bersama untuk kelompok.
+                            Dulu tiap anggota memakai ring sendiri-sendiri dan
+                            tidak ada penanda bahwa mereka satu kelompok, jadi
+                            tarikan berikutnya terlihat seperti memindah satu
+                            bentuk saja.
+                          */}
+                          {batasGrup && (
+                            <div
+                              data-testid="kotak-grup"
+                              className="absolute z-[29] pointer-events-none rounded-xl border-2 border-primary/70"
+                              style={{
+                                left: batasGrup.x - 6,
+                                top: batasGrup.y - 6,
+                                width: batasGrup.width + 12,
+                                height: batasGrup.height + 12,
+                              }}
+                            >
+                              {PEGANGAN_GRUP.map((pegangan) => (
+                                <div
+                                  key={pegangan.arah}
+                                  role="none"
+                                  data-testid={`pegangan-grup-${pegangan.arah}`}
+                                  onMouseDown={(e) => mulaiUbahUkuranGrup(e, pegangan.arah)}
+                                  className="absolute w-2.5 h-2.5 rounded-full bg-surface border-2 border-primary pointer-events-auto cursor-pointer"
+                                  style={{ ...pegangan.gaya, cursor: pegangan.kursor }}
+                                />
+                              ))}
+                            </div>
+                          )}
                         </div>
 
                         {/* FLOATING FLOWCHART INTERACTIVE MINIMAP VIEW */}
@@ -4584,6 +4826,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           onEditProperties={handleContextMenuEditProperties}
           onChangeColor={handleContextMenuChangeColor}
           onDuplicate={handleContextMenuDuplicate}
+          onZOrder={ubahTataLayers}
           onCopy={(nodeId) =>
             salinSeleksi(
               copiedNodes.some((n) => n.id === nodeId)

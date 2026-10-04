@@ -11,6 +11,8 @@
  */
 import { DIAGRAM_SHAPE_GROUPS, UKURAN_BENTUK } from "../constants";
 import { customSvgTypes, renderCustomSvgShape, renderMiniPreviewIcon } from "./shapes";
+import { TIPE_BENTUK_EKSTRA } from "./tipeBentukEkstra";
+import { ekstraTypes } from "./shapes/ekstraShapes";
 import type { FlowNode } from "../types";
 
 const SEMUA_ITEM = DIAGRAM_SHAPE_GROUPS.flatMap((g) => g.items);
@@ -58,8 +60,28 @@ describe("katalog bentuk papan (#541)", () => {
   });
 
   it("peta ukuran hanya menyebut tipe yang benar-benar ada di katalog", () => {
-    const yatim = Object.keys(UKURAN_BENTUK).filter((t) => !SEMUA_TIPE.includes(t));
+    const dikenal = new Set<string>(SEMUA_TIPE);
+    const yatim = Object.keys(UKURAN_BENTUK).filter((t) => !dikenal.has(t));
     expect(yatim).toEqual([]);
+  });
+
+  /**
+   * #620 — palet pernah menawarkan 138 bentuk yang tidak dikenal `FlowNodeType`
+   * (masuk lewat cast), sehingga sistem tipe tidak bisa lagi menolak bentuk tanpa
+   * gambar. Sekarang keduanya diikat dua arah: `types.ts` memuat union dari
+   * daftar ini, dan peta gambar bertipe `Record<TipeBentukEkstra, …>`. Test ini
+   * menjaga sisi runtime agar kunci yang muncul tidak berbeda dari daftarnya.
+   */
+  it("daftar tipe ekstra persis sama dengan isi peta gambarnya", () => {
+    expect([...TIPE_BENTUK_EKSTRA].sort()).toEqual([...ekstraTypes].sort());
+  });
+
+  it("setiap bentuk ekstra punya gambar SVG asli di kanvas", () => {
+    const tanpaGambar = TIPE_BENTUK_EKSTRA.filter((t) => {
+      const hasil = renderCustomSvgShape(nodeUntuk(t), "miro", false);
+      return hasil === null || hasil === undefined;
+    });
+    expect(tanpaGambar).toEqual([]);
   });
 
   it("grup baru ikut terdaftar sehingga bentuknya terjangkau pencarian", () => {

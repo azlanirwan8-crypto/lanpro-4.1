@@ -6,16 +6,18 @@
  * terbesar di berkas itu. Dipindah verbatim; yang berubah hanya cara ia
  * memperoleh data: dari closure atas state induk menjadi props eksplisit.
  *
- * Props-nya banyak (28) dan itu memang konsekuensi yang disengaja. Node
+ * Props-nya banyak dan itu memang konsekuensi yang disengaja. Node
  * bersinggungan dengan hampir seluruh state kanvas — seleksi, hover, drag,
- * mode sambung, tema, simulasi. Memindahkan state itu ke sini akan memecah
- * satu sumber kebenaran, karena edge dan marquee membaca state yang sama.
- * Daftar props yang panjang justru membuat ketergantungan itu terlihat, bukan
- * menyembunyikannya di balik closure.
+ * mode sambung, tema, simulasi. Sejak #621 state itu datang sebagai BOOLEAN PER
+ * BENTUK (`isSelected`, `isHovered`, `isDragging`, ...), bukan sebagai id
+ * global: `selectedNodeId` yang dikirim apa adanya membuat SERATUS bentuk
+ * ikut dirender ulang hanya karena satu bentuk dipilih, sehingga `React.memo`
+ * di hilir tidak pernah lolos. Daftar props yang panjang justru membuat
+ * ketergantungan itu terlihat, bukan menyembunyikannya di balik closure.
  */
 import { useTranslation } from "react-i18next";
 import React from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { toast } from "sonner";
 import { Plus, User, ExternalLink } from "lucide-react";
 import { cn } from "../../../lib/utils";
@@ -30,16 +32,19 @@ import type { Task } from "../../../types";
 interface FlowchartNodeProps {
   /** Node yang dirender oleh instance ini. */
   node: FlowNode;
-  selectedNodeId: string | null;
+  /** Bentuk ini bagian dari seleksi — termasuk kelompok hasil tempel. */
+  isSelected: boolean;
   setSelectedNodeId: (id: string | null) => void;
   setSelectedEdgeId: (id: string | null) => void;
-  copiedNodes: FlowNode[];
-  connectSourceId: string | null;
+  /** Bentuk ini ujung awal sambungan yang sedang ditarik. */
+  isSourceOfConnect: boolean;
+  /** Ada bentuk lain yang menjadi sumber sambungan (menentukan gaya hover). */
+  adaSumberSambung: boolean;
   setConnectSourceId: (id: string | null) => void;
-  hoveredNodeId: string | null;
+  isHovered: boolean;
   setHoveredNodeId: (id: string | null) => void;
-  draggingNodeId: string | null;
-  activeSimNodeId: string | null;
+  isDragging: boolean;
+  isActiveSim: boolean;
   canvasTheme: "miro" | "blueprint";
   /** Menentukan boleh-tidaknya menu konteks dan sunting muncul. */
   isWorkspaceEditable: boolean;
@@ -66,18 +71,18 @@ interface FlowchartNodeProps {
   suppressNodeOverlay?: boolean;
 }
 
-export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
+const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
   node,
-  selectedNodeId,
+  isSelected,
   setSelectedNodeId,
   setSelectedEdgeId,
-  copiedNodes,
-  connectSourceId,
+  isSourceOfConnect,
+  adaSumberSambung,
   setConnectSourceId,
-  hoveredNodeId,
+  isHovered,
   setHoveredNodeId,
-  draggingNodeId,
-  activeSimNodeId,
+  isDragging,
+  isActiveSim,
   canvasTheme,
   isWorkspaceEditable,
   setActiveTool,
@@ -96,8 +101,6 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
   suppressNodeOverlay = false,
 }) => {
   const { t } = useTranslation();
-  const isSelected = selectedNodeId === node.id || copiedNodes.some((copy) => copy.id === node.id);
-  const isSourceOfConnect = connectSourceId === node.id;
   const linkedTask = getLinkedTaskDetails(node.taskId);
 
   const nodeWidth = node.width || 130;
@@ -140,31 +143,30 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
       onMouseLeave={() => setHoveredNodeId(null)}
       className={cn(
         "absolute z-20 cursor-pointer rounded-[inherit]",
-        node.id === activeSimNodeId && "ring-4 ring-emerald-500 shadow-2xl "
+        isActiveSim && "ring-4 ring-emerald-500 shadow-2xl "
       )}
       animate={{
-        scale:
-          draggingNodeId === node.id
-            ? 1.07
-            : isSourceOfConnect
-              ? 1.05
-              : isSelected
-                ? 1.03
-                : hoveredNodeId === node.id
-                  ? connectSourceId !== null
-                    ? 1.05
-                    : 1.02
-                  : 1,
-        rotate: draggingNodeId === node.id ? 1.2 : isSourceOfConnect ? [0, -1.2, 1.2, -1.2, 0] : 0,
+        scale: isDragging
+          ? 1.07
+          : isSourceOfConnect
+            ? 1.05
+            : isSelected
+              ? 1.03
+              : isHovered
+                ? adaSumberSambung
+                  ? 1.05
+                  : 1.02
+                : 1,
+        rotate: isDragging ? 1.2 : isSourceOfConnect ? [0, -1.2, 1.2, -1.2, 0] : 0,
         boxShadow: !isSvgShape
-          ? draggingNodeId === node.id
+          ? isDragging
             ? "0 25px 40px -10px rgba(0, 0, 0, 0.25), 0 12px 20px -8px rgba(0, 0, 0, 0.18)"
             : isSourceOfConnect
               ? "0 0 0 3px rgba(244, 63, 94, 0.45), 0 8px 20px -6px rgba(244, 63, 94, 0.3)"
               : isSelected
                 ? "0 0 0 3px rgba(139, 92, 246, 0.4), 0 8px 20px -6px rgba(139, 92, 246, 0.3)"
-                : hoveredNodeId === node.id
-                  ? connectSourceId !== null
+                : isHovered
+                  ? adaSumberSambung
                     ? "0 0 0 3px rgba(167, 139, 250, 0.45), 0 10px 15px -3px rgba(0, 0, 0, 0.08)"
                     : "0 10px 20px -5px rgba(0, 0, 0, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.06)"
                   : "0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04)"
@@ -192,7 +194,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
       id={`val-node-${node.id}`}
     >
       {/* Floating connection ports on hover/select */}
-      {(hoveredNodeId === node.id || isSelected) && (
+      {(isHovered || isSelected) && (
         <div className="absolute inset-0 pointer-events-none z-30">
           {/* TOP PORT */}
           <div
@@ -280,8 +282,8 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
           node,
           canvasTheme,
           isSelected,
-          hoveredNodeId === node.id,
-          draggingNodeId === node.id,
+          isHovered,
+          isDragging,
           isSourceOfConnect
         )}
 
@@ -498,3 +500,6 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
     </motion.div>
   );
 };
+
+/** #621 — menyeret satu bentuk tidak boleh membangunkan seluruh papan. */
+export const FlowchartNode = React.memo(FlowchartNodeBati);

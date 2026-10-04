@@ -3174,6 +3174,11 @@ export const id = {
     duplicate: "Duplikat Komponen",
     changeColor: "Ubah Warna",
     delete: "Hapus Komponen",
+    tataLayers: "Urutan Lapisan",
+    zDepan: "Paling depan",
+    zNaik: "Naik satu tingkat",
+    zTurun: "Turun satu tingkat",
+    zBelakang: "Paling belakang",
   },
   editSuite: {
     title: "Ubah Info Dokumen Suite",

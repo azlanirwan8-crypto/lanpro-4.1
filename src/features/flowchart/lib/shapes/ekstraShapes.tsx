@@ -14,10 +14,17 @@
  */
 import React from "react";
 import type { FlowNode } from "../../types";
+import type { TipeBentukEkstra } from "../tipeBentukEkstra";
 
 type Pembuat = (p: any) => React.ReactNode;
 
-const BENTUK: Record<string, Pembuat> = {
+/**
+ * #620 — dulu `Record<string, Pembuat>`, jadi kunci yang salah ketik atau
+ * bentuk yang hilang tidak pernah diketahui kompilator. Sekarang petanya
+ * dipaksa persis dengan union tipe: tambah bentuk di palet tanpa gambar di
+ * sini (atau gambar tanpa tipe) membuat `tsc` merah.
+ */
+const BENTUK: Record<TipeBentukEkstra, Pembuat> = {
   /* ── Geometri dasar ─────────────────────────────────────────────────── */
   heptagon: (p) => (
     <polygon points="50,0 89.2,18.8 98.7,61.1 71.5,95 28.5,95 1.3,61.1 10.8,18.8" {...p} />
@@ -1045,6 +1052,15 @@ const IKON_PRATINJAU: Record<string, Pembuat> = {
   ),
 };
 
+/**
+ * Peta dibaca dengan kunci bebas (tipe sebuah node bisa apa saja, termasuk
+ * bentuk yang digambar div), jadi view pencarian ini diperlebar. Perluasan
+ * terjadi SATU kali di sini dan tidak menghapus jaminan di atas: `BENTUK`
+ * tetap wajib berisi tepat 138 bentuk bertipe.
+ */
+const GAMBAR: Record<string, Pembuat | undefined> = BENTUK;
+const IKON: Record<string, Pembuat | undefined> = IKON_PRATINJAU;
+
 /** Semua tipe yang digambar berkas ini — dipakai registrasi dan test kelengkapan. */
 export const ekstraTypes = Object.keys(BENTUK);
 
@@ -1053,13 +1069,13 @@ export function renderEkstraShape(
   svgProps: any,
   elementProps: any
 ): React.ReactNode | null {
-  const bikin = BENTUK[node.type];
+  const bikin = GAMBAR[node.type];
   if (!bikin) return null;
   return <svg {...svgProps}>{bikin(elementProps)}</svg>;
 }
 
 export function renderEkstraPreviewIcon(type: string, commonProps: any, elementProps: any) {
-  const bikin = BENTUK[type] || IKON_PRATINJAU[type];
+  const bikin = GAMBAR[type] || IKON[type];
   if (!bikin) return null;
   return <svg {...commonProps}>{bikin(elementProps)}</svg>;
 }

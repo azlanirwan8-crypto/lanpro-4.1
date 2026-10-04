@@ -3,6 +3,23 @@
  *
  * Diekstrak apa adanya dari FlowchartContainer.tsx (Fase 3 — Anti-God-Object).
  */
+import type { FlowNodeType } from "./types";
+
+/**
+ * #620 — bentuk yang ditawarkan palet DAN bentuk yang bisa disimpan ke payload
+ * papan kini satu sumber: entri tanpa tipe yang dikenal menolak dikompilasi,
+ * bukan lagi lolos lewat `as FlowNode["type"]` di panel.
+ */
+export interface EntriBentukPalet {
+  type: FlowNodeType;
+  name: string;
+  desc: string;
+}
+
+export interface GrupBentukPalet {
+  title: string;
+  items: EntriBentukPalet[];
+}
 
 /** Palet HEX untuk bentuk SVG presisi (Tailwind-equivalent). */
 export const colorPaletteHex: Record<string, { bg: string; bgGrad: string; stroke: string }> = {
@@ -260,7 +277,7 @@ export const UKURAN_BENTUK: Record<string, { width: number; height: number; font
   pidValve: { width: 150, height: 110 },
   pidPump: { width: 130, height: 120 },
 };
-export const DIAGRAM_SHAPE_GROUPS = [
+export const DIAGRAM_SHAPE_GROUPS: GrupBentukPalet[] = [
   {
     title: "Basic Shapes",
     items: [

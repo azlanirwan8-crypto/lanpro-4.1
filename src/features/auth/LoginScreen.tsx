@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import { ArrowRight, Eye, EyeOff, AlertCircle, User, Lock } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { safeLocalStorage } from "../../lib/safeStorage";
 import { cn } from "../../components/ui/CoreUI";

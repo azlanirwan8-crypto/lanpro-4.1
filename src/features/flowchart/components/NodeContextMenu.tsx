@@ -1,8 +1,22 @@
 import { useTranslation } from "react-i18next";
 import React, { useEffect, useRef } from "react";
 import { motion } from "motion/react";
-import { Trash2, Edit3, Palette, Copy, Check, ClipboardCopy } from "lucide-react";
+import {
+  Trash2,
+  Edit3,
+  Palette,
+  Copy,
+  Check,
+  ClipboardCopy,
+  BringToFront,
+  SendToBack,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
 import { cn } from "../../../lib/utils";
+
+/** Arah tata lapisan (#615). `naik`/`turun` satu tingkat, `depan`/`belakang` ke ujung. */
+export type ArahLayers = "depan" | "naik" | "turun" | "belakang";
 
 interface NodeContextMenuProps {
   x: number;
@@ -15,7 +29,18 @@ interface NodeContextMenuProps {
   onChangeColor: (nodeId: string, color: string) => void;
   onDuplicate: (nodeId: string) => void;
   onCopy: (nodeId: string) => void;
+  onZOrder: (nodeId: string, arah: ArahLayers) => void;
 }
+
+const IKON_LAYERS = "w-3.5 h-3.5";
+
+/** Urutan tampil = urutan aksi di strip #615. */
+const ITEM_TATA_LAYERS: { arah: ArahLayers; kunci: string; ikon: React.ReactElement }[] = [
+  { arah: "depan", kunci: "nodeMenu.zDepan", ikon: <BringToFront className={IKON_LAYERS} /> },
+  { arah: "naik", kunci: "nodeMenu.zNaik", ikon: <ChevronUp className={IKON_LAYERS} /> },
+  { arah: "turun", kunci: "nodeMenu.zTurun", ikon: <ChevronDown className={IKON_LAYERS} /> },
+  { arah: "belakang", kunci: "nodeMenu.zBelakang", ikon: <SendToBack className={IKON_LAYERS} /> },
+];
 
 export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
   x,
@@ -28,6 +53,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
   onChangeColor,
   onDuplicate,
   onCopy,
+  onZOrder,
 }) => {
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -48,7 +74,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
 
   // Adjust coordinates so it doesn't overflow screen boundaries
   const adjustedX = Math.min(x, window.innerWidth - 210);
-  const adjustedY = Math.min(y, window.innerHeight - 380);
+  const adjustedY = Math.min(y, window.innerHeight - 440);
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -88,11 +114,8 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
       onContextMenu={(e) => e.preventDefault()}
     >
       {/* Node Info Header */}
-      <div className="px-3 py-1.5 text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle border-b border-border-faint mb-1 flex items-center justify-between">
+      <div className="px-3 py-1.5 text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle border-b border-border-faint mb-1">
         <span>{t("nodeMenu.title")}</span>
-        <span className="text-primary font-mono text-xs sm:text-[10px]">
-          ID: {nodeId.split("_")[1] || "Active"}
-        </span>
       </div>
 
       {/* Edit Properties Button */}
@@ -132,6 +155,33 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
       </button>
 
       <div className="h-px bg-surface-muted my-1" />
+
+      {/*
+        #615 — tata lapisan. Bentuk digambar dalam urutan array, jadi sebelum
+        item ini tidak ada cara menata dua bentuk yang bertumpuk selain hapus
+        lalu gambar ulang. Strip ikon, bukan empat baris teks: aksinya satu
+        kelompok dan namanya terlalu mirip untuk dibedakan lewat bacaan.
+      */}
+      <div className="flex items-center gap-1 px-3 pb-1">
+        <span className="text-xs sm:text-[11px] uppercase tracking-normal text-content-subtle mr-1 shrink-0">
+          {t("nodeMenu.tataLayers")}
+        </span>
+        {ITEM_TATA_LAYERS.map((item) => (
+          <button
+            key={item.arah}
+            type="button"
+            onClick={() => {
+              onZOrder(nodeId, item.arah);
+              onClose();
+            }}
+            aria-label={t(item.kunci)}
+            title={t(item.kunci)}
+            className="min-h-9 min-w-9 p-1.5 rounded-lg text-content-secondary hover:text-primary hover:bg-primary/10 border border-border-faint/70 transition-colors flex items-center justify-center cursor-pointer"
+          >
+            {item.ikon}
+          </button>
+        ))}
+      </div>
 
       {/* Change Color Palette Title */}
       <div className="px-3 py-1 flex items-center gap-1.5 text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle">

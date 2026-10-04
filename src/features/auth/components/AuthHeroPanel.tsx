@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import i18n from "../../../i18n";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { VelzonFloatingParticles } from "../../../components/ui/CoreUI";
 
 export const AuthHeroPanel = () => {

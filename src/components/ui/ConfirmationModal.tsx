@@ -1,7 +1,7 @@
 import i18n from "../../i18n";
 import { useTranslation } from "react-i18next";
 import React, { useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
 import { Portal } from "./Portal";
 import { AnimatedLogoutIcon } from "./AnimatedLogoutIcon";
