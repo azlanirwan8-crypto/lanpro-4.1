@@ -113,7 +113,7 @@ export function renderCustomSvgShape(
           ? "drop-shadow(0 12px 20px rgba(139, 92, 246, 0.3))"
           : isHovered
             ? "drop-shadow(0 10px 15px rgba(0,0,0,0.12))"
-            : "drop-shadow(0 3px 6px rgba(0,0,0,0.06))";
+            : "none"; // #627 — tanpa halo saat diam: bayangan permanen membuat tepi bentuk terlihat lembek
 
   // Common props
   const svgProps = {

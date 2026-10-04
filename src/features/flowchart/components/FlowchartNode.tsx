@@ -169,7 +169,7 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
                   ? adaSumberSambung
                     ? "0 0 0 3px rgba(167, 139, 250, 0.45), 0 10px 15px -3px rgba(0, 0, 0, 0.08)"
                     : "0 10px 20px -5px rgba(0, 0, 0, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.06)"
-                  : "0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04)"
+                  : "none" // #627 — bentuk diam tidak lagi membawa dua bayangan sekaligus
           : "none",
       }}
       whileTap={{ scale: 0.97 }}

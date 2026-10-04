@@ -1039,6 +1039,30 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     };
   };
 
+  /**
+   * #626 — ke mana hasil tempel mendarat. Peristiwa `paste` dan Ctrl+V TIDAK
+   * membawa koordinat, jadi satu-satunya pegangan adalah kursor terakhir. Kalau
+   * kursor belum pernah berada di atas papan — menyalin di draw.io, kembali ke
+   * Lanpro, langsung Ctrl+V — hasilnya dulu `null`, dan kelompok mendarat di
+   * koordinat dokumen ASLI + 30 (terukur: halaman draw.io selebar 1.150 px
+   * menaruh bentuk pertamanya di x=210..1150, di luar yang sedang dilihat
+   * pengguna). Sekarang titik kursor dipakai kalau memang di atas papan, dan
+   * kalau tidak: TENGAH area papan yang terlihat. Tidak ada lagi tempel yang
+   * harus dicari.
+   */
+  const titikKursorTerakhir = (): { x: number; y: number } | null =>
+    titikKursorRef.current
+      ? koordinatPapan(titikKursorRef.current.x, titikKursorRef.current.y)
+      : null;
+
+  const titikTempel = (): { x: number; y: number } | null => {
+    const dariKursor = titikKursorTerakhir();
+    if (dariKursor) return dariKursor;
+    const rect = canvasContainerRef.current?.getBoundingClientRect();
+    if (!rect) return null;
+    return koordinatPapan(rect.left + rect.width / 2, rect.top + rect.height / 2);
+  };
+
   const salinSeleksi = (kandidat?: FlowNode[]) => {
     const terpilih =
       kandidat && kandidat.length > 0
@@ -1149,9 +1173,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     if (!data) return false;
 
     const teks = (data.getData("text/html") || data.getData("text/plain") || "").trim();
-    const posisi = titikKursorRef.current
-      ? koordinatPapan(titikKursorRef.current.x, titikKursorRef.current.y)
-      : null;
+    const posisi = titikTempel();
 
     if (teks) {
       if (tempelTeksPeramban(teks, posisi)) e.preventDefault();
@@ -1173,21 +1195,20 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   const tempelSalinan = async (diTitik?: { x: number; y: number } | null) => {
-    const posisi =
-      diTitik ??
-      (titikKursorRef.current
-        ? koordinatPapan(titikKursorRef.current.x, titikKursorRef.current.y)
-        : null);
-
     const isi = getClipboard();
     if (isi.nodes.length > 0) {
-      komitTempel(isi, posisi);
+      // Tempel HASIL SALINAN SENDIRI tetap berjenjang +30 dari aslinya bila
+      // kursor tidak diketahui (#582): yang dicari pengguna adalah salinan di
+      // sebelah sumbernya, bukan di tengah layar.
+      komitTempel(isi, diTitik ?? titikKursorTerakhir());
       return;
     }
 
     const teks = await bacaTeksPeramban();
     if (teks === null) return;
-    tempelTeksPeramban(teks, posisi);
+    // Datang dari luar (draw.io): koordinatnya milik dokumen orang lain, jadi
+    // TIDAK BOLEH dipakai apa adanya — mendarat di kursor atau tengah papan.
+    tempelTeksPeramban(teks, diTitik ?? titikTempel());
   };
 
   // Pintasan papan dipasang sekali di window; ref ini yang menjamin Ctrl+C/V

@@ -21,20 +21,28 @@ export interface GrupBentukPalet {
   items: EntriBentukPalet[];
 }
 
-/** Palet HEX untuk bentuk SVG presisi (Tailwind-equivalent). */
+/**
+ * Palet HEX untuk bentuk SVG presisi (Tailwind-equivalent).
+ *
+ * #627 — isian dulu memakai tingkat 50/100 (kroma 14-20) sementara bagan
+ * draw.io/Miro memakai tingkat setebal 20-51; hasilnya bentuk terlihat
+ * "pudar" walau kontras teksnya sebenarnya tinggi. Sekarang keduanya
+ * selevel 100/200 dengan garis tepi 600/700, dan `colorPalettes` di bawah
+ * ikut digeser supaya bentuk div dan bentuk SVG tidak lagi berbeda warna.
+ */
 export const colorPaletteHex: Record<string, { bg: string; bgGrad: string; stroke: string }> = {
-  yellow: { bg: "#fffbeb", bgGrad: "#fef3c7", stroke: "#eab308" }, // amber-50 / amber-100 / amber-500
-  orange: { bg: "#fff7ed", bgGrad: "#ffedd5", stroke: "#f97316" }, // orange-50 / orange-100 / orange-500
-  pink: { bg: "#fdf2f8", bgGrad: "#fce7f3", stroke: "#ec4899" }, // pink-50 / pink-100 / pink-500
-  blue: { bg: "#eff6ff", bgGrad: "#dbeafe", stroke: "#3b82f6" }, // blue-50 / blue-100 / blue-550
-  green: { bg: "#ecfdf5", bgGrad: "#d1fae5", stroke: "#10b981" }, // emerald-50 / emerald-100 / emerald-500
-  purple: { bg: "#faf5ff", bgGrad: "#f3e8ff", stroke: "#a855f7" }, // purple-50 / purple-100 / purple-500
-  indigo: { bg: "#eef2ff", bgGrad: "#e0e7ff", stroke: "#6366f1" }, // indigo-50 / indigo-100 / indigo-500
-  sky: { bg: "#f0f9ff", bgGrad: "#e0f2fe", stroke: "#0ea5e9" }, // sky-50 / sky-100 / sky-500
-  amber: { bg: "#fffbeb", bgGrad: "#fef3c7", stroke: "#f59e0b" }, // amber-50 / amber-100 / amber-550
-  rose: { bg: "#fff1f2", bgGrad: "#ffe4e6", stroke: "#f43f5e" }, // rose-50 / rose-100 / rose-500
-  violet: { bg: "#f5f3ff", bgGrad: "#ede9fe", stroke: "#8b5cf6" }, // violet-50 / violet-100 / violet-500
-  slate: { bg: "#f8fafc", bgGrad: "#f1f5f9", stroke: "#64748b" }, // slate-50 / slate-100 / slate-500
+  yellow: { bg: "#fef3c7", bgGrad: "#fde68a", stroke: "#b45309" }, // amber-50 / amber-100 / amber-500
+  orange: { bg: "#ffedd5", bgGrad: "#fed7aa", stroke: "#c2410c" }, // orange-50 / orange-100 / orange-500
+  pink: { bg: "#fce7f3", bgGrad: "#fbcfe8", stroke: "#be185d" }, // pink-50 / pink-100 / pink-500
+  blue: { bg: "#dbeafe", bgGrad: "#bfdbfe", stroke: "#1d4ed8" }, // blue-50 / blue-100 / blue-550
+  green: { bg: "#d1fae5", bgGrad: "#a7f3d0", stroke: "#047857" }, // emerald-50 / emerald-100 / emerald-500
+  purple: { bg: "#f3e8ff", bgGrad: "#e9d5ff", stroke: "#7e22ce" }, // purple-50 / purple-100 / purple-500
+  indigo: { bg: "#e0e7ff", bgGrad: "#c7d2fe", stroke: "#4338ca" }, // indigo-50 / indigo-100 / indigo-500
+  sky: { bg: "#e0f2fe", bgGrad: "#bae6fd", stroke: "#0369a1" }, // sky-50 / sky-100 / sky-500
+  amber: { bg: "#fef3c7", bgGrad: "#fde68a", stroke: "#92400e" }, // amber-50 / amber-100 / amber-550
+  rose: { bg: "#ffe4e6", bgGrad: "#fecdd3", stroke: "#be123c" }, // rose-50 / rose-100 / rose-500
+  violet: { bg: "#ede9fe", bgGrad: "#ddd6fe", stroke: "#6d28d9" }, // violet-50 / violet-100 / violet-500
+  slate: { bg: "#f1f5f9", bgGrad: "#e2e8f0", stroke: "#334155" }, // slate-50 / slate-100 / slate-500
 };
 
 /**
@@ -49,69 +57,69 @@ export const colorPalettes: Record<
   { bg: string; text: string; border: string; preview: string }
 > = {
   yellow: {
-    bg: "bg-amber-50/85 border-amber-300",
+    bg: "bg-amber-100 border-amber-600",
     text: "text-amber-900",
-    border: "border-amber-300",
+    border: "border-amber-600",
     preview: "bg-amber-200",
   },
   orange: {
-    bg: "bg-orange-50/80 border-orange-300",
+    bg: "bg-orange-100 border-orange-600",
     text: "text-orange-900",
-    border: "border-orange-300",
+    border: "border-orange-600",
     preview: "bg-orange-200",
   },
   pink: {
-    bg: "bg-pink-50/80 border-pink-300",
+    bg: "bg-pink-100 border-pink-600",
     text: "text-pink-900",
-    border: "border-pink-300",
+    border: "border-pink-600",
     preview: "bg-pink-200",
   },
   blue: {
-    bg: "bg-blue-50/80 border-blue-300",
+    bg: "bg-blue-100 border-blue-600",
     text: "text-blue-900",
-    border: "border-blue-300",
+    border: "border-blue-600",
     preview: "bg-blue-200",
   },
   green: {
-    bg: "bg-emerald-50/80 border-emerald-300",
+    bg: "bg-emerald-100 border-emerald-600",
     text: "text-emerald-900",
-    border: "border-emerald-300",
+    border: "border-emerald-600",
     preview: "bg-emerald-200",
   },
   purple: {
-    bg: "bg-purple-50/80 border-purple-300",
+    bg: "bg-purple-100 border-purple-600",
     text: "text-purple-900",
-    border: "border-purple-300",
+    border: "border-purple-600",
     preview: "bg-purple-200",
   },
   indigo: {
-    bg: "bg-indigo-50/80 border-indigo-300",
+    bg: "bg-indigo-100 border-indigo-600",
     text: "text-indigo-900",
-    border: "border-indigo-300",
+    border: "border-indigo-600",
     preview: "bg-indigo-200",
   },
   sky: {
-    bg: "bg-sky-50/80 border-sky-300",
+    bg: "bg-sky-100 border-sky-600",
     text: "text-sky-900",
-    border: "border-sky-300",
+    border: "border-sky-600",
     preview: "bg-sky-200",
   },
   amber: {
-    bg: "bg-amber-50/80 border-amber-400",
+    bg: "bg-amber-100 border-amber-400",
     text: "text-amber-900",
     border: "border-amber-400",
     preview: "bg-amber-300",
   },
   rose: {
-    bg: "bg-rose-50/80 border-rose-300",
+    bg: "bg-rose-100 border-rose-600",
     text: "text-rose-900",
-    border: "border-rose-300",
+    border: "border-rose-600",
     preview: "bg-rose-200",
   },
   violet: {
-    bg: "bg-violet-50/80 border-violet-300",
+    bg: "bg-violet-100 border-violet-600",
     text: "text-violet-900",
-    border: "border-violet-300",
+    border: "border-violet-600",
     preview: "",
   },
   slate: {
@@ -119,7 +127,7 @@ export const colorPalettes: Record<
     // `colorPaletteHex.slate` (#f8fafc) yang dipakai bentuk SVG, dan kanvas ini
     // mewakili dokumen, bukan antarmuka — ikut tema aplikasi membuat node "slate"
     // jadi hitam pekat di mode gelap sementara sebelahnya tetap pastel.
-    bg: "bg-slate-50/80 border-border-subtle",
+    bg: "bg-slate-100 border-border-subtle",
     text: "text-content-strong",
     border: "border-border-subtle",
     preview: "bg-surface-marker",
