@@ -470,13 +470,17 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
               onMouseEnter={() => setHoveredEdgeId(edge.id)}
               onMouseLeave={() => setHoveredEdgeId(null)}
             >
-              {/* Interaction trigger line (Invisible & wide) */}
+              {/*
+                Wilayah sentuh. Dulu jalur ini ikut MENGGAMBAR `#c084fc` saat garis
+                dipilih, di atas 16 px, sehingga garis 2 px terlihat sebagai pita
+                ungu (#630). Kini transparan selamanya — lebarnya hanya menentukan
+                seberapa mudah garis ditangkap kursor.
+              */}
               <path
                 d={pathD}
                 fill="none"
-                stroke={isSelected ? "#c084fc" : "transparent"}
+                stroke="transparent"
                 strokeWidth="16"
-                className="opacity-45 transition-all"
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedEdgeId(edge.id);
@@ -485,20 +489,15 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                 }}
               />
 
-              {/* Suble hover or selected pulse under-glow path */}
+              {/* #630 — seleksi/hover ditandai satu halo tipis STATIS, bukan pendar 8 px yang berdenyut selamanya. */}
               {(isHovered || isSelected) && (
-                <motion.path
+                <path
                   d={pathD}
                   fill="none"
                   stroke={isSelected ? "#c084fc" : "#93c5fd"}
-                  strokeWidth={isSelected ? "8" : "6"}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: [0.2, 0.5, 0.2] }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 1.4,
-                    ease: "easeInOut",
-                  }}
+                  strokeWidth="5"
+                  opacity="0.26"
+                  className="pointer-events-none"
                 />
               )}
 
@@ -508,7 +507,7 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                   d={pathD}
                   fill="none"
                   stroke={isSourceSelected || isSourceHovered ? "#10b981" : "#3b82f6"} // Green/Emerald for outflow, Blue/Indigo for inflow
-                  strokeWidth={isSelected ? "4" : "3"}
+                  strokeWidth={isSelected ? "2.5" : "2"}
                   strokeLinecap="round"
                   strokeDasharray="12, 60"
                   animate={{ strokeDashoffset: [0, -72] }}
@@ -517,7 +516,7 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                     duration: 1.2,
                     ease: "linear",
                   }}
-                  className="pointer-events-none opacity-90 drop-shadow-[0_0_2px_rgba(59,130,246,0.5)]"
+                  className="pointer-events-none opacity-90"
                 />
               )}
 
@@ -543,7 +542,7 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                         ? "#475569"
                         : "#60a5fa"
                 }
-                strokeWidth={isSelected ? "3" : isHovered ? "2.5" : "2"}
+                strokeWidth="2"
                 strokeLinecap={edge.strokeStyle === "dotted" ? "round" : "butt"}
                 strokeDasharray={DASH[edge.strokeStyle ?? "solid"]}
                 markerEnd={
