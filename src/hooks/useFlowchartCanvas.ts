@@ -74,18 +74,16 @@ export function hitungPasKeLayar(
 }
 
 /**
- * #635 — geser supaya `batas` terlihat, TANPA mengubah zoom selama tidak
- * terpaksa. Bedanya dengan `hitungPasKeLayar`: fungsi itu adalah "lihat semua
- * isi papan" dan boleh membesar sampai 3x; hasil tempel hanya perlu DIJANGKAU,
- * dan papan yang tiba-tiba membesar 3x terasa seperti melompat. Zoom hanya
- * diturunkan — tidak pernah dinaikkan — kalau kelompoknya memang lebih besar
- * dari layar.
+ * #635 #637 — geser supaya `batas` terlihat. ZOOM TIDAK PERNAH berubah: yang
+ * berubah hanya ketika pengguna sendiri menekan "pas ke layar" (#618) atau
+ * menggulir. Kelompok yang lebih lebar dari layar akan terpotong simetris di
+ * kedua sisinya — sama seperti Miro dan Figma, yang juga tidak mengubah skala
+ * orang saat menempel. Sudah muat seluruhnya = tidak ada yang berubah.
  */
 export function hitungTampilDiLayar(
   batas: Batas,
   kanvas: { lebar: number; tinggi: number },
-  layar: { zoom: number; pan: { x: number; y: number } },
-  margin: number = MARGIN_PAS
+  layar: { zoom: number; pan: { x: number; y: number } }
 ): { zoom: number; pan: { x: number; y: number } } {
   if (kanvas.lebar <= 0 || kanvas.tinggi <= 0) {
     return { zoom: layar.zoom, pan: { ...layar.pan } };
@@ -95,10 +93,7 @@ export function hitungTampilDiLayar(
   }
   const lebarIsi = Math.max(1, batas.width);
   const tinggiIsi = Math.max(1, batas.height);
-  const skalaPas = batasZoom(
-    Math.min((kanvas.lebar - 2 * margin) / lebarIsi, (kanvas.tinggi - 2 * margin) / tinggiIsi)
-  );
-  const skala = Math.min(layar.zoom, Math.max(ZOOM_MIN, skalaPas));
+  const skala = layar.zoom;
   return {
     zoom: skala,
     pan: {

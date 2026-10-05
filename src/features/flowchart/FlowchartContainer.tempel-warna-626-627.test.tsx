@@ -114,34 +114,59 @@ const xAwal = (container: Element) =>
     )
   );
 
+/** Titik tengah kotak pembungkus kelompok yang menempel, dalam koordinat papan. */
+const pusatKelompok = (container: Element) => {
+  const isi = Array.from(container.querySelectorAll('[id^="val-node-"]')).map((el) => {
+    const e = el as HTMLElement;
+    return {
+      x: parseFloat(e.style.left || "0"),
+      y: parseFloat(e.style.top || "0"),
+      width: parseFloat(e.style.width || "130"),
+      height: parseFloat(e.style.height || "70"),
+    };
+  });
+  const x1 = Math.min(...isi.map((b) => b.x));
+  const y1 = Math.min(...isi.map((b) => b.y));
+  const x2 = Math.max(...isi.map((b) => b.x + b.width));
+  const y2 = Math.max(...isi.map((b) => b.y + b.height));
+  return { x: (x1 + x2) / 2, y: (y1 + y2) / 2 };
+};
+
 beforeEach(() => {
   (fetchFlowcharts as jest.Mock).mockReset().mockResolvedValue(PAPAN);
 });
 
-describe("posisi hasil tempel (#626)", () => {
-  it("tanpa kursor di atas papan, kelompok mendarat di TENGAH area yang terlihat", async () => {
+describe("posisi hasil tempel (#626, jangkar diubah oleh #637)", () => {
+  it("tanpa kursor di atas papan, kelompok mencari TENGAH area yang terlihat dan ditahan tepi papan", async () => {
     const { container } = renderPapan();
     await bukaPapan(container);
 
     tempelPeramban({ "text/html": htmlDrawio(xmlDrawio) });
 
-    // Tengah papan (400,300) -> papan: ((400-50)/0.9, (300-50)/0.9) = (389, 278).
-    // SEBELUM #626: posisi null -> koordinat dokumen ASLI + 30, yaitu x=230 dan
-    // bentuk terakhir duduk di x=1330 — di luar yang sedang dilihat.
-    expect(xAwal(container)).toBe(389);
+    // Tengah layar (400,300) -> papan: (389,278). Kelompok ini selebar 1.240 px,
+    // jadi memusatkan titik (389,278) berarti pojok kirinya jatuh di x=-231 - di
+    // luar dokumen papan (mulai x=10). Yang dijepit adalah kelompoknya secara
+    // utuh: x=10, pusatnya bergeser ke 630. SEBELUM #626 hasilnya x=230 dan
+    // bentuk terakhir duduk di x=1330, di luar yang sedang dilihat.
+    expect(xAwal(container)).toBe(10);
+    expect(Math.round(pusatKelompok(container).x)).toBe(630);
     expect(container.querySelectorAll('[id^="val-node-"]')).toHaveLength(3);
     expect(container.querySelectorAll("path[marker-end]")).toHaveLength(2);
   });
 
-  it("kursor di atas papan dipakai apa adanya, bukan tengah papan", async () => {
+  it("kursor di atas papan: PUSAT kelompok yang duduk di titik kursor, bukan pojoknya (#637)", async () => {
     const { container } = renderPapan();
     const kanvas = await bukaPapan(container);
 
     fireEvent.mouseMove(kanvas, { clientX: 620, clientY: 320 });
     tempelPeramban({ "text/html": htmlDrawio(xmlDrawio) });
 
-    // ((620-50)/0.9, (320-50)/0.9) = (633, 300)
-    expect(xAwal(container)).toBe(633);
+    // ((620-50)/0.9, (320-50)/0.9) = (633,300) - titik yang sekarang diduduki
+    // TENGAH kelompok, sehingga separuh alur selalu ada di kiri kursor.
+    const pusat = pusatKelompok(container);
+    expect(Math.round(pusat.x)).toBe(633);
+    expect(Math.round(pusat.y)).toBe(300);
+    expect(xAwal(container)).toBe(13);
   });
 });
 

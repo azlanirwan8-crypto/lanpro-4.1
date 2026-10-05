@@ -60,8 +60,13 @@ function sudut(kumpulan: FlowNode[]) {
 /**
  * Repelika salinan dengan id segar.
  *
- * `posisi` adalah titik ruang papan tempat POJOK KIRI-ATAS kelompok mendarat;
- * tanpa itu replika bergeser 30px — dulu itu satu-satunya perilaku, jadi
+ * `posisi` adalah titik ruang papan tempat TENGAH kelompok mendarat (#637).
+ * Dulu yang diancor pojok kiri-atas: terukur 05 Okt, kelompok 3 bentuk selebar
+ * 1.240 px yang ditempel di kursor x=700 membentang sampai x layar 1.816 dari
+ * layar 800 px — 91 persen keluar layar, persis "kok jauh, susah dicari".
+ * Dengan pusat yang di kursor, kelompok lebar seimbang di kedua sisi dan
+ * separuh depannya selalu terlihat, sama seperti Miro dan Figma.
+ * Tanpa `posisi` replika bergeser 30px — dulu itu satu-satunya perilaku, jadi
  * menempel dua kali menindih hasil pertama persis di tempat yang sama dan
  * terlihat seperti Ctrl+V tidak berfungsi.
  */
@@ -69,8 +74,8 @@ export function hasilTempel(salinan: SalinanPapan, posisi?: TitikPapan | null): 
   if (!salinan.nodes.length) return { nodes: [], edges: [] };
 
   const { xMin, yMin, xMax, yMax } = sudut(salinan.nodes);
-  const geserX = posisi ? Math.round(posisi.x - xMin) : 30;
-  const geserY = posisi ? Math.round(posisi.y - yMin) : 30;
+  const geserX = posisi ? Math.round(posisi.x - (xMin + xMax) / 2) : 30;
+  const geserY = posisi ? Math.round(posisi.y - (yMin + yMax) / 2) : 30;
 
   // Kelompok dijaga tetap utuh di dalam papan: yang dijepit adalah geseran
   // seluruh kelompok, bukan tiap bentuk, supaya panah tidak ikut tertebas.

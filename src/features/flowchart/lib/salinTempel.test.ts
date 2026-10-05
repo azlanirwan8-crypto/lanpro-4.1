@@ -43,11 +43,20 @@ describe("hasilTempel — apa yang lahir saat Ctrl+V (#582)", () => {
     edges: [panah("e1", "a", "b", { strokeStyle: "dashed" as const })],
   };
 
-  it("menempel di posisi kursor, bukan menindih yang lama", () => {
+  it("PUSAT kelompok mendarat di titik kursor, bukan pojok kiri-atas (#637)", () => {
     const hasil = hasilTempel(duaBentukSatuPanah, { x: 800, y: 600 });
 
-    expect(hasil.nodes.map((n) => n.x)).toEqual([800, 1020]);
-    expect(hasil.nodes[0].y).toBe(600);
+    // Kotak pembungkus salinan: x 100..450, y 100..170 -> pusat (275,135),
+    // jadi geserannya (525,465). Pojok kiri-atas dulu mendarat di (800,600);
+    // sekarang titik itulah yang diduduki TENGAH kelompok.
+    expect(hasil.nodes.map((n) => n.x)).toEqual([625, 845]);
+    expect(hasil.nodes[0].y).toBe(565);
+    const x1 = Math.min(...hasil.nodes.map((n) => n.x));
+    const x2 = Math.max(...hasil.nodes.map((n) => n.x + (n.width || 130)));
+    const y1 = Math.min(...hasil.nodes.map((n) => n.y));
+    const y2 = Math.max(...hasil.nodes.map((n) => n.y + (n.height || 70)));
+    expect((x1 + x2) / 2).toBe(800);
+    expect((y1 + y2) / 2).toBe(600);
   });
 
   it("memberi id segar dan panah tetap menghubungkan hasil tempelnya sendiri", () => {

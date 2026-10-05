@@ -58,18 +58,29 @@ describe("hitungTampilDiLayar (#635)", () => {
     expect(hitungTampilDiLayar(b, KANVAS, LAYAR)).toEqual({ zoom: 0.9, pan: { x: 50, y: 50 } });
   });
 
-  it("kelompok yang lebih besar dari layar membuat zoom TURUN, bukan naik", () => {
-    // (600-80)/3.000 = 0,173 -> mentok batas bawah 0,2; 0,4 tetap turun.
+  it("kelompok yang lebih besar dari layar: zoom TETAP, kelebihannya terpotong simetris (#637)", () => {
+    // Dulu (#635) zoom diturunkan sampai kelompok muat. Pemilik proyek memilih
+    // Opsi A untuk #637: menempel tidak boleh mengubah skala yang sedang ia
+    // pakai sendiri — Miro dan Figma juga tidak. Yang penting PUSATNYA masuk.
     const b: Batas = { x: 0, y: 5000, width: 4000, height: 3000 };
     const hasil = hitungTampilDiLayar(b, KANVAS, { zoom: 0.4, pan: { x: 0, y: 0 } });
-    expect(hasil.zoom).toBe(0.2);
+    const l = diLayar(hasil, b);
 
-    // Grup yang pas-pasan: (800-80)/3.000 = 0,24, jadi 0,3 diturunkan ke 0,24.
+    expect(hasil.zoom).toBe(0.4);
+    // 4.000 x 3.000 pada zoom 0,4 = 1.600 x 1.200 di layar 800 x 600: kelebihannya
+    // 800 px mendatar dan 600 px tegak, dibagi rata ke dua sisi.
+    expect(l.kiri).toBeCloseTo(-400, 6);
+    expect(l.kanan).toBeCloseTo(KANVAS.lebar + 400, 6);
+    expect(l.atas).toBeCloseTo(-300, 6);
+    expect(l.bawah).toBeCloseTo(KANVAS.tinggi + 300, 6);
+
+    // Kelompok yang cuma sedikit lebih lebar: zoom tetap tidak disentuh.
     const pas = hitungTampilDiLayar({ x: 0, y: 0, width: 3000, height: 1000 }, KANVAS, {
       zoom: 0.3,
       pan: { x: 0, y: 0 },
     });
-    expect(pas.zoom).toBeCloseTo(0.24, 6);
+    expect(pas.zoom).toBe(0.3);
+    expect(pas.pan.x).toBeCloseTo((KANVAS.lebar - 3000 * 0.3) / 2, 6);
   });
 
   it("kanvas yang belum terukur tidak menggeser dan tidak menghasilkan NaN", () => {
