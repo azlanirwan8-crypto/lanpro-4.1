@@ -100,7 +100,8 @@ export function renderCustomSvgShape(
         : colorPaletteHex[node.color]?.stroke || "#6366f1";
 
   const strokeDash = node.borderStyle === "dashed" ? "5,5" : "none";
-  const strokeWidth = node.borderStyle === "none" ? "0" : "2";
+  /** #638 — 2 px membuat tepi bentuk setebal stiker; draw.io 1 px. */
+  const strokeWidth = node.borderStyle === "none" ? "0" : "1";
 
   // Compute modern layered drop shadows for maximum softness and 3D feel
   const shadowFilter = isBlueprint

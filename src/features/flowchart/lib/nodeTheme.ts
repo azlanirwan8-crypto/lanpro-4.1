@@ -8,6 +8,11 @@
  * Pelengkap `lib/shapes.tsx`: berkas itu menggambar bentuk yang butuh SVG
  * presisi, berkas ini memberi gaya bentuk yang cukup diwakili sebuah div.
  *
+ * #638 — kelas di sini tidak lagi mewarnai bentuk. Latar dan garis tepi dibaca
+ * dari `colorPaletteHex` dan dipasang inline oleh `FlowchartNode`, supaya
+ * bentuk div, bentuk SVG, dan petak pemilih warna tidak bisa berbeda warna;
+ * tebal tepi div ikut diturunkan ke 1 px seperti garis tepi draw.io.
+ *
  * Kelas keras yang tersisa di berkas ini (tepi bawah sticky note dan kertas
  * card) SENGAJA tidak dipindah ke token: kanvas mewakili dokumen, bukan
  * antarmuka — alasan yang sama dengan entri `slate` di `../constants`.
@@ -30,8 +35,8 @@ export const getShapeThemeClasses = (node: FlowNode, isSelected: boolean): strin
 
   const base =
     "transition-all duration-300 flex flex-col justify-center items-center text-center p-3 select-none";
-  let borderStyleClass = "border-2";
-  if (node.borderStyle === "dashed") borderStyleClass = "border-2 border-dashed";
+  let borderStyleClass = "border";
+  if (node.borderStyle === "dashed") borderStyleClass = "border border-dashed";
   if (node.borderStyle === "none") borderStyleClass = "border-0 shadow-none";
 
   if (
@@ -45,11 +50,11 @@ export const getShapeThemeClasses = (node: FlowNode, isSelected: boolean): strin
   }
 
   if (node.type === "sticky") {
-    return `${base} justify-start text-left p-4  ${palette.bg} ${palette.text} border-b-[3px] border-black/15 rounded-md ${ringClass}`;
+    return `${base} justify-start text-left p-4  ${palette.text} border-b-[3px] border-black/15 rounded-md ${ringClass}`;
   }
 
   if (node.type === "rect") {
-    return `${base} ${borderStyleClass} rounded-xl ${palette.bg} ${palette.text} ${ringClass}`;
+    return `${base} ${borderStyleClass} rounded-xl ${palette.text} ${ringClass}`;
   }
 
   // Tidak ada cabang untuk "oval" dan "circle": keduanya terdaftar di
@@ -59,11 +64,11 @@ export const getShapeThemeClasses = (node: FlowNode, isSelected: boolean): strin
   // yang perlu diubah adalah daftar di lib/shapes.tsx.
 
   if (node.type === "cylinder" || node.type === "database") {
-    return `${base} ${borderStyleClass} rounded-t-[20px] rounded-b-[20px] ${palette.bg} ${palette.text} ${ringClass}`;
+    return `${base} ${borderStyleClass} rounded-t-[20px] rounded-b-[20px] ${palette.text} ${ringClass}`;
   }
 
   if (node.type === "cloud") {
-    return `${base} ${borderStyleClass} rounded-[28px] ${palette.bg} ${palette.text} ${ringClass}`;
+    return `${base} ${borderStyleClass} rounded-[28px] ${palette.text} ${ringClass}`;
   }
 
   if (node.type === "card") {
@@ -71,19 +76,19 @@ export const getShapeThemeClasses = (node: FlowNode, isSelected: boolean): strin
   }
 
   if (node.type === "document") {
-    return `${base} ${borderStyleClass} rounded-tl-lg rounded-tr-2xl rounded-b-lg ${palette.bg} ${palette.text} ${ringClass}`;
+    return `${base} ${borderStyleClass} rounded-tl-lg rounded-tr-2xl rounded-b-lg ${palette.text} ${ringClass}`;
   }
 
   if (node.type === "subprocess" || node.type === "predefined") {
-    return `${base} ${borderStyleClass} rounded-lg ${palette.bg} ${palette.text} ${ringClass}`;
+    return `${base} ${borderStyleClass} rounded-lg ${palette.text} ${ringClass}`;
   }
 
   if (node.type === "actor") {
-    return `${base} ${borderStyleClass} rounded-full aspect-square ${palette.bg} ${palette.text} ${ringClass}`;
+    return `${base} ${borderStyleClass} rounded-full aspect-square ${palette.text} ${ringClass}`;
   }
 
   if (node.type === "folder") {
-    return `${base} ${borderStyleClass} rounded-b-lg rounded-tr-lg ${palette.bg} ${palette.text} ${ringClass}`;
+    return `${base} ${borderStyleClass} rounded-b-lg rounded-tr-lg ${palette.text} ${ringClass}`;
   }
 
   return `${base} ${palette.text} border-0 bg-transparent text-left items-start ${ringClass}`;

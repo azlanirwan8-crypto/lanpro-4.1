@@ -65,7 +65,12 @@ import { setScreenSnapshot, clearScreenSnapshot } from "../../lib/screenContext"
 import { parseUniversalDiagram } from "./lib/importers";
 import type { ParsedDiagram } from "./lib/importers";
 import { apakahPembuat, tampilanNamaPembuat } from "./lib/authorIdentity";
-import { colorPalettes, UKURAN_BENTUK, ukuranBentukEfektif, batasSeluruhBentuk } from "./constants";
+import {
+  colorPaletteHex,
+  UKURAN_BENTUK,
+  ukuranBentukEfektif,
+  batasSeluruhBentuk,
+} from "./constants";
 // Diberi akhiran Api karena useFlowchartList() juga mengekspos updateFlowchart
 // dan deleteFlowchart untuk state daftar lokal. Nama berbeda mencegah salah
 // panggil, sekaligus memperjelas mana yang menembak backend.
@@ -4654,19 +4659,20 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 {t("flowchart.colorPalette")}
                               </span>
                               <div className="grid grid-cols-6 gap-1.5">
-                                {Object.keys(colorPalettes).map((colName) => {
+                                {Object.keys(colorPaletteHex).map((colName) => {
                                   const isActive =
                                     nodes.find((n) => n.id === selectedNodeId)?.color === colName;
                                   return (
                                     <button
                                       key={colName}
                                       onClick={() => handleUpdateActiveNode({ color: colName })}
+                                      style={{
+                                        backgroundColor: colorPaletteHex[colName]?.bg,
+                                        borderColor: colorPaletteHex[colName]?.stroke,
+                                      }}
                                       className={cn(
                                         "h-5 rounded-md hover:scale-105 border transition-all",
-                                        colorPalettes[colName].preview,
-                                        isActive
-                                          ? "border-border-subtle ring-2 ring-primary scale-105"
-                                          : "border-border-subtle"
+                                        isActive && "ring-2 ring-primary scale-105"
                                       )}
                                       title={colName}
                                     />

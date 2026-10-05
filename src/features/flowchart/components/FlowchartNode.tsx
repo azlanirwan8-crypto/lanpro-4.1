@@ -116,6 +116,15 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
     node.type === "diamond" ||
     node.type === "decision";
 
+  /**
+   * #638 — satu sumber warna untuk SEMUA bentuk: latar RATA dan garis tepi
+   * sewarna keluarga yang lunak, sama seperti draw.io. Dulu latar diambil dari
+   * sini tetapi dari `colorPalettes` yang berbeda kelasnya, dan isian masih
+   * bergradien 135 derajat - dua tone dalam satu bentuk itulah yang dilaporkan
+   * sebagai "warnanya pecah".
+   */
+  const warnaBentuk = colorPaletteHex[node.color] || colorPaletteHex.indigo;
+
   const cincin = cincinBentuk({
     isDragging,
     isSelected,
@@ -252,20 +261,9 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
       <div
         className={cn(getShapeThemeClasses(node, isSelected), "w-full h-full relative")}
         style={
-          isBlueprint
-            ? undefined
-            : isSticky
-              ? {
-                  background: `linear-gradient(135deg, ${colorPaletteHex[node.color]?.bg || "#fef08a"} 0%, ${colorPaletteHex[node.color]?.bgGrad || "#fef3c7"} 100%)`,
-                }
-              : customSvgTypes.includes(node.type as any) ||
-                  node.type === "parallelogram" ||
-                  node.type === "diamond" ||
-                  node.type === "decision"
-                ? undefined // SVGs handle their own fill
-                : {
-                    background: `linear-gradient(135deg, ${colorPaletteHex[node.color]?.bg || "#eff6ff"} 0%, ${colorPaletteHex[node.color]?.bgGrad || "#dbeafe"} 100%)`,
-                  }
+          isBlueprint || isSvgShape
+            ? undefined // blueprint punya gaya sendiri; bentuk SVG digambar `lib/shapes.tsx`
+            : { backgroundColor: warnaBentuk.bg, borderColor: warnaBentuk.stroke }
         }
       >
         {renderCustomSvgShape(

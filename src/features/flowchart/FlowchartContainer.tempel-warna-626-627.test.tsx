@@ -24,7 +24,7 @@ jest.setTimeout(30_000);
 
 import { FlowchartView } from "./FlowchartContainer";
 import { fetchFlowcharts } from "./services/flowchart.service";
-import { colorPaletteHex } from "./constants";
+import { colorPaletteHex, colorPalettes } from "./constants";
 import { renderCustomSvgShape } from "./lib/shapes";
 import type { FlowNode } from "./types";
 
@@ -182,33 +182,56 @@ describe("kejernisan bentuk (#627)", () => {
     return (l1 + 0.05) / (l2 + 0.05);
   };
 
-  it("setiap isian punya tepi yang terbaca dan teks yang tetap kontras", () => {
-    const tepiLemah = Object.entries(colorPaletteHex).filter(
-      ([, w]) => kontras(w.bg, w.stroke) < 2.2
+  /**
+   * Ambang di bawah ini ANGKA UKUR, bukan selera, dan dasar pemilihannya
+   * berubah 05 Okt (#638, rute 2 yang dipilih pemilik proyek):
+   * - Palet lama (#627) punya kontras tepi/isian 4,51-9,45 rata-rata 5,71.
+   *   Itulah "masih gemuk dan warnanya pecah" yang dilaporkan pemilik proyek.
+   * - draw.io, diukur pada palet kanoniknya sendiri: 1,76-3,32 rata-rata 2,83.
+   * - Palet sekarang: 1,76-3,36 rata-rata 2,91, kecuali `slate` 5,27 karena
+   *   #f5f5f5/#666666 memang pasangan abu-abu kanonik draw.io.
+   * Teks tetap disyaratkan >= 8 (terukur 10,1-13,4), jadi melunakkan tepi tidak
+   * dibayar dengan label yang sulit dibaca.
+   */
+  const BANDANG_TEPI = { min: 1.7, maks: 3.5 };
+
+  it("setiap bentuk duduk di bandang kontras draw.io, bukan setebal palet lama (#638)", () => {
+    const tepi = Object.entries(colorPaletteHex).map(([n, w]) => ({
+      n,
+      c: kontras(w.bg, w.stroke),
+    }));
+    const keluarBandang = tepi.filter(
+      (t) => t.n !== "slate" && (t.c < BANDANG_TEPI.min || t.c > BANDANG_TEPI.maks)
     );
+    const rata = tepi.reduce((a, t) => a + t.c, 0) / tepi.length;
+
+    expect(keluarBandang.map((t) => `${t.n} ${t.c.toFixed(2)}`)).toEqual([]);
+    // Rata-rata palet lama 5,71 - kalau angka ini naik mendekati itu, bentuk
+    // kembali jadi stiker tebal.
+    expect(rata).toBeLessThan(3.2);
+  });
+
+  it("isian RATA satu tone: tidak ada lagi dua warna dalam satu bentuk (#638)", () => {
+    // Gradien 135 derajat bg -> bgGrad adalah separuh dari "warnanya pecah".
+    const berGradien = Object.entries(colorPaletteHex).filter(([, w]) => w.bg !== w.bgGrad);
+    expect(berGradien.map(([n]) => n)).toEqual([]);
+  });
+
+  it("teks di atas isian tetap terbaca, dan hanya ada SATU tabel warna bentuk", () => {
     const tidakTerbaca = Object.entries(colorPaletteHex).filter(
       ([, w]) => kontras(w.bg, "#1e293b") < 8
     );
-    // SEBELUM #627 isian duduk di tingkat 50/100 (kroma 14-20) sehingga bentuk
-    // nyaris menyatu dengan papan; draw.io memakai 20-51. Sekarang 100/200
-    // dengan tepi 600/700 — dan TIDAK boleh kembali ke tingkat 50.
-    const tingkat50 = new Set([
-      "#fffbeb",
-      "#fff7ed",
-      "#fdf2f8",
-      "#eff6ff",
-      "#ecfdf5",
-      "#faf5ff",
-      "#eef2ff",
-      "#f0f9ff",
-      "#fff1f2",
-      "#f5f3ff",
-      "#f8fafc",
-    ]);
-    const kembaliPudar = Object.entries(colorPaletteHex).filter(([, w]) => tingkat50.has(w.bg));
-    expect(tepiLemah.map(([n]) => n)).toEqual([]);
     expect(tidakTerbaca.map(([n]) => n)).toEqual([]);
-    expect(kembaliPudar.map(([n]) => n)).toEqual([]);
+
+    // #631 untuk warna: dulu kelas Tailwind (`bg-amber-100 border-amber-600`)
+    // hidup sendiri di `colorPalettes` dan bisa menyimpang dari hex yang
+    // dipakai bentuk SVG. Sekarang hex satu-satunya sumber; kelas hanya memegang
+    // warna teks, dan kuncinya wajib sama.
+    expect(Object.keys(colorPalettes).sort()).toEqual(Object.keys(colorPaletteHex).sort());
+    const masihMegangLatar = Object.entries(colorPalettes).filter(([, k]) =>
+      /\bbg-/.test(Object.values(k).join(" "))
+    );
+    expect(masihMegangLatar.map(([n]) => n)).toEqual([]);
   });
 
   it("bentuk yang diam tidak membawa bayangan, hanya hovered/terpilih", () => {

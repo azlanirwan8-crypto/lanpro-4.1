@@ -23,17 +23,33 @@ const node = (over: Partial<FlowNode> = {}): FlowNode =>
   }) as FlowNode;
 
 describe("getShapeThemeClasses", () => {
-  // #627 — isian naik dari tingkat 50/80 ke 100 dengan tepi 600 supaya bentuk
-  // tidak lagi menyatu dengan papan (bandingkan dengan draw.io). Yang dijaga di
-  // sini adalah PEMETAAN warna -> palet, bukan tingkat kecerahannya.
-  it("memakai palet sesuai warna node", () => {
-    expect(getShapeThemeClasses(node({ color: "rose" }), false)).toContain("bg-rose-100");
-    expect(getShapeThemeClasses(node({ color: "rose" }), false)).toContain("border-rose-600");
+  /**
+   * #638 (rute 2) memindahkan WARNA bentuk dari kelas Tailwind ke
+   * `colorPaletteHex`, dipasang inline oleh `FlowchartNode`. Alasannya diukur:
+   * kelas `bg-*-100 border-*-600` memberi kontras tepi/isian 4,5-9,4 sementara
+   * draw.io 1,8-3,3, dan bentuk terlihat seperti stiker tebal ("gemuk, warnanya
+   * pecah" - laporan pemilik proyek 05 Okt). Yang dijaga di sini karena itu:
+   * PEMETAAN warna -> palet teks, dan fakta bahwa kelas warna bentuk sudah
+   * tidak memegang latar/tepi lagi.
+   */
+  it("memakai palet teks sesuai warna node, tanpa mewarnai latar dari kelas", () => {
+    const hasil = getShapeThemeClasses(node({ color: "rose" }), false);
+
+    expect(hasil).toContain("text-rose-900");
+    expect(hasil).not.toMatch(/\bbg-/);
+    expect(hasil).not.toMatch(/border-rose/);
+  });
+
+  it("tepi bentuk div 1 px seperti garis tepi draw.io, bukan 2 px", () => {
+    const hasil = getShapeThemeClasses(node({ color: "rose" }), false);
+
+    expect(hasil).toContain(" border ");
+    expect(hasil).not.toContain("border-2");
   });
 
   it("jatuh ke palet indigo bila warnanya tidak dikenal", () => {
     expect(getShapeThemeClasses(node({ color: "tidak-ada-warna-ini" }), false)).toContain(
-      "bg-indigo-100"
+      "text-indigo-900"
     );
   });
 

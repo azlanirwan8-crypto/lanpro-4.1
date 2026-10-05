@@ -22,116 +22,72 @@ export interface GrupBentukPalet {
 }
 
 /**
- * Palet HEX untuk bentuk SVG presisi (Tailwind-equivalent).
+ * Palet HEX bentuk - SATU-SATUNYA sumber warna bentuk di papan.
  *
- * #627 — isian dulu memakai tingkat 50/100 (kroma 14-20) sementara bagan
- * draw.io/Miro memakai tingkat setebal 20-51; hasilnya bentuk terlihat
- * "pudar" walau kontras teksnya sebenarnya tinggi. Sekarang keduanya
- * selevel 100/200 dengan garis tepi 600/700, dan `colorPalettes` di bawah
- * ikut digeser supaya bentuk div dan bentuk SVG tidak lagi berbeda warna.
+ * Riangnya terukur, dan #638 mengubahnya karena keluhan, bukan selera:
+ * - #627 menaikkan isian ke tingkat 100/200 dengan tepi 600/700 karena bentuk
+ *   terlihat pudar. Yang tidak dihitung waktu itu: kontras tepi/isian jadi
+ *   rata-rata 5,71, dan bentuk berubah jadi stiker tebal - dilaporkan lagi
+ *   05 Okt ("masih gemuk dan warnanya tidak bagus, pecah").
+ * - #638 memakai resep draw.io: isian pastel RATA satu tone, tepi sewarna
+ *   keluarga tetapi lunak. Kontras tepi/isian jadi 1,76-3,36 (rata 2,91),
+ *   bandang draw.io sendiri 1,76-3,32 (rata 2,83); `slate` 5,27 karena
+ *   #f5f5f5/#666666 memang pasangan abu-abu kanonik mereka. Kontras teks
+ *   #1e293b di atas isian tetap 10,1-13,4 - melunakkan bentuk tidak
+ *   mengorbankan keterbacaan label.
+ * - Sembilan pasangan diambil apa adanya dari palet kanonik draw.io. `amber`,
+ *   `indigo`, dan `purple` tidak ada padanannya di daftar itu, jadi diturunkan
+ *   dengan resep yang sama (isian S 45-70 L 89-91, tepi S 30-45 L 48-58) agar
+ *   tetap berbeda dari tetangganya.
+ *
+ * `bgGrad` sengaja disamakan dengan `bg`: isian tidak lagi bergradien 135
+ * derajat. Kolomnya dipertahankan karena `warnaPaletTerdekat` (penjeraf
+ * draw.io/Miro) memetakan hex asal ke NAMA warna lewat bacaan `bgGrad`+`stroke`.
  */
 export const colorPaletteHex: Record<string, { bg: string; bgGrad: string; stroke: string }> = {
-  yellow: { bg: "#fef3c7", bgGrad: "#fde68a", stroke: "#b45309" }, // amber-50 / amber-100 / amber-500
-  orange: { bg: "#ffedd5", bgGrad: "#fed7aa", stroke: "#c2410c" }, // orange-50 / orange-100 / orange-500
-  pink: { bg: "#fce7f3", bgGrad: "#fbcfe8", stroke: "#be185d" }, // pink-50 / pink-100 / pink-500
-  blue: { bg: "#dbeafe", bgGrad: "#bfdbfe", stroke: "#1d4ed8" }, // blue-50 / blue-100 / blue-550
-  green: { bg: "#d1fae5", bgGrad: "#a7f3d0", stroke: "#047857" }, // emerald-50 / emerald-100 / emerald-500
-  purple: { bg: "#f3e8ff", bgGrad: "#e9d5ff", stroke: "#7e22ce" }, // purple-50 / purple-100 / purple-500
-  indigo: { bg: "#e0e7ff", bgGrad: "#c7d2fe", stroke: "#4338ca" }, // indigo-50 / indigo-100 / indigo-500
-  sky: { bg: "#e0f2fe", bgGrad: "#bae6fd", stroke: "#0369a1" }, // sky-50 / sky-100 / sky-500
-  amber: { bg: "#fef3c7", bgGrad: "#fde68a", stroke: "#92400e" }, // amber-50 / amber-100 / amber-550
-  rose: { bg: "#ffe4e6", bgGrad: "#fecdd3", stroke: "#be123c" }, // rose-50 / rose-100 / rose-500
-  violet: { bg: "#ede9fe", bgGrad: "#ddd6fe", stroke: "#6d28d9" }, // violet-50 / violet-100 / violet-500
-  slate: { bg: "#f1f5f9", bgGrad: "#e2e8f0", stroke: "#334155" }, // slate-50 / slate-100 / slate-500
+  yellow: { bg: "#fff2cc", bgGrad: "#fff2cc", stroke: "#d6b656" }, // draw.io yellow
+  orange: { bg: "#ffe6cc", bgGrad: "#ffe6cc", stroke: "#d79b00" }, // draw.io orange
+  pink: { bg: "#e6d0de", bgGrad: "#e6d0de", stroke: "#996185" }, // draw.io mauve
+  blue: { bg: "#dae8fc", bgGrad: "#dae8fc", stroke: "#6c8ebf" }, // draw.io blue
+  green: { bg: "#d5e8d4", bgGrad: "#d5e8d4", stroke: "#82b366" }, // draw.io green
+  purple: { bg: "#e1d5e7", bgGrad: "#e1d5e7", stroke: "#9673a6" }, // draw.io purple
+  indigo: { bg: "#dfdbf5", bgGrad: "#dfdbf5", stroke: "#7c74b4" }, // resep draw.io, hue 248
+  sky: { bg: "#b0e3e6", bgGrad: "#b0e3e6", stroke: "#0e8088" }, // draw.io cyan
+  amber: { bg: "#f7e9cf", bgGrad: "#f7e9cf", stroke: "#b18d43" }, // resep draw.io, hue 40
+  rose: { bg: "#f8cecc", bgGrad: "#f8cecc", stroke: "#b85450" }, // draw.io red
+  violet: { bg: "#f0d7f4", bgGrad: "#f0d7f4", stroke: "#a970b2" }, // resep draw.io, hue 292
+  slate: { bg: "#f5f5f5", bgGrad: "#f5f5f5", stroke: "#666666" }, // draw.io grey
 };
 
 /**
- * Palet kelas Tailwind untuk bentuk non-SVG dan untuk petak pemilih warna.
+ * Kelas TEKS bentuk non-SVG, per nama warna.
  *
- * Pendamping `colorPaletteHex` di atas: yang itu dipakai bentuk SVG presisi
- * yang butuh nilai HEX, yang ini dipakai bentuk berbasis div yang butuh nama
- * kelas. Keduanya harus memuat kunci warna yang sama.
+ * Dulu struktur ini memegang kelas latar DAN tepi (`bg-amber-100
+ * border-amber-600`) di samping `colorPaletteHex`. Sejak #638 keduanya tidak
+ * di sini lagi: latar dan garis tepi bentuk dibaca dari `colorPaletteHex` di
+ * atas lalu dipasang inline, supaya bentuk div, bentuk SVG, dan petak pemilih
+ * warna tidak bisa berbeda warna - sebab yang sama dengan #631 untuk ukuran
+ * bentuk. Yang tersisa hanya warna teks, dan itu memang kosakata kelas.
+ *
+ * `slate` satu-satunya yang memakai token (`text-content-strong`), bukan
+ * karena khusus, tapi supaya gerbang `audit:warna` tidak bertambah pemakai
+ * kelas keras. Konsekuensinya tercatat dan TIDAK diubah di sini: label node
+ * slate ikut tema aplikasi sementara isian tetap #f5f5f5, jadi di mode gelap
+ * kontrasnya menurun. Perlu item sendiri kalau itu mau dibereskan.
  */
-export const colorPalettes: Record<
-  string,
-  { bg: string; text: string; border: string; preview: string }
-> = {
-  yellow: {
-    bg: "bg-amber-100 border-amber-600",
-    text: "text-amber-900",
-    border: "border-amber-600",
-    preview: "bg-amber-200",
-  },
-  orange: {
-    bg: "bg-orange-100 border-orange-600",
-    text: "text-orange-900",
-    border: "border-orange-600",
-    preview: "bg-orange-200",
-  },
-  pink: {
-    bg: "bg-pink-100 border-pink-600",
-    text: "text-pink-900",
-    border: "border-pink-600",
-    preview: "bg-pink-200",
-  },
-  blue: {
-    bg: "bg-blue-100 border-blue-600",
-    text: "text-blue-900",
-    border: "border-blue-600",
-    preview: "bg-blue-200",
-  },
-  green: {
-    bg: "bg-emerald-100 border-emerald-600",
-    text: "text-emerald-900",
-    border: "border-emerald-600",
-    preview: "bg-emerald-200",
-  },
-  purple: {
-    bg: "bg-purple-100 border-purple-600",
-    text: "text-purple-900",
-    border: "border-purple-600",
-    preview: "bg-purple-200",
-  },
-  indigo: {
-    bg: "bg-indigo-100 border-indigo-600",
-    text: "text-indigo-900",
-    border: "border-indigo-600",
-    preview: "bg-indigo-200",
-  },
-  sky: {
-    bg: "bg-sky-100 border-sky-600",
-    text: "text-sky-900",
-    border: "border-sky-600",
-    preview: "bg-sky-200",
-  },
-  amber: {
-    bg: "bg-amber-100 border-amber-400",
-    text: "text-amber-900",
-    border: "border-amber-400",
-    preview: "bg-amber-300",
-  },
-  rose: {
-    bg: "bg-rose-100 border-rose-600",
-    text: "text-rose-900",
-    border: "border-rose-600",
-    preview: "bg-rose-200",
-  },
-  violet: {
-    bg: "bg-violet-100 border-violet-600",
-    text: "text-violet-900",
-    border: "border-violet-600",
-    preview: "",
-  },
-  slate: {
-    // slate-50 di bawah ini SENGAJA masih kelas keras, bukan token: ia pasangan
-    // `colorPaletteHex.slate` (#f8fafc) yang dipakai bentuk SVG, dan kanvas ini
-    // mewakili dokumen, bukan antarmuka — ikut tema aplikasi membuat node "slate"
-    // jadi hitam pekat di mode gelap sementara sebelahnya tetap pastel.
-    bg: "bg-slate-100 border-border-subtle",
-    text: "text-content-strong",
-    border: "border-border-subtle",
-    preview: "bg-surface-marker",
-  },
+export const colorPalettes: Record<string, { text: string }> = {
+  yellow: { text: "text-amber-900" },
+  orange: { text: "text-orange-900" },
+  pink: { text: "text-pink-900" },
+  blue: { text: "text-blue-900" },
+  green: { text: "text-emerald-900" },
+  purple: { text: "text-purple-900" },
+  indigo: { text: "text-indigo-900" },
+  sky: { text: "text-sky-900" },
+  amber: { text: "text-amber-900" },
+  rose: { text: "text-rose-900" },
+  violet: { text: "text-violet-900" },
+  slate: { text: "text-content-strong" },
 };
 
 /** Kelompok bentuk yang tampil di panel pemilih diagram. Data murni. */
