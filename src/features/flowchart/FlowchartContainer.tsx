@@ -193,6 +193,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     resetZoom,
     resetPan,
     pasKeLayar,
+    tampilDiLayar,
     skalaSeratus,
     applyGridSnap,
   } = canvasHook;
@@ -1124,6 +1125,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     // berikutnya memindahkan seluruh kelompok, bukan satu bentuk.
     setCopiedNodes(hasil.nodes);
     setSelectedNodeId(hasil.nodes.length === 1 ? hasil.nodes[0].id : null);
+
+    // #635 — Miro dan draw.io tidak pernah menyuruh penggunanya mencari hasil
+    // tempel. Kalau kelompok mendarat keluar layar (kursor tidak terbaca, papan
+    // sedang digeser jauh, atau hasilnya dijepit ke dalam papan), layar yang
+    // mengikuti kelompoknya, bukan sebaliknya.
+    const batasTempel = batasSeluruhBentuk(hasil.nodes);
+    if (batasTempel) tampilDiLayar(batasTempel);
+
     toast.success(
       t("flowchart.pastedShapes", { bentuk: hasil.nodes.length, panah: hasil.edges.length })
     );

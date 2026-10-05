@@ -26,6 +26,24 @@ export interface Batas {
 }
 
 /**
+ * #635 — jaga-jaga terakhir setelah menempel: kalau `batas` sudah seluruhnya
+ * muat di layar, TIDAK ADA yang berubah. Miro dan draw.io menaruh hasil tempel
+ * di bawah kursor (#626 sudah memperbaikinya di papan ini), jadi geser otomatis
+ * hanya boleh terjadi kalau hasilnya memang keluar layar — bukan tiap kali.
+ */
+function batasMuatDiLayar(
+  batas: Batas,
+  layar: { zoom: number; pan: { x: number; y: number }; lebar: number; tinggi: number }
+): boolean {
+  if (layar.lebar <= 0 || layar.tinggi <= 0) return true; // belum ada ukuran untuk dipercaya
+  const kiri = layar.pan.x + batas.x * layar.zoom;
+  const kanan = layar.pan.x + (batas.x + batas.width) * layar.zoom;
+  const atas = layar.pan.y + batas.y * layar.zoom;
+  const bawah = layar.pan.y + (batas.y + batas.height) * layar.zoom;
+  return kiri >= 0 && atas >= 0 && kanan <= layar.lebar && bawah <= layar.tinggi;
+}
+
+/**
  * #534 #618 — skala dan geser supaya `batas` muat seluruhnya di kanvas.
  *
  * Ditulis sebagai fungsi murni karena papan ini di-zoom lewat `transform: scale()`
@@ -46,6 +64,41 @@ export function hitungPasKeLayar(
   const skala = batasZoom(
     Math.min((kanvas.lebar - 2 * margin) / lebarIsi, (kanvas.tinggi - 2 * margin) / tinggiIsi)
   );
+  return {
+    zoom: skala,
+    pan: {
+      x: (kanvas.lebar - lebarIsi * skala) / 2 - batas.x * skala,
+      y: (kanvas.tinggi - tinggiIsi * skala) / 2 - batas.y * skala,
+    },
+  };
+}
+
+/**
+ * #635 — geser supaya `batas` terlihat, TANPA mengubah zoom selama tidak
+ * terpaksa. Bedanya dengan `hitungPasKeLayar`: fungsi itu adalah "lihat semua
+ * isi papan" dan boleh membesar sampai 3x; hasil tempel hanya perlu DIJANGKAU,
+ * dan papan yang tiba-tiba membesar 3x terasa seperti melompat. Zoom hanya
+ * diturunkan — tidak pernah dinaikkan — kalau kelompoknya memang lebih besar
+ * dari layar.
+ */
+export function hitungTampilDiLayar(
+  batas: Batas,
+  kanvas: { lebar: number; tinggi: number },
+  layar: { zoom: number; pan: { x: number; y: number } },
+  margin: number = MARGIN_PAS
+): { zoom: number; pan: { x: number; y: number } } {
+  if (kanvas.lebar <= 0 || kanvas.tinggi <= 0) {
+    return { zoom: layar.zoom, pan: { ...layar.pan } };
+  }
+  if (batasMuatDiLayar(batas, { ...layar, ...kanvas })) {
+    return { zoom: layar.zoom, pan: { ...layar.pan } };
+  }
+  const lebarIsi = Math.max(1, batas.width);
+  const tinggiIsi = Math.max(1, batas.height);
+  const skalaPas = batasZoom(
+    Math.min((kanvas.lebar - 2 * margin) / lebarIsi, (kanvas.tinggi - 2 * margin) / tinggiIsi)
+  );
+  const skala = Math.min(layar.zoom, Math.max(ZOOM_MIN, skalaPas));
   return {
     zoom: skala,
     pan: {
@@ -228,6 +281,26 @@ export function useFlowchartCanvas() {
   /** #534 — tombol persentase meminta 100%, bukan skala awal. */
   const skalaSeratus = () => aturZoom(ZOOM_SERATUS);
 
+  /**
+   * #635 — menjamin `batas` terlihat setelah menempel. viewport dibaca dari REF
+   * (`viewport.current`), bukan state penutup: penangan tempel bisa berasal dari
+   * render sebelumnya, dan zoom/pan basi justru menghasilkan posisi yang salah.
+   * Sudah muat seluruhnya = tidak ada yang diubah, jadi tempel di bawah kursor
+   * (#626) tidak pernah membuat papan bergeser sendiri.
+   */
+  const tampilDiLayar = (batas: Batas) => {
+    const el = canvasContainerRef.current;
+    const kanvas = { lebar: el?.clientWidth ?? 0, tinggi: el?.clientHeight ?? 0 };
+    const layar = { zoom: viewport.current.zoom, pan: { ...viewport.current.pan } };
+    const hasil = hitungTampilDiLayar(batas, kanvas, layar);
+    if (hasil.zoom === layar.zoom && hasil.pan.x === layar.pan.x && hasil.pan.y === layar.pan.y) {
+      return; // sudah terlihat: papan tidak boleh bergeser sendiri
+    }
+    setZoomLevel(hasil.zoom);
+    setPanOffset(hasil.pan);
+    viewport.current = { zoom: hasil.zoom, pan: hasil.pan };
+  };
+
   // Apply grid snap to coordinate
   const applyGridSnap = (value: number, gridSize: number = 10): number => {
     if (!isSnapToGrid) return value;
@@ -276,6 +349,7 @@ export function useFlowchartCanvas() {
     resetPan,
     resetCanvas,
     pasKeLayar,
+    tampilDiLayar,
     skalaSeratus,
     applyGridSnap,
   };

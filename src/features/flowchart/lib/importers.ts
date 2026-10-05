@@ -1,5 +1,5 @@
 import i18n from "../../../i18n";
-import { colorPaletteHex } from "../constants";
+import { colorPaletteHex, ukuranBentukEfektif } from "../constants";
 import type { FlowNode, FlowEdge } from "../types";
 
 /**
@@ -177,6 +177,52 @@ export const autoCenterAndNormalizeDiagram = (
   };
 };
 
+/**
+ * draw.io menulis garis yang TIDAK di-glue dengan ujung berupa koordinat saja
+ * (`<mxPoint as="sourcePoint">` / `as="targetPoint"`, tanpa atribut
+ * `source`/`target`) (#636). Ujung itu dipetakan ke bentuk yang DISANTUHNYA,
+ * dengan kelonggaran satu langkah kisi (20 px — sama dengan snap papan di
+ * `FlowchartContainer.tsx:4011`), BUKAN ke bentuk yang paling dekat di seluruh
+ * papan: garis yang benar-benar melayang di ruang kosong harus tetap hilang,
+ * bukan tiba-tiba menyambung ke sesuatu yang tidak pernah dimaksud penulisnya.
+ */
+const TOLERANSI_UJUNG_GARIS = 20;
+
+const jarakKeBentuk = (titik: { x: number; y: number }, node: FlowNode): number => {
+  const { width, height } = ukuranBentukEfektif(node);
+  const dx = Math.max(node.x - titik.x, 0, titik.x - (node.x + width));
+  const dy = Math.max(node.y - titik.y, 0, titik.y - (node.y + height));
+  return Math.hypot(dx, dy);
+};
+
+const bentukDiTitik = (nodes: FlowNode[], titik: { x: number; y: number }): FlowNode | null => {
+  let terbaik: FlowNode | null = null;
+  let jarak = Number.POSITIVE_INFINITY;
+  for (const n of nodes) {
+    const d = jarakKeBentuk(titik, n);
+    if (d < jarak) {
+      jarak = d;
+      terbaik = n;
+    }
+  }
+  return jarak <= TOLERANSI_UJUNG_GARIS ? terbaik : null;
+};
+
+const titikUjungGaris = (
+  cell: Element,
+  nama: "sourcePoint" | "targetPoint"
+): { x: number; y: number } | null => {
+  const geometri = cell.getElementsByTagName("mxGeometry")[0];
+  if (!geometri) return null;
+  for (const titik of Array.from(geometri.getElementsByTagName("mxPoint"))) {
+    if (titik.getAttribute("as") !== nama) continue;
+    const x = parseFloat(titik.getAttribute("x") || "");
+    const y = parseFloat(titik.getAttribute("y") || "");
+    if (Number.isFinite(x) && Number.isFinite(y)) return { x, y };
+  }
+  return null;
+};
+
 /** Membaca berkas .drawio/.xml dan memetakan tiap <mxCell> ke node atau edge. */
 export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
   const parser = new DOMParser();
@@ -205,6 +251,13 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
   const extractedNodes: FlowNode[] = [];
   const extractedEdges: FlowEdge[] = [];
   const nodeIdsSet = new Set<string>();
+  /** Garis ber-ujung koordinat, baru bisa dipetakan setelah semua bentuk dikenal. */
+  const panahLepas: {
+    id: string;
+    awal: { x: number; y: number };
+    akhir: { x: number; y: number };
+    label: string;
+  }[] = [];
 
   for (let i = 0; i < cells.length; i++) {
     const cell = cells[i];
@@ -298,23 +351,39 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
     } else if (edge === "1") {
       const sourceId = cell.getAttribute("source");
       const targetId = cell.getAttribute("target");
+      const labelText = decodeHtmlEntity(valueAttr)
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/<\/p>/gi, "\n")
+        .replace(/<[^>]*>/g, "")
+        .trim();
 
       if (sourceId && targetId) {
-        const edgeId = `drawio-edge-${id}`;
-        const labelText = decodeHtmlEntity(valueAttr)
-          .replace(/<br\s*\/?>/gi, "\n")
-          .replace(/<\/p>/gi, "\n")
-          .replace(/<[^>]*>/g, "")
-          .trim();
-
         extractedEdges.push({
-          id: edgeId,
+          id: `drawio-edge-${id}`,
           fromNodeId: `drawio-${sourceId}`,
           toNodeId: `drawio-${targetId}`,
           label: labelText || undefined,
         });
+      } else {
+        const awal = titikUjungGaris(cell, "sourcePoint");
+        const akhir = titikUjungGaris(cell, "targetPoint");
+        if (awal && akhir) panahLepas.push({ id, awal, akhir, label: labelText });
       }
     }
+  }
+
+  // #636 — garis ber-ujung koordinat baru bisa dipetakan setelah SEMUA bentuk
+  // diketahui, karena draw.io tidak menjamin garis selalu ditulis sesudah bentuk.
+  for (const lepas of panahLepas) {
+    const awal = bentukDiTitik(extractedNodes, lepas.awal);
+    const akhir = bentukDiTitik(extractedNodes, lepas.akhir);
+    if (!awal || !akhir || awal.id === akhir.id) continue;
+    extractedEdges.push({
+      id: `drawio-edge-${lepas.id}`,
+      fromNodeId: awal.id,
+      toNodeId: akhir.id,
+      label: lepas.label || undefined,
+    });
   }
 
   const validEdges = extractedEdges.filter(
