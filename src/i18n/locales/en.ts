@@ -1839,6 +1839,7 @@ export const en = {
     to: "to",
     of: "of",
     entries: "entries",
+    rowsPerPage: "Rows per page:",
     close: "Close",
     collapseSidebar: "Collapse Sidebar",
     expandSidebar: "Expand Sidebar",

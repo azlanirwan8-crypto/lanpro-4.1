@@ -47,6 +47,7 @@ import {
   LIST_TABLE_WRAP_CLASS,
   LIST_THEAD_ROW_CLASS,
 } from "../../components/ui/ListPageShell";
+import { ListPerPageSelect } from "../../components/ui/ListPerPageSelect";
 import {
   loadProjectMeetings,
   peekProjectMeetings,
@@ -183,7 +184,8 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [totalMeetings, setTotalMeetings] = useState(0);
-  const itemsPerPage = 8; // adjusted for side-by-side list density
+  /** #639 — dulu 8 dan tidak bisa diubah; kini 10 + pemilih seperti daftar lain. */
+  const [itemsPerPage, setItemsPerPage] = useState(10); // disesuaikan untuk kerapatan daftar berdampingan
 
   const currentUserProfile = users.find((u) => u.uid === currentUser?.uid) || currentUser;
 
@@ -231,7 +233,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
     } else {
       fetchUsers();
     }
-  }, [projectId, projectMembers, currentPage, searchQuery]);
+  }, [projectId, projectMembers, currentPage, searchQuery, itemsPerPage]);
 
   useEffect(() => {
     setWorkspaceTab("manual");
@@ -765,10 +767,20 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
           {/* Table Footer / Pagination */}
           <div className="px-6 py-3.5 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-            <div className="text-[11px] text-content-subtle font-normal">
-              {t("common.showing")} {totalMeetings === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
-              {t("common.to")} {Math.min(currentPage * itemsPerPage, totalMeetings)}{" "}
-              {t("common.of")} {totalMeetings} {t("common.entries")}
+            <div className="flex items-center gap-3">
+              <span className="text-[11px] text-content-subtle font-normal">
+                {t("common.showing")}{" "}
+                {totalMeetings === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} {t("common.to")}{" "}
+                {Math.min(currentPage * itemsPerPage, totalMeetings)} {t("common.of")}{" "}
+                {totalMeetings} {t("common.entries")}
+              </span>
+              <ListPerPageSelect
+                value={itemsPerPage}
+                onChange={(jumlah) => {
+                  setItemsPerPage(jumlah);
+                  setCurrentPage(1);
+                }}
+              />
             </div>
 
             {totalPages > 1 && (

@@ -21,6 +21,7 @@ import {
   type MasterData,
 } from "../../types";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
+import { ListPerPageSelect } from "../../components/ui/ListPerPageSelect";
 import { LanproDatePicker } from "../../components/ui/LanproDatePicker";
 import { UserAvatar } from "../../components/ui/UserAvatar";
 import { AiMeetingCompanion } from "./AiMeetingCompanion";
@@ -88,7 +89,8 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPoints, setTotalPoints] = useState(0);
-  const itemsPerPage = 5;
+  /** #639 — 5 tidak bisa diubah; kini 10 + pemilih seperti daftar lain. */
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const paginatedPoints = points;
   const totalPages = Math.max(1, Math.ceil(totalPoints / itemsPerPage) || 1);
@@ -129,7 +131,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     } else {
       fetchUsers();
     }
-  }, [meetingId, projectId, projectMembers, currentPage, searchQuery]);
+  }, [meetingId, projectId, projectMembers, currentPage, searchQuery, itemsPerPage]);
 
   useEffect(() => {
     let socket: any;
@@ -1052,12 +1054,21 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
           {/* Pagination Footer */}
           <div className="px-5 py-3 bg-surface-sunken/40 border-t border-border-subtle flex items-center justify-between text-[11px] text-content-subtle font-normal shrink-0">
-            <div>
-              {t("discussion.showingPoints", {
-                shown: paginatedPoints.length,
-                filtered: totalPoints,
-                total: totalPoints,
-              })}
+            <div className="flex items-center gap-3">
+              <span>
+                {t("discussion.showingPoints", {
+                  shown: paginatedPoints.length,
+                  filtered: totalPoints,
+                  total: totalPoints,
+                })}
+              </span>
+              <ListPerPageSelect
+                value={itemsPerPage}
+                onChange={(jumlah) => {
+                  setItemsPerPage(jumlah);
+                  setCurrentPage(1);
+                }}
+              />
             </div>
             <div className="flex items-center gap-2">
               <button

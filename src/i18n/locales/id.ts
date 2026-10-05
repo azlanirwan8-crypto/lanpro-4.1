@@ -1854,6 +1854,7 @@ export const id = {
     to: "sampai",
     of: "dari",
     entries: "entri",
+    rowsPerPage: "Baris per halaman:",
     close: "Tutup",
     collapseSidebar: "Ciutkan Bilah Sisi",
     expandSidebar: "Bentangkan Bilah Sisi",

@@ -3607,6 +3607,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
           itemsPerPage={itemsPerPage}
+          setItemsPerPage={setItemsPerPage}
           totalItems={totalItems}
           totalPages={totalPages}
           currentItems={currentItems}

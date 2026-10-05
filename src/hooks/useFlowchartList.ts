@@ -20,7 +20,13 @@ export function useFlowchartList() {
   const [isEditorActive, setIsEditorActive] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(5);
+  /**
+   * #639 — dulu 5 dan tidak bisa diubah (`setItemsPerPage` tidak pernah
+   * dipanggil di mana pun), jadi enam papan masuk halaman 2 sementara kartu
+   * tabel menyisakan ruang kosong. Sekarang 10, sama seperti Pengguna dan Isu,
+   * dan pemilihnya ada di kaki tabel (`ListPerPageSelect`).
+   */
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [sortBy, setSortBy] = useState<"name" | "createdAt" | "lastEditedAt">("lastEditedAt");
 
   // Confirmation modal for deletion

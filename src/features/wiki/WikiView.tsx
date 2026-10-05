@@ -47,6 +47,7 @@ import {
   LIST_TABLE_WRAP_CLASS,
   LIST_THEAD_ROW_CLASS,
 } from "../../components/ui/ListPageShell";
+import { ListPerPageSelect } from "../../components/ui/ListPerPageSelect";
 import { WikiMobileCardView } from "./components/WikiMobileCardView";
 import { urlSematanDokumen, urlSematBolehDiuji } from "./embedUrl";
 import { hasPermission } from "../../lib/permissions";
@@ -84,7 +85,8 @@ export const WikiView: React.FC<WikiViewProps> = ({
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [dragActive, setDragActive] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(8);
+  /** #639 — 8 tidak bisa diubah dan bikin baris berikutnya tersembunyi; kini 10 + pemilih. */
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   /* 
     ===================================================================
@@ -1125,10 +1127,19 @@ export const WikiView: React.FC<WikiViewProps> = ({
 
           {/* Table Footer / Pagination */}
           <div className="px-6 py-4 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-            <div className="text-xs sm:text-[10px] text-content-muted font-normal">
-              {t("common.showing")} {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
-              {t("common.to")} {Math.min(currentPage * itemsPerPage, totalItems)} {t("common.of")}{" "}
-              {totalItems} {t("common.entries")}
+            <div className="flex items-center gap-3">
+              <span className="text-xs sm:text-[10px] text-content-muted font-normal">
+                {t("common.showing")} {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
+                {t("common.to")} {Math.min(currentPage * itemsPerPage, totalItems)} {t("common.of")}{" "}
+                {totalItems} {t("common.entries")}
+              </span>
+              <ListPerPageSelect
+                value={itemsPerPage}
+                onChange={(jumlah) => {
+                  setItemsPerPage(jumlah);
+                  setCurrentPage(1);
+                }}
+              />
             </div>
 
             {totalPages > 1 && (
