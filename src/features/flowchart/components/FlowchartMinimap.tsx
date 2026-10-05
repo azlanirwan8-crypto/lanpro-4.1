@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Map, ChevronDown, ChevronUp, Move } from "lucide-react";
 import { cn } from "../../../lib/utils";
+import { ukuranBentukEfektif } from "../constants";
 
 // Using exact types from Flowchart editor for native compatibility
 interface FlowNode {
@@ -200,8 +201,10 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
 
               {/* Render Nodes as miniatures */}
               {nodes.map((node) => {
-                const nodeWidth = node.width || 120;
-                const nodeHeight = node.height || 60;
+                // #631 — minimap dulu menggambar dengan cadangan 120x60 sementara
+                // papan menggambar 130x70, jadi miniatur bentuk tidak pernah sama
+                // dengan aslinya. Satu sumber: angka yang benar-benar dirender.
+                const { width: nodeWidth, height: nodeHeight } = ukuranBentukEfektif(node);
                 const miniX = node.x * SCALE_X;
                 const miniY = node.y * SCALE_Y;
                 const miniW = nodeWidth * SCALE_X;

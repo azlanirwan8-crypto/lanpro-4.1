@@ -3450,8 +3450,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     const node = nodes.find((n) => n.id === nodeId);
     if (!node) return { x: 0, y: 0 };
 
-    const width = node.width || 140;
-    const height = node.height || 70;
+    const { width, height } = ukuranBentukEfektif(node);
 
     return {
       x: node.x + width / 2,
