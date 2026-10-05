@@ -21,6 +21,7 @@ import {
   Layers,
   Search,
   ExternalLink,
+  Copy,
   BookOpen,
   Paperclip,
   Info,
@@ -764,6 +765,20 @@ export const WikiView: React.FC<WikiViewProps> = ({
     }
   };
 
+  /**
+   * #632 — menyalin tautan dokumen utama. Clipboard bisa ditolak peramban di
+   * halaman http, jadi kegagalannya diberi pesan, bukan didiamkan.
+   */
+  const salinTautanDokumen = async (tautan?: string) => {
+    if (!tautan) return;
+    try {
+      await navigator.clipboard.writeText(tautan);
+      toast.success(t("wiki.tautanTersalin"));
+    } catch {
+      toast.info(t("wiki.tautanSalinGagal"));
+    }
+  };
+
   // Download logic for attached files
   const handleDownload = async (docId: string, fName?: string) => {
     toast.info(t("toast.downloadingFile"));
@@ -1308,18 +1323,63 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           </div>
                         </div>
                       ) : activeDoc.link ? (
-                        /* Sematan Google — URL-nya dibetulkan dulu (#600), dan
-                           judul panel ini menyediakan "Buka di Tab Baru" sebab
-                           iframe tidak ikut membawa sesi login Google pengguna:
-                           berkas yang tidak dibagi publik akan tetap ditolak
-                           Google, dan tanpa itu panelnya jadi jalan buntu. */
-                        <iframe
-                          src={urlSematanGoogle(activeDoc.link)}
-                          className="w-full h-full border-none absolute inset-0 bg-surface"
-                          title={activeDoc.title}
-                          referrerPolicy="no-referrer"
-                          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-                        />
+                        /* #632 — tautannya sendiri SELALU tampil sebagai satu baris
+                           di atas frame, sebab penolakan sematan tidak bisa dideteksi
+                           dari sisi kita: `onLoad` tetap terpicu untuk halaman
+                           penolakan lintas-asal dan isinya tidak terbaca. Sebelumnya
+                           panel ini hanya memasang <iframe>, jadi kalau Google menolak
+                           (berkas tidak dibagi publik, atau sesi Google tidak ikut ke
+                           dalam iframe), yang tersisa adalah halaman abu-abu milik
+                           Google tanpa satu pun jalan keluar di layar. */
+                        <div className="flex-1 flex flex-col relative min-h-0 overflow-hidden bg-surface-sunken">
+                          <div className="shrink-0 flex items-center gap-2 px-3 sm:px-4 py-2 border-b border-border-subtle bg-surface text-xs min-w-0">
+                            <LinkIcon className="w-3.5 h-3.5 text-content-muted shrink-0" />
+                            <a
+                              href={activeDoc.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title={activeDoc.link}
+                              data-testid="pratinjau-tautan"
+                              className="min-w-0 truncate text-content-body hover:text-primary underline decoration-border-faint underline-offset-2"
+                            >
+                              {activeDoc.link}
+                            </a>
+                            <span
+                              title={t("wiki.sematanKosongHint")}
+                              className="hidden lg:inline text-content-subtle whitespace-nowrap"
+                            >
+                              {t("wiki.sematanKosongHint")}
+                            </span>
+                            <div className="ml-auto flex items-center gap-1 shrink-0">
+                              <button
+                                onClick={() => salinTautanDokumen(activeDoc.link)}
+                                title={t("wiki.salinTautan")}
+                                aria-label={t("wiki.salinTautan")}
+                                className="p-1.5 rounded-md text-content-muted hover:text-primary hover:bg-surface-sunken transition-colors"
+                              >
+                                <Copy className="w-3.5 h-3.5" />
+                              </button>
+                              <a
+                                href={activeDoc.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse font-normal text-xs sm:text-[10px] uppercase tracking-normal rounded-md shadow-2xs transition-all whitespace-nowrap"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                {t("wiki.openNewTab")}
+                              </a>
+                            </div>
+                          </div>
+
+                          <div className="flex-1 relative min-h-0 bg-surface">
+                            <iframe
+                              src={urlSematanGoogle(activeDoc.link)}
+                              className="w-full h-full border-none absolute inset-0 bg-surface"
+                              title={activeDoc.title}
+                              referrerPolicy="origin"
+                            />
+                          </div>
+                        </div>
                       ) : (
                         /* Empty State: Drag-Drop File Uploader */
                         <div className="flex-1 flex flex-col items-center justify-center p-8 bg-surface-sunken/40">
