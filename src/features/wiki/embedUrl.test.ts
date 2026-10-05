@@ -131,3 +131,66 @@ describe("urlSematanGoogle — yang TIDAK boleh disentuh (#600)", () => {
     });
   });
 });
+
+/**
+ * #634 — SharePoint dan OneDrive. Gejala yang sama seperti #600 ("This content
+ * is blocked") tapi di host yang tidak pernah disentuh #600: tautan berbagi
+ * Office dipasang apa adanya ke iframe dan Office menolaknya. Yang boleh
+ * dibingkai adalah penampil Office for the Web.
+ */
+import { urlSematanDokumen, urlSematanKantor } from "./embedUrl";
+
+const TAKAR = (u: string) => encodeURIComponent(u);
+
+describe("urlSematanKantor (#634)", () => {
+  const excel =
+    "https://bankbnitbk.sharepoint.com/:x:/s/RetailChannelService/IQCu8HIAFrnvR7O4FPQ-vURAbayHtk4L?e=Ab1c2D";
+
+  it("tautan berbagi Excel, Word, dan PowerPoint dikirim ke penampil Office", () => {
+    expect(urlSematanKantor(excel)).toBe(
+      `https://view.officeapps.live.com/op/embed.aspx?src=${TAKAR(excel)}`
+    );
+    for (const jenis of ["w", "p", "b"]) {
+      const u = excel.replace("/:x:/", `/:${jenis}:/`);
+      expect(urlSematanKantor(u)).toContain("view.officeapps.live.com/op/embed.aspx");
+    }
+  });
+
+  it("berkas langsung di pustaka bersama juga dipetakan", () => {
+    const langsung =
+      "https://bankbnitbk.sharepoint.com/sites/Retail/Shared Documents/Error List.xlsx";
+    expect(urlSematanKantor(langsung)).toBe(
+      `https://view.officeapps.live.com/op/embed.aspx?src=${TAKAR(langsung)}`
+    );
+  });
+
+  it("OneDrive pribadi dan tautan pendek ikut dikenali", () => {
+    const onedrive = "https://bankbnitbk-my.sharepoint.com/:x:/g/personal/a_b/Edf2";
+    expect(urlSematanKantor(onedrive)).toContain("view.officeapps.live.com");
+    expect(urlSematanKantor("https://1drv.ms/x/s!Akz9")).toContain("view.officeapps.live.com");
+  });
+
+  it("halaman situs BUKAN berkas: tidak dikirim ke penampil Office", () => {
+    const halaman = "https://bankbnitbk.sharepoint.com/sites/Retail/SitePages/Beranda.aspx";
+    expect(urlSematanKantor(halaman)).toBe(halaman);
+  });
+
+  it("host yang menyamar di akhir nama tidak tertipu", () => {
+    const palsu = "https://sharepoint.com.evil.test/:x:/s/A/B";
+    expect(urlSematanKantor(palsu)).toBe(palsu);
+  });
+
+  it("idempoten: hasil yang sudah benar tidak disarangkan dua kali", () => {
+    const sekali = urlSematanKantor(excel);
+    expect(urlSematanKantor(sekali)).toBe(sekali);
+  });
+
+  it("satu pintu: Google tetap ditangani, SharePoint menyusul, lainnya tidak disentuh", () => {
+    const g =
+      "https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit";
+    expect(urlSematanDokumen(g)).toContain("/preview");
+    expect(urlSematanDokumen(excel)).toContain("view.officeapps.live.com");
+    const lain = "https://example.com/laporan.pdf";
+    expect(urlSematanDokumen(lain)).toBe(lain);
+  });
+});

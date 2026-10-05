@@ -94,3 +94,58 @@ export function urlSematBolehDiuji(url?: string): boolean {
     return false;
   }
 }
+
+/**
+ * #634 — berkas Word/Excel/PowerPoint dari SharePoint dan OneDrive.
+ *
+ * KENAPA. Panel ini selama ini hanya mengenal Google. Tautan SharePoint
+ * (`https://tenant.sharepoint.com/:x:/s/RetailChannelService/...`) lolos APA
+ * ADANYA ke `<iframe>`, dan Office membalas halaman "This content is blocked.
+ * Contact the site owner to fix the issue." — gejala yang sama persis dengan
+ * #600, di host yang sama sekali tidak disentuh #600, #632, maupun #633.
+ *
+ * Yang boleh dibingkai adalah penampil Office for the Web, bukan URL berbagi
+ * aslinya: `view.officeapps.live.com/op/embed.aspx?src=<tautan ditakar>`.
+ *
+ * BATAS. Penampil itu mengambil berkasnya SECARA ANONIM. Kalau berkas hanya
+ * dibuka untuk orang tertentu di tenant, Office juga menolaknya — sama seperti
+ * Google di #633. Yang bisa diperbaiki kode adalah bentuk URL-nya; pengaturan
+ * baginya tetap milik pemilik berkas.
+ */
+const POLA_HOST_KANTOR = /(?:^|\.)(?:sharepoint\.com|onedrive\.live\.com|1drv\.ms)$/i;
+/** Tautan "Share": `/:x:/` Excel, `/:w:/` Word, `/:p:/` PowerPoint, `/:b:/` keduanya. */
+const POLA_TAUTAN_BERBAGI = /^\/:[xwpb]:(?:\/r)?\//i;
+/** Versi pendek tautan yang sama di 1drv.ms: `/x/s!...`. */
+const POLA_TAUTAN_PENDEK = /^\/[xwpb](?:\/|$)/i;
+const POLA_BERKAS_KANTOR = /\.(?:xlsx?|docx?|pptx?|ppsx?|odt|ods|odp)$/i;
+
+export function urlSematanKantor(url?: string): string {
+  if (!url) return "";
+  let u: URL;
+  try {
+    u = new URL(url);
+  } catch {
+    return url;
+  }
+  if (u.protocol !== "https:" || !POLA_HOST_KANTOR.test(u.hostname)) return url;
+  const pendek = u.hostname.toLowerCase() === "1drv.ms";
+  // Halaman situs (/sites/..., /sites/.../SitePages/...) bukan berkas: tidak ada
+  // yang bisa dipandang Office, jadi jangan dikirim ke penampilnya.
+  const berkas =
+    POLA_TAUTAN_BERBAGI.test(u.pathname) ||
+    POLA_BERKAS_KANTOR.test(u.pathname) ||
+    (pendek && POLA_TAUTAN_PENDEK.test(u.pathname));
+  if (!berkas) return url;
+  return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`;
+}
+
+/**
+ * Satu pintu masuk untuk panel: Google dulu, lalu SharePoint/OneDrive.
+ * Komponen tidak boleh tahu-menahu soal host — kalau tidak, #634 terulang
+ * sebagai host ketiga.
+ */
+export function urlSematanDokumen(url?: string): string {
+  if (!url) return "";
+  const google = urlSematanGoogle(url);
+  return google === url ? urlSematanKantor(url) : google;
+}

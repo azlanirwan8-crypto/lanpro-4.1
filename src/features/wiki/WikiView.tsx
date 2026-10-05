@@ -48,7 +48,7 @@ import {
   LIST_THEAD_ROW_CLASS,
 } from "../../components/ui/ListPageShell";
 import { WikiMobileCardView } from "./components/WikiMobileCardView";
-import { urlSematanGoogle, urlSematBolehDiuji } from "./embedUrl";
+import { urlSematanDokumen, urlSematBolehDiuji } from "./embedUrl";
 import { hasPermission } from "../../lib/permissions";
 import { useMobileAction } from "../../contexts/MobileActionContext";
 import { loadProjectDocuments, peekProjectDocuments } from "../../lib/moduleDataCache";
@@ -575,7 +575,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
     }
     // Hanya tautan Google yang diuji; selain itu tidak ada yang berubah dari
     // perilaku lama, jadi jangan pernah mencabut bingkainya.
-    const semat = urlSematanGoogle(tautan);
+    const semat = urlSematanDokumen(tautan);
     if (!urlSematBolehDiuji(semat)) {
       setSematTautan({ tautan, status: "bisa" });
       return;
@@ -1398,15 +1398,6 @@ export const WikiView: React.FC<WikiViewProps> = ({
                               >
                                 <Copy className="w-3.5 h-3.5" />
                               </button>
-                              <a
-                                href={activeDoc.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse font-normal text-xs sm:text-[10px] uppercase tracking-normal rounded-md shadow-2xs transition-all whitespace-nowrap"
-                              >
-                                <ExternalLink className="w-3 h-3" />
-                                {t("wiki.openNewTab")}
-                              </a>
                             </div>
                           </div>
 
@@ -1454,7 +1445,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
 
                             {sematTautan.status === "bisa" && (
                               <iframe
-                                src={urlSematanGoogle(activeDoc.link)}
+                                src={urlSematanDokumen(activeDoc.link)}
                                 className="w-full h-full border-none absolute inset-0 bg-surface"
                                 title={activeDoc.title}
                                 referrerPolicy="origin"

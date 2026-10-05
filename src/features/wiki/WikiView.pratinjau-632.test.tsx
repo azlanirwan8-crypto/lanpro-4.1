@@ -150,3 +150,48 @@ describe("bingkai hanya dipasang kalau memang bisa (#633)", () => {
     expect((cekSematBisa as jest.Mock).mock.calls.length).toBe(1);
   });
 });
+
+describe("SharePoint langsung dibingkai lewat penampil Office (#634)", () => {
+  const SHAREPOINT =
+    "https://bankbnitbk.sharepoint.com/:x:/s/RetailChannelService/IQCu8HIAFrnvR7O4FPQ-vURAbayHtk4L?e=Ab1c2D";
+
+  beforeEach(() => {
+    (peekProjectDocuments as jest.Mock).mockReturnValue([
+      { ...DOKUMEN[0], link: SHAREPOINT, title: "Error List SharePoint" },
+    ]);
+    (loadProjectDocuments as jest.Mock).mockResolvedValue({
+      data: [{ ...DOKUMEN[0], link: SHAREPOINT, title: "Error List SharePoint" }],
+    });
+  });
+
+  it("iframe memakai view.officeapps.live.com, bukan tautan SharePoint mentah", async () => {
+    renderView();
+    const judul = await screen.findAllByText("Error List SharePoint");
+    fireEvent.click(judul[0]);
+
+    await waitFor(() => expect(document.querySelector("iframe")).toBeTruthy());
+    const frame = document.querySelector("iframe") as HTMLIFrameElement;
+    expect(frame.getAttribute("src")).toBe(
+      `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(SHAREPOINT)}`
+    );
+  });
+
+  it("tidak ditanyakan ke server: penampil Office menjawab 200 walau berkasnya tertolak", async () => {
+    renderView();
+    const judul = await screen.findAllByText("Error List SharePoint");
+    fireEvent.click(judul[0]);
+
+    await waitFor(() => expect(document.querySelector("iframe")).toBeTruthy());
+    expect(cekSematBisa).not.toHaveBeenCalled();
+  });
+
+  it("tombol 'Buka di Tab Baru' tidak lagi dobel di baris tautan", async () => {
+    renderView();
+    const judul = await screen.findAllByText("Error List SharePoint");
+    fireEvent.click(judul[0]);
+    await screen.findByTestId("pratinjau-tautan");
+
+    const buka = screen.getAllByText(/Open in New Tab|Buka di Tab Baru/i);
+    expect(buka).toHaveLength(1);
+  });
+});
