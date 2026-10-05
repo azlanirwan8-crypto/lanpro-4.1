@@ -48,7 +48,7 @@ import {
   LIST_THEAD_ROW_CLASS,
 } from "../../components/ui/ListPageShell";
 import { WikiMobileCardView } from "./components/WikiMobileCardView";
-import { urlSematanGoogle } from "./embedUrl";
+import { urlSematanGoogle, urlSematBolehDiuji } from "./embedUrl";
 import { hasPermission } from "../../lib/permissions";
 import { useMobileAction } from "../../contexts/MobileActionContext";
 import { loadProjectDocuments, peekProjectDocuments } from "../../lib/moduleDataCache";
@@ -61,6 +61,7 @@ import {
   updateDocument as updateDocumentApi,
   deleteDocument as deleteDocumentApi,
   downloadDocument as downloadDocumentApi,
+  cekSematBisa,
 } from "./services/wiki.service";
 
 export const WikiView: React.FC<WikiViewProps> = ({
@@ -160,6 +161,14 @@ export const WikiView: React.FC<WikiViewProps> = ({
 
   // Split-Pane & Preview Interactive States
   const [isFullscreenPreview, setIsFullscreenPreview] = useState(false);
+  /**
+   * #633 — keadaan sematan tautan. `menunggu` dipasang lebih dulu supaya
+   * halaman penolakan Google tidak sempat terlihat sekilas.
+   */
+  const [sematTautan, setSematTautan] = useState<{
+    tautan: string;
+    status: "menunggu" | "bisa" | "tertutup";
+  }>({ tautan: "", status: "bisa" });
   const [notesText, setNotesText] = useState("");
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [savingNotes, setSavingNotes] = useState(false);
@@ -551,6 +560,36 @@ export const WikiView: React.FC<WikiViewProps> = ({
   const activeDoc = useMemo(() => {
     return documents.find((d) => d.id === activeDocId) || null;
   }, [documents, activeDocId]);
+
+  // #633 — ID pengguna dibaca lewat ref, bukan lewat deps efek. `currentUser`
+  // adalah objek dari parent; kalau ia masuk deps, setiap render parent memicu
+  // ulang ujian sematan dan panelnya berputar tanpa henti.
+  const userIdRef = useRef(currentUser);
+  userIdRef.current = currentUser;
+
+  useEffect(() => {
+    const tautan = activeDoc?.link || "";
+    if (!tautan) {
+      setSematTautan({ tautan: "", status: "bisa" });
+      return;
+    }
+    // Hanya tautan Google yang diuji; selain itu tidak ada yang berubah dari
+    // perilaku lama, jadi jangan pernah mencabut bingkainya.
+    const semat = urlSematanGoogle(tautan);
+    if (!urlSematBolehDiuji(semat)) {
+      setSematTautan({ tautan, status: "bisa" });
+      return;
+    }
+
+    let batal = false;
+    setSematTautan({ tautan, status: "menunggu" });
+    cekSematBisa(projectId, resolveUserId(userIdRef.current), semat).then((hasil) => {
+      if (!batal) setSematTautan({ tautan, status: hasil.bisa ? "bisa" : "tertutup" });
+    });
+    return () => {
+      batal = true;
+    };
+  }, [activeDoc?.link, projectId]);
 
   // Trigger modal for Creating new documentation
   const handleCreateNew = useCallback(() => {
@@ -1371,13 +1410,56 @@ export const WikiView: React.FC<WikiViewProps> = ({
                             </div>
                           </div>
 
+                          {/*
+                            #633 — bingkai hanya dipasang kalau server memastikan
+                            berkasnya bisa dibuka tanpa kredensial. Kalau tidak,
+                            yang dipasang adalah keterangan kita sendiri: halaman
+                            abu-abu Google di dalam iframe terbaca sebagai
+                            aplikasi rusak, padahal yang tertutup adalah berkasnya.
+                          */}
                           <div className="flex-1 relative min-h-0 bg-surface">
-                            <iframe
-                              src={urlSematanGoogle(activeDoc.link)}
-                              className="w-full h-full border-none absolute inset-0 bg-surface"
-                              title={activeDoc.title}
-                              referrerPolicy="origin"
-                            />
+                            {sematTautan.status === "menunggu" && (
+                              <div
+                                className="absolute inset-0 flex items-center justify-center gap-2 text-xs text-content-muted"
+                                data-testid="pratinjau-menunggu"
+                              >
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                                {t("wiki.sematMemeriksa")}
+                              </div>
+                            )}
+
+                            {sematTautan.status === "tertutup" && (
+                              <div
+                                className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-8 text-center select-none"
+                                data-testid="pratinjau-tertutup"
+                              >
+                                <Info className="w-7 h-7 text-content-muted" />
+                                <p className="text-xs font-medium text-content-strong">
+                                  {t("wiki.sematTertutup")}
+                                </p>
+                                <p className="text-xs sm:text-[10px] text-content-subtle max-w-sm leading-normal">
+                                  {t("wiki.sematTertutupCara")}
+                                </p>
+                                <a
+                                  href={activeDoc.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="mt-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs sm:text-[10px] uppercase tracking-normal rounded-md shadow-2xs whitespace-nowrap"
+                                >
+                                  <ExternalLink className="w-3 h-3" />
+                                  {t("wiki.openNewTab")}
+                                </a>
+                              </div>
+                            )}
+
+                            {sematTautan.status === "bisa" && (
+                              <iframe
+                                src={urlSematanGoogle(activeDoc.link)}
+                                className="w-full h-full border-none absolute inset-0 bg-surface"
+                                title={activeDoc.title}
+                                referrerPolicy="origin"
+                              />
+                            )}
                           </div>
                         </div>
                       ) : (

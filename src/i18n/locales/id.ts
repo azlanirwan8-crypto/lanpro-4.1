@@ -1744,6 +1744,11 @@ export const id = {
     tautanTersalin: "Tautan disalin",
     tautanSalinGagal: "Peramban menolak menyalin - seleksi alamatnya di tab baru",
     sematanKosongHint: "Isinya tidak muncul? Berkasnya belum dibagi publik.",
+    sematMemeriksa: "Memeriksa akses berkas...",
+    sematTertutup: "Berkas ini tidak bisa ditampilkan di sini",
+    sematTertutupCara:
+      'Google hanya mau menampilkan berkas yang dibagi "Siapa saja dengan tautan". ' +
+      "Ubah baginya di Google Drive, atau buka lewat tautan di atas.",
     downloadPdf: "Unduh PDF",
     noAttachment: "Belum Ada Lampiran Berkas",
     notesComments: "Catatan & Komentar Diskusi",

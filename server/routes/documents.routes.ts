@@ -13,6 +13,8 @@ import { tabrakanVersi } from "../lib/versiDokumen";
 import { documentListQuerySchema } from "../schemas/pagination.schema";
 import { respondWithProjectList } from "../lib/listResponse";
 import { sanitizeUserText } from "../lib/sanitizeText";
+import { cekSematGoogle } from "../lib/sematGoogle";
+import { urlSematBolehDiuji } from "../../src/features/wiki/embedUrl";
 
 const router = Router();
 
@@ -31,6 +33,36 @@ router.get(
         () => documentRepository.findByProjectId(projectId, search, type),
         (pagination) => documentRepository.findByProjectIdPaged(projectId, pagination, search, type)
       );
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
+    }
+  }
+);
+
+/**
+ * #633 — boleh tidaknya sebuah tautan Google dibingkai.
+ *
+ * Sengaja memakai nama jalur yang tidak bertabrakan dengan `/documents/:id`,
+ * dan hanya menerima dua host Google (lihat `server/lib/sematGoogle.ts`) supaya
+ * rute ini tidak berubah menjadi proxy umum.
+ */
+router.get(
+  "/api/projects/:projectId/documents/semat-bisa",
+  jagaProyek("wiki", "R"),
+  async (req, res) => {
+    try {
+      const url = typeof req.query.url === "string" ? req.query.url : "";
+      if (!urlSematBolehDiuji(url)) {
+        res.json({ status: "success", data: { bisa: false, sebab: "bukan-google" } });
+        return;
+      }
+      const hasil = await cekSematGoogle(url);
+      res.json({ status: "success", data: hasil });
     } catch (error: any) {
       console.error(error);
       res.status(500).json({

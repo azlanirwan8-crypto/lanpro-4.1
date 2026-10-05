@@ -21,7 +21,7 @@
  * nilai lama tidak meniru "Open in new tab" yang justru berhasil.
  */
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
 jest.mock("../../lib/moduleDataCache", () => ({
   peekProjectDocuments: jest.fn(),
@@ -34,6 +34,7 @@ jest.mock("./services/wiki.service", () => ({
   updateDocument: jest.fn(),
   deleteDocument: jest.fn(),
   downloadDocument: jest.fn(),
+  cekSematBisa: jest.fn(),
 }));
 jest.mock("../../contexts/MobileActionContext", () => ({
   useMobileAction: () => ({
@@ -44,6 +45,7 @@ jest.mock("../../contexts/MobileActionContext", () => ({
 
 import { WikiView } from "./WikiView";
 import { peekProjectDocuments, loadProjectDocuments } from "../../lib/moduleDataCache";
+import { cekSematBisa } from "./services/wiki.service";
 
 const TAUTAN = "https://docs.google.com/spreadsheets/d/1aBcDeFgHiJkLmNoPqRsTuVwXyZ/edit#gid=123";
 const SEMATAN =
@@ -85,6 +87,7 @@ async function bukaDokumen() {
 beforeEach(() => {
   (peekProjectDocuments as jest.Mock).mockReturnValue(DOKUMEN);
   (loadProjectDocuments as jest.Mock).mockResolvedValue({ data: DOKUMEN });
+  (cekSematBisa as jest.Mock).mockReset().mockResolvedValue({ bisa: true, sebab: "publik" });
 });
 
 describe("kartu tautan di atas sematan (#632)", () => {
@@ -115,5 +118,35 @@ describe("kartu tautan di atas sematan (#632)", () => {
     const frame = document.querySelector("iframe") as HTMLIFrameElement;
     expect(frame.getAttribute("sandbox")).toBeNull();
     expect(frame.getAttribute("referrerpolicy")).toBe("origin");
+  });
+});
+
+describe("bingkai hanya dipasang kalau memang bisa (#633)", () => {
+  it("berkas tertutup: TIDAK ada iframe, yang ada keterangan kita sendiri", async () => {
+    (cekSematBisa as jest.Mock).mockResolvedValue({ bisa: false, sebab: "butuh-akses" });
+    await bukaDokumen();
+
+    expect(await screen.findByTestId("pratinjau-tertutup")).toBeTruthy();
+    expect(document.querySelector("iframe")).toBeNull();
+    // Jalan keluarnya tetap ada di layar, bukan halaman abu-abu milik Google.
+    const tautan = await screen.findByTestId("pratinjau-tautan");
+    expect(tautan.getAttribute("href")).toBe(TAUTAN);
+  });
+
+  it("berkas publik: iframe dipasang setelah ujian selesai", async () => {
+    await bukaDokumen();
+    await screen.findByTestId("pratinjau-tautan");
+
+    await waitFor(() => expect(document.querySelector("iframe")).toBeTruthy());
+    expect(screen.queryByTestId("pratinjau-tertutup")).toBeNull();
+  });
+
+  it("yang ditanyakan adalah bentuk sematan, dan ia ditanya SATU kali per dokumen", async () => {
+    await bukaDokumen();
+    await screen.findByTestId("pratinjau-tautan");
+
+    await waitFor(() => expect(cekSematBisa).toHaveBeenCalled());
+    expect((cekSematBisa as jest.Mock).mock.calls[0][2]).toBe(SEMATAN);
+    expect((cekSematBisa as jest.Mock).mock.calls.length).toBe(1);
   });
 });

@@ -1730,6 +1730,11 @@ export const en = {
     tautanTersalin: "Link copied",
     tautanSalinGagal: "The browser refused to copy - select the address in the new tab",
     sematanKosongHint: "Nothing showing? The file isn't shared publicly.",
+    sematMemeriksa: "Checking file access...",
+    sematTertutup: "This file can't be shown here",
+    sematTertutupCara:
+      'Google only embeds files shared with "Anyone with the link". ' +
+      "Change the sharing setting in Google Drive, or open it with the link above.",
     downloadPdf: "Download PDF",
     noAttachment: "No File Attachment Yet",
     notesComments: "Discussion Notes & Comments",

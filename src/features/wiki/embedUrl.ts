@@ -74,3 +74,23 @@ export function urlSematanGoogle(url?: string): string {
   }
   return `https://docs.google.com/document/d/${id}/preview`;
 }
+
+/**
+ * #633 — host yang boleh diuji kelayakan sematannya.
+ *
+ * Satu sumber untuk dua sisi: peramban memakainya untuk memutuskan apakah
+ * perlu bertanya, server memakainya sebagai pagar — tanpa pagar itu rute
+ * pemeriksa berubah menjadi proxy umum.
+ */
+const HOST_SEMAT_BOLEH = new Set(["docs.google.com", "drive.google.com"]);
+
+/** Hanya https, hanya dua host di atas, kecocokan persis (bukan awalan). */
+export function urlSematBolehDiuji(url?: string): boolean {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:" && HOST_SEMAT_BOLEH.has(u.hostname);
+  } catch {
+    return false;
+  }
+}

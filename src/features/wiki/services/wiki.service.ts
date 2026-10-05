@@ -98,3 +98,28 @@ export async function downloadDocument(
     headers: userHeader(userId),
   });
 }
+
+/**
+ * #633 — menanyakan apakah sebuah tautan Google boleh dibingkai.
+ *
+ * Yang ditanyakan adalah bentuk SEMAT-nya (`urlSematanGoogle`), bukan tautan
+ * aslinya, karena itulah yang akan dipasang ke `<iframe>`. Gagal bertanya
+ * dianggap "boleh": panel tidak boleh mencabut bingkai hanya karena ujisannya
+ * tidak selesai.
+ */
+export async function cekSematBisa(
+  projectId: string,
+  userId: string,
+  urlSematan: string
+): Promise<{ bisa: boolean; sebab: string }> {
+  try {
+    const r = await apiRequest(
+      `/api/projects/${projectId}/documents/semat-bisa?url=${encodeURIComponent(urlSematan)}`,
+      { method: "GET", headers: userHeader(userId) }
+    );
+    if (r?.status === "success" && typeof r.data?.bisa === "boolean") return r.data;
+    return { bisa: true, sebab: "gagal" };
+  } catch {
+    return { bisa: true, sebab: "gagal" };
+  }
+}
