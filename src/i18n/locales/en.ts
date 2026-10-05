@@ -1522,6 +1522,7 @@ export const en = {
     zoomOut: "Zoom out (-)",
     zoomReset: "Reset zoom (100%)",
     zoomIn: "Zoom in (+)",
+    fitView: "Fit to screen",
     helpNav: "Navigation help & keyboard shortcuts",
     shortcutsTitle: "Keyboard Shortcuts & Tips",
     duplicateShape: "Duplicate Shape",

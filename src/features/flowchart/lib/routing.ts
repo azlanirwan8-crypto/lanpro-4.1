@@ -7,6 +7,7 @@
  */
 
 import type { FlowNode, Point } from "../types";
+import { ukuranBentukEfektif } from "../constants";
 
 /** Apakah dua ruas garis saling berpotongan (termasuk kasus kolinear/bersentuhan). */
 export function isSegmentIntersectingSegment(p1: Point, p2: Point, q1: Point, q2: Point): boolean {
@@ -201,8 +202,8 @@ export function findSmartRoute(
 
   for (const n of nodes) {
     if (n.id === fromNodeId || n.id === toNodeId) continue;
-    const w = n.width || 130;
-    const h = n.height || 70;
+    const w = ukuranBentukEfektif(n).width;
+    const h = ukuranBentukEfektif(n).height;
     const x1 = n.x - padding;
     const y1 = n.y - padding;
     const x2 = n.x + w + padding;

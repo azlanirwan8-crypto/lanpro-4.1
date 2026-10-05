@@ -15,7 +15,7 @@
 import React, { useRef } from "react";
 import { motion } from "motion/react";
 import { findSmartRoute, memotongInteriorKotak } from "../lib/routing";
-import { colorPaletteHex } from "../constants";
+import { colorPaletteHex, ukuranBentukEfektif } from "../constants";
 import { EdgeStyleBar } from "./EdgeStyleBar";
 import type { FlowNode, FlowEdge, Point } from "../types";
 
@@ -32,8 +32,8 @@ const MARGIN_RUTE = 26;
 const kotakBentuk = (n: FlowNode): Kotak => ({
   x1: n.x - MARGIN_RUTE,
   y1: n.y - MARGIN_RUTE,
-  x2: n.x + (n.width || 130) + MARGIN_RUTE,
-  y2: n.y + (n.height || 70) + MARGIN_RUTE,
+  x2: n.x + ukuranBentukEfektif(n).width + MARGIN_RUTE,
+  y2: n.y + ukuranBentukEfektif(n).height + MARGIN_RUTE,
 });
 
 /**
@@ -308,10 +308,12 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
 
           // Magnetic Snapping and Dynamic Port Connection Locator
           const getClosestPortsPoint = (srcNode: FlowNode, tgtNode: FlowNode) => {
-            const sW = srcNode.width || 130;
-            const sH = srcNode.height || 70;
-            const tW = tgtNode.width || 130;
-            const tH = tgtNode.height || 70;
+            const src = ukuranBentukEfektif(srcNode);
+            const tgt = ukuranBentukEfektif(tgtNode);
+            const sW = src.width;
+            const sH = src.height;
+            const tW = tgt.width;
+            const tH = tgt.height;
 
             const sourcePorts = [
               { name: "top", x: srcNode.x + sW / 2, y: srcNode.y, dir: { x: 0, y: -1 } },

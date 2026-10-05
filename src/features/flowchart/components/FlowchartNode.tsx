@@ -24,7 +24,8 @@ import { cn } from "../../../lib/utils";
 import { gayaLabel, warnaLabel } from "../../../lib/warnaLabel";
 import { customSvgTypes, renderCustomSvgShape } from "../lib/shapes";
 import { getShapeThemeClasses } from "../lib/nodeTheme";
-import { colorPaletteHex } from "../constants";
+import { colorPaletteHex, ukuranBentukEfektif } from "../constants";
+import { cincinBentuk, gayaBentuk } from "../lib/gayaBentuk";
 import { NodePropertiesOverlay } from "./NodePropertiesOverlay";
 import type { FlowNode, FlowEdge } from "../types";
 import type { Task } from "../../../types";
@@ -103,8 +104,8 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
   const { t } = useTranslation();
   const linkedTask = getLinkedTaskDetails(node.taskId);
 
-  const nodeWidth = node.width || 130;
-  const nodeHeight = node.height || 70;
+  const nodeWidth = ukuranBentukEfektif(node).width;
+  const nodeHeight = ukuranBentukEfektif(node).height;
 
   const isSticky = node.type === "sticky";
   const isDiamond = node.type === "diamond" || node.type === "decision";
@@ -114,6 +115,15 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
     node.type === "parallelogram" ||
     node.type === "diamond" ||
     node.type === "decision";
+
+  const cincin = cincinBentuk({
+    isDragging,
+    isSelected,
+    isHovered,
+    isSourceOfConnect,
+    adaSumberSambung,
+    isSvgShape,
+  });
 
   return (
     <motion.div
@@ -145,34 +155,14 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
         "absolute z-20 cursor-pointer rounded-[inherit]",
         isActiveSim && "ring-4 ring-emerald-500 shadow-2xl "
       )}
-      animate={{
-        scale: isDragging
-          ? 1.07
-          : isSourceOfConnect
-            ? 1.05
-            : isSelected
-              ? 1.03
-              : isHovered
-                ? adaSumberSambung
-                  ? 1.05
-                  : 1.02
-                : 1,
-        rotate: isDragging ? 1.2 : isSourceOfConnect ? [0, -1.2, 1.2, -1.2, 0] : 0,
-        boxShadow: !isSvgShape
-          ? isDragging
-            ? "0 25px 40px -10px rgba(0, 0, 0, 0.25), 0 12px 20px -8px rgba(0, 0, 0, 0.18)"
-            : isSourceOfConnect
-              ? "0 0 0 3px rgba(244, 63, 94, 0.45), 0 8px 20px -6px rgba(244, 63, 94, 0.3)"
-              : isSelected
-                ? "0 0 0 3px rgba(139, 92, 246, 0.4), 0 8px 20px -6px rgba(139, 92, 246, 0.3)"
-                : isHovered
-                  ? adaSumberSambung
-                    ? "0 0 0 3px rgba(167, 139, 250, 0.45), 0 10px 15px -3px rgba(0, 0, 0, 0.08)"
-                    : "0 10px 20px -5px rgba(0, 0, 0, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.06)"
-                  : "none" // #627 — bentuk diam tidak lagi membawa dua bayangan sekaligus
-          : "none",
-      }}
-      whileTap={{ scale: 0.97 }}
+      animate={gayaBentuk({
+        isDragging,
+        isSelected,
+        isHovered,
+        isSourceOfConnect,
+        adaSumberSambung,
+        isSvgShape,
+      })}
       transition={{
         type: "spring",
         stiffness: 450,
@@ -287,23 +277,13 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
           isSourceOfConnect
         )}
 
-        {/* Glowing high-fidelity active border overlays (only for non-SVG standard box shapes) */}
-        {!isSvgShape && isSelected && (
-          <motion.div
-            className="absolute -inset-1 rounded-[inherit] border-2 border-violet-500/50 pointer-events-none z-10"
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: [0.4, 0.8, 0.4] }}
-            transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
-          />
+        {/* #629 — satu cincin per keadaan, tidak berdenyut selamanya. */}
+        {cincin.seleksi && (
+          <div className="absolute -inset-1 rounded-[inherit] border-2 border-violet-500/60 pointer-events-none z-10" />
         )}
 
-        {!isSvgShape && isSourceOfConnect && (
-          <motion.div
-            className="absolute -inset-1.5 rounded-[inherit] border-2 border-dashed border-rose-500/80 pointer-events-none z-10"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0.6, 1, 0.6] }}
-            transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
-          />
+        {cincin.sumberSambung && (
+          <div className="absolute -inset-1.5 rounded-[inherit] border-2 border-dashed border-rose-500/80 pointer-events-none z-10" />
         )}
 
         {node.type === "card" && (

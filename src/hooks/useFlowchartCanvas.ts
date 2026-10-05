@@ -11,9 +11,49 @@ import { POLA_BAWAAN, type PolaPapan } from "../features/flowchart/types";
 const ZOOM_MIN = 0.2;
 const ZOOM_MAX = 3.0;
 const ZOOM_AWAL = 0.9;
+/** #534 — "100%" dan "skala awal" adalah dua hal berbeda dan dulu tertukar. */
+const ZOOM_SERATUS = 1;
 const PAN_AWAL = { x: 50, y: 50 };
+const MARGIN_PAS = 40;
 
 const batasZoom = (nilai: number) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, nilai));
+
+export interface Batas {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * #534 #618 — skala dan geser supaya `batas` muat seluruhnya di kanvas.
+ *
+ * Ditulis sebagai fungsi murni karena papan ini di-zoom lewat `transform: scale()`
+ * pada wadah DIV (`FlowchartContainer.tsx:4018`), bukan lewat viewBox SVG, jadi
+ * angkanya tidak bisa diverifikasi dari render jsdom. Papan kosong (null)
+ * dikembalikan ke keadaan awal, bukan ke titik (0,0) yang kosong.
+ */
+export function hitungPasKeLayar(
+  batas: Batas | null,
+  kanvas: { lebar: number; tinggi: number },
+  margin: number = MARGIN_PAS
+): { zoom: number; pan: { x: number; y: number } } {
+  if (!batas || kanvas.lebar <= 0 || kanvas.tinggi <= 0) {
+    return { zoom: ZOOM_AWAL, pan: { ...PAN_AWAL } };
+  }
+  const lebarIsi = Math.max(1, batas.width);
+  const tinggiIsi = Math.max(1, batas.height);
+  const skala = batasZoom(
+    Math.min((kanvas.lebar - 2 * margin) / lebarIsi, (kanvas.tinggi - 2 * margin) / tinggiIsi)
+  );
+  return {
+    zoom: skala,
+    pan: {
+      x: (kanvas.lebar - lebarIsi * skala) / 2 - batas.x * skala,
+      y: (kanvas.tinggi - tinggiIsi * skala) / 2 - batas.y * skala,
+    },
+  };
+}
 
 export function useFlowchartCanvas() {
   // Canvas Viewport Pan & Zoom
@@ -169,6 +209,25 @@ export function useFlowchartCanvas() {
     setPanOffset(PAN_AWAL);
   };
 
+  /**
+   * #618 — padanan "zoom to fit" Miro/draw.io. `batas` dihitung pemanggil dari
+   * seluruh bentuk di papan; kanvas dibaca dari ref supaya angka viewport yang
+   * dipakai adalah yang sedang tampil, bukan asumsi.
+   */
+  const pasKeLayar = (batas: Batas | null) => {
+    const el = canvasContainerRef.current;
+    const hasil = hitungPasKeLayar(batas, {
+      lebar: el?.clientWidth ?? 0,
+      tinggi: el?.clientHeight ?? 0,
+    });
+    setZoomLevel(hasil.zoom);
+    setPanOffset(hasil.pan);
+    viewport.current = { zoom: hasil.zoom, pan: hasil.pan };
+  };
+
+  /** #534 — tombol persentase meminta 100%, bukan skala awal. */
+  const skalaSeratus = () => aturZoom(ZOOM_SERATUS);
+
   // Apply grid snap to coordinate
   const applyGridSnap = (value: number, gridSize: number = 10): number => {
     if (!isSnapToGrid) return value;
@@ -216,6 +275,8 @@ export function useFlowchartCanvas() {
     resetZoom,
     resetPan,
     resetCanvas,
+    pasKeLayar,
+    skalaSeratus,
     applyGridSnap,
   };
 }

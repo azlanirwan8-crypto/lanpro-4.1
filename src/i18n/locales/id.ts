@@ -1533,6 +1533,7 @@ export const id = {
     zoomOut: "Perkecil (-)",
     zoomReset: "Setel Ulang Zoom (100%)",
     zoomIn: "Perbesar (+)",
+    fitView: "Pas ke layar",
     helpNav: "Bantuan Navigasi & Pintasan Papan Tik",
     shortcutsTitle: "Pintasan Papan Tik & Tips",
     duplicateShape: "Duplikasi Bentuk",

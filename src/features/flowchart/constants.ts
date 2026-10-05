@@ -577,3 +577,49 @@ export const DIAGRAM_SHAPE_GROUPS: GrupBentukPalet[] = [
     ],
   },
 ];
+
+/**
+ * Ukuran yang BENAR-BENAR tergambar untuk satu bentuk.
+ *
+ * `width`/`height` boleh kosong pada papan lama dan pada diagram hasil impor
+ * sebagian. Angka cadangannya dulu ditulis empat tempat dengan tiga nilai
+ * berbeda (120 di minimap, 130 di perender + routing, 140 di `getNodeCenter`),
+ * jadi pusat garis bisa meleset dari kotak yang terlihat. Satu-satunya angka
+ * yang boleh dipakai adalah yang dipakai perender bentuk.
+ */
+const UKURAN_CADANGAN = { width: 130, height: 70 } as const;
+
+export function ukuranBentukEfektif(node: { width?: number; height?: number }): {
+  width: number;
+  height: number;
+} {
+  return {
+    width: node.width || UKURAN_CADANGAN.width,
+    height: node.height || UKURAN_CADANGAN.height,
+  };
+}
+
+/**
+ * Kotak pembungkus seluruh bentuk di papan, dalam koordinat papan.
+ *
+ * Dipakai "pas ke layar" (#618): yang harus muat adalah yang TERLIHAT, jadi
+ * ukurannya diambil dari `ukuranBentukEfektif`, bukan dari angka lain. Papan
+ * kosong memulangkan `null` — pemanggil tidak boleh mengira isi (0,0).
+ */
+export function batasSeluruhBentuk(
+  nodes: { x: number; y: number; width?: number; height?: number }[]
+): { x: number; y: number; width: number; height: number } | null {
+  if (nodes.length === 0) return null;
+  let x1 = Infinity;
+  let y1 = Infinity;
+  let x2 = -Infinity;
+  let y2 = -Infinity;
+  for (const n of nodes) {
+    const { width, height } = ukuranBentukEfektif(n);
+    x1 = Math.min(x1, n.x);
+    y1 = Math.min(y1, n.y);
+    x2 = Math.max(x2, n.x + width);
+    y2 = Math.max(y2, n.y + height);
+  }
+  return { x: x1, y: y1, width: x2 - x1, height: y2 - y1 };
+}

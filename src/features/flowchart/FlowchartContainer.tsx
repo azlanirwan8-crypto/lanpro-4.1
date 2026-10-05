@@ -22,6 +22,7 @@ import {
   MousePointer,
   ZoomIn,
   ZoomOut,
+  Maximize,
   BookOpen,
   Edit3,
   X,
@@ -64,7 +65,7 @@ import { setScreenSnapshot, clearScreenSnapshot } from "../../lib/screenContext"
 import { parseUniversalDiagram } from "./lib/importers";
 import type { ParsedDiagram } from "./lib/importers";
 import { apakahPembuat, tampilanNamaPembuat } from "./lib/authorIdentity";
-import { colorPalettes, UKURAN_BENTUK } from "./constants";
+import { colorPalettes, UKURAN_BENTUK, ukuranBentukEfektif, batasSeluruhBentuk } from "./constants";
 // Diberi akhiran Api karena useFlowchartList() juga mengekspos updateFlowchart
 // dan deleteFlowchart untuk state daftar lokal. Nama berbeda mencegah salah
 // panggil, sekaligus memperjelas mana yang menembak backend.
@@ -191,7 +192,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     geserZoom,
     resetZoom,
     resetPan,
-    resetCanvas,
+    pasKeLayar,
+    skalaSeratus,
     applyGridSnap,
   } = canvasHook;
 
@@ -1260,6 +1262,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         setIsSpacePressed(true);
       }
 
+      // #618 — pas ke layar adalah navigasi, bukan suntingan: tetap jalan di
+      // papan yang sedang dibaca-saja. Shift+1 mengikuti Cmd+Shift+1 di Miro.
+      if (e.shiftKey && e.key === "1") {
+        e.preventDefault();
+        fitPapanKeLayar();
+        return;
+      }
+
       if (!isWorkspaceEditable) {
         if (e.key === "Escape") {
           setSelectedNodeId(null);
@@ -1587,7 +1597,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       setSelectedNodeId(null);
       setSelectedEdgeId(null);
       setConnectSourceId(null);
-      resetCanvas();
+      // #534 — papan yang isinya jauh dari titik asal dulu "direset" menjadi
+      // layar kosong. Yang benar adalah menunjukkannya, bukan memindahkan angka.
+      pasKeLayar(batasSeluruhBentuk(loadedNodes));
       setRightViewMode("embed");
     }
   };
@@ -3447,6 +3459,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     };
   };
 
+  /**
+   * #618 — padanan "zoom to fit" (Miro Cmd+Shift+1). Yang dihitung adalah kotak
+   * seluruh bentuk; papan kosong tetap ke keadaan awal, bukan ke (0,0).
+   */
+  const fitPapanKeLayar = () => pasKeLayar(batasSeluruhBentuk(nodes));
+
   const getLinkedTaskDetails = (taskId?: string) => {
     if (!taskId) return undefined;
     return tasks.find((t) => t.id === taskId);
@@ -3562,8 +3580,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         id: n.id,
         x: n.x,
         y: n.y,
-        width: n.width || 130,
-        height: n.height || 70,
+        ...ukuranBentukEfektif(n),
       })),
     });
   };
@@ -4393,7 +4410,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               <ZoomOut className="w-3.5 h-3.5" />
                             </button>
                             <button
-                              onClick={() => aturZoom(1)}
+                              onClick={skalaSeratus}
                               className="px-2 text-xs sm:text-[10px] font-medium text-content-secondary hover:text-primary w-11 text-center font-mono cursor-pointer transition-colors"
                               title={t("flowchart.zoomReset")}
                             >
@@ -4407,6 +4424,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               <ZoomIn className="w-3.5 h-3.5" />
                             </button>
                           </div>
+
+                          {/* #618 — pas ke layar, padanan "zoom to fit" Miro/draw.io */}
+                          <button
+                            onClick={fitPapanKeLayar}
+                            className="p-1.5 text-content-muted hover:bg-surface-strong hover:text-content-strong rounded-lg transition-all active:scale-95"
+                            title={t("flowchart.fitView")}
+                          >
+                            <Maximize className="w-3.5 h-3.5" />
+                          </button>
 
                           <div className="w-px h-5 bg-surface-strong mx-1" />
 
@@ -4478,6 +4504,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 </span>
                                 <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] font-medium">
                                   {t("flowchart.shiftArrow")}
+                                </kbd>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-content-subtle font-medium font-sans">
+                                  {t("flowchart.fitView")}
+                                </span>
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] font-medium">
+                                  Shift + 1
                                 </kbd>
                               </div>
                               <div className="flex justify-between items-center">
@@ -4874,7 +4908,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           }
           onZoomIn={() => geserZoom(1.1)}
           onZoomOut={() => geserZoom(1 / 1.1)}
-          onResetZoom={resetCanvas}
+          onResetZoom={fitPapanKeLayar}
           onUndo={handleUndoClick}
           onRedo={handleRedoClick}
           onClear={handleClearWhiteboard}
