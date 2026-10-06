@@ -90,6 +90,7 @@ class ErrorBoundary extends Component<Props, State> {
 }
 
 import { AuthNotificationProvider } from "./components/AuthToastContainer";
+import { MotionConfig } from "motion/react";
 
 // Global Event Listener for unhandledrejection to suppress benign WebSocket/Vite issues before rendering
 window.addEventListener("unhandledrejection", (event) => {
@@ -132,11 +133,22 @@ try {
   console.error("[SSO] Gagal memproses kembalian SSO:", e);
 }
 
+// #641 — satu saklar untuk seluruh mesin animasi.
+//
+// Blok `prefers-reduced-motion` di `index.css` hanya bisa memerintah CSS; ia
+// tidak punya jalan ke 42 berkas yang menganimasikan lewat `motion/react`, jadi
+// pengguna yang meminta gerakan dikurangi tetap melihat papan dan modal
+// bergerak. `reducedMotion="user"` memerintah seluruh komponen itu dari satu
+// tempat, tanpa ada komponen yang perlu memeriksa apa pun: gerakan
+// perpindahan dan ukuran dilepas, perubahan kel opacity tetap (itu tanda
+// kehadiran, bukan gerakan).
 const pasang = () =>
   createRoot(document.getElementById("root")!).render(
     <ErrorBoundary>
       <AuthNotificationProvider>
-        <App />
+        <MotionConfig reducedMotion="user">
+          <App />
+        </MotionConfig>
       </AuthNotificationProvider>
     </ErrorBoundary>
   );

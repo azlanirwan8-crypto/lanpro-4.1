@@ -654,6 +654,21 @@ html.dark .shadow-soft-lg {
   .animate-dropdown {
     animation: none;
   }
+  /* #641 — daftar di atas cuma menjangkau beberapa elemen. Yang bergerak di
+   * aplikasi ini sebagian besar memakai utilitas (`transition-all` 84 kemunculan
+   * di papan flowchart saja, `animate-ping`/`animate-pulse` 9 lainnya), dan itu
+   * dipasang lewat KELAS: tanpa `!important` aturan universal di bawah kalah
+   * spesifik (0-0-0 lawan 0-1-0) sehingga diam-diam tidak berlaku sama sekali.
+   * Durasi 0.01 ms, bukan 0, supaya `transitionend`/`animationend` masih
+   * terjadi seperti yang diandalkan beberapa komponen. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ==========================================
