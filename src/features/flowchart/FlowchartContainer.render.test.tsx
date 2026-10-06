@@ -560,7 +560,13 @@ describe("FlowchartView", () => {
     fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
     await screen.findByTitle(/Snap to Grid|Snapping/i);
 
-    const titikUjung = () => container.querySelector("circle.animate-ping");
+    // #642 — penanda ujung garis yang sedang ditarik dulu dicari lewat kelas
+    // `animate-ping`, yaitu NAMA ANIMASINYA. Animasi itulah yang dilepas (titik
+    // berdenyut terus di tempat yang paling dilihat pengguna), jadi penandanya
+    // sekarang punya kelas sendiri. Ketiga asersi di bawah tidak berubah makna:
+    // belum ada sambungan = tidak ada penanda, ada = penandanya di pusat bentuk
+    // asal, batal = hilang lagi.
+    const titikUjung = () => container.querySelector("circle.titik-ujung-sambung");
     expect(titikUjung()).toBeNull();
 
     // Paku hanya muncul saat bentuk disentuh kursor.

@@ -501,22 +501,22 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                 />
               )}
 
-              {/* Flow Tracer Animation (When connected node is hovered or selected) */}
+              {/* Penanda garis yang menyentuh bentuk yang sedang disentuh.
+                  #642 — dulu ini motion.path dengan strokeDashoffset yang
+                  diulang SELAMANYA: satu loop animasi per garis hanya karena
+                  kursor berhenti di atas sebuah bentuk, dan loop itu terus
+                  hidup selama kursor diam di sana. Miro dan draw.io tidak
+                  menggambar apa pun yang bergerak pada keadaan ini. Informasi
+                  yang sama (garis mana yang ikut bentuk ini) dipertahankan
+                  lewat lebar dan warna, bukan lewat gerakan. */}
               {isNodeConnectedActive && (
-                <motion.path
+                <path
                   d={pathD}
                   fill="none"
-                  stroke={isSourceSelected || isSourceHovered ? "#10b981" : "#3b82f6"} // Green/Emerald for outflow, Blue/Indigo for inflow
-                  strokeWidth={isSelected ? "2.5" : "2"}
+                  stroke={isSourceSelected || isSourceHovered ? "#10b981" : "#3b82f6"}
+                  strokeWidth={isSelected ? 5.5 : 4.5}
                   strokeLinecap="round"
-                  strokeDasharray="12, 60"
-                  animate={{ strokeDashoffset: [0, -72] }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 1.2,
-                    ease: "linear",
-                  }}
-                  className="pointer-events-none opacity-90"
+                  className="pointer-events-none opacity-25"
                 />
               )}
 
@@ -613,7 +613,23 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                     ease: "linear",
                   }}
                 />
-                <circle cx={endX} cy={endY} r="5" fill="#8b5cf6" className="animate-ping" />
+                {/* Ujung garis yang sedang ditarik. #642 — lingkaran luarnya
+                    dulu `animate-ping`, yaitu satu animasi tak berhenti di
+                    titik yang justru paling dilihat pengguna. Cincin statis
+                    memberi bobot yang sama tanpa loop. Loop dash di atas
+                    sengaja TINGGAL: ia menandai "sedang menarik", berhenti saat
+                    mouse lepas, dan bukan pada keadaan diam. Kelas
+                    `titik-ujung-sambung` dipakai test sebagai identitas penanda
+                    ini — sebelumnya penanda itu dicari lewat kelas
+                    `animate-ping`, yaitu nama animasi yang justru dilepas. */}
+                <circle
+                  cx={endX}
+                  cy={endY}
+                  r="6"
+                  fill="#8b5cf6"
+                  opacity="0.25"
+                  className="titik-ujung-sambung"
+                />
                 <circle cx={endX} cy={endY} r="4" fill="#8b5cf6" />
               </motion.g>
             );

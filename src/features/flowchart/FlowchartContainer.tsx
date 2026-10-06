@@ -55,6 +55,11 @@ import { FlowchartEdges } from "./components/FlowchartEdges";
 import { FlowchartMinimap } from "./components/FlowchartMinimap";
 import { NodeContextMenu } from "./components/NodeContextMenu";
 import { CanvasContextMenu } from "./components/CanvasContextMenu";
+// #642 — `AnimatePresence` adalah satu-satunya cara gerakan KELUAR dijalankan
+// oleh mesin animasi: tanpa pembungkus ini prop `exit` yang sudah ditulis di
+// kedua menu konteks papan tidak pernah punya kesempatan main, dan menunya
+// hilang seketika.
+import { AnimatePresence } from "motion/react";
 import { FlowchartDetail } from "./components/FlowchartDetail";
 import { hasilTempel, kumpulkanSalinan } from "./lib/salinTempel";
 import type { SalinanPapan } from "./lib/salinTempel";
@@ -4885,54 +4890,65 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         setFlowKonteks={setFlowKonteks}
       />
 
-      {nodeContextMenu && (
-        <NodeContextMenu
-          x={nodeContextMenu.x}
-          y={nodeContextMenu.y}
-          nodeId={nodeContextMenu.nodeId}
-          nodeColor={nodes.find((n) => n.id === nodeContextMenu.nodeId)?.color || "indigo"}
-          onClose={() => setNodeContextMenu(null)}
-          onDelete={handleContextMenuDeleteNode}
-          onEditProperties={handleContextMenuEditProperties}
-          onChangeColor={handleContextMenuChangeColor}
-          onDuplicate={handleContextMenuDuplicate}
-          onZOrder={ubahTataLayers}
-          onCopy={(nodeId) =>
-            salinSeleksi(
-              copiedNodes.some((n) => n.id === nodeId)
-                ? copiedNodes
-                : nodes.filter((n) => n.id === nodeId)
-            )
-          }
-        />
-      )}
+      {/* #642 — kedua menu konteks papan dulu dipasang POLOS. Prop `exit` di
+          dalam komponen sudah ada sejak lama, tapi tanpa `AnimatePresence` tidak
+          ada yang menahannya sepersekian detik: React melepas elemennya pada
+          bingkai yang sama, jadi menu menutup seketika sementara membukanya
+          tetap beranimasi. */}
+      <AnimatePresence>
+        {nodeContextMenu && (
+          <NodeContextMenu
+            key="menu-bentuk"
+            x={nodeContextMenu.x}
+            y={nodeContextMenu.y}
+            nodeId={nodeContextMenu.nodeId}
+            nodeColor={nodes.find((n) => n.id === nodeContextMenu.nodeId)?.color || "indigo"}
+            onClose={() => setNodeContextMenu(null)}
+            onDelete={handleContextMenuDeleteNode}
+            onEditProperties={handleContextMenuEditProperties}
+            onChangeColor={handleContextMenuChangeColor}
+            onDuplicate={handleContextMenuDuplicate}
+            onZOrder={ubahTataLayers}
+            onCopy={(nodeId) =>
+              salinSeleksi(
+                copiedNodes.some((n) => n.id === nodeId)
+                  ? copiedNodes
+                  : nodes.filter((n) => n.id === nodeId)
+              )
+            }
+          />
+        )}
+      </AnimatePresence>
 
-      {canvasContextMenu && (
-        <CanvasContextMenu
-          x={canvasContextMenu.x}
-          y={canvasContextMenu.y}
-          onClose={() => setCanvasContextMenu(null)}
-          onAddNode={(type, label, color) =>
-            handleAddNewNodeAtPosition(
-              type as any,
-              label,
-              color,
-              canvasContextMenu.x,
-              canvasContextMenu.y
-            )
-          }
-          onZoomIn={() => geserZoom(1.1)}
-          onZoomOut={() => geserZoom(1 / 1.1)}
-          onResetZoom={fitPapanKeLayar}
-          onUndo={handleUndoClick}
-          onRedo={handleRedoClick}
-          onClear={handleClearWhiteboard}
-          onPaste={(klienX, klienY) => tempelSalinan(koordinatPapan(klienX, klienY))}
-          bolehTempel
-          canUndo={historyIndex > 0}
-          canRedo={historyIndex < historyStack.length - 1}
-        />
-      )}
+      <AnimatePresence>
+        {canvasContextMenu && (
+          <CanvasContextMenu
+            key="menu-kanvas"
+            x={canvasContextMenu.x}
+            y={canvasContextMenu.y}
+            onClose={() => setCanvasContextMenu(null)}
+            onAddNode={(type, label, color) =>
+              handleAddNewNodeAtPosition(
+                type as any,
+                label,
+                color,
+                canvasContextMenu.x,
+                canvasContextMenu.y
+              )
+            }
+            onZoomIn={() => geserZoom(1.1)}
+            onZoomOut={() => geserZoom(1 / 1.1)}
+            onResetZoom={fitPapanKeLayar}
+            onUndo={handleUndoClick}
+            onRedo={handleRedoClick}
+            onClear={handleClearWhiteboard}
+            onPaste={(klienX, klienY) => tempelSalinan(koordinatPapan(klienX, klienY))}
+            bolehTempel
+            canUndo={historyIndex > 0}
+            canRedo={historyIndex < historyStack.length - 1}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Upload Document Modal */}
       {isUploadDocModalOpen && (

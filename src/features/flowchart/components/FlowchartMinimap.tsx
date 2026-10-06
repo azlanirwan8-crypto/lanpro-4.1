@@ -282,7 +282,11 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
         <Map
           className={cn(
             "w-3.5 h-3.5",
-            isOpen ? "text-primary animate-pulse" : "text-content-subtle"
+            // #642 — ikonnya dulu berdenyut terus sepanjang panel terbuka.
+            // Terbuka/tutup sudah tersampaikan oleh chevron di sebelahnya;
+            // denyut di sini cuma membuat papan terasa sibuk saat tidak ada
+            // yang terjadi.
+            isOpen ? "text-primary" : "text-content-subtle"
           )}
         />
         <span>{t("flowNode.minimap")}</span>

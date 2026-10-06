@@ -172,24 +172,12 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
         adaSumberSambung,
         isSvgShape,
       })}
-      transition={{
-        type: "spring",
-        stiffness: 450,
-        damping: 22,
-        mass: 0.5,
-        rotate: isSourceOfConnect
-          ? {
-              type: "keyframes",
-              duration: 1.0,
-              ease: "easeInOut",
-              repeat: Infinity,
-            }
-          : {
-              type: "spring",
-              stiffness: 300,
-              damping: 15,
-            },
-      }}
+      // #642 — di bawah blok ini pernah ada `rotate` berkondisi yang minta
+      // keyframes diulang selamanya selama bentuk menjadi sumber sambungan.
+      // `gayaBentuk` mengunci PUTAR_BENTUK = 0 (#629: getaran bukan informasi),
+      // jadi tidak ada nilai yang pernah berubah: konfigurasinya mati dan yang
+      // tertinggal hanya biaya perawatannya. Satu pegas untuk semuanya.
+      transition={{ type: "spring", stiffness: 450, damping: 22, mass: 0.5 }}
       id={`val-node-${node.id}`}
     >
       {/* Floating connection ports on hover/select */}
