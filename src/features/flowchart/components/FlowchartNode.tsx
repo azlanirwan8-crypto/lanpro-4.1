@@ -62,6 +62,8 @@ interface FlowchartNodeProps {
     e?: { clientX: number; clientY: number }
   ) => void;
   handleUpdateActiveNode: (props: Partial<FlowNode>) => void;
+  /** #644 — label ditulis ke bentuknya SENDIRI, bukan ke "yang terpilih". */
+  handleUpdateNode: (id: string, props: Partial<FlowNode>) => void;
   handleDuplicateNode: (node: FlowNode) => void;
   handleDeleteSelected: () => void;
   /** Task yang tertaut pada node, bila ada. */
@@ -94,6 +96,7 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
   handleResizeMouseDown,
   handleConnectPortClick,
   handleUpdateActiveNode,
+  handleUpdateNode,
   handleDuplicateNode,
   handleDeleteSelected,
   getLinkedTaskDetails,
@@ -332,7 +335,13 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
           <textarea
             disabled={!isWorkspaceEditable}
             value={node.label}
-            onChange={(e) => handleUpdateActiveNode({ label: e.target.value })}
+            // #644 — dulu memanggil `handleUpdateActiveNode`, yang menulis ke
+            // bentuk TERPILIH dan mengembalikan tanpa arti kalau tidak ada yang
+            // terpilih (keadaan biasa setelah menempel kelompok). Mengetik di
+            // sini sekarang mengubah bentuk ini, dan fokusnya sekaligus memilih
+            // bentuk itu supaya panel sifat tidak menunjuk bentuk lain.
+            onChange={(e) => handleUpdateNode(node.id, { label: e.target.value })}
+            onFocus={() => setSelectedNodeId(node.id)}
             className={cn(
               "w-full bg-transparent border-0 resize-none font-medium text-current focus:outline-none focus:ring-1 focus:ring-violet-300 rounded leading-tight text-center font-sans tracking-tight custom-scrollbar",
               canvasTheme === "blueprint" && !isSticky && "text-content-inverse select-text",

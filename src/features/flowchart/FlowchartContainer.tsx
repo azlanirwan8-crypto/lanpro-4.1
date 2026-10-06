@@ -1424,13 +1424,24 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     // .readText()` hanya melihat text/plain, jadi rasa HTML draw.io tidak pernah
     // sampai padanya.
     const saatTempel = (e: Event) => aksiKlipboardRef.current.tempelPeristiwa(e as ClipboardEvent);
+    // #643 — kursor dicatat di LEVEL JENDELA, bukan hanya di elemen papan.
+    // `handleCanvasMouseMove` hanya jalan kalau pointer berada di atas papan DAN
+    // `berinteraksi` sedang mati (ia dilepas saat menyeret/marque/pan), jadi
+    // titik tempel bisa basi atau kosong padahal peramban tahu persis di mana
+    // kursor berada. Ini hanya menulis ref — tidak ada state, tidak ada render
+    // (aturan yang sama dengan #520/#582).
+    const saatGerak = (e: MouseEvent) => {
+      titikKursorRef.current = { x: e.clientX, y: e.clientY };
+    };
     window.addEventListener("keydown", saatKetik);
     window.addEventListener("keyup", saatLepas);
     window.addEventListener("paste", saatTempel);
+    window.addEventListener("mousemove", saatGerak, { passive: true });
     return () => {
       window.removeEventListener("keydown", saatKetik);
       window.removeEventListener("keyup", saatLepas);
       window.removeEventListener("paste", saatTempel);
+      window.removeEventListener("mousemove", saatGerak);
     };
   }, []);
 
@@ -2219,6 +2230,21 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setNodes(updated);
   };
 
+  /**
+   * #644 — mengubah SATU bentuk yang bernama, bukan "yang sedang terpilih".
+   *
+   * Kotak label di dalam bentuk dulu memanggil `handleUpdateActiveNode`. Kalau
+   * tidak ada bentuk terpilih — dan itu keadaan biasa setelah menempel
+   * KELOMPOK, karena `komitTempel` hanya menyetel satu bentuk terpilih bila
+   * hasilnya satu bentuk — fungsi itu mengembalikan tanpa melakukan apa pun:
+   * pengguna mengetik, huruf tidak muncul, dan tidak ada pesan. Terukur: dua
+   * test S3/S4 membuang inputnya. Identitas bentuk harus datang dari komponen
+   * yang menggambar kotaknya, bukan dari keadaan global yang bisa basi.
+   */
+  const handleUpdateNode = (id: string, props: Partial<FlowNode>) => {
+    setNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...props } : n)));
+  };
+
   // Add flow symbol/shape to workspace
   const handleAddNewNode = (type: FlowNode["type"], customColor?: string, labelAwal?: string) => {
     const id = "node_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
@@ -2977,9 +3003,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   const handleCanvasMouseMove = (e: React.MouseEvent) => {
-    // #582 — sekadar mencatat posisi di ref: tidak ada state yang ditulis, jadi
-    // tidak ada render tambahan seperti yang dihindari #520 di atas.
-    titikKursorRef.current = { x: e.clientX, y: e.clientY };
+    // #643 — penulisan titik kursor yang dulu ada di sini dipindah ke
+    // pendengar `mousemove` level jendela (lihat efek #643 di atas): dari sini
+    // handler ini hanya jalan saat pointer di ATAS papan dan saat tidak sedang
+    // menyeret, jadi acuan tempel bisa basi. Aturan lamanya tetap berlaku —
+    // hanya menulis ref, tidak ada state, tidak ada render (#520/#582).
 
     // Item #520 — posisi kursor hanya dibutuhkan garis bantu penghubung, yaitu
     // saat pengguna SEDANG menarik koneksi. Sebelumnya state ini disetel pada
@@ -3530,6 +3558,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     handleResizeMouseDown,
     handleConnectPortClick,
     handleUpdateActiveNode,
+    handleUpdateNode,
     handleDuplicateNode,
     handleDeleteSelected,
     getLinkedTaskDetails,
@@ -3539,6 +3568,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     handleResizeMouseDown,
     handleConnectPortClick,
     handleUpdateActiveNode,
+    handleUpdateNode,
     handleDuplicateNode,
     handleDeleteSelected,
     getLinkedTaskDetails,
@@ -3556,6 +3586,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       ) => aksiBentukRef.current.handleConnectPortClick(nodeId, portName, e),
       handleUpdateActiveNode: (props: Partial<FlowNode>) =>
         aksiBentukRef.current.handleUpdateActiveNode(props),
+      handleUpdateNode: (id: string, props: Partial<FlowNode>) =>
+        aksiBentukRef.current.handleUpdateNode(id, props),
       handleDuplicateNode: (node: FlowNode) => aksiBentukRef.current.handleDuplicateNode(node),
       handleDeleteSelected: () => aksiBentukRef.current.handleDeleteSelected(),
       getLinkedTaskDetails: (taskId?: string) => aksiBentukRef.current.getLinkedTaskDetails(taskId),
@@ -4133,6 +4165,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               handleResizeMouseDown={aksiBentuk.handleResizeMouseDown}
                               handleConnectPortClick={aksiBentuk.handleConnectPortClick}
                               handleUpdateActiveNode={aksiBentuk.handleUpdateActiveNode}
+                              handleUpdateNode={aksiBentuk.handleUpdateNode}
                               handleDuplicateNode={aksiBentuk.handleDuplicateNode}
                               handleDeleteSelected={aksiBentuk.handleDeleteSelected}
                               getLinkedTaskDetails={aksiBentuk.getLinkedTaskDetails}
