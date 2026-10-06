@@ -24,6 +24,7 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { validateFileClient } from "../lib/fileSecurity";
+import { dataUnduhAman, gambarAman, tautanAman } from "../lib/tautanAman";
 // UTANG LAPISAN: komponen ini memanggil backend langsung (9 panggilan chat).
 // Dijadwalkan pindah ke services/ pada fase L4. Ditandai eksplisit agar
 // terlihat sebagai utang yang diketahui, bukan lolos diam-diam.
@@ -533,6 +534,32 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
     }
   };
 
+  /**
+   * Peninjauan gambar ukuran penuh (#640).
+   *
+   * Dulu popup-nya diisi dengan `document.write` yang menerima deretan HTML
+   * hasil template: satu tanda kutip di dalam URL menutup atribut `src`, dan
+   * sisa teksnya menjadi atribut baru — di dokumen `about:blank` yang
+   * ber-origin SAMA dengan aplikasi, jadi skripnya punya akses ke sesi
+   * pengguna. Elemen yang dipasang lewat DOM tidak punya jalur itu: `src`
+   * adalah properti, dan properti tidak bisa "ditutup" oleh teks.
+   */
+  const bukaPeninjauan = (sumber: string) => {
+    const w = window.open("", "_blank");
+    if (!w) {
+      toast.error(t("chat.peninjauanDitolak"));
+      return;
+    }
+    const gambar = w.document.createElement("img");
+    gambar.src = sumber;
+    gambar.referrerPolicy = "no-referrer";
+    gambar.style.maxWidth = "100%";
+    gambar.style.maxHeight = "100vh";
+    gambar.style.display = "block";
+    gambar.style.margin = "auto";
+    w.document.body.appendChild(gambar);
+  };
+
   // Render attachment in message bubble
   const renderMessageContent = (msgText: string) => {
     if (msgText.startsWith("[IMAGE:")) {
@@ -541,20 +568,24 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
         const delimiterIdx = cleanStr.indexOf("|");
         const url = cleanStr.substring(0, delimiterIdx).trim();
         const name = cleanStr.substring(delimiterIdx + 1).trim() || "Gambar";
+        // Nilainya datang dari ISI pesan, dan pemindai menerima awalan ini pada
+        // teks yang diketik bebas — jadi keputusannya diambil tepat sebelum
+        // dipakai, sama seperti tautan lampiran flowchart (#584, #640).
+        const sumber = gambarAman(url);
+        if (!sumber) {
+          return (
+            <span className="italic text-rose-500 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" /> {t("chat.gambarDitolak", { nama: name })}
+            </span>
+          );
+        }
         return (
           <div className="flex flex-col gap-1.5 max-w-full">
             <img
-              src={url}
+              src={sumber}
               alt={name}
               className="rounded-xl max-w-full h-auto border border-border-subtle/50 shadow-soft max-h-40 object-cover cursor-zoom-in hover:brightness-95 transition-all"
-              onClick={() => {
-                const w = window.open();
-                if (w) {
-                  w.document.write(
-                    `<img src="${url}" style="max-width:100%; max-height:100vh; display:block; margin:auto;"/>`
-                  );
-                }
-              }}
+              onClick={() => bukaPeninjauan(sumber)}
               referrerPolicy="no-referrer"
             />
             <span className="text-xs sm:text-[11px] sm:text-[9px] opacity-75 flex items-center gap-1 font-mono tracking-tight">
@@ -577,9 +608,20 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
         const delimiterIdx = cleanStr.indexOf("|");
         const url = cleanStr.substring(0, delimiterIdx).trim();
         const name = cleanStr.substring(delimiterIdx + 1).trim() || "File";
+        // Berkas lampiran selalu data URL (hasil FileReader) — tapi teks pesan
+        // bisa diketik bebas, jadi kedua bentuk diterima hanya kalau skemanya
+        // hidup: data non-eksekusi, http(s), mailto, tel (#640).
+        const tujuan = dataUnduhAman(url) ?? tautanAman(url);
+        if (!tujuan) {
+          return (
+            <span className="italic text-rose-500 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" /> {t("chat.lampiranDitolak", { nama: name })}
+            </span>
+          );
+        }
         return (
           <a
-            href={url}
+            href={tujuan}
             download={name}
             target="_blank"
             rel="noopener noreferrer"

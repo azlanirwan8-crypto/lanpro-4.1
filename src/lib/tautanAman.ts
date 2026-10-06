@@ -41,3 +41,21 @@ export function dataUnduhAman(nilai?: string | null): string | null {
   if (tipe === "text/html" || tipe === "application/xhtml+xml") return null;
   return v;
 }
+
+const AWAL_GAMBAR = /^(?:https?:\/\/|data:image\/[a-z0-9.+-]+[,;])/i;
+
+/**
+ * Sumber untuk `<img>`. Lampiran obrolan selalu data URL `image/*` (#640), tapi
+ * alamat http(s) diterima juga karena pratinjau bisa menunjuk berkas yang
+ * sudah diunggah ke penyimpanan. Selain itu `null`: `javascript:` dan
+ * `data:text/html` tidak pernah boleh jadi `src`.
+ *
+ * Nilai yang lolos dari sini hanya boleh dipakai lewat PROPERTI elemen
+ * (`el.src = ...`), bukan disisipkan ke teks HTML. Perbedaannya bukan gaya
+ * penulisan: di HTML teks, satu tanda kutip menutup atribut dan sisa teksnya
+ * menjadi atribut baru — jalur yang dulu dipakai `document.write` di obrolan.
+ */
+export function gambarAman(nilai?: string | null): string | null {
+  const v = (nilai || "").trim();
+  return AWAL_GAMBAR.test(v) ? v : null;
+}

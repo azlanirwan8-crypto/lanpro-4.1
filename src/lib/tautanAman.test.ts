@@ -5,7 +5,7 @@
  * yang bisa salah: tautan yang tertolak diam-diam masih bisa dilihat teksnya,
  * sedangkan tautan yang lolos bisa dijalankan.
  */
-import { dataUnduhAman, tautanAman } from "./tautanAman";
+import { dataUnduhAman, gambarAman, tautanAman } from "./tautanAman";
 
 describe("tautanAman — hanya skema yang hidup (#584)", () => {
   it("menerima http, https, mailto, dan tel", () => {
@@ -56,5 +56,27 @@ describe("dataUnduhAman — berkas lama base64 masih bisa diunduh", () => {
     expect(dataUnduhAman("https://contoh.id/berkas.pdf")).toBeNull();
     expect(dataUnduhAman("javascript:alert(1)")).toBeNull();
     expect(dataUnduhAman(undefined)).toBeNull();
+  });
+});
+
+// #640 — sumber <img> di obrolan. Lampiran gambar selalu data URL image/*,
+// jadi menolaknya membuat seluruh lampiran mati; yang harus ditolak adalah
+// skema yang bisa berjalan.
+describe("gambarAman — hanya sumber gambar (#640)", () => {
+  it("menerima data URL image/* dan alamat http(s)", () => {
+    const png = "data:image/png;base64,iVBORw0KGgo=";
+    expect(gambarAman(png)).toBe(png);
+    expect(gambarAman("data:image/jpeg,<bytes>")).toBe("data:image/jpeg,<bytes>");
+    expect(gambarAman("https://cdn.lanpro.id/x.png")).toBe("https://cdn.lanpro.id/x.png");
+  });
+
+  it("menolak skrip, HTML, dan sisipan atribut", () => {
+    expect(gambarAman("javascript:alert(1)")).toBeNull();
+    expect(gambarAman("data:text/html;base64,PHNjcmlwdD4=")).toBeNull();
+    // Bentuk yang dulu menutup atribut src di document.write popup.
+    expect(gambarAman('" onload="alert(1)')).toBeNull();
+    expect(gambarAman("//evil.com/x.png")).toBeNull();
+    expect(gambarAman("")).toBeNull();
+    expect(gambarAman(undefined)).toBeNull();
   });
 });
