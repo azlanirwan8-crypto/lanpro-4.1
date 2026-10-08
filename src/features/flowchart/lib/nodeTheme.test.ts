@@ -94,6 +94,32 @@ describe("getShapeThemeClasses", () => {
   it("memberi sticky note tata letak kiri-atas, bukan tengah", () => {
     expect(getShapeThemeClasses(node({ type: "sticky" }), false)).toContain("text-left");
   });
+
+  /**
+   * #652. Cabang `sticky` adalah satu-satunya jalur gambar yang tidak pernah
+   * memasang kelas border: bentuk div lain memakai `borderStyleClass`, bentuk
+   * SVG membawa `strokeDasharray`. Catatan Miro yang aslinya bergaris
+   * putus-putus jadi kotak polos, dan tidak ada tempat lain untuk memperbaikinya
+   * karena `borderStyle` sudah dibaca parser sejak #650 — nilainya ada, hanya
+   * tidak pernah dipakai di sini.
+   */
+  it("sticky bergaris putus-putus menampilkan garisnya (#652)", () => {
+    expect(getShapeThemeClasses(node({ type: "sticky", borderStyle: "dashed" }), false)).toContain(
+      "border-dashed"
+    );
+  });
+
+  it("sticky biasa TIDAK ikut dapat border — bawaannya tetap tepi bawah saja (#652)", () => {
+    const hasil = getShapeThemeClasses(node({ type: "sticky" }), false);
+    expect(hasil).not.toContain("border-dashed");
+    expect(hasil).toContain("border-b-[3px]");
+  });
+
+  it("sticky tanpa border sama sekali tetap tidak bergaris (#652)", () => {
+    const hasil = getShapeThemeClasses(node({ type: "sticky", borderStyle: "none" }), false);
+    expect(hasil).not.toContain("border-dashed");
+    expect(hasil).toContain("border-0");
+  });
 });
 
 describe("getInitials", () => {

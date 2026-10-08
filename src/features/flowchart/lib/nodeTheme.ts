@@ -50,7 +50,19 @@ export const getShapeThemeClasses = (node: FlowNode, isSelected: boolean): strin
   }
 
   if (node.type === "sticky") {
-    return `${base} justify-start text-left p-4  ${palette.text} border-b-[3px] border-black/15 rounded-md ${ringClass}`;
+    // #652 — cabang ini satu-satunya jalur gambar yang tidak pernah memasang
+    // kelas border: bentuk div lain memakai `borderStyleClass`, bentuk SVG
+    // membawa `strokeDasharray`. Catatan Miro yang aslinya putus-putus jadi
+    // kotak polos padahal nilainya sudah dibacakan parser sejak #650.
+    // Untuk sticky solid kelasnya TIDAK berubah sama sekali — tampilan lama
+    // papan tidak boleh ikut bergeser.
+    const tepi =
+      node.borderStyle === "dashed"
+        ? "border border-dashed"
+        : node.borderStyle === "none"
+          ? "border-0 shadow-none"
+          : "border-b-[3px] border-black/15";
+    return `${base} justify-start text-left p-4 ${palette.text} ${tepi} rounded-md ${ringClass}`;
   }
 
   if (node.type === "rect") {

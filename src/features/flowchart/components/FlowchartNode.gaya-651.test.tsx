@@ -108,3 +108,50 @@ describe("tebal dan warna huruf pada bentuk (#651)", () => {
     expect(p.handleUpdateActiveNode).toHaveBeenCalledWith({ fontWeight: "bold" });
   });
 });
+
+/**
+ * #652 — sisa jalan buntu yang benar-benar ada, dan yang ternyata tidak.
+ *
+ * Catatan lama saya di papan (#650) mengklaim bentuk SVG tidak menampilkan garis
+ * putus-putus. Salah: `basicShapes` menyebar `elementProps` — yang sudah berisi
+ * `strokeDasharray` dari `shapes.tsx:132` — ke oval, circle, dan diamond. Dua
+ * test di bawah mengunci fakta itu pada DOM, lewat `<svg>` bentuknya SENDIRI,
+ * bukan sembarang elemen: versi pertama test ini mencari `.border-dashed` di
+ * seluruh container dan LULUS tanpa perbaikan apa pun, karena yang ketemu
+ * ternyata ikon overlay (`lucide-square … border-dashed`). Kelas bentuknya
+ * diuji terpisah di `nodeTheme.test.ts`, tempat string itu memang disusun.
+ */
+describe("garis putus-putus mencapai bentuk SVG (#652, koreksi catatan #650)", () => {
+  /**
+   * `<svg>` pertama di container adalah IKON overlay, jadi pencarian harus
+   * menunjuk svg bentuknya sendiri — yang dipasang `absolute inset-0` oleh
+   * `svgProps` di `shapes.tsx:122`. Versi pertama test ini memakai
+   * `querySelector("svg")` dan gagal justru karena itu.
+   */
+  const svgBentuk = (container: HTMLElement) =>
+    Array.from(container.querySelectorAll("svg")).find((s) =>
+      (s.getAttribute("class") || "").includes("inset-0")
+    );
+
+  it("oval: pola garis dipasang pada elemen yang digambar", () => {
+    const { container } = render(
+      <FlowchartNode {...props(bentuk({ type: "oval", borderStyle: "dashed" }))} />
+    );
+    const gambar = svgBentuk(container)!.querySelector("[stroke-dasharray]");
+    expect(gambar?.getAttribute("stroke-dasharray")).toBe("5,5");
+  });
+
+  it("diamond: sama, lewat polygon", () => {
+    const { container } = render(
+      <FlowchartNode {...props(bentuk({ type: "diamond", borderStyle: "dashed" }))} />
+    );
+    const gambar = svgBentuk(container)!.querySelector("[stroke-dasharray]");
+    expect(gambar?.tagName.toLowerCase()).toBe("polygon");
+    expect(gambar?.getAttribute("stroke-dasharray")).toBe("5,5");
+  });
+
+  it("oval tanpa borderStyle tidak membawa pola garis", () => {
+    const { container } = render(<FlowchartNode {...props(bentuk({ type: "oval" }))} />);
+    expect(svgBentuk(container)!.querySelector("[stroke-dasharray]")).toBeNull();
+  });
+});
