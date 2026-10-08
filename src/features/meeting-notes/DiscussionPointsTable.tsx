@@ -815,9 +815,14 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                           )}
                         </td>
 
-                        {/* Notes / Keterangan */}
+                        {/* Notes / Keterangan — #645: TIDAK boleh dipotong.
+                            Dulu `line-clamp-2 max-w-sm`, jadi catatan panjang
+                            ("... Analis…", "... via ema…") hilang di layar padahal
+                            tersimpan utuh di basis data (`keterangan TEXT`).
+                            Kartu mobile di berkas yang sama sudah menampilkan
+                            penuh, jadi tabel inilah yang menyimpang. */}
                         <td className="py-3 px-4 align-middle text-content-body font-normal">
-                          <div className="line-clamp-2 max-w-sm">
+                          <div className="whitespace-pre-wrap break-words">
                             {p.keterangan || p.comment || "-"}
                           </div>
                         </td>
@@ -846,7 +851,11 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                         {/* PIC (Assignee) */}
                         <td className="py-3 px-4 align-middle text-content-body font-normal">
                           <div className="flex items-center gap-1.5">
-                            <span className="truncate max-w-[120px]">{assigneeName}</span>
+                            {/* #645 — nama PIC dulu dipotong pada 120 px, jadi
+                                "Gloria Handoyo" tampil sebagai "Gloria Hand…".
+                                Kolomnya sudah punya `min-w-[140px]` dan pembungkus
+                                tabel bisa menggulir, jadi tidak ada alasan memotong. */}
+                            <span className="whitespace-nowrap">{assigneeName}</span>
                           </div>
                         </td>
 

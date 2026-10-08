@@ -173,7 +173,9 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
               {/* Context Tag */}
               <div className="flex items-center gap-1 min-w-0">
                 {p.fitur ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 truncate max-w-[130px]">
+                  // #645 — label tag dan nama PIC tidak boleh dipotong; catatan
+                  // di kartu ini sudah utuh, tinggal dua potongan ini yang tersisa.
+                  <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 whitespace-normal break-words">
                     <Tag className="w-3 h-3 shrink-0" />
                     {contextMeta?.label || p.fitur}
                   </span>
@@ -188,7 +190,7 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                 {/* PIC */}
                 <div className="flex items-center gap-1 text-[11px] text-content-body">
                   <User className="w-3 h-3 text-content-subtle shrink-0" />
-                  <span className="truncate max-w-[90px]">{assigneeName}</span>
+                  <span className="whitespace-nowrap">{assigneeName}</span>
                 </div>
 
                 {/* Target Date */}
