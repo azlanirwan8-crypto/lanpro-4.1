@@ -187,12 +187,18 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                       handleSelectFlowchart(fw.id);
                       setIsEditorActive(true);
                     }}
-                    className="hover:bg-surface-sunken/70 transition-colors duration-200 group cursor-pointer h-14 whitespace-nowrap"
+                    className="hover:bg-surface-sunken/70 transition-colors duration-200 group cursor-pointer whitespace-nowrap"
                   >
                     <td className="py-3 px-4 text-center text-content-subtle font-medium whitespace-nowrap">
                       {String(srNo).padStart(2, "0")}
                     </td>
-                    <td className="py-3 px-4 font-medium text-content group-hover:text-primary transition-colors max-w-[220px] truncate whitespace-nowrap">
+                    {/* #647 — `h-14` di baris ini dan `truncate` pada tiga sel
+                        data di bawahnya saling mengunci: tinggi baris dikunci
+                        56 px jadi teks yang diizinkan melebar pun tidak bisa
+                        bertambah tinggi. Sekarang baris mengikuti isi dan
+                        nama/deskripsi/epic tampil penuh di dalam batas kolomnya
+                        (yang masih ada, supaya tabel tidak melebar tanpa batas). */}
+                    <td className="py-3 px-4 font-medium text-content group-hover:text-primary transition-colors max-w-[260px] break-words">
                       {fw.name}
                     </td>
                     <td className="py-3 px-4 whitespace-nowrap">
@@ -202,7 +208,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                         kosong={t("flowchart.uncategorized")}
                       />
                     </td>
-                    <td className="py-3 px-4 text-content-muted font-medium max-w-[260px] truncate whitespace-nowrap">
+                    <td className="py-3 px-4 text-content-muted font-medium max-w-[320px] break-words">
                       {fw.description ? (
                         fw.description
                       ) : (
@@ -214,7 +220,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                     <td className="py-3 px-4 whitespace-nowrap">
                       {linkedEpic ? (
                         <span
-                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary border border-primary/30 text-[10px] leading-none font-medium rounded-md max-w-[180px] truncate"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary border border-primary/30 text-[10px] leading-snug font-medium rounded-md max-w-[200px] whitespace-normal break-words"
                           title={linkedEpic.title}
                         >
                           🎯 {linkedEpic.title}
@@ -228,7 +234,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                         <div className="w-6 h-6 rounded-full bg-primary-surface/10 text-primary flex items-center justify-center text-[10px] leading-none font-medium shrink-0">
                           {initials}
                         </div>
-                        <span className="truncate max-w-[120px]">{createdBy}</span>
+                        <span className="whitespace-nowrap">{createdBy}</span>
                       </div>
                     </td>
                     <td className="py-3 px-4 text-content-muted font-medium whitespace-nowrap">

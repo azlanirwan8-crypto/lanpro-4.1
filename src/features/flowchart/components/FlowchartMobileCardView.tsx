@@ -83,11 +83,14 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
             {/* Header: Title & Action buttons */}
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-semibold text-content-strong line-clamp-2 leading-snug">
+                {/* #647 — nama dan deskripsi dipecah dua baris dengan elipsis, jadi
+                    sisa judul/keterangan tidak pernah tampil dan tidak ada cara
+                    membukanya di kartu ini. Kartu boleh memanjang. */}
+                <h4 className="text-sm font-semibold text-content-strong whitespace-normal break-words leading-snug">
                   {flow.name || "Untitled Diagram"}
                 </h4>
                 {flow.description && (
-                  <p className="text-xs text-content-muted line-clamp-2 mt-1 leading-relaxed">
+                  <p className="text-xs text-content-muted whitespace-pre-wrap break-words mt-1 leading-relaxed">
                     {flow.description}
                   </p>
                 )}
@@ -127,9 +130,9 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
               {flow.category && <LabelChip kelompok="jenis_dokumen" nilai={flow.category} />}
 
               {epicName && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-sunken border border-border-subtle text-content-muted text-[11px] font-medium truncate max-w-[200px]">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-sunken border border-border-subtle text-content-muted text-[11px] font-medium whitespace-normal break-words max-w-full">
                   <Layers className="w-3 h-3 text-primary shrink-0" />
-                  <span className="truncate">{epicName}</span>
+                  <span>{epicName}</span>
                 </span>
               )}
             </div>
@@ -138,7 +141,7 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
             <div className="pt-2 border-t border-border-faint flex items-center justify-between gap-2 text-xs text-content-subtle">
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="text-[11px]">{t("meetings.thAuthor")}:</span>
-                <span className="font-medium text-content truncate">{author}</span>
+                <span className="font-medium text-content whitespace-nowrap">{author}</span>
               </div>
 
               <div className="flex items-center gap-2 shrink-0">

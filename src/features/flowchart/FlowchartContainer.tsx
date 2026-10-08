@@ -3842,10 +3842,19 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                         <FileText className="w-5 h-5" />
                                       </div>
                                       <div className="flex flex-col flex-1 min-w-0">
-                                        <span className="text-sm font-medium text-content-strong whitespace-nowrap">
+                                        {/* #646 — kedua baris ini dulu `whitespace-nowrap`.
+                                            Kolomnya memang `min-w-0` (boleh menyusut) tapi
+                                            teks yang tak boleh berganti baris tidak bisa
+                                            menyusut: URL SharePoint ±200 karakter lolos dari
+                                            border kartu dan memanjang sampai tepi layar, jadi
+                                            "Document List" bukan kartu lagi. Nama berkas
+                                            dipecah pada kata, URL dipecah di mana saja karena
+                                            URL tidak punya spasi. Tidak ada yang dipotong:
+                                            seluruh alamat tetap tampil, kartu yang memanjang. */}
+                                        <span className="text-sm font-medium text-content-strong whitespace-normal break-words">
                                           {doc.name}
                                         </span>
-                                        <span className="text-xs text-content-muted font-medium whitespace-nowrap mt-0.5">
+                                        <span className="text-xs text-content-muted font-medium whitespace-normal break-all mt-0.5">
                                           {doc.link || doc.fileName}
                                         </span>
                                         {!tautan && (

@@ -94,11 +94,13 @@ export const MeetingMobileCardView: React.FC<MeetingMobileCardViewProps> = ({
             {/* Top row: Title & Action buttons */}
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-semibold text-content-strong line-clamp-2 leading-snug">
+                {/* #647 — sama seperti tabel desktopnya: judul dan keterangan
+                    dipecah dua baris dengan elipsis tanpa cara membuka sisanya. */}
+                <h4 className="text-sm font-semibold text-content-strong whitespace-normal break-words leading-snug">
                   {meeting.title}
                 </h4>
                 {meeting.description && (
-                  <p className="text-xs text-content-muted line-clamp-2 mt-1 leading-relaxed">
+                  <p className="text-xs text-content-muted whitespace-pre-wrap break-words mt-1 leading-relaxed">
                     {meeting.description}
                   </p>
                 )}
@@ -192,7 +194,7 @@ export const MeetingMobileCardView: React.FC<MeetingMobileCardViewProps> = ({
                   name={authorName}
                   className="w-5 h-5 text-[10px]"
                 />
-                <span className="font-medium text-content truncate">{authorName}</span>
+                <span className="font-medium text-content whitespace-nowrap">{authorName}</span>
               </div>
             </div>
           </div>

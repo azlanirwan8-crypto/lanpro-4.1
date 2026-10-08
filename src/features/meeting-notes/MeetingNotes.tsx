@@ -639,7 +639,16 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                           {String(srNo).padStart(2, "0")}
                         </td>
                         <td className="py-3 px-4 font-medium text-content group-hover:text-primary transition-colors">
-                          <div className="line-clamp-1">{meeting.title}</div>
+                          {/* #647 — empat NILAI DATA di layar ini dipotong dan
+                              tidak bisa dibuka: judul (`line-clamp-1`), nama
+                              berkas rekaman (`truncate max-w-[140px]`), nama
+                              pembuat (`truncate`), dan keterangan
+                              (`line-clamp-1 max-w-xs`). Kolomnya sudah punya
+                              `min-w-[180px] max-w-[260px]` dan pembungkus tabel
+                              bisa menggulir, jadi yang hilang bukan karena
+                              ruangnya habis — hanya karena dipotong. Baris yang
+                              memanjang ke bawah adalah konsekuensi yang benar. */}
+                          <div className="whitespace-normal break-words">{meeting.title}</div>
                         </td>
                         <td className="py-3 px-4 text-content-muted font-medium">
                           <div className="flex items-center gap-1.5">
@@ -677,7 +686,9 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                               title={t("meetings.clickToDownload")}
                             >
                               <Download className="w-3.5 h-3.5 shrink-0 text-emerald-600 group-hover/file:scale-110 transition-transform" />
-                              <span className="truncate max-w-[140px]">{meeting.fileName}</span>
+                              <span className="whitespace-normal break-all">
+                                {meeting.fileName}
+                              </span>
                             </button>
                           ) : (
                             <span className="text-content-subtle italic text-xs">—</span>
@@ -691,11 +702,14 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                               name={author.name}
                               className="w-6 h-6 text-xs sm:text-[10px]"
                             />
-                            <span className="truncate">{author.name}</span>
+                            <span className="whitespace-nowrap">{author.name}</span>
                           </div>
                         </td>
                         <td className="py-3 px-4 text-content-muted font-normal">
-                          <div className="line-clamp-1 max-w-xs">
+                          {/* #647 — keterangan rapat adalah paragraf; satu baris
+                              dengan elipsis menyembunyikan sisanya tanpa cara
+                              membukanya. Sama seperti #645. */}
+                          <div className="whitespace-pre-wrap break-words">
                             {meeting.description || (
                               <span className="text-content-subtle text-xs sm:text-[11px] italic">
                                 {t("meetings.noDescription")}
@@ -851,7 +865,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                               title={t("meetingExtra.downloadAttachment")}
                             >
                               <FileText className="w-3.5 h-3.5 text-emerald-600" />
-                              <span className="truncate max-w-[140px]">
+                              <span className="whitespace-normal break-words">
                                 {activeMeeting.fileName}
                               </span>
                               <span className="text-[10px] bg-emerald-200/60 px-1.5 py-0.5 rounded font-medium">
@@ -1077,7 +1091,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   {newMeetingFile ? (
                     <div className="flex items-center justify-center gap-2">
                       <FileText className="w-4 h-4 text-emerald-600" />
-                      <span className="text-xs font-medium text-content-strong truncate max-w-[200px]">
+                      <span className="text-xs font-medium text-content-strong whitespace-normal break-words">
                         {newMeetingFile.name}
                       </span>
                       <span className="text-xs sm:text-[10px] text-content-subtle">
@@ -1086,9 +1100,9 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                     </div>
                   ) : editingMeeting?.fileName && !shouldRemoveMeetingFile ? (
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 truncate">
-                        <FileText className="w-4 h-4 text-primary" />
-                        <span className="text-xs font-medium text-content-strong truncate max-w-[180px]">
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-primary shrink-0" />
+                        <span className="text-xs font-medium text-content-strong whitespace-normal break-words">
                           {editingMeeting.fileName}
                         </span>
                         <span className="text-xs sm:text-[10px] text-content-subtle">
