@@ -187,7 +187,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                       handleSelectFlowchart(fw.id);
                       setIsEditorActive(true);
                     }}
-                    className="hover:bg-surface-sunken/70 transition-colors duration-200 group cursor-pointer whitespace-nowrap"
+                    className="hover:bg-surface-sunken/70 transition-colors duration-200 group cursor-pointer"
                   >
                     <td className="py-3 px-4 text-center text-content-subtle font-medium whitespace-nowrap">
                       {String(srNo).padStart(2, "0")}
@@ -197,8 +197,20 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                         56 px jadi teks yang diizinkan melebar pun tidak bisa
                         bertambah tinggi. Sekarang baris mengikuti isi dan
                         nama/deskripsi/epic tampil penuh di dalam batas kolomnya
-                        (yang masih ada, supaya tabel tidak melebar tanpa batas). */}
-                    <td className="py-3 px-4 font-medium text-content group-hover:text-primary transition-colors max-w-[260px] break-words">
+                        (yang masih ada, supaya tabel tidak melebar tanpa batas).
+                        #649 — baris itu sendiri masih membawa
+                        `whitespace-nowrap`, dan WARISAN ITU YANG MEMBUAT
+                        TABELNYA JADI SAMPAH: `white-space: nowrap` menghapus
+                        kesempatan berganti baris, sementara
+                        `overflow-wrap: break-word` hanya memecah kata yang
+                        TIDAK MUAT DI BARISNYA — di bawah nowrap ia tidak pernah
+                        aktif. Hasilnya terukur di screenshot pemilik proyek
+                        08 Okt: deskripsi 200 karakter memanjang satu baris
+                        MENIMPA kolom Author, Last Updated dan Action.
+                        `whitespace-normal` kini ditulis EKSPLISIT di setiap sel
+                        data yang melebar, jadi izin-wrap tidak lagi bergantung
+                        pada apa yang diwarisi dari baris. */}
+                    <td className="py-3 px-4 font-medium text-content group-hover:text-primary transition-colors max-w-[280px] whitespace-normal break-words">
                       {fw.name}
                     </td>
                     <td className="py-3 px-4 whitespace-nowrap">
@@ -208,7 +220,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                         kosong={t("flowchart.uncategorized")}
                       />
                     </td>
-                    <td className="py-3 px-4 text-content-muted font-medium max-w-[320px] break-words">
+                    <td className="py-3 px-4 text-content-muted font-medium max-w-[280px] whitespace-normal break-words">
                       {fw.description ? (
                         fw.description
                       ) : (

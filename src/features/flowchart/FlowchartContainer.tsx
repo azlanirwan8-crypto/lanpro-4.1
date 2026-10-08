@@ -37,6 +37,7 @@ import {
   Upload,
   Image as ImageIcon,
   Link as LinkIcon,
+  Copy,
   ChevronLeft,
 } from "lucide-react";
 import { Task, Project } from "../../types";
@@ -66,6 +67,7 @@ import type { SalinanPapan } from "./lib/salinTempel";
 import type { FlowNode, FlowEdge, FlowchartDocument, FlowchartData } from "./types";
 import { adaKonteks, KONTEKS_KOSONG } from "./types";
 import { dataUnduhAman, tautanAman } from "../../lib/tautanAman";
+import { labelTautan } from "./lib/labelTautan";
 import { setScreenSnapshot, clearScreenSnapshot } from "../../lib/screenContext";
 import { parseUniversalDiagram } from "./lib/importers";
 import type { ParsedDiagram } from "./lib/importers";
@@ -3832,6 +3834,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 // baris yang sudah ada (#584).
                                 const tautan = tautanAman(doc.link);
                                 const unduh = dataUnduhAman(doc.fileData);
+                                // #648 — label manusia (host + nama berkas), bukan
+                                // token mesin sepanjang 200 karakter.
+                                const label = labelTautan(doc.link);
                                 return (
                                   <div
                                     key={doc.id}
@@ -3842,20 +3847,26 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                         <FileText className="w-5 h-5" />
                                       </div>
                                       <div className="flex flex-col flex-1 min-w-0">
-                                        {/* #646 — kedua baris ini dulu `whitespace-nowrap`.
-                                            Kolomnya memang `min-w-0` (boleh menyusut) tapi
-                                            teks yang tak boleh berganti baris tidak bisa
-                                            menyusut: URL SharePoint ±200 karakter lolos dari
-                                            border kartu dan memanjang sampai tepi layar, jadi
-                                            "Document List" bukan kartu lagi. Nama berkas
-                                            dipecah pada kata, URL dipecah di mana saja karena
-                                            URL tidak punya spasi. Tidak ada yang dipotong:
-                                            seluruh alamat tetap tampil, kartu yang memanjang. */}
+                                        {/* #648 — yang ditampilkan adalah dua hal
+                                            yang dicari orang dari sebuah tautan:
+                                            MILIK SIAPA dan BERKAS APA. Alamat
+                                            SharePoint mentah adalah token mesin
+                                            (±200 karakter tanpa spasi): satu baris
+                                            membuatnya menjebol border kartu,
+                                            diizinkan berganti baris membuatnya jadi
+                                            lima baris yang tidak dibaca siapa pun —
+                                            dua-duanya ada di screenshot 06 Okt.
+                                            Alamat mentahnya TIDAK hilang: terpasang
+                                            di `title` baris ini dan bisa disalin
+                                            utuh lewat tombol Salin di bawah. */}
                                         <span className="text-sm font-medium text-content-strong whitespace-normal break-words">
-                                          {doc.name}
+                                          {doc.name || label.berkas || doc.fileName}
                                         </span>
-                                        <span className="text-xs text-content-muted font-medium whitespace-normal break-all mt-0.5">
-                                          {doc.link || doc.fileName}
+                                        <span
+                                          className="text-xs text-content-muted font-medium whitespace-normal break-words mt-0.5"
+                                          title={doc.link || doc.fileName}
+                                        >
+                                          {label.host || doc.fileName || doc.link}
                                         </span>
                                         {!tautan && (
                                           <span className="text-[10px] text-content-subtle mt-1">
@@ -3872,6 +3883,26 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                       </div>
                                     </div>
                                     <div className="pt-3 border-t border-border-faint flex items-center justify-end gap-2">
+                                      {/* #648 — alamat lengkap tetap bisa diambil
+                                          utuh meski tidak lagi dituang ke kartu. */}
+                                      {tautan && (
+                                        <button
+                                          type="button"
+                                          onClick={async () => {
+                                            try {
+                                              await navigator.clipboard.writeText(tautan);
+                                              toast.success(t("flowchart.tautanTersalin"));
+                                            } catch {
+                                              toast.error(t("flowchart.tautanSalinGagal"));
+                                            }
+                                          }}
+                                          title={t("flowchart.salinTautan")}
+                                          aria-label={t("flowchart.salinTautan")}
+                                          className="p-2 rounded-lg text-content-subtle hover:text-primary hover:bg-surface-muted transition-colors cursor-pointer"
+                                        >
+                                          <Copy className="w-3.5 h-3.5" />
+                                        </button>
+                                      )}
                                       <button
                                         type="button"
                                         onClick={(e) => hapusTautanDokumen(doc.id, e)}
