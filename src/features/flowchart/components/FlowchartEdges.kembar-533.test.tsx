@@ -48,6 +48,7 @@ const propsUntuk = (edges: FlowEdge[], extra: Partial<Props> = {}): Props => ({
   connectorType: "straight",
   zoomLevel: 1,
   onEdgePatch: jest.fn(),
+  koordinatPapan: (x: number, y: number) => ({ x, y }),
   isEditable: true,
   getNodeCenter: (id: string) => {
     const n = NODES.find((x) => x.id === id);

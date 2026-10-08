@@ -94,6 +94,10 @@ export function hasilTempel(salinan: SalinanPapan, posisi?: TitikPapan | null): 
     id: idReplika(e.id),
     fromNodeId: petaId.get(e.fromNodeId) ?? e.fromNodeId,
     toNodeId: petaId.get(e.toNodeId) ?? e.toNodeId,
+    // #653 — tekukan manual disimpan dalam koordinat PAPAN, bukan relatif ke
+    // bentuknya. Tanpa digeser bersama bentuknya, hasil tempel menampilkan garis
+    // yang tekukannya masih duduk di tempat aslinya.
+    waypoints: e.waypoints?.map((w) => ({ x: w.x + dx, y: w.y + dy })),
   }));
 
   return { nodes, edges };

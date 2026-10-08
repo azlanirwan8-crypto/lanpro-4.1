@@ -134,6 +134,14 @@ export interface FlowEdge {
   connector?: "bezier" | "straight" | "orthogonal";
   /** Gaya goresan. Kosong = garis utuh. */
   strokeStyle?: "solid" | "dashed" | "dotted";
+  /**
+   * Titik tekuk manual dalam koordinat papan (#653). Selama kosong atau tidak
+   * ada, jalurnya dihitung otomatis oleh `findSmartRoute` dan dihitung ulang
+   * setiap kali ujung atau rintangan berubah. Begitu pengguna menggeser garis,
+   * tekukan inilah yang menjadi jalurnya — rute otomatis mundur, persis seperti
+   * Miro menyimpan waypoint per penghubung.
+   */
+  waypoints?: Point[];
 }
 
 /**

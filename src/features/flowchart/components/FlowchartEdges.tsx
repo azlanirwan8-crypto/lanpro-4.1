@@ -37,6 +37,36 @@ const kotakBentuk = (n: FlowNode): Kotak => ({
 });
 
 /**
+ * Titik di TENGAH SEPANJANG jalur (#653) — bukan rata-rata koordinat ujung.
+ *
+ * Rata-rata ujung jatuh di ruang kosong begitu garis mengitari bentuk, jadi
+ * pemegang "tambah tekukan" harus duduk di separuh panjang garisnya sendiri, di
+ * atas segmen yang benar-benar ada. `titikBilah` lama memakai rata-rata itu dan
+ * tetap begitu untuk bilah gaya; yang baru hanya untuk pemegang tekukan.
+ */
+export const titikTengahJalur = (points: Point[]): Point => {
+  if (points.length === 0) return { x: 0, y: 0 };
+  if (points.length === 1) return points[0];
+  let jumlah = 0;
+  for (let i = 1; i < points.length; i++)
+    jumlah += Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+  const sasaran = jumlah / 2;
+  let berjalan = 0;
+  for (let i = 1; i < points.length; i++) {
+    const panjang = Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+    if (berjalan + panjang >= sasaran) {
+      const t = panjang === 0 ? 0 : (sasaran - berjalan) / panjang;
+      return {
+        x: Math.round(points[i - 1].x + (points[i].x - points[i - 1].x) * t),
+        y: Math.round(points[i - 1].y + (points[i].y - points[i - 1].y) * t),
+      };
+    }
+    berjalan += panjang;
+  }
+  return points[points.length - 1];
+};
+
+/**
  * Apakah salah satu patahan jalur MEMOTONG INTERIOR kotak ini?
  *
  * #544: sejak perutean boleh menyentuh sudut rintangan, rute yang sah memang
@@ -131,6 +161,11 @@ interface FlowchartEdgesProps {
   zoomLevel: number;
   /** Simpan bentuk/goresan satu garis (popup mini saat garis diklik). */
   onEdgePatch: (id: string, patch: Partial<FlowEdge>) => void;
+  /**
+   * Layar → koordinat papan (#653). Dipakai pemegang tekukan: tanpa konversi
+   * ini, menyeret di zoom 0,5 memindahkan titik dua kali lipat dari jarinya.
+   */
+  koordinatPapan: (clientX: number, clientY: number) => { x: number; y: number } | null;
   /** Putuskan sambungan garis terpilih. Kosong = tombol putuskan tak dipakai. */
   onDeleteEdge?: () => void;
   /** Papan boleh diubah; bilah gaya tidak muncul untuk pembaca saja. */
@@ -160,6 +195,7 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
   connectorType,
   zoomLevel,
   onEdgePatch,
+  koordinatPapan,
   onDeleteEdge,
   isEditable,
   getNodeCenter,
@@ -230,6 +266,51 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
     if (daftar) daftar.push(e.id);
     else kembar.set(k, [e.id]);
   }
+
+  /**
+   * #653 — seret satu tekukan. `titikAwal` diisi hanya bila tekukan ini belum
+   * ada: pemegang "tambah tekukan" duduk di tengah segmen, jadi tekukan baru
+   * lahir di sana lalu langsung mengikuti jarinya.
+   *
+   * Pendengarnya dipasang di `window`, bukan di lingkaran: jarinya bisa
+   * meninggalkan elemen sekecil 5 px di tengah seretan, dan kehilangan peristiwa
+   * di tengah jalan berarti garis berhenti di tengah udara.
+   */
+  const mulaiSeretTekukan = (
+    e: React.PointerEvent,
+    edge: FlowEdge,
+    indeks: number,
+    titikAwal?: Point
+  ) => {
+    if (!isEditable) return;
+    e.stopPropagation();
+    e.preventDefault();
+    const asal = (edge.waypoints || []).slice();
+    const daftar = titikAwal ? asal.concat([titikAwal]) : asal;
+    const tulis = (isi: Point[]) => onEdgePatch(edge.id, { waypoints: isi.slice() });
+    if (titikAwal) tulis(daftar);
+    const pindah = (ev: PointerEvent) => {
+      const p = koordinatPapan(ev.clientX, ev.clientY);
+      // Tanpa penjagaan ini, satu peristiwa tanpa koordinat (pointer yang lahir
+      // di luar jendela, atau lingkungan tanpa layout) menulis NaN ke dalam
+      // papan — dan NaN itu ikut tersimpan lalu membuat garisnya hilang.
+      if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return;
+      daftar.splice(indeks, 1, p);
+      tulis(daftar);
+    };
+    const lepas = () => {
+      window.removeEventListener("pointermove", pindah);
+      window.removeEventListener("pointerup", lepas);
+    };
+    window.addEventListener("pointermove", pindah);
+    window.addEventListener("pointerup", lepas);
+  };
+
+  const hapusTekukan = (edge: FlowEdge, indeks: number) => {
+    if (!isEditable) return;
+    const sisa = (edge.waypoints || []).filter((_, i) => i !== indeks);
+    onEdgePatch(edge.id, { waypoints: sisa });
+  };
 
   return (
     <>
@@ -382,14 +463,21 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
           // #533 — kunci simpanan ikut indeks kembar: dua garis searah pada
           // pasangan yang sama dulu berebut satu entri, jadi yang kedua
           // menimpa yang pertama dan keduanya menggambar rute identik.
-          const pathPoints = ruteDenganCache(
-            `${edge.fromNodeId}>${edge.toNodeId}#${urutan}`,
-            tandaTangan,
-            terganggu,
-            edge,
-            () => findSmartRoute(start, end, edge.fromNodeId, edge.toNodeId, nodes),
-            simpananRute
-          );
+          // #653 — begitu garis punya tekukan manual, rute otomatis MUNDUR:
+          // jalurnya adalah [ujung, ...tekukan, ujung] apa adanya. Ujungnya
+          // tetap menempel pada port yang sama, jadi menggeser bentuk tidak
+          // melepas sambungannya — hanya tekukannya yang ikut berpindah.
+          const tekukan = edge.waypoints && edge.waypoints.length ? edge.waypoints : null;
+          const pathPoints = tekukan
+            ? [start, ...tekukan, end]
+            : ruteDenganCache(
+                `${edge.fromNodeId}>${edge.toNodeId}#${urutan}`,
+                tandaTangan,
+                terganggu,
+                edge,
+                () => findSmartRoute(start, end, edge.fromNodeId, edge.toNodeId, nodes),
+                simpananRute
+              );
 
           // Bentuk jalur per garis: pilihan garis sendiri menang, selain itu ikut
           // bawaan papan.
@@ -570,6 +658,52 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                   </div>
                 </foreignObject>
               )}
+
+              {/*
+                #653 — pemegang tekukan, hanya pada garis terpilih di papan yang
+                boleh disunting. Lingkaran isi = tekukan yang sudah ada (seret
+                untuk memindah, klik-ganda untuk membuang); lingkaran kosong di
+                TENGAH JALUR menambah tekukan baru. Ukuran dan tebal garisnya
+                dibagi `zoomLevel` supaya tetap teraih di papan 0,3 maupun 3,0 —
+                sama seperti bilah gaya garis.
+              */}
+              {isSelected &&
+                isEditable &&
+                (() => {
+                  const tengah = titikTengahJalur(pathPoints);
+                  const daftar = edge.waypoints || [];
+                  return (
+                    <g>
+                      {daftar.map((w, i) => (
+                        <circle
+                          key={`tekuk-${i}`}
+                          cx={w.x}
+                          cy={w.y}
+                          r={6 / zoomLevel}
+                          fill="#8b5cf6"
+                          stroke="#ffffff"
+                          strokeWidth={2 / zoomLevel}
+                          className="cursor-grab"
+                          onPointerDown={(e) => mulaiSeretTekukan(e, edge, i)}
+                          onDoubleClick={(e) => {
+                            e.stopPropagation();
+                            hapusTekukan(edge, i);
+                          }}
+                        />
+                      ))}
+                      <circle
+                        cx={tengah.x}
+                        cy={tengah.y}
+                        r={5 / zoomLevel}
+                        fill="#ffffff"
+                        stroke="#8b5cf6"
+                        strokeWidth={2 / zoomLevel}
+                        className="cursor-crosshair"
+                        onPointerDown={(e) => mulaiSeretTekukan(e, edge, daftar.length, tengah)}
+                      />
+                    </g>
+                  );
+                })()}
             </g>
           );
         })}

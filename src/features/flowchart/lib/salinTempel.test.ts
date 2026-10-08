@@ -86,6 +86,26 @@ describe("hasilTempel — apa yang lahir saat Ctrl+V (#582)", () => {
     expect(hasil.nodes[1].x - hasil.nodes[0].x).toBe(220);
   });
 
+  it("tekukan manual ikut bergeser bersama bentuknya (#653)", () => {
+    // Waypoint disimpan dalam koordinat papan. Kalau tempel hanya menggeser
+    // bentuknya, hasil tempel menampilkan garis yang tekukannya masih duduk di
+    // tempat yang lama.
+    const papan = {
+      nodes: [bentuk("a", 100, 100), bentuk("b", 320, 100)],
+      edges: [panah("e1", "a", "b", { waypoints: [{ x: 200, y: 400 }] })],
+    };
+    const hasil = hasilTempel(papan, { x: 800, y: 600 });
+    const dx = hasil.nodes[0].x - 100;
+    const dy = hasil.nodes[0].y - 100;
+
+    expect(hasil.edges[0].waypoints).toEqual([{ x: 200 + dx, y: 400 + dy }]);
+  });
+
+  it("garis tanpa tekukan tidak tiba-tiba punya waypoint (#653)", () => {
+    const hasil = hasilTempel(duaBentukSatuPanah, { x: 800, y: 600 });
+    expect(hasil.edges[0].waypoints).toBeUndefined();
+  });
+
   it("clipboard kosong menempel tanpa menambah apa pun", () => {
     expect(hasilTempel({ nodes: [], edges: [] }, { x: 10, y: 10 })).toEqual({
       nodes: [],

@@ -66,6 +66,7 @@ const propsUntuk = (partial: Partial<Props> = {}): Props => ({
   zoomLevel: 1,
   isEditable: true,
   onEdgePatch: jest.fn(),
+  koordinatPapan: (x: number, y: number) => ({ x, y }),
   onDeleteEdge: jest.fn(),
   getNodeCenter: (id: string) => {
     const n = NODES.find((x) => x.id === id);

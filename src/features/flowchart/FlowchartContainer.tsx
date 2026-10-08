@@ -4173,6 +4173,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             connectorType={connectorType}
                             zoomLevel={zoomLevel}
                             onEdgePatch={handleEdgePatch}
+                            koordinatPapan={koordinatPapan}
                             onDeleteEdge={handlePutuskanGaris}
                             isEditable={isWorkspaceEditable}
                             getNodeCenter={getNodeCenter}
