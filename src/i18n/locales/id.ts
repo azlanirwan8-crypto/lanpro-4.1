@@ -2252,6 +2252,8 @@ export const id = {
     textAlign: "Rata Kiri/Tengah/Kanan",
     fontSmaller: "Perkecil Huruf",
     fontLarger: "Perbesar Huruf",
+    fontBold: "Tebal",
+    fontNormal: "Biasa",
     borderStyleTip: "Ubah garis tepi (Solid/Putus-putus/Tanpa)",
     duplicateShape: "Duplikat Bentuk (Ctrl+D)",
     startConnector: "Mulai tarik panah hubungan",

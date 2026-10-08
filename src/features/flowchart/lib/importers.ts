@@ -7,6 +7,8 @@ import {
   gayaGarisDariItem,
   gayaGarisDrawIo,
   potongTeks,
+  tebalDariHtml,
+  warnaTeksAman,
 } from "./gayaImpor";
 
 /**
@@ -355,6 +357,8 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
         color,
         fontSize: gaya.fontSize ?? 13,
         align: gaya.align ?? "center",
+        fontWeight: gaya.bold ? "bold" : undefined,
+        fontColor: warnaTeksAman(gaya.fontHex) ?? undefined,
         width,
         height,
         borderStyle: gaya.dashed ? "dashed" : "solid",
@@ -830,6 +834,9 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
           color,
           fontSize: gaya.fontSize ?? 13,
           align: gaya.align ?? "center",
+          // Miro tidak menyimpan tebal di gaya: ia ada di HTML teksnya.
+          fontWeight: gaya.bold || tebalDariHtml(item?.data?.textHtml) ? "bold" : undefined,
+          fontColor: warnaTeksAman(gaya.fontHex) ?? undefined,
           width,
           height,
           borderStyle: gaya.dashed ? "dashed" : "solid",

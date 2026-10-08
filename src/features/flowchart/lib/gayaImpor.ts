@@ -41,10 +41,13 @@ export interface GayaBentuk {
   /** Hex isian apa adanya; `warnaPaletTerdekat()` yang mengubahnya jadi nama palet. */
   fillHex: string;
   strokeHex: string;
+  /** Warna huruf apa adanya. WAJIB dilewatkan `warnaTeksAman()` sebelum ke DOM. */
+  fontHex: string;
   fontSize?: number;
   align?: FlowNode["align"];
   dashed?: boolean;
   strokeWidth?: number;
+  bold?: boolean;
   /** Rangkaian nama bentuk dari kunci mana pun yang dipakai sumber. */
   bentukHint: string;
 }
@@ -52,8 +55,32 @@ export interface GayaBentuk {
 const KOSONG: GayaBentuk = {
   fillHex: "",
   strokeHex: "",
+  fontHex: "",
   bentukHint: "",
 };
+
+/**
+ * Penjaga warna teks (#651).
+ *
+ * Nilainya datang dari berkas yang diunggah orang, dan akan masuk ke
+ * `style.color` pada elemen sungguhan. Satu-satunya bentuk yang diterima adalah
+ * hex tiga atau enam digit; apa pun yang lain — `url(...)`, `red; } body {`,
+ * `javascript:` — dipulangkan `null` supaya tidak pernah menyentuh DOM.
+ */
+export const warnaTeksAman = (nilai?: string | null): string | null => {
+  const v = (nilai || "").trim();
+  return /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(v) ? v : null;
+};
+
+/** Tebal dari angka bitmask draw.io: bit 1 = tebal, 2 = miring, 4 = garis bawah. */
+export const tebalDariBitmask = (nilai: string | number | undefined | null): boolean => {
+  const n = typeof nilai === "number" ? nilai : Number.parseInt(String(nilai ?? ""), 10);
+  return Number.isFinite(n) && (n & 1) === 1;
+};
+
+/** Sebagian sumber (Miro) hanya menyimpan tebal di dalam HTML teksnya. */
+export const tebalDariHtml = (html?: string | null): boolean =>
+  /<(?:b|strong)\b|font-weight\s*:\s*(?:bold|[6-9]00)/i.test(html || "");
 
 /** Wadah gaya yang mungkin dipakai sumber, urut dari yang paling umum. */
 const wadahGaya = (item: any): any[] =>
@@ -100,13 +127,25 @@ export const gayaDariItem = (item: any): GayaBentuk => {
   ]).toLowerCase();
   const rata = RATA[ambil(item, ["textAlign", "align", "horizontalAlign", "hAlign"]).toLowerCase()];
 
+  // `fontStyle` di Miro/draw.io adalah bitmask tebal/miring/garis-bawah, BUKAN
+  // medan `fontStyle` (sans/serif/mono) milik kita — nama yang sama, arti beda,
+  // jadi ia tidak pernah dibaca sebagai huruf. Sebagian ekspor hanya menulis
+  // "bold" atau angka CSS (600-900).
+  const tebalMentah = ambil(item, ["fontStyle", "fontWeight", "bold"]);
+  const tebal =
+    /^bold$/i.test(tebalMentah) ||
+    /^[6-9]00$/.test(tebalMentah) ||
+    (/^\d+$/.test(tebalMentah) && tebalDariBitmask(tebalMentah));
+
   return {
     fillHex: ambil(item, ["fillColor", "fill", "backgroundColor", "background"]),
     strokeHex: ambil(item, ["strokeColor", "borderColor", "lineColor", "border"]),
+    fontHex: ambil(item, ["fontColor", "color", "textColor"]),
     fontSize: angka(["fontSize", "fontsize", "textSize"]),
     align: rata,
     dashed: garis === "dashed" || garis === "dash" || garis === "dotted",
     strokeWidth: angka(["borderWidth", "strokeWidth", "lineWidth"]),
+    bold: tebal,
     // Nama bentuk bisa duduk di empat tempat tergantung generasi API (dan ekspor
     // lama menaruhnya di puncak item), jadi semuanya dikumpulkan — bukan dipilih
     // satu. `type` ikut karena sebagian sumber hanya menulis bentuk di sana.
@@ -178,16 +217,19 @@ export const gayaGarisDrawIo = (style: string): GayaGaris => {
   return gaya;
 };
 
+export interface GayaDrawIo {
+  dashed?: boolean;
+  fontSize?: number;
+  align?: FlowNode["align"];
+  strokeWidth?: number;
+  bold?: boolean;
+  /** `fontColor=` draw.io; sama seperti Miro, wajib lewat `warnaTeksAman()`. */
+  fontHex?: string;
+}
+
 /** Gaya bentuk pada string `style=` draw.io. */
-export const gayaDrawIo = (
-  style: string
-): { dashed?: boolean; fontSize?: number; align?: FlowNode["align"]; strokeWidth?: number } => {
-  const out: {
-    dashed?: boolean;
-    fontSize?: number;
-    align?: FlowNode["align"];
-    strokeWidth?: number;
-  } = {};
+export const gayaDrawIo = (style: string): GayaDrawIo => {
+  const out: GayaDrawIo = {};
   const angka = (kunci: string) => {
     const m = new RegExp(`${kunci}=([0-9.]+)`, "i").exec(style);
     const n = m ? Number.parseFloat(m[1]) : NaN;
@@ -200,5 +242,9 @@ export const gayaDrawIo = (
   if (sw) out.strokeWidth = Math.round(sw);
   const align = /align=(left|center|right)/i.exec(style)?.[1]?.toLowerCase();
   if (align === "left" || align === "center" || align === "right") out.align = align;
+  const tebal = /fontstyle=([0-9]+)/i.exec(style)?.[1];
+  if (tebal && tebalDariBitmask(tebal)) out.bold = true;
+  const fc = /fontcolor=([^;]+)/i.exec(style)?.[1];
+  if (fc) out.fontHex = fc;
   return out;
 };

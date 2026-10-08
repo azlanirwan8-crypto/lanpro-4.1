@@ -20,7 +20,50 @@ import {
   gayaGarisDariItem,
   gayaGarisDrawIo,
   potongTeks,
+  tebalDariBitmask,
+  tebalDariHtml,
+  warnaTeksAman,
 } from "./gayaImpor";
+
+describe("warnaTeksAman: hanya hex yang boleh sampai ke DOM (#651)", () => {
+  it("menerima hex tiga dan enam digit", () => {
+    expect(warnaTeksAman("#b85450")).toBe("#b85450");
+    expect(warnaTeksAman("#F8C")).toBe("#F8C");
+  });
+
+  it("menolak apa pun yang bukan hex — termasuk potongan CSS dan skrip", () => {
+    for (const tolak of [
+      "red",
+      "#12345",
+      "#gggggg",
+      "#fff; position:fixed",
+      "url(#pola)",
+      "javascript:alert(1)",
+      "",
+      undefined,
+      null,
+    ]) {
+      expect(warnaTeksAman(tolak as string)).toBeNull();
+    }
+  });
+});
+
+describe("tebal huruf dari sumber (#651)", () => {
+  it("bitmask draw.io: bit 1 tebal, bit 2 miring bukan", () => {
+    expect(tebalDariBitmask(1)).toBe(true);
+    expect(tebalDariBitmask("3")).toBe(true);
+    expect(tebalDariBitmask(2)).toBe(false);
+    expect(tebalDariBitmask(0)).toBe(false);
+    expect(tebalDariBitmask(undefined)).toBe(false);
+  });
+
+  it("Miro hanya menyimpan tebal di HTML teksnya", () => {
+    expect(tebalDariHtml("<div><b>Kriteria</b> password:</div>")).toBe(true);
+    expect(tebalDariHtml('<span style="font-weight:700">x</span>')).toBe(true);
+    expect(tebalDariHtml("<div>Kriteria password:</div>")).toBe(false);
+    expect(tebalDariHtml(undefined)).toBe(false);
+  });
+});
 
 describe("potongTeks: baris sumber tidak boleh menempel (#650)", () => {
   it("setiap </div> adalah batas baris, bukan ruang yang dibuang", () => {
@@ -91,10 +134,31 @@ describe("gayaDariItem: dua generasi API Miro dibaca keduanya (#650)", () => {
     const gaya = gayaDariItem({ type: "shape", data: { content: "X" } });
     expect(gaya.fillHex).toBe("");
     expect(gaya.strokeHex).toBe("");
+    expect(gaya.fontHex).toBe("");
     expect(gaya.fontSize).toBeUndefined();
     expect(gaya.align).toBeUndefined();
     expect(gaya.dashed).toBeFalsy();
+    expect(gaya.bold).toBeFalsy();
     expect(gaya.strokeWidth).toBeUndefined();
+  });
+
+  it("warna huruf dan bitmask tebal ikut terbaca", () => {
+    const gaya = gayaDariItem({
+      type: "shape",
+      data: { content: "X" },
+      style: { color: "#b85450", fontStyle: 1 },
+    });
+    expect(gaya.fontHex).toBe("#b85450");
+    expect(gaya.bold).toBe(true);
+  });
+
+  it("`fontStyle` Miro bukan medan `fontStyle` kita: miring tidak dianggap tebal", () => {
+    // Nama kunci sama, arti beda. `fontStyle: 2` di draw.io/Miro = miring,
+    // sedangkan `fontStyle` di FlowNode = sans/serif/mono. Yang pertama tidak
+    // boleh bocor ke yang kedua.
+    const gaya = gayaDariItem({ type: "shape", style: { fontStyle: 2 } });
+    expect(gaya.bold).toBe(false);
+    expect(gaya.fontHex).toBe("");
   });
 
   it("bukan objek sama sekali tidak melempar", () => {
@@ -140,6 +204,15 @@ describe("gaya draw.io (#650)", () => {
 
   it("style tanpa gaya kembali kosong supaya bawaan papan yang berlaku", () => {
     expect(gayaDrawIo("rounded=1;whiteSpace=wrap")).toEqual({});
+  });
+
+  it("fontStyle bitmask dan fontColor ikut terbaca", () => {
+    expect(gayaDrawIo("rounded=1;fontStyle=1;fontColor=#b85450")).toEqual({
+      bold: true,
+      fontHex: "#b85450",
+    });
+    // fontStyle=4 di draw.io adalah garis bawah — bukan tebal.
+    expect(gayaDrawIo("fontStyle=4").bold).toBeUndefined();
   });
 
   it("edgeStyle orthogonal, curved=1, dan dashed=1 pada garis", () => {
@@ -205,6 +278,32 @@ describe("parseMiroContent JSON: gaya asli sampai ke node dan edge (#650)", () =
     expect(parseMiroContent(papanMiro, false).nodes[0].label).toBe("Ringkasan\nData Merchant");
   });
 
+  it("tebal dari HTML teks dan warna huruf dari gaya ikut masuk (#651)", () => {
+    const { nodes } = parseMiroContent(
+      JSON.stringify({
+        data: [
+          {
+            id: "b1",
+            type: "shape",
+            data: { shape: "rounded_rect", textHtml: "<div><b>Kriteria</b> password:</div>" },
+            style: { color: "#b85450" },
+          },
+          {
+            id: "b2",
+            type: "shape",
+            data: { shape: "rounded_rect", content: "biasa saja" },
+          },
+        ],
+      }),
+      false
+    );
+    expect(nodes[0].fontWeight).toBe("bold");
+    expect(nodes[0].fontColor).toBe("#b85450");
+    expect(nodes[0].label).toBe("Kriteria password:");
+    expect(nodes[1].fontWeight).toBeUndefined();
+    expect(nodes[1].fontColor).toBeUndefined();
+  });
+
   it("label garis dan jalur bersiku dipulangkan", () => {
     const { edges } = parseMiroContent(papanMiro, false);
     expect(edges[0]).toMatchObject({ label: "YA", connector: "orthogonal" });
@@ -231,7 +330,7 @@ describe("parseUniversalDiagram draw.io: gaya string style ikut masuk (#650)", (
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="2" value="&lt;div&gt;Kriteria password:&lt;/div&gt;&lt;div&gt;1. 8-12 karakter&lt;/div&gt;" style="rounded=1;fillColor=#e1d5e7;dashed=1;fontSize=14;align=left" vertex="1">
+        <mxCell id="2" value="&lt;div&gt;Kriteria password:&lt;/div&gt;&lt;div&gt;1. 8-12 karakter&lt;/div&gt;" style="rounded=1;fillColor=#e1d5e7;dashed=1;fontSize=14;align=left;fontStyle=1;fontColor=#b85450" vertex="1">
           <mxGeometry x="40" y="80" width="160" height="120" />
         </mxCell>
         <mxCell id="3" value="Lanjut" style="edgeStyle=orthogonalEdgeStyle;dashed=1" edge="1" source="2" target="4" />
@@ -248,6 +347,17 @@ describe("parseUniversalDiagram draw.io: gaya string style ikut masuk (#650)", (
     expect(catatan?.fontSize).toBe(14);
     expect(catatan?.align).toBe("left");
     expect(catatan?.color).toBe("purple");
+  });
+
+  it("tebal dan warna huruf draw.io ikut masuk (#651)", () => {
+    const { nodes } = parseUniversalDiagram(xml, "papan.drawio");
+    const catatan = nodes.find((n) => n.id === "drawio-2");
+    expect(catatan?.fontWeight).toBe("bold");
+    expect(catatan?.fontColor).toBe("#b85450");
+    // Bentuk kedua tidak menuliskan keduanya: jangan sampai ikut terisi.
+    const selesai = nodes.find((n) => n.id === "drawio-4");
+    expect(selesai?.fontWeight).toBeUndefined();
+    expect(selesai?.fontColor).toBeUndefined();
   });
 
   it("setiap baris <div> tetap baris terpisah", () => {

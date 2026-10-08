@@ -2230,6 +2230,8 @@ export const en = {
     textAlign: "Align left/centre/right",
     fontSmaller: "Decrease font size",
     fontLarger: "Increase font size",
+    fontBold: "Bold",
+    fontNormal: "Regular",
     borderStyleTip: "Change border (Solid/Dashed/None)",
     duplicateShape: "Duplicate shape (Ctrl+D)",
     startConnector: "Start dragging a connector arrow",

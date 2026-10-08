@@ -26,6 +26,7 @@ import { customSvgTypes, renderCustomSvgShape } from "../lib/shapes";
 import { getShapeThemeClasses } from "../lib/nodeTheme";
 import { colorPaletteHex, ukuranBentukEfektif } from "../constants";
 import { cincinBentuk, gayaBentuk } from "../lib/gayaBentuk";
+import { warnaTeksAman } from "../lib/gayaImpor";
 import { NodePropertiesOverlay } from "./NodePropertiesOverlay";
 import type { FlowNode, FlowEdge } from "../types";
 import type { Task } from "../../../types";
@@ -343,14 +344,19 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
             onChange={(e) => handleUpdateNode(node.id, { label: e.target.value })}
             onFocus={() => setSelectedNodeId(node.id)}
             className={cn(
-              "w-full bg-transparent border-0 resize-none font-medium text-current focus:outline-none focus:ring-1 focus:ring-violet-300 rounded leading-tight text-center font-sans tracking-tight custom-scrollbar",
+              "w-full bg-transparent border-0 resize-none text-current focus:outline-none focus:ring-1 focus:ring-violet-300 rounded leading-tight text-center font-sans tracking-tight custom-scrollbar",
+              node.fontWeight === "bold" ? "font-bold" : "font-medium",
               canvasTheme === "blueprint" && !isSticky && "text-content-inverse select-text",
-              node.fontStyle === "serif" && "sticky-handwriting font-medium",
+              node.fontStyle === "serif" && "sticky-handwriting",
               node.fontStyle === "mono" && "font-mono text-xs sm:text-[10px]",
               node.align === "left" && "text-left",
               node.align === "right" && "text-right"
             )}
             style={{
+              // #651 — warna huruf dari berkas impor. Nilainya sudah disaring
+              // `warnaTeksAman()` (hanya hex 3/6 digit), jadi yang masuk ke sini
+              // tidak pernah bisa berupa potongan CSS atau skrip.
+              color: warnaTeksAman(node.fontColor) ?? undefined,
               fontSize: `${
                 node.type === "sticky"
                   ? (node.label || "").length > 100

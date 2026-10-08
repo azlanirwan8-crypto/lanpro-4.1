@@ -112,6 +112,14 @@ export interface FlowNode {
   height?: number;
   fontSize?: number;
   fontStyle?: "sans" | "serif" | "mono";
+  /** Tebal huruf. Kosong = biasa. #651 — dulu gaya ini tidak punya tempat di
+   *  model sama sekali, jadi papan Miro yang hurufnya tebal datang sebagai
+   *  huruf biasa dan tidak bisa diperbaiki dari mana pun. */
+  fontWeight?: "normal" | "bold";
+  /** Warna huruf, hex `#rgb`/`#rrggbb` dari berkas impor. Kosong = ikut palet
+   *  bentuk. Nilainya TIDAK pernah dipercaya apa adanya: yang masuk ke DOM
+   *  hanya yang lolos `warnaTeksAman()`. */
+  fontColor?: string;
   align?: "left" | "center" | "right";
   borderStyle?: "solid" | "dashed" | "none";
   strokeWidth?: number;

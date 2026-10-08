@@ -14,7 +14,16 @@
 import { useTranslation } from "react-i18next";
 import { StyledDropdown } from "../../../components/ui/CommonComponents";
 import React from "react";
-import { AlignLeft, AlignCenter, AlignRight, Square, Copy, ArrowRight, Trash2 } from "lucide-react";
+import {
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Square,
+  Copy,
+  ArrowRight,
+  Trash2,
+  Bold,
+} from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "../../../lib/utils";
 import type { FlowNode } from "../types";
@@ -135,6 +144,25 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
         title={t("shapes.fontFamily")}
       >
         {node.fontStyle || "sans"}
+      </button>
+
+      {/* Tebal huruf (#651) — dulu gaya ini tidak bisa disentuh dari mana pun:
+          tidak ada medannya di model, jadi papan Miro yang hurufnya tebal
+          datang sebagai huruf biasa dan tetap begitu selamanya. */}
+      <button
+        onClick={() =>
+          handleUpdateActiveNode({
+            fontWeight: node.fontWeight === "bold" ? "normal" : "bold",
+          })
+        }
+        aria-pressed={node.fontWeight === "bold"}
+        className={cn(
+          "p-1 rounded pointer-events-auto hover:bg-surface-muted",
+          node.fontWeight === "bold" ? "text-primary" : "text-content-secondary"
+        )}
+        title={t(node.fontWeight === "bold" ? "shapes.fontNormal" : "shapes.fontBold")}
+      >
+        <Bold className="w-3.5 h-3.5" />
       </button>
 
       {/* Toggle Align text */}
