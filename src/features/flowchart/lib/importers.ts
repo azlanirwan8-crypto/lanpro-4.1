@@ -1,6 +1,13 @@
 import i18n from "../../../i18n";
 import { colorPaletteHex, ukuranBentukEfektif } from "../constants";
 import type { FlowNode, FlowEdge } from "../types";
+import {
+  gayaDariItem,
+  gayaDrawIo,
+  gayaGarisDariItem,
+  gayaGarisDrawIo,
+  potongTeks,
+} from "./gayaImpor";
 
 /**
  * Clipboard draw.io menaruh XML-nya TER-ENCODE URI: "%3CmxGraphModel%3E%3Croot%3E…".
@@ -257,6 +264,8 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
     awal: { x: number; y: number };
     akhir: { x: number; y: number };
     label: string;
+    connector?: FlowEdge["connector"];
+    strokeStyle?: FlowEdge["strokeStyle"];
   }[] = [];
 
   for (let i = 0; i < cells.length; i++) {
@@ -282,11 +291,10 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
         height = parseFloat(geometry.getAttribute("height") || "80");
       }
 
-      let decodedLabel = decodeHtmlEntity(valueAttr)
-        .replace(/<br\s*\/?>/gi, "\n")
-        .replace(/<\/p>/gi, "\n")
-        .replace(/<[^>]*>/g, "")
-        .trim();
+      // #650 — `potongTeks` dipakai SEMUA jalur impor. Dulu `<div>` dibuang tanpa
+      // jejak, padahal draw.io dan Miro menulis satu baris teks per `<div>`:
+      // "Ringkasan" + "Data Merchant" menempel jadi "RingkasanData Merchant".
+      let decodedLabel = potongTeks(decodeHtmlEntity(valueAttr));
 
       if (!decodedLabel) {
         decodedLabel = "Komponen Alur";
@@ -333,6 +341,11 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
         warnaPaletTerdekat(/strokecolor=([^;]+)/i.exec(style)?.[1]);
       if (dariGambar) color = dariGambar;
 
+      // #650 — draw.io menyimpan garis putus-putus, ukuran huruf, perataan, dan
+      // tebal garis di dalam string `style=` yang sama; selama tidak satu pun
+      // dibacakan.
+      const gaya = gayaDrawIo(style);
+
       extractedNodes.push({
         id: `drawio-${id}`,
         type,
@@ -340,22 +353,21 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
         y,
         label: decodedLabel,
         color,
-        fontSize: 13,
-        align: "center",
+        fontSize: gaya.fontSize ?? 13,
+        align: gaya.align ?? "center",
         width,
         height,
-        borderStyle: "solid",
-        strokeWidth: 2,
+        borderStyle: gaya.dashed ? "dashed" : "solid",
+        strokeWidth: gaya.strokeWidth ?? 2,
       });
       nodeIdsSet.add(`drawio-${id}`);
     } else if (edge === "1") {
       const sourceId = cell.getAttribute("source");
       const targetId = cell.getAttribute("target");
-      const labelText = decodeHtmlEntity(valueAttr)
-        .replace(/<br\s*\/?>/gi, "\n")
-        .replace(/<\/p>/gi, "\n")
-        .replace(/<[^>]*>/g, "")
-        .trim();
+      const labelText = potongTeks(decodeHtmlEntity(valueAttr));
+      // #650 — bentuk jalur dan gaya goresan garis ikut terbawa, kalau tidak
+      // setiap garis impor berakhir melengkung bezier padahal sumbernya bersiku.
+      const gayaGaris = gayaGarisDrawIo(cell.getAttribute("style") || "");
 
       if (sourceId && targetId) {
         extractedEdges.push({
@@ -363,11 +375,21 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
           fromNodeId: `drawio-${sourceId}`,
           toNodeId: `drawio-${targetId}`,
           label: labelText || undefined,
+          connector: gayaGaris.connector,
+          strokeStyle: gayaGaris.strokeStyle,
         });
       } else {
         const awal = titikUjungGaris(cell, "sourcePoint");
         const akhir = titikUjungGaris(cell, "targetPoint");
-        if (awal && akhir) panahLepas.push({ id, awal, akhir, label: labelText });
+        if (awal && akhir)
+          panahLepas.push({
+            id,
+            awal,
+            akhir,
+            label: labelText,
+            connector: gayaGaris.connector,
+            strokeStyle: gayaGaris.strokeStyle,
+          });
       }
     }
   }
@@ -383,6 +405,8 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
       fromNodeId: awal.id,
       toNodeId: akhir.id,
       label: lepas.label || undefined,
+      connector: lepas.connector,
+      strokeStyle: lepas.strokeStyle,
     });
   }
 
@@ -621,14 +645,18 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
 
         let labelText =
           row.text || row.label || row.content || row.title || `Komponen Miro ${idx + 1}`;
-        labelText = decodeHtmlEntity(labelText)
-          .replace(/<[^>]*>/g, "")
-          .trim();
+        labelText = potongTeks(decodeHtmlEntity(labelText));
 
         let type: FlowNode["type"] = "rect";
         let color = "indigo";
         const parsedShape = (row.shape || row.type || "").toLowerCase();
-        if (parsedShape.includes("circle") || parsedShape.includes("oval")) {
+        // Miro menulis oval sebagai "ellipse" — nama itu tidak memuat "oval"
+        // maupun "circle", jadi Start/End papan Miro dulu masuk sebagai kotak.
+        if (
+          parsedShape.includes("circle") ||
+          parsedShape.includes("oval") ||
+          parsedShape.includes("ellipse")
+        ) {
           type = "oval";
           color = "emerald";
         } else if (parsedShape.includes("rhombus") || parsedShape.includes("diamond")) {
@@ -644,6 +672,13 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
           type = "sticky";
           color = "yellow";
         }
+
+        // CSV ekspor Miro tidak punya kolom gaya; kalau berkasnya tetap
+        // menyertakan satu, warna itu yang dipakai — bukan tebakan dari nama.
+        const warnaBaris = warnaPaletTerdekat(
+          row.fillcolor || row["fill color"] || row.color || row.fill
+        );
+        if (warnaBaris) color = warnaBaris;
 
         extractedNodes.push({
           id: `miro-${id}`,
@@ -733,7 +768,10 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
         }
 
         let text = "";
-        if (item.data && typeof item.data.content === "string") {
+        if (item.data && typeof item.data.textHtml === "string" && item.data.textHtml.trim()) {
+          // `textHtml` yang menyimpan struktur baris; `content` versi polosnya.
+          text = item.data.textHtml;
+        } else if (item.data && typeof item.data.content === "string") {
           text = item.data.content;
         } else if (item.data && typeof item.data.text === "string") {
           text = item.data.text;
@@ -745,25 +783,26 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
           text = item.content;
         }
 
-        text = decodeHtmlEntity(text)
-          .replace(/<br\s*\/?>/gi, "\n")
-          .replace(/<\/p>/gi, "\n")
-          .replace(/<[^>]*>/g, "")
-          .trim();
+        text = potongTeks(decodeHtmlEntity(text));
 
         if (!text) {
           text = `Miro ${item.type || "Bentuk"}`;
         }
 
+        // #650 — gaya asli item: warna isian/garis, ukuran huruf, perataan, dan
+        // garis putus-putus. Selama ini tidak satu pun dibaca, jadi catatan
+        // bergaris putus-putus di Miro masuk sebagai kotak polos rata tengah.
+        const gaya = gayaDariItem(item);
+        const warnaAsli = warnaPaletTerdekat(gaya.fillHex) || warnaPaletTerdekat(gaya.strokeHex);
+
         let type: FlowNode["type"] = "rect";
         let color = "indigo";
-        const shapeStyle = (
-          (item.style && item.style.shapeType) ||
-          item.shape ||
-          item.type ||
-          ""
-        ).toLowerCase();
-        if (shapeStyle.includes("circle") || shapeStyle.includes("oval")) {
+        const shapeStyle = gaya.bentukHint;
+        if (
+          shapeStyle.includes("circle") ||
+          shapeStyle.includes("oval") ||
+          shapeStyle.includes("ellipse")
+        ) {
           type = "oval";
           color = "emerald";
         } else if (shapeStyle.includes("rhombus") || shapeStyle.includes("diamond")) {
@@ -780,6 +819,8 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
           color = "yellow";
         }
 
+        if (warnaAsli) color = warnaAsli;
+
         extractedNodes.push({
           id: `miro-${id}`,
           type,
@@ -787,12 +828,12 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
           y,
           label: text,
           color,
-          fontSize: 13,
-          align: "center",
+          fontSize: gaya.fontSize ?? 13,
+          align: gaya.align ?? "center",
           width,
           height,
-          borderStyle: "solid",
-          strokeWidth: 2,
+          borderStyle: gaya.dashed ? "dashed" : "solid",
+          strokeWidth: gaya.strokeWidth ?? 2,
         });
         nodeIdsSet.add(`miro-${id}`);
       } else {
@@ -800,22 +841,21 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
         const toNode = item.end?.id || item.endCell || item.to || item.target;
 
         if (fromNode && toNode) {
-          let label = "";
-          if (item.captions && Array.isArray(item.captions) && item.captions[0]) {
-            label = item.captions[0].text || "";
-          } else if (item.label) {
-            label = item.label;
-          }
+          // #650 — teks pada garis Miro ada di `captions[]` (WebSDK) atau
+          // `data.captions[]` (REST); dulu hanya `item.captions` yang dicari,
+          // jadi label "YA"/"TIDAK"/"EDC"/"QRIS" lenyap tanpa pesan. Bentuk
+          // jalurnya (`elbowed`/`curved`/`straight`) juga ikut dibawa supaya
+          // garis siku tidak berubah jadi lengkungan.
+          const gaya = gayaGarisDariItem(item);
+          const label = potongTeks(decodeHtmlEntity(gaya.label));
 
           extractedEdges.push({
             id: `miro-edge-${id}`,
             fromNodeId: `miro-${fromNode}`,
             toNodeId: `miro-${toNode}`,
-            label: label
-              ? decodeHtmlEntity(label)
-                  .replace(/<[^>]*>/g, "")
-                  .trim()
-              : undefined,
+            label: label || undefined,
+            connector: gaya.connector,
+            strokeStyle: gaya.strokeStyle,
           });
         }
       }
