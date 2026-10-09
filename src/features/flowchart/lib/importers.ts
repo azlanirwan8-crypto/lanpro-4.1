@@ -180,9 +180,24 @@ export const autoCenterAndNormalizeDiagram = (
     y: Math.round(node.y + shiftY),
   }));
 
+  // #664 — tekukan garis ikut digeser. Bentuk dipindah, dan titik tekukan duduk
+  // di ruang koordinat yang sama: mengeser satu tanpa yang lain membuat garis
+  // impor melengkung ke tempat yang tidak pernah dimaksud penulisnya.
+  const normalizedEdges = (diagram.edges || []).map((edge) =>
+    edge.waypoints && edge.waypoints.length
+      ? {
+          ...edge,
+          waypoints: edge.waypoints.map((w) => ({
+            x: Math.round(w.x + shiftX),
+            y: Math.round(w.y + shiftY),
+          })),
+        }
+      : edge
+  );
+
   return {
     nodes: normalizedNodes,
-    edges: diagram.edges || [],
+    edges: normalizedEdges,
   };
 };
 
@@ -232,6 +247,33 @@ const titikUjungGaris = (
   return null;
 };
 
+/**
+ * #664 — tekukan manual yang ditulis draw.io di `<Array as="points">`.
+ *
+ * Selama ini hanya ujungnya yang dibaca, jadi garis yang di sumbernya sengaja
+ * dibelokkan lewat dua titik datang sebagai garis hasil rute otomatis yang lewat
+ * jalan lain. Kolom `waypoints` sudah ada di papan sejak #653 — yang belum adalah
+ * jalannya masuk.
+ *
+ * Hanya titik di DALAM `Array` yang diambil: `mxGeometry` juga memuat
+ * `sourcePoint` dan `targetPoint`, dan keduanya bukan tekukan.
+ */
+const titikTekukanGaris = (cell: Element): { x: number; y: number }[] => {
+  const geometri = cell.getElementsByTagName("mxGeometry")[0];
+  if (!geometri) return [];
+  const array = Array.from(geometri.getElementsByTagName("Array")).find(
+    (a) => a.getAttribute("as") === "points"
+  );
+  if (!array) return [];
+  const keluar: { x: number; y: number }[] = [];
+  for (const titik of Array.from(array.getElementsByTagName("mxPoint"))) {
+    const x = parseFloat(titik.getAttribute("x") || "");
+    const y = parseFloat(titik.getAttribute("y") || "");
+    if (Number.isFinite(x) && Number.isFinite(y)) keluar.push({ x, y });
+  }
+  return keluar;
+};
+
 /** Membaca berkas .drawio/.xml dan memetakan tiap <mxCell> ke node atau edge. */
 export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
   const parser = new DOMParser();
@@ -268,6 +310,8 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
     label: string;
     connector?: FlowEdge["connector"];
     strokeStyle?: FlowEdge["strokeStyle"];
+    /** #664 — tekukan dari `<Array as="points">`, kosong berarti tidak ada. */
+    waypoints: { x: number; y: number }[];
   }[] = [];
 
   for (let i = 0; i < cells.length; i++) {
@@ -364,6 +408,11 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
         height,
         borderStyle: gaya.dashed ? "dashed" : "solid",
         strokeWidth: gaya.strokeWidth ?? 1,
+        // #666 — tiga kunci yang selama ini dibuang: bentuk membulat, pola
+        // putus-putus, dan letak huruf tegak lurus di dalam bentuknya.
+        rounded: gaya.rounded,
+        dashPattern: gaya.dashPattern,
+        verticalAlign: gaya.verticalAlign,
       });
       nodeIdsSet.add(`drawio-${id}`);
     } else if (edge === "1") {
@@ -373,6 +422,7 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
       // #650 — bentuk jalur dan gaya goresan garis ikut terbawa, kalau tidak
       // setiap garis impor berakhir melengkung bezier padahal sumbernya bersiku.
       const gayaGaris = gayaGarisDrawIo(cell.getAttribute("style") || "");
+      const tekukan = titikTekukanGaris(cell);
 
       if (sourceId && targetId) {
         extractedEdges.push({
@@ -382,6 +432,9 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
           label: labelText || undefined,
           connector: gayaGaris.connector,
           strokeStyle: gayaGaris.strokeStyle,
+          // Kosong harus tetap kosong, bukan array nol isi: perender #653
+          // membeda-kan keduanya.
+          waypoints: tekukan.length ? tekukan : undefined,
         });
       } else {
         const awal = titikUjungGaris(cell, "sourcePoint");
@@ -394,6 +447,7 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
             label: labelText,
             connector: gayaGaris.connector,
             strokeStyle: gayaGaris.strokeStyle,
+            waypoints: tekukan,
           });
       }
     }
@@ -412,6 +466,7 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
       label: lepas.label || undefined,
       connector: lepas.connector,
       strokeStyle: lepas.strokeStyle,
+      waypoints: lepas.waypoints.length ? lepas.waypoints : undefined,
     });
   }
 

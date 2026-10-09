@@ -353,7 +353,15 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
         {/* Display Text content box */}
         <div
           className={cn(
-            "flex-1 w-full flex flex-col justify-center min-w-0 h-full relative z-10",
+            "flex-1 w-full flex flex-col min-w-0 h-full relative z-10",
+            // #666 — `verticalAlign` draw.io: label duduk di atas, tengah, atau
+            // bawah bentuknya. Tengah memang bawaan, jadi hanya permintaan
+            // sumber yang berpindah.
+            node.verticalAlign === "top"
+              ? "justify-start"
+              : node.verticalAlign === "bottom"
+                ? "justify-end"
+                : "justify-center",
             node.type === "actor" && "pt-3.5"
           )}
           style={{ padding: isDiamond ? "15%" : undefined }}

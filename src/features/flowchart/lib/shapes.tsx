@@ -99,8 +99,9 @@ export function renderCustomSvgShape(
         ? "#60a5fa"
         : colorPaletteHex[node.color]?.stroke || "#6366f1";
 
-  // #655 — polanya 3,3 seperti draw.io, bukan 5,5.
-  const strokeDash = node.borderStyle === "dashed" ? "3,3" : "none";
+  // #655 — polanya 3,3 seperti draw.io, bukan 5,5. #666 — kecuali berkas sumber
+  // menulis `dashPattern=` sendiri; itu yang berlaku, apa pun angkanya.
+  const strokeDash = node.borderStyle === "dashed" ? node.dashPattern || "3,3" : "none";
   /**
    * #638 pernah mengunci 1 px untuk SEMUA bentuk ("2 px membuat tepi bentuk
    * setebal stiker"). #655 mengembalikan hak sumber: draw.io sendiri bawaannya

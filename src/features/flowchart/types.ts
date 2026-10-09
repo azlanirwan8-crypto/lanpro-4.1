@@ -121,6 +121,20 @@ export interface FlowNode {
    *  hanya yang lolos `warnaTeksAman()`. */
   fontColor?: string;
   align?: "left" | "center" | "right";
+  /**
+   * #666 — `rounded=1` dari berkas draw.io. Kosong = bawaan papan, dan bawaan
+   * itu sejak #655 adalah `rounded=0` seperti draw.io. Tanpa kolom ini, bentuk
+   * yang di sumbernya membulat justru datang bersudut tajam: #655 memperbaiki
+   * bawaan tapi merusak yang disetel.
+   */
+  rounded?: boolean;
+  /**
+   * #666 — `dashPattern=4 4` apa adanya, disimpan dengan koma ala SVG (`4,4`).
+   * Kosong berarti gaya putus-putus memakai pola bawaan draw.io, `3,3`.
+   */
+  dashPattern?: string;
+  /** #666 — `verticalAlign=top|middle|bottom`; kosong = tengah seperti draw.io. */
+  verticalAlign?: "top" | "middle" | "bottom";
   borderStyle?: "solid" | "dashed" | "none";
   strokeWidth?: number;
 }

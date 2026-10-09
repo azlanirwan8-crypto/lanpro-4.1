@@ -288,3 +288,41 @@ describe("geometri tepi bentuk mengikuti draw.io (#655)", () => {
     expect(divBentuk(container)!.style.borderWidth).toBe("");
   });
 });
+
+/**
+ * #666 — dua kunci sumber yang harus terlihat di DOM, bukan hanya di data:
+ * pola putus-putus yang ditulis berkas dan letak label tegak lurus.
+ */
+describe("dashPattern dan verticalAlign sumber sampai ke layar (#666)", () => {
+  const svgBentuk = (container: HTMLElement) =>
+    Array.from(container.querySelectorAll("svg")).find((x) =>
+      (x.getAttribute("class") || "").includes("inset-0")
+    );
+
+  const polaDash = (lebih: Partial<FlowNode>) => {
+    const { container } = render(
+      <FlowchartNode {...props(bentuk({ type: "oval", borderStyle: "dashed", ...lebih }))} />
+    );
+    return svgBentuk(container)!
+      .querySelector("[stroke-dasharray]")
+      ?.getAttribute("stroke-dasharray");
+  };
+
+  it("pola dari berkas sumber dipakai apa adanya", () => {
+    expect(polaDash({ dashPattern: "6,3" })).toBe("6,3");
+  });
+
+  it("tanpa pola dari sumber, papan memakai bawaan draw.io 3,3", () => {
+    expect(polaDash({})).toBe("3,3");
+  });
+
+  it("verticalAlign menggeser label, dan tengah tetap bawaannya", () => {
+    const kelas = (lebih: Partial<FlowNode>) => {
+      const { container } = render(<FlowchartNode {...props(bentuk(lebih))} />);
+      return (container.querySelector("textarea")!.parentElement as HTMLElement).className;
+    };
+    expect(kelas({ verticalAlign: "top" })).toContain("justify-start");
+    expect(kelas({ verticalAlign: "bottom" })).toContain("justify-end");
+    expect(kelas({})).toContain("justify-center");
+  });
+});

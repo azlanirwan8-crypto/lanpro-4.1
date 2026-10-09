@@ -69,7 +69,10 @@ export const getShapeThemeClasses = (node: FlowNode, isSelected: boolean): strin
     // #655 — tanpa kelas radius: bawaan draw.io adalah `rounded=0`, dan `rect`
     // tidak digambar SVG (lihat `renderBasicShape`), jadi div INI yang terlihat.
     // Tebal tepinya ikut `node.strokeWidth` lewat gaya inline di FlowchartNode.
-    return `${base} ${borderStyleClass} ${palette.text} ${ringClass}`;
+    // #666 — KECUALI berkas sumber yang menyetel `rounded=1`; untuk itu dipakai
+    // langkah `rounded-lg` yang sudah ada di garis dasar `audit:radius`, bukan
+    // langkah baru, dan `arcSize` bawaan draw.io (10) memang paling dekat ke 8.
+    return `${base} ${borderStyleClass} ${node.rounded ? "rounded-lg" : ""} ${palette.text} ${ringClass}`;
   }
 
   // Tidak ada cabang untuk "oval" dan "circle": keduanya terdaftar di

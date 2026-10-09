@@ -199,17 +199,22 @@ describe("gaya draw.io (#650)", () => {
   it("string style dibaca: dashed, fontSize, align, strokeWidth", () => {
     expect(
       gayaDrawIo("rounded=1;whiteSpace=wrap;html=1;dashed=1;fontSize=14;align=left;strokeWidth=1")
-    ).toEqual({ dashed: true, fontSize: 14, align: "left", strokeWidth: 1 });
+      // #666 — `rounded=1` ikut terbaca; #650 tidak membacanya sama sekali.
+    ).toEqual({ dashed: true, fontSize: 14, align: "left", strokeWidth: 1, rounded: true });
   });
 
   it("style tanpa gaya kembali kosong supaya bawaan papan yang berlaku", () => {
-    expect(gayaDrawIo("rounded=1;whiteSpace=wrap")).toEqual({});
+    // Dulu berkas uji ini memakai `rounded=1` sebagai contoh "tanpa gaya",
+    // karena saat itu kuncinya memang belum dibacakan. Sejak #660-#666 rounded
+    // adalah gaya, jadi contohnya diganti yang benar-benar tidak berisi gaya.
+    expect(gayaDrawIo("whiteSpace=wrap;html=1")).toEqual({});
   });
 
   it("fontStyle bitmask dan fontColor ikut terbaca", () => {
     expect(gayaDrawIo("rounded=1;fontStyle=1;fontColor=#b85450")).toEqual({
       bold: true,
       fontHex: "#b85450",
+      rounded: true,
     });
     // fontStyle=4 di draw.io adalah garis bawah — bukan tebal.
     expect(gayaDrawIo("fontStyle=4").bold).toBeUndefined();

@@ -225,6 +225,12 @@ export interface GayaDrawIo {
   bold?: boolean;
   /** `fontColor=` draw.io; sama seperti Miro, wajib lewat `warnaTeksAman()`. */
   fontHex?: string;
+  /** #666 — `rounded=1`; kosong berarti bawaan draw.io, bersudut tajam. */
+  rounded?: boolean;
+  /** #666 — `dashPattern=4 4` diubah ke notasi SVG (`4,4`). Kosong = `3,3`. */
+  dashPattern?: string;
+  /** #666 — `verticalAlign=top|middle|bottom`. */
+  verticalAlign?: FlowNode["verticalAlign"];
 }
 
 /** Gaya bentuk pada string `style=` draw.io. */
@@ -246,5 +252,13 @@ export const gayaDrawIo = (style: string): GayaDrawIo => {
   if (tebal && tebalDariBitmask(tebal)) out.bold = true;
   const fc = /fontcolor=([^;]+)/i.exec(style)?.[1];
   if (fc) out.fontHex = fc;
+
+  // #666 — tiga kunci yang selama ini tidak pernah dibacakan.
+  if (/rounded=1/i.test(style)) out.rounded = true;
+  const pola = /dashpattern=([^;]+)/i.exec(style)?.[1]?.trim();
+  if (pola) out.dashPattern = pola.replace(/[\s,]+/g, ",").replace(/,+$/, "");
+  const va = /verticalalign=(top|middle|bottom)/i.exec(style)?.[1]?.toLowerCase();
+  if (va === "top" || va === "middle" || va === "bottom") out.verticalAlign = va;
+
   return out;
 };
