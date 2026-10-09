@@ -690,6 +690,7 @@ export const en = {
     simStarting: "Starting the workflow connection step simulation...",
     simDone: "Workflow simulation finished!",
     jsonDownloaded: "Workspace JSON downloaded!",
+    drawioDownloaded: "draw.io file downloaded!",
     preparingImage: "Preparing the image...",
     jpgDownloaded: "JPG image downloaded!",
     imageDownloadFailed: "Failed to download the image.",
@@ -1631,6 +1632,7 @@ export const en = {
     heightH: "Height (H)",
     export: "Export",
     backup: "Backup",
+    exportDrawio: "draw.io file",
     pickADocumentInThe:
       "Pick a document in the sidebar or create a new one to preview and design a flow.",
     flowDiagram: "Flow diagram",

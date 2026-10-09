@@ -22,6 +22,7 @@ import {
   Dot,
   Grid3x3,
   Square,
+  FileDown,
 } from "lucide-react";
 import type { PolaPapan } from "../types";
 import { toast } from "sonner";
@@ -35,6 +36,8 @@ interface CanvasToolbarProps {
   setPolaPapan: (value: PolaPapan) => void;
   handleExportJPG: () => void;
   handleExportJSON: () => void;
+  /** #659 - unduh papan sebagai berkas .drawio. */
+  handleExportDrawIo: () => void;
   isRightSidebarOpen: boolean;
   setIsRightSidebarOpen: (value: boolean) => void;
   /** Papan sedang tampil layar penuh? Hanya papan, bukan seluruh aplikasi. */
@@ -49,6 +52,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   setPolaPapan,
   handleExportJPG,
   handleExportJSON,
+  handleExportDrawIo,
   isRightSidebarOpen,
   setIsRightSidebarOpen,
   isFullscreen,
@@ -167,6 +171,17 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           >
             <Database className="w-3.5 h-3.5" />
             <span className="hidden md:inline">{t("flowchart.backup")}</span>
+          </button>
+
+          {/* #659 - berkas .drawio: keluaran yang bisa dibuka draw.io sungguhan. */}
+          <button
+            type="button"
+            onClick={handleExportDrawIo}
+            className="flex items-center gap-1 px-2 py-1.5 text-primary hover:bg-primary/10 rounded-md text-[10px] leading-none font-medium transition-all cursor-pointer"
+            title={t("flowchart.exportDrawio")}
+          >
+            <FileDown className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">{t("flowchart.exportDrawio")}</span>
           </button>
         </div>
 

@@ -39,6 +39,7 @@ import {
   Link as LinkIcon,
   Copy,
   ChevronLeft,
+  FileDown,
 } from "lucide-react";
 import { Task, Project } from "../../types";
 import { cn } from "../../lib/utils";
@@ -71,6 +72,8 @@ import { labelTautan } from "./lib/labelTautan";
 import { setScreenSnapshot, clearScreenSnapshot } from "../../lib/screenContext";
 import { parseUniversalDiagram } from "./lib/importers";
 import type { ParsedDiagram } from "./lib/importers";
+// #659 - papan bisa ditulis MENJADI berkas draw.io, bukan dibaca saja.
+import { eksporDrawIo } from "./lib/eksporDrawio";
 import { apakahPembuat, tampilanNamaPembuat } from "./lib/authorIdentity";
 import {
   colorPaletteHex,
@@ -947,6 +950,30 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     downloadAnchor.click();
     downloadAnchor.remove();
     toast.success(t("toast.jsonDownloaded"));
+  };
+
+  /**
+   * #659 - unduh papan sebagai berkas `.drawio`.
+   *
+   * Ini ALAT UKUR sekaligus fitur: berkas yang sama bisa dibuka orang di draw.io
+   * untuk dibandingkan dengan mata, dan bisa diimpor kembali ke sini untuk
+   * dibandingkan oleh test (`lib/eksporDrawio-659.test.tsx`). Selama keluarannya
+   * hanya JSON milik kita sendiri, klaim "sama dengan draw.io" tidak pernah
+   * punya bukti yang bisa dihitung dari kedua arah.
+   */
+  const handleExportDrawIo = () => {
+    const isi = eksporDrawIo(nodes, edges, currentFlowMetadata?.name || "LanPro");
+    const url = `data:text/xml;charset=utf-8,${encodeURIComponent(isi)}`;
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `${(currentFlowMetadata?.name || "flow_workspace").replace(/[\\/:*?"<>|]/g, "_")}.drawio`
+    );
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    toast.success(t("toast.drawioDownloaded"));
   };
 
   // Download JPG Snapshot
@@ -3974,6 +4001,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         setPolaPapan={setPolaPapan}
                         handleExportJPG={handleExportJPG}
                         handleExportJSON={handleExportJSON}
+                        handleExportDrawIo={handleExportDrawIo}
                         isRightSidebarOpen={isRightSidebarOpen}
                         setIsRightSidebarOpen={setIsRightSidebarOpen}
                         isFullscreen={papanPenuh}
@@ -4425,6 +4453,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             title={t("flowchart.exportJson")}
                           >
                             <Download className="w-3.5 h-3.5 text-blue-500" />
+                          </button>
+
+                          {/* #659 - berkas .drawio, keluaran yang bisa dibuka draw.io */}
+                          <button
+                            onClick={handleExportDrawIo}
+                            className="p-2 text-content-muted hover:bg-surface-muted hover:text-violet-600 rounded-xl transition-all flex items-center justify-center active:scale-95"
+                            title={t("flowchart.exportDrawio")}
+                          >
+                            <FileDown className="w-3.5 h-3.5 text-violet-500" />
                           </button>
                           {/*
                 Impor diagram dari Draw.io, Miro, atau JSON.

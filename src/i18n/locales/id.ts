@@ -701,6 +701,7 @@ export const id = {
     simStarting: "Memulai Simulasi Langkah Hubungan Alur Kerja...",
     simDone: "Simulasi Alur Kerja Selesai!",
     jsonDownloaded: "JSON Workspace Berhasil Diunduh!",
+    drawioDownloaded: "Berkas draw.io Berhasil Diunduh!",
     preparingImage: "Menyiapkan gambar...",
     jpgDownloaded: "Gambar JPG Berhasil Diunduh!",
     imageDownloadFailed: "Gagal mengunduh gambar.",
@@ -1643,6 +1644,7 @@ export const id = {
     heightH: "Tinggi (H)",
     export: "Ekspor",
     backup: "Cadangan",
+    exportDrawio: "Berkas draw.io",
     pickADocumentInThe:
       "Pilih dokumen di panel samping atau buat baru untuk melihat pratinjau dan merancang alur.",
     flowDiagram: "Diagram Alur",
