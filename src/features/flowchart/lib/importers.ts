@@ -363,15 +363,38 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
       // "Ringkasan" + "Data Merchant" menempel jadi "RingkasanData Merchant".
       let decodedLabel = potongTeks(decodeHtmlEntity(valueAttr));
 
+      // #667 — bentuk dengan `value=""` TIDAK boleh dikarangi labelnya. Dulu
+      // berkas kosong mendapat "Komponen Alur", jadi papan hasil impor
+      // menampilkan teks yang tidak pernah ada di sumbernya - dan itu string
+      // Indonesia keras di luar kamus (#602).
       if (!decodedLabel) {
-        decodedLabel = "Komponen Alur";
+        decodedLabel = "";
       }
 
       const style = (cell.getAttribute("style") || "").toLowerCase();
       let type: FlowNode["type"] = "rect";
       let color = "indigo";
 
-      if (style.includes("ellipse") || style.includes("oval") || style.includes("circle")) {
+      // #667 — `shape=` dan `fillColor=none`/`strokeColor=none` dibaca lebih
+      // dulu. draw.io menulis awan sebagai `ellipse;shape=cloud`, jadi urutan
+      // lama (nama bentuk ditebak dari isi string) selalu menangkap "ellipse"
+      // lebih dulu dan awan datang sebagai oval.
+      const namaShape = /shape=([^;]+)/.exec(style)?.[1]?.trim();
+      const teksPolos = /(?:^|;)text(?:;|$)/.test(style);
+      const tanpaIsian = /fillcolor=none/.test(style);
+      const tanpaTepi = /strokecolor=none/.test(style) || teksPolos;
+
+      if (namaShape === "cloud") {
+        type = "cloud";
+        color = "slate";
+      } else if (namaShape === "process" || namaShape === "preprocess") {
+        type = "subprocess";
+        color = "blue";
+      } else if (teksPolos) {
+        // draw.io `style=text` bukan kotak: tidak ada isian dan tidak ada tepi.
+        type = "rect";
+        color = "slate";
+      } else if (style.includes("ellipse") || style.includes("oval") || style.includes("circle")) {
         type = "oval";
         color = "emerald";
       } else if (style.includes("rhombus") || style.includes("diamond")) {
@@ -427,7 +450,7 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
         fontColor: warnaTeksAman(gaya.fontHex) ?? undefined,
         width,
         height,
-        borderStyle: gaya.dashed ? "dashed" : "solid",
+        borderStyle: tanpaTepi && !gaya.dashed ? "none" : gaya.dashed ? "dashed" : "solid",
         strokeWidth: gaya.strokeWidth ?? 1,
         // #666 — tiga kunci yang selama ini dibuang: bentuk membulat, pola
         // putus-putus, dan letak huruf tegak lurus di dalam bentuknya.
@@ -438,6 +461,8 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
         // yang dibuat di papan.
         fillHex: warnaTeksAman(gaya.fillHex) ?? undefined,
         strokeHex: warnaTeksAman(gaya.strokeHex) ?? undefined,
+        // #667 — `fillColor=none` berarti TIDAK ada isian, bukan "warna palet".
+        fillNone: tanpaIsian || teksPolos || undefined,
       });
       nodeIdsSet.add(`drawio-${id}`);
     } else if (edge === "1") {

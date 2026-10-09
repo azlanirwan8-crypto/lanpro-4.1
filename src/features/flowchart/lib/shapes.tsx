@@ -94,7 +94,10 @@ export function renderCustomSvgShape(
   // Fallback or exact styling based on blueprint context
   const fillCol = isBlueprint
     ? "rgba(30, 58, 138, 0.4)" // translucent dark blue
-    : warnaSumber.isi || `url(#grad-${node.color || "indigo"})`;
+    : // #667 - `fillColor=none`: tidak ada isian sama sekali.
+      node.fillNone
+      ? "none"
+      : warnaSumber.isi || `url(#grad-${node.color || "indigo"})`;
 
   const strokeCol = isSelected
     ? "#8b5cf6"

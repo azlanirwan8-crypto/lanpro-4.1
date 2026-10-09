@@ -134,6 +134,13 @@ export interface FlowNode {
    */
   fillHex?: string;
   strokeHex?: string;
+  /**
+   * #667 - `fillColor=none` draw.io: bentuk tanpa isian (garis saja, atau teks
+   * polos). Bukan "warna transparan dari palet" - tidak ada warna yang boleh
+   * ditebak di sini, dan sebelumnya `none` ditolak penjaga hex lalu jatuh ke
+   * palet, jadi teks draw.io datang sebagai kotak berwarna.
+   */
+  fillNone?: boolean;
   align?: "left" | "center" | "right";
   /**
    * #666 — `rounded=1` dari berkas draw.io. Kosong = bawaan papan, dan bawaan

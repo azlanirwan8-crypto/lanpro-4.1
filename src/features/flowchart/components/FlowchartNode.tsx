@@ -274,7 +274,9 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
                 // #657 — bentuk div memakai hex sumber bila ada; palet tetap
                 // pemegang terakhir supaya papan yang dibuat dari nol tidak
                 // berubah sedikit pun.
-                backgroundColor: warnaSumber.isi ?? warnaBentuk.bg,
+                backgroundColor: node.fillNone
+                  ? "transparent"
+                  : (warnaSumber.isi ?? warnaBentuk.bg),
                 borderColor: warnaSumber.tepi ?? warnaBentuk.stroke,
                 // #655 — tebal tepi bentuk div dibaca dari bentuknya, tidak lagi
                 // dipatok 1 px oleh kelas `border`. Angka, bukan string: React
