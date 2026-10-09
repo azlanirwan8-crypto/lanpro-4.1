@@ -491,8 +491,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const [canvasContextMenu, setCanvasContextMenu] = useState<{ x: number; y: number } | null>(null);
 
   // Custom connection line routing types: bezier (curved), straight (direct), orthogonal (clean right-angles)
+  // #656 — bawaannya LURUS. draw.io menggambar garis baru sebagai garis lurus;
+  // `bezier` di sini adalah sisa papan bergaya Miro, dan ia membuat setiap garis
+  // baru melengkung padahal sumbernya (draw.io) tidak.
   const [connectorType, setConnectorType] = useState<"bezier" | "straight" | "orthogonal">(
-    "bezier"
+    "straight"
   );
 
   // Node Interactive Resizing properties

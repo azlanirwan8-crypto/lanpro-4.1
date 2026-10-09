@@ -96,6 +96,15 @@ const DASH: Record<NonNullable<FlowEdge["strokeStyle"]>, string | undefined> = {
 };
 
 /**
+ * #656 — SATU sumber warna garis. Dulu jalur dan kepala panah masing-masing
+ * menulis hex abu-abu slate, dua tempat yang bisa lupa disamakan. draw.io
+ * memakai hitam untuk garis pada papan terang; papan gelap `blueprint` tetap
+ * butuh warna terang supaya garisnya terlihat.
+ */
+const warnaGarisPapan = (tema: "miro" | "blueprint"): string =>
+  tema === "miro" ? "#000000" : "#60a5fa";
+
+/**
  * Item #521 / #542 / #543 — rute garis dihitung ulang HANYA bila geometri yang
  * memengaruhinya berubah.
  *
@@ -334,10 +343,7 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
             orient="auto"
             markerUnits="userSpaceOnUse"
           >
-            <path
-              d="M0.8,0.8 L9.5,4 L0.8,7.2 Z"
-              fill={canvasTheme === "miro" ? "#475569" : "#60a5fa"}
-            />
+            <path d="M0.8,0.8 L9.5,4 L0.8,7.2 Z" fill={warnaGarisPapan(canvasTheme)} />
           </marker>
           <marker
             id="canvas-arrow-head-selected"
@@ -622,15 +628,11 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                 d={pathD}
                 fill="none"
                 stroke={
-                  isSelected
-                    ? "#8b5cf6"
-                    : isHovered
-                      ? "#3b82f6"
-                      : canvasTheme === "miro"
-                        ? "#475569"
-                        : "#60a5fa"
+                  isSelected ? "#8b5cf6" : isHovered ? "#3b82f6" : warnaGarisPapan(canvasTheme)
                 }
-                strokeWidth="2"
+                // #656 — 1 px seperti bawaan draw.io. Dulu 2 px, dan kepala
+                // panahnya tidak ikut.
+                strokeWidth="1"
                 strokeLinecap={edge.strokeStyle === "dotted" ? "round" : "butt"}
                 strokeDasharray={DASH[edge.strokeStyle ?? "solid"]}
                 markerEnd={
@@ -648,12 +650,19 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
               {/* Optional inline description on arrows */}
               {edge.label && (
                 <foreignObject
-                  x={(start.x + end.x) / 2 - 45}
-                  y={(start.y + end.y) / 2 - 12}
-                  width="90"
-                  height="26"
+                  x={(start.x + end.x) / 2 - 60}
+                  y={(start.y + end.y) / 2 - 17}
+                  width="120"
+                  height="34"
                 >
-                  <div className="bg-surface border border-border-subtle text-xs sm:text-[11px] text-content-strong font-medium px-1.5 py-0.5 rounded shadow-soft text-center truncate">
+                  {/*
+                    #656 — draw.io menaruh teks di atas garis, tanpa bingkai dan
+                    tanpa bayangan. Dulu kotp: border + shadow-soft + rounded +
+                    font-medium, dan `truncate` yang MEMOTONG isinya. Kotak lebarnya
+                    120 px supaya label panjang bisa membungkus dua baris seperti di
+                    sana, bukan dibuang ke elipsis.
+                  */}
+                  <div className="bg-surface/85 text-xs text-content-strong font-normal px-1 py-0.5 text-center whitespace-pre-wrap break-words">
                     {edge.label}
                   </div>
                 </foreignObject>
