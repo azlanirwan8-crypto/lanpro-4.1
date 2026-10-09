@@ -57,8 +57,16 @@ describe("tebal huruf dari sumber (#651)", () => {
     expect(tebalDariBitmask(undefined)).toBe(false);
   });
 
-  it("Miro hanya menyimpan tebal di HTML teksnya", () => {
-    expect(tebalDariHtml("<div><b>Kriteria</b> password:</div>")).toBe(true);
+  it("Miro menyimpan tebal di HTML teksnya — hanya bila seluruh teks tebal (#651/#670)", () => {
+    // #651 dulu mengunci `true` untuk label SEBAGIAN tebal. Itu bukan membaca
+    // berkas, itu mengarang: hanya "Kriteria" yang tebal, " password:" tidak,
+    // dan papan ini menampung satu berat untuk seluruh label karena hidup di
+    // `textarea`. #670 membalik aturannya — tebal hanya bila tidak ada satu
+    // huruf pun yang biasa. Batas arsitekturnya tetap: teks campuran tidak bisa
+    // dirender campuran, dan memilih "biasa" lebih jujur daripada menebalkan
+    // huruf yang di sumbernya memang biasa.
+    expect(tebalDariHtml("<div><b>Kriteria</b> password:</div>")).toBe(false);
+    expect(tebalDariHtml("<b>Kriteria password:</b>")).toBe(true);
     expect(tebalDariHtml('<span style="font-weight:700">x</span>')).toBe(true);
     expect(tebalDariHtml("<div>Kriteria password:</div>")).toBe(false);
     expect(tebalDariHtml(undefined)).toBe(false);
@@ -283,7 +291,7 @@ describe("parseMiroContent JSON: gaya asli sampai ke node dan edge (#650)", () =
     expect(parseMiroContent(papanMiro, false).nodes[0].label).toBe("Ringkasan\nData Merchant");
   });
 
-  it("tebal dari HTML teks dan warna huruf dari gaya ikut masuk (#651)", () => {
+  it("tebal dari HTML teks dan warna huruf dari gaya ikut masuk (#651/#670)", () => {
     const { nodes } = parseMiroContent(
       JSON.stringify({
         data: [
@@ -294,6 +302,11 @@ describe("parseMiroContent JSON: gaya asli sampai ke node dan edge (#650)", () =
             style: { color: "#b85450" },
           },
           {
+            id: "b3",
+            type: "shape",
+            data: { shape: "rounded_rect", textHtml: "<div><b>Kriteria password:</b></div>" },
+          },
+          {
             id: "b2",
             type: "shape",
             data: { shape: "rounded_rect", content: "biasa saja" },
@@ -302,11 +315,15 @@ describe("parseMiroContent JSON: gaya asli sampai ke node dan edge (#650)", () =
       }),
       false
     );
-    expect(nodes[0].fontWeight).toBe("bold");
+    // Sebagian tebal → TIDAK dinaikkan ke seluruh bentuk (#670).
+    expect(nodes[0].fontWeight).toBeUndefined();
     expect(nodes[0].fontColor).toBe("#b85450");
     expect(nodes[0].label).toBe("Kriteria password:");
-    expect(nodes[1].fontWeight).toBeUndefined();
-    expect(nodes[1].fontColor).toBeUndefined();
+    // Seluruhnya tebal → tetap tebal; jalur positifnya tidak ikut dimatikan #670.
+    expect(nodes[1].fontWeight).toBe("bold");
+    expect(nodes[1].label).toBe("Kriteria password:");
+    expect(nodes[2].fontWeight).toBeUndefined();
+    expect(nodes[2].fontColor).toBeUndefined();
   });
 
   it("label garis dan jalur bersiku dipulangkan", () => {

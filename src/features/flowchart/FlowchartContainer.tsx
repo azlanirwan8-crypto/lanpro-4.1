@@ -4108,20 +4108,33 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 background-size: 20px 20px;
               }
               /*
-                #654 — keluarga huruf papan. Ditulis dengan !important karena
-                src/index.css:493 mengunci font-family semua textarea dengan
-                !important juga; kelas biasa kalah dan tombol serif/mono di panel
-                sifat hanya mengubah data, tidak mengubah layar. Bawaannya Helvetica
-                seperti draw.io, bukan Inter.
+                #654 keluarga huruf papan - DAN #671 MENGAPA BLOK INI WAJIB DI
+                DALAM @layer base. src/index.css:493 mengunci font-family semua
+                textarea dengan !important, dan kunci itu tinggal di dalam
+                @layer base. Untuk deklarasi !important, urutan layer DIBALIK:
+                layer mana pun mengalahkan aturan tanpa-layer, dan spesifikitas
+                tidak ikut berperan. Karena itu aturan kelas di luar layer selalu
+                kalah - terukur di Chrome 09 Okt atas CSS hasil build: textarea
+                kelas huruf-mono tetap terhitung Inter, jadi tombol serif/mono di
+                panel sifat mengubah data tanpa mengubah layar walaupun #654 sudah
+                berstatus SELESAI. Dengan nama layer yang SAMA (base) kedua aturan
+                berada di satu layer yang sama, sehingga yang tersisa adalah
+                spesifikitas: kelas (0,1,0) di atas textarea (0,0,1), dan !important
+                menahan kelas dari aturan normal lain. Layer BARU di sini tidak
+                berguna: urutannya jatuh sesudah base dan tetap kalah. jsdom tidak
+                mengurai @layer sama sekali, jadi test tidak bisa membuktikan
+                bagian ini - hanya peramban yang bisa.
               */
-              .huruf-sans {
-                font-family: Helvetica, Arial, 'Liberation Sans', sans-serif !important;
-              }
-              .huruf-serif {
-                font-family: Georgia, 'Times New Roman', serif !important;
-              }
-              .huruf-mono {
-                font-family: 'Courier New', Courier, monospace !important;
+              @layer base {
+                .huruf-sans {
+                  font-family: Helvetica, Arial, 'Liberation Sans', sans-serif !important;
+                }
+                .huruf-serif {
+                  font-family: Georgia, 'Times New Roman', serif !important;
+                }
+                .huruf-mono {
+                  font-family: 'Courier New', Courier, monospace !important;
+                }
               }
               .custom-scrollbar::-webkit-scrollbar {
                 width: 5px;

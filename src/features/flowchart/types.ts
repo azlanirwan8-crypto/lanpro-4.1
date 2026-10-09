@@ -121,6 +121,15 @@ export interface FlowNode {
    *  hanya yang lolos `warnaTeksAman()`. */
   fontColor?: string;
   /**
+   * #670 - keluarga huruf, miring, dan garis bawah dari berkas sumber.
+   * `fontFamily` TIDAK pernah dipakai sebagai nilai CSS: ia dipetakan ke salah
+   * satu kelas papan (`huruf-sans`, `huruf-serif`, `huruf-mono`), jadi string
+   * asing dari berkas unggahan tidak bisa menyuntik gaya.
+   */
+  fontFamily?: string;
+  italic?: boolean;
+  underline?: boolean;
+  /**
    * #657 - isian dan tepi APA ADANYA dari berkas sumber. `color` tetap ada dan
    * tetap nama palet (ia dipakai pemilih warna, kepala garis, dan gradioen
    * `url(#grad-..)`), tetapi bila kolom ini terisi maka yang digambar adalah

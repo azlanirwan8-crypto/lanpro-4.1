@@ -88,6 +88,34 @@ const KELAS_HURUF: Record<NonNullable<FlowNode["fontStyle"]>, string> = {
   mono: "huruf-mono",
 };
 
+/**
+ * #670 - keluarga huruf dari berkas sumber dipetakan ke SALAH SATU kelas papan,
+ * tidak pernah dipakai sebagai nilai CSS apa adanya. Nama yang tidak dikenal
+ * jatuh ke sans - itu pilihan, bukan tebakan: papan ini hanya bisa menampilkan
+ * tiga keluarga, dan menyuntik string asing ke `font-family` adalah jalan
+ * masuknya gaya dari berkas unggahan orang ke layar.
+ */
+const KELUARGA_KE_KELAS: Record<string, string> = {
+  courier: KELAS_HURUF.mono,
+  "courier new": KELAS_HURUF.mono,
+  monospace: KELAS_HURUF.mono,
+  georgia: KELAS_HURUF.serif,
+  times: KELAS_HURUF.serif,
+  "times new roman": KELAS_HURUF.serif,
+  serif: KELAS_HURUF.serif,
+  helvetica: KELAS_HURUF.sans,
+  arial: KELAS_HURUF.sans,
+  verdana: KELAS_HURUF.sans,
+  tahoma: KELAS_HURUF.sans,
+  "sans-serif": KELAS_HURUF.sans,
+};
+
+const kelasKeluargaHuruf = (node: FlowNode): string => {
+  if (node.fontStyle && node.fontStyle !== "sans") return KELAS_HURUF[node.fontStyle];
+  const dariSumber = KELUARGA_KE_KELAS[(node.fontFamily || "").trim().toLowerCase()];
+  return dariSumber || KELAS_HURUF.sans;
+};
+
 const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
   node,
   isSelected,
@@ -393,7 +421,10 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
               "w-full bg-transparent border-0 resize-none text-current focus:outline-none focus:ring-1 focus:ring-violet-300 rounded leading-tight text-center custom-scrollbar",
               node.fontWeight === "bold" ? "font-bold" : "font-normal",
               canvasTheme === "blueprint" && !isSticky && "text-content-inverse select-text",
-              KELAS_HURUF[node.fontStyle || "sans"],
+              kelasKeluargaHuruf(node),
+              // #670 - dua gaya lagi dari bitmask `fontStyle` draw.io.
+              node.italic && "italic",
+              node.underline && "underline",
               node.align === "left" && "text-left",
               node.align === "right" && "text-right"
             )}

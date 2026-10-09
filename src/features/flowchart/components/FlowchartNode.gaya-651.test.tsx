@@ -169,10 +169,12 @@ describe("garis putus-putus mencapai bentuk SVG (#652, koreksi catatan #650)", (
  *
  * DIUJI DUA BAGIAN, dan bagiannya tidak boleh dicampur. Bagian perilaku memakai
  * `<textarea>` sungguhan. Bagian sumber membaca dua berkas: jsdom TIDAK MEMUAT
- * `src/index.css`, jadi kaskade `!important` - yaitu hal yang membuat tombol
- * serif/mono akhirnya benar-benar bekerja - TIDAK bisa dibuktikan dari sini. Yang
- * dibuktikan hanyalah bahwa aturan penjaganya masih berdiri di kedua berkas;
- * sisanya ditulis apa adanya sebagai belum terverifikasi di tab bersih.
+ * `src/index.css` dan juga TIDAK MENGURAI `@layer`, jadi kaskade aslinya tidak
+ * bisa dibuktikan dari test mana pun di berkas ini. Yang terbukti di sini hanya
+ * BENTUK EMITAN - keluarga huruf harus berdiri di dalam `@layer base`, sebab
+ * `!important` saja kalah oleh kunci berlapis (#671, diukur di Chrome). Angka
+ * keluarga huruf yang sebenarnya datang dari probe peramban atas CSS build,
+ * tercatat di baris #671 papan, bukan dari test ini.
  */
 describe("tipografi bawaan draw.io (#654)", () => {
   const label = (lebih: Partial<FlowNode> = {}) => {
@@ -202,19 +204,40 @@ describe("tipografi bawaan draw.io (#654)", () => {
     expect(label().className).not.toContain("tracking-tight");
   });
 
-  it("ketiga keluarga huruf ditulis dengan !important di blok gaya papan", () => {
+  it("ketiga keluarga huruf berada di dalam @layer base, bukan sekadar !important (#654/#671)", () => {
     const sumber = readFileSync(join(__dirname, "..", "FlowchartContainer.tsx"), "utf8");
+    // `!important` SAJA tidak cukup, dan itu bukan teori. Diukur di Chrome atas CSS
+    // hasil build: kelas tanpa-layer yang memakai !important tetap kalah oleh kunci
+    // textarea, karena kunci itu tinggal di dalam @layer base dan urutan layer
+    // dibalik untuk deklarasi !important. Jadi yang dikunci di sini adalah
+    // KEANGGOTAAN LAYER, bukan penanda !important.
+    const lapisan = /@layer base\s*\{([\s\S]*?)\n\s*\}\s*\n\s*\.custom-scrollbar/.exec(sumber);
+    expect(lapisan).not.toBeNull();
+    const isi = lapisan ? lapisan[1] : "";
     for (const kelas of ["huruf-sans", "huruf-serif", "huruf-mono"]) {
       const pola = new RegExp("\\." + kelas + "\\s*\\{[^}]*font-family:[^;]*!important", "");
-      expect(pola.test(sumber)).toBe(true);
+      expect(pola.test(isi)).toBe(true);
+    }
+    // Di LUAR lapisan tidak boleh ada salinan kelas mana pun - aturan yang berdiri
+    // sendiri itulah yang kalah, dan meninggalkannya berarti meninggalkan dua
+    // sumber kebenaran untuk satu kelas.
+    const sisa = sumber.replace(lapisan ? lapisan[0] : "", "");
+    for (const kelas of ["huruf-sans", "huruf-serif", "huruf-mono"]) {
+      expect(new RegExp("\\." + kelas + "\\s*\\{").test(sisa)).toBe(false);
     }
     // Kelas lama dihapus, bukan ditinggal setengah.
     expect(sumber).not.toContain("sticky-handwriting");
   });
 
-  it("index.css masih mengunci textarea - itu sebabnya kelas papan butuh !important", () => {
+  it("kunci textarea memang hidup di dalam @layer base - itu sebabnya #654 salah obat (#671)", () => {
     const css = readFileSync(join(__dirname, "..", "..", "..", "index.css"), "utf8");
-    expect(/textarea[\s\S]{0,400}font-family:[\s\S]{0,400}!important/.test(css)).toBe(true);
+    const base = /@layer base\s*\{/.exec(css);
+    expect(base).not.toBeNull();
+    const mulai = base ? base.index : -1;
+    const kunci = /[\s\S]*?textarea[\s\S]*?\{[^}]*font-family:[^}]*!important[^}]*\}/.exec(
+      css.slice(mulai, mulai + 1400)
+    );
+    expect(kunci).not.toBeNull();
   });
 });
 

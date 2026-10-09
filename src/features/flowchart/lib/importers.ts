@@ -465,6 +465,10 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
         align: gaya.align ?? "center",
         fontWeight: gaya.bold ? "bold" : undefined,
         fontColor: warnaTeksAman(gaya.fontHex) ?? undefined,
+        // #670 - dua bit lagi dan keluarga huruf, selama ini dibuang.
+        italic: gaya.italic,
+        underline: gaya.underline,
+        fontFamily: gaya.fontFamily,
         width,
         height,
         borderStyle: tanpaTepi && !gaya.dashed ? "none" : gaya.dashed ? "dashed" : "solid",

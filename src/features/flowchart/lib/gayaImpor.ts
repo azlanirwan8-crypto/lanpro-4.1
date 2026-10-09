@@ -79,8 +79,50 @@ export const tebalDariBitmask = (nilai: string | number | undefined | null): boo
 };
 
 /** Sebagian sumber (Miro) hanya menyimpan tebal di dalam HTML teksnya. */
-export const tebalDariHtml = (html?: string | null): boolean =>
-  /<(?:b|strong)\b|font-weight\s*:\s*(?:bold|[6-9]00)/i.test(html || "");
+/**
+ * #670 - tebal HANYA bila seluruh label tebal.
+ *
+ * draw.io bisa menebalkan satu kata (`Kotak <b>tebal</b> dan`), papan ini tidak:
+ * labelnya hidup di dalam `textarea` dan tidak menampung gaya campuran. Sebelum
+ * #670 penjeraf menaikkan sebagian menjadi seluruhnya, jadi kata yang di
+ * sumbernya biasa ikut tebal. Membuang penanda tebalnya juga salah (label
+ * ber-gaya jadi tanpa gaya sama sekali). Yang jujur: tebal bila SEMUA teksnya
+ * tebal, biasa bila ada satu potong teks yang tidak - dan itu ditulis sebagai
+ * BATAS di baris #670, bukan ditutupi.
+ */
+export const tebalDariHtml = (html?: string | null): boolean => {
+  const mentah = (html || "").trim();
+  if (!mentah) return false;
+  let dalamTebal = false;
+  let adaTeks = false;
+  let adaTeksBiasa = false;
+  for (const token of mentah.matchAll(/<[^>]+>|[^<]+/g)) {
+    const t = token[0];
+    if (t.startsWith("<")) {
+      if (/^<(?:b|strong)\b/i.test(t) || /font-weight\s*:\s*(?:bold|[6-9]00)/i.test(t))
+        dalamTebal = true;
+      else if (/^<\/(?:b|strong)\s*>/i.test(t)) dalamTebal = false;
+      continue;
+    }
+    const teks = t.replace(/&nbsp;|&[\w#]+;/g, " ").trim();
+    if (!teks) continue;
+    adaTeks = true;
+    if (!dalamTebal) adaTeksBiasa = true;
+  }
+  return adaTeks && !adaTeksBiasa;
+};
+
+/** #670 - bit 2 pada bitmask `fontStyle` draw.io: miring. */
+export const miringDariBitmask = (nilai: string | number | undefined | null): boolean => {
+  const n = typeof nilai === "number" ? nilai : Number.parseInt(String(nilai ?? ""), 10);
+  return Number.isFinite(n) && (n & 2) === 2;
+};
+
+/** #670 - bit 4 pada bitmask `fontStyle` draw.io: garis bawah. */
+export const garisBawahDariBitmask = (nilai: string | number | undefined | null): boolean => {
+  const n = typeof nilai === "number" ? nilai : Number.parseInt(String(nilai ?? ""), 10);
+  return Number.isFinite(n) && (n & 4) === 4;
+};
 
 /** Wadah gaya yang mungkin dipakai sumber, urut dari yang paling umum. */
 const wadahGaya = (item: any): any[] =>
@@ -270,6 +312,12 @@ export interface GayaDrawIo {
   dashPattern?: string;
   /** #666 — `verticalAlign=top|middle|bottom`. */
   verticalAlign?: FlowNode["verticalAlign"];
+  /** #670 — `fontFamily=` apa adanya; pemetaan ke kelas ada di perender. */
+  fontFamily?: string;
+  /** #670 — bit 2 `fontStyle`. */
+  italic?: boolean;
+  /** #670 — bit 4 `fontStyle`. */
+  underline?: boolean;
 }
 
 /** Gaya bentuk pada string `style=` draw.io. */
@@ -296,6 +344,11 @@ export const gayaDrawIo = (style: string): GayaDrawIo => {
   if (align === "left" || align === "center" || align === "right") out.align = align;
   const tebal = /fontstyle=([0-9]+)/i.exec(style)?.[1];
   if (tebal && tebalDariBitmask(tebal)) out.bold = true;
+  // #670 - dua bit lagi dari bitmask yang sama, selama ini dibuang.
+  if (tebal && miringDariBitmask(tebal)) out.italic = true;
+  if (tebal && garisBawahDariBitmask(tebal)) out.underline = true;
+  const keluarga = /fontfamily=([^;]+)/i.exec(style)?.[1]?.trim();
+  if (keluarga && keluarga.toLowerCase() !== "default") out.fontFamily = keluarga;
   const fc = /fontcolor=([^;]+)/i.exec(style)?.[1];
   if (fc) out.fontHex = fc;
 
