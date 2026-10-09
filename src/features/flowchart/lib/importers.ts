@@ -392,7 +392,8 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
         decodedLabel = "";
       }
 
-      const style = (cell.getAttribute("style") || "").toLowerCase();
+      const styleAsli = cell.getAttribute("style") || "";
+      const style = styleAsli.toLowerCase();
       let type: FlowNode["type"] = "rect";
       let color = "indigo";
 
@@ -455,7 +456,13 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
       // #650 — draw.io menyimpan garis putus-putus, ukuran huruf, perataan, dan
       // tebal garis di dalam string `style=` yang sama; selama tidak satu pun
       // dibacakan.
-      const gaya = gayaDrawIo(style);
+      // #660 - yang dikirim ke pembaca gaya adalah string APA ADANYA, bukan
+      // salinan terkecil. Setiap regex di `gayaDrawIo` tahan huruf besar, jadi
+      // pelipatan tidak diperlukan di sana dan yang hilang hanya isinya:
+      // `fontFamily=Courier New` tersimpan jadi "courier new". Jalur GARIS sudah
+      // mengirim yang asli sejak awal - ketidaksimetrisan inilah yang membuat
+      // nama keluarga huruf tidak bisa dikembalikan apa adanya.
+      const gaya = gayaDrawIo(styleAsli);
 
       extractedNodes.push({
         id: `drawio-${id}`,
