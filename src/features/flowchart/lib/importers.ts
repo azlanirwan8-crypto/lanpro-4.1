@@ -335,6 +335,14 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
     gaya: GayaGaris;
   }[] = [];
 
+  /**
+   * #668 - posisi MENTAH tiap bentuk dan daftar anak yang geometry-nya relatif
+   * ke induknya. draw.io menulis induk sebelum anaknya, jadi satu lintasan
+   * berurutan sudah cukup untuk kolam bertingkat sekali pun.
+   */
+  const lokasiSet = new Map<string, { x: number; y: number }>();
+  const daftarRelatif: { anak: string; induk: string }[] = [];
+
   for (let i = 0; i < cells.length; i++) {
     const cell = cells[i];
     const id = cell.getAttribute("id");
@@ -357,6 +365,15 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
         width = parseFloat(geometry.getAttribute("width") || "130");
         height = parseFloat(geometry.getAttribute("height") || "80");
       }
+
+      // #668 - draw.io menyimpan geometry ANAK relatif ke induknya (kolam,
+      // wadah, kelompok). Angka itu selama ini dipakai apa adanya, jadi anak
+      // pada x=30 y=50 mendarat di kiri-atas kolam, bukan di dalamnya.
+      const indukMentah = cell.getAttribute("parent") || "";
+      if (indukMentah && indukMentah !== "0" && indukMentah !== "1") {
+        daftarRelatif.push({ anak: `drawio-${id}`, induk: `drawio-${indukMentah}` });
+      }
+      lokasiSet.set(`drawio-${id}`, { x, y });
 
       // #650 — `potongTeks` dipakai SEMUA jalur impor. Dulu `<div>` dibuang tanpa
       // jejak, padahal draw.io dan Miro menulis satu baris teks per `<div>`:
@@ -503,6 +520,19 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
           });
       }
     }
+  }
+
+  // #668 - anak kolam, wadah, atau kelompok: angkanya relatif ke induknya, jadi
+  // baru boleh menjadi koordinat papan SETELAH posisi induk diketahui. Tanpa
+  // ini, bentuk di x=30 y=50 dalam kolam di x=40 y=200 mendarat di KIRI-ATAS
+  // kolam, bukan di dalamnya.
+  for (const { anak, induk } of daftarRelatif) {
+    const posisiInduk = lokasiSet.get(induk);
+    const bentukAnak = extractedNodes.find((n) => n.id === anak);
+    if (!posisiInduk || !bentukAnak) continue;
+    bentukAnak.x += posisiInduk.x;
+    bentukAnak.y += posisiInduk.y;
+    lokasiSet.set(anak, { x: bentukAnak.x, y: bentukAnak.y });
   }
 
   // #636 — garis ber-ujung koordinat baru bisa dipetakan setelah SEMUA bentuk
