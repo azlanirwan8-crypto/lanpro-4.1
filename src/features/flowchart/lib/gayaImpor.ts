@@ -217,6 +217,15 @@ export interface GayaGaris {
   startFill?: boolean;
   labelFontSize?: number;
   labelColor?: string;
+  /**
+   * #669 - titik sambung yang ditulis sumber. `exitX/exitY` di ujung asal dan
+   * `entryX/entryY` di ujung tujuan, pecahan 0-1 dari lebar/tinggi bentuk.
+   * Satu pasangan hanya dipasang bila KEDUA kuncinya ada: `exitX=0.5` tanpa
+   * `exitY` bukan titik, itu setengah titik, dan menempelkannya ke sisi mana
+   * pun adalah mengarang.
+   */
+  portSumber?: { x: number; y: number };
+  portTujuan?: { x: number; y: number };
 }
 
 /** Teks pada garis. WebSDK menyimpannya di `captions[]`, REST di `data.captions[]`,
@@ -291,6 +300,25 @@ export const gayaGarisDrawIo = (style: string): GayaGaris => {
   const fc = gayaDari("fontcolor");
   if (fc) gaya.labelColor = fc;
 
+  // #669 - titik sambung. Nol SAH (sisi kiri/atas), jadi penolaknya bukan
+  // "lebih besar dari nol" seperti kunci angka lain di berkas ini.
+  const pecahan = (kunci: string): number | undefined => {
+    const mentah = new RegExp(kunci + "=(-?[0-9]+(?:\\.[0-9]+)?)", "i").exec(style)?.[1];
+    if (mentah === undefined) return undefined;
+    const n = Number.parseFloat(mentah);
+    if (!Number.isFinite(n)) return undefined;
+    return n < -0.5 || n > 1.5 ? undefined : n;
+  };
+  const titik = (dep: string): { x: number; y: number } | undefined => {
+    const x = pecahan(dep + "x");
+    const y = pecahan(dep + "y");
+    return x !== undefined && y !== undefined ? { x, y } : undefined;
+  };
+  const keluar = titik("exit");
+  if (keluar) gaya.portSumber = keluar;
+  const masuk = titik("entry");
+  if (masuk) gaya.portTujuan = masuk;
+
   return gaya;
 };
 
@@ -318,6 +346,17 @@ export interface GayaDrawIo {
   italic?: boolean;
   /** #670 — bit 4 `fontStyle`. */
   underline?: boolean;
+  /**
+   * #669 — `rotation=` dalam derajat, NEGATIF SAH (-15putar berlawanan jarum jam),
+   * jadi ia tidak bisa dibaca dengan pembaca angka yang sama dengan kunci lain.
+   */
+  rotation?: number;
+  /** #669 — `opacity=` persen 0-100 apa adanya; 0 sah. */
+  opacity?: number;
+  /** #669 — `shadow=1`. */
+  shadow?: boolean;
+  /** #669 — `gradientColor=` apa adanya; wajib lewat `warnaTeksAman()` sebelum DOM. */
+  gradientHex?: string;
 }
 
 /** Gaya bentuk pada string `style=` draw.io. */
@@ -358,6 +397,22 @@ export const gayaDrawIo = (style: string): GayaDrawIo => {
   if (pola) out.dashPattern = pola.replace(/[\s,]+/g, ",").replace(/,+$/, "");
   const va = /verticalalign=(top|middle|bottom)/i.exec(style)?.[1]?.toLowerCase();
   if (va === "top" || va === "middle" || va === "bottom") out.verticalAlign = va;
+
+  // #669 - empat kunci lagi yang tidak pernah dibacakan. `rotation` dan `opacity`
+  // sengaja TIDAK memakai `angka()` di atas: penolaknya "harus lebih besar dari
+  // nol" akan membuang `-15` dan membuang `opacity=0`, dan keduanya nilai yang
+  // ada di berkas orang.
+  const putar = /rotation=(-?[0-9]+(?:\.[0-9]+)?)/i.exec(style)?.[1];
+  if (putar !== undefined && Number.isFinite(Number.parseFloat(putar)))
+    out.rotation = Number.parseFloat(putar);
+  const opak = /opacity=(-?[0-9]+(?:\.[0-9]+)?)/i.exec(style)?.[1];
+  if (opak !== undefined) {
+    const n = Number.parseFloat(opak);
+    if (Number.isFinite(n)) out.opacity = Math.min(100, Math.max(0, n));
+  }
+  if (/shadow=1/i.test(style)) out.shadow = true;
+  const grad = /gradientcolor=([^;]+)/i.exec(style)?.[1]?.trim();
+  if (grad && grad.toLowerCase() !== "default") out.gradientHex = grad;
 
   return out;
 };

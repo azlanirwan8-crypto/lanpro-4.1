@@ -72,7 +72,7 @@ export function cincinBentuk(keadaan: KeadaanBentuk): {
  *
  * Fungsinya SENGAJA hanya mengembalikan hex sumber atau `undefined`. Palet dua
  * belas nama tetap menjadi pemegang terakhir, karena `color` dipakai pemilih
- * warna, kepala garis, dan gradioen `url(#grad-..)` papan - menyatunya kedua
+ * warna, kepala garis, dan gradien `url(#grad-..)` papan - menyatunya kedua
  * jalur itu lewat satu fungsi yang selalu berisi akan mengubah papan yang tidak
  * pernah diimpor.
  *
@@ -85,3 +85,14 @@ export const warnaSumberBentuk = (
   isi: warnaTeksAman(node.fillHex) ?? undefined,
   tepi: warnaTeksAman(node.strokeHex) ?? undefined,
 });
+
+/**
+ * #669 - satu sumber penamaan untuk gradien `gradientColor=` dari berkas sumber.
+ *
+ * Bentuk SVG mengambil isian dari `lib/shapes.tsx`, sedangkan `<defs>`-nya
+ * ikut dirender di `components/FlowchartNode.tsx`. Rujukan `url(#..)` SVG itu
+ * berlaku sekalian dokumen, jadi kedua tempat HARUS memakai nama yang sama, dan
+ * itu alasan helper ini ada: dua tulisan tangan atas satu id adalah cara
+ * paling mudah membuat isian bentuk hilang tanpa pesan apa pun.
+ */
+export const idGradienSumber = (nodeId: string): string => ["grad-sumber", nodeId].join("-");

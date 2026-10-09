@@ -167,6 +167,32 @@ export interface FlowNode {
   verticalAlign?: "top" | "middle" | "bottom";
   borderStyle?: "solid" | "dashed" | "none";
   strokeWidth?: number;
+  /**
+   * #669 — `rotation=` draw.io, dalam DERAJAT dan boleh negatif ( `-15` sah).
+   * Yang diputar adalah tampilan bentuk beserta labelnya; geometri papan
+   * (x/y/width/height) TIDAK berubah, jadi titik sambung garis tetap dihitung
+   * dari kotak yang belum diputar. Itu pilihan, bukan kelalaian: memutar
+   * kotak pembatas akan memindahkan semua ujung garis setiap kali bentuk
+   * diputar, dan draw.io sendiri tidak melakukannya.
+   */
+  rotation?: number;
+  /**
+   * #669 — `opacity=` berkas sumber, disimpan APA ADANYA sebagai persen
+   * 0-100 dan baru diubah jadi 0-1 di perender. 0 berarti benar-benar
+   * transparan dan tetap sah; karena itu angka ini tidak boleh dibaca
+   * dengan penjaga "hanya yang lebih besar dari nol" seperti kunci lain.
+   */
+  opacity?: number;
+  /** #669 — `shadow=1`. Bawaan draw.io adalah TANPA bayangan, jadi kosong
+   *  berarti tidak ada; ini bukan memanggil ulang bayangan diam yang dicabut
+   *  #627, karena #627 mencabut bayangan yang dipasang pada SEMUA bentuk. */
+  shadow?: boolean;
+  /**
+   * #669 — `gradientColor=` apa adanya. Isian bentuk menjadi gradasi dari
+   * `fillHex` (atau warna paletnya) ke hex ini. Wajib lewat
+   * `warnaTeksAman()` sebelum masuk DOM, seperti hex lainnya.
+   */
+  gradientHex?: string;
 }
 
 export interface FlowEdge {
@@ -208,6 +234,20 @@ export interface FlowEdge {
   startFill?: boolean;
   labelFontSize?: number;
   labelColor?: string;
+  /**
+   * #669 - `exitX/exitY` dan `entryX/entryY` draw.io: GARIS ITU MENEMPEL DI MANA,
+   * dinyatakan sebagai pecahan 0-1 dari lebar dan tinggi bentuk (0,0 = kiri atas,
+   * 1,0.5 = tengah kanan). Kosong = papan memilih sendiri pasangan titik tengah
+   * sisi yang paling berdekatan, seperti sebelum item ini ada.
+   *
+   * Ini bagian paling terlihat dari "sama dengan draw.io" pada sebuah garis:
+   * tanpa kolom ini, dua papan dengan bentuk dan hubungan yang sama bisa
+   * menunjukkan garis yang menempel di sisi yang berbeda, dan tidak ada tempat
+   * untuk menyimpan perbedaan itu. `exitDx/exitDy` (geseran dalam piksel) TIDAK
+   * didukung dan itu tertulis sebagai batas, bukan dijanjikan.
+   */
+  portSumber?: Point;
+  portTujuan?: Point;
 }
 
 /**

@@ -9,7 +9,8 @@
 import React from "react";
 import type { FlowNode } from "../types";
 import { colorPaletteHex } from "../constants";
-import { warnaSumberBentuk } from "./gayaBentuk";
+import { warnaSumberBentuk, idGradienSumber } from "./gayaBentuk";
+import { warnaTeksAman } from "./gayaImpor";
 import { renderBasicShape, renderBasicPreviewIcon } from "./shapes/basicShapes";
 import { renderAwsShape, renderAwsPreviewIcon } from "./shapes/awsShapes";
 import { renderUmlShape, renderUmlPreviewIcon } from "./shapes/umlShapes";
@@ -90,6 +91,8 @@ export function renderCustomSvgShape(
   // #657 — hex dari berkas sumber, bila ada. Papan gelap dan status seleksi tetap
   // di atasnya: itu penanda, bukan warna bentuk.
   const warnaSumber = warnaSumberBentuk(node);
+  // #669 — hex gradien dari berkas sumber, lewat pintu yang sama dengan hex lain.
+  const hexGradien = node.gradientHex ? warnaTeksAman(node.gradientHex) : null;
 
   // Fallback or exact styling based on blueprint context
   const fillCol = isBlueprint
@@ -97,7 +100,13 @@ export function renderCustomSvgShape(
     : // #667 - `fillColor=none`: tidak ada isian sama sekali.
       node.fillNone
       ? "none"
-      : warnaSumber.isi || `url(#grad-${node.color || "indigo"})`;
+      : // #669 - `gradientColor=`: isian menjadi gradasi. Yang dihitung di sini
+        // hanya RUJUKANNYA; `<linearGradient>`-nya dirender per bentuk di
+        // `FlowchartNode.tsx`, dan keduanya memakai `idGradienSumber()` supaya
+        // tidak ada dua tulisan tangan atas satu nama.
+        hexGradien
+        ? `url(#${idGradienSumber(node.id)})`
+        : warnaSumber.isi || `url(#grad-${node.color || "indigo"})`;
 
   const strokeCol = isSelected
     ? "#8b5cf6"

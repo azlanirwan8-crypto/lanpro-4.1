@@ -97,6 +97,37 @@ const DASH: Record<NonNullable<FlowEdge["strokeStyle"]>, string | undefined> = {
 };
 
 /**
+ * #669 - arah garis keluar dari sebuah titik port, yaitu sumbu yang paling jauh
+ * dari tengah bentuk. draw.io menyimpan SATU titik, bukan arahnya; arahnya
+ * diturunkan dari sisi mana titik itu duduk, karena mata panah dan belokan
+ * pertama rute dibangun dari arah ini.
+ *
+ * Titik tepat di tengah (0.5, 0.5) tidak punya sisi. Ia diambil sebagai tumpu
+ * `kanan`, bukan karena benar, tetapi karena harus mengembalikan sesuatu; berkas
+ * draw.io yang sungguh-sungguh menulis tengah berarti garis menempel di dalam
+ * bentuk, dan itu belum punya jalan di papan ini.
+ */
+export const arahPort = (p: Point): { x: number; y: number } => {
+  const dx = p.x - 0.5;
+  const dy = p.y - 0.5;
+  if (Math.abs(dx) >= Math.abs(dy)) return { x: dx >= 0 ? 1 : -1, y: 0 };
+  return { x: 0, y: dy >= 0 ? 1 : -1 };
+};
+
+/** Titik papan dari pecahan 0-1 (`exitX`/`exitY` draw.io) pada satu bentuk. */
+export const titikPort = (
+  node: FlowNode,
+  pecahan: Point
+): Point & { dir: { x: number; y: number } } => {
+  const u = ukuranBentukEfektif(node);
+  return {
+    x: node.x + pecahan.x * u.width,
+    y: node.y + pecahan.y * u.height,
+    dir: arahPort(pecahan),
+  };
+};
+
+/**
  * #656 — SATU sumber warna garis. Dulu jalur dan kepala panah masing-masing
  * menulis hex abu-abu slate, dua tempat yang bisa lupa disamakan. draw.io
  * memakai hitam untuk garis pada papan terang; papan gelap `blueprint` tetap
@@ -539,13 +570,22 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
             return { source: bestSource, target: bestTarget };
           };
 
-          const { source: startPort, target: endPort } =
+          // #669 — berkas yang menulis titik sambung sendiri tidak boleh dilompati
+          // oleh pilihan papan. Yang digantikan HANYA titik ujungnya: rute di
+          // antara kedua ujung (tekukan manual,cache, dan `findSmartRoute`) tetap
+          // jalur yang sama, jadi garis yang menempel di kiri bawah bentuk datang
+          // di kiri bawah, bukan di sisi terdekat seperti sebelumnya.
+          const otomatis =
             source && target
               ? getClosestPortsPoint(source, target)
               : {
                   source: { x: startCenter.x, y: startCenter.y, dir: { x: 0, y: 1 } },
                   target: { x: endCenter.x, y: endCenter.y, dir: { x: 0, y: -1 } },
                 };
+          const startPort =
+            source && edge.portSumber ? titikPort(source, edge.portSumber) : otomatis.source;
+          const endPort =
+            target && edge.portTujuan ? titikPort(target, edge.portTujuan) : otomatis.target;
 
           // #533 — kembar digeser berlawanan arah sepanjang tepi bentuknya,
           // dengan langkah yang sama di kedua ujungnya, sehingga dua garis

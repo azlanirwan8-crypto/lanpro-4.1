@@ -25,7 +25,7 @@ import { gayaLabel, warnaLabel } from "../../../lib/warnaLabel";
 import { customSvgTypes, renderCustomSvgShape } from "../lib/shapes";
 import { getShapeThemeClasses } from "../lib/nodeTheme";
 import { colorPaletteHex, ukuranBentukEfektif } from "../constants";
-import { cincinBentuk, gayaBentuk, warnaSumberBentuk } from "../lib/gayaBentuk";
+import { cincinBentuk, gayaBentuk, idGradienSumber, warnaSumberBentuk } from "../lib/gayaBentuk";
 import { warnaTeksAman } from "../lib/gayaImpor";
 import { NodePropertiesOverlay } from "./NodePropertiesOverlay";
 import type { FlowNode, FlowEdge } from "../types";
@@ -172,6 +172,44 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
   /** #657 — hex dari berkas sumber, atau `undefined` bila bentuknya buatan papan. */
   const warnaSumber = warnaSumberBentuk(node);
 
+  /**
+   * #669 — tiga gaya yang berlaku untuk SEMUA cara menggambar bentuk (div, SVG,
+   * maupun papan blueprint), jadi keduanya dihitung di sini dan digabung ke gaya
+   * bingkai di bawah, BUKAN ke blok isian yang hanya untuk div.
+   *
+   * `opacity` sengaja tidak memakai penjaga "harus lebih besar dari nol":
+   * `opacity=0` adalah nilai yang ada di berkas orang dan artinya berbeda dari
+   * "tidak ada opasitas". Nol harus tetap menipis, bukan dianggap tidak ada.
+   */
+  const putar =
+    typeof node.rotation === "number" && Number.isFinite(node.rotation) ? node.rotation : undefined;
+  const opak =
+    typeof node.opacity === "number" && Number.isFinite(node.opacity)
+      ? Math.min(1, Math.max(0, node.opacity / 100))
+      : undefined;
+  /**
+   * Bayangan dari berkas. Ini BUKAN memanggil kembali bayangan diam yang dicabut
+   * #627 - yang dicabut saat itu adalah bayangan yang dipasang pada SEMUA bentuk
+   * walau tidak ada yang memintanya. Di sini bentuknya sendiri yang meminta.
+   */
+  const hexGradien = node.gradientHex ? warnaTeksAman(node.gradientHex) : null;
+  const idGradien = idGradienSumber(node.id);
+  /**
+   * Syaratnya HARUS SAMA dengan yang dipakai `lib/shapes.tsx` untuk memilih
+   * `url(#..)`: kalau salah satu pihak menambahkan syarat, bentuk SVG bisa
+   * menunjuk id yang tidak pernah dirender, dan kanvas menggambar bentuk tanpa
+   * isian tanpa pesan apa pun. Tidak ada isian = tidak ada gradasi (#667), dan
+   * papan gelap punya bahasa warnanya sendiri.
+   */
+  const adaGradien = !!hexGradien && !node.fillNone && !isBlueprint;
+  const gayaSumber: React.CSSProperties = {
+    ...(putar !== undefined ? { transform: `rotate(${putar}deg)` } : null),
+    ...(opak !== undefined ? { opacity: opak } : null),
+    ...(node.shadow && !isBlueprint
+      ? { filter: "drop-shadow(2px 2px 1px rgba(0, 0, 0, 0.25))" }
+      : null),
+  };
+
   const cincin = cincinBentuk({
     isDragging,
     isSelected,
@@ -295,9 +333,9 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
       {/* Shape Component Frame Body */}
       <div
         className={cn(getShapeThemeClasses(node, isSelected), "w-full h-full relative")}
-        style={
-          isBlueprint || isSvgShape
-            ? undefined // blueprint punya gaya sendiri; bentuk SVG digambar `lib/shapes.tsx`
+        style={{
+          ...(isBlueprint || isSvgShape
+            ? null // blueprint punya gaya sendiri; bentuk SVG digambar `lib/shapes.tsx`
             : {
                 // #657 — bentuk div memakai hex sumber bila ada; palet tetap
                 // pemegang terakhir supaya papan yang dibuat dari nol tidak
@@ -305,6 +343,16 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
                 backgroundColor: node.fillNone
                   ? "transparent"
                   : (warnaSumber.isi ?? warnaBentuk.bg),
+                // #669 — `gradientColor=` pada bentuk div: gradasi vertical dari
+                // isian asal ke warna gradiennya, seperti draw.io tanpa arah
+                // eksplisit. Arah gradien (`gradientDirection`) belum didukung
+                // dan itu tercatat sebagai batas, bukan dijanjikan.
+                backgroundImage:
+                  adaGradien && hexGradien
+                    ? `linear-gradient(180deg, ${
+                        (node.fillHex ? warnaSumber.isi : warnaBentuk.bg) ?? warnaBentuk.bg
+                      } 0%, ${hexGradien} 100%)`
+                    : undefined,
                 borderColor: warnaSumber.tepi ?? warnaBentuk.stroke,
                 // #655 — tebal tepi bentuk div dibaca dari bentuknya, tidak lagi
                 // dipatok 1 px oleh kelas `border`. Angka, bukan string: React
@@ -315,9 +363,25 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
                   node.type === "sticky" || node.borderStyle === "none"
                     ? undefined
                     : node.strokeWidth || 1,
-              }
-        }
+              }),
+          // #669 — putar, opasitas, dan bayangan berlaku untuk semua cara menggambar.
+          ...gayaSumber,
+        }}
       >
+        {/* #669 — `<defs>` untuk bentuk SVG. Rujukan url(#..) berlaku sekalian
+            dokumen, jadi isian yang dihitung `lib/shapes.tsx` menemukan gradien
+            yang nama id-nya dihasilkan helper yang sama. */}
+        {adaGradien && isSvgShape && hexGradien ? (
+          <svg width="0" height="0" className="absolute" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id={idGradien} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={warnaSumber.isi ?? warnaBentuk.bg} />
+                <stop offset="100%" stopColor={hexGradien} />
+              </linearGradient>
+            </defs>
+          </svg>
+        ) : null}
+
         {renderCustomSvgShape(
           node,
           canvasTheme,

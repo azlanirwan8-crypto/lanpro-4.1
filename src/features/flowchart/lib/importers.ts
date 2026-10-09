@@ -28,6 +28,10 @@ const gayaGarisEdge = (g: GayaGaris): Partial<FlowEdge> => ({
   startFill: g.startFill,
   labelFontSize: g.labelFontSize,
   labelColor: g.labelColor,
+  // #669 - titik sambung. Salinan, bukan rujukan: dua garis yang lahir dari
+  // objek gaya yang sama tidak boleh berbagi satu titik lalu bergerak bersama.
+  portSumber: g.portSumber ? { x: g.portSumber.x, y: g.portSumber.y } : undefined,
+  portTujuan: g.portTujuan ? { x: g.portTujuan.x, y: g.portTujuan.y } : undefined,
 });
 
 /**
@@ -484,6 +488,13 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
         strokeHex: warnaTeksAman(gaya.strokeHex) ?? undefined,
         // #667 — `fillColor=none` berarti TIDAK ada isian, bukan "warna palet".
         fillNone: tanpaIsian || teksPolos || undefined,
+        // #669 — empat kunci yang tidak pernah punya jalan masuk. `opacity` dan
+        // `rotation` sengaja tidak disaring "harus ada": null dan 0 keduanya
+        // berarti sesuatu yang berbeda di sini, dan 0 adalah nilai yang sah.
+        rotation: gaya.rotation,
+        opacity: gaya.opacity,
+        shadow: gaya.shadow,
+        gradientHex: warnaTeksAman(gaya.gradientHex) ?? undefined,
       });
       nodeIdsSet.add(`drawio-${id}`);
     } else if (edge === "1") {
