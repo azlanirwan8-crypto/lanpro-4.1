@@ -99,9 +99,15 @@ export function renderCustomSvgShape(
         ? "#60a5fa"
         : colorPaletteHex[node.color]?.stroke || "#6366f1";
 
-  const strokeDash = node.borderStyle === "dashed" ? "5,5" : "none";
-  /** #638 — 2 px membuat tepi bentuk setebal stiker; draw.io 1 px. */
-  const strokeWidth = node.borderStyle === "none" ? "0" : "1";
+  // #655 — polanya 3,3 seperti draw.io, bukan 5,5.
+  const strokeDash = node.borderStyle === "dashed" ? "3,3" : "none";
+  /**
+   * #638 pernah mengunci 1 px untuk SEMUA bentuk ("2 px membuat tepi bentuk
+   * setebal stiker"). #655 mengembalikan hak sumber: draw.io sendiri bawaannya
+   * 1 px, dan nilai dari berkas yang diimpor sekarang benar-benar dipakai,
+   * bukan dibuang di jalan.
+   */
+  const strokeWidth = node.borderStyle === "none" ? "0" : String(node.strokeWidth ?? 1);
 
   // Compute modern layered drop shadows for maximum softness and 3D feel
   const shadowFilter = isBlueprint

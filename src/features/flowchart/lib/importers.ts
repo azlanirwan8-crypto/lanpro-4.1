@@ -363,7 +363,7 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
         width,
         height,
         borderStyle: gaya.dashed ? "dashed" : "solid",
-        strokeWidth: gaya.strokeWidth ?? 2,
+        strokeWidth: gaya.strokeWidth ?? 1,
       });
       nodeIdsSet.add(`drawio-${id}`);
     } else if (edge === "1") {
@@ -518,7 +518,7 @@ export const parseMermaid = (mermaidText: string): ParsedDiagram => {
         width: type === "diamond" ? 140 : 130,
         height: type === "diamond" ? 85 : 75,
         borderStyle: "solid",
-        strokeWidth: 2,
+        strokeWidth: 1,
       };
       nodeMap.set(cleanId, node);
       extractedNodes.push(node);
@@ -697,7 +697,7 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
           width,
           height,
           borderStyle: "solid",
-          strokeWidth: 2,
+          strokeWidth: 1,
         });
         nodeIdsSet.add(`miro-${id}`);
       }
@@ -841,7 +841,7 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
           width,
           height,
           borderStyle: gaya.dashed ? "dashed" : "solid",
-          strokeWidth: gaya.strokeWidth ?? 2,
+          strokeWidth: gaya.strokeWidth ?? 1,
         });
         nodeIdsSet.add(`miro-${id}`);
       } else {

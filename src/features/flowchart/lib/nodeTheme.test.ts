@@ -59,7 +59,10 @@ describe("getShapeThemeClasses", () => {
   });
 
   it("membedakan bentuk lewat kelas sudutnya", () => {
-    expect(getShapeThemeClasses(node({ type: "rect" }), false)).toContain("rounded-xl");
+    // #655 — `rect` tidak lagi membawa kelas radius. Bawaan draw.io adalah
+    // `rounded=0`, dan rect adalah bentuk yang paling sering dibuat orang,
+    // sehingga sudut inilah yang paling menentukan "ini papan draw.io atau bukan".
+    expect(getShapeThemeClasses(node({ type: "rect" }), false)).not.toMatch(/rounded/);
     expect(getShapeThemeClasses(node({ type: "cylinder" }), false)).toContain("rounded-t-[20px]");
     expect(getShapeThemeClasses(node({ type: "folder" }), false)).toContain("rounded-tr-lg");
   });

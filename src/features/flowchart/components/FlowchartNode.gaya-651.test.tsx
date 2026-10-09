@@ -144,7 +144,7 @@ describe("garis putus-putus mencapai bentuk SVG (#652, koreksi catatan #650)", (
       <FlowchartNode {...props(bentuk({ type: "oval", borderStyle: "dashed" }))} />
     );
     const gambar = svgBentuk(container)!.querySelector("[stroke-dasharray]");
-    expect(gambar?.getAttribute("stroke-dasharray")).toBe("5,5");
+    expect(gambar?.getAttribute("stroke-dasharray")).toBe("3,3");
   });
 
   it("diamond: sama, lewat polygon", () => {
@@ -153,7 +153,7 @@ describe("garis putus-putus mencapai bentuk SVG (#652, koreksi catatan #650)", (
     );
     const gambar = svgBentuk(container)!.querySelector("[stroke-dasharray]");
     expect(gambar?.tagName.toLowerCase()).toBe("polygon");
-    expect(gambar?.getAttribute("stroke-dasharray")).toBe("5,5");
+    expect(gambar?.getAttribute("stroke-dasharray")).toBe("3,3");
   });
 
   it("oval tanpa borderStyle tidak membawa pola garis", () => {
@@ -215,5 +215,76 @@ describe("tipografi bawaan draw.io (#654)", () => {
   it("index.css masih mengunci textarea - itu sebabnya kelas papan butuh !important", () => {
     const css = readFileSync(join(__dirname, "..", "..", "..", "index.css"), "utf8");
     expect(/textarea[\s\S]{0,400}font-family:[\s\S]{0,400}!important/.test(css)).toBe(true);
+  });
+});
+
+/**
+ * #655 — geometri tepi bentuk mengikuti draw.io.
+ *
+ * TIGA JALUR YANG BERBEDA DIUJI TERPISAH, karena bentuk di papan ini digambar
+ * dengan tiga cara: div ber-border (`rect`), SVG dengan `stroke` (oval, diamond,
+ * dan sebangsanya), dan catatan tempel yang tepinya cuma satu garis bawah.
+ * Mengunci salah satu tidak membuktikan dua lainnya.
+ */
+describe("geometri tepi bentuk mengikuti draw.io (#655)", () => {
+  const svgBentuk = (container: HTMLElement) =>
+    Array.from(container.querySelectorAll("svg")).find((s) =>
+      (s.getAttribute("class") || "").includes("inset-0")
+    );
+
+  /** Div bentuk: satu-satunya div yang diberi warna TEPI lewat gaya inline. */
+  const divBentuk = (container: HTMLElement) =>
+    Array.from(container.querySelectorAll("div")).find((d) => !!d.style.borderColor);
+
+  it("tebal tepi SVG dibaca dari bentuknya, bukan dipatok konstanta", () => {
+    const { container } = render(
+      <FlowchartNode {...props(bentuk({ type: "oval", strokeWidth: 4 }))} />
+    );
+    const gambar = svgBentuk(container)!.querySelector("[stroke]") as SVGElement;
+    expect(gambar.getAttribute("stroke-width")).toBe("4");
+  });
+
+  it("tanpa nilai di bentuk, tepinya 1 px seperti bawaan draw.io", () => {
+    const { container } = render(<FlowchartNode {...props(bentuk({ type: "oval" }))} />);
+    const gambar = svgBentuk(container)!.querySelector("[stroke]") as SVGElement;
+    expect(gambar.getAttribute("stroke-width")).toBe("1");
+  });
+
+  it("pola putus-putus mengikuti draw.io: 3,3 bukan 5,5", () => {
+    const { container } = render(
+      <FlowchartNode {...props(bentuk({ type: "circle", borderStyle: "dashed" }))} />
+    );
+    const gambar = svgBentuk(container)!.querySelector("[stroke-dasharray]");
+    expect(gambar?.tagName.toLowerCase()).toBe("circle");
+    expect(gambar?.getAttribute("stroke-dasharray")).toBe("3,3");
+  });
+
+  it("rect tidak lagi bersudut lengkung", () => {
+    const { container } = render(<FlowchartNode {...props(bentuk())} />);
+    const div = divBentuk(container)!;
+    expect(div.className).not.toMatch(/rounded/);
+    expect(div.style.borderWidth).toBe("1px");
+  });
+
+  it("tebal tepi ikut sampai ke bentuk div", () => {
+    const { container } = render(<FlowchartNode {...props(bentuk({ strokeWidth: 5 }))} />);
+    expect(divBentuk(container)!.style.borderWidth).toBe("5px");
+  });
+
+  it("catatan tempel tidak mendapat tepi baru - tepinya tetap satu garis bawah (#652)", () => {
+    const { container } = render(<FlowchartNode {...props(bentuk({ type: "sticky" }))} />);
+    const tepiBawah = Array.from(container.querySelectorAll("div")).filter((d) =>
+      /border-b-\[3px\]/.test(d.className)
+    );
+    expect(tepiBawah.length).toBeGreaterThan(0);
+    // Gaya inline tidak boleh menimpa garis bawah 3 px itu dengan empat sisi.
+    for (const d of tepiBawah) expect(d.style.borderWidth).toBe("");
+  });
+
+  it("bentuk tanpa tepi tidak kebagian lebar garis", () => {
+    const { container } = render(
+      <FlowchartNode {...props(bentuk({ borderStyle: "none", strokeWidth: 3 }))} />
+    );
+    expect(divBentuk(container)!.style.borderWidth).toBe("");
   });
 });

@@ -268,7 +268,19 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
         style={
           isBlueprint || isSvgShape
             ? undefined // blueprint punya gaya sendiri; bentuk SVG digambar `lib/shapes.tsx`
-            : { backgroundColor: warnaBentuk.bg, borderColor: warnaBentuk.stroke }
+            : {
+                backgroundColor: warnaBentuk.bg,
+                borderColor: warnaBentuk.stroke,
+                // #655 — tebal tepi bentuk div dibaca dari bentuknya, tidak lagi
+                // dipatok 1 px oleh kelas `border`. Angka, bukan string: React
+                // yang menambahkan px. Catatan tempel dikecualikan karena tepinya
+                // memang satu garis bawah (#652), dan bentuk tanpa tepi jangan
+                // mendapat garis lagi.
+                borderWidth:
+                  node.type === "sticky" || node.borderStyle === "none"
+                    ? undefined
+                    : node.strokeWidth || 1,
+              }
         }
       >
         {renderCustomSvgShape(

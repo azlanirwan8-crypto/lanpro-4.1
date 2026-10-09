@@ -320,7 +320,9 @@ describe("parseMiroContent JSON: gaya asli sampai ke node dan edge (#650)", () =
       fontSize: 12,
       align: "center",
       borderStyle: "solid",
-      strokeWidth: 2,
+      // #655 — bawaan tepi draw.io 1 px, dan angkanya sekarang benar-benar
+      // dipakai perender, bukan disimpan lalu dibuang.
+      strokeWidth: 1,
     });
   });
 });
