@@ -4104,9 +4104,21 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                   linear-gradient(to bottom, rgba(148, 163, 184, 0.28) 1px, transparent 1px);
                 background-size: 20px 20px;
               }
-              .sticky-handwriting {
-                font-family: 'Georgia', 'Georgia Ref', serif;
-                letter-spacing: -0.01em;
+              /*
+                #654 — keluarga huruf papan. Ditulis dengan !important karena
+                src/index.css:493 mengunci font-family semua textarea dengan
+                !important juga; kelas biasa kalah dan tombol serif/mono di panel
+                sifat hanya mengubah data, tidak mengubah layar. Bawaannya Helvetica
+                seperti draw.io, bukan Inter.
+              */
+              .huruf-sans {
+                font-family: Helvetica, Arial, 'Liberation Sans', sans-serif !important;
+              }
+              .huruf-serif {
+                font-family: Georgia, 'Times New Roman', serif !important;
+              }
+              .huruf-mono {
+                font-family: 'Courier New', Courier, monospace !important;
               }
               .custom-scrollbar::-webkit-scrollbar {
                 width: 5px;

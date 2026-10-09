@@ -309,14 +309,15 @@ describe("parseMiroContent JSON: gaya asli sampai ke node dan edge (#650)", () =
     expect(edges[0]).toMatchObject({ label: "YA", connector: "orthogonal" });
   });
 
-  it("item tanpa gaya tetap dapat bawaan lama — tidak ada yang berubah diam-diam", () => {
+  it("item tanpa gaya tetap dapat bawaan, dan bawaan itu tidak berubah diam-diam", () => {
     const { nodes } = parseMiroContent(
       JSON.stringify([{ id: "x", type: "shape", data: { shape: "ellipse", content: "Mulai" } }]),
       false
     );
     expect(nodes[0]).toMatchObject({
       color: "emerald",
-      fontSize: 13,
+      // #654 — 12 px, bukan 13: bawaan huruf papan disamakan dengan draw.io.
+      fontSize: 12,
       align: "center",
       borderStyle: "solid",
       strokeWidth: 2,

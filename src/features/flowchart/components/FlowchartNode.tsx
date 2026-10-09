@@ -75,6 +75,19 @@ interface FlowchartNodeProps {
   suppressNodeOverlay?: boolean;
 }
 
+/**
+ * #654 — keluarga huruf label, dituliskan lewat tabel kecil supaya tepat satu
+ * kemungkinan yang terpasang pada sebuah bentuk. Ketiganya diberi `!important`
+ * di blok gaya papan (`FlowchartContainer.tsx`), tempatnya aturan
+ * `font-family: Inter !important` untuk `textarea` di `src/index.css` bisa
+ * dikalahkan tanpa menyentuh berkas itu.
+ */
+const KELAS_HURUF: Record<NonNullable<FlowNode["fontStyle"]>, string> = {
+  sans: "huruf-sans",
+  serif: "huruf-serif",
+  mono: "huruf-mono",
+};
+
 const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
   node,
   isSelected,
@@ -344,11 +357,16 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
             onChange={(e) => handleUpdateNode(node.id, { label: e.target.value })}
             onFocus={() => setSelectedNodeId(node.id)}
             className={cn(
-              "w-full bg-transparent border-0 resize-none text-current focus:outline-none focus:ring-1 focus:ring-violet-300 rounded leading-tight text-center font-sans tracking-tight custom-scrollbar",
-              node.fontWeight === "bold" ? "font-bold" : "font-medium",
+              // #654 — berat dan keluarga huruf mengikuti bawaan draw.io: normal
+              // (400) dan Helvetica. `tracking-tight` dilepas karena draw.io tidak
+              // merapatkan huruf. Kelas huruf di bawah ditulis dengan `!important`
+              // di blok gaya papan; tanpa penanda itu ia kalah oleh `index.css:493`
+              // yang mengunci `font-family` semua `textarea`, sehingga tombol
+              // serif/mono di panel sifat mengubah DATA tanpa mengubah TAMPILAN.
+              "w-full bg-transparent border-0 resize-none text-current focus:outline-none focus:ring-1 focus:ring-violet-300 rounded leading-tight text-center custom-scrollbar",
+              node.fontWeight === "bold" ? "font-bold" : "font-normal",
               canvasTheme === "blueprint" && !isSticky && "text-content-inverse select-text",
-              node.fontStyle === "serif" && "sticky-handwriting",
-              node.fontStyle === "mono" && "font-mono text-xs sm:text-[10px]",
+              KELAS_HURUF[node.fontStyle || "sans"],
               node.align === "left" && "text-left",
               node.align === "right" && "text-right"
             )}
@@ -357,17 +375,10 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
               // `warnaTeksAman()` (hanya hex 3/6 digit), jadi yang masuk ke sini
               // tidak pernah bisa berupa potongan CSS atau skrip.
               color: warnaTeksAman(node.fontColor) ?? undefined,
-              fontSize: `${
-                node.type === "sticky"
-                  ? (node.label || "").length > 100
-                    ? 9
-                    : (node.label || "").length > 60
-                      ? 10
-                      : (node.label || "").length > 30
-                        ? 11
-                        : 13
-                  : node.fontSize || 12
-              }px`,
+              // #654 — draw.io memakai SATU ukuran bawaan untuk semua bentuk, 12 px,
+              // termasuk catatan tempel. Tangga 9/10/11/13 berdasarkan panjang teks
+              // adalah kebiasaan papan Miro dan sudah tidak berlaku di sini.
+              fontSize: `${node.fontSize || 12}px`,
             }}
             placeholder="..."
           />

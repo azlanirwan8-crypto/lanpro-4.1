@@ -1,6 +1,10 @@
 /**
  * #651 — tebal huruf dan warna huruf benar-benar sampai ke DOM.
  *
+ * Beratk biasa bentuk berubah pada #654: dari `font-medium` menjadi
+ * `font-normal`, karena bawaan draw.io adalah berat normal. Test di bawah
+ * mengunci keadaan TERBARU, bukan keadaan 08 Okt.
+ *
  * MENGAPA DIUJI PADA RENDER, BUKAN PADA SUMBER. Yang dilaporkan pemilik proyek
  * adalah apa yang MATANYA lihat pada papan Miro-nya: semua hurufnya tebal, hasil
  * impor semuanya biasa. Test yang membaca string kelas bisa hijau sementara
@@ -14,6 +18,8 @@
  *    batas akhirnya: potongan CSS tidak boleh menemukan jalan ke `style`.
  */
 import React from "react";
+import { readFileSync } from "fs";
+import { join } from "path";
 import { render, fireEvent } from "@testing-library/react";
 import { FlowchartNode } from "./FlowchartNode";
 import type { FlowNode } from "../types";
@@ -64,10 +70,10 @@ const props = (node: FlowNode) =>
 const textarea = (html: HTMLElement) => html.querySelector("textarea") as HTMLTextAreaElement;
 
 describe("tebal dan warna huruf pada bentuk (#651)", () => {
-  it("bentuk biasa memakai font-medium, bukan font-bold", () => {
+  it("bentuk biasa memakai font-normal, bukan font-bold", () => {
     const { container } = render(<FlowchartNode {...props(bentuk())} />);
     const kelas = textarea(container).className;
-    expect(kelas).toContain("font-medium");
+    expect(kelas).toContain("font-normal");
     expect(kelas).not.toContain("font-bold");
   });
 
@@ -153,5 +159,61 @@ describe("garis putus-putus mencapai bentuk SVG (#652, koreksi catatan #650)", (
   it("oval tanpa borderStyle tidak membawa pola garis", () => {
     const { container } = render(<FlowchartNode {...props(bentuk({ type: "oval" }))} />);
     expect(svgBentuk(container)!.querySelector("[stroke-dasharray]")).toBeNull();
+  });
+});
+
+/**
+ * #654 — tipografi papan mengikuti bawaan draw.io: Helvetica, 12 px, berat
+ * normal, dan SATU ukuran untuk semua bentuk (catatan tempel panjang tidak lagi
+ * dikecilkan ke 9 px).
+ *
+ * DIUJI DUA BAGIAN, dan bagiannya tidak boleh dicampur. Bagian perilaku memakai
+ * `<textarea>` sungguhan. Bagian sumber membaca dua berkas: jsdom TIDAK MEMUAT
+ * `src/index.css`, jadi kaskade `!important` - yaitu hal yang membuat tombol
+ * serif/mono akhirnya benar-benar bekerja - TIDAK bisa dibuktikan dari sini. Yang
+ * dibuktikan hanyalah bahwa aturan penjaganya masih berdiri di kedua berkas;
+ * sisanya ditulis apa adanya sebagai belum terverifikasi di tab bersih.
+ */
+describe("tipografi bawaan draw.io (#654)", () => {
+  const label = (lebih: Partial<FlowNode> = {}) => {
+    const { container } = render(<FlowchartNode {...props(bentuk(lebih))} />);
+    return textarea(container);
+  };
+
+  it("satu ukuran untuk semua bentuk: 12 px, termasuk catatan tempel panjang", () => {
+    expect(label().style.fontSize).toBe("12px");
+    expect(label({ type: "sticky" }).style.fontSize).toBe("12px");
+    expect(label({ type: "sticky", label: "A".repeat(140) }).style.fontSize).toBe("12px");
+  });
+
+  it("ukuran dari berkas sumber tetap menang atas bawaan", () => {
+    expect(label({ fontSize: 18 }).style.fontSize).toBe("18px");
+  });
+
+  it("tepat satu keluarga huruf terpasang, dan ketiganya bisa ditukar", () => {
+    expect(label().className).toContain("huruf-sans");
+    expect(label({ fontStyle: "serif" }).className).toContain("huruf-serif");
+    expect(label({ fontStyle: "mono" }).className).toContain("huruf-mono");
+    expect(label({ fontStyle: "mono" }).className).not.toContain("huruf-sans");
+    expect(label({ fontStyle: "mono" }).className).not.toContain("huruf-serif");
+  });
+
+  it("letter-spacing rapat khas papan lain tidak dipakai lagi", () => {
+    expect(label().className).not.toContain("tracking-tight");
+  });
+
+  it("ketiga keluarga huruf ditulis dengan !important di blok gaya papan", () => {
+    const sumber = readFileSync(join(__dirname, "..", "FlowchartContainer.tsx"), "utf8");
+    for (const kelas of ["huruf-sans", "huruf-serif", "huruf-mono"]) {
+      const pola = new RegExp("\\." + kelas + "\\s*\\{[^}]*font-family:[^;]*!important", "");
+      expect(pola.test(sumber)).toBe(true);
+    }
+    // Kelas lama dihapus, bukan ditinggal setengah.
+    expect(sumber).not.toContain("sticky-handwriting");
+  });
+
+  it("index.css masih mengunci textarea - itu sebabnya kelas papan butuh !important", () => {
+    const css = readFileSync(join(__dirname, "..", "..", "..", "index.css"), "utf8");
+    expect(/textarea[\s\S]{0,400}font-family:[\s\S]{0,400}!important/.test(css)).toBe(true);
   });
 });
