@@ -165,6 +165,16 @@ export interface GayaGaris {
   label: string;
   connector?: FlowEdge["connector"];
   strokeStyle?: FlowEdge["strokeStyle"];
+  /** #665 - gaya garis yang selama ini tidak punya tempat di model. */
+  strokeColor?: string;
+  strokeWidth?: number;
+  dashPattern?: string;
+  endArrow?: string;
+  startArrow?: string;
+  endFill?: boolean;
+  startFill?: boolean;
+  labelFontSize?: number;
+  labelColor?: string;
 }
 
 /** Teks pada garis. WebSDK menyimpannya di `captions[]`, REST di `data.captions[]`,
@@ -214,6 +224,31 @@ export const gayaGarisDrawIo = (style: string): GayaGaris => {
     gaya.connector = "straight";
   if (/dashed=1/.test(s)) gaya.strokeStyle = "dashed";
   else if (/dashpattern=1;2|dotted=1/.test(s)) gaya.strokeStyle = "dotted";
+
+  // #665 - sisanya tidak pernah dibacakan sama sekali.
+  const gayaDari = (kunci: string): string | undefined => {
+    const v = new RegExp(kunci + "=([^;]+)", "i").exec(style)?.[1]?.trim();
+    return v && v.toLowerCase() !== "default" ? v : undefined;
+  };
+  const sc = gayaDari("strokecolor");
+  if (sc) gaya.strokeColor = sc;
+  const sw = Number.parseFloat(gayaDari("strokewidth") || "");
+  if (Number.isFinite(sw) && sw > 0) gaya.strokeWidth = Math.round(sw);
+  const pola = gayaDari("dashpattern");
+  if (pola) gaya.dashPattern = pola.replace(/[\s,]+/g, ",").replace(/,+$/, "");
+  const ea = gayaDari("endarrow");
+  if (ea) gaya.endArrow = ea.toLowerCase();
+  const sa = gayaDari("startarrow");
+  if (sa) gaya.startArrow = sa.toLowerCase();
+  const ef = /endfill=([01])/i.exec(style)?.[1];
+  if (ef !== undefined) gaya.endFill = ef === "1";
+  const sf = /startfill=([01])/i.exec(style)?.[1];
+  if (sf !== undefined) gaya.startFill = sf === "1";
+  const fsLabel = Number.parseFloat(gayaDari("fontsize") || "");
+  if (Number.isFinite(fsLabel) && fsLabel > 0) gaya.labelFontSize = Math.round(fsLabel);
+  const fc = gayaDari("fontcolor");
+  if (fc) gaya.labelColor = fc;
+
   return gaya;
 };
 
@@ -223,6 +258,10 @@ export interface GayaDrawIo {
   align?: FlowNode["align"];
   strokeWidth?: number;
   bold?: boolean;
+  /** #657 — `fillColor=` apa adanya, sebelum apa pun dipetakan ke palet. */
+  fillHex?: string;
+  /** #657 — `strokeColor=` apa adanya. */
+  strokeHex?: string;
   /** `fontColor=` draw.io; sama seperti Miro, wajib lewat `warnaTeksAman()`. */
   fontHex?: string;
   /** #666 — `rounded=1`; kosong berarti bawaan draw.io, bersudut tajam. */
@@ -242,6 +281,13 @@ export const gayaDrawIo = (style: string): GayaDrawIo => {
     return Number.isFinite(n) && n > 0 ? n : undefined;
   };
   if (/dashed=1/i.test(style)) out.dashed = true;
+  // #657 — isian dan tepi apa adanya. `warnaPaletTerdekat()` memaksa hex ke
+  // dua belas nama palet dan MELEPAS putih serta abu-abu, jadi kotak putih
+  // draw.io datang sebagai `indigo`. Hex-nya harus ikut tersimpan.
+  const fill = /fillcolor=([^;]+)/i.exec(style)?.[1]?.trim();
+  if (fill && fill.toLowerCase() !== "default") out.fillHex = fill;
+  const tepi = /strokecolor=([^;]+)/i.exec(style)?.[1]?.trim();
+  if (tepi && tepi.toLowerCase() !== "default") out.strokeHex = tepi;
   const fs = angka("fontsize");
   if (fs) out.fontSize = Math.round(fs);
   const sw = angka("strokeWidth");

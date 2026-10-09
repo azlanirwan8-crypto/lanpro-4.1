@@ -1,3 +1,6 @@
+import { warnaTeksAman } from "./gayaImpor";
+import type { FlowNode } from "../types";
+
 /**
  * Geometri satu bentuk saat disentuh — item #629.
  *
@@ -63,3 +66,22 @@ export function cincinBentuk(keadaan: KeadaanBentuk): {
     sumberSambung: !keadaan.isSvgShape && keadaan.isSourceOfConnect,
   };
 }
+
+/**
+ * #657 - warna yang ditulis berkas sumber, bila ada.
+ *
+ * Fungsinya SENGAJA hanya mengembalikan hex sumber atau `undefined`. Palet dua
+ * belas nama tetap menjadi pemegang terakhir, karena `color` dipakai pemilih
+ * warna, kepala garis, dan gradioen `url(#grad-..)` papan - menyatunya kedua
+ * jalur itu lewat satu fungsi yang selalu berisi akan mengubah papan yang tidak
+ * pernah diimpor.
+ *
+ * Nilainya datang dari berkas unggahan orang, jadi `warnaTeksAman()` adalah
+ * satu-satunya pintunya: hex tiga atau enam digit, bukan yang lain.
+ */
+export const warnaSumberBentuk = (
+  node: Pick<FlowNode, "fillHex" | "strokeHex">
+): { isi?: string; tepi?: string } => ({
+  isi: warnaTeksAman(node.fillHex) ?? undefined,
+  tepi: warnaTeksAman(node.strokeHex) ?? undefined,
+});

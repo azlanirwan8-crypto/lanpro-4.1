@@ -9,6 +9,7 @@
 import React from "react";
 import type { FlowNode } from "../types";
 import { colorPaletteHex } from "../constants";
+import { warnaSumberBentuk } from "./gayaBentuk";
 import { renderBasicShape, renderBasicPreviewIcon } from "./shapes/basicShapes";
 import { renderAwsShape, renderAwsPreviewIcon } from "./shapes/awsShapes";
 import { renderUmlShape, renderUmlPreviewIcon } from "./shapes/umlShapes";
@@ -86,10 +87,14 @@ export function renderCustomSvgShape(
 ) {
   const isBlueprint = canvasTheme === "blueprint";
 
+  // #657 — hex dari berkas sumber, bila ada. Papan gelap dan status seleksi tetap
+  // di atasnya: itu penanda, bukan warna bentuk.
+  const warnaSumber = warnaSumberBentuk(node);
+
   // Fallback or exact styling based on blueprint context
   const fillCol = isBlueprint
     ? "rgba(30, 58, 138, 0.4)" // translucent dark blue
-    : `url(#grad-${node.color || "indigo"})`;
+    : warnaSumber.isi || `url(#grad-${node.color || "indigo"})`;
 
   const strokeCol = isSelected
     ? "#8b5cf6"
@@ -97,7 +102,7 @@ export function renderCustomSvgShape(
       ? "#f43f5e"
       : isBlueprint
         ? "#60a5fa"
-        : colorPaletteHex[node.color]?.stroke || "#6366f1";
+        : warnaSumber.tepi || colorPaletteHex[node.color]?.stroke || "#6366f1";
 
   // #655 — polanya 3,3 seperti draw.io, bukan 5,5. #666 — kecuali berkas sumber
   // menulis `dashPattern=` sendiri; itu yang berlaku, apa pun angkanya.

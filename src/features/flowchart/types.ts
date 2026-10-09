@@ -120,6 +120,20 @@ export interface FlowNode {
    *  bentuk. Nilainya TIDAK pernah dipercaya apa adanya: yang masuk ke DOM
    *  hanya yang lolos `warnaTeksAman()`. */
   fontColor?: string;
+  /**
+   * #657 - isian dan tepi APA ADANYA dari berkas sumber. `color` tetap ada dan
+   * tetap nama palet (ia dipakai pemilih warna, kepala garis, dan gradioen
+   * `url(#grad-..)`), tetapi bila kolom ini terisi maka yang digambar adalah
+   * hex-nya, bukan paletnya. Alasannya terukur: `warnaPaletTerdekat()` memaksa
+   * setiap hex ke dua belas nama palet dan melepaskan saturasi di bawah 0,12,
+   * jadi kotak PUTIH draw.io jatuh ke tebakan nama bentuk dan datang sebagai
+   * `indigo` ungu.
+   *
+   * Nilainya tidak pernah dipercaya: yang masuk ke DOM hanya yang lolos
+   * `warnaTeksAman()`.
+   */
+  fillHex?: string;
+  strokeHex?: string;
   align?: "left" | "center" | "right";
   /**
    * #666 — `rounded=1` dari berkas draw.io. Kosong = bawaan papan, dan bawaan
@@ -156,6 +170,28 @@ export interface FlowEdge {
    * Miro menyimpan waypoint per penghubung.
    */
   waypoints?: Point[];
+  /**
+   * #665 - gaya yang ditulis berkas draw.io pada tepi. Sebelum ini `FlowEdge`
+   * tidak punya kolom gaya selain `connector` dan `strokeStyle`, jadi garis
+   * `strokeColor=#b85450;strokeWidth=4` datang sebagai garis tema setebal 1 px:
+   * warnanya hilang, tebalnya hilang, dan mata panahnya tetap digambar walau
+   * sumber menulis `endArrow=none`.
+   *
+   * `strokeColor` dan `labelColor` TIDAK pernah dipercaya apa adanya: yang masuk
+   * ke DOM hanya yang lolos `warnaTeksAman()`.
+   */
+  strokeColor?: string;
+  strokeWidth?: number;
+  /** `dashPattern=8 8` draw.io, disimpan sebagai notasi SVG: `8,8`. */
+  dashPattern?: string;
+  /** Bentuk ujung garis, nilai `endArrow` dan `startArrow` draw.io apa adanya. */
+  endArrow?: string;
+  startArrow?: string;
+  /** `endFill=0` berarti mata terbuka. `undefined` ikut bentuknya. */
+  endFill?: boolean;
+  startFill?: boolean;
+  labelFontSize?: number;
+  labelColor?: string;
 }
 
 /**

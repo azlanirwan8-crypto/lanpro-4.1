@@ -17,6 +17,7 @@ import { motion } from "motion/react";
 import { findSmartRoute, memotongInteriorKotak } from "../lib/routing";
 import { colorPaletteHex, ukuranBentukEfektif } from "../constants";
 import { EdgeStyleBar } from "./EdgeStyleBar";
+import { warnaTeksAman } from "../lib/gayaImpor";
 import type { FlowNode, FlowEdge, Point } from "../types";
 
 type SimpananRute = { sig: string; points: Point[] };
@@ -103,6 +104,99 @@ const DASH: Record<NonNullable<FlowEdge["strokeStyle"]>, string | undefined> = {
  */
 const warnaGarisPapan = (tema: "miro" | "blueprint"): string =>
   tema === "miro" ? "#000000" : "#60a5fa";
+
+/**
+ * #665 - mata panah yang papan ini bisa gambar. draw.io mengenal lebih banyak
+ * lagi (stepped, skip, circle, dan seterusnya); nilai yang tidak ada di daftar
+ * ini jatuh ke `classic`, dan itu dituliskan sebagai BATAS, bukan ditebak.
+ */
+const BENTUK_KEPALA = ["classic", "open", "oval", "block", "diamond", "none"];
+
+const gambarKepala = (bentuk: string, isi: boolean, warna: string) => {
+  if (bentuk === "oval")
+    return (
+      <ellipse
+        cx="5.5"
+        cy="4"
+        rx="4.5"
+        ry="3"
+        fill={isi ? warna : "none"}
+        stroke={warna}
+        strokeWidth="1"
+      />
+    );
+  if (bentuk === "diamond")
+    return (
+      <path
+        d="M0.8,4 L5,0.8 L9.2,4 L5,7.2 Z"
+        fill={isi ? warna : "none"}
+        stroke={warna}
+        strokeWidth="1"
+      />
+    );
+  if (bentuk === "open")
+    return <path d="M0.8,0.8 L9.5,4 L0.8,7.2" fill="none" stroke={warna} strokeWidth="1" />;
+  // `classic` dan `block`: segitiga, terisi atau berbingkai.
+  return <path d="M0.8,0.8 L9.5,4 L0.8,7.2 Z" fill={warna} stroke={warna} strokeWidth="1" />;
+};
+
+type SpesifikasiKepala = { id: string; bentuk: string; isi: boolean; warna: string };
+
+/**
+ * `id` marker memuat warna dan bentuknya, jadi ia harus disusun dari bagian-
+ * bagiannya, bukan ditulis sebagai satu templat panjang di dalam objek: pemindai
+ * teks layar (`sapu:teks`) membaca string bermuatan tanda hubung di posisi itu
+ * sebagai kalimat yang tidak lewat kamus.
+ */
+const idKepala = (arah: string, bentuk: string, isi: boolean, hex: string): string => {
+  const akhiran = isi ? "isi" : "kosong";
+  return ["canvas-arrow-head", arah, bentuk, akhiran, hex].join("-");
+};
+
+/**
+ * #665 - mata panah di kedua ujung, dibaca dari `endArrow` dan `startArrow`.
+ *
+ * TIGA keadaan yang harus dibeda-kan, dan inilah bagian yang paling gampang
+ * salah: `undefined` berarti sumber TIDAK menulis apa pun, jadi papan memakai
+ * matanya sendiri; `"none"` berarti sumber menulis tanpa mata, dan garisnya
+ * harus benar-benar tanpa mata (sebelum ini papan selalu menggambar satu);
+ * selebihnya digambar sesuai bentuk dan isian sumber.
+ */
+const kepalaUntuk = (
+  edge: FlowEdge,
+  warna: string,
+  dipilih: boolean
+): { markerEnd?: string; markerStart?: string; kepala: SpesifikasiKepala[] } => {
+  const hex = warna.replace("#", "") || "000000";
+  const spec = (arah: "end" | "start"): SpesifikasiKepala | null | undefined => {
+    const nilai = (arah === "end" ? edge.endArrow : edge.startArrow)?.toLowerCase();
+    if (!nilai) return undefined;
+    if (nilai === "none") return null;
+    const bentuk = BENTUK_KEPALA.includes(nilai) ? nilai : "classic";
+    const flag = arah === "end" ? edge.endFill : edge.startFill;
+    const isi = flag ?? !(bentuk === "open" || bentuk === "oval" || bentuk === "diamond");
+    return {
+      id: idKepala(arah, bentuk, isi, hex),
+      bentuk,
+      isi,
+      warna,
+    };
+  };
+  const akhir = spec("end");
+  const awal = spec("start");
+  return {
+    markerEnd:
+      akhir === undefined
+        ? dipilih
+          ? "url(#canvas-arrow-head-selected)"
+          : "url(#canvas-arrow-head)"
+        : akhir
+          ? `url(#${akhir.id})`
+          : undefined,
+    markerStart: awal ? `url(#${awal.id})` : undefined,
+    kepala: [akhir, awal].filter((k): k is SpesifikasiKepala => !!k),
+  };
+};
 
 /**
  * Item #521 / #542 / #543 — rute garis dihitung ulang HANYA bila geometri yang
@@ -384,6 +478,15 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
           const isSelected = selectedEdgeId === edge.id;
           const isHovered = hoveredEdgeId === edge.id;
 
+          // #665 - warna, tebal, pola, dan mata panah garis. Warna dari berkas
+          // sumber menang; kalau tidak ada, papan yang memilih (hitam di papan
+          // terang, biru muda di papan gelap). Nilai sumber sudah disaring
+          // `warnaTeksAman()` - hex tiga atau enam digit, bukan yang lain.
+          const warnaTepi =
+            warnaTeksAman(edge.strokeColor) ||
+            (isSelected ? "#8b5cf6" : isHovered ? "#3b82f6" : warnaGarisPapan(canvasTheme));
+          const { markerEnd, markerStart, kepala } = kepalaUntuk(edge, warnaTepi, isSelected);
+
           const isSourceSelected = selectedNodeId === edge.fromNodeId;
           const isTargetSelected = selectedNodeId === edge.toNodeId;
           const isSourceHovered = hoveredNodeId === edge.fromNodeId;
@@ -565,6 +668,32 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
               onMouseLeave={() => setHoveredEdgeId(null)}
             >
               {/*
+                #665 - mata panah yang ditulis berkas sumber hidup di DALAM
+                gugus garisnya sendiri. Alasannya teknis: `id`-nya memuat warna
+                dan bentuk garis itu, dan definisi di `<defs>` papan cuma ada
+                satu untuk semua garis. `orient="auto-start-reverse"` membuat
+                bentuk yang sama dipakai di kedua ujung tanpa dibalik manual.
+              */}
+              {kepala.length > 0 && (
+                <defs>
+                  {kepala.map((k) => (
+                    <marker
+                      key={k.id}
+                      id={k.id}
+                      viewBox="0 0 10 8"
+                      markerWidth="10"
+                      markerHeight="8"
+                      refX="9.5"
+                      refY="4"
+                      orient="auto-start-reverse"
+                      markerUnits="userSpaceOnUse"
+                    >
+                      {gambarKepala(k.bentuk, k.isi, k.warna)}
+                    </marker>
+                  ))}
+                </defs>
+              )}
+              {/*
                 Wilayah sentuh. Dulu jalur ini ikut MENGGAMBAR `#c084fc` saat garis
                 dipilih, di atas 16 px, sehingga garis 2 px terlihat sebagai pita
                 ungu (#630). Kini transparan selamanya — lebarnya hanya menentukan
@@ -627,17 +756,14 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
               <path
                 d={pathD}
                 fill="none"
-                stroke={
-                  isSelected ? "#8b5cf6" : isHovered ? "#3b82f6" : warnaGarisPapan(canvasTheme)
-                }
-                // #656 — 1 px seperti bawaan draw.io. Dulu 2 px, dan kepala
-                // panahnya tidak ikut.
-                strokeWidth="1"
+                stroke={warnaTepi}
+                // #656 - 1 px seperti bawaan draw.io. #665 - kecuali berkas
+                // sumber menulis `strokeWidth` sendiri.
+                strokeWidth={edge.strokeWidth ?? 1}
                 strokeLinecap={edge.strokeStyle === "dotted" ? "round" : "butt"}
-                strokeDasharray={DASH[edge.strokeStyle ?? "solid"]}
-                markerEnd={
-                  isSelected ? "url(#canvas-arrow-head-selected)" : "url(#canvas-arrow-head)"
-                }
+                strokeDasharray={edge.dashPattern || DASH[edge.strokeStyle ?? "solid"] || undefined}
+                markerEnd={markerEnd}
+                markerStart={markerStart}
                 className="transition-all"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -662,7 +788,14 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                     120 px supaya label panjang bisa membungkus dua baris seperti di
                     sana, bukan dibuang ke elipsis.
                   */}
-                  <div className="bg-surface/85 text-xs text-content-strong font-normal px-1 py-0.5 text-center whitespace-pre-wrap break-words">
+                  <div
+                    style={{
+                      // #665 - `fontSize=10;fontColor=#ff0000` pada label garis.
+                      fontSize: edge.labelFontSize,
+                      color: warnaTeksAman(edge.labelColor) ?? undefined,
+                    }}
+                    className="bg-surface/85 text-xs text-content-strong font-normal px-1 py-0.5 text-center whitespace-pre-wrap break-words"
+                  >
                     {edge.label}
                   </div>
                 </foreignObject>

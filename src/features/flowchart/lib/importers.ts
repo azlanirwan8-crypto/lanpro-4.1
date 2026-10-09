@@ -10,6 +10,25 @@ import {
   tebalDariHtml,
   warnaTeksAman,
 } from "./gayaImpor";
+import type { GayaGaris } from "./gayaImpor";
+
+/**
+ * #665 - kolom gaya garis hasil pembacaan `style=` tepi. Kedua jalur pembuatan
+ * garis (yang bersambung `source` dan `target`, dan yang hanya koordinat ujung
+ * seperti #636) memakai fungsi yang sama, supaya tidak ada satu jalur yang
+ * diam-diam kehilangan warna atau mata panah.
+ */
+const gayaGarisEdge = (g: GayaGaris): Partial<FlowEdge> => ({
+  strokeColor: g.strokeColor,
+  strokeWidth: g.strokeWidth,
+  dashPattern: g.dashPattern,
+  endArrow: g.endArrow,
+  startArrow: g.startArrow,
+  endFill: g.endFill,
+  startFill: g.startFill,
+  labelFontSize: g.labelFontSize,
+  labelColor: g.labelColor,
+});
 
 /**
  * Clipboard draw.io menaruh XML-nya TER-ENCODE URI: "%3CmxGraphModel%3E%3Croot%3E…".
@@ -312,6 +331,8 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
     strokeStyle?: FlowEdge["strokeStyle"];
     /** #664 — tekukan dari `<Array as="points">`, kosong berarti tidak ada. */
     waypoints: { x: number; y: number }[];
+    /** #665 - gaya utuh, dipakai saat garis ini akhirnya mendapat bentuk. */
+    gaya: GayaGaris;
   }[] = [];
 
   for (let i = 0; i < cells.length; i++) {
@@ -413,6 +434,10 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
         rounded: gaya.rounded,
         dashPattern: gaya.dashPattern,
         verticalAlign: gaya.verticalAlign,
+        // #657 — hex sumber disimpan apa adanya; palet tetap ada untuk bentuk
+        // yang dibuat di papan.
+        fillHex: warnaTeksAman(gaya.fillHex) ?? undefined,
+        strokeHex: warnaTeksAman(gaya.strokeHex) ?? undefined,
       });
       nodeIdsSet.add(`drawio-${id}`);
     } else if (edge === "1") {
@@ -435,6 +460,7 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
           // Kosong harus tetap kosong, bukan array nol isi: perender #653
           // membeda-kan keduanya.
           waypoints: tekukan.length ? tekukan : undefined,
+          ...gayaGarisEdge(gayaGaris),
         });
       } else {
         const awal = titikUjungGaris(cell, "sourcePoint");
@@ -448,6 +474,7 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
             connector: gayaGaris.connector,
             strokeStyle: gayaGaris.strokeStyle,
             waypoints: tekukan,
+            gaya: gayaGaris,
           });
       }
     }
@@ -467,6 +494,7 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
       connector: lepas.connector,
       strokeStyle: lepas.strokeStyle,
       waypoints: lepas.waypoints.length ? lepas.waypoints : undefined,
+      ...gayaGarisEdge(lepas.gaya),
     });
   }
 
@@ -893,6 +921,9 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
           // Miro tidak menyimpan tebal di gaya: ia ada di HTML teksnya.
           fontWeight: gaya.bold || tebalDariHtml(item?.data?.textHtml) ? "bold" : undefined,
           fontColor: warnaTeksAman(gaya.fontHex) ?? undefined,
+          // #657 — Miro menaruh warna aslinya di gaya juga; simpan apa adanya.
+          fillHex: warnaTeksAman(gaya.fillHex) ?? undefined,
+          strokeHex: warnaTeksAman(gaya.strokeHex) ?? undefined,
           width,
           height,
           borderStyle: gaya.dashed ? "dashed" : "solid",

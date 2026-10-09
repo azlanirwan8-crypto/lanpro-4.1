@@ -25,7 +25,7 @@ import { gayaLabel, warnaLabel } from "../../../lib/warnaLabel";
 import { customSvgTypes, renderCustomSvgShape } from "../lib/shapes";
 import { getShapeThemeClasses } from "../lib/nodeTheme";
 import { colorPaletteHex, ukuranBentukEfektif } from "../constants";
-import { cincinBentuk, gayaBentuk } from "../lib/gayaBentuk";
+import { cincinBentuk, gayaBentuk, warnaSumberBentuk } from "../lib/gayaBentuk";
 import { warnaTeksAman } from "../lib/gayaImpor";
 import { NodePropertiesOverlay } from "./NodePropertiesOverlay";
 import type { FlowNode, FlowEdge } from "../types";
@@ -141,6 +141,8 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
    * sebagai "warnanya pecah".
    */
   const warnaBentuk = colorPaletteHex[node.color] || colorPaletteHex.indigo;
+  /** #657 — hex dari berkas sumber, atau `undefined` bila bentuknya buatan papan. */
+  const warnaSumber = warnaSumberBentuk(node);
 
   const cincin = cincinBentuk({
     isDragging,
@@ -269,8 +271,11 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
           isBlueprint || isSvgShape
             ? undefined // blueprint punya gaya sendiri; bentuk SVG digambar `lib/shapes.tsx`
             : {
-                backgroundColor: warnaBentuk.bg,
-                borderColor: warnaBentuk.stroke,
+                // #657 — bentuk div memakai hex sumber bila ada; palet tetap
+                // pemegang terakhir supaya papan yang dibuat dari nol tidak
+                // berubah sedikit pun.
+                backgroundColor: warnaSumber.isi ?? warnaBentuk.bg,
+                borderColor: warnaSumber.tepi ?? warnaBentuk.stroke,
                 // #655 — tebal tepi bentuk div dibaca dari bentuknya, tidak lagi
                 // dipatok 1 px oleh kelas `border`. Angka, bukan string: React
                 // yang menambahkan px. Catatan tempel dikecualikan karena tepinya

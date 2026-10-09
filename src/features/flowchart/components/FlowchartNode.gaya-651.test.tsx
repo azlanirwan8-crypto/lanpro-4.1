@@ -326,3 +326,62 @@ describe("dashPattern dan verticalAlign sumber sampai ke layar (#666)", () => {
     expect(kelas({})).toContain("justify-center");
   });
 });
+
+/**
+ * #657 - dan hex itu benar-benar DIKATAM pada elemen, bukan berhenti di model.
+ * Ini bagian yang dulu selalu meleset di papan ini (#650 dan #651): kolomnya
+ * terisi, perenderya tidak pernah membacanya.
+ */
+describe("hex sumber benar-benar digambar (#657)", () => {
+  const divBentuk = (container: HTMLElement) =>
+    Array.from(container.querySelectorAll("div")).find((d) => !!d.style.borderColor);
+
+  const svgBentuk = (container: HTMLElement) =>
+    Array.from(container.querySelectorAll("svg")).find((x) =>
+      (x.getAttribute("class") || "").includes("inset-0")
+    );
+
+  it("rect: isian dan tepi dari berkas sumber mengalahkan palet", () => {
+    const { container } = render(
+      <FlowchartNode {...props(bentuk({ fillHex: "#fad992", strokeHex: "#d79b00" }))} />
+    );
+    const div = divBentuk(container)!;
+    expect(div.style.backgroundColor).toBe("rgb(250, 217, 146)");
+    expect(div.style.borderColor).toBe("rgb(215, 155, 0)");
+  });
+
+  it("kotak PUTIH draw.io datang putih, bukan ungu palet", () => {
+    const { container } = render(
+      <FlowchartNode
+        {...props(bentuk({ color: "indigo", fillHex: "#ffffff", strokeHex: "#666666" }))}
+      />
+    );
+    const div = divBentuk(container)!;
+    expect(div.style.backgroundColor).toBe("rgb(255, 255, 255)");
+    expect(div.style.borderColor).toBe("rgb(102, 102, 102)");
+  });
+
+  it("oval: tepi SVG memakai hex sumber", () => {
+    // `isSelected: false` - seleksi SENGAJA tetap di atas hex sumber (#657),
+    // karena itu penanda papan, bukan warna bentuk. Harness bawaan memilih
+    // bentuknya, jadi keadaan itu ditutup di sini, bukan di perender.
+    const { container } = render(
+      <FlowchartNode
+        {...{ ...props(bentuk({ type: "oval", strokeHex: "#82b366" })), isSelected: false }}
+      />
+    );
+    const gambar = svgBentuk(container)!.querySelector("[stroke]") as SVGElement;
+    expect(gambar.getAttribute("stroke")).toBe("#82b366");
+  });
+
+  it("hex yang tidak sah tidak pernah sampai ke elemen", () => {
+    const { container } = render(
+      <FlowchartNode
+        {...props(bentuk({ fillHex: "red; position:fixed", strokeHex: "javascript:1" }))}
+      />
+    );
+    const div = divBentuk(container)!;
+    expect(div.style.backgroundColor).toBe("rgb(255, 242, 204)");
+    expect(div.getAttribute("style")).not.toContain("position");
+  });
+});
