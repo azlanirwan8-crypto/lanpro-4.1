@@ -1,6 +1,7 @@
 import db from "../../src/lib/db";
 import crypto from "crypto";
 import { adalahTabelTidakAda } from "../helpers/pgErrors";
+import { normalkanPeran } from "../../src/types/roles";
 
 /**
  * Batas atas daftar proyek yang dimuat sekaligus (#284).
@@ -46,7 +47,11 @@ export class ProjectRepository {
         "SELECT id, role FROM Users WHERE id = ? OR uid = ?",
         [callerId, callerId]
       );
-      const role = callerRows[0]?.role || callerRole;
+      // #92 — `callerRole` adalah cadangan dari pemanggil, dan nilai dari database
+      // bisa `Admin`/`ADMIN`; `src/types/roles.ts` mewajibkan normalisasi sebelum
+      // dibandingkan. Tanpa ini, Administrator dengan data lama justru masuk
+      // cabang non-admin dan hanya melihat proyek yang ia ikuti.
+      const role = normalkanPeran(callerRows[0]?.role || callerRole);
       const resolvedCallerId = callerRows[0]?.id || callerId;
 
       let query = `SELECT * FROM Projects ORDER BY createdAt DESC LIMIT ${BATAS_PROYEK}`;

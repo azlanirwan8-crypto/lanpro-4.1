@@ -195,8 +195,15 @@ export const jagaProyek = (modul: ModulProyek, aksi: Aksi, lewat?: LewatEntitas)
       let userId: string;
       let peranSistem: string;
 
-      // authenticateJWT sudah memuat id + role dari DB — hindari kueri Users duplikat (#317).
-      if (req.user?.id && req.user?.role !== undefined) {
+      // authenticateJWT sudah memuat id + role dari DB — hindari kueri Users
+      // duplikat (#317).
+      //
+      // #92 menyempitkan jalan pintas itu: ia hanya boleh dipakai kalau peran yang
+      // ada di `req.user` MEMANG terbaca dari database pada permintaan ini. Tanpa
+      // syarat tersebut, peran dari token berumur dua jam (mis. saat kueri Users
+      // gagal karena Neon putus-putus) langsung menyala sebagai God Mode di
+      // bawah, dan pencabutan hak admin tidak berlaku sampai token kedaluwarsa.
+      if (req.user?.id && req.user?.role !== undefined && req.user?.peranDariDatabase === true) {
         userId = String(req.user.id);
         peranSistem = String(req.user.role);
       } else {

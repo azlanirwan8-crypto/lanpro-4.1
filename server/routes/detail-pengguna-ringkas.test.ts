@@ -134,7 +134,8 @@ describe("#243 rute memilih berdasarkan peran DAN kepemilikan", () => {
   });
 
   it("admin mendapat isi penuh", () => {
-    expect(blok).toContain('req.user?.role === "admin"');
+    // #92 — sama seperti #162: satu helper, satu asal peran.
+    expect(blok).toContain('peranSistemTersinkron(req) === "admin"');
     expect(blok).toContain("findByIdOrUid(");
   });
 
@@ -145,10 +146,12 @@ describe("#243 rute memilih berdasarkan peran DAN kepemilikan", () => {
 
   it("memakai kosakata peran yang SAMA dengan verifyGlobalAdmin", () => {
     // Dua pemeriksaan admin yang berbeda bunyi adalah cara paling umum
-    // otorisasi meleset diam-diam. Asersi yang sama dipasang #162.
+    // otorisasi meleset diam-diam. Asersi yang sama dipasang #162, dan #92
+    // mengikat keduanya ke SATU fungsi.
     const mw = baca("server", "middleware", "auth.ts");
+    expect(mw).toContain("export const peranSistemTersinkron");
     const i = mw.indexOf("verifyGlobalAdmin");
-    expect(mw.slice(i, i + 200)).toContain('role === "admin"');
+    expect(mw.slice(i, i + 700)).toContain('peranSistemTersinkron(req) === "admin"');
   });
 
   it("kepemilikan diuji lewat helper yang sama dengan rute lain", () => {

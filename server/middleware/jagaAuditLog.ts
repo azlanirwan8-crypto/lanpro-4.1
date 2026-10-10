@@ -1,6 +1,7 @@
 import { Response, NextFunction } from "express";
 import db from "../../src/lib/db";
 import { bolehDiSistem } from "../../src/lib/matriksAkses";
+import { normalkanPeran } from "../../src/types/roles";
 
 /**
  * Otorisasi baca audit log (#314).
@@ -9,7 +10,9 @@ import { bolehDiSistem } from "../../src/lib/matriksAkses";
  */
 export async function jagaAuditLogBaca(req: any, res: Response, next: NextFunction) {
   const peran = req.user?.role;
-  if (peran === "admin" || bolehDiSistem(peran, "auditLog", "R")) {
+  // #92 — `src/types/roles.ts` mewajibkan semua pembanding peran melewati
+  // `normalkanPeran`, karena data lama menyimpan `Admin`/`ADMIN`.
+  if (normalkanPeran(peran) === "admin" || bolehDiSistem(peran, "auditLog", "R")) {
     return next();
   }
 

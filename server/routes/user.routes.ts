@@ -2,7 +2,7 @@ import express from "express";
 import fs from "fs";
 import path from "path";
 import multer from "multer";
-import { authenticateJWT, verifyGlobalAdmin } from "../middleware/auth";
+import { authenticateJWT, verifyGlobalAdmin, peranSistemTersinkron } from "../middleware/auth";
 import { hashPassword, verifyPassword } from "../helpers/hash";
 import jwt from "jsonwebtoken";
 import { getJwtSecret } from "../middleware/auth";
@@ -227,7 +227,9 @@ router.get("/api/presence/sync", authenticateJWT, async (req: any, res) => {
 router.get("/api/users", validasiQuery(listSearchQuerySchema), async (req: any, res) => {
   try {
     const search = req.query.search as string | undefined;
-    const isAdmin = req.user?.role === "admin";
+    // #92/#162 — keputusan "admin" di rute ini memakai SATU fungsi dengan
+    // `verifyGlobalAdmin`: peran harus barusan terbaca dari database.
+    const isAdmin = peranSistemTersinkron(req) === "admin";
     await respondWithProjectList(
       res,
       req.query as Record<string, unknown>,
@@ -262,7 +264,7 @@ router.get("/api/users/:id", async (req: any, res) => {
     // memang perlu membaca email dan nomornya di halaman profil.
     // `matchesCaller` dipakai karena `:id` boleh berupa `id` MAUPUN `uid`,
     // persis seperti `findByIdOrUid()` yang melayaninya.
-    const bolehPenuh = req.user?.role === "admin" || matchesCaller(req.user, id);
+    const bolehPenuh = peranSistemTersinkron(req) === "admin" || matchesCaller(req.user, id);
     const user = bolehPenuh
       ? await userRepository.findByIdOrUid(id)
       : await userRepository.findByIdOrUidRingkas(id);
@@ -292,8 +294,9 @@ router.post(
     try {
       const { id } = req.params;
       const currentUserId = req.user?.id || req.user?.uid;
-      const currentUserRole = String(req.user?.role || req.user?.system_role || "").toLowerCase();
-      const isAdmin = currentUserRole === "admin";
+      // #92 — satu keputusan admin untuk seluruh rute ini, lewat fungsi yang sama
+      // dengan `verifyGlobalAdmin`: peran harus barusan terbaca dari database.
+      const isAdmin = peranSistemTersinkron(req) === "admin";
 
       if (!isAdmin && String(id) !== String(currentUserId)) {
         return res.status(403).json({
@@ -389,8 +392,9 @@ router.post(
     try {
       const { id } = req.params;
       const currentUserId = req.user?.id || req.user?.uid;
-      const currentUserRole = String(req.user?.role || req.user?.system_role || "").toLowerCase();
-      const isAdmin = currentUserRole === "admin";
+      // #92 — satu keputusan admin untuk seluruh rute ini, lewat fungsi yang sama
+      // dengan `verifyGlobalAdmin`: peran harus barusan terbaca dari database.
+      const isAdmin = peranSistemTersinkron(req) === "admin";
 
       if (!isAdmin && String(id) !== String(currentUserId)) {
         return res.status(403).json({
@@ -474,8 +478,9 @@ router.put(
     try {
       const { id } = req.params;
       const currentUserId = req.user?.id || req.user?.uid;
-      const currentUserRole = String(req.user?.role || req.user?.system_role || "").toLowerCase();
-      const isAdmin = currentUserRole === "admin";
+      // #92 — satu keputusan admin untuk seluruh rute ini, lewat fungsi yang sama
+      // dengan `verifyGlobalAdmin`: peran harus barusan terbaca dari database.
+      const isAdmin = peranSistemTersinkron(req) === "admin";
 
       if (!isAdmin && String(id) !== String(currentUserId)) {
         return res.status(403).json({

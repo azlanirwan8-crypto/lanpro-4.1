@@ -7,6 +7,7 @@ import express from "express";
 import crypto from "crypto";
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { matchesCaller } from "../services/task.service";
+import { normalkanPeran } from "../../src/types/roles";
 import { notificationRepository } from "../repositories/notification.repository";
 import { userRepository } from "../repositories/user.repository";
 import { validasiQuery } from "../middleware/validate";
@@ -77,7 +78,10 @@ router.get(
       }
 
       const activeUserId = activeUser.id || activeUser.uid;
-      const requesterRole = activeUser.role || "user";
+      // #92 — cabang ini menentukan apakah pemanggil boleh membaca notifikasi
+      // orang lain, jadi pembandingnya wajib lewat `normalkanPeran`: data lama
+      // menyimpan `Admin`/`ADMIN` (`src/types/roles.ts`).
+      const requesterRole = normalkanPeran(activeUser.role) || "user";
 
       let targetUserId = activeUserId;
       if (requesterRole === "admin") {
@@ -288,7 +292,7 @@ router.post("/api/users/:userId/notifications", notifikasiPostLimiter, async (re
      * kesalahan bentuk (404/400) — bukan tertutupi jadi 403 otorisasi hanya
      * karena kebetulan `type` juga tidak disertakan.
      */
-    const requesterRole = req.user?.role || "user";
+    const requesterRole = normalkanPeran(req.user?.role) || "user";
     const menotifikasiOrangLain = userId !== senderId;
     if (
       menotifikasiOrangLain &&

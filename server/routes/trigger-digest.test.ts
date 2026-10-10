@@ -58,7 +58,10 @@ describe("Task Trigger Digest Route - Otorisasi Admin (Item #245)", () => {
   });
 
   it("mengizinkan pengguna dengan peran admin memanggil next()", () => {
-    const req: any = { user: { id: "admin-1", role: "admin" } };
+    // #92 — `authenticateJWT` menandai peran yang barusan terbaca dari database.
+    // Tanpa penanda itu peran cuma berasal dari isi token (umur dua jam) dan
+    // `verifyGlobalAdmin` wajib menolak; lihat `role-dari-token-92.test.ts`.
+    const req: any = { user: { id: "admin-1", role: "admin", peranDariDatabase: true } };
     const res: any = {};
     let nextDipanggil = false;
     const next = () => {

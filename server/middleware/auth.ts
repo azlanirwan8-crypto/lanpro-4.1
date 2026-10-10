@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import { Response, NextFunction } from "express";
 import db from "../../src/lib/db";
 import { getJwtSecret } from "../helpers/jwtSecret";
+import { normalkanPeran } from "../../src/types/roles";
 
 export interface UserSession {
   token: string;
@@ -32,8 +33,23 @@ export const generateToken = (user: any): string => {
   );
 };
 
+/**
+ * #92 — peran SISTEM yang boleh dipakai untuk memutuskan hak akses.
+ *
+ * Nilainya kembali HANYA kalau peran itu barusan terbaca dari database pada
+ * permintaan ini. Peran yang hanya berasal dari isi token sengaja menghasilkan
+ * `null`: token berumur dua jam (`generateToken`), jadi memakainya berarti
+ * pencabutan hak administrator baru terasa setelah token kedaluwarsa — dan itu
+ * persis gejala yang dilaporkan di tiket ini.
+ */
+export const peranSistemTersinkron = (req: any): string | null =>
+  req.user?.peranDariDatabase === true ? normalkanPeran(req.user?.role) : null;
+
 export const verifyGlobalAdmin = (req: any, res: Response, next: NextFunction) => {
-  if (req.user?.role === "admin") {
+  // #92 — God Mode hanya diterima kalau perannya barusan terbaca dari database,
+  // dan setelah dinormalisasi (`src/types/roles.ts` mencatat data lama menyimpan
+  // `Admin`/`ADMIN` dan mewajibkan semua pembanding melewatinya).
+  if (peranSistemTersinkron(req) === "admin") {
     next();
   } else {
     res.status(403).json({
@@ -118,6 +134,9 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
                   ...user,
                   role: dbUser.role || user.role,
                   status: dbUser.status || user.status,
+                  // Penanda ASAL peran. Penjaga apa pun yang memutuskan hak
+                  // lintas proyek wajib memeriksanya (#92).
+                  peranDariDatabase: true,
                 };
                 return next();
               }
@@ -143,11 +162,13 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
                     "Sesi Anda telah diakhiri oleh Administrator atau Anda telah masuk di perangkat/browser lain.",
                 });
               }
-              req.user = user;
+              req.user = { ...user, peranDariDatabase: false };
               next();
             });
         } else {
-          req.user = user;
+          // Token tanpa `id`/`uid`: tidak ada yang bisa dicocokkan ke baris
+          // Users, jadi perannya murni isi token — tandai apa adanya (#92).
+          req.user = { ...user, peranDariDatabase: false };
           next();
         }
       };

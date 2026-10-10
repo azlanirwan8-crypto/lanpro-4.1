@@ -10,6 +10,7 @@
  */
 import crypto from "crypto";
 import db from "../../src/lib/db";
+import { normalkanPeran } from "../../src/types/roles";
 
 /**
  * Membuat proyek demo beserta seluruh isinya.
@@ -25,7 +26,7 @@ export async function buatProyekDemoBni(req: any, res: any) {
   // melempar ReferenceError — termasuk pada jalur sukses.
   let connection: any = null;
   try {
-    if (req.user?.role !== "admin") {
+    if (normalkanPeran(req.user?.role) !== "admin") {
       return res.status(403).json({
         status: "error",
         code: "srv.akses_ditolak_hanya_administrator",
