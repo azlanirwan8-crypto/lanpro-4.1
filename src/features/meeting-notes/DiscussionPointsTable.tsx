@@ -749,7 +749,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
           <div className="hidden sm:block overflow-x-auto flex-1">
             <ResponsiveTable className="w-full border-collapse text-left text-xs">
               <thead>
-                <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs font-normal text-content-subtle whitespace-nowrap">
+                <tr className="bg-primary-surface/5 border-b border-border-subtle text-xs font-normal text-content-subtle whitespace-nowrap">
                   <th className="py-3 px-4 w-12 text-center">{t("discussion.thNo")}</th>
                   <th className="py-3 px-4 min-w-[220px]">{t("discussion.thConcern")}</th>
                   <th className="py-3 px-4 min-w-[200px]">{t("discussion.thNotes")}</th>

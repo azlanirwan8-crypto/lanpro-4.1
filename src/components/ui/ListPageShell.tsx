@@ -11,9 +11,17 @@ import { cn } from "../../lib/utils";
 export const LIST_SEARCH_INPUT_CLASS =
   "w-full min-w-0 pl-9 pr-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-content-strong shadow-2xs font-medium";
 
-/** Baris thead tabel list (bukan uppercase primary). */
+/** Baris thead tabel list (bukan uppercase primary).
+ *
+ * #678b — garis pemisah kepala tabel memakai TOKEN garis, bukan alpha aksen.
+ * Alasan: `border-primary/15` di mode gelap menghitung ke 1,22:1 di atas kartu —
+ * kepala tabel tidak berpindah ke mana pun, hanya melebur ke badan tabel. Di
+ * mode terang perubahannya nyaris nol: `rgba(64,81,137,.15)` di atas putih
+ * menghasilkan #e3edf2, dan garis kontrol mode terang adalah #e2e8f0 — jarak
+ * 0,01:1, jadi tampilan yang sudah disetujui pemilik proyek tidak bergeser.
+ * Kelas ini dipakai 9 tabel sekaligus. */
 export const LIST_THEAD_ROW_CLASS =
-  "bg-primary-surface/5 border-b border-primary/15 text-xs font-normal text-content-subtle whitespace-nowrap";
+  "bg-primary-surface/5 border-b border-border-subtle text-xs font-normal text-content-subtle whitespace-nowrap";
 
 /** Wrapper scroll tabel desktop di dalam kartu konten. */
 export const LIST_TABLE_WRAP_CLASS =

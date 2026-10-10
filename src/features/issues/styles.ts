@@ -24,9 +24,15 @@ export const styles = {
   // sel reorder di kepala yang sama — selama ini hanya kolom itu yang tidak tembus.
   // `z-30` di atas `z-20` milik sel baris tambah, supaya tidak ada sel baris yang
   // bisa menggambar di atas kepala.
-  tableHeader: "bg-surface-sunken border-b border-primary/15 sticky top-0 z-30 shadow-2xs",
+  // #678b — tepi kepala dan pemisah kolom pindah ke TOKEN garis. `border-primary/15`
+  // dan `/10` hanya 1,22:1 dan 1,13:1 di mode gelap, sehingga kepala tabel tidak
+  // lagi terpisah dari isinya; di mode terang perubahan nyaris nol (#e3edf2 ->
+  // #e2e8f0). Pemisah kolom ikut ke garis pemisah karena ia hiasan, bukan batas
+  // kontrol: garis setajam garis kontrol di setiap kolom akan mengubah tabel
+  // menjadi kisi.
+  tableHeader: "bg-surface-sunken border-b border-border-subtle sticky top-0 z-30 shadow-2xs",
   tableHeaderCell:
-    "group relative px-4 py-2.5 text-[10px] font-normal text-content-subtle whitespace-nowrap border-r border-primary/10",
+    "group relative px-4 py-2.5 text-[10px] font-normal text-content-subtle whitespace-nowrap border-r border-border-faint",
   tableRow:
     "group hover:bg-surface-sunken/70 transition-all duration-150 cursor-default border-b border-border-faint",
   selectedTableRow: "bg-primary-surface/5",

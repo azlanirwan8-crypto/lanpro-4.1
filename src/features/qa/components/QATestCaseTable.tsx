@@ -533,7 +533,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         <div className="hidden sm:block overflow-x-auto">
           <ResponsiveTable className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-primary-surface/5 border-b border-primary/15 text-[10px] font-normal uppercase tracking-normal text-content-subtle">
+              <tr className="bg-primary-surface/5 border-b border-border-subtle text-[10px] font-normal uppercase tracking-normal text-content-subtle">
                 {/* SELECT ALL CHECKBOX (For Admin / Users with edit access) */}
                 <th className="py-2.5 px-3 w-8 text-center" onClick={(e) => e.stopPropagation()}>
                   {(canUpdate || isAdminRole) && (

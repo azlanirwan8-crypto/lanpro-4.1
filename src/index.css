@@ -179,8 +179,21 @@
    * tingkat lebih pucat lagi, ia tidak boleh dipakai untuk teks yang harus
    * dibaca atau kontrol yang bisa ditekan.
    *
-   * Sisi gelapnya tidak disentuh: #7c8ba1 di atas kartu gelap sudah 5,03:1. */
+   * KOREKSI #679: kalimat penutup komentar ini sebelumnya menulis "sisi gelapnya
+   * tidak disentuh: #7c8ba1 di atas kartu gelap sudah 5,03:1". Nilai #7c8ba1
+   * tidak pernah ada di berkas mana pun — sisi gelap yang sebenarnya adalah
+   * #6c757d, yaitu 3,29:1. Klaim tanpa angka itulah yang membuat cacatnya
+   * bertahan sebulan, dan sekarang dijaga test, bukan oleh komentar. */
   --color-content-subtle: #64748b; /* = slate-500 */
+  /* #677 — `content-kanvas`: warna HURUF yang dipakai kanvas flowchart, dan
+   * SENGAJA bernilai sama di `@theme` dan `html.dark`. Kanvas mewakili dokumen,
+   * bukan antarmuka (§22.5): isian bentuknya adalah DATA yang tidak ikut tema,
+   * jadi hurufnya juga tidak boleh berpindah pihak. Sebelum token ini ada,
+   * palet `slate` mengambil `content-strong` dan hasilnya di mode gelap huruf
+   * terang di atas isian #f5f5f5 — 1,01:1. Pola "sama di kedua mode" ini bukan
+   * penemuan baru: `--color-content-inverse`, `--color-surface-glass`, dan
+   * `--color-border-glass` sudah beralasan persis begitu di catatan `:root`. */
+  --color-content-kanvas: #1e293b;
 
   /* Sidebar Semantik Velzon — Mode Terang (#395 koreksi).
    * Bukan light-menu putih: referensi pemilik = sidebar brand navy
@@ -263,23 +276,74 @@ html.dark {
   --color-surface: #212529; /* kartu — Velzon --vz-card-bg */
   --color-surface-muted: #1a1d21; /* body — Velzon --vz-body-bg */
   --color-surface-raised: #2a2f34; /* elevasi — Velzon --vz-light */
-  --color-border-subtle: #32383e; /* garis — Velzon --vz-border-color */
-  --color-border-faint: #2a2f34; /* garis samar */
+  /* #678 — DUA garis, dua tugas yang berbeda, dan angka yang sekarang benar.
+   *
+   * Sebelum ini `--color-border-faint` bernilai #2a2f34 — SAMA PERSIS dengan
+   * `--color-surface-raised` di atas. Garis di atas permukaan elevasi bukan
+   * lagi samar, ia tidak ada (1,00:1). Itulah sebabnya tabel terasa "hilang
+   * berbatasnya" di mode gelap sementara tidak ada satu pun gerbang yang bisa
+   * menegurnya: `audit:tema` mengunci nilai, bukan membandingkan nilai.
+   *
+   * `--color-border-subtle` adalah batas KONTROL — `SelectField.tsx:70`,
+   * `TextAreaField.tsx:30`, `LanproDatePicker.tsx:232`, `LanproTimePicker.tsx:143`
+   * semuanya memakainya untuk menggambar tepi kolom isian. WCAG 1.4.11 menuntut
+   * 3:1 untuk batas yang memberi tahu di mana kontrol berada; yang lama hanya
+   * 1,03-1,47:1, jadi di mode gelap tidak ada satu pun kolom isian yang tepinya
+   * terlihat. Nilainya sekarang #8b9299 (3,65:1 terburuk) — sengaja disejajarkan
+   * ke `outline` Material 3 (#938F99, 3,63:1 pada permukaan yang sama), bukan ke
+   * arbitrary: ia pasangan terdekat yang sudah jadi acuan industri.
+   *
+   * `--color-border-faint` tetap PEMISAH hiasan (baris tabel, pemisah seksi) dan karena
+   * itu tidak dituntut 3:1 — garis 3:1 di setiap baris akan mengubah papan jadi
+   * kisi. Yang dituntut: tidak boleh menabrak nilai latar mana pun, dan minimal
+   * 1,3:1 supaya masih ada batas yang mata bisa lihat. #4b5259 = 1,45:1.
+   * Keduanya dikunci `src/lib/kontrasTemaGelap-682.test.ts`. */
+  --color-border-subtle: #8b9299; /* batas kontrol — 3,65:1 terburuk */
+  --color-border-faint: #4b5259; /* pemisah — 1,45:1, tidak lagi = surface-raised */
   --color-surface-sunken: #171a1e; /* kanvas terdalam */
+  /* #679 — Tangga teks dinaikkan satu tingkat. Alasannya terukur, bukan rasa:
+   * mode gelap menaikkan TERANG latar pada tiap elevasi (sunken 0,0101 →
+   * strong 0,0413) tetapi tidak menaikkan teks redupnya, jadi kontras justru
+   * MEROSOT saat permukaan naik. Yang lama: `content-muted` 3,36:1 dan
+   * `content-subtle` 2,45:1 di atas `surface-strong` — keduanya di bawah AA
+   * 4,5:1, dan `content-subtle` bahkan di bawah 3:1 untuk ikon yang bisa
+   * ditekan (pakainya nyata: tombol-tombol header di `AppContainer.tsx:4006`,
+   * 4015, 4031, 4048, 4112).
+   *
+   * `content-subtle` juga menanggung placeholder, dan komentar `index.css:182`
+   * sejak #647 mengklaim sisi gelapnya sudah 5,03:1 karena "#7c8ba1" — nilai itu
+   * TIDAK PERNAH ada di berkas; yang terpakai adalah #6c757d (=3,29:1). Klaim
+   * tanpa angka itu yang membuat cacatnya bertahan satu bulan. Sekarang yang
+   * sebenarnya #a0a7ae (4,73:1 terburuk), dan test menjaganya.
+   *
+   * Tangga tetap monoton (judul > utama > isi > sekunder > redup > samar) —
+   * dikunci test yang sama supaya perbaikan ini tidak diratakan jadi satu warna. */
   --color-content: #e9ecef; /* teks utama */
   --color-content-strong: #f3f6f9; /* judul — Velzon --vz-dark */
-  --color-content-body: #ced4da; /* teks isi — Velzon --vz-body-color */
-  --color-content-secondary: #adb5bd; /* teks sekunder */
-  --color-content-muted: #878a99; /* teks redup — Velzon --vz-text-muted */
-  --color-content-subtle: #6c757d; /* placeholder — Bootstrap gray-600 */
+  --color-content-body: #dee2e6; /* teks isi — naik dari #ced4da (8,84:1) */
+  --color-content-secondary: #ced4da; /* teks sekunder — naik dari #adb5bd */
+  --color-content-muted: #adb5bd; /* teks redup — naik dari #878a99 (5,55:1) */
+  --color-content-subtle: #a0a7ae; /* placeholder — naik dari #6c757d (4,73:1) */
+  /* Sengaja SAMA dengan mode terang — lihat catatan di `@theme`. Ditulis ulang
+   * di sini supaya tidak ada yang tergoda menambah override gelap untuk token
+   * yang justru tidak boleh bergerak; penjaganya
+   * `components/FlowchartNode.labelGelap-677.test.tsx` menghitung kemunculan
+   * nilai token ini dan menolak bila suatu hari berbeda. */
+  --color-content-kanvas: #1e293b;
 
   /* #427 — Sidebar diselaraskan ke Velzon neutral gray */
   --color-sidebar-surface: #212529; /* = card bg */
-  --color-sidebar-border: #32383e; /* = border */
+  /* #678 — komentarnya menulis "= border", jadi ia ikut naik bersama
+   * `--color-border-subtle`. Kalau tidak, komentar itu menjadi bohong dan tepi sidebar
+   * kembali jadi garis yang tidak ada. */
+  --color-sidebar-border: #8b9299; /* = garis kontrol, lihat di atas */
   /* #524 — label seksi naik dari #878a99 (4,50:1, nyaris tanpa margin) ke
-   * 5,20:1. Teks menu mode ini sudah lolos (7,43:1) dan tidak disentuh. */
-  --color-sidebar-title: #9096a3; /* = muted, AA #524 */
-  --color-sidebar-text: #adb5bd; /* = secondary */
+   * 5,20:1. Teks menu mode ini sudah lolos (7,43:1) dan tidak disentuh.
+   * #679 menulis ulang komentar di bawahnya: sejak tangga teks dinaikkan, nilai
+   * sidebar ini BUKAN lagi "sama dengan" content-muted atau content-secondary —
+   * ia tingkat tersendiri yang kebetulan berada di tengah keduanya. */
+  --color-sidebar-title: #9096a3; /* 5,20:1 di atas #212529 — AA, dijaga #524 */
+  --color-sidebar-text: #adb5bd; /* = content-muted baru; 7,43:1 */
   --color-sidebar-text-active: #ffffff;
   --color-sidebar-item-active: rgba(255, 255, 255, 0.08);
   --color-sidebar-item-hover: rgba(255, 255, 255, 0.05);
@@ -302,12 +366,17 @@ select option {
   color: var(--color-content);
 }
 
+/* #678/#679 — tiga nilai di blok ini dulu salinan KERAS dari token yang sama
+ * (#32383e = garis kontrol lama, #878a99 = teks redup lama). Salinan seperti
+ * itu tidak ikut bergerak saat tokenya dinaikkan, jadi markdown tetap memakai
+ * garis 1,03:1 dan teks redup lama sementara seluruh aplikasi sudah diperbaiki.
+ * Sekarang semuanya mengacu ke token. */
 .dark .markdown-body h2 {
-  border-bottom-color: #32383e; /* #427 — Velzon border */
+  border-bottom-color: var(--color-border-subtle);
 }
 .dark .markdown-body blockquote {
-  border-left-color: #495057; /* #427 — Velzon gray-700 */
-  color: #878a99; /* #427 — Velzon muted */
+  border-left-color: #495057; /* #427 — Velzon gray-700, bukan salinan token */
+  color: var(--color-content-muted);
 }
 .dark .markdown-body code {
   background-color: #2a2f34; /* #427 — Velzon --vz-light */
@@ -619,6 +688,31 @@ html.dark .shadow-soft-lg {
   box-shadow:
     0 2px 4px rgb(0 0 0 / 0.32),
     0 12px 32px rgb(0 0 0 / 0.4);
+}
+
+/* #680 — `shadow-2xs` (280 pemakaian) dan `shadow-xs` (129) tidak pernah punya
+ * definisi DI SINI, jadi keduanya jatuh ke bawaan Tailwind: hitam 5 %. Di atas
+ * `#e2e8f0` (mode terang) itu sudah tipis, dan di atas `#212529` praktis nol —
+ * seluruh pemisahan elevasi lewat bayangan hilang di mode gelap persis di
+ * elemen yang paling banyak memakainya (kepala tabel, kartu, dropdown tanggal).
+ * `shadow-soft` sudah punya override gelap sejak #415; dua utilitas ini hanya
+ * lupa ikut.
+ *
+ * Bentuk override-nya bukan hitam yang ditebalkan. Bayangan hitam beralpha
+ * tinggi di atas charcoal tidak membuat kartu terbaca, hanya membuatnya kotor —
+ * yang membuat kartu gelap terpisah dari latarnya adalah SEAM: garis selebar 1px
+ * yang sedikit lebih terang dari permukaannya (cara Material 3 dan Velzon
+ * sendiri menangani elevasi di gelap). Jadi lapis pertama tetap hitam untuk
+ * menjatuhkan, lapis kedua putih 6 % untuk memberi tepi. */
+html.dark .shadow-2xs {
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / 0.35),
+    0 0 0 1px rgb(255 255 255 / 0.05);
+}
+html.dark .shadow-xs {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.4),
+    0 0 0 1px rgb(255 255 255 / 0.06);
 }
 
 /* 3. Animasi masuk dropdown & popover (#403 — standar Velzon LanPro):

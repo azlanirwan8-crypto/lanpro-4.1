@@ -52,14 +52,28 @@ const props = {
 };
 
 describe("#165 teks layar SSO tidak duduk di atas banner", () => {
-  it("teks di atas banner memang gagal AA — inilah alasan item ini ada", () => {
+  /**
+   * KOREKSI 10 Okt (#679): bagian mode gelap dari test ini sebelumnya mengunci
+   * KEADAAN CACAT — `expect(...).toBeLessThan(4.5)` dengan komentar "nyaris
+   * lolos, tetapi tetap di bawah 4,5:1". Angka itu benar pada waktunya (#adb5bd
+   * di atas #405189 = 3,67:1), tetapi ia bukan persyaratan, melainkan bukti
+   * sejarah: yang membuat #165 ada adalah mode TERANG, tempat pasangan yang sama
+   * hanya 1,01:1. Setelah tangga teks gelap dinaikkan #679, pasangan itu jadi
+   * 5,10:1 dan testnya merah — merah yang menegurnya, bukan menegur kodenya.
+   *
+   * Arah assertion gelap sekarang dibalik dan dijaga pada nilai barunya, supaya
+   * "gelap sudah lolos AA" tidak lagi bisa diam-diam merosot kembali. Bagian
+   * terang dibiarkan mengunci kegagalan apa adanya: itulah alasan layar SSO kini
+   * WAJIB duduk di atas kartu `bg-surface`, dan itu dijaga dua test di bawah.
+   */
+  it("teks di atas banner: terang tetap tidak terbaca, gelap kini lolos AA (#679)", () => {
     const banner = token("primary-surface");
     const sekunder = token("content-secondary");
 
-    // Mode gelap: nyaris lolos, tetapi tetap di bawah 4,5:1.
-    expect(rasio(sekunder.gelap, banner.gelap)).toBeLessThan(4.5);
-    // Mode terang jauh lebih parah — praktis tidak terbaca sama sekali.
+    // Mode terang: praktis tidak terbaca sama sekali, dan itu tidak berubah.
     expect(rasio(sekunder.terang, banner.terang)).toBeLessThan(1.5);
+    // Mode gelap: #ced4da di atas #405189 = 5,10:1 sejak #679.
+    expect(rasio(sekunder.gelap, banner.gelap)).toBeGreaterThanOrEqual(4.5);
   });
 
   it("di atas surface kartu, kedua tema lulus AA dengan lega", () => {

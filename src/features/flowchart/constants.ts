@@ -69,11 +69,14 @@ export const colorPaletteHex: Record<string, { bg: string; bgGrad: string; strok
  * warna tidak bisa berbeda warna - sebab yang sama dengan #631 untuk ukuran
  * bentuk. Yang tersisa hanya warna teks, dan itu memang kosakata kelas.
  *
- * `slate` satu-satunya yang memakai token (`text-content-strong`), bukan
- * karena khusus, tapi supaya gerbang `audit:warna` tidak bertambah pemakai
- * kelas keras. Konsekuensinya tercatat dan TIDAK diubah di sini: label node
- * slate ikut tema aplikasi sementara isian tetap #f5f5f5, jadi di mode gelap
- * kontrasnya menurun. Perlu item sendiri kalau itu mau dibereskan.
+ * `slate` dulu satu-satunya yang memakai token tema (`text-content-strong`), dan
+ * itu cacat yang tercatat: isian bentuk adalah DATA dan tetap #f5f5f5 di kedua
+ * mode, sementara token teks membalik jadi terang di mode gelap — label slate
+ * akhirnya 1,01:1 di atas isian sendiri. #677 memindahkannya ke
+ * `text-content-kanvas`, token `content-*` yang nilainya SENGAJA sama di terang
+ * dan gelap (pola yang sama dengan `content-inverse`, `index.css:84-92`), supaya
+ * tetap kosakata teks dan `audit:warna` tidak bertambah pemakai kelas keras.
+ * Penjaganya: `components/FlowchartNode.labelGelap-677.test.tsx`.
  */
 export const colorPalettes: Record<string, { text: string }> = {
   yellow: { text: "text-amber-900" },
@@ -87,7 +90,7 @@ export const colorPalettes: Record<string, { text: string }> = {
   amber: { text: "text-amber-900" },
   rose: { text: "text-rose-900" },
   violet: { text: "text-violet-900" },
-  slate: { text: "text-content-strong" },
+  slate: { text: "text-content-kanvas" },
 };
 
 /** Kelompok bentuk yang tampil di panel pemilih diagram. Data murni. */

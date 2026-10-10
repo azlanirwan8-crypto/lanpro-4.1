@@ -23,7 +23,7 @@ import { Plus, User, ExternalLink } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { gayaLabel, warnaLabel } from "../../../lib/warnaLabel";
 import { customSvgTypes, renderCustomSvgShape } from "../lib/shapes";
-import { getShapeThemeClasses } from "../lib/nodeTheme";
+import { getShapeThemeClasses, bentukLatarTerang } from "../lib/nodeTheme";
 import { colorPaletteHex, ukuranBentukEfektif } from "../constants";
 import { cincinBentuk, gayaBentuk, idGradienSumber, warnaSumberBentuk } from "../lib/gayaBentuk";
 import { warnaTeksAman } from "../lib/gayaImpor";
@@ -152,9 +152,16 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
   const nodeWidth = ukuranBentukEfektif(node).width;
   const nodeHeight = ukuranBentukEfektif(node).height;
 
-  const isSticky = node.type === "sticky";
   const isDiamond = node.type === "diamond" || node.type === "decision";
   const isBlueprint = canvasTheme === "blueprint";
+  /**
+   * #677 — hanya bentuk yang memuat LATAR TERANGNYA SENDIRI yang tidak boleh
+   * diberi huruf putih. `card` mengurat latar putih bening 95 % di kedua mode
+   * (kanvas mewakili dokumen, §22.5), sehingga `text-content-inverse` di atasnya
+   * adalah putih-di-atas-putih. Daftarnya tinggal satu dan hidup di berkas yang
+   * memasang kelas itu, `lib/nodeTheme.ts`, supaya tidak bisa lupa disamakan.
+   */
+  const mengguratLatarTerang = bentukLatarTerang.includes(node.type);
   const isSvgShape =
     customSvgTypes.includes(node.type as any) ||
     node.type === "parallelogram" ||
@@ -484,7 +491,9 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
               // serif/mono di panel sifat mengubah DATA tanpa mengubah TAMPILAN.
               "w-full bg-transparent border-0 resize-none text-current focus:outline-none focus:ring-1 focus:ring-violet-300 rounded leading-tight text-center custom-scrollbar",
               node.fontWeight === "bold" ? "font-bold" : "font-normal",
-              canvasTheme === "blueprint" && !isSticky && "text-content-inverse select-text",
+              canvasTheme === "blueprint" &&
+                !mengguratLatarTerang &&
+                "text-content-inverse select-text",
               kelasKeluargaHuruf(node),
               // #670 - dua gaya lagi dari bitmask `fontStyle` draw.io.
               node.italic && "italic",

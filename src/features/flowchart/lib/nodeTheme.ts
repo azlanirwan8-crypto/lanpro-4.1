@@ -22,6 +22,19 @@ import { colorPalettes } from "../constants";
 import { customSvgTypes } from "./shapes";
 
 /**
+ * Bentuk yang menggurat LATARNYA SENDIRI yang terang, apa pun temanya.
+ *
+ * `card` memakai latar putih bening 95 % sebagai kelas keras, dan itu SENGAJA:
+ * kanvas mewakili dokumen, bukan antarmuka (§22.5, alasan yang sama dengan entri
+ * `slate` di `../constants`). Konsekuensinya harus ikut diumumkan di sini,
+ * karena `FlowchartNode` tidak boleh menebaknya dari jauh — di papan gelap
+ * label dipaksa `text-content-inverse` (#ffffff), dan putih di atas kartu putih
+ * adalah 1,00:1 (#677). Daftarnya tinggal satu; bentuk lain di berkas ini memakai
+ * `bg-transparent` atau isian inline yang sudah ditekan di blueprint.
+ */
+export const bentukLatarTerang: string[] = ["card"];
+
+/**
  * Menghasilkan kelas Tailwind untuk sebuah node sesuai tipe, warna, gaya
  * garis, dan status terpilihnya.
  *
