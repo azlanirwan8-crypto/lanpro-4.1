@@ -33,6 +33,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"server/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"server/**/*.ts\"",
     "audit:tema": "node scripts/validate/audit-tema.cjs",
+    "audit:workflow": "node scripts/validate/audit-workflow.cjs",
     "audit:kelas": "node scripts/validate/audit-kelas-token.cjs",
     "audit:navigasi": "node scripts/validate/audit-navigasi.cjs",
     "audit:logika": "node scripts/validate/audit-logika.cjs",

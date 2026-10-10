@@ -110,8 +110,31 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # #686 — `secrets` TIDAK tersedia di dalam `if:` (lihat tabel
+      # "Context availability" dokumen GitHub), dan satu `if:` yang memakai
+      # `secrets.` membuat GitHub menolak SELURUH berkas: nol job berjalan,
+      # jadi tidak ada test, tidak ada build, tidak ada deploy — tanpa pesan
+      # yang jelas bagi pembaca run. Kepresentasian kredensial karena itu
+      # diuji di dalam langkah (di mana `secrets` memang boleh) dan hasilnya
+      # dijadikan output; `if:` hanya boleh membaca `steps.`.
+      #
+      # Nilai secret tidak pernah dicetak: yang ditulis ke $GITHUB_OUTPUT
+      # hanya `true`/`false`.
+      - name: Cek Kredensial Docker Hub
+        id: docker
+        env:
+          PENGGUNA: ${{ secrets.DOCKERHUB_USERNAME }}
+          TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          if [ -n "$PENGGUNA" ] && [ -n "$TOKEN" ]; then
+            echo "siap=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "siap=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::DOCKERHUB_USERNAME / DOCKERHUB_TOKEN belum diset — image dibangun, tidak di-push."
+          fi
+
       - name: Login ke Docker Hub
-        if: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' }}
+        if: steps.docker.outputs.siap == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -121,7 +144,10 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' }}
+          # Satu sumber keputusan: langkah di atas yang menentukan jadi-di-push
+          # atau tidak. Menguji ulang `secrets` di sini akan melahirkan dua
+          # pendapat tentang hal yang sama.
+          push: ${{ steps.docker.outputs.siap == 'true' }}
           tags: ${{ secrets.DOCKERHUB_USERNAME != '' && format('{0}/lanpro-app:{1}', secrets.DOCKERHUB_USERNAME, github.sha) || format('lanpro-app:{0}', github.sha) }}
 
   # 3. Tahap Deployment dengan Approval Gate (Segregation of Duties - SoD)
@@ -134,8 +160,23 @@ jobs:
       name: Production
       url: https://lanpro-bni-internal.bank
     steps:
+      # #686 — sama seperti di atas: kepresentasian kredensial diuji di dalam
+      # langkah, `if:` hanya membaca outputnya.
+      - name: Cek Kredensial Server Produksi
+        id: ssh
+        env:
+          IP: ${{ secrets.PROD_SERVER_IP }}
+          PENGGUNA: ${{ secrets.PROD_SERVER_USER }}
+        run: |
+          if [ -n "$IP" ] && [ -n "$PENGGUNA" ]; then
+            echo "siap=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "siap=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::PROD_SERVER_IP / PROD_SERVER_USER belum diset — tidak ada SSH ke server produksi."
+          fi
+
       - name: Eksekusi SSH ke Server Produksi
-        if: ${{ secrets.PROD_SERVER_IP != '' && secrets.PROD_SERVER_USER != '' }}
+        if: steps.ssh.outputs.siap == 'true'
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.PROD_SERVER_IP }}
@@ -159,7 +200,7 @@ jobs:
             echo "[BNI-AUDIT] Rilis versi ${{ github.sha }} telah disebarkan dengan persetujuan manajerial."
 
       - name: Audit Status Deployment Produksi
-        if: ${{ secrets.PROD_SERVER_IP == '' || secrets.PROD_SERVER_USER == '' }}
+        if: steps.ssh.outputs.siap != 'true'
         run: |
           echo "[BNI-AUDIT] Build artifact versi ${{ github.sha }} disiapkan & terverifikasi 100% aman (Pre-Production Ready)."
           echo "[BNI-AUDIT] Untuk mengaktifkan auto-SSH deploy, isi PROD_SERVER_IP & PROD_SERVER_USER di GitHub Secrets."

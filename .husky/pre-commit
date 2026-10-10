@@ -41,6 +41,13 @@ npm run audit:radius || exit 1
 # hanya boleh menyusut.
 npm run audit:label || exit 1
 
+# Item #686 — berkas workflow yang ditolak GitHub membuat SELURUH CI/CD diam:
+# nol job, nol test, nol build, dan run-nya terlihat seperti "CI sedang
+# bermasalah", bukan seperti "pengawasanmu mati". Tidak ada pemeriksaan lokal
+# yang bisa menangkapnya: YAML-nya valid, yang salah adalah konteks ekspresi
+# GitHub di dalam `if:`. Jadi aturannya ditegakkan sendiri, di sini.
+npm run audit:workflow || exit 1
+
 # CATATAN. Ketiga gerbang di atas TIDAK membuktikan aplikasinya benar.
 # `npm test` dan `npm run build` sengaja TIDAK dijalankan di sini agar commit
 # tidak berubah jadi menit-menitan — keduanya tetap WAJIB sebelum merge ke
