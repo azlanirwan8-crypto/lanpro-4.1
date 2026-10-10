@@ -227,14 +227,13 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
   const hasSubtasks = subtasks.length > 0;
   // Item #200 — sebelumnya `isEditable`/`canDelete` dihitung dari
   // `isDirectOwner` mentah, mengabaikan `canEditIssue`/`canDeleteIssue`
-  // (prop yang sudah lewat `hasPermission` dan memberi akses penuh ke
-  // Admin/Manager/Head) yang bahkan sudah diteruskan tapi tidak dipakai.
-  // Akibatnya Admin terkunci mengedit/menghapus issue yang bukan mereka
-  // laporkan — termasuk field Reporter.
+  // (prop yang sudah menerapkan izin task) yang bahkan sudah diteruskan tapi
+  // tidak dipakai. Akibatnya batas reporter/assignee dan admin sistem bisa
+  // berbeda antara tombol dan server.
   const isEditable = canEditIssue(task);
   const canDelete = canDeleteIssue(task);
   // Item #201 — Assignee (dan Reporter, di sidebar detail) cuma boleh diubah
-  // Admin/Manager/Head atau Reporter task ini — bukan sekadar "isEditable"
+  // Reporter task atau Administrator sistem — bukan sekadar "isEditable"
   // umum, supaya assignee yang cuma diberi tugas TIDAK bisa melimpahkannya
   // ke orang lain.
   const canManage = canManageIssue(task);

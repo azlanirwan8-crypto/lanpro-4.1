@@ -15,6 +15,22 @@ export function matchesCaller(reqUser: any, val: any): boolean {
   return String(val) === String(reqUser?.id) || String(val) === String(reqUser?.uid);
 }
 
+export function isTaskParticipant(
+  task: { reporterId?: unknown; assigneeId?: unknown } | null | undefined,
+  identifiers: readonly unknown[]
+): boolean {
+  if (!task) return false;
+  const knownIdentifiers = new Set(
+    identifiers
+      .filter((identifier) => identifier !== undefined && identifier !== null && identifier !== "")
+      .map(String)
+  );
+  return [task.reporterId, task.assigneeId].some(
+    (identifier) =>
+      identifier !== undefined && identifier !== null && knownIdentifiers.has(String(identifier))
+  );
+}
+
 // #477 — recordExecutionRunLog di sini dihapus: mati + kolom evaluationNotes
 // salah vs skema QATestCaseExecutionLogs. Jalur hidup ada di qa.repository.
 

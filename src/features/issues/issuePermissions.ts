@@ -1,6 +1,6 @@
 /**
- * Item #200/#201 — Assignee/manage: Admin/Manager/Head atau Reporter task;
- * Assignee (bukan reporter) hanya edit field lain di task yang diberikan.
+ * Item #200/#201/#675 — Reporter dapat mengelola task; assignee hanya mengedit
+ * field umum. Administrator sistem tetap memiliki akses penuh.
  *
  * Item #482 — field Reporter: hanya Administrator SISTEM (`Users.role ===
  * admin`), bukan project admin/manager/head/reporter.
@@ -30,15 +30,20 @@ export interface IssuePermissionContext {
   ) => boolean;
 }
 
-const LEAD_ROLES = ["admin", "manager", "head"];
-
-function currentUserIdOf(ctx: IssuePermissionContext): string | undefined {
-  return (
-    ctx.currentUserProfile?.uid ||
-    ctx.currentUserProfile?.id ||
-    ctx.user?.uid ||
-    ctx.user?.id ||
-    undefined
+function currentUserIdentifiersOf(ctx: IssuePermissionContext): Set<string> {
+  return new Set(
+    [
+      ctx.currentUserProfile?.uid,
+      ctx.currentUserProfile?.id,
+      ctx.currentUserProfile?.username,
+      ctx.currentUserProfile?.email,
+      ctx.user?.uid,
+      ctx.user?.id,
+      ctx.user?.username,
+      ctx.user?.email,
+    ]
+      .filter((identifier) => identifier !== undefined && identifier !== null && identifier !== "")
+      .map(String)
   );
 }
 
@@ -52,17 +57,8 @@ export function isUserReporter(
   ctx: IssuePermissionContext
 ): boolean {
   if (!issue) return false;
-  const currentUserId = currentUserIdOf(ctx);
-  const currentUsername = ctx.currentUserProfile?.username || ctx.user?.username;
-  const currentEmail = ctx.currentUserProfile?.email || ctx.user?.email;
-  const rId = issue.reporterId;
-  return (
-    !!currentUserId &&
-    (rId === currentUserId ||
-      rId === currentUsername ||
-      rId === currentEmail ||
-      rId === ctx.currentUserProfile?.id)
-  );
+  const identifiers = currentUserIdentifiersOf(ctx);
+  return issue.reporterId != null && identifiers.has(String(issue.reporterId));
 }
 
 export function isUserAssignee(
@@ -70,17 +66,18 @@ export function isUserAssignee(
   ctx: IssuePermissionContext
 ): boolean {
   if (!issue) return false;
-  const currentUserId = currentUserIdOf(ctx);
-  if (!currentUserId) return false;
-  if (issue.assigneeId && issue.assigneeId === currentUserId) return true;
-  if (Array.isArray((issue as any).assignees) && (issue as any).assignees.includes(currentUserId)) {
-    return true;
-  }
-  return false;
+  const identifiers = currentUserIdentifiersOf(ctx);
+  const additionalAssignees = Array.isArray((issue as any).assignees)
+    ? (issue as any).assignees
+    : [];
+  const assigneeIds = [issue.assigneeId, ...additionalAssignees];
+  return assigneeIds.some(
+    (identifier) => identifier != null && identifiers.has(String(identifier))
+  );
 }
 
-function isLeadOrAdmin(ctx: IssuePermissionContext): boolean {
-  return LEAD_ROLES.includes(String(ctx.userRole || ""));
+function isSystemAdmin(ctx: IssuePermissionContext): boolean {
+  return systemRoleOf(ctx) === "admin";
 }
 
 /** Delete, dan field Assignee (melimpahkan tanggung jawab). Reporter → #482. */
@@ -89,7 +86,7 @@ export function canManageIssue(
   ctx: IssuePermissionContext
 ): boolean {
   if (!issue) return false;
-  return isLeadOrAdmin(ctx) || isUserReporter(issue, ctx);
+  return isSystemAdmin(ctx) || isUserReporter(issue, ctx);
 }
 
 /**
@@ -121,7 +118,8 @@ export function canDeleteIssue(
   ctx: IssuePermissionContext
 ): boolean {
   if (!issue) return false;
-  if (systemRoleOf(ctx) === "admin") return true;
+  if (isSystemAdmin(ctx)) return true;
+  if (!isUserReporter(issue, ctx) && !isUserAssignee(issue, ctx)) return false;
   const custom = ctx.currentUserProfile?.permissions ?? ctx.user?.permissions ?? undefined;
   const allowed = ctx.hasPermission(
     (systemRoleOf(ctx) || "user") as any,

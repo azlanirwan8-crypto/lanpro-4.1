@@ -44,6 +44,23 @@ describe("issuePermissions", () => {
       expect(isUserReporter(issue, ctx("orang-lain", "user"))).toBe(false);
       expect(isUserAssignee(issue, ctx("orang-lain", "user"))).toBe(false);
     });
+
+    it("mengenali reporter dan assignee lewat username atau email lama", () => {
+      const issue = buatIssue({ reporterId: "reporter@example.test", assigneeId: "assignee-name" });
+      const reporter = ctx("reporter-id", "user");
+      reporter.currentUserProfile = {
+        ...reporter.currentUserProfile!,
+        email: "reporter@example.test",
+      } as any;
+      const assignee = ctx("assignee-id", "user");
+      assignee.currentUserProfile = {
+        ...assignee.currentUserProfile!,
+        username: "assignee-name",
+      } as any;
+
+      expect(isUserReporter(issue, reporter)).toBe(true);
+      expect(isUserAssignee(issue, assignee)).toBe(true);
+    });
   });
 
   describe("canManageIssue (gerbang Delete + Assignee)", () => {
@@ -51,9 +68,10 @@ describe("issuePermissions", () => {
       expect(canManageIssue(buatIssue(), ctx("orang-lain", "admin"))).toBe(true);
     });
 
-    it("manager dan head selalu bisa manage", () => {
-      expect(canManageIssue(buatIssue(), ctx("orang-lain", "manager"))).toBe(true);
-      expect(canManageIssue(buatIssue(), ctx("orang-lain", "head"))).toBe(true);
+    it("owner, manager, dan head tidak bisa manage task orang lain", () => {
+      expect(canManageIssue(buatIssue(), ctx("orang-lain", "owner"))).toBe(false);
+      expect(canManageIssue(buatIssue(), ctx("orang-lain", "manager"))).toBe(false);
+      expect(canManageIssue(buatIssue(), ctx("orang-lain", "head"))).toBe(false);
     });
 
     it("reporter bisa manage issue-nya sendiri", () => {
@@ -91,8 +109,11 @@ describe("issuePermissions", () => {
   });
 
   describe("canEditIssue (gerbang field umum: Status, Priority, dst.)", () => {
-    it("admin/manager/head/reporter tetap bisa edit", () => {
+    it("admin sistem dan reporter tetap bisa edit; role proyek lain dibatasi", () => {
       expect(canEditIssue(buatIssue(), ctx("orang-lain", "admin"))).toBe(true);
+      expect(canEditIssue(buatIssue(), ctx("orang-lain", "owner"))).toBe(false);
+      expect(canEditIssue(buatIssue(), ctx("orang-lain", "manager"))).toBe(false);
+      expect(canEditIssue(buatIssue(), ctx("orang-lain", "head"))).toBe(false);
       expect(canEditIssue(buatIssue(), ctx("user-reporter", "user"))).toBe(true);
     });
 
@@ -120,8 +141,8 @@ describe("issuePermissions", () => {
       expect(canDeleteIssue(buatIssue(), c)).toBe(false);
     });
 
-    it("non-admin boleh delete bila checklist list.delete mengizinkan", () => {
-      const c = ctx("orang-lain", "user", "user");
+    it("reporter boleh delete bila checklist list.delete mengizinkan", () => {
+      const c = ctx("user-reporter", "user", "user");
       c.hasPermission = hasPermissionSelaluTrue;
       expect(canDeleteIssue(buatIssue(), c)).toBe(true);
     });
@@ -132,9 +153,21 @@ describe("issuePermissions", () => {
       expect(canDeleteIssue(buatIssue(), c)).toBe(false);
     });
 
+    it("user lain tidak bisa delete walau checklist mengizinkan", () => {
+      const c = ctx("orang-lain", "user", "user");
+      c.hasPermission = hasPermissionSelaluTrue;
+      expect(canDeleteIssue(buatIssue(), c)).toBe(false);
+    });
+
+    it("assignee boleh delete bila checklist mengizinkan", () => {
+      const c = ctx("user-assignee", "user", "user");
+      c.hasPermission = hasPermissionSelaluTrue;
+      expect(canDeleteIssue(buatIssue(), c)).toBe(true);
+    });
+
     it("memanggil hasPermission dengan peran SISTEM + permissions profil", () => {
       const calls: any[] = [];
-      const c = ctx("orang-lain", "admin", "user");
+      const c = ctx("user-reporter", "admin", "user");
       c.currentUserProfile = {
         ...c.currentUserProfile!,
         permissions: { list: { delete: true } },

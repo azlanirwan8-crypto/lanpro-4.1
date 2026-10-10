@@ -13,7 +13,7 @@ import { optimisticLockingConflicts } from "../config/metrics";
 import { GoogleGenAI } from "@google/genai";
 import xss from "xss";
 import { generateContentWithFallback } from "../services/ai.service";
-import { matchesCaller, checkUserPermissionBackend } from "../services/task.service";
+import { checkUserPermissionBackend, isTaskParticipant } from "../services/task.service";
 import { jagaProyek } from "../middleware/jagaProyek";
 import { validasiBody, validasiQuery } from "../middleware/validate";
 import { paginationQuerySchema, taskListQuerySchema } from "../schemas/pagination.schema";
@@ -24,6 +24,7 @@ import {
   updateTaskSchema,
   reorderTaskIdsSchema,
   addAttachmentSchema,
+  createTaskLinkSchema,
 } from "../schemas/task.schema";
 import { AuthenticatedRequest } from "../types/express";
 import { taskRepository } from "../repositories/task.repository";
@@ -36,8 +37,36 @@ import { hitungTenggat } from "../lib/tenggat";
 import { cekPindahLingkupSprint } from "../lib/sprintLingkup";
 import { sprintRepository } from "../repositories/sprint.repository";
 import { masterDataRepository } from "../repositories/master-data.repository";
+import { normalkanPeran } from "../../src/types/roles";
 
 const router = express.Router();
+
+const identitasTaskPemanggil = (jwtUser: any, user: any): string[] =>
+  Array.from(
+    new Set(
+      [
+        jwtUser?.id,
+        jwtUser?.uid,
+        jwtUser?.username,
+        jwtUser?.email,
+        jwtUser?.displayName,
+        user?.id,
+        user?.uid,
+        user?.username,
+        user?.email,
+        user?.displayName,
+        user?.nama_lengkap,
+      ]
+        .filter(
+          (identifier) => identifier !== undefined && identifier !== null && identifier !== ""
+        )
+        .map(String)
+    )
+  );
+
+const bolehUbahTask = (task: any, jwtUser: any, user: any): boolean =>
+  normalkanPeran(user?.role) === "admin" ||
+  isTaskParticipant(task, identitasTaskPemanggil(jwtUser, user));
 
 router.get(
   "/api/projects/:projectId/tasks",
@@ -46,41 +75,13 @@ router.get(
   async (req: AuthenticatedRequest, res) => {
     try {
       const { projectId } = req.params;
-      const userId = req.user?.id || req.user?.uid;
       const search = req.query.search as string | undefined;
       const rootsOnlyRaw = String(req.query.rootsOnly || "");
       const rootsOnly = rootsOnlyRaw === "1" || rootsOnlyRaw === "true";
       const pagination = parsePaginationQuery(req.query as Record<string, unknown>);
 
-      const rawIdentifiers: (string | null | undefined)[] = [
-        userId,
-        req.user?.uid,
-        req.user?.id,
-        req.user?.username,
-        req.user?.email,
-        req.user?.displayName,
-      ];
-
-      if (userId) {
-        const user = await userRepository.findByIdOrUid(String(userId));
-        if (user) {
-          rawIdentifiers.push(
-            user.id,
-            user.uid,
-            user.username,
-            user.email,
-            user.displayName,
-            user.nama_lengkap
-          );
-        }
-      }
-      const userIdentifiers = Array.from(new Set(rawIdentifiers.filter(Boolean) as string[]));
-
-      const uRole = req.user?.role || "viewer";
-      const isAdminOrManager = ["admin", "manager", "head"].includes(uRole.toLowerCase());
-
       // Issue List: page root + keturunan. Board tanpa page/limit → penuh.
-      if (rootsOnly && pagination && isAdminOrManager) {
+      if (rootsOnly && pagination) {
         const { items, total } = await taskRepository.findIssueListPage(
           projectId,
           pagination,
@@ -89,111 +90,8 @@ router.get(
         return res.json(listSuccessPayload(items, pagination, total));
       }
 
-      if (isAdminOrManager) {
-        const tasks = await taskRepository.findTasksWithRelations(projectId, null);
-        if (rootsOnly && pagination) {
-          const roots = tasks.filter(
-            (t: any) => !t.parentId || !tasks.some((p: any) => p.id === t.parentId)
-          );
-          const filtered = search?.trim()
-            ? roots.filter(
-                (t: any) =>
-                  (t.title || "").toLowerCase().includes(search.toLowerCase()) ||
-                  (t.key || t.taskKey || "").toLowerCase().includes(search.toLowerCase())
-              )
-            : roots;
-          const pageRoots = filtered.slice(pagination.offset, pagination.offset + pagination.limit);
-          const rootIdSet = new Set(pageRoots.map((r: any) => r.id));
-          const include = new Set<string>(rootIdSet);
-          const addChildren = (parentId: string) => {
-            tasks.forEach((t: any) => {
-              if (t.parentId === parentId && !include.has(t.id)) {
-                include.add(t.id);
-                addChildren(t.id);
-              }
-            });
-          };
-          rootIdSet.forEach((id) => addChildren(id));
-          const pageTasks = tasks.filter((t: any) => include.has(t.id));
-          return res.json(listSuccessPayload(pageTasks, pagination, filtered.length));
-        }
-        return res.json({ status: "success", data: tasks });
-      }
-
-      const allProjTasks = await taskRepository.findRawProjectTasks(projectId);
-      const directMatchedIds = new Set<string>();
-
-      const hasAncestorReporterMatch = (task: any): boolean => {
-        let curr = task;
-        while (curr && curr.parentId) {
-          const parent = allProjTasks.find((p: any) => p.id === curr.parentId);
-          if (!parent) break;
-          if (userIdentifiers.includes(parent.reporterId)) {
-            return true;
-          }
-          curr = parent;
-        }
-        return false;
-      };
-
-      allProjTasks.forEach((t: any) => {
-        if (!t) return;
-        const isAssignee = userIdentifiers.includes(t.assigneeId);
-        const isReporter = userIdentifiers.includes(t.reporterId);
-        const hasParentReporter = hasAncestorReporterMatch(t);
-
-        if (isAssignee || isReporter || hasParentReporter) {
-          directMatchedIds.add(t.id);
-        }
-      });
-
-      const allowedIds = new Set<string>(directMatchedIds);
-
-      const addAncestors = (childTask: any) => {
-        if (childTask && childTask.parentId) {
-          const parent = allProjTasks.find((p: any) => p.id === childTask.parentId);
-          if (parent && !allowedIds.has(parent.id)) {
-            allowedIds.add(parent.id);
-            addAncestors(parent);
-          }
-        }
-      };
-
-      directMatchedIds.forEach((id) => {
-        const t = allProjTasks.find((x: any) => x.id === id);
-        if (t) addAncestors(t);
-      });
-
-      const tasks = await taskRepository.findTasksWithRelations(projectId, allowedIds);
-
-      if (rootsOnly && pagination) {
-        const roots = tasks.filter(
-          (t: any) => !t.parentId || !tasks.some((p: any) => p.id === t.parentId)
-        );
-        const filtered = search?.trim()
-          ? roots.filter(
-              (t: any) =>
-                (t.title || "").toLowerCase().includes(search.toLowerCase()) ||
-                (t.key || t.taskKey || "").toLowerCase().includes(search.toLowerCase())
-            )
-          : roots;
-        const pageRoots = filtered.slice(pagination.offset, pagination.offset + pagination.limit);
-        const rootIdSet = new Set(pageRoots.map((r: any) => r.id));
-        const include = new Set<string>(rootIdSet);
-        const addChildren = (parentId: string) => {
-          tasks.forEach((t: any) => {
-            if (t.parentId === parentId && !include.has(t.id)) {
-              include.add(t.id);
-              addChildren(t.id);
-            }
-          });
-        };
-        rootIdSet.forEach((id) => addChildren(id));
-        const pageTasks = tasks.filter((t: any) => include.has(t.id));
-        return res.json(listSuccessPayload(pageTasks, pagination, filtered.length));
-      }
-
-      res.json({ status: "success", data: tasks });
+      const tasks = await taskRepository.findTasksWithRelations(projectId, null);
+      return res.json({ status: "success", data: tasks });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: GET /api/projects/:projectId/tasks error:", error);
       res.status(500).json({
@@ -513,7 +411,14 @@ router.put(
       const title = req.body.title !== undefined ? xss(req.body.title || "") : undefined;
       const description =
         req.body.description !== undefined ? xss(req.body.description || "") : undefined;
-      const userId = (req as any).user?.id || req.headers["x-user-id"] || "guest";
+      const userId = (req as any).user?.id || (req as any).user?.uid;
+      if (!userId) {
+        return res.status(401).json({
+          status: "error",
+          code: "srv.akses_ditolak",
+          message: "Akses ditolak",
+        });
+      }
 
       const oldTask = await taskRepository.findTaskWithProjectCategory(id, projectId);
       if (!oldTask) {
@@ -540,41 +445,12 @@ router.put(
       }
 
       const user = await userRepository.findByIdOrUid(userId);
-      const userRole = user?.role || "viewer";
+      const userRole = normalkanPeran(user?.role || "viewer");
       const userPerms = user?.permissions || null;
 
-      const dbUserId = user?.id;
-      const dbUserUid = user?.uid;
-      const dbUsername = user?.username;
-
-      const isDirectReporter =
-        oldTask.reporterId === userId ||
-        oldTask.reporterId === (req as any).user?.uid ||
-        oldTask.reporterId === (req as any).user?.username ||
-        (dbUserId && oldTask.reporterId === dbUserId) ||
-        (dbUserUid && oldTask.reporterId === dbUserUid) ||
-        (dbUsername && oldTask.reporterId === dbUsername);
-
-      const parentReporterId = oldTask.parentEpicReporterId;
-      const isParentReporter = parentReporterId
-        ? parentReporterId === userId ||
-          parentReporterId === (req as any).user?.uid ||
-          parentReporterId === (req as any).user?.username ||
-          (dbUserId && parentReporterId === dbUserId) ||
-          (dbUserUid && parentReporterId === dbUserUid) ||
-          (dbUsername && parentReporterId === dbUsername)
-        : false;
-
-      const isAssignee = oldTask.assigneeId
-        ? oldTask.assigneeId === userId ||
-          oldTask.assigneeId === (req as any).user?.uid ||
-          oldTask.assigneeId === (req as any).user?.username ||
-          (dbUserId && oldTask.assigneeId === dbUserId) ||
-          (dbUserUid && oldTask.assigneeId === dbUserUid) ||
-          (dbUsername && oldTask.assigneeId === dbUsername)
-        : false;
-
-      const isWorkspaceAdmin = (userRole || "").toLowerCase() === "admin";
+      const actorIdentifiers = identitasTaskPemanggil((req as any).user, user);
+      const isDirectReporter = actorIdentifiers.includes(String(oldTask.reporterId ?? ""));
+      const isWorkspaceAdmin = userRole === "admin";
       const isAdmin = isWorkspaceAdmin;
 
       // #482 — ganti Reporter hanya Administrator sistem (Users.role)
@@ -591,6 +467,19 @@ router.put(
         }
       }
 
+      if (
+        assigneeId !== undefined &&
+        String(assigneeId ?? "") !== String(oldTask.assigneeId ?? "") &&
+        !isDirectReporter &&
+        !isAdmin
+      ) {
+        return res.status(403).json({
+          status: "error",
+          code: "srv.akses_ditolak",
+          message: "Akses ditolak",
+        });
+      }
+
       const hasRolePermission = checkUserPermissionBackend(userRole, userPerms, "update");
       if (!hasRolePermission) {
         return res.status(403).json({
@@ -601,7 +490,7 @@ router.put(
       }
 
       if (sprintId !== undefined) {
-        const isAuthorizedSprint = isDirectReporter || isParentReporter || isAdmin;
+        const isAuthorizedSprint = isDirectReporter || isAdmin;
         if (!isAuthorizedSprint) {
           return res.status(403).json({
             status: "error",
@@ -636,7 +525,7 @@ router.put(
           });
         }
       } else {
-        const isAuthorizedGeneral = isDirectReporter || isParentReporter || isAssignee || isAdmin;
+        const isAuthorizedGeneral = isTaskParticipant(oldTask, actorIdentifiers) || isAdmin;
         if (!isAuthorizedGeneral) {
           return res.status(403).json({
             status: "error",
@@ -994,6 +883,13 @@ router.post(
     try {
       const { id, projectId } = req.params;
       const userId = req.user?.id || req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({
+          status: "error",
+          code: "srv.akses_ditolak",
+          message: "Akses ditolak",
+        });
+      }
       const user = userId ? await userRepository.findByIdOrUid(String(userId)) : null;
       const uploadedByName =
         user?.displayName || user?.nama_lengkap || user?.username || req.user?.name || "User";
@@ -1004,6 +900,24 @@ router.post(
           status: "error",
           code: "srv.tugas_tidak_ditemukan",
           message: "Tugas tidak ditemukan.",
+        });
+      }
+      if (!user || !bolehUbahTask(task, req.user, user)) {
+        return res.status(403).json({
+          status: "error",
+          code: "srv.akses_ditolak",
+          message: "Akses ditolak",
+        });
+      }
+      const userRole = normalkanPeran(user.role);
+      if (
+        userRole !== "admin" &&
+        !checkUserPermissionBackend(userRole, user.permissions, "update")
+      ) {
+        return res.status(403).json({
+          status: "error",
+          code: "srv.role_anda_tidak_memiliki",
+          message: "Role Anda tidak memiliki akses untuk tindakan ini",
         });
       }
 
@@ -1057,6 +971,13 @@ router.delete(
     try {
       const { id, projectId, attachmentId } = req.params;
       const userId = req.user?.id || req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({
+          status: "error",
+          code: "srv.akses_ditolak",
+          message: "Akses ditolak",
+        });
+      }
 
       const task = await taskRepository.findTaskWithProjectCategory(id, projectId);
       if (!task) {
@@ -1064,6 +985,26 @@ router.delete(
           status: "error",
           code: "srv.tugas_tidak_ditemukan",
           message: "Tugas tidak ditemukan.",
+        });
+      }
+
+      const user = await userRepository.findByIdOrUid(String(userId));
+      if (!user || !bolehUbahTask(task, req.user, user)) {
+        return res.status(403).json({
+          status: "error",
+          code: "srv.akses_ditolak",
+          message: "Akses ditolak",
+        });
+      }
+      const userRole = normalkanPeran(user.role);
+      if (
+        userRole !== "admin" &&
+        !checkUserPermissionBackend(userRole, user.permissions, "delete")
+      ) {
+        return res.status(403).json({
+          status: "error",
+          code: "srv.role_anda_tidak_memiliki",
+          message: "Role Anda tidak memiliki akses untuk tindakan ini",
         });
       }
 
@@ -1111,7 +1052,14 @@ router.delete(
   async (req, res) => {
     try {
       const { id, projectId } = req.params;
-      const userId = (req as any).user?.id || req.headers["x-user-id"] || "guest";
+      const userId = (req as any).user?.id || (req as any).user?.uid;
+      if (!userId) {
+        return res.status(401).json({
+          status: "error",
+          code: "srv.akses_ditolak",
+          message: "Akses ditolak",
+        });
+      }
 
       const task = await taskRepository.findTaskOwnership(id, projectId);
       if (!task) {
@@ -1121,10 +1069,20 @@ router.delete(
       }
 
       const user = await userRepository.findByIdOrUid(userId);
-      const userRole = user?.role || "viewer";
+      const userRole = normalkanPeran(user?.role || "viewer");
       const userPerms = user?.permissions || null;
 
-      const isWorkspaceAdmin = (userRole || "").toLowerCase() === "admin";
+      const isWorkspaceAdmin = userRole === "admin";
+      if (
+        !isWorkspaceAdmin &&
+        !isTaskParticipant(task, identitasTaskPemanggil((req as any).user, user))
+      ) {
+        return res.status(403).json({
+          status: "error",
+          code: "srv.akses_ditolak",
+          message: "Akses ditolak",
+        });
+      }
       // #483 — Administrator sistem full akses; non-admin wajib checklist list.delete
       // (bukan jalur project lead / reporter yang mengabaikan Users.permissions).
       if (!isWorkspaceAdmin) {
@@ -1169,8 +1127,14 @@ router.post(
           taskIds = JSON.parse(taskIds);
         } catch (e) {}
       }
-      const userId =
-        (req as any).user?.id || (req as any).user?.uid || req.headers["x-user-id"] || "guest";
+      const userId = (req as any).user?.id || (req as any).user?.uid;
+      if (!userId) {
+        return res.status(401).json({
+          status: "error",
+          code: "srv.akses_ditolak",
+          message: "Akses ditolak",
+        });
+      }
 
       if (!Array.isArray(taskIds) || taskIds.length === 0) {
         return res.status(400).json({
@@ -1181,9 +1145,9 @@ router.post(
       }
 
       const user = await userRepository.findByIdOrUid(userId);
-      const userRole = user?.role || "viewer";
+      const userRole = normalkanPeran(user?.role || "viewer");
       const userPerms = user?.permissions || null;
-      const isWorkspaceAdmin = (userRole || "").toLowerCase() === "admin";
+      const isWorkspaceAdmin = userRole === "admin";
 
       // #483 — selaras delete satuan: admin sistem full; non-admin wajib checklist
       if (!isWorkspaceAdmin) {
@@ -1197,14 +1161,24 @@ router.post(
         }
       }
 
-      const taskRows = await taskRepository.findTasksByIds(taskIds, projectId);
+      const requestedTaskIds = Array.from(new Set(taskIds.map(String)));
+      const taskRows = await taskRepository.findTasksByIds(requestedTaskIds, projectId);
       const deletableTaskIds = taskRows.map((t: { id: string }) => t.id);
 
-      if (deletableTaskIds.length === 0) {
+      const containsUnauthorizedTask =
+        !isWorkspaceAdmin &&
+        taskRows.some(
+          (task: any) => !isTaskParticipant(task, identitasTaskPemanggil((req as any).user, user))
+        );
+      if (
+        deletableTaskIds.length === 0 ||
+        taskRows.length !== requestedTaskIds.length ||
+        containsUnauthorizedTask
+      ) {
         return res.status(403).json({
           status: "error",
-          code: "srv.you_do_not_have",
-          message: "You do not have permission to delete any of the selected tasks",
+          code: "srv.akses_ditolak",
+          message: "Akses ditolak",
         });
       }
 
@@ -1239,7 +1213,17 @@ router.get(
   jagaProyek("list", "R"),
   async (req, res) => {
     try {
-      const { taskId } = req.params;
+      const { projectId, taskId } = req.params;
+      // #675 — `:taskId` tidak pernah diuji terhadap `:projectId`, sehingga
+      // komentar task di proyek lain bisa dibaca memakai proyek yang kita ikuti.
+      const task = await taskRepository.findTaskOwnership(taskId, projectId);
+      if (!task) {
+        return res.status(404).json({
+          status: "error",
+          code: "srv.tugas_tidak_ditemukan",
+          message: "Tugas tidak ditemukan.",
+        });
+      }
       const rows = await taskRepository.findCommentsByTaskId(taskId);
       res.json({ status: "success", data: rows });
     } catch (error: any) {
@@ -1262,6 +1246,15 @@ router.post(
   async (req, res) => {
     try {
       const { projectId, taskId } = req.params;
+      // #675 — komentar hanya boleh ditulis pada task di proyek URL.
+      const task = await taskRepository.findTaskOwnership(taskId, projectId);
+      if (!task) {
+        return res.status(404).json({
+          status: "error",
+          code: "srv.tugas_tidak_ditemukan",
+          message: "Tugas tidak ditemukan.",
+        });
+      }
       const rawContent = req.body.text ?? req.body.content ?? "";
       const content =
         typeof rawContent === "string" ? rawContent.trim() : String(rawContent || "").trim();
@@ -1382,11 +1375,55 @@ router.post("/api/projects/:projectId/activity", jagaProyek("list", "U"), async 
 // Task Links API
 router.post(
   "/api/projects/:projectId/tasks/:taskId/links",
+  authenticateJWT,
   jagaProyek("list", "C"),
-  async (req, res) => {
+  validasiBody(createTaskLinkSchema),
+  async (req: AuthenticatedRequest, res) => {
     try {
-      const { taskId } = req.params;
+      const { projectId, taskId } = req.params;
       const { targetTaskId, relationType } = req.body;
+
+      const userId = req.user?.id || req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({
+          status: "error",
+          code: "srv.akses_ditolak",
+          message: "Akses ditolak",
+        });
+      }
+
+      // #675 — `jagaProyek` hanya menguji keanggotaan proyek yang tertulis di
+      // URL, jadi kedua ujung tautan harus diuji sendiri. Tanpa ini `:projectId`
+      // bisa dipinjam dari proyek yang kita ikuti untuk menyentuh task di luar.
+      const sumber = await taskRepository.findTaskOwnership(taskId, projectId);
+      if (!sumber) {
+        return res.status(404).json({
+          status: "error",
+          code: "srv.tugas_tidak_ditemukan",
+          message: "Tugas tidak ditemukan.",
+        });
+      }
+      const target = await taskRepository.findTaskOwnership(targetTaskId, projectId);
+      if (!target) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.akses_ditolak",
+          message: "Akses ditolak",
+        });
+      }
+
+      const user = await userRepository.findByIdOrUid(String(userId));
+      if (
+        !user ||
+        !bolehUbahTask(sumber, req.user, user) ||
+        !bolehUbahTask(target, req.user, user)
+      ) {
+        return res.status(403).json({
+          status: "error",
+          code: "srv.akses_ditolak",
+          message: "Akses ditolak",
+        });
+      }
 
       if (relationType === "precedes" || relationType === "blocks") {
         const cycleDetected = await taskRepository.hasCycle(taskId, targetTaskId);
@@ -1428,10 +1465,58 @@ router.post(
 
 router.delete(
   "/api/projects/:projectId/tasks/:taskId/links/:linkId",
+  authenticateJWT,
   jagaProyek("list", "D"),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
-      const { linkId } = req.params;
+      const { projectId, taskId, linkId } = req.params;
+      const userId = req.user?.id || req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({
+          status: "error",
+          code: "srv.akses_ditolak",
+          message: "Akses ditolak",
+        });
+      }
+
+      // #675 — `deleteLink` bekerja lewat id tautan saja, jadi `:projectId` dan
+      // `:taskId` di URL dulu tidak pernah dibaca. Tautan harus benar-benar
+      // menyentuh task yang disebut URL, kalau tidak id tautan mana pun dari
+      // proyek lain bisa dihapus oleh anggota proyek mana pun.
+      const link = await taskRepository.findLinkById(linkId);
+      const menyeteli =
+        !!link &&
+        (String(link.sourceTaskId) === String(taskId) ||
+          String(link.targetTaskId) === String(taskId));
+      if (!menyeteli) {
+        return res.status(404).json({
+          status: "error",
+          code: "srv.tugas_tidak_ditemukan",
+          message: "Tugas tidak ditemukan.",
+        });
+      }
+
+      const task = await taskRepository.findTaskOwnership(taskId, projectId);
+      if (!task) {
+        return res.status(404).json({
+          status: "error",
+          code: "srv.tugas_tidak_ditemukan",
+          message: "Tugas tidak ditemukan.",
+        });
+      }
+
+      // Berbeda dari pembuatan tautan yang menuntut kedua ujung: melepas
+      // tautan justru melepaskan beban pada task pihak lain, sehingga cukup
+      // jika pemanggil berpihak pada task yang ia buka.
+      const user = await userRepository.findByIdOrUid(String(userId));
+      if (!user || !bolehUbahTask(task, req.user, user)) {
+        return res.status(403).json({
+          status: "error",
+          code: "srv.akses_ditolak",
+          message: "Akses ditolak",
+        });
+      }
+
       await taskRepository.deleteLink(linkId);
       res.json({ status: "success", code: "srv.task_link_deleted", message: "Task link deleted" });
     } catch (error: any) {
@@ -1472,7 +1557,17 @@ router.get(
   jagaProyek("list", "R"),
   async (req, res) => {
     try {
-      const rows = await taskRepository.listWorkLogs(req.params.taskId);
+      const { projectId, taskId } = req.params;
+      // #675 — sama seperti komentar: jalur baca juga harus tetap di dalam proyek.
+      const task = await taskRepository.findTaskOwnership(taskId, projectId);
+      if (!task) {
+        return res.status(404).json({
+          status: "error",
+          code: "srv.tugas_tidak_ditemukan",
+          message: "Tugas tidak ditemukan.",
+        });
+      }
+      const rows = await taskRepository.listWorkLogs(taskId);
       res.json({ status: "success", data: rows });
     } catch (error: any) {
       console.error("GET work-logs error:", error);
@@ -1486,6 +1581,41 @@ router.post(
   jagaProyek("list", "U"),
   async (req: any, res) => {
     try {
+      const userId = req.user?.id || req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({
+          status: "error",
+          code: "srv.akses_ditolak",
+          message: "Akses ditolak",
+        });
+      }
+      const task = await taskRepository.findTaskOwnership(req.params.taskId, req.params.projectId);
+      if (!task) {
+        return res.status(404).json({
+          status: "error",
+          code: "srv.tugas_tidak_ditemukan",
+          message: "Tugas tidak ditemukan.",
+        });
+      }
+      const user = await userRepository.findByIdOrUid(String(userId));
+      if (!user || !bolehUbahTask(task, req.user, user)) {
+        return res.status(403).json({
+          status: "error",
+          code: "srv.akses_ditolak",
+          message: "Akses ditolak",
+        });
+      }
+      const userRole = normalkanPeran(user.role);
+      if (
+        userRole !== "admin" &&
+        !checkUserPermissionBackend(userRole, user.permissions, "update")
+      ) {
+        return res.status(403).json({
+          status: "error",
+          code: "srv.role_anda_tidak_memiliki",
+          message: "Role Anda tidak memiliki akses untuk tindakan ini",
+        });
+      }
       const hours = Number(req.body?.hours);
       if (!Number.isFinite(hours) || hours <= 0) {
         return res.status(400).json({ status: "error", message: "hours harus angka > 0" });
@@ -1497,7 +1627,7 @@ router.post(
       await taskRepository.createWorkLog({
         id,
         taskId: req.params.taskId,
-        userId: req.user?.uid || req.user?.id || null,
+        userId: String(userId),
         hours,
         note: String(req.body?.note || "").slice(0, 2000),
         loggedAt,

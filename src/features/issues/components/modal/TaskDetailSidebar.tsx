@@ -34,7 +34,7 @@ interface TaskDetailSidebarProps {
   blockMember: boolean;
   isProjectMember: boolean;
   isReporter: boolean;
-  /** Item #201 — Admin/Manager/Head atau Reporter: Assignee. */
+  /** Item #201/#675 — Reporter atau Administrator sistem: Assignee. */
   canManage: boolean;
   /** #482 — hanya Administrator sistem: Reporter. */
   canChangeReporter: boolean;

@@ -151,7 +151,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
 
   const [inlineAddSprintId, setInlineAddSprintId] = useState("");
 
-  // Item #200/#201 — Assignee: Admin/Manager/Head atau Reporter.
+  // Item #200/#201/#675 — pengelolaan: Reporter atau Administrator sistem.
   // Item #482 — Reporter: hanya Administrator sistem.
   // Item #483 — Hapus: admin sistem full; non-admin ikut checklist list.delete.
   const permCtx: IssuePermissionContext = { userRole, currentUserProfile, user, hasPermission };

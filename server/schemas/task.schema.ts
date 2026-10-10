@@ -61,7 +61,13 @@ export const updateTaskSchema = z.object({
 });
 
 export const reorderTaskIdsSchema = z.object({
-  orderedIds: z.array(z.string()),
+  orderedIds: z.array(z.string()).min(1, "Daftar urutan tidak boleh kosong"),
+});
+
+/** #675 — relasi yang dikenal `src/types/task.ts`; nilai lain ditolak sebelum DB. */
+export const createTaskLinkSchema = z.object({
+  targetTaskId: z.string().min(1, "Tugas target wajib diisi"),
+  relationType: z.enum(["blocks", "is_blocked_by", "relates_to", "clones", "is_cloned_by"]),
 });
 
 export const addTaskCommentSchema = z.object({

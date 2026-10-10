@@ -846,6 +846,25 @@ export class TaskRepository {
     }
   }
 
+  /**
+   * #675 — baca satu tautan untuk keperluan otorisasi SEBELUM menghapus.
+   *
+   * `deleteLink` sudah membaca baris ini lebih dulu tetapi membuang hasilnya,
+   * sehingga rute tidak punya cara untuk tahu tautan mana yang sedang
+   * dihapus. SQL-nya identik dengan yang dipakai `deleteLink` hari ini.
+   */
+  async findLinkById(linkId: string): Promise<any | null> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query("SELECT * FROM LinkedTasks WHERE id = ?", [
+        linkId,
+      ]);
+      return rows && rows.length > 0 ? rows[0] : null;
+    } finally {
+      connection.release();
+    }
+  }
+
   async deleteLink(linkId: string): Promise<void> {
     const connection = await db.getConnection();
     try {
