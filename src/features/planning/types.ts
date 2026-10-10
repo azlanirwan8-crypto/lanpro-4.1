@@ -1,4 +1,4 @@
-import { Task, Sprint, UserProfile, MasterData } from '../../types';
+import { Task, Sprint, UserProfile, MasterData } from "../../types";
 
 export interface PlanningViewProps {
   tasks: Task[];
@@ -6,6 +6,11 @@ export interface PlanningViewProps {
   masterData: MasterData[];
   userRole: string;
   currentUserProfile: UserProfile | null;
+  /**
+   * #688 — `currentUserProfile` termuat belakangan; identitas untuk saring
+   * "My Tasks" butuh cadangan. Modul lain sudah menerima `user` dari AppRoutes.
+   */
+  user?: UserProfile | null;
   projectMembers: UserProfile[];
   expandedSprintId: string | null;
   setExpandedSprintId: (id: string | null) => void;

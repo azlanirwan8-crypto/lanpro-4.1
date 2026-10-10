@@ -52,6 +52,12 @@ export const fetchTasks = (
     limit?: number;
     search?: string;
     rootsOnly?: boolean;
+    /**
+     * #688 — "My Tasks" untuk daftar yang di-page server. Hanya menyalakan
+     * filter: identitas pemilik tidak dikirim dari sini, selalu ditentukan server
+     * dari JWT (lihat `server/routes/task.routes.ts`, pelajaran #674).
+     */
+    mineOnly?: boolean;
   }
 ) => {
   const params = new URLSearchParams();
@@ -59,6 +65,7 @@ export const fetchTasks = (
   if (options?.limit !== undefined) params.set("limit", String(options.limit));
   if (options?.search?.trim()) params.set("search", options.search.trim());
   if (options?.rootsOnly) params.set("rootsOnly", "1");
+  if (options?.mineOnly) params.set("mineOnly", "1");
   const qs = params.toString();
   return apiRequest(`/api/projects/${projectId}/tasks${qs ? `?${qs}` : ""}`);
 };

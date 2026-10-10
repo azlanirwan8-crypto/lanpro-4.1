@@ -186,7 +186,13 @@ export class TaskRepository {
   async findIssueListPage(
     projectId: string,
     pagination: PaginationParams,
-    search?: string
+    search?: string,
+    /**
+     * #688 — kunci milik pemanggil untuk mode "My Tasks". `undefined` = tidak
+     * memfilter. Array KOSONG berarti identitas pemanggil tidak berhasil ditegakkan,
+     * dan jawabannya harus kosong, bukan seluruh isi proyek.
+     */
+    penugasanKepada?: string[]
   ): Promise<{ items: any[]; total: number }> {
     const connection = await db.getConnection();
     let total = 0;
@@ -199,6 +205,30 @@ export class TaskRepository {
           " AND (LOWER(COALESCE(title, '')) LIKE ? OR LOWER(COALESCE(taskKey, '')) LIKE ?)";
         const term = `%${search.trim().toLowerCase()}%`;
         params.push(term, term);
+      }
+      if (penugasanKepada !== undefined) {
+        if (penugasanKepada.length === 0) {
+          return { items: [], total: 0 };
+        }
+        // Kolom camelCase di sini mengikuti konvensi yang SUDAH dipakai fungsi ini
+        // (`projectId`, `parentId`, `orderIndex`, `taskKey`). Menyimpang ke bentuk
+        // ber-kutip di tengah query yang sama justru berisiko (§5 AGENTS.md).
+        const tempat = penugasanKepada.map(() => "?").join(",");
+        rootWhere += ` AND (assigneeId IN (${tempat}) OR assigneeEmail IN (${tempat})`;
+        params.push(...penugasanKepada, ...penugasanKepada);
+        // Multi-assignee disimpan sebagai JSONB array-of-string. Kecocokan
+        // dilakukan pada elemen TERKUTIP supaya id yang kebetulan menjadi
+        // bagian dari id lain tidak ikut tersaring.
+        //
+        // Metakarakter LIKE di-escape dan `ESCAPE '\'` dipasang. Tanpa itu, akun
+        // yang emailnya mengandung `%` (pengguna boleh mengubah emailnya sendiri)
+        // berubah menjadi wildcard "apa saja": filter "My Tasks" justru
+        // memulangkan tugas orang lain.
+        for (const kunci of penugasanKepada) {
+          rootWhere += " OR assignees::text LIKE ? ESCAPE '\\'";
+          params.push(`%"${kunci.replace(/[\\%_]/g, (c) => `\\${c}`)}"%`);
+        }
+        rootWhere += ")";
       }
 
       const [countRows]: any = await connection.query(

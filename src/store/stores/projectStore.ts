@@ -1,4 +1,5 @@
-import { create } from 'zustand';
+import { create } from "zustand";
+import type { LingkupTugas } from "../../lib/tugasSaya";
 
 interface ProjectState {
   // Current selections
@@ -17,6 +18,11 @@ interface ProjectState {
   // Task filtering
   taskFilters: Record<string, any>;
   selectedTasks: string[];
+  /**
+   * #688 — "All Tasks" / "My Tasks" SATU kali untuk seluruh modul.
+   * Default aman `all`; dikunci oleh definisi di `src/lib/tugasSaya.ts`.
+   */
+  lingkupTugas: LingkupTugas;
 
   // Actions
   setSelectedProject: (project: any) => void;
@@ -31,6 +37,7 @@ interface ProjectState {
 
   // Filter actions
   setTaskFilters: (filters: Record<string, any>) => void;
+  setLingkupTugas: (lingkup: LingkupTugas) => void;
   setSelectedTasks: (tasks: string[]) => void;
   toggleTaskSelection: (taskId: string) => void;
 
@@ -51,9 +58,11 @@ export const useProjectStore = create<ProjectState>((set) => ({
   allUsers: [],
   taskFilters: {},
   selectedTasks: [],
+  lingkupTugas: "all",
 
   // Selection actions
-  setSelectedProject: (project) => set({ selectedProject: project, selectedProjectId: project?.id }),
+  setSelectedProject: (project) =>
+    set({ selectedProject: project, selectedProjectId: project?.id }),
   setSelectedProjectId: (id) => set({ selectedProjectId: id }),
 
   // List actions
@@ -67,24 +76,30 @@ export const useProjectStore = create<ProjectState>((set) => ({
 
   // Filter actions
   setTaskFilters: (filters) => set({ taskFilters: filters }),
+  setLingkupTugas: (lingkup) => set({ lingkupTugas: lingkup }),
   setSelectedTasks: (tasks) => set({ selectedTasks: tasks }),
-  toggleTaskSelection: (taskId) => set((state) => ({
-    selectedTasks: state.selectedTasks.includes(taskId)
-      ? state.selectedTasks.filter((id) => id !== taskId)
-      : [...state.selectedTasks, taskId],
-  })),
+  toggleTaskSelection: (taskId) =>
+    set((state) => ({
+      selectedTasks: state.selectedTasks.includes(taskId)
+        ? state.selectedTasks.filter((id) => id !== taskId)
+        : [...state.selectedTasks, taskId],
+    })),
 
   // Bulk clear
-  clearProjectData: () => set({
-    selectedProject: null,
-    selectedProjectId: null,
-    projects: [],
-    tasks: [],
-    sprints: [],
-    projectMembers: [],
-    activityLogs: [],
-    masterData: [],
-    taskFilters: {},
-    selectedTasks: [],
-  }),
+  clearProjectData: () =>
+    set({
+      selectedProject: null,
+      selectedProjectId: null,
+      projects: [],
+      tasks: [],
+      sprints: [],
+      projectMembers: [],
+      activityLogs: [],
+      masterData: [],
+      taskFilters: {},
+      selectedTasks: [],
+      // #688 — kembali ke default aman "all": pengguna tidak seharusnya berpindah
+      // proyek lalu mendapati daftar kosong tanpa tahu filter masih "mine".
+      lingkupTugas: "all",
+    }),
 }));

@@ -21,11 +21,13 @@ import { useAppStore } from "../../store/useAppStore";
 import { BacklogSection } from "./BacklogSection";
 import { SprintSection } from "./SprintSection";
 import { useMobileAction } from "../../contexts/MobileActionContext";
+import { TugasScopeToggle } from "../../components/ui/TugasScopeToggle";
+import { useLingkupTugas } from "../../hooks/useLingkupTugas";
 
 export const PlanningView: React.FC<PlanningViewProps> = (props) => {
   const { t } = useTranslation();
   const {
-    tasks,
+    tasks: tasksProyek,
     sprints,
     masterData,
     projectMembers,
@@ -42,7 +44,13 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
     handleDragEndPlanning,
     userRole,
     currentUserProfile,
+    user,
   } = props;
+
+  // #688 — backlog, sprint, dan epics di layar ini dibaca dari SATU array.
+  // Menyaring di kedua section akan membiarkan salah satunya lupa menyaring.
+  const { lingkup, setLingkup, saring } = useLingkupTugas(currentUserProfile || user);
+  const tasks = React.useMemo(() => saring(tasksProyek), [tasksProyek, saring]);
 
   const { canEditPlanning } = usePlanning(props);
 
@@ -82,7 +90,10 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
     }
     // 2. User is the Reporter of the PARENT ISSUE (Epic)
     if (task.parentId) {
-      const parentEpic = tasks.find((t) => t.id === task.parentId);
+      // #688 — pencarian induknya di array SEBELUM disaring. Keputusan boleh-tidak
+      // boleh diseret bukan hak tampilan: kalau induknya ikut tersaring oleh
+      // "My Tasks", task yang seharusnya bisa digeser tiba-tiba terkunci.
+      const parentEpic = tasksProyek.find((t) => t.id === task.parentId);
       if (parentEpic && isUserMatch(parentEpic.reporterId)) {
         return true;
       }
@@ -273,7 +284,10 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
 
   return (
     <div className="flex-1 overflow-y-auto md:overflow-hidden bg-surface-muted flex flex-col h-[calc(100dvh-64px)] text-left">
-      <PageHeader title={t("planning.sprintPlanning")} />
+      <PageHeader
+        title={t("planning.sprintPlanning")}
+        actions={<TugasScopeToggle value={lingkup} onChange={setLingkup} />}
+      />
       <DragDropContext onDragEnd={handleDragEndPlanning}>
         <div className="flex flex-col md:flex-row flex-1 gap-5 w-full h-full min-h-0 px-2 sm:px-4 md:px-5 pt-3 md:pt-4 pb-20 sm:pb-4 md:pb-5">
           <div className="w-full md:w-[320px] lg:w-[360px] xl:w-[380px] h-[220px] sm:h-[280px] md:h-full shrink-0 flex flex-col bg-surface border border-border-subtle/80 rounded-lg overflow-hidden shadow-2xs">

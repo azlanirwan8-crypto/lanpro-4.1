@@ -6,6 +6,7 @@ import { statusSelesai } from "../../../lib/statusSelesai";
 import { resolveStatusWriteValue } from "../../../lib/statusKolom";
 import { updateTask, resolveUserId } from "../services/kanban.service";
 import { suppressTaskDataRefresh } from "../../../lib/taskRefreshControl";
+import { useLingkupTugas } from "../../../hooks/useLingkupTugas";
 
 const checkTaskBlockers = (
   tasks: any[],
@@ -39,9 +40,13 @@ const checkTaskBlockers = (
 export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" = "epic") => {
   const { masterData, tasks, projectMembers, userRole, user, selectedProject } = props;
   const [shakingTaskId, setShakingTaskId] = useState<string | null>(null);
+  // #688 — "All Tasks" / "My Tasks" disaring di SATU titik (`tArr`), sehingga
+  // epics, standaloneTasks, dan groupedTasks ikut semua; tidak ada lagi jalur
+  // kedua yang bisa lupa menyaring.
+  const { saring: saringLingkup } = useLingkupTugas(user);
 
   const mArr = useMemo(() => (Array.isArray(masterData) ? masterData : []), [masterData]);
-  const tArr = useMemo(() => (Array.isArray(tasks) ? tasks : []), [tasks]);
+  const tArr = useMemo(() => saringLingkup(tasks), [tasks, saringLingkup]);
   const pArr = useMemo(
     () => (Array.isArray(projectMembers) ? projectMembers : []),
     [projectMembers]

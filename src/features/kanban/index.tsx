@@ -14,6 +14,8 @@ import { UserAvatar } from "../../components/ui/UserAvatar";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { Card } from "../../components/ui/CoreUI";
+import { TugasScopeToggle } from "../../components/ui/TugasScopeToggle";
+import { useLingkupTugas } from "../../hooks/useLingkupTugas";
 
 export const BoardView: React.FC<KanbanBoardProps> = (props) => {
   const { t } = useTranslation();
@@ -21,6 +23,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
   const isCompact = density === "compact";
   const [groupBy, setGroupBy] = useState<"epic" | "assignee">("epic");
   const [showEmptySwimlanes, setShowEmptySwimlanes] = useState(false);
+  const { lingkup, setLingkup, punyaIdentitas } = useLingkupTugas(props.user);
 
   const {
     boardStatuses,
@@ -423,13 +426,25 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
           { label: t("sidebar.kanbanBoard"), current: true },
         ]}
         title={t("kanban.title", t("sidebar.kanbanBoard"))}
+        actions={<TugasScopeToggle value={lingkup} onChange={setLingkup} />}
       />
       {/* #417/#421 — Card board shell */}
       <div className="flex-1 flex flex-col min-h-0 px-3 md:px-4 pt-3 pb-20 md:pb-3">
         <Card className="flex-1 flex flex-col rounded-lg overflow-hidden min-h-0">
           <DragDropContext onDragEnd={handleDragEndBoard}>
             <div className="flex-1 overflow-auto bg-transparent relative z-10 custom-scrollbar">
-              {renderBoard()}
+              {/* #688 — "mine" boleh menghasilkan papan kosong; papan kosong bukan error,
+                  tapi juga bukan alasan menampilkan kolom tanpa isi. */}
+              {lingkup === "mine" && tArr.length === 0 ? (
+                <div className="flex flex-col items-center justify-center gap-1 py-16 text-center">
+                  <p className="text-sm text-content-body">{t("filters.noMyTasks")}</p>
+                  {!punyaIdentitas && (
+                    <p className="text-xs text-content-muted">{t("filters.myTasksTanpaLogin")}</p>
+                  )}
+                </div>
+              ) : (
+                renderBoard()
+              )}
             </div>
           </DragDropContext>
         </Card>

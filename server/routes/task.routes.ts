@@ -68,6 +68,32 @@ const bolehUbahTask = (task: any, jwtUser: any, user: any): boolean =>
   normalkanPeran(user?.role) === "admin" ||
   isTaskParticipant(task, identitasTaskPemanggil(jwtUser, user));
 
+/**
+ * #688 — kunci "tugas siapa ini" untuk menyaring daftar.
+ *
+ * SENGAJA lebih sempit dari `identitasTaskPemanggil` (#675). Yang di sana boleh
+ * (username, displayName, nama_lengkap) dipakai untuk membandingkan relasi
+ * penugasan di kolom yang historisnya bisa terisi label. Di sini tidak: kolom
+ * `assigneeId`/`assigneeEmail` diisi uid ATAU email
+ * (`src/services/taskService.ts:11-21`), dan membandingkannya dengan nama
+ * tampilan akan membuat dua orang bernama sama saling memiliki tugas.
+ *
+ * Identitasnya HANYA dari JWT yang sudah diverifikasi plus baris Users. Nilai
+ * query/body tidak pernah dipakai — itu pelajaran #674.
+ */
+const kunciPenugasanPemanggil = async (req: any): Promise<string[]> => {
+  const jwtUser = req.user;
+  const idMentah = jwtUser?.id || jwtUser?.uid;
+  const baris = idMentah ? await userRepository.findByIdOrUid(String(idMentah)) : null;
+  return Array.from(
+    new Set(
+      [jwtUser?.id, jwtUser?.uid, jwtUser?.email, baris?.id, baris?.uid, baris?.email]
+        .filter((nilai) => typeof nilai === "string" && String(nilai).trim() !== "")
+        .map((nilai) => String(nilai).trim())
+    )
+  );
+};
+
 router.get(
   "/api/projects/:projectId/tasks",
   jagaProyek("list", "R"),
@@ -78,14 +104,20 @@ router.get(
       const search = req.query.search as string | undefined;
       const rootsOnlyRaw = String(req.query.rootsOnly || "");
       const rootsOnly = rootsOnlyRaw === "1" || rootsOnlyRaw === "true";
+      // #688 — "My Tasks". Nilanya hanya menyalakan filter; siapa "saya" diambil
+      // dari JWT + baris Users, tidak pernah dari query.
+      const mineOnlyRaw = String(req.query.mineOnly || "");
+      const mineOnly = mineOnlyRaw === "1" || mineOnlyRaw === "true";
       const pagination = parsePaginationQuery(req.query as Record<string, unknown>);
 
       // Issue List: page root + keturunan. Board tanpa page/limit → penuh.
       if (rootsOnly && pagination) {
+        const penugasan = mineOnly ? await kunciPenugasanPemanggil(req) : undefined;
         const { items, total } = await taskRepository.findIssueListPage(
           projectId,
           pagination,
-          search
+          search,
+          penugasan
         );
         return res.json(listSuccessPayload(items, pagination, total));
       }

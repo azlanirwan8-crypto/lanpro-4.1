@@ -28,11 +28,19 @@ import {
 import { useMobileAction } from "../../contexts/MobileActionContext";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { ListPageShell } from "../../components/ui/ListPageShell";
+import { TugasScopeToggle } from "../../components/ui/TugasScopeToggle";
+import { useLingkupTugas } from "../../hooks/useLingkupTugas";
 
 export const IssueListView: React.FC<IssueListViewProps> = (props) => {
   const { t } = useTranslation();
   const { density, setCurrentView } = useAppStore();
   const isCompact = density === "compact";
+  // #688 — identitas lewat prop yang SUDAH diterima modul ini, bukan dari
+  // `useAuth` (hook itu bukan context; memanggilnya di sini menghasilkan
+  // sesi kosong). `currentUserProfile` lebih kaya daripada `user`.
+  const { lingkup, setLingkup, punyaIdentitas } = useLingkupTugas(
+    props.currentUserProfile || props.user
+  );
   const {
     projectRole,
     tasks = [],
@@ -296,7 +304,15 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
   );
 
   return (
-    <ListPageShell className="h-full" header={<PageHeader title={t("sidebar.issueList")} />}>
+    <ListPageShell
+      className="h-full"
+      header={
+        <PageHeader
+          title={t("sidebar.issueList")}
+          actions={<TugasScopeToggle value={lingkup} onChange={setLingkup} />}
+        />
+      }
+    >
       <div className={cn(styles.container, "rounded-none border-0 shadow-none flex-1 min-h-0")}>
         {/* Header Toolbar & Advanced Filters */}
         <IssueAdvancedFiltersPanel
@@ -440,9 +456,21 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                             >
                               <div className="flex flex-col items-center gap-3 opacity-40">
                                 <Search className="w-8 h-8 text-content-subtle" />
+                                {/* #688 — "tidak ada hasil" karena filter dan "tidak ada
+                                    tugas untukmu" karena memang kosong adalah dua hal
+                                    berbeda; mencampur keduanya membuat pengguna
+                                    menyalahkan filternya. `tasks` di sini sudah dari
+                                    server (mode paging), jadi kosong = memang kosong. */}
                                 <p className="text-xs font-normal text-content-muted uppercase tracking-normal">
-                                  {t("issues.noMatchingRecordsFound")}
+                                  {lingkup === "mine" && tasks.length === 0
+                                    ? t("filters.noMyTasks")
+                                    : t("issues.noMatchingRecordsFound")}
                                 </p>
+                                {lingkup === "mine" && !punyaIdentitas && (
+                                  <p className="text-[11px] font-normal text-content-subtle normal-case">
+                                    {t("filters.myTasksTanpaLogin")}
+                                  </p>
+                                )}
                               </div>
                             </td>
                           </tr>

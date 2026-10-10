@@ -342,6 +342,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
             masterData={masterData || []}
             userRole={effectiveRole}
             currentUserProfile={currentUserProfile}
+            user={currentUser}
             projectMembers={projectMembers || []}
             expandedSprintId={expandedSprintId}
             setExpandedSprintId={setExpandedSprintId}

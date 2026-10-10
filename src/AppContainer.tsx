@@ -247,6 +247,8 @@ function AppContainer() {
   // temporal dead zone dan AppContainer gagal render.
   const projectMembers = useProjectStore((s) => s.projectMembers);
   const setProjectMembers = useProjectStore((s) => s.setProjectMembers);
+  // #688 — "All Tasks" / "My Tasks" SATU status untuk semua modul.
+  const lingkupTugas = useProjectStore((s) => s.lingkupTugas);
 
   const [confirmAction, setConfirmAction] = useState<{
     isOpen: boolean;
@@ -1149,6 +1151,8 @@ function AppContainer() {
     limit?: number;
     search?: string;
     rootsOnly?: boolean;
+    /** #688 — default ikut status global; panggilan eksplisit boleh menimpa. */
+    mineOnly?: boolean;
   }) => {
     const proyekSaatBerangkat = selectedProject?.id;
     if (!getAuthToken()) return;
@@ -1177,6 +1181,10 @@ function AppContainer() {
               limit: opts?.limit ?? ISSUE_LIST_PAGE_SIZE,
               search: opts?.search ?? issueListSearch,
               rootsOnly: true,
+              // #688 — halaman dan jumlahnya dihitung server, jadi "mine" harus
+              // ikut ke query; menyaring di klien akan meninggalkan total yang
+              // masih milik semua orang.
+              mineOnly: opts?.mineOnly ?? lingkupTugas === "mine",
             }
           : undefined
       );
@@ -1227,7 +1235,18 @@ function AppContainer() {
     currentView,
     issueListPage,
     issueListSearch,
+    lingkupTugas,
   ]);
+
+  /**
+   * #688 — pindah ke "My Tasks" dari halaman 4 tidak boleh mendarat di halaman 4
+   * hasil yang tersaring: di Jira dan Linear, mengganti filter besar selalu
+   * mengembalikan pengguna ke halaman pertama. Tanpa ini pengguna melihat layar
+   * kosong dan menyangka tidak ada tugas, padahal ada di halaman 1.
+   */
+  useEffect(() => {
+    setIssueListPage(1);
+  }, [lingkupTugas]);
 
   const realTimeRefs = useRef<any>({});
   const taskDataRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

@@ -27,6 +27,17 @@ export const taskListQuerySchema = listSearchQuerySchema.extend({
   rootsOnly: z
     .union([z.literal("1"), z.literal("true"), z.literal("0"), z.literal("false")])
     .optional(),
+  /**
+   * #688 — "My Tasks" pada daftar yang di-page server.
+   *
+   * Nilanya HANYA mengaktifkan filter; siapa "saya"-nya tidak pernah datang dari
+   * sini. Identitas selalu diambil dari JWT yang sudah diverifikasi + baris Users,
+   * karena kalau tidak, `?mineOnly=1&assigneeId=...` berubah menjadi alat untuk
+   * membaca tugas orang lain (pelajaran #674).
+   */
+  mineOnly: z
+    .union([z.literal("1"), z.literal("true"), z.literal("0"), z.literal("false")])
+    .optional(),
 });
 
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>;

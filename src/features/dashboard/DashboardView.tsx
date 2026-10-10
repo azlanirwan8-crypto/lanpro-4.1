@@ -50,6 +50,9 @@ import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { Card } from "../../components/ui/CoreUI";
+import { TugasScopeToggle } from "../../components/ui/TugasScopeToggle";
+import { useLingkupTugas } from "../../hooks/useLingkupTugas";
+import { adalahTugasMilikSaya } from "../../lib/tugasSaya";
 
 const defaultChartOrder = [
   "status-distribution",
@@ -63,6 +66,13 @@ const defaultChartOrder = [
 
 export function DashboardView(props: DashboardViewProps) {
   const { t } = useTranslation();
+  // #688 — SATU titik potong untuk seluruh agregat. Menyaring di tiap kartu akan
+  // menghasilkan satu layar dengan dua ruang lingkup, persis cacat #129.
+  const { lingkup, setLingkup, saring: saringLingkup } = useLingkupTugas(props.currentUser);
+  // Referensinya harus stabil: `useDashboard` mengembalikan turunan yang dipakai
+  // `useMemo`/`useEffect` di bawah, dan array baru tiap render akan membuat
+  // seluruh agregat dihitung ulang (dan bisa berputar) walau tidak ada yang berubah.
+  const tasksDalamLingkup = useMemo(() => saringLingkup(props.tasks), [props.tasks, saringLingkup]);
   const {
     tasks,
     nonEpicTasks,
@@ -92,7 +102,7 @@ export function DashboardView(props: DashboardViewProps) {
     velocityData,
     estimationAccuracyData,
     estimationStats,
-  } = useDashboard(props);
+  } = useDashboard({ ...props, tasks: tasksDalamLingkup });
 
   const [selectedSprintFilter, setSelectedSprintFilter] = useState<string>("ALL");
 
@@ -117,18 +127,12 @@ export function DashboardView(props: DashboardViewProps) {
       };
     }
 
-    const currentUserId = currentUser.uid || currentUser.id;
-    const currentUserEmail = currentUser.email;
-
-    // Filter STRICT ASSIGNEE
-    const myTasks = tasks.filter((t) => {
-      // Handle array or single string for assigneeId if needed, but usually string
-      const isAssignee = t.assigneeId === currentUserId || t.assigneeEmail === currentUserEmail;
-
-      // Exclude Parent tasks (Epic/Story) if they are not explicitly assigned to this user
-      // Assuming tasks have a type/issueType property or we rely strictly on assignee
-      return isAssignee;
-    });
+    // #688 — predikat kepemilikan dipindah ke src/lib/tugasSaya. Versi lama hanya
+    // membandingkan `assigneeId`/`assigneeEmail` sehingga task multi-assignee
+    // (kolom `assignees`) hilang dari metrik, dan `currentUserId` yang undefined
+    // membuat `t.assigneeId === undefined` ikut benar untuk task tanpa assignee
+    // di data yang menyimpan field-nya sebagai undefined.
+    const myTasks = tasks.filter((t) => adalahTugasMilikSaya(t, currentUser));
 
     const now = new Date();
 
@@ -269,11 +273,14 @@ export function DashboardView(props: DashboardViewProps) {
     );
   };
 
+  // #688 — daftar ini memang selalu personal; yang berubah hanya KUNCINYA.
+  // Versi lama membandingkan `assigneeId === currentUser.uid` saja, sehingga
+  // penugasan lewat email dan multi-assignee tidak pernah muncul di sini.
   const myActiveTasks = useMemo(() => {
     if (!currentUser) return [];
     return tasks.filter(
       (t) =>
-        t.assigneeId === currentUser.uid &&
+        adalahTugasMilikSaya(t, currentUser) &&
         !["done", "archive", "closed", "canceled"].includes(t.status?.toLowerCase() || "")
     );
   }, [tasks, currentUser]);
@@ -650,6 +657,7 @@ export function DashboardView(props: DashboardViewProps) {
         title={`${getGreeting()}, ${currentUser?.displayName || "Administrator"}!`}
         actions={
           <div className="flex flex-wrap items-center justify-end gap-2 min-w-0">
+            <TugasScopeToggle value={lingkup} onChange={setLingkup} />
             <div className="w-full sm:w-auto sm:min-w-[180px] sm:max-w-[240px] min-w-0 shrink-0">
               <StyledDropdown
                 value={selectedSprintFilter}

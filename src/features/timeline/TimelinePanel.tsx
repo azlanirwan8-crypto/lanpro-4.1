@@ -38,6 +38,8 @@ import { GANTT_ROW_PX, kumpulkanEdgeBlocks, pathSikuDep } from "./ganttDependenc
 import { can } from "../../lib/permissions";
 import { gayaLabel, nadaLabel, warnaDariMaster, type NadaLabel } from "../../lib/warnaLabel";
 import { PageHeader } from "../../components/ui/PageHeader";
+import { TugasScopeToggle } from "../../components/ui/TugasScopeToggle";
+import { useLingkupTugas } from "../../hooks/useLingkupTugas";
 
 interface TimelineProps {
   tasks: Task[];
@@ -162,7 +164,7 @@ const getPriorityColor = (priority: string = "") => {
 };
 
 export const TimelinePanel: React.FC<TimelineProps> = ({
-  tasks,
+  tasks: tasksProp,
   selectedProject,
   updateTaskField,
   setSelectedTaskForDetail,
@@ -171,6 +173,11 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
   masterData = [],
 }) => {
   const { t } = useTranslation();
+  // #688 — satu titik saring sebelum baris Gantt disusun. Menyaring di penyusun
+  // baris SAJA akan meninggalkan garis dependensi dan hitungan yang dihitung dari
+  // array penuh.
+  const { lingkup, setLingkup, saring } = useLingkupTugas(currentUser);
+  const tasks = React.useMemo(() => saring(tasksProp), [tasksProp, saring]);
   const canWriteMilestone = can("C", "timeline", {
     user: currentUser,
     project: selectedProject,
@@ -673,6 +680,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
         title={t("roadmap.title")}
         actions={
           <div className="flex items-center gap-2 md:gap-3 flex-wrap w-full md:w-auto">
+            <TugasScopeToggle value={lingkup} onChange={setLingkup} />
             <div className="flex items-center gap-1 md:gap-1.5 bg-surface-sunken/80 p-1 rounded-md border border-border-subtle/80">
               <button
                 type="button"
