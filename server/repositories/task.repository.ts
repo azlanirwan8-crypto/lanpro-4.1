@@ -505,6 +505,23 @@ export class TaskRepository {
     }
   }
 
+  /**
+   * #689 — urutan baru diterapkan dengan menempati ulang SLOT yang sudah
+   * diami id yang dikirim, bukan dengan menulis posisi 0..n-1.
+   *
+   * Pemanggilnya (Issue List backlog) mengirim SATU HALAMAN saat paging aktif.
+   * Versi posisional yang lama membuat `d` di halaman dua mengambil nomor 0
+   * yang sudah dipegang `a`, sehingga dua akar berbagi `orderIndex`, urutan
+   * proyek jatuh ke `createdAt`, dan akar yang tidak pernah disentuh pengguna
+   * ikut tergeser. Dengan slot: yang tidak dikirim tidak disentuh, dan
+   * kiriman daftar LENGKAP memberi hasil yang sama persis dengan sebelumnya
+   * (slot-nya memang 0..n-1).
+   *
+   * Batas yang ditulis apa adanya: hanya akar dalam `BATAS_DAFTAR_TANPA_PAGINATION`
+   * teratas yang punya slot, jadi id di luar jendela itu diabaikan, dan id yang
+   * bukan akar proyek ini (termasuk `undefined` dari cacat klien) tidak pernah
+   * sampai ke UPDATE.
+   */
   async reorderTasks(projectId: string, orderedIds: string[]): Promise<void> {
     const connection = await db.getConnection();
     let transaksiTerbuka = false;
@@ -512,10 +529,38 @@ export class TaskRepository {
       await connection.beginTransaction();
       transaksiTerbuka = true;
 
-      for (let i = 0; i < orderedIds.length; i++) {
+      const [akar]: any = await connection.query(
+        `SELECT id FROM Tasks
+         WHERE projectId = ? AND (parentId IS NULL OR parentId = '')
+         ORDER BY orderIndex ASC, createdAt DESC
+         LIMIT ${BATAS_DAFTAR_TANPA_PAGINATION}`,
+        [projectId]
+      );
+
+      const slotOlehId = new Map<string, number>();
+      (Array.isArray(akar) ? akar : []).forEach((baris: any, posisi: number) => {
+        const id = baris?.id;
+        if (typeof id === "string" && !slotOlehId.has(id)) slotOlehId.set(id, posisi);
+      });
+
+      const yangDikenal: { id: string; urutan: number }[] = [];
+      const sudahDipakai = new Set<string>();
+      for (const mentah of Array.isArray(orderedIds) ? orderedIds : []) {
+        const id = typeof mentah === "string" ? mentah : "";
+        if (!id || sudahDipakai.has(id)) continue;
+        const urutan = slotOlehId.get(id);
+        if (urutan === undefined) continue;
+        sudahDipakai.add(id);
+        yangDikenal.push({ id, urutan });
+      }
+
+      // Slot dipakai naik dari kecil ke besar, TAPI isinya ikut urutan permintaan:
+      // itulah "pindahkan dalam halaman ini" yang dimaksud pengguna.
+      const slotBersama = yangDikenal.map((entry) => entry.urutan).sort((a, b) => a - b);
+      for (let i = 0; i < yangDikenal.length; i++) {
         await connection.query("UPDATE Tasks SET orderIndex = ? WHERE id = ? AND projectId = ?", [
-          i,
-          orderedIds[i],
+          slotBersama[i],
+          yangDikenal[i].id,
           projectId,
         ]);
       }

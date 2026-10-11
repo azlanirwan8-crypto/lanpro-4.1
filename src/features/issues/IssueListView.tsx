@@ -5,6 +5,7 @@ import { Search, List } from "lucide-react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { cn } from "../../lib/utils";
 import { reorderTasks } from "./services/issues.service";
+import { susunUrutanAkar } from "./lib/urutanAkar";
 import { toast } from "sonner";
 import { Task } from "../../types";
 import { useAppStore } from "../../store/useAppStore";
@@ -218,18 +219,25 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
     if (!result.destination) return;
     if (result.destination.index === result.source.index) return;
 
-    const startIndex = (effectiveListPage - 1) * effectiveItemsPerPage;
-    const absoluteSourceIndex = startIndex + result.source.index;
-    const absoluteDestinationIndex = startIndex + result.destination.index;
-
-    const reorderedRoots = Array.from(displayRoots);
-    const [removed] = reorderedRoots.splice(absoluteSourceIndex, 1);
-    reorderedRoots.splice(absoluteDestinationIndex, 0, removed);
+    // #689 — indeks dari perpustakaan seret-dan-lepas itu relatif terhadap apa
+    // yang TAMPIL, sedangkan payload harus memotong array yang sama. Dulu kedua
+    // hal ini dicampur (offset halaman dipakai memotong `displayRoots` yang saat
+    // paging server sudah satu halaman), jadi halaman dua menghasilkan id
+    // `undefined` dan TypeError mentah sampai ke pengguna. Sekarang: kalau tidak
+    // sah, berhenti — mengirim apa pun di sini berarti menulis urutan yang tidak
+    // pernah diminta pengguna.
+    const orderedIds = susunUrutanAkar({
+      daftar: displayRoots,
+      memakaiServerPaging: useServerPaging,
+      halaman: effectiveListPage,
+      perHalaman: effectiveItemsPerPage,
+      sumber: result.source.index,
+      tujuan: result.destination.index,
+    });
+    if (!orderedIds) return;
 
     const toastId = toast.loading(t("toast.reorderingBacklog"));
     try {
-      const orderedIds = reorderedRoots.map((r) => r.id);
-
       const response = await reorderTasks(selectedProject.id, orderedIds);
 
       if (response.status === "success") {
