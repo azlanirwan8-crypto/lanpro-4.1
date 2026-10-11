@@ -199,6 +199,13 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
     if (prevProps.tasks.length !== nextProps.tasks.length) return false;
     if (prevProps.mArr !== nextProps.mArr) return false;
     if (prevProps.pArr !== nextProps.pArr) return false;
+    // #689 — dua prop ini dulu sama sekali tidak dibandingkan, padahal keduanya
+    // mengubah tampilan kolom: `shakingTaskId` menyalakan getaran penolakan dan
+    // `wipLimit` menggeser ambang peringatan WIP. `onTaskClick` ikut karena
+    // kolom tidak boleh menyimpan handler dari papan sebelumnya.
+    if (prevProps.shakingTaskId !== nextProps.shakingTaskId) return false;
+    if (prevProps.wipLimit !== nextProps.wipLimit) return false;
+    if (prevProps.onTaskClick !== nextProps.onTaskClick) return false;
 
     // Verify deep equality of tasks
     for (let i = 0; i < prevProps.tasks.length; i++) {
@@ -214,7 +221,16 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
         pt.priority !== nt.priority ||
         pt.updatedAt !== nt.updatedAt ||
         JSON.stringify(pt.subtasks) !== JSON.stringify(nt.subtasks) ||
-        (pt.linkedTasks?.length || 0) !== (nt.linkedTasks?.length || 0)
+        (pt.linkedTasks?.length || 0) !== (nt.linkedTasks?.length || 0) ||
+        // #689 — empat field di bawah ini DIRENDER kartu (`dueDate` jadi lencana
+        // hitungan waktu, `category` jadi LabelChip, `commentsCount` jadi angka,
+        // `projectId` ikut dibaca) tetapi tidak pernah dibandingkan, jadi kartu
+        // basi sampai sesuatu memaksa kolom render ulang. `dueDate` bisa datang
+        // sebagai string ATAU Date dari server, jadi dibandingkan sebagai teks.
+        String(pt.dueDate ?? "") !== String(nt.dueDate ?? "") ||
+        String(pt.category ?? "") !== String(nt.category ?? "") ||
+        Number(pt.commentsCount || 0) !== Number(nt.commentsCount || 0) ||
+        pt.projectId !== nt.projectId
       ) {
         return false;
       }
