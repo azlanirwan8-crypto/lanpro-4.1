@@ -31,12 +31,13 @@ import {
   Menu,
   X,
   Flag,
+  Maximize2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { MilestonePanel } from "./MilestonePanel";
 import { GANTT_ROW_PX, kumpulkanEdgeBlocks, pathSikuDep } from "./ganttDependencyEdges";
 import { can } from "../../lib/permissions";
-import { gayaLabel, nadaLabel, warnaDariMaster, type NadaLabel } from "../../lib/warnaLabel";
+import { gayaLabel, warnaDariMaster } from "../../lib/warnaLabel";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { TugasScopeToggle } from "../../components/ui/TugasScopeToggle";
 import { useLingkupTugas } from "../../hooks/useLingkupTugas";
@@ -55,116 +56,15 @@ interface TimelineProps {
   isUpdatingTask?: Record<string, boolean>;
 }
 
-// Provide default helpers for mapping status and priorities to Tailwind colors
 /**
- * #564 — batang Gantt tidak bisa diwarnai dari hex (ia gradien + pegangan
- * geser, semuanya kelas), jadi ia memilih SALAH SATU dari enam set lewat rona
- * yang sama yang dipakai chipnya: `nadaLabel(warnaDariMaster(...))`.
- *
- * Sebelum ini pemetaannya membaca kata kunci sendiri dan kehilangan "Selesai"
- * — label yang aplikasi ini cetak di layar Indonesia — sehingga tugas selesai
- * bergambar seperti tugas yang belum dimulai.
+ * #698 — batang Gantt TIDAK lagi membawa peta warnanya sendiri. `SET_GANTT`
+ * (enam set gradien keras: 60 kelas ungu/hijau yang memaksa hex MasterData
+ * masuk ke salah satu rona, jadi "Sedang Berjalan" tercetak ungu apa pun warna
+ * label aslinya) dan `getPriorityColor` (peta kata `p0`/`urgent`/`high` yang
+ * dilarang AGENTS.md §3) dihapus. Warna batang sekarang datang dari `--lbr`
+ * yang SAMA dengan chip di sebelahnya (#564), dilukis oleh `.gantt-bar` di
+ * `src/index.css`; bentuk epik vs tugas dibedakan lewat `gantt-bar-epic`.
  */
-const SET_GANTT: Record<NadaLabel | "epic", Record<string, string>> = {
-  epic: {
-    bg: "bg-gradient-to-r from-purple-100 to-purple-50/50",
-    border: "border-purple-500/30 hover:border-purple-500/30",
-    text: "text-purple-900",
-    activeBg: "bg-purple-950 ring-2 ring-purple-400 border-purple-800",
-    handle: "hover:bg-purple-600/15 active:bg-purple-600/25 group/l-handle",
-    handleBar: "bg-purple-400/80 border-purple-400/20 group-hover/l-handle:bg-purple-600",
-    handleR: "hover:bg-purple-600/15 active:bg-purple-600/25 group/r-handle",
-    handleBarR: "bg-purple-400/80 border-purple-400/20 group-hover/r-handle:bg-purple-600",
-    tooltipText: "text-purple-300",
-    tooltipBadge: "bg-purple-500/30 text-purple-200",
-  },
-  selesai: {
-    bg: "bg-gradient-to-r from-emerald-50 to-white",
-    border: "border-emerald-500/30 hover:border-emerald-500/30",
-    text: "text-emerald-900",
-    activeBg: "bg-emerald-950 ring-2 ring-emerald-400 border-emerald-800",
-    handle: "hover:bg-emerald-600/15 active:bg-emerald-600/25 group/l-handle",
-    handleBar: "bg-emerald-400/80 border-emerald-400/20 group-hover/l-handle:bg-emerald-600",
-    handleR: "hover:bg-emerald-600/15 active:bg-emerald-600/25 group/r-handle",
-    handleBarR: "bg-emerald-400/80 border-emerald-400/20 group-hover/r-handle:bg-emerald-600",
-    tooltipText: "text-emerald-300",
-    tooltipBadge: "bg-emerald-500/30 text-emerald-200",
-  },
-  berjalan: {
-    bg: "bg-gradient-to-r from-purple-100 to-purple-50/50",
-    border: "border-purple-500/30 hover:border-purple-500/30",
-    text: "text-purple-900",
-    activeBg: "bg-purple-950 ring-2 ring-purple-400 border-purple-800",
-    handle: "hover:bg-purple-600/15 active:bg-purple-600/25 group/l-handle",
-    handleBar: "bg-purple-400/80 border-purple-400/20 group-hover/l-handle:bg-purple-600",
-    handleR: "hover:bg-purple-600/15 active:bg-purple-600/25 group/r-handle",
-    handleBarR: "bg-purple-400/80 border-purple-400/20 group-hover/r-handle:bg-purple-600",
-    tooltipText: "text-purple-300",
-    tooltipBadge: "bg-purple-500/30 text-purple-200",
-  },
-  tinjau: {
-    bg: "bg-gradient-to-r from-primary/10 to-surface",
-    border: "border-primary/30 hover:border-primary/30",
-    text: "text-primary",
-    activeBg: "bg-primary-surface ring-2 ring-primary/40 border-primary",
-    handle: "hover:bg-primary-surface/15 active:bg-primary-surface/25 group/l-handle",
-    handleBar: "bg-primary/50 border-primary/20 group-hover/l-handle:bg-primary-surface",
-    handleR: "hover:bg-primary-surface/15 active:bg-primary-surface/25 group/r-handle",
-    handleBarR: "bg-primary/50 border-primary/20 group-hover/r-handle:bg-primary-surface",
-    tooltipText: "text-primary",
-    tooltipBadge: "bg-primary/20 text-content-inverse",
-  },
-  terhenti: {
-    bg: "bg-gradient-to-r from-danger/10 to-surface",
-    border: "border-danger/30 hover:border-danger/30",
-    text: "text-danger-text",
-    activeBg: "bg-danger-surface ring-2 ring-danger/40 border-danger",
-    handle: "hover:bg-danger/15 active:bg-danger/25 group/l-handle",
-    handleBar: "bg-danger/50 border-danger/20 group-hover/l-handle:bg-danger",
-    handleR: "hover:bg-danger/15 active:bg-danger/25 group/r-handle",
-    handleBarR: "bg-danger/50 border-danger/20 group-hover/r-handle:bg-danger",
-    tooltipText: "text-danger-text",
-    tooltipBadge: "bg-danger/20 text-content-inverse",
-  },
-  awal: {
-    bg: "bg-gradient-to-r from-surface-muted to-surface",
-    border: "border-border-subtle/80 hover:border-border-subtle",
-    text: "text-content",
-    activeBg: "bg-surface-inverse-strong ring-2 ring-border-strong border-border-inverse",
-    handle: "hover:bg-surface-muted/80 active:bg-surface-strong group/l-handle",
-    handleBar: "bg-surface-marker border-border-subtle group-hover/l-handle:bg-surface-strong",
-    handleR: "hover:bg-surface-muted/80 active:bg-surface-strong group/r-handle",
-    handleBarR: "bg-surface-marker border-border-subtle group-hover/r-handle:bg-surface-strong",
-    tooltipText: "text-content-subtle",
-    tooltipBadge: "bg-surface-marker/30 text-content-inverse-muted",
-  },
-  netral: {
-    bg: "bg-gradient-to-r from-surface-muted to-surface",
-    border: "border-border-subtle/80 hover:border-border-subtle",
-    text: "text-content",
-    activeBg: "bg-surface-inverse-strong ring-2 ring-border-strong border-border-inverse",
-    handle: "hover:bg-surface-muted/80 active:bg-surface-strong group/l-handle",
-    handleBar: "bg-surface-marker border-border-subtle group-hover/l-handle:bg-surface-strong",
-    handleR: "hover:bg-surface-muted/80 active:bg-surface-strong group/r-handle",
-    handleBarR: "bg-surface-marker border-border-subtle group-hover/r-handle:bg-surface-strong",
-    tooltipText: "text-content-subtle",
-    tooltipBadge: "bg-surface-marker/30 text-content-inverse-muted",
-  },
-};
-
-const getStatusColors = (hexStatus: string, isEpic: boolean) =>
-  SET_GANTT[isEpic ? "epic" : nadaLabel(hexStatus)];
-
-const getPriorityColor = (priority: string = "") => {
-  const p = priority.toLowerCase();
-  if (p.includes("p0") || p.includes("urgent") || p.includes("blocker") || p.includes("highest"))
-    return "border-l-rose-500 shadow-rose-900/5";
-  if (p.includes("p1") || p.includes("high")) return "border-l-orange-500 shadow-orange-900/5";
-  if (p.includes("p2") || p.includes("medium")) return "border-l-amber-400 shadow-amber-900/5";
-  if (p.includes("p3") || p.includes("low")) return "border-l-blue-400 shadow-blue-900/5";
-  // Default
-  return "border-l-slate-400 shadow-slate-900/5";
-};
 
 export const TimelinePanel: React.FC<TimelineProps> = ({
   tasks: tasksProp,
@@ -561,6 +461,40 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
     });
   };
 
+  /** #698 — "pas ke layar": satu tombol yang menghitung zoom dari lebar yang
+   *  benar-benar terlihat, bukan angka yang ditebak. Tanpa ini menyusut satu
+   *  sumbu setahun berarti menekan "−" belasan kali. */
+  const pasKeLayar = () => {
+    const el = timelineMainRef.current;
+    if (!el || !totalDays) return;
+    setPixelsPerDay(Math.max(4, Math.min(150, el.clientWidth / totalDays)));
+    el.scrollLeft = 0;
+  };
+
+  /**
+   * #698 — menu Ekspor dulu ditutup lewat `onBlur` pada tombolnya plus
+   * `setTimeout(200)`: item menu lebih dulu membuat tombol kehilangan fokus,
+   * dan penundaan itulah yang membuat semuanya terasa benar — satu-satunya
+   * jalan lain adalah menutup menu SEBELUM itemnya sempat terpakai. Sekarang
+   * penutupan diikat ke klik di luar pembungkusnya dan ke Escape.
+   */
+  const exportWrapRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!isExportMenuOpen) return;
+    const tutupBilaDiLuar = (e: PointerEvent) => {
+      if (!exportWrapRef.current?.contains(e.target as Node)) setIsExportMenuOpen(false);
+    };
+    const tutupEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsExportMenuOpen(false);
+    };
+    document.addEventListener("pointerdown", tutupBilaDiLuar);
+    document.addEventListener("keydown", tutupEscape);
+    return () => {
+      document.removeEventListener("pointerdown", tutupBilaDiLuar);
+      document.removeEventListener("keydown", tutupEscape);
+    };
+  }, [isExportMenuOpen]);
+
   const hasAutoScrolledRef = useRef(false);
   useEffect(() => {
     if (!hasAutoScrolledRef.current && tasks && tasks.length > 0) {
@@ -654,6 +588,15 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
+              <div className="w-px h-4 bg-surface-strong mx-0.5 md:mx-1" />
+              <button
+                type="button"
+                onClick={pasKeLayar}
+                className="min-h-11 min-w-11 inline-flex items-center justify-center text-xs text-content-muted hover:text-content-strong hover:bg-surface-muted rounded-md transition-colors cursor-pointer"
+                title={t("roadmap.fitView")}
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+              </button>
             </div>
             {/* #426 — Add Milestone sejajar toolbar */}
             {canWriteMilestone && (
@@ -667,28 +610,57 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                 <span className="hidden sm:inline">{t("roadmap.milestoneAdd")}</span>
               </button>
             )}
-            <div className="relative ml-auto md:ml-0">
+            {/* #698 — Ekspor jadi tombol utama + pemisah menu: aksi yang paling
+                sering dipakai (PDF) tidak lagi butuh dua klik, dan menunya
+                tertutup karena klik di luar, bukan karena `setTimeout(200)`. */}
+            <div
+              ref={exportWrapRef}
+              className="relative ml-auto md:ml-0 flex items-stretch rounded-lg shadow-xs"
+            >
               <button
-                onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
-                onBlur={() => setTimeout(() => setIsExportMenuOpen(false), 200)}
-                className="h-9 px-3 md:px-4 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-lg text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
-                title={t("roadmap.exportAs")}
+                type="button"
+                onClick={exportTimelineToPdf}
+                className="h-9 px-3 md:px-4 rounded-l-lg bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer"
+                title={t("roadmap.pdfDocument")}
               >
                 <Download className="w-3.5 h-3.5 shrink-0" />
                 <span className="hidden sm:inline">{t("roadmap.exportAs")}</span>
+              </button>
+              <span className="w-px bg-surface-inverse/25" aria-hidden />
+              <button
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={isExportMenuOpen}
+                onClick={() => setIsExportMenuOpen((buka) => !buka)}
+                className="h-9 px-2 rounded-r-lg bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse transition-all flex items-center justify-center cursor-pointer"
+                title={t("roadmap.exportAs")}
+              >
                 <ChevronDown className="w-3.5 h-3.5" />
               </button>
               {isExportMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-surface rounded-md shadow-md border border-border-subtle/80 py-1.5 z-50">
+                <div
+                  role="menu"
+                  className="absolute right-0 mt-2 w-48 bg-surface rounded-md shadow-md border border-border-subtle/80 py-1.5 z-50"
+                >
                   <button
-                    onClick={exportTimelineToPdf}
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setIsExportMenuOpen(false);
+                      void exportTimelineToPdf();
+                    }}
                     className="w-full text-left px-3.5 py-2 hover:bg-surface-sunken text-xs font-medium text-content-body flex items-center gap-2 cursor-pointer transition-colors"
                   >
                     <FileText className="w-4 h-4 text-danger-text" />
                     <span>{t("roadmap.pdfDocument")}</span>
                   </button>
                   <button
-                    onClick={exportTimelineToPng}
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setIsExportMenuOpen(false);
+                      void exportTimelineToPng();
+                    }}
                     className="w-full text-left px-3.5 py-2 hover:bg-surface-sunken text-xs font-medium text-content-body flex items-center gap-2 cursor-pointer transition-colors"
                   >
                     <ImageIcon className="w-4 h-4 text-secondary" />
@@ -999,11 +971,19 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                       return (
                         <div
                           key={w.toISOString()}
-                          className="flex items-center justify-center border-r border-border-subtle/50 shrink-0"
+                          className="flex flex-col items-center justify-center gap-0 border-r border-border-subtle/50 shrink-0"
                           style={{ width: `${actualDays * pixelsPerDay}px` }}
                         >
-                          <span className="text-xs sm:text-[10px] font-normal text-content-subtle">
+                          <span className="text-xs sm:text-[10px] font-normal text-content-secondary leading-tight">
                             W{format(w, "w")}
+                          </span>
+                          {/* #698 — nomor minggu saja tidak cukup dibaca: tanpa
+                              rentang tanggalnya, "W38" menuntut pengguna menghitung
+                              sendiri. Tanggal yang dicetak adalah yang TERLIHAT
+                              (`actualStart`/`expectedEnd`), bukan minggu penuh di
+                              luar sumbu. */}
+                          <span className="text-[9px] font-normal text-content-subtle leading-tight whitespace-nowrap">
+                            {format(actualStart, "d MMM")} – {format(expectedEnd, "d MMM")}
                           </span>
                         </div>
                       );
@@ -1162,22 +1142,27 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                               : { type: "spring", stiffness: 350, damping: 25 }
                           }
                           className={cn(
-                            "absolute top-1/2 -translate-y-1/2 h-6 rounded-lg shadow-soft flex items-center border overflow-hidden",
-                            getStatusColors(hexStatus, isEpic).bg,
-                            getStatusColors(hexStatus, isEpic).border,
-                            getStatusColors(hexStatus, isEpic).text,
-                            getPriorityColor(task.priority),
-                            !isEpic && "border-l-[3.5px]",
-                            isEpic && "border-l-[3.5px]",
+                            // #698 — warna batang datang dari `--lbr` (hex label
+                            // dari master data) lewat `.gantt-bar`, bukan dari
+                            // enam set gradien. Epik lebih pucat dan ramping
+                            // karena ia RENTANG, bukan satu pekerjaan; ujungnya
+                            // yang menandai batas awal–akhir.
+                            //
+                            // Bentuk epik dan bentuk tugas ditulis SALING
+                            // EKSKLUSIF, bukan ditumpuk: `cn()` di repo ini
+                            // hanyalah gabung spasi (src/lib/utils.ts:4), jadi
+                            // `h-6` + `h-4` dimenangkan urutan stylesheet, bukan
+                            // oleh niat penulisnya — pelajaran #692.
+                            "gantt-bar absolute top-1/2 -translate-y-1/2 flex items-center border overflow-hidden shadow-soft",
+                            isEpic ? "gantt-bar-epic h-4 rounded-md" : "h-6 rounded-lg",
                             "group/bar",
+                            timelineInteraction?.taskId === task.id && "gantt-bar-aktif",
                             timelineInteraction?.taskId === task.id
-                              ? cn(
-                                  "scale-[1.01] shadow-md z-30",
-                                  getStatusColors(hexStatus, isEpic).activeBg
-                                )
+                              ? "scale-[1.01] shadow-md z-30"
                               : "transition-all"
                           )}
                           style={{
+                            ...gayaLabel(hexStatus),
                             left: `${left}%`,
                             width: `${width}%`,
                             minWidth: "24px",
@@ -1186,6 +1171,12 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                               : {}),
                           }}
                         >
+                          {isEpic && (
+                            <>
+                              <div className="gantt-bar-ujung pointer-events-none absolute left-0 top-0 bottom-0 w-[3px]" />
+                              <div className="gantt-bar-ujung pointer-events-none absolute right-0 top-0 bottom-0 w-[3px]" />
+                            </>
+                          )}
                           {/* Dynamic Floating Tooltip */}
                           <div
                             className={cn(
@@ -1196,41 +1187,23 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                                 : ""
                             )}
                           >
-                            <span
-                              className={cn(
-                                "font-medium",
-                                getStatusColors(hexStatus, isEpic).tooltipText
-                              )}
-                            >
+                            {/* #698 — tanggal di dalam tooltip tidak lagi ikut
+                                rona status: latar tooltip sudah `surface-inverse-strong`,
+                                jadi teksnya cukup `content-inverse`. */}
+                            <span className="font-medium">
                               {format(start, "dd MMM yyyy")}
                             </span>
-                            <span className="text-content-subtle">→</span>
-                            <span
-                              className={cn(
-                                "font-medium",
-                                getStatusColors(hexStatus, isEpic).tooltipText
-                              )}
-                            >
-                              {format(end, "dd MMM yyyy")}
-                            </span>
-                            <span
-                              className={cn(
-                                "font-medium px-1.5 py-0.5 rounded text-xs sm:text-[11px] sm:text-[9px] ml-1",
-                                getStatusColors(hexStatus, isEpic).tooltipBadge
-                              )}
-                            >
+                            <span className="text-content-inverse-muted">→</span>
+                            <span className="font-medium">{format(end, "dd MMM yyyy")}</span>
+                            <span className="font-medium px-1.5 py-0.5 rounded text-xs sm:text-[11px] sm:text-[9px] ml-1 bg-surface-inverse/60 text-content-inverse">
                               {t("rakit.daysCount", { count: differenceInDays(end, start) + 1 })}
                             </span>
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-x-4 border-t-4 border-x-transparent border-t-slate-900" />
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-x-4 border-t-4 border-x-transparent border-t-surface-inverse-strong" />
                           </div>
 
                           {/* Visually Rich Left Resize Handle */}
                           <div
-                            className={cn(
-                              "absolute left-0 top-0 bottom-0 w-3 flex items-center justify-center cursor-ew-resize z-25",
-                              "transition-colors",
-                              getStatusColors(hexStatus, isEpic).handle
-                            )}
+                            className="absolute left-0 top-0 bottom-0 w-3 flex items-center justify-center cursor-ew-resize z-25 transition-colors hover:bg-surface-strong/10 active:bg-surface-strong/25 group/l-handle"
                             onMouseDown={(e) => {
                               e.stopPropagation();
                               setTimelineInteraction({
@@ -1243,12 +1216,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             }}
                             title={t("roadmap.dragLeft")}
                           >
-                            <div
-                              className={cn(
-                                "w-[3px] h-3.5 border-l border-r rounded-full transition-colors shadow-soft",
-                                getStatusColors(hexStatus, isEpic).handleBar
-                              )}
-                            />
+                            <div className="gantt-bar-ujung w-[3px] h-3.5 rounded-full transition-colors shadow-soft group-hover/l-handle:opacity-80" />
                           </div>
 
                           {/* Drag and Move Row Area */}
@@ -1270,26 +1238,19 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                               }
                             }}
                           >
-                            <span
-                              className={cn(
-                                "text-xs sm:text-[10.5px] font-semibold truncate tracking-tight select-none pr-1",
-                                getStatusColors(hexStatus, isEpic).text
-                              )}
-                            >
+                            <span className="text-xs sm:text-[10.5px] font-semibold truncate tracking-tight select-none">
                               {task.title}
                             </span>
-                            <div className="w-5 h-5 rounded-full bg-primary-surface/90 text-content-inverse font-normal text-[9px] flex items-center justify-center shrink-0 ml-1.5 shadow-xs uppercase">
-                              {task.assigneeId ? task.assigneeId.slice(0, 2) : "AL"}
-                            </div>
+                            {/* #698 — cakram inisial penerima dibuang. Ia mencetak
+                                dua karakter PERDANA `assigneeId` (bukan nama), dan
+                                "AL" yang tampil di semua batang tanpa penerima itu
+                                string keras di JSX. Nama penerima sudah terbaca di
+                                detail tugas; batang yang bersih lebih berguna. */}
                           </div>
 
                           {/* Visually Rich Right Resize Handle */}
                           <div
-                            className={cn(
-                              "absolute right-0 top-0 bottom-0 w-3 flex items-center justify-center cursor-ew-resize z-25 rounded-r-lg",
-                              "transition-colors",
-                              getStatusColors(hexStatus, isEpic).handleR
-                            )}
+                            className="absolute right-0 top-0 bottom-0 w-3 flex items-center justify-center cursor-ew-resize z-25 rounded-r-lg transition-colors hover:bg-surface-strong/10 active:bg-surface-strong/25 group/r-handle"
                             onMouseDown={(e) => {
                               e.stopPropagation();
                               setTimelineInteraction({
@@ -1302,12 +1263,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             }}
                             title={t("roadmap.dragRight")}
                           >
-                            <div
-                              className={cn(
-                                "w-[3px] h-3.5 border-l border-r rounded-full transition-colors shadow-soft",
-                                getStatusColors(hexStatus, isEpic).handleBarR
-                              )}
-                            />
+                            <div className="gantt-bar-ujung w-[3px] h-3.5 rounded-full transition-colors shadow-soft group-hover/r-handle:opacity-80" />
                           </div>
                         </motion.div>
                       </motion.div>

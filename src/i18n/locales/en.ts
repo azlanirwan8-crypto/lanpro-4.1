@@ -2091,6 +2091,7 @@ export const en = {
     todayMarker: "TODAY",
     zoomOut: "Zoom Out (Ctrl + Scroll Down)",
     zoomIn: "Zoom In (Ctrl + Scroll Up)",
+    fitView: "Fit to view",
     zoomDays: "Days",
     zoomWeeks: "Weeks",
     zoomMonths: "Months",

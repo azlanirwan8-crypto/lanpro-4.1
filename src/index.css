@@ -905,3 +905,68 @@ html.dark .shadow-xs {
 .label-chip:hover {
   background-color: color-mix(in srgb, var(--lbr, var(--color-surface-marker)) 20%, transparent);
 }
+
+/**
+ * #698 — batang Gantt ikut warna labelnya sendiri.
+ *
+ * `TimelinePanel` dulu menyimpan enam set gradien keras (`SET_GANTT`): hex dari
+ * MasterData dipaksa masuk salah satu dari enam rona, jadi "Sedang Berjalan"
+ * tercetak ungu dan "Selesai" hijau apa pun warna label aslinya — persis kelas
+ * cacat yang sudah ditutup #564/#590 untuk chip. Kelas ini menurunkan batang
+ * dari `--lbr` yang SAMA dengan chip di sebelahnya, lewat `color-mix` terhadap
+ * `--color-surface` (gelap di mode gelap, terang di mode terang). Tidak ada
+ * `dark:` dan tidak ada token baru.
+ *
+ * Teks batang sengaja TIDAK ikut diwarnai: `--color-content` adalah pasangan
+ * terukur `--color-surface`, dan batang hanya sedikit diwarnai di atasnya.
+ * Menggeser teks ke arah hex akan menurunkan kontras pada hex pucat seperti
+ * #94A3B8 — dan §22.6 langkah 1 menuntut pemindaian kontras di peramban lebih
+ * dulu sebelum ada klaim angka.
+ */
+.gantt-bar {
+  background-color: color-mix(
+    in srgb,
+    var(--lbr, var(--color-surface-marker)) 22%,
+    var(--color-surface)
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--lbr, var(--color-surface-marker)) 55%,
+    var(--color-border-subtle)
+  );
+  color: var(--color-content);
+}
+.gantt-bar:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--lbr, var(--color-surface-marker)) 30%,
+    var(--color-surface)
+  );
+}
+/* Epik adalah rentang, bukan satu pekerjaan: lebih pucat supaya batang anaknya
+ * tetap yang paling menarik mata, dan ujungnya (`gantt-bar-ujung`) yang
+ * menandai batas awal–akhir. */
+.gantt-bar-epic {
+  background-color: color-mix(
+    in srgb,
+    var(--lbr, var(--color-surface-marker)) 12%,
+    var(--color-surface)
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--lbr, var(--color-surface-marker)) 35%,
+    var(--color-border-subtle)
+  );
+}
+/* Keadaan diseret: diganti lewat kelas, bukan `activeBg` per rona. */
+.gantt-bar-aktif {
+  background-color: color-mix(
+    in srgb,
+    var(--lbr, var(--color-surface-marker)) 45%,
+    var(--color-surface)
+  );
+  border-color: var(--lbr, var(--color-primary));
+}
+.gantt-bar-ujung {
+  background-color: var(--lbr, var(--color-surface-marker));
+}

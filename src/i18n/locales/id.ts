@@ -2111,6 +2111,7 @@ export const id = {
     todayMarker: "HARI INI",
     zoomOut: "Perkecil (Ctrl + Gulir Bawah)",
     zoomIn: "Perbesar (Ctrl + Gulir Atas)",
+    fitView: "Pas ke layar",
     zoomDays: "Hari",
     zoomWeeks: "Minggu",
     zoomMonths: "Bulan",
