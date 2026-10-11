@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { safeLocalStorage } from "../../lib/safeStorage";
 import React, { useEffect, useState, useMemo } from "react";
+import { useReducedMotion } from "motion/react";
 import { toast } from "sonner";
 import { format, isSameDay } from "date-fns";
 import {
@@ -18,6 +19,7 @@ import {
   AlertTriangle,
   ShieldAlert,
   Target,
+  RefreshCw,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -53,19 +55,19 @@ import { Card } from "../../components/ui/CoreUI";
 import { TugasScopeToggle } from "../../components/ui/TugasScopeToggle";
 import { useLingkupTugas } from "../../hooks/useLingkupTugas";
 import { adalahTugasMilikSaya } from "../../lib/tugasSaya";
-
-const defaultChartOrder = [
-  "status-distribution",
-  "priority-distribution",
-  "user-workload-analytics",
-  "team-workload-analytics",
-  "tasks-per-user-list",
-  "tasks-by-category",
-  "sprint-velocity-history",
-];
+import { useProjectStore } from "../../store/stores";
+import { keadaanDashboard } from "./lib/keadaanDashboard";
 
 export function DashboardView(props: DashboardViewProps) {
   const { t } = useTranslation();
+  // #691 — MotionConfig reducedMotion="user" (main.tsx:149, #641) hanya memerintah
+  // komponen motion/react. recharts menganimasikan lewat mesinnya sendiri, jadi
+  // preferensi gerakan harus dibaca di sini supaya chart ikut diam.
+  const reduceChartMotion = useReducedMotion() ?? false;
+  // #693 — penanda fetch global yang SUDAH ditulis AppContainer untuk semua
+  // modul. Dashboard tidak punya state fetch sendiri, jadi ia membacanya dari
+  // sini; tidak ada props baru dan tidak ada `AppContainer` yang disentuh.
+  const muatTugasGlobal = useProjectStore((s) => s.muatDaftarIsu);
   // #688 — SATU titik potong untuk seluruh agregat. Menyaring di tiap kartu akan
   // menghasilkan satu layar dengan dua ruang lingkup, persis cacat #129.
   const { lingkup, setLingkup, saring: saringLingkup } = useLingkupTugas(props.currentUser);
@@ -204,22 +206,21 @@ export function DashboardView(props: DashboardViewProps) {
 
   const formattedStatusData = myPersonalMetrics.statusData;
 
-  const [revenueFilter, setRevenueFilter] = useState<"ALL" | "1M" | "6M" | "1Y">("ALL");
-  const [productSort, setProductSort] = useState<string>("Today");
+  const [filterRentang, setFilterRentang] = useState<"ALL" | "1M" | "6M" | "1Y">("ALL");
 
   /** #342 — filter rentang menggerakkan deret tren (bukan hanya gaya tombol). */
   const rangedTrendData = useMemo(() => {
-    if (revenueFilter === "ALL") return last7DaysData;
-    if (revenueFilter === "1M") return buildRangeActivity(30);
-    if (revenueFilter === "6M") return buildRangeActivity(90);
+    if (filterRentang === "ALL") return last7DaysData;
+    if (filterRentang === "1M") return buildRangeActivity(30);
+    if (filterRentang === "6M") return buildRangeActivity(90);
     return buildRangeActivity(90);
-  }, [revenueFilter, last7DaysData, buildRangeActivity]);
+  }, [filterRentang, last7DaysData, buildRangeActivity]);
 
   const rangedThroughput = useMemo(() => {
-    if (revenueFilter === "ALL" || revenueFilter === "1M") return throughputWeeklyData;
+    if (filterRentang === "ALL" || filterRentang === "1M") return throughputWeeklyData;
     // 6M / 1Y: tetap 8 minggu terakhir (MVP tipis — tidak memuat 52 bar)
     return throughputWeeklyData;
-  }, [revenueFilter, throughputWeeklyData]);
+  }, [filterRentang, throughputWeeklyData]);
 
   const {
     selectedProject,
@@ -645,6 +646,9 @@ export function DashboardView(props: DashboardViewProps) {
     completedTasks,
   ]);
 
+  // #693 — satu keadaan untuk empat sebab layar ini kosong atau basi.
+  const keadaan = keadaanDashboard({ muat: muatTugasGlobal, totalTugas: totalTasks });
+
   return (
     <div className={styles.container}>
       {/* #446/#485 — PageHeader salam kiri; filter sprint + chip Active di pojok kanan (actions) */}
@@ -682,6 +686,66 @@ export function DashboardView(props: DashboardViewProps) {
         }
       />
       <div className={styles.wrapper}>
+        {/* #693 — kegagalan fetch global dulu tidak pernah sampai ke layar ini:
+            `AppContainer.tsx:1205`/`:1224` sudah menyetel penandanya, tetapi
+            Dashboard hanya membaca `props.tasks`, jadi proyek yang datanya tidak
+            turun terbaca sebagai "0 tugas". Bentuk banner dan tombolnya mengikuti
+            `IssueListView.tsx:422-443` (#689 d), bukan gaya baru. */}
+        {keadaan === "galat-kosong" || keadaan === "galat-basi" ? (
+          <div
+            role="alert"
+            data-testid="dashboard-galat-muat"
+            className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 mb-6 rounded-md border border-border-subtle bg-surface-sunken"
+          >
+            <div>
+              <p className="text-xs font-medium text-content-strong">
+                {keadaan === "galat-kosong"
+                  ? t("dashboard.loadFailedTitle")
+                  : t("dashboard.refreshFailedTitle")}
+              </p>
+              <p className="text-[11px] text-content-subtle">{t("dashboard.loadFailedHint")}</p>
+            </div>
+            <button
+              type="button"
+              data-testid="dashboard-coba-lgi"
+              onClick={() => props.fetchTasks?.()}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border-subtle bg-surface text-xs font-medium text-content-strong hover:bg-surface-muted cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              {t("dashboard.retry")}
+            </button>
+          </div>
+        ) : keadaan === "memperbarui" ? (
+          <p
+            role="status"
+            data-testid="dashboard-memperbarui"
+            className="mb-3 text-[11px] text-content-subtle"
+          >
+            {t("dashboard.refreshPending")}
+          </p>
+        ) : null}
+
+        {keadaan === "memuat-pertama" ? (
+          <div
+            role="status"
+            aria-label={t("dashboard.loading")}
+            data-testid="dashboard-memuat-kartu"
+            className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6"
+          >
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="p-3 sm:p-5 rounded-lg border border-border-subtle bg-surface shadow-2xs animate-pulse motion-reduce:animate-none"
+              >
+                <div className="h-2.5 w-16 rounded bg-surface-muted" />
+                <div className="mt-3 h-6 w-12 rounded bg-surface-muted" />
+                <div className="mt-4 pt-3 border-t border-border-faint">
+                  <div className="h-2.5 w-20 rounded bg-surface-muted" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6">
           {/* Card 1: Total Tasks — putih + soft icon + hover lift (#415) */}
           <Card
@@ -717,7 +781,7 @@ export function DashboardView(props: DashboardViewProps) {
               </span>
               <button
                 onClick={() => props.setCurrentView("board")}
-                className="text-primary hover:underline text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
+                className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
               >
                 {t("dashboard.viewAllTasks")}
               </button>
@@ -749,7 +813,7 @@ export function DashboardView(props: DashboardViewProps) {
               </span>
               <button
                 onClick={() => props.setCurrentView("board")}
-                className="text-content-inverse/90 hover:text-content-inverse hover:underline text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
+                className="text-content-inverse/90 hover:text-content-inverse hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-subtle text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
               >
                 {t("dashboard.viewActiveBoard")}
               </button>
@@ -775,28 +839,28 @@ export function DashboardView(props: DashboardViewProps) {
               </div>
             </div>
             <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">
-              {/* #105 — idem. Tanda `+` ikut disembunyikan saat nol; "+0%"
-                  membaca seperti pertumbuhan yang tidak terjadi. */}
+              {/* #105 — ikon pertumbuhan hanya saat memang ada kenaikan, DAN #692 —
+                  kaki kartu ini tidak lagi mengulang persen yang sudah dibaca di
+                  kartu Total. Dua kartu bersayap angka yang sama dengan label beda
+                  membuat layar tidak bisa dibaca dalam tiga detik. */}
               <span
                 className={`flex items-center gap-1 font-medium ${
                   completionPercentage > 0 ? "text-success-text" : "text-content-muted"
                 }`}
               >
                 {completionPercentage > 0 ? (
-                  <>
-                    <ArrowUpRight className="w-3.5 h-3.5" />{" "}
-                    {t("dashboard.percentRate", { percent: completionPercentage })}
-                  </>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
                 ) : (
-                  <>
-                    <Minus className="w-3.5 h-3.5" />{" "}
-                    {t("dashboard.percentRate", { percent: completionPercentage })}
-                  </>
+                  <Minus className="w-3.5 h-3.5" />
                 )}
+                {t("dashboard.doneOfTotal", {
+                  done: completedTasks.length,
+                  total: totalTasks,
+                })}
               </span>
               <button
                 onClick={() => props.setCurrentView("board")}
-                className="text-primary hover:underline text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
+                className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
               >
                 {t("dashboard.viewDoneListLink")}
               </button>
@@ -850,13 +914,14 @@ export function DashboardView(props: DashboardViewProps) {
               </span>
               <button
                 onClick={() => props.setCurrentView("board")}
-                className="text-primary hover:underline text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
+                className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
               >
                 {t("dashboard.handleBlockersLink")}
               </button>
             </div>
           </Card>
         </div>
+        )}
 
         {/* Real-time Dashboard Panels Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start text-left">
@@ -875,10 +940,10 @@ export function DashboardView(props: DashboardViewProps) {
                   {(["ALL", "1M", "6M", "1Y"] as const).map((filter) => (
                     <button
                       key={filter}
-                      onClick={() => setRevenueFilter(filter)}
+                      onClick={() => setFilterRentang(filter)}
                       className={cn(
                         "px-3 py-2.5 min-h-11 min-w-11 inline-flex items-center justify-center rounded text-xs sm:text-[11px] font-medium transition cursor-pointer",
-                        revenueFilter === filter
+                        filterRentang === filter
                           ? "bg-primary-surface text-content-inverse shadow-2xs"
                           : "text-content-secondary hover:text-content"
                       )}
@@ -981,6 +1046,7 @@ export function DashboardView(props: DashboardViewProps) {
                       fill="#10b981"
                       radius={[4, 4, 0, 0]}
                       maxBarSize={24}
+                      isAnimationActive={!reduceChartMotion}
                     />
                     <Bar
                       dataKey="Planned"
@@ -988,6 +1054,7 @@ export function DashboardView(props: DashboardViewProps) {
                       fill="#6366f1"
                       radius={[4, 4, 0, 0]}
                       maxBarSize={24}
+                      isAnimationActive={!reduceChartMotion}
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -1003,7 +1070,7 @@ export function DashboardView(props: DashboardViewProps) {
                   <p className="text-[11px] text-content-muted mb-3">
                     {t("dashboard.burndownHint")}
                   </p>
-                  <div className="h-[220px] w-full">
+                  <div className="h-[260px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart
                         data={burndownData}
@@ -1045,6 +1112,7 @@ export function DashboardView(props: DashboardViewProps) {
                           strokeDasharray="4 4"
                           dot={false}
                           strokeWidth={2}
+                          isAnimationActive={!reduceChartMotion}
                         />
                         <Line
                           type="monotone"
@@ -1054,6 +1122,7 @@ export function DashboardView(props: DashboardViewProps) {
                           connectNulls={false}
                           dot={false}
                           strokeWidth={2}
+                          isAnimationActive={!reduceChartMotion}
                         />
                       </LineChart>
                     </ResponsiveContainer>
@@ -1070,7 +1139,7 @@ export function DashboardView(props: DashboardViewProps) {
                 <p className="text-[11px] text-content-muted mb-3">
                   {t("dashboard.throughputHint")}
                 </p>
-                <div className="h-[200px] w-full">
+                <div className="h-[260px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={rangedThroughput}
@@ -1104,6 +1173,7 @@ export function DashboardView(props: DashboardViewProps) {
                         fill="#10b981"
                         radius={[4, 4, 0, 0]}
                         maxBarSize={28}
+                        isAnimationActive={!reduceChartMotion}
                       />
                     </BarChart>
                   </ResponsiveContainer>
@@ -1152,7 +1222,7 @@ export function DashboardView(props: DashboardViewProps) {
                       </div>
                       <div className="w-full h-1.5 bg-surface-muted rounded-full overflow-hidden">
                         <div
-                          className="h-full rounded-full transition-all duration-500"
+                          className="h-full rounded-full transition-all duration-500 motion-reduce:transition-none"
                           style={{ width: `${t.pct}%`, backgroundColor: t.color }}
                         />
                       </div>
@@ -1196,7 +1266,7 @@ export function DashboardView(props: DashboardViewProps) {
                       </div>
                       <div className="w-full h-1.5 bg-surface-muted rounded-full overflow-hidden">
                         <div
-                          className="h-full rounded-full transition-all duration-500"
+                          className="h-full rounded-full transition-all duration-500 motion-reduce:transition-none"
                           style={{ width: `${s.pct}%`, backgroundColor: s.color }}
                         />
                       </div>
@@ -1298,7 +1368,7 @@ export function DashboardView(props: DashboardViewProps) {
                                 </span>
                                 <div className="w-24 h-2 bg-surface-muted rounded-full overflow-hidden">
                                   <div
-                                    className="h-full bg-success rounded-full"
+                                    className="h-full bg-success rounded-full transition-all duration-500 motion-reduce:transition-none"
                                     style={{ width: `${pct}%` }}
                                   />
                                 </div>
@@ -1363,7 +1433,7 @@ export function DashboardView(props: DashboardViewProps) {
                       <div className="w-full h-2 bg-surface-strong/80 rounded-full overflow-hidden">
                         <div
                           className={cn(
-                            "h-full rounded-full transition-all duration-500",
+                            "h-full rounded-full transition-all duration-500 motion-reduce:transition-none",
                             epic.progress === 100 ? "bg-success" : "bg-primary"
                           )}
                           style={{ width: `${epic.progress}%` }}
@@ -1440,7 +1510,7 @@ export function DashboardView(props: DashboardViewProps) {
                 </div>
               </div>
 
-              <div className="h-[200px] w-full">
+              <div className="h-[260px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart
                     data={
@@ -1504,6 +1574,7 @@ export function DashboardView(props: DashboardViewProps) {
                       fill="#10b981"
                       fillOpacity={0.15}
                       strokeWidth={2}
+                      isAnimationActive={!reduceChartMotion}
                     />
                     <Area
                       type="monotone"
@@ -1513,6 +1584,7 @@ export function DashboardView(props: DashboardViewProps) {
                       fill="#6366f1"
                       fillOpacity={0.15}
                       strokeWidth={2}
+                      isAnimationActive={!reduceChartMotion}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -1562,7 +1634,7 @@ export function DashboardView(props: DashboardViewProps) {
                       </div>
                       <div className="w-full h-1.5 bg-surface-muted rounded-full overflow-hidden">
                         <div
-                          className="h-full rounded-full transition-all duration-500"
+                          className="h-full rounded-full transition-all duration-500 motion-reduce:transition-none"
                           style={{ width: `${pct}%`, backgroundColor: color }}
                         />
                       </div>

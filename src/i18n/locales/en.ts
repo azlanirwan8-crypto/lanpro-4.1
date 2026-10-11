@@ -854,6 +854,15 @@ export const en = {
     percentDone: "{{percent}}% Completed",
     percentRate: "{{percent}}% Rate",
     notDoneYet: "{{count}} not yet done",
+    // #692 — the Completed card's footer no longer repeats the Total card's percent.
+    doneOfTotal: "{{done}} of {{total}} done",
+    // #693 — four distinct reasons this screen can be empty or stale.
+    loadFailedTitle: "Dashboard data failed to load",
+    refreshFailedTitle: "Dashboard data could not be refreshed",
+    loadFailedHint: "The numbers below may not be current. Check your connection, then try again.",
+    retry: "Try again",
+    refreshPending: "Refreshing data…",
+    loading: "Loading dashboard data…",
     blockedOverdue: "{{blocked}} Blocked • {{overdue}} Overdue",
     viewAllTasks: "View all tasks",
     viewActiveBoard: "View active board",

@@ -865,6 +865,15 @@ export const id = {
     percentDone: "{{percent}}% Selesai",
     percentRate: "{{percent}}% Tuntas",
     notDoneYet: "{{count}} belum selesai",
+    // #692 — kaki kartu Selesai tidak lagi mengulang persen kartu Total.
+    doneOfTotal: "{{done}} dari {{total}} selesai",
+    // #693 — empat sebab layar ini kosong atau basi, dinamai satu per satu.
+    loadFailedTitle: "Data dashboard gagal dimuat",
+    refreshFailedTitle: "Data dashboard tidak berhasil diperbarui",
+    loadFailedHint: "Angka di bawah mungkin bukan yang terbaru. Periksa koneksi, lalu coba lagi.",
+    retry: "Coba lagi",
+    refreshPending: "Memperbarui data…",
+    loading: "Memuat data dashboard…",
     blockedOverdue: "{{blocked}} Tersumbat • {{overdue}} Terlambat",
     viewAllTasks: "Lihat semua tugas",
     viewActiveBoard: "Lihat papan aktif",
