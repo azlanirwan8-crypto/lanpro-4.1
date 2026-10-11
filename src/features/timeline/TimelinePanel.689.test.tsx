@@ -11,9 +11,11 @@
  *    bertanggal mendapat tiga lapis sekaligus.
  * 3. Sumbu dulu ditarik paksa ke satu kuartal tetap; sekarang ia mengikuti
  *    tanggal tugas, dan itu terlihat dari rentang tick yang dirender.
+ * 4. Geser tanggal bersifat optimistik dan tidak pernah memberi tahu bahwa
+ *    permintaannya masih di jalan (`#689 butir (f)`).
  */
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { TimelinePanel } from "./TimelinePanel";
 import { useProjectStore } from "../../store/stores";
 
@@ -39,7 +41,11 @@ const tugas = (tambahan: Record<string, unknown> = {}) =>
     ...tambahan,
   }) as any;
 
-const renderPanel = (tasks: any[], currentUser: any = { id: "u-1", role: "admin" }) =>
+const renderPanel = (
+  tasks: any[],
+  currentUser: any = { id: "u-1", role: "admin" },
+  isUpdatingTask?: Record<string, boolean>
+) =>
   render(
     <TimelinePanel
       tasks={tasks}
@@ -48,6 +54,7 @@ const renderPanel = (tasks: any[], currentUser: any = { id: "u-1", role: "admin"
       setSelectedTaskForDetail={jest.fn()}
       setIsTaskDetailModalOpen={jest.fn()}
       currentUser={currentUser}
+      isUpdatingTask={isUpdatingTask}
     />
   );
 
@@ -91,5 +98,27 @@ describe("#689 Roadmap membedakan situasinya sendiri", () => {
     const teks = teksPanel(container);
     expect(teks).toMatch(/Aug/i);
     expect(teks).not.toMatch(/\bMar 2026\b/);
+  });
+
+  // #689 butir (f) — menyimpan tanggal adalah satu-satunya aksi tulis di layar
+  // ini, dan ia optimistik: `TimelinePanel:476` melepas baris seretan lalu
+  // `await updateTaskField(...)`, sementara `AppContainer` menyetel
+  // `isUpdatingTask` di dalam. Sebelum penanda ini dipasang, bar yang digeser
+  // langsung tampak tersimpan — termasuk ketika permintaannya masih di jalan.
+  it("baris yang permintaannya masih jalan memunculkan penanda menyimpan", () => {
+    renderPanel(
+      [epic, tugas({ startDate: new Date("2026-08-04"), endDate: new Date("2026-08-28") })],
+      { id: "u-1", role: "admin" },
+      { "t-1": true }
+    );
+    expect(screen.getByTestId("roadmap-menyimpan-t-1")).toHaveTextContent("Menyimpan tanggal");
+  });
+
+  it("tanpa permintaan yang berjalan, penanda itu tidak ada", () => {
+    renderPanel([
+      epic,
+      tugas({ startDate: new Date("2026-08-04"), endDate: new Date("2026-08-28") }),
+    ]);
+    expect(screen.queryByTestId("roadmap-menyimpan-t-1")).toBeNull();
   });
 });

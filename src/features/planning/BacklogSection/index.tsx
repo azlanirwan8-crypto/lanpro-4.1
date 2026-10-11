@@ -23,26 +23,47 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
   const [search, setSearch] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("All Priorities");
 
-  const backlogTasks = tasks.filter((t) => !t.sprintId && (t.type || "").toLowerCase() !== "epic");
+  // #689 butir (g) — satu kali jalan, bukan saringan berulang per baris.
+  // Dulu: `backlogTasks` (n), `filteredBacklogTasks` (n), `epics` (n), lalu
+  // `getTasksForParent` menyaring `filteredBacklogTasks` SEKALI LAGI untuk tiap
+  // epik yang dirender (e × n). Pada 600 backlog dengan 40 epik itu ±24.000
+  // iterasi per render, dan render terjadi setiap kali satu karakter diketik di
+  // kotak pencarian atau satu kartu diseret.
+  const { filteredBacklogTasks, epics, kelompok } = React.useMemo(() => {
+    const backlog = tasks.filter((t) => !t.sprintId && (t.type || "").toLowerCase() !== "epic");
+    const kata = search.toLowerCase();
 
-  const filteredBacklogTasks = backlogTasks.filter((t) => {
-    if (
-      search &&
-      !t.title.toLowerCase().includes(search.toLowerCase()) &&
-      !t.key?.toLowerCase().includes(search.toLowerCase())
-    )
-      return false;
-    if (priorityFilter !== "All Priorities" && t.priority !== priorityFilter) return false;
-    return true;
-  });
+    const tersaring = backlog.filter((t) => {
+      if (kata && !t.title.toLowerCase().includes(kata) && !t.key?.toLowerCase().includes(kata))
+        return false;
+      if (priorityFilter !== "All Priorities" && t.priority !== priorityFilter) return false;
+      return true;
+    });
 
-  const epics = tasks.filter((t) => (t.type || "").toLowerCase() === "epic");
+    const peta = new Map<string, Task[]>();
+    const dorong = (kunci: string, t: Task) => {
+      const wadah = peta.get(kunci);
+      if (wadah) wadah.push(t);
+      else peta.set(kunci, [t]);
+    };
+    tersaring.forEach((t) => {
+      if (t.parentId) dorong(t.parentId, t);
+      else if ((t.type || "").toLowerCase() !== "epic") dorong("standalone", t);
+    });
 
-  const getTasksForParent = (parentId: string | null) => {
-    if (parentId === "standalone")
-      return filteredBacklogTasks.filter((t) => !t.parentId && t.type?.toLowerCase() !== "epic");
-    return filteredBacklogTasks.filter((t) => t.parentId === parentId);
-  };
+    return {
+      filteredBacklogTasks: tersaring,
+      epics: tasks.filter((t) => (t.type || "").toLowerCase() === "epic"),
+      kelompok: peta,
+    };
+  }, [tasks, search, priorityFilter]);
+
+  const getTasksForParent = (parentId: string | null) => kelompok.get(parentId ?? "") ?? [];
+
+  // #689 butir (g) — "backlog kosong" dan "tidak ada yang cocok" adalah dua
+  // kabar yang berbeda; yang pertama berarti tidak ada kerja, yang kedua berarti
+  // saringannya terlalu sempit.
+  const adaSaringan = Boolean(search.trim()) || priorityFilter !== "All Priorities";
 
   let _draggablesRenderedCount = 0;
 
@@ -158,7 +179,12 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
 
         {filteredBacklogTasks.length === 0 && (
           <div className="py-12 text-center text-xs font-normal text-content-subtle italic">
-            {t("planning.emptyBacklog")}
+            {/* Dua cabang, bukan `data-testid` ternary — lihat penjaga #602. */}
+            {adaSaringan ? (
+              <span data-testid="backlog-tidak-cocok">{t("planning.emptyBacklogFilter")}</span>
+            ) : (
+              <span data-testid="backlog-kosong">{t("planning.emptyBacklog")}</span>
+            )}
           </div>
         )}
       </div>

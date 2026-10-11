@@ -118,9 +118,29 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
   }, [allMemberSwimlanes, showEmptySwimlanes, boardStatuses, groupedTasks, t]);
 
   if (!boardStatuses || boardStatuses.length === 0) {
+    // #689 butir (e) — "memuat" hanya jujur selama MasterData memang belum tiba.
+    // Kalau datanya sudah ada tetapi tidak satu pun bertipe "status", papan ini
+    // tidak sedang loading: konfigurasinya yang tidak punya kolom. Mengatakan
+    // "memuat" membuat pengguna menunggu sesuatu yang tidak akan pernah datang.
+    const masihMemuat = mArr.length === 0;
     return (
       <div className="flex items-center justify-center h-full text-content-muted">
-        {t("kanban.loadingBoard")}
+        {/* Dua cabang JSX, bukan satu `data-testid` ternary: penjaga #602
+            menghitung string di dalam ternary sebagai kandidat teks layar. */}
+        {masihMemuat ? (
+          <div data-testid="papan-memuat" className="text-center max-w-sm px-6">
+            <p className="text-sm font-medium text-content-strong">{t("kanban.loadingBoard")}</p>
+          </div>
+        ) : (
+          <div data-testid="papan-tanpa-kolom" className="text-center max-w-sm px-6">
+            <p className="text-sm font-medium text-content-strong">
+              {t("kanban.masterDataTanpaStatus")}
+            </p>
+            <p className="mt-1 text-xs text-content-subtle">
+              {t("kanban.masterDataTanpaStatusHint")}
+            </p>
+          </div>
+        )}
       </div>
     );
   }

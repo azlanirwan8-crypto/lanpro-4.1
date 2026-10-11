@@ -51,6 +51,8 @@ interface TimelineProps {
   currentUser?: any;
   /** #564 — warna status dibaca dari master data, sama seperti layar lain. */
   masterData?: MasterData[];
+  /** #689 butir (f) — task yang permintaannya masih di jalan (lihat AppRoutes). */
+  isUpdatingTask?: Record<string, boolean>;
 }
 
 // Provide default helpers for mapping status and priorities to Tailwind colors
@@ -172,6 +174,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
   setIsTaskDetailModalOpen,
   currentUser,
   masterData = [],
+  isUpdatingTask = {},
 }) => {
   const { t } = useTranslation();
   // #688 — satu titik saring sebelum baris Gantt disusun. Menyaring di penyusun
@@ -1134,6 +1137,18 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             : undefined
                         }
                       >
+                        {/* #689 butir (f) — geser tanggal bersifat optimistik:
+                            barisnya pindah SEBELUM server menjawab. Tanpa penanda
+                            ini, permintaan yang masih di jalan (atau yang sedang
+                            diantre jaringan) tampak seperti sudah tersimpan. */}
+                        {isUpdatingTask[task.id] && (
+                          <span
+                            data-testid={`roadmap-menyimpan-${task.id}`}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 z-40 inline-flex items-center px-1.5 py-0.5 rounded border border-border-subtle bg-surface text-[10px] font-medium text-content-muted"
+                          >
+                            {t("roadmap.savingDates")}
+                          </span>
+                        )}
                         <motion.div
                           whileHover={{
                             scale: 1.02,

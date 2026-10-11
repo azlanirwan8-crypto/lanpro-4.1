@@ -4423,6 +4423,7 @@ function AppContainer() {
                       projectMembers={projectMembers}
                       allUsers={allUsers}
                       activityLogs={activityLogs}
+                      isUpdatingTask={isUpdatingTask}
                       setTasks={setTasks}
                       effectiveRole={userRoleForProject}
                       currentUser={currentUser}

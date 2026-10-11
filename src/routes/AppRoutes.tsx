@@ -148,6 +148,13 @@ export interface AppRoutesProps {
     limit: number;
     totalPages: number;
   } | null;
+  /**
+   * #689 butir (f) — peta "sedang disimpan" per task, sudah dihasilkan
+   * `AppContainer.updateTaskField`. Roadmap membutuhkannya karena menggeser
+   * tanggal adalah aksi optimistik: tanpa penanda ini, bar yang digeser tampak
+   * sudah tersimpan padahal permintaannya masih di jalan.
+   */
+  isUpdatingTask?: Record<string, boolean>;
   setExpandedSprintId?: (id: string | null) => void;
   setIsNewSprintModalOpen?: (open: boolean) => void;
   setIsEditSprintModalOpen?: (open: boolean) => void;
@@ -211,6 +218,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
     issueListSearch = "",
     setIssueListSearch = () => {},
     issueListMeta = null,
+    isUpdatingTask = {},
     expandedSprintId = null,
     setExpandedSprintId = (_id: string | null) => {},
     setIsNewSprintModalOpen = (_open: boolean) => {},
@@ -404,6 +412,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
             tasks={tasks || []}
             selectedProject={selectedProject}
             updateTaskField={updateTaskField}
+            isUpdatingTask={isUpdatingTask}
             setSelectedTaskForDetail={setSelectedTaskForDetail}
             setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
             currentUser={currentUserProfile || currentUser}

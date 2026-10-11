@@ -16,7 +16,7 @@
  * plugin `react-hooks`. Jadi perilakunya dikunci lewat test, bukan lewat alat.
  */
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, screen, cleanup } from "@testing-library/react";
 import { BoardView } from "./index";
 import type { Task } from "../../types";
 
@@ -73,5 +73,27 @@ describe("#689 urutan hook di BoardView", () => {
     expect(() =>
       awal.rerender(<BoardView {...(props as any)} masterData={masterStatus} />)
     ).not.toThrow();
+  });
+});
+
+describe("#689 butir (e) — papan membedakan memuat dari konfigurasi yang salah", () => {
+  afterEach(cleanup);
+
+  it("MasterData yang belum tiba boleh disebut memuat", () => {
+    render(<BoardView {...(props as any)} masterData={[]} />);
+    expect(screen.getByTestId("papan-memuat")).toHaveTextContent("Memuat papan");
+  });
+
+  it("MasterData yang sudah tiba tanpa satu pun status bukan disebut memuat", () => {
+    // Guard lama memakai satu pesan untuk dua keadaan. Kalau datanya sudah ada
+    // tetapi tidak punya baris bertipe "status", papan ini tidak akan pernah
+    // selesai "memuat" — dan itu galat konfigurasi, bukan antrean.
+    render(
+      <BoardView {...(props as any)} masterData={[{ id: "p", type: "priority", code: "High" }]} />
+    );
+    expect(screen.getByTestId("papan-tanpa-kolom")).toHaveTextContent(
+      "MasterData tidak mendefinisikan satu pun status papan."
+    );
+    expect(screen.queryByTestId("papan-memuat")).toBeNull();
   });
 });

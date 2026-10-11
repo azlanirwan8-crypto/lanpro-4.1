@@ -1467,6 +1467,9 @@ export const id = {
     subtitle: "Seret kartu antar kolom status. Kelompokkan per epic atau penanggung jawab.",
     blockedCardHint: "Kartu terbelenggu: Selesaikan semua subtask sebelum memindahkan ke Done",
     loadingBoard: "Memuat papan...",
+    masterDataTanpaStatus: "MasterData tidak mendefinisikan satu pun status papan.",
+    masterDataTanpaStatusHint:
+      "Tambahkan data utama bertipe status di menu Konfigurasi, lalu buka papan ini lagi.",
     empty: "Kosong",
     byEpic: "Per Epic",
     byAssignee: "Per Penanggung Jawab",
@@ -2076,7 +2079,8 @@ export const id = {
     backlogTasks: "Tugas Backlog",
     searchBacklog: "Cari tugas backlog...",
     standaloneBacklog: "Backlog Mandiri",
-    emptyBacklog: "Belum ada tugas di Backlog. Buat tugas baru atau sesuaikan saringan.",
+    emptyBacklog: "Belum ada tugas di Backlog. Buat tugas baru untuk memulai.",
+    emptyBacklogFilter: "Tidak ada tugas di Backlog yang cocok dengan pencarian atau filter ini.",
     noDates: "Belum ada tanggal",
     defaultGoal: "Selesaikan alur pendaftaran dan siapkan modul dependensi transaksi.",
     sprintOptions: "Opsi Sprint",
@@ -2109,6 +2113,7 @@ export const id = {
     notPlotted: "Belum diplot. Klik untuk mengatur.",
     emptyProject: "Proyek ini belum punya tugas. Buat tugas dulu untuk melihat peta jalan.",
     emptyMyTasks: "Tidak ada tugas yang ditugaskan kepada Anda di proyek ini.",
+    savingDates: "Menyimpan tanggal…",
     emptyDates:
       "Belum ada tugas yang punya tanggal. Batang peta jalan muncul begitu tugas diberi tanggal mulai atau tanggal target selesai.",
     dragLeft: "Tarik ujung kiri untuk mengubah tanggal mulai",
