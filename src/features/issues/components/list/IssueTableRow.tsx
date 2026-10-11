@@ -260,7 +260,13 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
         }}
         className={cn(
           styles.tableRow,
-          "hover:bg-primary-surface/5 hover:border-primary/20 transition-all duration-200",
+          // #699 butir-A — latar hover hanya satu sumber, yaitu
+          // `styles.tableRow`. Di sini dulu ada `hover:bg-primary-surface/5`
+          // KEDUA: `cn()` di repo ini hanyalah gabung spasi
+          // (src/lib/utils.ts:4), jadi yang tampil ditentukan urutan
+          // stylesheet, bukan niat penulisnya — dan keduanya 1,03–1,08:1.
+          // Garis tepi hover tetap di sini karena ia properti lain.
+          "hover:border-primary/20 transition-all duration-200",
           isSelected && styles.selectedTableRow
         )}
       >

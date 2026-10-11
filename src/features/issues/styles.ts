@@ -33,9 +33,23 @@ export const styles = {
   tableHeader: "bg-surface-sunken border-b border-border-subtle sticky top-0 z-30 shadow-2xs",
   tableHeaderCell:
     "group relative px-4 py-2.5 text-[10px] font-normal text-content-subtle whitespace-nowrap border-r border-border-faint",
+  // #699 butir-A (12 Okt) — tiga angka yang memutuskan baris ini, bukan rasa.
+  // Laporan pemilik proyek: "terlalu putih". Terukur terhadap putih (#ffffff):
+  // pemisah baris `border-faint` (#f1f5f9) = 1,096:1; hover `bg-surface-sunken/70`
+  // = 1,032:1; baris terpilih `bg-primary-surface/5` = 1,078:1. Ketiganya di
+  // bawah ambang yang mata baca sebagai permukaan berbeda, jadi baris, kursor,
+  // dan pilihan sama-sama tidak terlihat walaupun seluruh kelas sudah token.
+  // Sekarang: garis baris `border-subtle` (1,233:1), hover `bg-surface-strong/60`
+  // (1,132:1), terpilih `bg-primary/10` (1,164:1, sama seperti `filterPill`).
+  // Yang SENGAJA tidak disentuh: pemisah KOLOM tetap `border-faint` karena
+  // #678b sudah memutuskannya ("garis setajam garis kontrol di setiap kolom akan
+  // mengubah tabel menjadi kisi"), dan latar kepala tabel tetap `bg-surface-sunken`
+  // tertutup karena #606 plus testnya `kepalaTabel-606.test.ts`. Anak tangga yang
+  // hilang di mode terang adalah soal NILAI TOKEN, dan itu #699 butir-B — bukan
+  // sesuatu yang boleh ditambal dari satu layar (§22.4).
   tableRow:
-    "group hover:bg-surface-sunken/70 transition-all duration-150 cursor-default border-b border-border-faint",
-  selectedTableRow: "bg-primary-surface/5",
+    "group hover:bg-surface-strong/60 transition-all duration-150 cursor-default border-b border-border-subtle",
+  selectedTableRow: "bg-primary/10",
   inlineAddRow: "bg-surface group/inline-add relative overflow-visible",
   // #486 — tanpa border-y-2 border-primary (terlalu tebal); cukup pemisah kolom tipis
   inlineAddBorderedCell: "p-0 border-r border-border-faint relative",
