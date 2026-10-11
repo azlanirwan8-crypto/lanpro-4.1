@@ -40,6 +40,7 @@ import { gayaLabel, nadaLabel, warnaDariMaster, type NadaLabel } from "../../lib
 import { PageHeader } from "../../components/ui/PageHeader";
 import { TugasScopeToggle } from "../../components/ui/TugasScopeToggle";
 import { useLingkupTugas } from "../../hooks/useLingkupTugas";
+import { indeksAnak, sumbuWaktu, susunBaris } from "./lib/hirarkiBaris";
 
 interface TimelineProps {
   tasks: Task[];
@@ -208,63 +209,23 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
     }));
   };
 
-  // Build a highly-scannable, vertically synchronized parent-child presentation list
-  const renderedRows = React.useMemo(() => {
-    const list: Array<{
-      task: Task;
-      isChild: boolean;
-      depth: number;
-      parentId?: string;
-      isLastChild?: boolean;
-    }> = [];
+  // Daftar baris yang tampil, tersusun induk → anak → cucu.
+  // #689 — penyusunnya pindah ke `lib/hirarkiBaris.ts`: `parentId -> anak`
+  // dibangun SEKALI, bukan `filter` per induk + `some` per baris. Keluarannya
+  // dikunci identik dengan algoritma lama oleh `hirarkiBaris-689.test.ts`.
+  const renderedRows = React.useMemo(
+    () => susunBaris(tasks, expandedEpics),
+    [tasks, expandedEpics]
+  );
 
-    // Find top-level parents (tasks of type Epic, or tasks with no parent, or tasks whose parent is not loaded)
-    const topLevels = tasks.filter((t) => !t.parentId || !tasks.some((p) => p.id === t.parentId));
+  // #689 — pertanyaan "baris ini punya anak?" dulu `tasks.some(...)` per baris
+  // per render (≈ n×n tiap frame, termasuk setiap langkah seretan tanggal).
+  const indukDikenal = React.useMemo(() => new Set(indeksAnak(tasks).keys()), [tasks]);
 
-    // Put Epics first, then others, sorting to keep structure nice
-    const sortedTopLevels = [...topLevels].sort((a, b) => {
-      const aIsEpic = (a.type || "").toLowerCase() === "epic";
-      const bIsEpic = (b.type || "").toLowerCase() === "epic";
-      if (aIsEpic && !bIsEpic) return -1;
-      if (!aIsEpic && bIsEpic) return 1;
-      return 0;
-    });
-
-    sortedTopLevels.forEach((task) => {
-      list.push({ task, isChild: false, depth: 0, isLastChild: false });
-
-      const children = tasks.filter((t) => t.parentId === task.id);
-      if (children.length > 0) {
-        // Epics are expanded by default unless explicitly clicked to collapse
-        const isCollapsed = expandedEpics[task.id] === false;
-        if (!isCollapsed) {
-          const addChildren = (currentChildren: Task[], currentDepth: number) => {
-            currentChildren.forEach((child, idx) => {
-              const isLastChild = idx === currentChildren.length - 1;
-              list.push({
-                task: child,
-                isChild: true,
-                depth: currentDepth,
-                parentId: child.parentId,
-                isLastChild,
-              });
-
-              // Add grand-children if any, keeping them visually grouped under this child
-              // Note: we can use the same expandedEpics state to let users collapse ANY parent if we want,
-              // but for now we follow the same collapse state as before
-              const grandChildren = tasks.filter((t) => t.parentId === child.id);
-              if (grandChildren.length > 0 && expandedEpics[child.id] !== false) {
-                addChildren(grandChildren, currentDepth + 1);
-              }
-            });
-          };
-          addChildren(children, 1);
-        }
-      }
-    });
-
-    return list;
-  }, [tasks, expandedEpics]);
+  // #689 — `will-change` adalah HINT ke kompositor, bukan hiasan. Ditempel ke
+  // SEMUA baris berarti browser menyiapkan layer untuk ratusan elemen yang tidak
+  // pernah bergerak; yang benar-benar bergerak hanya baris yang sedang diseret.
+  const sedangDiseret = (id: string) => timelineInteraction?.taskId === id;
 
   const [isDraggingToPan, setIsDraggingToPan] = useState(false);
   /** #309 gelombang 2 — hierarki jadi laci di bawah md agar Gantt punya lebar penuh. */
@@ -480,74 +441,6 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
     });
   };
 
-  const getTimelineBounds = () => {
-    let minDate = new Date("2099-12-31");
-    let maxDate = new Date("2000-01-01");
-    let hasDates = false;
-
-    (tasks || []).forEach((task) => {
-      if (task.startDate) {
-        const start = ensureDate(task.startDate);
-        if (start < minDate) minDate = start;
-        hasDates = true;
-      }
-      if (task.endDate) {
-        const end = ensureDate(task.endDate);
-        if (end > maxDate) maxDate = end;
-        hasDates = true;
-      }
-    });
-
-    if (!hasDates) {
-      minDate = startOfMonth(new Date());
-      maxDate = endOfMonth(addDays(new Date(), 90));
-    } else {
-      minDate = startOfMonth(minDate);
-      maxDate = endOfMonth(addDays(maxDate, 90));
-    }
-
-    const targetMin = new Date("2026-03-01");
-    const targetMax = new Date("2026-05-31");
-    if (minDate > targetMin) minDate = targetMin;
-    if (maxDate < targetMax) maxDate = targetMax;
-
-    minDate = startOfMonth(minDate);
-    maxDate = endOfMonth(maxDate);
-
-    if (minDate > maxDate) {
-      maxDate = endOfMonth(addDays(minDate, 90));
-    }
-
-    const totalDays = differenceInDays(maxDate, minDate);
-    const months = [];
-    let current = startOfMonth(minDate);
-    while (current <= maxDate) {
-      months.push(current);
-      current = addDays(endOfMonth(current), 1);
-    }
-
-    const weeks = [];
-    let currentWeek = startOfWeek(minDate);
-    while (currentWeek <= maxDate) {
-      weeks.push(currentWeek);
-      currentWeek = addDays(endOfWeek(currentWeek), 1);
-    }
-
-    const days = [];
-    for (let i = 0; i <= totalDays; i++) {
-      days.push(addDays(minDate, i));
-    }
-
-    const years = [];
-    let currentYear = startOfYear(minDate);
-    while (currentYear <= maxDate) {
-      years.push(currentYear);
-      currentYear = addDays(endOfYear(currentYear), 1);
-    }
-
-    return { minDate, maxDate, totalDays, months, weeks, days, years };
-  };
-
   useEffect(() => {
     if (!timelineInteraction) return;
 
@@ -600,6 +493,11 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
     };
   }, [timelineInteraction, tasks, tempDates, pixelsPerDay, updateTaskField]);
 
+  // #689 — sumbu waktu DIPEROLEH DARI DATA. Versi lama menarik paksa rentang ke
+  // satu kuartal tetap yang tertulis di kode, sehingga semua proyek membuka
+  // ruang kosong dan batangnya menyusut. Fungsi lama juga dipanggil SETIAP
+  // render sambil membangun ulang array bulan, minggu, hari, dan tahunnya.
+  const sumbu = React.useMemo(() => sumbuWaktu(tasks), [tasks]);
   const {
     minDate,
     totalDays,
@@ -607,7 +505,8 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
     days: timelineDays,
     weeks: timelineWeeks,
     years: timelineYears,
-  } = getTimelineBounds();
+    punyaTanggal,
+  } = sumbu;
   const today = new Date();
   let todayLeft = 0;
   if (today >= minDate) {
@@ -811,6 +710,21 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
       )}
 
       <div className="flex-1 overflow-hidden flex flex-col min-h-0 gap-2 px-2 md:px-5 pt-3 pb-2 md:pb-5">
+        {/* #689 — layar ini TIDAK punya pesan apa pun: proyek tanpa tugas, proyek
+            yang tugasnya belum bertanggal, dan "My Tasks" yang kosong tampil
+            identik — kanvas kosong tanpa penjelasan. */}
+        {tasks.length === 0 || !punyaTanggal ? (
+          <div className="shrink-0 rounded-lg border border-dashed border-border-subtle/80 bg-surface-muted/40 px-4 py-5 text-center">
+            <p className="text-xs font-medium text-content-body">
+              {tasks.length === 0
+                ? lingkup === "mine"
+                  ? t("roadmap.emptyMyTasks")
+                  : t("roadmap.emptyProject")
+                : t("roadmap.emptyDates")}
+            </p>
+          </div>
+        ) : null}
+
         {/* #309 — pemicu hierarki di HP/tablet */}
         <button
           type="button"
@@ -865,7 +779,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
             >
               <AnimatePresence initial={false}>
                 {renderedRows.map(({ task, isChild, depth, isLastChild }, rowIdx) => {
-                  const hasChildren = tasks.some((t) => t.parentId === task.id);
+                  const hasChildren = indukDikenal.has(task.id);
                   const expanded = expandedEpics[task.id] !== false;
                   const isEpic = (task.type || "").toLowerCase() === "epic";
                   // #564 — label status DAN batang Gantt memakai hex yang sama:
@@ -889,7 +803,9 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                       )}
                       style={{
                         ...(isChild ? { paddingLeft: `${14 + depth * 20}px` } : {}),
-                        willChange: "transform, opacity, height",
+                        ...(sedangDiseret(task.id)
+                          ? { willChange: "transform, opacity, height" }
+                          : {}),
                       }}
                     >
                       {isChild && (
@@ -1009,7 +925,9 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               style={{
                 width: `${totalDays * pixelsPerDay}px`,
                 minHeight: "100%",
-                willChange: "transform, opacity",
+                ...(timelineInteraction || isDraggingToPan
+                  ? { willChange: "transform, opacity" }
+                  : {}),
               }}
             >
               <div className="sticky top-0 z-30 h-[73px] bg-surface-sunken/90 backdrop-blur-sm border-b border-border-subtle shadow-soft box-border flex flex-col">
@@ -1167,7 +1085,11 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ duration: 0.2, ease: "easeInOut" }}
                           className="relative border-b border-border-faint bg-transparent flex items-center group/row hover:bg-surface-sunken/50 transition-colors overflow-hidden"
-                          style={{ willChange: "transform, opacity, height" }}
+                          style={
+                            sedangDiseret(task.id)
+                              ? { willChange: "transform, opacity, height" }
+                              : undefined
+                          }
                         >
                           <motion.button
                             whileHover={{
@@ -1206,7 +1128,11 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2, ease: "easeInOut" }}
                         className="relative border-b border-border-faint bg-transparent flex items-center group/row hover:bg-surface-sunken/50 transition-colors overflow-hidden"
-                        style={{ willChange: "transform, opacity, height" }}
+                        style={
+                          sedangDiseret(task.id)
+                            ? { willChange: "transform, opacity, height" }
+                            : undefined
+                        }
                       >
                         <motion.div
                           whileHover={{
@@ -1240,7 +1166,9 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             left: `${left}%`,
                             width: `${width}%`,
                             minWidth: "24px",
-                            willChange: "transform, left, width",
+                            ...(sedangDiseret(task.id)
+                              ? { willChange: "transform, left, width" }
+                              : {}),
                           }}
                         >
                           {/* Dynamic Floating Tooltip */}

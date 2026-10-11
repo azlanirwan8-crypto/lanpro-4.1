@@ -2101,6 +2101,10 @@ export const id = {
     itemHierarchy: "Item & Hierarki",
     closeHierarchy: "Tutup hierarki",
     notPlotted: "Belum diplot. Klik untuk mengatur.",
+    emptyProject: "Proyek ini belum punya tugas. Buat tugas dulu untuk melihat peta jalan.",
+    emptyMyTasks: "Tidak ada tugas yang ditugaskan kepada Anda di proyek ini.",
+    emptyDates:
+      "Belum ada tugas yang punya tanggal. Batang peta jalan muncul begitu tugas diberi tanggal mulai atau tanggal target selesai.",
     dragLeft: "Tarik ujung kiri untuk mengubah tanggal mulai",
     dragRight: "Tarik ujung kanan untuk mengubah tanggal selesai",
     milestones: "Milestone",

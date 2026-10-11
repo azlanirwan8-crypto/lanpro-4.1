@@ -2081,6 +2081,10 @@ export const en = {
     itemHierarchy: "Item & Hierarchy",
     closeHierarchy: "Close hierarchy",
     notPlotted: "Not plotted yet. Click to configure.",
+    emptyProject: "This project has no tasks yet. Create a task to see the roadmap.",
+    emptyMyTasks: "No tasks are assigned to you in this project.",
+    emptyDates:
+      "No task has dates yet. Bars appear once a task gets a start date or a target end date.",
     dragLeft: "Drag the left edge to change the start date",
     dragRight: "Drag the right edge to change the end date",
     milestones: "Milestones",
