@@ -35,7 +35,9 @@ interface ProjectState {
    */
   lingkupTugas: LingkupTugas;
 
-  /** #689 (d) — lihat `KeadaanMuatDaftarIsu`. Hanya Issue List yang membacanya. */
+  /** #689 (d) — lihat `KeadaanMuatDaftarIsu`. Dibaca Issue List (#689) dan
+   *  Dashboard (#693); keduanya menampilkan penanda apa adanya, jadi permintaan
+   *  berhalaman dari satu layar ikut terasa di layar lain sampai itu diukur. */
   muatDaftarIsu: KeadaanMuatDaftarIsu;
 
   // Actions
