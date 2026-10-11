@@ -7,6 +7,7 @@ import { resolveStatusWriteValue } from "../../../lib/statusKolom";
 import { updateTask, resolveUserId } from "../services/kanban.service";
 import { suppressTaskDataRefresh } from "../../../lib/taskRefreshControl";
 import { useLingkupTugas } from "../../../hooks/useLingkupTugas";
+import { tutupLeluhur } from "../../../lib/tugasSaya";
 
 const checkTaskBlockers = (
   tasks: any[],
@@ -43,10 +44,21 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
   // #688 — "All Tasks" / "My Tasks" disaring di SATU titik (`tArr`), sehingga
   // epics, standaloneTasks, dan groupedTasks ikut semua; tidak ada lagi jalur
   // kedua yang bisa lupa menyaring.
+  // #689 — penyaringan itu TIDAK BOLEH membuang epic induk dari kartu yang
+  // tersisa. Papan menyusun lajur per epic (`groupedTasks` melewati kartu yang
+  // induknya tidak ada di `epics`, :76-78), jadi epic orang lain harus tetap
+  // duduk di papan sebagai baris induk — bukan sebagai kartu saya.
   const { saring: saringLingkup } = useLingkupTugas(user);
 
   const mArr = useMemo(() => (Array.isArray(masterData) ? masterData : []), [masterData]);
-  const tArr = useMemo(() => saringLingkup(tasks), [tasks, saringLingkup]);
+  const tArr = useMemo(() => tutupLeluhur(saringLingkup(tasks), tasks), [tasks, saringLingkup]);
+  // #689 — `tArr` itu TAMPILAN, bukan sumber kebenaran. Penjaga (anak belum
+  // selesai, pemblokir, hak pindah) dan salinan optimistik yang ditulis kembali
+  // ke state bersama wajib memakai daftar penuh. Anak yang penugasannya ke
+  // orang lain tidak boleh lenyap dari penjaga hanya karena kartunya sedang
+  // tidak terlihat, dan state bersama tidak boleh mengecil hanya karena satu
+  // tab sedang menyaring papan.
+  const tSemua = useMemo(() => (Array.isArray(tasks) ? tasks : []), [tasks]);
   const pArr = useMemo(
     () => (Array.isArray(projectMembers) ? projectMembers : []),
     [projectMembers]
@@ -111,7 +123,7 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
       return;
     }
 
-    const taskToMove = tArr.find((t) => t.id === draggableId);
+    const taskToMove = tSemua.find((t) => t.id === draggableId);
 
     const parts = destination.droppableId.split(":");
     const rawStatus = parts.length > 1 ? parts.slice(1).join(":") : destination.droppableId;
@@ -125,7 +137,7 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
       const inlineUnfinished = (taskToMove.subtasks || []).filter(
         (st: any) => !statusSelesai(st.status, mArr)
       );
-      const childUnfinished = tArr.filter(
+      const childUnfinished = tSemua.filter(
         (t: any) => t.parentId === taskToMove.id && !statusSelesai(t.status, mArr)
       );
 
@@ -145,7 +157,7 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
         (l: any) => l.relationType === "is_blocked_by"
       );
       for (const blocker of blockers) {
-        const blockingTask = tArr.find((t) => t.id === blocker.targetTaskId);
+        const blockingTask = tSemua.find((t) => t.id === blocker.targetTaskId);
         if (blockingTask && !statusSelesai(blockingTask.status, mArr)) {
           toast.error(
             i18n.t("toast.cannotMoveBlocked", {
@@ -160,7 +172,9 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
 
     if (taskToMove && !["admin", "manager"].includes(userRole)) {
       const parentEpic = taskToMove.parentId
-        ? tArr.find((t) => t.id === taskToMove.parentId && (t.type || "").toLowerCase() === "epic")
+        ? tSemua.find(
+            (t) => t.id === taskToMove.parentId && (t.type || "").toLowerCase() === "epic"
+          )
         : null;
       const isEpicReporter = parentEpic && parentEpic.reporterId === user?.uid;
 
@@ -176,11 +190,11 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
 
     const destLaneId = parts.length > 1 ? parts[0] : null;
 
-    if (!checkTaskBlockers(tArr, draggableId, newStatus, mArr)) return;
+    if (!checkTaskBlockers(tSemua, draggableId, newStatus, mArr)) return;
 
     if (props.setTasks && taskToMove) {
       suppressTaskDataRefresh(8000);
-      const newTasks = tArr.map((t) => {
+      const newTasks = tSemua.map((t) => {
         if (t.id === draggableId) {
           const updated = { ...t, status: newStatus };
           if (destLaneId) {

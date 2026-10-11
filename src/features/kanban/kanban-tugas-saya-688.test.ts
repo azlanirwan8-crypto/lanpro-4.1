@@ -77,18 +77,31 @@ describe("#688 lingkup tugas di Papan", () => {
     setLingkup("mine");
     const { result } = renderHook(() => useBoard(props as any, "epic"));
 
-    expect(result.current.tArr.map((t) => t.id).sort()).toEqual(["e-mine", "t-mine", "t-multi"]);
-    // Epics ikut tersaring — bukan hanya kartunya.
-    expect(result.current.epics.map((e: Task) => e.id)).toEqual(["e-mine"]);
+    // #689 mengoreksi harapan baris ini. `t-multi` (punya saya, multi-assignee)
+    // bergendong di bawah `e-orang`. Kalau epic itu dibuang bersama kartu
+    // orang lain, kartunya sendiri hilang dari papan — padahal justru itu yang
+    // mau dilihat. Yang boleh ikut kembali HANYA baris induk, tidak pernah
+    // kartu daun milik orang lain.
+    expect(result.current.tArr.map((t) => t.id).sort()).toEqual([
+      "e-mine",
+      "e-orang",
+      "t-mine",
+      "t-multi",
+    ]);
+    expect(result.current.tArr.map((t) => t.id)).not.toContain("t-orang");
+    // Epics punya saya tetap ada, dan epic orang lain muncul semata sebagai induk.
+    expect(result.current.epics.map((e: Task) => e.id).sort()).toEqual(["e-mine", "e-orang"]);
     // Multi-assignee tetap milik saya walau epic induknya milik orang lain.
     expect(result.current.tArr.map((t) => t.id)).toContain("t-multi");
-    // groupedTasks dibangun dari tArr, jadi kolom tidak bisa kebagian tugas orang.
+    // groupedTasks dibangun dari tArr, tapi epics tidak pernah jadi kartu.
     const groupId = Object.keys(result.current.groupedTasks || {});
     const semuaYangDikelompokkan = groupId.flatMap((k) =>
       (result.current.groupedTasks as any)[k].map((t: Task) => t.id)
     );
     expect(semuaYangDikelompokkan).not.toContain("t-orang");
     expect(semuaYangDikelompokkan).not.toContain("e-orang");
+    // ...sedangkan anak saya yang di bawah epic orang itu DAPAT tempat duduk.
+    expect(semuaYangDikelompokkan).toContain("t-multi");
   });
 
   it("mine tanpa pengguna login mengosongkan papan, bukan menunjukkannya semua", () => {

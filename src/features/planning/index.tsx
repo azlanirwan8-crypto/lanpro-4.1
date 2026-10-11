@@ -23,6 +23,7 @@ import { SprintSection } from "./SprintSection";
 import { useMobileAction } from "../../contexts/MobileActionContext";
 import { TugasScopeToggle } from "../../components/ui/TugasScopeToggle";
 import { useLingkupTugas } from "../../hooks/useLingkupTugas";
+import { tutupLeluhur } from "../../lib/tugasSaya";
 
 export const PlanningView: React.FC<PlanningViewProps> = (props) => {
   const { t } = useTranslation();
@@ -50,7 +51,15 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
   // #688 — backlog, sprint, dan epics di layar ini dibaca dari SATU array.
   // Menyaring di kedua section akan membiarkan salah satunya lupa menyaring.
   const { lingkup, setLingkup, saring } = useLingkupTugas(currentUserProfile || user);
-  const tasks = React.useMemo(() => saring(tasksProyek), [tasksProyek, saring]);
+  const tasksTerpilih = React.useMemo(() => saring(tasksProyek), [tasksProyek, saring]);
+  // #689 — layar ini MENGELAMPOKKAN kartu per induk. Epic milik orang lain yang
+  // menjadi induk kartu saya harus tetap ikut, tidak peduli apakah ia "milik
+  // saya": tanpa baris induk, kartunya tidak punya tempat duduk sementara
+  // badge jumlah tetap menghitungnya — "ada 3 tugas" di atas dua kartu.
+  const tasks = React.useMemo(
+    () => tutupLeluhur(tasksTerpilih, tasksProyek),
+    [tasksTerpilih, tasksProyek]
+  );
 
   const { canEditPlanning } = usePlanning(props);
 

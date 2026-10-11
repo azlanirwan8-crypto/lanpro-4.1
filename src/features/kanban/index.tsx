@@ -37,24 +37,6 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
     shakingTaskId,
   } = useBoard(props as any, groupBy);
 
-  if (!boardStatuses || boardStatuses.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-full text-content-muted">
-        {t("kanban.loadingBoard")}
-      </div>
-    );
-  }
-
-  const filteredEpics = showEmptySwimlanes
-    ? epics
-    : epics.filter((epic) => {
-        const epicTasks = boardStatuses.reduce(
-          (acc, status) => acc + tasksForStatusLane(groupedTasks, epic.id, status).length,
-          0
-        );
-        return epicTasks > 0;
-      });
-
   // Consolidate & Deduplicate Assignees for Swimlane 'By Assignee'
   const allMemberSwimlanes = React.useMemo(() => {
     const map = new Map<
@@ -134,6 +116,24 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
 
     return memberLanes;
   }, [allMemberSwimlanes, showEmptySwimlanes, boardStatuses, groupedTasks, t]);
+
+  if (!boardStatuses || boardStatuses.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-content-muted">
+        {t("kanban.loadingBoard")}
+      </div>
+    );
+  }
+
+  const filteredEpics = showEmptySwimlanes
+    ? epics
+    : epics.filter((epic) => {
+        const epicTasks = boardStatuses.reduce(
+          (acc, status) => acc + tasksForStatusLane(groupedTasks, epic.id, status).length,
+          0
+        );
+        return epicTasks > 0;
+      });
 
   const renderBoard = () => {
     return (

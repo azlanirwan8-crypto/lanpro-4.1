@@ -115,3 +115,69 @@ export const saringMenurutLingkup = (
   if (lingkup !== "mine") return daftar;
   return daftar.filter((task) => adalahTugasMilikSaya(task, orang));
 };
+
+/**
+ * #689 — kembalikan leluhur dari task yang tersaring, JANGAN kartu orang lain.
+ *
+ * `saringMenurutLingkup` menjawab "kartu siapa ini", tetapi layar yang
+ * MENGELAMPOKKAN per induk (Papan dan Planning) butuh satu hal lagi: kartu
+ * milik saya yang bergendong di bawah epic milik orang lain kehilangan baris
+ * induknya, jadi ia tidak dirender di mana pun sementara penghitungnya tetap
+ * ikut menghitung. Hasilnya "ada 3 tugas" di atas layar yang menampilkan 2.
+ *
+ * Batas yang disengaja: hanya simpul antara (induk, dan induknya induk) yang
+ * ikut kembali — dan hanya kalau ia memang leluhur dari sesuatu yang tampil.
+ * Kartu daun milik orang lain tidak pernah masuk, karena ia bukan penyebab
+ * baris ini ada.
+ *
+ * Dipakai di tempat pengelompokan saja. Dashboard menampilkan daftar RATA, jadi
+ * di sana penyaringnya tetap `saringMenurutLingkup` apa adanya — menutup
+ * leluhur di sana berarti menampilkan epic orang lain tanpa alasan.
+ */
+export const tutupLeluhur = <T extends Task>(
+  tersaring: T[] | null | undefined,
+  semua: readonly T[] | null | undefined
+): T[] => {
+  const tampil: T[] = Array.isArray(tersaring) ? tersaring : [];
+  const daftarSemua: readonly T[] = Array.isArray(semua) ? semua : [];
+  if (daftarSemua.length === 0) return tampil;
+
+  const olehId = new Map<string, T>();
+  for (const task of daftarSemua) {
+    if (task && typeof task.id === "string" && !olehId.has(task.id)) olehId.set(task.id, task);
+  }
+
+  const sudahTampil = new Set<string>();
+  for (const task of tampil) {
+    if (task && typeof task.id === "string") sudahTampil.add(task.id);
+  }
+
+  const tambahan: T[] = [];
+  for (const task of tampil) {
+    // `parentId` yang tidak dikenal di layar ini (bukan milik siapa pun) sudah
+    // dipisahkan sebagai "standalone" oleh pemakai, jadi jalan ke atas berhenti
+    // sendiri di sana.
+    const naik = new Set<string>();
+    let idInduk = task?.parentId;
+    while (idInduk && !sudahTampil.has(idInduk) && !naik.has(idInduk)) {
+      const induk = olehId.get(idInduk);
+      if (!induk) break;
+      naik.add(idInduk);
+      tambahan.push(induk);
+      idInduk = induk.parentId;
+    }
+  }
+
+  // Tidak ada yang perlu ditutup: array yang masuk dikembalikan apa adanya,
+  // supaya identitas memo di pemakai tidak bergeser tiap render.
+  if (tambahan.length === 0) return tampil;
+  // Urutan dipertahankan: kartu yang memang milik saya lebih dulu, lalu baris
+  // induk yang ditambahkan — supaya layar yang mengandalkan urutan tidak berubah.
+  const seen = new Set<string>();
+  const unik = tambahan.filter((t) => {
+    if (sudahTampil.has(t.id) || seen.has(t.id)) return false;
+    seen.add(t.id);
+    return true;
+  });
+  return [...tampil, ...unik];
+};
