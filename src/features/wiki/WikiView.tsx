@@ -81,6 +81,8 @@ export const WikiView: React.FC<WikiViewProps> = ({
   });
   const [totalDocuments, setTotalDocuments] = useState(0);
   const [loading, setLoading] = useState(false);
+  // #689 — daftar butuh keadaan "gagal" sendiri, bukan hanya toast yang hilang.
+  const [galatDaftar, setGalatDaftar] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [dragActive, setDragActive] = useState(false);
@@ -427,7 +429,9 @@ export const WikiView: React.FC<WikiViewProps> = ({
     if (cached && !opts?.force && currentPage === 1 && !search && selectedCategory === "Semua") {
       setDocuments(cached);
     }
-
+    // #689 — `loading` DIDEKLARASIKAN di :83 tapi tidak pernah disentuh fungsi
+    // ini, jadi daftar sempat mengaku kosong selagi masih menunggu jawaban.
+    setLoading(true);
     try {
       const result = await loadProjectDocuments(projectId, effectiveUserId, {
         ...listOpts,
@@ -435,11 +439,17 @@ export const WikiView: React.FC<WikiViewProps> = ({
       });
       setDocuments(result.data as DocumentModel[]);
       setTotalDocuments(result.meta?.total ?? result.data.length);
+      setGalatDaftar(null);
     } catch (e: any) {
       console.error("Gagal memuat dokumen:", e);
+      // #689 — `silent` boleh menekan TOAST, tidak boleh menghapus keterangan:
+      // tanpa ini, kegagalan jaringan dan proyek kosong tampil sama persis.
+      setGalatDaftar(e?.message || "Gagal memuat dokumen");
       if (!cached && !opts?.silent) {
         toast.error(e.message || "Gagal memuat dokumen");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -990,16 +1000,59 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-faint text-xs font-medium text-content-body">
-                {currentDocs.length === 0 ? (
+                {galatDaftar && currentDocs.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="text-center py-16 text-content-subtle">
-                      <div className="w-12 h-12 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-3 text-primary shadow-2xs">
-                        <FileText className="w-5 h-5" />
+                      <div data-testid="wiki-galat" role="alert">
+                        <p className="font-medium text-content-strong text-sm">
+                          {t("wiki.errorTitle")}
+                        </p>
+                        <p className="text-xs text-content-subtle mt-1">{galatDaftar}</p>
+                        <button
+                          type="button"
+                          data-testid="wiki-coba-lgi"
+                          onClick={() => fetchDocuments({ force: true })}
+                          className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border-subtle bg-surface text-xs font-medium text-content-strong hover:bg-surface-sunken cursor-pointer"
+                        >
+                          {t("wiki.retry")}
+                        </button>
                       </div>
-                      <p className="font-medium text-content-strong text-sm">
-                        {t("wiki.emptyTitle")}
-                      </p>
-                      <p className="text-xs text-content-subtle mt-1">{t("wiki.emptyHint")}</p>
+                    </td>
+                  </tr>
+                ) : loading && currentDocs.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-16 text-content-subtle">
+                      <div data-testid="wiki-memuat" className="text-xs">
+                        {t("wiki.loading")}
+                      </div>
+                    </td>
+                  </tr>
+                ) : currentDocs.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-16 text-content-subtle">
+                      {search.trim() ? (
+                        <div data-testid="wiki-kosong-filter">
+                          <div className="w-12 h-12 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-3 text-primary shadow-2xs">
+                            <FileText className="w-5 h-5" />
+                          </div>
+                          <p className="font-medium text-content-strong text-sm">
+                            {t("wiki.noMatchTitle")}
+                          </p>
+                          <p className="text-xs text-content-subtle mt-1">
+                            {t("wiki.noMatchHint")}
+                          </p>
+                        </div>
+                      ) : (
+                        <div data-testid="wiki-kosong">
+                          <div className="w-12 h-12 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-3 text-primary shadow-2xs">
+                            <FileText className="w-5 h-5" />
+                          </div>
+                          <p className="font-medium text-content-strong text-sm">
+                            {t("wiki.emptyTitle")}
+                          </p>
+                          <p className="text-xs text-content-subtle mt-1">{t("wiki.emptyHint")}</p>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ) : (
@@ -1027,7 +1080,9 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           {String(srNo).padStart(2, "0")}
                         </td>
                         <td className="py-2.5 px-4 font-medium text-content group-hover:text-primary transition-colors max-w-[320px]">
-                          <div className="line-clamp-1">{doc.title}</div>
+                          <div className="line-clamp-1" title={doc.title}>
+                            {doc.title}
+                          </div>
                         </td>
                         <td className="py-2.5 px-4">
                           <LabelChip
@@ -1044,7 +1099,10 @@ export const WikiView: React.FC<WikiViewProps> = ({
                               title={t("meetings.clickToDownload")}
                             >
                               <Download className="w-3.5 h-3.5 shrink-0 text-emerald-600 group-hover/file:scale-110 transition-transform" />
-                              <span className="truncate max-w-[130px]">
+                              <span
+                                className="truncate max-w-[130px]"
+                                title={doc.fileName || t("wiki.attachment")}
+                              >
                                 {doc.fileName || t("wiki.attachment")}
                               </span>
                             </button>
@@ -1060,7 +1118,9 @@ export const WikiView: React.FC<WikiViewProps> = ({
                               name={creatorName}
                               className="w-6 h-6 text-xs sm:text-[10px]"
                             />
-                            <span className="truncate max-w-[130px]">{creatorName}</span>
+                            <span className="truncate max-w-[130px]" title={creatorName}>
+                              {creatorName}
+                            </span>
                           </div>
                         </td>
                         <td className="py-2.5 px-4 text-content-muted font-medium">{lastEdited}</td>

@@ -91,7 +91,10 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
             {/* Header: Title & Action buttons */}
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-semibold text-content-strong line-clamp-2 leading-snug">
+                <h4
+                  className="text-sm font-semibold text-content-strong line-clamp-2 leading-snug"
+                  title={doc.title}
+                >
                   {doc.title}
                 </h4>
                 {doc.description && (
@@ -158,7 +161,9 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 font-medium hover:underline cursor-pointer"
                 >
                   <Download className="w-3 h-3" />
-                  <span className="truncate max-w-[140px]">{doc.fileName}</span>
+                  <span className="truncate max-w-[140px]" title={doc.fileName}>
+                    {doc.fileName}
+                  </span>
                 </button>
               )}
 
@@ -180,7 +185,9 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
             <div className="pt-2 border-t border-border-faint flex items-center justify-between gap-2 text-xs text-content-subtle">
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="text-[11px]">{t("meetings.thAuthor")}:</span>
-                <span className="font-medium text-content truncate">{authorName}</span>
+                <span className="font-medium text-content truncate" title={authorName}>
+                  {authorName}
+                </span>
               </div>
 
               <div className="flex items-center gap-1 shrink-0 text-[11px]">
