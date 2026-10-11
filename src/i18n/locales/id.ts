@@ -2786,6 +2786,7 @@ export const id = {
       "Baris ini akan hilang dari daftar riwayat ekspor sesi ini. Berkas yang sudah diunduh tidak ikut terhapus.",
   },
   bulkActions: {
+    deleteCount: "Hapus ({{count}})",
     changeRole: "Ubah Peran",
     unassignedClear: "Tanpa Penerima (Kosongkan)",
     perPage: "Per Halaman:",

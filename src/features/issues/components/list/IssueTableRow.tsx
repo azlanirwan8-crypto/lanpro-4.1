@@ -583,10 +583,20 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                   <UncontrolledInput
                     type="number"
                     disabled={!isEditable}
-                    initialValue={task.storyPoints || ""}
-                    onSave={(val: any) =>
-                      updateTaskField(task.id, "storyPoints", val ? Number(val) : null)
-                    }
+                    initialValue={task.storyPoints === 0 ? "0" : task.storyPoints || ""}
+                    onSave={(val: any) => {
+                      // #689 — `val ? Number(val) : null` membuat angka 0
+                      // tersimpan sebagai null: "0 poin" tidak bisa diisi, dan
+                      // setelah diisi ulang barisnya kembali kosong. Nilai kosong
+                      // tetap null; yang bukan angka batal.
+                      const teks = String(val ?? "").trim();
+                      const angka = teks === "" ? null : Number(teks);
+                      updateTaskField(
+                        task.id,
+                        "storyPoints",
+                        angka === null || Number.isFinite(angka) ? angka : null
+                      );
+                    }}
                     className="bg-transparent border border-transparent hover:border-border-subtle focus:border-primary rounded px-2 py-1 text-xs font-normal text-content-body w-full outline-none transition-colors"
                     placeholder="-"
                   />

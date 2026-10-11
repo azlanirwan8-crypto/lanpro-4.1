@@ -150,13 +150,19 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
               </span>
               <StyledDropdown
                 value=""
-                onChange={(val: string) => {
-                  if (val) {
-                    const ids = Array.from(selectedTaskIds);
-                    ids.forEach((id) => updateTaskField(id, "status", val));
-                    toast.success(t("toast.bulkStatusChanged", { count: ids.length, status: val }));
-                    setSelectedTaskIds(new Set());
-                  }
+                onChange={async (val: string) => {
+                  if (!val) return;
+                  const ids = Array.from(selectedTaskIds);
+                  // #689 — dulu `forEach` tanpa await lalu `toast.success` seketika:
+                  // pengguna membaca "N tugas diubah" padahal setiap item masih di
+                  // jalan, dan yang ditolak server di-rollback diam-diam oleh
+                  // `updateTaskField` sendiri. Sukses sekarang menyusul jawaban
+                  // server, pola yang sama dengan E7.
+                  await Promise.allSettled(
+                    ids.map((id) => updateTaskField(id, "status", val))
+                  );
+                  toast.success(t("toast.bulkStatusChanged", { count: ids.length, status: val }));
+                  setSelectedTaskIds(new Set());
                 }}
                 options={[
                   {
@@ -182,11 +188,13 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
               </span>
               <StyledDropdown
                 value=""
-                onChange={(val) => {
+                onChange={async (val) => {
                   if (!val) return;
                   const effectiveAssignee = val === "unassigned" ? null : val;
                   const ids = Array.from(selectedTaskIds);
-                  ids.forEach((id) => updateTaskField(id, "assigneeId", effectiveAssignee));
+                  await Promise.allSettled(
+                    ids.map((id) => updateTaskField(id, "assigneeId", effectiveAssignee))
+                  );
                   toast.success(t("toast.bulkAssigneeUpdated", { count: ids.length }));
                   setSelectedTaskIds(new Set());
                 }}
@@ -209,10 +217,10 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
               </span>
               <StyledDropdown
                 value=""
-                onChange={(val: string) => {
+                onChange={async (val: string) => {
                   if (!val) return;
                   const ids = Array.from(selectedTaskIds);
-                  ids.forEach((id) => updateTaskField(id, "priority", val));
+                  await Promise.allSettled(ids.map((id) => updateTaskField(id, "priority", val)));
                   toast.success(
                     t("toast.bulkPriorityChanged", { count: ids.length, priority: val })
                   );
@@ -242,11 +250,13 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
               </span>
               <StyledDropdown
                 value=""
-                onChange={(val: string) => {
+                onChange={async (val: string) => {
                   if (!val) return;
                   const sprintVal = val === "Backlog" ? null : val;
                   const ids = Array.from(selectedTaskIds);
-                  ids.forEach((id) => updateTaskField(id, "sprintId", sprintVal));
+                  await Promise.allSettled(
+                    ids.map((id) => updateTaskField(id, "sprintId", sprintVal))
+                  );
                   toast.success(t("toast.bulkSprintChanged", { count: ids.length }));
                   setSelectedTaskIds(new Set());
                 }}
@@ -283,19 +293,23 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
                 (bulkDeleteTasks || deleteTask) &&
                 canDeleteAnySelected && (
                   <button
-                    onClick={() => {
+                    onClick={async () => {
+                      // #689 — seleksi dikosongkan SESUDAH tulisan hapus selesai,
+                      // dan `forEach` tanpa await diganti agar kegagalan per item
+                      // tetap punya kesempatan melaporkan dirinya sebelum bar ini
+                      // menutup diri. `bulkDeleteTasks` dan `deleteTask` sama-sama
+                      // async di AppContainer (:3696, :3757).
                       if (bulkDeleteTasks) {
-                        bulkDeleteTasks(deletableIds);
-                        setSelectedTaskIds(new Set());
+                        await bulkDeleteTasks(deletableIds);
                       } else if (deleteTask) {
-                        deletableIds.forEach((id) => deleteTask(id));
-                        setSelectedTaskIds(new Set());
+                        await Promise.allSettled(deletableIds.map((id) => deleteTask(id)));
                       }
+                      setSelectedTaskIds(new Set());
                     }}
                     className="bg-rose-600 hover:bg-rose-700 active:scale-95 text-content-inverse font-medium rounded-xl px-4 py-2 flex items-center gap-1.5 transition-all shadow-soft cursor-pointer"
                   >
                     <Trash className="w-3.5 h-3.5" />
-                    <span>Hapus ({deletableIds.length})</span>
+                    <span>{t("bulkActions.deleteCount", { count: deletableIds.length })}</span>
                   </button>
                 )
               );

@@ -56,7 +56,10 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
 
   return (
     <div className="flex-1 overflow-auto space-y-3.5 pb-16 pr-1 min-h-0 custom-scrollbar">
-      {sprints
+      {/* #689 — `sprints.sort()` di sini MEMUTASI array yang datang dari props:
+          urutan di store berubah tanpa setState, dan render berikutnya melihat
+          array yang sudah dibalik. Disalin dulu. */}
+      {[...sprints]
         .sort((a, b) => ensureDate(b.startDate).getTime() - ensureDate(a.startDate).getTime())
         .map((sprint) => {
           const sprintTasks = tasks.filter(

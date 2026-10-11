@@ -2762,6 +2762,7 @@ export const en = {
       "This row disappears from this session's export history. Files you already downloaded are not deleted.",
   },
   bulkActions: {
+    deleteCount: "Delete ({{count}})",
     changeRole: "Change Role",
     unassignedClear: "Unassigned (Clear)",
     perPage: "Per Page:",

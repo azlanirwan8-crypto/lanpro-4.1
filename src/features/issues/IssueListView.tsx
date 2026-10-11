@@ -441,7 +441,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
               {t("issues.retry")}
             </button>
           </div>
-        ) : muatDaftarIsu === "memuat" && pageRoots.length === 0 ? (
+        ) : muatDaftarIsu === "memuat" ? (
           <p data-testid="isu-memuat" className="py-2 mb-2 text-[11px] text-content-subtle">
             {t("issues.refreshPending")}
           </p>
@@ -664,7 +664,11 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
           </div>
         </div>
 
-        {/* Global Inline Quick Create Bar */}
+        {/* #689 — kolom tambah cepat hanya untuk yang berhak membuat. Penjaga
+            `canCreateIssue` sudah dihitung di :176 tetapi sebelumnya cuma dipakai
+            aksi mobile, jadi pengguna tanpa hak tetap melihat baris ini dan baru
+            tahu ia ditolak setelah server membalas galat. */}
+        {canCreateIssue && (
         <IssueQuickCreateBar
           quickCreateTitle={quickCreateTitle}
           setQuickCreateTitle={setQuickCreateTitle}
@@ -684,6 +688,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
           projectMembers={projectMembers}
           sprints={sprints}
         />
+        )}
 
         {/* Pagination & Bulk Action Bar */}
         <IssueBulkActionsBar
