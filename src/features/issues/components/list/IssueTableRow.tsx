@@ -365,7 +365,9 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                         setCurrentView("issueDetail" as any);
                       }}
                       className="text-xs font-normal text-content-body hover:text-blue-600 transition-colors cursor-pointer whitespace-nowrap block"
-                      title={t("issueRow.openDetail")}
+                      title={`${task.title || (task as any).summary || (task as any).name || ""} — ${t(
+                        "issueRow.openDetail"
+                      )}`}
                     >
                       {task.title || (task as any).summary || (task as any).name || ""}
                     </span>
@@ -618,6 +620,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                       task.labels.map((L, lIdx) => (
                         <span
                           key={`${L}-${lIdx}`}
+                          title={L}
                           className="text-xs sm:text-[11px] font-normal rounded border border-border-subtle bg-surface-muted text-content-secondary px-1.5 py-0.5 whitespace-nowrap"
                         >
                           {L}

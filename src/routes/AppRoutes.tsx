@@ -5,6 +5,10 @@ import type { PeranEfektif } from "../types/roles";
 import type { Project, Sprint, Task, User } from "../types";
 import { useAppStore } from "../store/useAppStore";
 import { lazyWithRetry } from "../lib/lazyWithRetry";
+// #689 butir (d) — murni dan kecil, jadi diimpor statis; `IssueListView` sendiri
+// tetap potongan malas (#293). Memakainya di badan render tanpa helper ini
+// berarti satu filter O(n²) dievaluasi ulang setiap render.
+import { akarDaftar } from "../features/issues/lib/akarDaftar";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { useProjectStore } from "../store";
 
@@ -304,9 +308,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
                 : undefined
             }
             tasks={tasks || []}
-            roots={(tasks || []).filter(
-              (t) => !t.parentId || !(tasks || []).some((p) => p.id === t.parentId)
-            )}
+            roots={akarDaftar(tasks || [])}
             sprints={sprints || []}
             projectMembers={projectMembers || []}
             allUsers={allUsers || []}

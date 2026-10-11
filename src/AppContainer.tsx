@@ -249,6 +249,14 @@ function AppContainer() {
   const setProjectMembers = useProjectStore((s) => s.setProjectMembers);
   // #688 — "All Tasks" / "My Tasks" SATU status untuk semua modul.
   const lingkupTugas = useProjectStore((s) => s.lingkupTugas);
+  // #689 butir (d) — pencatat permintaan daftar isu. Sengaja TIDAK mengubah
+  // array task: ia hanya memberi tahu layar bahwa yang sedang dibaca mungkin
+  // basi, dan bahwa mengulang masih mungkin dilakukan.
+  const setMuatDaftarIsu = useProjectStore((s) => s.setMuatDaftarIsu);
+  // Permintaan tumpang tindih (debas 300 ms, ganti halaman, kejadian socket). Hanya
+  // permintaan TERAKHIR yang boleh menutup status; kalau tidak, respons lama
+  // yang tiba belakangan memadamkan indikator "memuat" milik yang baru.
+  const nomorMuatDaftarIsu = useRef(0);
 
   const [confirmAction, setConfirmAction] = useState<{
     isOpen: boolean;
@@ -1172,6 +1180,9 @@ function AppContainer() {
     const useIssueListPage =
       opts?.rootsOnly === true || (currentView === "list" && opts?.rootsOnly !== false);
 
+    const penanda = ++nomorMuatDaftarIsu.current;
+    setMuatDaftarIsu("memuat");
+
     try {
       const data = await fetchTasksApi(
         selectedProject.id,
@@ -1188,23 +1199,29 @@ function AppContainer() {
             }
           : undefined
       );
-      if (data.status === "success") {
-        const allTasks = data.data as Task[];
-        const uniqueAllTasks = Array.from(
-          new Map((allTasks || []).filter((t) => t && t.id).map((t) => [t.id, t])).values()
-        );
-
-        if (!useIssueListPage) {
-          setAllProjectTasksForStats(uniqueAllTasks);
-          setIssueListMeta(null);
-        } else if (data.meta) {
-          setIssueListMeta(data.meta);
-        }
-
-        if (!masihProyekSama(proyekSaatBerangkat)) return;
-        setTasks(uniqueAllTasks);
+      if (data.status !== "success") {
+        // Sebelum #689 respons non-success dibuang diam-diam: layar tetap
+        // menampilkan baris dari respons sebelumnya seolah-olah itu data baru.
+        if (penanda === nomorMuatDaftarIsu.current) setMuatDaftarIsu("galat");
+        return;
       }
+      const allTasks = data.data as Task[];
+      const uniqueAllTasks = Array.from(
+        new Map((allTasks || []).filter((t) => t && t.id).map((t) => [t.id, t])).values()
+      );
+
+      if (!useIssueListPage) {
+        setAllProjectTasksForStats(uniqueAllTasks);
+        setIssueListMeta(null);
+      } else if (data.meta) {
+        setIssueListMeta(data.meta);
+      }
+
+      if (penanda === nomorMuatDaftarIsu.current) setMuatDaftarIsu("diam");
+      if (!masihProyekSama(proyekSaatBerangkat)) return;
+      setTasks(uniqueAllTasks);
     } catch (e: any) {
+      if (penanda === nomorMuatDaftarIsu.current) setMuatDaftarIsu("galat");
       const errorMsg = e?.message || String(e);
       if (isNetworkOrAuthError(e)) {
         console.warn("fetchTasks: Server is temporarily unavailable or connection is offline.");

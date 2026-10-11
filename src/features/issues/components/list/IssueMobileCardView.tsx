@@ -10,6 +10,12 @@ import { Task, MasterData, UserProfile, Sprint } from "../../../../types";
 
 interface IssueMobileCardViewProps {
   tasks: Task[];
+  /**
+   * #689 butir (d) — kunci kamus per sebab layar kosong, dihitung di
+   * `IssueListView`. Diterima sebagai KUNCI, bukan teks jadi, supaya komponen
+   * ini tetap menerjemahkannya sendiri saat bahasa berganti.
+   */
+  kunciKosong?: { judul: string; petunjuk: string };
   masterData: MasterData[];
   projectMembers: UserProfile[];
   sprints: Sprint[];
@@ -27,6 +33,7 @@ interface IssueMobileCardViewProps {
 
 export const IssueMobileCardView: React.FC<IssueMobileCardViewProps> = ({
   tasks,
+  kunciKosong,
   masterData,
   projectMembers,
   sprints,
@@ -39,18 +46,15 @@ export const IssueMobileCardView: React.FC<IssueMobileCardViewProps> = ({
   const { t } = useTranslation();
 
   if (!tasks || tasks.length === 0) {
+    const kunci = kunciKosong || { judul: "issues.emptyTitle", petunjuk: "issues.emptyHint" };
     return (
-      <div className="sm:hidden flex flex-col items-center justify-center gap-3 py-16 px-6 text-center mobile-nav-pb">
+      <div
+        data-testid="isu-mobile-kosong"
+        className="sm:hidden flex flex-col items-center justify-center gap-3 py-16 px-6 text-center mobile-nav-pb"
+      >
         <Layers className="w-10 h-10 text-content-subtle" />
-        <p className="text-sm font-medium text-content-strong">
-          {t("issues.emptyTitle", "Belum ada isu")}
-        </p>
-        <p className="text-xs text-content-muted max-w-xs">
-          {t(
-            "issues.emptyHint",
-            "Buat isu baru lewat tombol aksi (+), atau ubah filter pencarian."
-          )}
-        </p>
+        <p className="text-sm font-medium text-content-strong">{t(kunci.judul)}</p>
+        <p className="text-xs text-content-muted max-w-xs">{t(kunci.petunjuk)}</p>
       </div>
     );
   }
@@ -90,7 +94,10 @@ export const IssueMobileCardView: React.FC<IssueMobileCardViewProps> = ({
                 </div>
 
                 {sprint && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-sunken text-content-muted border border-border-subtle truncate max-w-[90px]">
+                  <span
+                    title={sprint.name}
+                    className="text-[10px] px-1.5 py-0.5 rounded bg-surface-sunken text-content-muted border border-border-subtle truncate max-w-[90px]"
+                  >
                     {sprint.name}
                   </span>
                 )}
@@ -117,7 +124,10 @@ export const IssueMobileCardView: React.FC<IssueMobileCardViewProps> = ({
             </div>
 
             {/* Title / Summary */}
-            <h4 className="text-sm font-medium text-content-strong leading-snug line-clamp-2">
+            <h4
+              title={task.title}
+              className="text-sm font-medium text-content-strong leading-snug line-clamp-2"
+            >
               {task.title}
             </h4>
 
@@ -155,7 +165,10 @@ export const IssueMobileCardView: React.FC<IssueMobileCardViewProps> = ({
                         {(assignee.name || assignee.displayName || "U")[0].toUpperCase()}
                       </div>
                     )}
-                    <span className="text-[11px] text-content-body truncate max-w-[80px]">
+                    <span
+                      title={assignee.name || assignee.displayName}
+                      className="text-[11px] text-content-body truncate max-w-[80px]"
+                    >
                       {assignee.name || assignee.displayName}
                     </span>
                   </div>

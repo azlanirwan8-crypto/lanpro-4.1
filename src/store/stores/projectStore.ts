@@ -1,6 +1,17 @@
 import { create } from "zustand";
 import type { LingkupTugas } from "../../lib/tugasSaya";
 
+/**
+ * #689 butir (d) — status permintaan daftar isu berhalaman.
+ *
+ * `fetchTasks` di `AppContainer` menelan galatnya sendiri (`catch` isi `console`
+ * saja), jadi halaman yang gagal dimuat tampak seperti daftar yang masih punya
+ * baris — pengguna tidak tahu yang ditampilkan adalah data basi, dan tidak punya
+ * jalan untuk mengulang. Store dipilih alih-alih prop karena nilainya dimiliki
+ * `AppContainer` sementara yang menampilkannya ada di tiga lapis di bawahnya.
+ */
+export type KeadaanMuatDaftarIsu = "diam" | "memuat" | "galat";
+
 interface ProjectState {
   // Current selections
   selectedProject: any;
@@ -24,6 +35,9 @@ interface ProjectState {
    */
   lingkupTugas: LingkupTugas;
 
+  /** #689 (d) — lihat `KeadaanMuatDaftarIsu`. Hanya Issue List yang membacanya. */
+  muatDaftarIsu: KeadaanMuatDaftarIsu;
+
   // Actions
   setSelectedProject: (project: any) => void;
   setSelectedProjectId: (id: string | null) => void;
@@ -38,6 +52,8 @@ interface ProjectState {
   // Filter actions
   setTaskFilters: (filters: Record<string, any>) => void;
   setLingkupTugas: (lingkup: LingkupTugas) => void;
+  setMuatDaftarIsu: (keadaan: KeadaanMuatDaftarIsu) => void;
+
   setSelectedTasks: (tasks: string[]) => void;
   toggleTaskSelection: (taskId: string) => void;
 
@@ -59,6 +75,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
   taskFilters: {},
   selectedTasks: [],
   lingkupTugas: "all",
+  muatDaftarIsu: "diam",
 
   // Selection actions
   setSelectedProject: (project) =>
@@ -77,6 +94,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
   // Filter actions
   setTaskFilters: (filters) => set({ taskFilters: filters }),
   setLingkupTugas: (lingkup) => set({ lingkupTugas: lingkup }),
+  setMuatDaftarIsu: (keadaan) => set({ muatDaftarIsu: keadaan }),
   setSelectedTasks: (tasks) => set({ selectedTasks: tasks }),
   toggleTaskSelection: (taskId) =>
     set((state) => ({
@@ -101,5 +119,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
       // #688 — kembali ke default aman "all": pengguna tidak seharusnya berpindah
       // proyek lalu mendapati daftar kosong tanpa tahu filter masih "mine".
       lingkupTugas: "all",
+      // #689 (d) — galat dari proyek sebelumnya tidak boleh ikut ke proyek baru.
+      muatDaftarIsu: "diam",
     }),
 }));

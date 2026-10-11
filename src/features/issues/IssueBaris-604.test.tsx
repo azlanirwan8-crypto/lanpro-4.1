@@ -324,7 +324,9 @@ describe("IssueTableRow — Hapus di depan (#604)", () => {
     expect(tombol[0]).toBe(hapus);
 
     const tds = Array.from(container.querySelectorAll("tr:first-of-type td"));
-    const judul = screen.getByTitle("Klik untuk membuka halaman detail isu");
+    // #689 — tooltip sel judul kini mengawali dengan teks lengkapnya (judul
+    // terpotong oleh lebar kolom), jadi pencocokan eksak tidak berlaku lagi.
+    const judul = screen.getByTitle(/membuka halaman detail isu/);
     expect(hapus.closest("td")).toBe(judul.closest("td"));
     expect(hapus.closest("td")).not.toBe(tds[tds.length - 1]);
   });
@@ -333,7 +335,7 @@ describe("IssueTableRow — Hapus di depan (#604)", () => {
     const { container } = renderRow();
     const hapus = screen.getByRole("button", { name: "Hapus Isu" });
     const pembungkus = hapus.parentElement as HTMLElement;
-    const judul = screen.getByTitle("Klik untuk membuka halaman detail isu");
+    const judul = screen.getByTitle(/membuka halaman detail isu/);
     expect(pembungkus.contains(hapus)).toBe(true);
     expect(judul.closest("td")?.contains(pembungkus)).toBe(true);
     // Wadah tetap ada walau isinya baru muncul saat hover; kalau tidak,

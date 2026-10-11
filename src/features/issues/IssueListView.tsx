@@ -1,11 +1,13 @@
 import { useTranslation } from "react-i18next";
 import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, List } from "lucide-react";
+import { Search, List, RefreshCw } from "lucide-react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { cn } from "../../lib/utils";
 import { reorderTasks } from "./services/issues.service";
 import { susunUrutanAkar } from "./lib/urutanAkar";
+import { akarDaftar } from "./lib/akarDaftar";
+import { keadaanDaftar, kunciPesanKosong } from "./lib/keadaanKosong";
 import { toast } from "sonner";
 import { Task } from "../../types";
 import { useAppStore } from "../../store/useAppStore";
@@ -31,6 +33,7 @@ import { PageHeader } from "../../components/ui/PageHeader";
 import { ListPageShell } from "../../components/ui/ListPageShell";
 import { TugasScopeToggle } from "../../components/ui/TugasScopeToggle";
 import { useLingkupTugas } from "../../hooks/useLingkupTugas";
+import { useProjectStore } from "../../store/stores";
 
 export const IssueListView: React.FC<IssueListViewProps> = (props) => {
   const { t } = useTranslation();
@@ -190,6 +193,45 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
   const rawTasks = Array.isArray(tasks) ? tasks : [];
   const mArr = Array.isArray(masterData) ? masterData : [];
 
+  // #689 butir (d) — empat sebab daftar ini kosong harus bisa dibedakan, jadi
+  // keempatnya dibaca dari pipa yang sebenarnya: total menurut server → baris
+  // yang datang untuk halaman ini → sisa setelah empat belas filter klien →
+  // irisan halaman yang benar-benar dirender. Menghilangkan satu mata rantai
+  // membuat "proyeknya kosong" dan "filtermu terlalu sempit" tampak identik.
+  const akarTersedia = useMemo(
+    () =>
+      akarDaftar(Array.isArray(props.roots) && props.roots.length > 0 ? props.roots : rawTasks)
+        .length,
+    [props.roots, rawTasks]
+  );
+
+  const muatDaftarIsu = useProjectStore((s) => s.muatDaftarIsu);
+
+  const keadaan = keadaanDaftar({
+    tampil: pageRoots.length,
+    sebelumSaring: akarTersedia,
+    hasilSaring: displayRoots.length,
+    total: useServerPaging ? (issueListMeta?.total ?? akarTersedia) : akarTersedia,
+    adaQueryServer: useServerPaging && Boolean(serverListSearch?.trim()),
+    mine: lingkup === "mine",
+    punyaIdentitas,
+  });
+  const pesanKosong = kunciPesanKosong(keadaan);
+
+  const cobaMuatUlang = () => {
+    if (!fetchTasks) return;
+    void fetchTasks(
+      useServerPaging
+        ? {
+            rootsOnly: true,
+            page: effectiveListPage,
+            limit: effectiveItemsPerPage,
+            search: issueSearch,
+          }
+        : { rootsOnly: false }
+    );
+  };
+
   const [isFiltersPanelOpen, setIsFiltersPanelOpen] = useState(false);
   const [activeContextMenuTaskId, setActiveContextMenuTaskId] = useState<string | null>(null);
 
@@ -247,7 +289,10 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
       }
     } catch (err: any) {
       console.error("Failed to reorder tasks:", err);
-      toast.error(err.message || "Failed to prioritize tasks", { id: toastId });
+      // #689 — `err.message` pernah tampil utuh di toast (pesan internal React:
+      // "Cannot read properties of undefined"). Detailnya sudah ada di konsol;
+      // yang dilihat pengguna hanya kegagalan yang bisa ia ulangi.
+      toast.error(t("toast.reorderGagal"), { id: toastId });
     }
   };
 
@@ -370,9 +415,42 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
           setIsConfigureColumnsOpen={setIsConfigureColumnsOpen}
         />
 
+        {/* #689 butir (d) — permintaan yang sedang jalan atau yang gagal harus
+            kelihatan. Sebelum ini `fetchTasks` menelan galatnya (`catch` isi
+            `console` saja), jadi halaman yang gagal dimuat tetap menampilkan
+            baris respons sebelumnya seolah-olah itu data baru. */}
+        {muatDaftarIsu === "galat" ? (
+          <div
+            role="alert"
+            data-testid="isu-galat-muat"
+            className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 mb-2 rounded-md border border-border-subtle bg-surface-sunken"
+          >
+            <div>
+              <p className="text-xs font-medium text-content-strong">
+                {t("issues.loadFailedTitle")}
+              </p>
+              <p className="text-[11px] text-content-subtle">{t("issues.loadFailedHint")}</p>
+            </div>
+            <button
+              type="button"
+              data-testid="isu-coba-lgi"
+              onClick={cobaMuatUlang}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border-subtle bg-surface text-xs font-medium text-content-strong hover:bg-surface-muted cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              {t("issues.retry")}
+            </button>
+          </div>
+        ) : muatDaftarIsu === "memuat" && pageRoots.length === 0 ? (
+          <p data-testid="isu-memuat" className="py-2 mb-2 text-[11px] text-content-subtle">
+            {t("issues.refreshPending")}
+          </p>
+        ) : null}
+
         {/* Mobile View: Card List (< 640px) */}
         <IssueMobileCardView
           tasks={pageRoots}
+          kunciKosong={pesanKosong}
           masterData={mArr}
           projectMembers={projectMembers}
           sprints={sprints}
@@ -451,7 +529,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                           </th>
                         </tr>
                       </thead>
-                      {displayRoots.length === 0 ? (
+                      {pageRoots.length === 0 ? (
                         <tbody className="divide-y divide-border-faint italic-rows text-xs font-normal">
                           <tr>
                             <td
@@ -464,20 +542,33 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                             >
                               <div className="flex flex-col items-center gap-3 opacity-40">
                                 <Search className="w-8 h-8 text-content-subtle" />
-                                {/* #688 — "tidak ada hasil" karena filter dan "tidak ada
-                                    tugas untukmu" karena memang kosong adalah dua hal
-                                    berbeda; mencampur keduanya membuat pengguna
-                                    menyalahkan filternya. `tasks` di sini sudah dari
-                                    server (mode paging), jadi kosong = memang kosong. */}
-                                <p className="text-xs font-normal text-content-muted uppercase tracking-normal">
-                                  {lingkup === "mine" && tasks.length === 0
-                                    ? t("filters.noMyTasks")
-                                    : t("issues.noMatchingRecordsFound")}
+                                {/* #689 — empat sebab layar kosong sekarang punya
+                                    nama sendiri. Yang lama cuma membedakan
+                                    "mine", jadi filter yang terlalu sempit
+                                    masih disebut "tidak ada tugas untukmu". */}
+                                <p
+                                  data-testid={`isu-kosong-${keadaan}`}
+                                  className="text-xs font-normal text-content-muted uppercase tracking-normal"
+                                >
+                                  {t(pesanKosong.judul)}
+                                </p>
+                                <p className="text-[11px] font-normal text-content-subtle normal-case max-w-md">
+                                  {t(pesanKosong.petunjuk)}
                                 </p>
                                 {lingkup === "mine" && !punyaIdentitas && (
                                   <p className="text-[11px] font-normal text-content-subtle normal-case">
                                     {t("filters.myTasksTanpaLogin")}
                                   </p>
+                                )}
+                                {keadaan === "halamanLewat" && (
+                                  <button
+                                    type="button"
+                                    data-testid="isu-ke-halaman-pertama"
+                                    onClick={() => effectiveSetListPage(1)}
+                                    className="px-3 py-1.5 rounded-md border border-border-subtle bg-surface text-[11px] font-medium text-content-strong hover:bg-surface-muted cursor-pointer"
+                                  >
+                                    {t("issues.backToFirstPage")}
+                                  </button>
                                 )}
                               </div>
                             </td>
