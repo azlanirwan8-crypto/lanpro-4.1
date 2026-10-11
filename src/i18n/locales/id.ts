@@ -745,6 +745,7 @@ export const id = {
     syncDone: "Sinkronisasi data berhasil diselesaikan!",
     syncFailed: "Gagal sinkronisasi: ",
     sprintCreated: "Fase berhasil dibuat",
+    sprintBacklogPartial: "{{count}} tugas tidak berhasil masuk ke fase.",
     sprintUpdated: "Fase berhasil diperbarui",
     sprintUpdateFailed: "Gagal memperbarui fase: ",
     noPermStartSprint: "Anda tidak memiliki izin untuk memulai sprint.",

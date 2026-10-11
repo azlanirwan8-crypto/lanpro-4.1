@@ -1865,7 +1865,11 @@ function AppContainer() {
     resetNewSprintForm();
     setSelectedSprintBacklog(new Set());
     setIsNewSprintModalOpen(false);
-    toast.success(t("toast.sprintCreated"));
+    // #689 — placeholder sudah tampil di layar, jadi "berhasil" TIDAK boleh
+    // dibunyikan di sini: sebelumnya toast sukses jalan sebelum `createSprint`
+    // dan kegagalan hanya menjadi snap-back + toast error di atas kata
+    // "berhasil" yang sudah dibaca pengguna.
+    const toastDibuat = toast.loading(t("toast.sprintCreated"));
 
     try {
       const data = await createSprint(selectedProject.id, {
@@ -1878,24 +1882,32 @@ function AppContainer() {
 
       const sprintId = data.data.id;
       setSprints((prev) => prev.map((s) => (s.id === tempId ? { ...data.data, id: sprintId } : s)));
+      toast.success(t("toast.sprintCreated"), { id: toastDibuat });
 
       if (backlogIds.length > 0) {
-        void Promise.all(
-          backlogIds.map((taskId) =>
-            updateTask(selectedProject.id, taskId, { sprintId }).catch((err) =>
-              console.error("Failed to update task:", taskId, err)
-            )
-          )
-        ).then(() => {
+        // #689 — penugasan backlog ke fase baru dulu DITITIPKAN (void Promise)
+        // dan kegagalannya hanya masuk console, lalu SEMUA id dipasang lokal.
+        // Hasilnya: kartu yang ditolak server tetap tampil berada di fase baru
+        // sampai refresh berikutnya memulangkannya ke backlog.
+        const hasil = await Promise.allSettled(
+          backlogIds.map((taskId) => updateTask(selectedProject.id, taskId, { sprintId }))
+        );
+        const masuk = backlogIds.filter((_, i) => hasil[i].status === "fulfilled");
+        const gagal = backlogIds.length - masuk.length;
+
+        if (masuk.length > 0) {
           setTasks((prevTasks) =>
-            prevTasks.map((t) => (backlogIds.includes(t.id) ? { ...t, sprintId } : t))
+            prevTasks.map((task) => (masuk.includes(task.id) ? { ...task, sprintId } : task))
           );
-        });
+        }
+        if (gagal > 0) {
+          toast.error(t("toast.sprintBacklogPartial", { count: gagal }));
+        }
       }
     } catch (e: any) {
       setSprints((prev) => prev.filter((s) => s.id !== tempId));
       console.error(e);
-      toast.error(e.message || "Failed to create sprint");
+      toast.error(e.message || "Failed to create sprint", { id: toastDibuat });
     }
   };
 
@@ -1923,7 +1935,6 @@ function AppContainer() {
         prev.map((s) => (s.id === sprintSnapshot.id ? { ...s, ...sprintSnapshot } : s))
       );
       setIsEditSprintModalOpen(false);
-      toast.success(t("toast.sprintUpdated"));
 
       const data = await updateSprint(selectedProject.id, sprintSnapshot.id, {
         name: sprintSnapshot.name,
@@ -1933,6 +1944,8 @@ function AppContainer() {
         status: sprintSnapshot.status,
       });
       if (data.status !== "success") throw new Error(data.message);
+      // #689 — sukses diumumkan sesudah server mengiyakan, bukan sebelumnya.
+      toast.success(t("toast.sprintUpdated"));
     } catch (e: any) {
       fetchSprints();
       console.error(e);
@@ -1970,11 +1983,13 @@ function AppContainer() {
         return s;
       })
     );
-    toast.success(t("toast.sprintStarted"));
-
+    // #689 — "Fase berhasil dimulai" dulu dibunyikan SEBELUM `updateSprint`
+    // sama sekali jalan; kalau server menolak, pengguna sudah membaca sukses dan
+    // hanya melihat papan snap-back. Sukses sekarang menyusul konfirmasi.
     try {
       const data = await updateSprint(selectedProject.id, sprintId, { status: "active" });
       if (data.status !== "success") throw new Error(data.message || "Failed");
+      toast.success(t("toast.sprintStarted"));
     } catch (e: any) {
       fetchSprints();
       console.error(e);
@@ -2038,8 +2053,6 @@ function AppContainer() {
         )
       );
     }
-    toast.success(t("alerts.sprintCompleted", { name: sprintToComplete.name }));
-
     const loadingToast = toast.loading(t("toast.completingSprint"));
 
     try {
@@ -2057,12 +2070,19 @@ function AppContainer() {
 
       if (data.status !== "success") throw new Error(data.message || "Failed");
 
+      // #689 — pesan "berhasil diselesaikan" dulu dibunyikan SEBELUM loading ini
+      // dan sebelum satu panggilan network pun jalan. Sekarang ia menyusul
+      // konfirmasi server dan memakai kembali toast loading yang sama, jadi
+      // pengguna hanya punya satu kartu status yang berubah isi.
+      toast.success(t("alerts.sprintCompleted", { name: sprintToComplete.name }), {
+        id: loadingToast,
+      });
       void logActivity("sprint_completed", `Fase ${sprintToComplete.name} telah diselesaikan.`);
     } catch (e: any) {
       fetchSprints();
       fetchTasks();
       console.error(e);
-      toast.error(e.message || "Gagal menyelesaikan fase");
+      toast.error(e.message || "Gagal menyelesaikan fase", { id: loadingToast });
     } finally {
       toast.dismiss(loadingToast);
     }

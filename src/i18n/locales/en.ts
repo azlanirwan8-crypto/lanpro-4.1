@@ -735,6 +735,7 @@ export const en = {
     syncDone: "Data sync completed successfully!",
     syncFailed: "Sync failed: ",
     sprintCreated: "Sprint created successfully",
+    sprintBacklogPartial: "{{count}} tasks could not be moved into the sprint.",
     sprintUpdated: "Sprint updated successfully",
     sprintUpdateFailed: "Failed to update sprint: ",
     noPermStartSprint: "You do not have permission to start a sprint.",
