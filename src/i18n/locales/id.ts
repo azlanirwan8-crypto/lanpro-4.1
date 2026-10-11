@@ -702,6 +702,9 @@ export const id = {
     simDone: "Simulasi Alur Kerja Selesai!",
     jsonDownloaded: "JSON Workspace Berhasil Diunduh!",
     drawioDownloaded: "Berkas draw.io Berhasil Diunduh!",
+    drawioSumberDiunduh: "Sumber .drawio diunduh — byte sama dengan berkas aslinya.",
+    drawioKonversiDiunduh:
+      "Berkas .drawio hasil konversi diunduh — bukan byte berkas asal papan ini.",
     preparingImage: "Menyiapkan gambar...",
     jpgDownloaded: "Gambar JPG Berhasil Diunduh!",
     imageDownloadFailed: "Gagal mengunduh gambar.",
@@ -1525,6 +1528,23 @@ export const id = {
     importDiagram: "Impor Diagram (Draw.io, Miro, atau JSON)",
     saveFlowchart: "Simpan seluruh diagram alur ini ke basis data",
     savedToDb: "Tersimpan di basis data — {{shapes}} bentuk, {{arrows}} panah",
+    // #685 — sumber .drawio dan batas konversi native.
+    sumberTidakDiadopsi:
+      "Berkas .drawio tidak dijadikan sumber papan ini karena isinya digabung dengan kerja yang sudah ada. Sumber lama tetap utuh.",
+    sumberTerlaluBesar:
+      "Papan tersimpan, tetapi berkas .drawio aslinya tidak ikut tersimpan (melebihi anggaran payload). Ekspor ulang tidak akan identik dengan berkas asal.",
+    eksporKonversiNote:
+      "Papan ini tidak punya sumber .drawio, jadi yang diunduh adalah hasil konversi dari model LanPro.",
+    batasJudul: "Yang tidak akan bertahan di papan LanPro",
+    batasHalaman:
+      "{{jumlah}} halaman digabung menjadi satu papan ({{nama}}) — bentuk dengan id sama bisa saling menimpa",
+    batasBentuk: "Bentuk khusus dirender sebagai kotak biasa: {{daftar}}",
+    batasKunci: "Kunci gaya diabaikan: {{daftar}}",
+    batasLabel: "{{jumlah}} label berisi HTML/gaya campuran menjadi teks polos",
+    batasRute:
+      "{{jumlah}} garis memakai routing otomatis draw.io dan akan dihitung ulang oleh LanPro",
+    batasSumberTetap:
+      "Sumber .drawio{{nama}} disimpan apa adanya — mengekspor sumber mengembalikan byte berkas ini.",
     saveToDbFailed: "Gagal menyimpan ke basis data: {{penyebab}}",
     saveNoServerRow:
       "Diagram ini belum punya baris di server, jadi isinya baru tersimpan di perangkat ini.",

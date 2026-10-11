@@ -691,6 +691,9 @@ export const en = {
     simDone: "Workflow simulation finished!",
     jsonDownloaded: "Workspace JSON downloaded!",
     drawioDownloaded: "draw.io file downloaded!",
+    drawioSumberDiunduh: "Source .drawio downloaded — byte-identical to the original file.",
+    drawioKonversiDiunduh:
+      ".drawio written from the conversion — not the original bytes of this board.",
     preparingImage: "Preparing the image...",
     jpgDownloaded: "JPG image downloaded!",
     imageDownloadFailed: "Failed to download the image.",
@@ -1514,6 +1517,23 @@ export const en = {
     importDiagram: "Import diagram (Draw.io, Miro, or JSON)",
     saveFlowchart: "Save this entire flowchart to the database",
     savedToDb: "Saved to the database — {{shapes}} shapes, {{arrows}} connectors",
+    // #685 — .drawio source and native conversion limits.
+    sumberTidakDiadopsi:
+      "The .drawio file was not adopted as this board's source because its content was merged with existing work. The previous source stays intact.",
+    sumberTerlaluBesar:
+      "The board was saved, but the original .drawio was not (it exceeded the payload budget). Re-exporting will not match the source file.",
+    eksporKonversiNote:
+      "This board has no .drawio source, so what was downloaded is a conversion from the LanPro model.",
+    batasJudul: "What will not survive in the LanPro board",
+    batasHalaman:
+      "{{jumlah}} pages merged into one board ({{nama}}) — shapes sharing an id can overwrite each other",
+    batasBentuk: "Special shapes rendered as plain rectangles: {{daftar}}",
+    batasKunci: "Style keys ignored: {{daftar}}",
+    batasLabel: "{{jumlah}} labels with HTML/mixed styling become plain text",
+    batasRute:
+      "{{jumlah}} connectors use draw.io automatic routing and will be recomputed by LanPro",
+    batasSumberTetap:
+      "The source .drawio{{nama}} is stored as-is — exporting the source returns these exact bytes.",
     saveToDbFailed: "Failed to save to the database: {{penyebab}}",
     saveNoServerRow:
       "This diagram has no row on the server yet, so its content is only stored on this device.",

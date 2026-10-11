@@ -298,6 +298,36 @@ const titikTekukanGaris = (cell: Element): { x: number; y: number }[] => {
 };
 
 /** Membaca berkas .drawio/.xml dan memetakan tiap <mxCell> ke node atau edge. */
+/**
+ * #685 — kata kunci gaya yang BENAR-BENAR dikenali pemetaan bentuk di bawah.
+ *
+ * Daftarnya hidup di sini, bukan disalin ke laporan batas, karena satu-satunya
+ * yang tahu bentuk apa yang dikenali adalah kode pemetaan itu sendiri. Kalau
+ * nanti ada bentuk baru, laporan "apa yang hilang" ikut berubah tanpa ada yang
+ * perlu mengingat untuk menyinkronkan dua tempat.
+ */
+export const KATA_BENTUK_DIKENALI: ReadonlySet<string> = new Set([
+  "cloud",
+  "process",
+  "preprocess",
+  "text",
+  "ellipse",
+  "oval",
+  "circle",
+  "rhombus",
+  "diamond",
+  "cylinder",
+  "db",
+  "database",
+  "parallelogram",
+  "document",
+  "actor",
+  "lambda",
+  "class",
+  "sticky",
+  "note",
+]);
+
 export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
   const parser = new DOMParser();
   let cleanXml = xmlText.trim();
@@ -347,6 +377,9 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
   const lokasiSet = new Map<string, { x: number; y: number }>();
   const daftarRelatif: { anak: string; induk: string }[] = [];
 
+  /** #685 — bentuk tanpa posisi ditempatkan pada kisi yang ditentukan urutannya. */
+  let tanpaPosisi = 0;
+
   for (let i = 0; i < cells.length; i++) {
     const cell = cells[i];
     const id = cell.getAttribute("id");
@@ -358,16 +391,33 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
 
     if (vertex === "1") {
       const geometry = cell.getElementsByTagName("mxGeometry")[0];
-      let x = Math.floor(Math.random() * 150 + 100);
-      let y = Math.floor(Math.random() * 150 + 100);
+      // #685 — bentuk TANPA koordinat dulu ditempatkan dengan `Math.random()`.
+      // Akibatnya dua kali impor berkas yang SAMA menghasilkan papan yang berbeda,
+      // dan itu membuat bukti round-trip/hash apa pun mustahil ditulis. Kisi di
+      // bawah deterministik dan tidak saling menindih.
+      let x = 100 + (tanpaPosisi % 6) * 190;
+      let y = 100 + Math.floor(tanpaPosisi / 6) * 130;
       let width = 130;
       let height = 80;
 
       if (geometry) {
-        x = parseFloat(geometry.getAttribute("x") || `${x}`);
-        y = parseFloat(geometry.getAttribute("y") || `${y}`);
-        width = parseFloat(geometry.getAttribute("width") || "130");
-        height = parseFloat(geometry.getAttribute("height") || "80");
+        const mentahX = geometry.getAttribute("x") || "";
+        const mentahY = geometry.getAttribute("y") || "";
+        const angka = (mentah: string, cadangan: number): number => {
+          const nilai = parseFloat(mentah);
+          return Number.isFinite(nilai) ? nilai : cadangan;
+        };
+        const punyaPosisi = mentahX !== "" || mentahY !== "";
+        if (punyaPosisi) {
+          x = angka(mentahX, x);
+          y = angka(mentahY, y);
+        } else {
+          tanpaPosisi++;
+        }
+        width = angka(geometry.getAttribute("width") || "", 130);
+        height = angka(geometry.getAttribute("height") || "", 80);
+      } else {
+        tanpaPosisi++;
       }
 
       // #668 - draw.io menyimpan geometry ANAK relatif ke induknya (kolam,

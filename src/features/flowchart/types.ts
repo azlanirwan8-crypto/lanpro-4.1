@@ -306,6 +306,20 @@ export interface FlowchartData {
    */
   muatGagal?: boolean;
   /**
+   * #685 — byte ASLI berkas `.drawio` yang menjadi sumber papan ini.
+   *
+   * Disimpan apa adanya: tidak didekompresi, tidak dinormalisasi, tidak ditulis
+   * ulang dari model native. Itu satu-satunya cara siklus unggah → simpan →
+   * muat → ekspor bisa mengembalikan berkas yang sama.
+   *
+   * Boleh tidak ada: papan native lama tidak punya sumber, dan sumber yang
+   * tidak muat dalam anggaran payload dibuang dengan peringatan (papannya yang
+   * diselamatkan, bukan sumbernya yang membahayakan penyimpanan).
+   */
+  sumberDrawio?: string;
+  /** Discriminator format sumber, eksplisit — jangan ditebak dari isi teksnya. */
+  formatSumber?: string;
+  /**
    * #568 — stempel `updatedAt` baris ini saat papan terakhir dibaca. Kalau
    * basis data sudah bergeser, kiriman berikutnya ditolak 409 dan pengguna
    * diminta memuat ulang, bukan menimpa kerja tab lain.

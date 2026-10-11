@@ -72,6 +72,10 @@ import { labelTautan } from "./lib/labelTautan";
 import { setScreenSnapshot, clearScreenSnapshot } from "../../lib/screenContext";
 import { parseUniversalDiagram } from "./lib/importers";
 import type { ParsedDiagram } from "./lib/importers";
+// #685 — berkas `.drawio` adalah sumber kanonik: dibaca utuh, disimpan utuh,
+// dan setiap yang TIDAK bertahan dalam konversi native dinyatakan lebih dulu.
+import { putuskanImporDiagram } from "./lib/putuskanImpor";
+import type { BatasKonversi } from "./lib/sumberDrawio";
 // #659 - papan bisa ditulis MENJADI berkas draw.io, bukan dibaca saja.
 import { eksporDrawIo } from "./lib/eksporDrawio";
 import { apakahPembuat, tampilanNamaPembuat } from "./lib/authorIdentity";
@@ -89,6 +93,7 @@ import {
   createFlowchart as createFlowchartApi,
   updateFlowchart as updateFlowchartApi,
   deleteFlowchart as deleteFlowchartApi,
+  sumberMuatDisimpan,
 } from "./services/flowchart.service";
 
 interface FlowchartViewProps {
@@ -555,9 +560,28 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  /**
+   * #685 — sumber `.drawio` yang baru diimpor tetapi belum disimpan.
+   *
+   * Dikunci ke id papan tempat ia diimpor, bukan disimpan telanjang: mengimpor
+   * ke papan A lalu berpindah ke papan B akan menuliskan berkas A ke B, dan itu
+   * merusak diagram orang lain. Setelah tersimpan, sumber dibaca dari barisnya
+   * sendiri (`currentFlowMetadata.sumberDrawio`), jadi tidak ada state yang perlu
+   * dijaga.
+   */
+  const [sumberImpor, setSumberImpor] = useState<{ flowId: string; xml: string } | null>(null);
+  /** Laporan apa yang TIDAK bertahan dalam konversi — ditampilkan sebelum diterapkan. */
+  const [batasImpor, setBatasImpor] = useState<BatasKonversi | null>(null);
+  /**
+   * Berkas yang BARU DIPILIH, belum diterapkan. Simpan di ref: kalau ia menjadi
+   * state, membatalkan modal akan meninggalkan sumber yang siap ikut tersimpan,
+   * dan papan akan punya sumber yang tidak pernah diimpor pengguna.
+   */
+  const calonSumber = useRef<string | null>(null);
+
   const handleProcessImportFile = (file: File) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const text = e.target?.result as string;
         const fileName = file.name.toLowerCase();
@@ -574,8 +598,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         )
           detectedType = "native";
 
-        // Universal parser handles: .drawio, .xml, .json (Miro/LanPro), .csv, .mmd, .mermaid, .txt
-        const result = parseUniversalDiagram(text, file.name);
+        // #685 — keputusan impor dipusatkan: draw.io dibaca sebagai SUMBER
+        // (termasuk yang terkompresi, yang dulu ditolak sebagai "bukan diagram"),
+        // format lain tetap lewat jalur lama tanpa sumber kanonik.
+        const keputusan = await putuskanImporDiagram(text, file.name);
+        const result = keputusan.hasil;
+        calonSumber.current = keputusan.sumber?.xmlSumber ?? null;
+        setBatasImpor(keputusan.batas);
+
+        if (keputusan.sumber) detectedType = "drawio";
 
         // Check for LanPro native JSON (has nodes/edges keys directly)
         if (fileName.endsWith(".json")) {
@@ -585,7 +616,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               detectedType = "native";
             }
           } catch {
-            /* handled by parseUniversalDiagram */
+            /* ditangani putuskanImporDiagram */
           }
         }
 
@@ -596,7 +627,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             `Berhasil memuat "${file.name}" — ${result.nodes.length} bentuk, ${result.edges.length} panah.`
           );
         } else {
-          toast.error(t("toast.noShapesInFile"));
+          // Sumber yang sah tapi tidak bisa dijeraf TIDAK sama dengan "bukan
+          // diagram": berkasnya masih bisa disimpan/diekspor, dan pesan yang
+          // salah membuat pengguna mengira berkasnya korup.
+          calonSumber.current = null;
+          setBatasImpor(null);
+          setParsedImportData(null);
+          toast.error(keputusan.pesan || t("toast.noShapesInFile"));
         }
       } catch (err: any) {
         toast.error(t("toast.fileReadFailed", { pesan: err.message || err }));
@@ -627,28 +664,53 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     }
 
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       try {
         const text = ev.target?.result as string;
-        const result = parseUniversalDiagram(text, file.name);
-        if (result && (result.nodes.length > 0 || result.edges.length > 0)) {
-          setNodes(result.nodes);
-          setEdges(result.edges);
-          setHistoryStack([
-            {
-              nodes: JSON.parse(JSON.stringify(result.nodes)),
-              edges: JSON.parse(JSON.stringify(result.edges)),
-            },
-          ]);
-          setHistoryIndex(0);
-          setSelectedNodeId(null);
-          setSelectedEdgeId(null);
-          toast.success(
-            `"${file.name}" berhasil dimuat — ${result.nodes.length} bentuk, ${result.edges.length} panah. Langsung siap diedit!`
-          );
-        } else {
-          toast.error(`File "${file.name}" tidak mengandung bentuk yang dapat dibaca.`);
+        const keputusan = await putuskanImporDiagram(text, file.name);
+        const result = keputusan.hasil;
+
+        if (keputusan.sebab && !(result.nodes.length > 0 || result.edges.length > 0)) {
+          toast.error(keputusan.pesan || `File "${file.name}" tidak dapat dibaca.`);
+          return;
         }
+
+        if (!(result.nodes.length > 0 || result.edges.length > 0)) {
+          toast.error(`File "${file.name}" tidak mengandung bentuk yang dapat dibaca.`);
+          return;
+        }
+
+        // #685 — berkas draw.io yang dijatuhkan ke kanvas DULU langsung menimpa
+        // seluruh papan tanpa konfirmasi. Itu persis "menimpa sumber secara
+        // diam-diam" yang dilarang spesifikasi penerimaan, dan sekarang ia lewat
+        // modal yang sama: pengguna melihat jumlah bentuk + apa yang tidak
+        // bertahan, lalu memilih Ganti atau Gabung.
+        if (keputusan.sumber) {
+          calonSumber.current = keputusan.sumber.xmlSumber;
+          setBatasImpor(keputusan.batas);
+          setParsedFilename(file.name);
+          setParsedImportData(result);
+          setImportType("drawio");
+          setIsImportModalOpen(true);
+          return;
+        }
+
+        calonSumber.current = null;
+        setBatasImpor(null);
+        setNodes(result.nodes);
+        setEdges(result.edges);
+        setHistoryStack([
+          {
+            nodes: JSON.parse(JSON.stringify(result.nodes)),
+            edges: JSON.parse(JSON.stringify(result.edges)),
+          },
+        ]);
+        setHistoryIndex(0);
+        setSelectedNodeId(null);
+        setSelectedEdgeId(null);
+        toast.success(
+          `"${file.name}" berhasil dimuat — ${result.nodes.length} bentuk, ${result.edges.length} panah. Langsung siap diedit!`
+        );
       } catch (err: any) {
         toast.error(
           t("flowchart.importLoadFailed", { name: file.name, reason: err.message || err })
@@ -718,6 +780,17 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setSelectedEdgeId(null);
     setIsImportModalOpen(false);
     setParsedImportData(null);
+    // #685 — sumber baru HANYA ditetapkan di sini, yaitu ketika pengguna memang
+    // menerapkan konversinya. Menggantikan papan dengan hasil konversi tidak
+    // boleh menghapus berkas aslinya: selama sumber masih disimpan, pengguna
+    // bisa mengekspor ulang byte yang sama dan tidak kehilangan apa pun.
+    if (selectedFlowId && calonSumber.current) {
+      setSumberImpor({ flowId: selectedFlowId, xml: calonSumber.current });
+    } else {
+      setSumberImpor(null);
+    }
+    calonSumber.current = null;
+    setBatasImpor(null);
     toast.success(t("toast.canvasReplaced"));
   };
 
@@ -758,6 +831,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
     setIsImportModalOpen(false);
     setParsedImportData(null);
+    // #685 — pada GABUNG, isi papan jadi campuran kerja lama + berkas yang
+    // diimpor. Menjadikan berkas itu "sumber kanonik" akan berdusta: ekspor
+    // sumber kemudian tidak mengembalikan papan, hanya sebagianya. Jadi sumber
+    // lama dipertahankan apa adanya dan calon sumber dibuang dengan kabar.
+    if (calonSumber.current) {
+      toast.info(t("flowchart.sumberTidakDiadopsi"), { duration: 6000 });
+    }
+    calonSumber.current = null;
+    setBatasImpor(null);
     toast.success(t("toast.canvasMerged"));
   };
 
@@ -962,7 +1044,22 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
    * punya bukti yang bisa dihitung dari kedua arah.
    */
   const handleExportDrawIo = () => {
-    const isi = eksporDrawIo(nodes, edges, currentFlowMetadata?.name || "LanPro");
+    // #685 — dua ekspor yang berbeda artinya, dan pengguna harus tahu yang mana
+    // yang baru saja ia unduh:
+    //   • SUMBER = byte berkas aslinya, apa adanya (termasuk halaman, metadata,
+    //     atribut yang tidak dikenali LanPro). Hanya tersedia kalau papan ini
+    //     memang lahir dari berkas itu.
+    //   • KONVERSI = mxfile yang ditulis ulang dari model native. Bentuknya
+    //     mirip, isinya bukan berkas asal.
+    // Selama ini yang terjadi selalu yang kedua, dan itu tidak pernah disebut.
+    const sumber =
+      sumberImpor?.flowId === selectedFlowId
+        ? sumberImpor.xml
+        : (currentFlowMetadata?.sumberDrawio ?? null);
+    const dariSumber = !!sumber;
+    const isi = dariSumber
+      ? (sumber as string)
+      : eksporDrawIo(nodes, edges, currentFlowMetadata?.name || "LanPro");
     const url = `data:text/xml;charset=utf-8,${encodeURIComponent(isi)}`;
     const link = document.createElement("a");
     link.setAttribute("href", url);
@@ -973,7 +1070,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     document.body.appendChild(link);
     link.click();
     link.remove();
-    toast.success(t("toast.drawioDownloaded"));
+    toast.success(
+      dariSumber ? t("toast.drawioSumberDiunduh") : t("toast.drawioKonversiDiunduh"),
+      dariSumber ? undefined : { description: t("flowchart.eksporKonversiNote"), duration: 8000 }
+    );
   };
 
   // Download JPG Snapshot
@@ -1862,6 +1962,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       throw new Error("flowchart-muat-gagal");
     }
     const dibaca = versiPapan.current.get(selectedFlowId) ?? alur?.versiMuat ?? null;
+    // #685 — sumber yang belum disimpan mengalahkan sumber di baris; kalau tidak
+    // ada impor baru, berkas yang tersimpan sebelumnya yang dipakai.
+    const sumberAktif =
+      sumberImpor?.flowId === selectedFlowId ? sumberImpor.xml : (alur?.sumberDrawio ?? null);
     try {
       const stempel = await updateFlowchartApi(idProyek, selectedFlowId, {
         // #568 — tanpa ini server tidak bisa membedakan "tab ini basi" dari
@@ -1886,11 +1990,25 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         // #588 — tanpa baris ini daftar "Tautan Dokumen" tetap tidak pernah
         // sampai ke server, padahal tombol hapusnya (#587) sudah ada.
         documents: alur?.documents,
+        // #685 — sumber kanonik ikut SEMUA jalur tulis (tombol Simpan, autosave,
+        // kirim-saat-keluar). Pelajaran #570/#583/#613: kunci yang tidak ikut
+        // terkirim akan dihapus oleh jalur tulis berikutnya.
+        sumberDrawio: sumberAktif ?? undefined,
       });
-      if (stempel) versiPapan.current.set(selectedFlowId, stempel);
+      if (stempel) {
+        versiPapan.current.set(selectedFlowId, stempel);
+        // Sumber sudah duduk di barisnya; state sementara tidak diperlukan lagi.
+        if (sumberImpor?.flowId === selectedFlowId) setSumberImpor(null);
+      }
       bersihkanTandaBelumTersinkron(projId, selectedFlowId);
       if (!opts.senyap) {
         toast.success(t("flowchart.savedToDb", { shapes: nodes.length, arrows: edges.length }));
+        // Jujur soal batas: kalau sumber tidak muat, papan TERSIMPAN tetapi
+        // ekspor-ulang sumbernya nanti tidak identik. Pengguna harus tahu itu
+        // sekarang, bukan saat berkasnya berbeda.
+        if (sumberAktif && !sumberMuatDisimpan({ nodes, edges, sumberDrawio: sumberAktif })) {
+          toast.warning(t("flowchart.sumberTerlaluBesar"), { duration: 8000 });
+        }
       }
     } catch (apiErr) {
       console.warn("Could not save flowchart canvas to API:", apiErr);
@@ -1937,6 +2055,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       // sekadar perubahan daftar di layar; tanpa ini autosave menganggap isinya
       // sama dan tidak pernah mengirimnya.
       documents: currentFlowMetadata?.documents,
+      // #685 — sumber yang baru diimpor juga perubahan papan. Tanpa baris ini
+      // autosave menganggap isinya sama persis dan tidak pernah mengirim
+      // berkasnya, jadi sumber hilang tanpa pernah tersimpan.
+      sumberBaru: sumberImpor?.flowId === selectedFlowId ? sumberImpor.xml : null,
     }),
     [
       nodes,
@@ -1948,6 +2070,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       flowDescription,
       flowCategory,
       flowExternalUrl,
+      sumberImpor,
+      selectedFlowId,
     ]
   );
 
@@ -5005,6 +5129,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         setParsedImportData={setParsedImportData}
         parsedFilename={parsedFilename}
         setParsedFilename={setParsedFilename}
+        batasImpor={batasImpor}
         dragOverImport={dragOverImport}
         setDragOverImport={setDragOverImport}
         handleProcessImportFile={handleProcessImportFile}

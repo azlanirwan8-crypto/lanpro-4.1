@@ -16,6 +16,7 @@ import { Upload, FileText } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { Modal } from "../../../components/ui/Modal";
 import { Button } from "../../../components/ui/CoreUI";
+import type { BatasKonversi } from "../lib/sumberDrawio";
 
 /** Bentuk hasil parse yang ditampilkan sebagai ringkasan sebelum diterapkan. */
 type ParsedImportData = { nodes: any[]; edges: any[] } | null;
@@ -38,6 +39,13 @@ interface ImportDiagramModalProps {
   handleApplyImportMerge: () => void;
   /** Mengganti seluruh isi kanvas dengan hasil impor. */
   handleApplyImportReplace: () => void;
+  /**
+   * #685 — apa yang TIDAK akan bertahan dalam konversi native, dihitung dari
+   * SUMBER (bukan dari tebakan). `null` untuk format lain dan untuk berkas yang
+   * belum selesai diperiksa: modal tidak boleh mengarang daftar kosong lalu
+   * terkesan "aman".
+   */
+  batasImpor: BatasKonversi | null;
 }
 
 /** Daftar format yang didukung, lengkap dengan label, warna, dan ekstensi. */
@@ -98,6 +106,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
   handleProcessImportFile,
   handleApplyImportMerge,
   handleApplyImportReplace,
+  batasImpor: laporanBatas,
 }) => {
   const { t } = useTranslation();
 
@@ -288,6 +297,60 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
               </div>
             </div>
           </div>
+
+          {/*
+            #685 — batas konversi dinyatakan SEBELUM diterapkan.
+
+            Blok ini ada karena satu kalimat di spesifikasi penerimaan: "konversi
+            native tidak boleh menghilangkan data sumber tanpa dilaporkan". Tanpa
+            daftar ini, "impor berhasil" berarti "tidak ada galat", padahal
+            halaman kedua sudah digabung, bentuk khusus sudah jadi kotak biasa,
+            dan gaya label sudah hilang. Pengguna baru menyadarinya setelah
+            papan lama tertimpa.
+
+            Warna memakai token (§22) — bukan kelas hijau/merah keras seperti
+            blok di atasnya, yang merupakan utang #623.
+          */}
+          {laporanBatas && (
+            <div className="bg-surface-raised border border-border-subtle rounded-lg p-3 space-y-2">
+              <div className="text-[11px] font-medium uppercase tracking-wide text-content-strong">
+                {t("flowchart.batasJudul")}
+              </div>
+              <ul className="space-y-1 text-[11px] text-content-body">
+                {laporanBatas.halaman.length > 1 && (
+                  <li>
+                    •{" "}
+                    {t("flowchart.batasHalaman", {
+                      jumlah: laporanBatas.halaman.length,
+                      nama: laporanBatas.halaman.map((h) => h.nama).join(", "),
+                    })}
+                  </li>
+                )}
+                {laporanBatas.bentukTakDikenal.length > 0 && (
+                  <li>
+                    •{" "}
+                    {t("flowchart.batasBentuk", {
+                      daftar: laporanBatas.bentukTakDikenal.join(", "),
+                    })}
+                  </li>
+                )}
+                {laporanBatas.kunciHilang.length > 0 && (
+                  <li>
+                    • {t("flowchart.batasKunci", { daftar: laporanBatas.kunciHilang.join(", ") })}
+                  </li>
+                )}
+                {laporanBatas.labelKaya > 0 && (
+                  <li>• {t("flowchart.batasLabel", { jumlah: laporanBatas.labelKaya })}</li>
+                )}
+                {laporanBatas.konektorOtomatis > 0 && (
+                  <li>• {t("flowchart.batasRute", { jumlah: laporanBatas.konektorOtomatis })}</li>
+                )}
+              </ul>
+              <p className="text-[11px] text-content-muted">
+                {t("flowchart.batasSumberTetap", { nama: parsedFilename || "" })}
+              </p>
+            </div>
+          )}
           <p className="text-[10px] text-emerald-700 italic leading-relaxed">
             Pilih <strong>Gabung ke Kanvas</strong> untuk menambahkan ke diagram yang ada, atau{" "}
             <strong>Ganti Kanvas</strong> untuk memulai baru.

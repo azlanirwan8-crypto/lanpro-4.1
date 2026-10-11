@@ -21,6 +21,19 @@ import { apiRequest } from "../../../lib/api";
 import type { KonteksFlowchart, FlowchartData, FlowchartDocument, PolaPapan } from "../types";
 import { POLA_PAPAN } from "../types";
 import { adaKonteks } from "../types";
+import { FORMAT_SUMBER, panjangByte } from "../lib/sumberDrawio";
+
+/**
+ * #685 — anggaran payload papan.
+ *
+ * Server menolak `canvasData` di atas 8 MB (lihat `BATAS_PAYLOAD` di
+ * `server/schemas/document.schema.ts:19`). 7,5 MB dipakai sebagai ambang klient
+ * supaya ada kepala untuk perbedaan escaping antara `JSON.stringify` di sini dan
+ * pengukuran di server — bukan untuk menebak-nebak: selisihnya diuji di test.
+ * Batas sumber itu sendiri lebih kecil lagi (`BATAS_BYTE_SUMBER`) karena XML
+ * duduk BERSAMEAN dengan nodes/edges di dalam satu payload.
+ */
+const ANGGARAN_PAYLOAD = 7.5 * 1024 * 1024;
 
 /**
  * Penanda baris papan di tabel Documents — sama dengan `JENIS_PAPAN` di
@@ -60,6 +73,14 @@ interface IsiKanvas {
   documents?: FlowchartDocument[];
   pola?: string;
   /**
+   * #685 — byte asli `.drawio`, dan discriminator yang menyebut formatnya.
+   * Pembaca lama mengabaikan kunci tak dikenal, jadi menambah keduanya tidak
+   * membuat payload lama tidak terbaca — dan payload lama tidak diubah saat
+   * dibaca.
+   */
+  sumberDrawio?: string;
+  formatSumber?: string;
+  /**
    * #567 — `false` berarti "kosong karena memang kosong". `true` berarti kolomnya
    * ada tapi tidak bisa dibaca, dan papan seperti itu TIDAK BOLEH ditulis balik:
    * satu muat yang rusak cukup untuk menghapus diagram yang benar lewat autosave.
@@ -97,6 +118,17 @@ function parseFlowPayload(payloadMentah?: string): IsiKanvas {
     epicTaskId: typeof payload.epicTaskId === "string" ? payload.epicTaskId : undefined,
     konteks: payload.konteks && typeof payload.konteks === "object" ? payload.konteks : undefined,
     pola: POLA_PAPAN.includes(payload.pola) ? payload.pola : undefined,
+    // #685 — sumber hanya diterima kalau formatnya DINYATAKAN dan isinya string.
+    // Menebak "ini XML drawio atau bukan" dari isi adalah cara menghasilkan papan
+    // yang dianggap punya sumber padahal sebenarnya tidak.
+    sumberDrawio:
+      payload.formatSumber === FORMAT_SUMBER && typeof payload.sumberDrawio === "string"
+        ? payload.sumberDrawio
+        : undefined,
+    formatSumber:
+      payload.formatSumber === FORMAT_SUMBER && typeof payload.sumberDrawio === "string"
+        ? FORMAT_SUMBER
+        : undefined,
     documents: Array.isArray(payload.documents)
       ? payload.documents.filter(
           (d: any) => d && typeof d.id === "string" && typeof d.name === "string"
@@ -154,9 +186,18 @@ function toFlowchartData(doc: DocumentRow): FlowchartData {
   // `description`. Dibaca sebagai cadangan supaya diagram lama tetap terbuka
   // walau backfill belum sempat berjalan di lingkungan itu.
   const payloadLama = isCanvasPayload(doc.description) ? doc.description : undefined;
-  const { nodes, edges, theme, epicTaskId, konteks, documents, pola, muatGagal } = parseFlowPayload(
-    doc.canvasData || payloadLama
-  );
+  const {
+    nodes,
+    edges,
+    theme,
+    epicTaskId,
+    konteks,
+    documents,
+    pola,
+    muatGagal,
+    sumberDrawio,
+    formatSumber,
+  } = parseFlowPayload(doc.canvasData || payloadLama);
   return {
     id: doc.id,
     name: doc.title,
@@ -176,6 +217,9 @@ function toFlowchartData(doc: DocumentRow): FlowchartData {
     polaPapan: pola as PolaPapan | undefined,
     epicTaskId: epicTaskId || undefined,
     konteks: bacaKonteks(konteks),
+    // #685 — sumber ikut sampai ke UI supaya ekspor-ulang bisa byte-identik.
+    sumberDrawio,
+    formatSumber,
     createdAt: doc.createdAt
       ? new Date(doc.createdAt).toLocaleDateString("id-ID")
       : new Date().toLocaleDateString("id-ID"),
@@ -188,8 +232,24 @@ function toFlowchartData(doc: DocumentRow): FlowchartData {
   };
 }
 
-/** Menyandikan isi papan menjadi payload kolom canvasData. */
-function encodeFlowPayload(flow: {
+/**
+ * #685 — menyusun payload `canvasData`, dan memutuskan apakah sumber `.drawio`
+ * ikut atau tidak.
+ *
+ * KEPUTUSAN YANG DIBUAT DI SINI DAN ALASANNYA. Server menolak SELURUH payload
+ * di atas 8 MB (`server/schemas/document.schema.ts:19`, konsekuensi #584/#586).
+ * Sumber yang besar tidak boleh membuat papan berhenti bisa disimpan — pengguna
+ * akan kehilangan PEKERJAAN yang sedang mereka edit demi berkas yang masih ada
+ * di laptopnya. Jadi urutan prioritasnya: nodes/edges dulu, sumber sesudahnya,
+ * dan sumber yang tidak muat DIBUANG DENGAN SUKARELA + DIKABARKAN, bukan hilang
+ * tanpa jejak. Flag `sumberIkutTersimpan` adalah jalur kabar itu; UI yang tidak
+ * membacanya akan berdusta.
+ *
+ * Fungsi ini diekspor (bukan hanya dipakai di dalam) supaya ambang yang sama
+ * bisa diperiksa UI SEBELUM menyimpan dan supaya test menyentuh angka yang sama
+ * dengan yang dipakai produksi.
+ */
+export function susunPayload(flow: {
   nodes: any[];
   edges: any[];
   theme?: string;
@@ -197,24 +257,53 @@ function encodeFlowPayload(flow: {
   konteks?: KonteksFlowchart;
   documents?: FlowchartDocument[];
   polaPapan?: PolaPapan;
-}): string {
+  sumberDrawio?: string;
+}): { payload: string; sumberIkutTersimpan: boolean } {
   const lampiran = sandiLampiran(flow.documents);
-  return JSON.stringify({
-    nodes: flow.nodes,
-    edges: flow.edges,
-    theme: flow.theme || "miro",
-    ...(flow.epicTaskId ? { epicTaskId: flow.epicTaskId } : {}),
-    // #583 — empat blok detail ikut tersimpan di payload yang sama supaya
-    // SETIAP jalur tulis (tombol Simpan, autosave, kirim-saat-keluar) membawanya.
-    // Yang tidak ikut terkirim akan hilang saat jalur lain menimpa barisnya.
-    ...(adaKonteks(flow.konteks) ? { konteks: flow.konteks } : {}),
-    // #588 — tanpa ini, daftar "Tautan Dokumen" hanya hidup di localStorage
-    // perangkat: berpindah laptop atau membersihkan cache menghapusnya.
-    ...(lampiran ? { documents: lampiran } : {}),
-    // #613 — pilihan pola papan harus ikut SEMUA jalur tulis; yang tidak ikut
-    // terkirim akan hilang saat jalur lain menimpa barisnya (#570).
-    ...(flow.polaPapan ? { pola: flow.polaPapan } : {}),
-  });
+
+  const bangun = (sumber?: string) =>
+    JSON.stringify({
+      nodes: flow.nodes,
+      edges: flow.edges,
+      theme: flow.theme || "miro",
+      ...(flow.epicTaskId ? { epicTaskId: flow.epicTaskId } : {}),
+      // #583 — empat blok detail ikut tersimpan di payload yang sama supaya
+      // SETIAP jalur tulis (tombol Simpan, autosave, kirim-saat-keluar) membawanya.
+      // Yang tidak ikut terkirim akan hilang saat jalur lain menimpa barisnya.
+      ...(adaKonteks(flow.konteks) ? { konteks: flow.konteks } : {}),
+      // #588 — tanpa ini, daftar "Tautan Dokumen" hanya hidup di localStorage
+      // perangkat: berpindah laptop atau membersihkan cache menghapusnya.
+      ...(lampiran ? { documents: lampiran } : {}),
+      // #613 — pilihan pola papan harus ikut SEMUA jalur tulis; yang tidak ikut
+      // terkirim akan hilang saat jalur lain menimpa barisnya (#570).
+      ...(flow.polaPapan ? { pola: flow.polaPapan } : {}),
+      ...(sumber ? { sumberDrawio: sumber, formatSumber: FORMAT_SUMBER } : {}),
+    });
+
+  const tanpaSumber = bangun(undefined);
+  if (!flow.sumberDrawio) return { payload: tanpaSumber, sumberIkutTersimpan: false };
+
+  const denganSumber = bangun(flow.sumberDrawio);
+  if (panjangByte(denganSumber) > ANGGARAN_PAYLOAD) {
+    return { payload: tanpaSumber, sumberIkutTersimpan: false };
+  }
+  return { payload: denganSumber, sumberIkutTersimpan: true };
+}
+
+/** Menyandikan isi papan menjadi payload kolom canvasData. */
+function encodeFlowPayload(flow: Parameters<typeof susunPayload>[0]): string {
+  return susunPayload(flow).payload;
+}
+
+/**
+ * #685 — apakah sumber `.drawio` papan ini akan ikut tersimpan?
+ *
+ * Dipakai UI untuk MEMBERITAHU sebelum menyimpan, bukan sesudah pengguna
+ * terkejut. Tanpa fungsi ini keputusannya ada di dalam `susunPayload` dan
+ * pengguna tidak pernah tahu bahwa ekspor-ulang sumbernya nanti tidak identik.
+ */
+export function sumberMuatDisimpan(flow: Parameters<typeof susunPayload>[0]): boolean {
+  return susunPayload(flow).sumberIkutTersimpan;
 }
 
 /**
@@ -252,6 +341,7 @@ export async function createFlowchart(
     | "konteks"
     | "documents"
     | "polaPapan"
+    | "sumberDrawio"
   >
 ): Promise<string | null> {
   const res: any = await apiRequest(`/api/projects/${projectId}/documents`, {
@@ -287,6 +377,8 @@ export async function updateFlowchart(
     konteks?: KonteksFlowchart;
     documents?: FlowchartDocument[];
     polaPapan?: PolaPapan;
+    /** #685 — byte asli `.drawio`; boleh tidak ada untuk papan native. */
+    sumberDrawio?: string;
   }
 ): Promise<string | null> {
   const res: any = await apiRequest(`/api/projects/${projectId}/documents/${flowId}`, {
