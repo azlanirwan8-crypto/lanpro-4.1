@@ -65,10 +65,19 @@ describe("findIssueListPage dengan penugasan (#688)", () => {
     expect(bersyarat).toHaveLength(1);
     const q = bersyarat[0];
     expect(q.sql).not.toMatch(/parentId IS NULL/);
-    expect(q.sql).toContain("assigneeId IN (?,?)");
-    expect(q.sql).toContain("assigneeEmail IN (?,?)");
+    // SATU placeholder per kolom, nilainya array. Bentuk `IN (?,?,…)` memang
+    // terlihat lebih wajar, tapi `convertToPostgres` melipatnya jadi `= ANY($1)`
+    // hanya bila ada satu `?` — dan dengan nilai string itu Postgres menolak.
+    expect(q.sql).toContain("assigneeId IN (?)");
+    expect(q.sql).toContain("assigneeEmail IN (?)");
     expect(q.sql).toContain("assignees::text LIKE ?");
-    expect(q.params).toEqual(expect.arrayContaining(["uid-1", "rina@contoh.test", '%"uid-1"%']));
+    expect(q.params).toEqual([
+      "p1",
+      ["uid-1", "rina@contoh.test"],
+      ["uid-1", "rina@contoh.test"],
+      '%"uid-1"%',
+      '%"rina@contoh.test"%',
+    ]);
   });
 
   it("total dihitung dari rantai milik pemanggil, bukan dari COUNT seluruh proyek", async () => {

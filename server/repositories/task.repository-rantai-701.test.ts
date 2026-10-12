@@ -125,7 +125,7 @@ describe("#701 rantai induk ikut dibawa saat My Tasks", () => {
     // Dua akar di rantai, tapi halaman pertama hanya memuat satu.
     expect(hasil.total).toBe(2);
     const tree = panggilan.find((p) => /WITH RECURSIVE tree/i.test(p.sql))!;
-    expect(tree.params).toEqual(["epic-a"]);
+    expect(tree.params).toEqual([["epic-a"]]);
     expect([...(terpilih.ids ?? [])].sort()).toEqual(["a", "epic-a"]);
   });
 

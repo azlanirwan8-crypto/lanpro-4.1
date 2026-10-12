@@ -217,14 +217,18 @@ export class TaskRepository {
       return { allowedIds: new Set<string>(), total };
     }
 
+    // `IN (?)` + SATU parameter array, bukan `IN (?,?,…)`: satu id dalam bentuk
+    // panjang itu diterjemahkan `convertToPostgres` jadi `= ANY($1)` dengan nilai
+    // string, dan Postgres menolaknya (`malformed array literal`). Konvensi yang
+    // sama sudah dipakai `findTasksWithRelations` di atas — lihat #329.
     const [treeRows]: any = await connection.query(
       `WITH RECURSIVE tree AS (
-         SELECT id FROM Tasks WHERE id IN (${rootIds.map(() => "?").join(",")})
+         SELECT id FROM Tasks WHERE id IN (?)
          UNION ALL
          SELECT c.id FROM Tasks c INNER JOIN tree p ON c.parentId = p.id
        )
        SELECT id FROM tree`,
-      rootIds
+      [rootIds]
     );
     return { allowedIds: new Set<string>((treeRows || []).map((r: any) => r.id)), total };
   }
@@ -272,9 +276,9 @@ export class TaskRepository {
     }
     // Kolom camelCase mengikuti konvensi yang SUDAH dipakai berkas ini
     // (`projectId`, `parentId`, `orderIndex`, `taskKey`) — §5 AGENTS.md.
-    const tempat = penugasanKepada.map(() => "?").join(",");
-    milikWhere += ` AND (assigneeId IN (${tempat}) OR assigneeEmail IN (${tempat})`;
-    params.push(...penugasanKepada, ...penugasanKepada);
+    // `IN (?)` + array, bukan `IN (?,?,…)`: lihat catatan di `halamanAkar()`.
+    milikWhere += " AND (assigneeId IN (?) OR assigneeEmail IN (?)";
+    params.push(penugasanKepada, penugasanKepada);
     // Multi-assignee disimpan sebagai JSONB array-of-string; kecocokan pada
     // elemen TERKUTIP supaya id yang kebetulan bagian dari id lain tidak ikut.
     // Metakarakter LIKE di-escape + `ESCAPE '\'`: tanpa itu email ber-% berubah
@@ -298,14 +302,14 @@ export class TaskRepository {
     const [naikRows]: any = await connection.query(
       `WITH RECURSIVE naik AS (
          SELECT id, parentId, "orderIndex", "createdAt", 0 AS kedalaman
-           FROM Tasks WHERE id IN (${milikIds.map(() => "?").join(",")})
+           FROM Tasks WHERE id IN (?)
          UNION ALL
          SELECT p.id, p.parentId, p."orderIndex", p."createdAt", n.kedalaman + 1
            FROM Tasks p INNER JOIN naik n ON p.id = n.parentId
           WHERE n.kedalaman < 20
        )
        SELECT id, parentId, "orderIndex", "createdAt" FROM naik`,
-      milikIds
+      [milikIds]
     );
     const rantai = (naikRows || []).filter((r: any) => r?.id);
     const dalamRantai = new Set<string>(rantai.map((r: any) => r.id));
@@ -335,12 +339,12 @@ export class TaskRepository {
     // Turun dari akar halaman ini, lalu POTONG ke rantai.
     const [treeRows]: any = await connection.query(
       `WITH RECURSIVE tree AS (
-         SELECT id FROM Tasks WHERE id IN (${rootIds.map(() => "?").join(",")})
+         SELECT id FROM Tasks WHERE id IN (?)
          UNION ALL
          SELECT c.id FROM Tasks c INNER JOIN tree p ON c.parentId = p.id
        )
        SELECT id FROM tree`,
-      rootIds
+      [rootIds]
     );
     const allowedIds = new Set<string>(
       (treeRows || []).map((r: any) => r.id).filter((id: string) => !!id && dalamRantai.has(id))
