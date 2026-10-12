@@ -131,6 +131,63 @@ export const deleteDiscussionPoint = async (
   }
 };
 
+/**
+ * #704 — unggah bayt sebuah gambar/berkas.
+ *
+ * Sengaja memakai endpoint yang SAMA dengan lampiran tugas (`/api/v1/upload-document`):
+ * hanya di sana `validateFileBuffer()` (magic byte + daftar putih + batas ukuran)
+ * dan penulisan lewat `storage.service.ts` berjalan. Membuat jalur unggah kedua
+ * berarti membuat penjaga kedua — dan yang selalu kalah adalah yang baru.
+ * Fungsi ini ditulis ulang di sini, bukan diimpor dari fitur Isu, karena §4
+ * melarang dua fitur saling menggergaji foldernya sendiri.
+ */
+export const uploadDiscussionPointFile = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  return apiRequest("/api/v1/upload-document", { method: "POST", body: formData });
+};
+
+export const attachDiscussionPointFile = async (
+  projectId: string,
+  meetingId: string,
+  pointId: string,
+  payload: {
+    fileRef: string;
+    name?: string | null;
+    originalName?: string | null;
+    mimetype?: string | null;
+    size?: number | null;
+    url?: string | null;
+  },
+  userId?: string
+) => {
+  const data = await apiRequest(
+    `/api/projects/${projectId}/meetings/${meetingId}/discussionPoints/${pointId}/files`,
+    { method: "POST", headers: getHeaders(userId), body: payload }
+  );
+  if (data && data.status !== "success") {
+    throw new Error(data.message || "Failed to attach file");
+  }
+  return data.data;
+};
+
+export const deleteDiscussionPointFile = async (
+  projectId: string,
+  meetingId: string,
+  pointId: string,
+  fileId: string,
+  userId?: string
+) => {
+  const data = await apiRequest(
+    `/api/projects/${projectId}/meetings/${meetingId}/discussionPoints/${pointId}/files/${fileId}`,
+    { method: "DELETE", headers: getHeaders(userId) }
+  );
+  if (data && data.status !== "success") {
+    throw new Error(data.message || "Failed to delete file");
+  }
+  return data;
+};
+
 export const getDiscussionPointComments = async (pointId: string, userId?: string) => {
   try {
     const data = await apiRequest(`/api/discussion-points/${pointId}/comments`, {

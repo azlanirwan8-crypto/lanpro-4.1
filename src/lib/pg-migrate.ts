@@ -482,6 +482,66 @@ export async function runMigrations(pool: Pool): Promise<void> {
       ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "tanggalUpdateStatus" VARCHAR(50);
     `);
 
+    // ── #703/#704 — titik diskusi: PIC jamak, Context/Tags ke Daftar Isu,
+    //    tautan jamak, dan gambar jamak ─────────────────────────────────────────
+    //
+    // KENAPA snake_case, BUKAN camelCase ber-kutip seperti kolom rapat lainnya.
+    // `src/lib/db.ts` mengutip nama tabel dan kolom dari DAFTAR TETAP (`pgTables`
+    // baris 88, `camelCaseCols` baris 122) dan berkas itu dilarang disentuh (§3).
+    // Nama baru tidak akan pernah masuk daftar itu, jadi camelCase akan dilipat
+    // Postgres menjadi huruf kecil — persis penyebab "kolom kembar" yang dicatat
+    // §5 dan yang masih dibayar mahal #476 (repository harus mengutip manual
+    // `parentPointId`, `assignTo`, `tindakanLanjut`). Nama huruf kecil utuh bebas
+    // dari keduanya: tidak ada yang dilipat, tidak ada yang perlu dikutip.
+    // Presedennya ada di berkas ini juga: `meeting_details` dan
+    // `discussion_point_comments`.
+    await client.query(`
+      -- #703 (keputusan B2 = b). PIC JAMAK disimpan sebagai tabel relasi, bukan
+      -- array JSONB di kolom, karena ia memang akan disaring: "titik diskusi apa
+      -- yang saya pegang". #688 dan #701 baru saja membuktikan ke mana membawa
+      -- filter lewat pencocokan TEKS atas JSONB — satu metakarakter, satu
+      -- kebocoran. Baris kunci tidak bisa bocor begitu.
+      CREATE TABLE IF NOT EXISTS discussion_point_assignees (
+        id          VARCHAR(36) PRIMARY KEY,
+        point_id    VARCHAR(36) NOT NULL,
+        user_id     VARCHAR(36) NOT NULL,
+        created_at  TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_dpa_point ON discussion_point_assignees (point_id);
+      CREATE INDEX IF NOT EXISTS idx_dpa_user ON discussion_point_assignees (user_id);
+
+      -- #703 (keputusan B1 = a). "Context / Tags" sekarang menunjuk ISU NYATA dari
+      -- Daftar Isu proyek, bukan lagi hanya label MasterData. Yang disimpan adalah
+      -- SNAPSHOT [{id, label}] dan bukan id telanjang: isu boleh dihapus, catatan
+      -- rapat tidak boleh ikut kehilangan maknanya dan menampilkan id mentah.
+      -- Kolom lama fitur/system/surrounding TIDAK disentuh — datanya tetap
+      -- terbaca, dan kolom itu masih punya kontrolnya sendiri di form.
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS tags JSONB;
+
+      -- #704 (keputusan B3): tautan jamak, disimpan sebagai JSONB dan bukan tabel
+      -- karena ia tidak pernah disaring di SQL — hanya ditampilkan.
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS links JSONB;
+
+      -- #704 — gambar/berkas per titik diskusi. Bayt-nya naik lewat
+      -- /api/v1/upload-document lalu barisnya ditulis ke sini; kolomnya sengaja
+      -- menyerupai tabel Attachments supaya pemanggil tidak perlu belajar dua
+      -- bentuk.
+      CREATE TABLE IF NOT EXISTS discussion_point_files (
+        id               VARCHAR(36) PRIMARY KEY,
+        point_id         VARCHAR(36) NOT NULL,
+        file_ref         TEXT,
+        name             VARCHAR(255),
+        original_name    VARCHAR(255),
+        mimetype         VARCHAR(100),
+        size             BIGINT DEFAULT 0,
+        url              TEXT,
+        uploaded_by      VARCHAR(36),
+        uploaded_by_name VARCHAR(255),
+        uploaded_at      TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_dpf_point ON discussion_point_files (point_id);
+    `);
+
     // ── meeting_details ──────────────────────────────────────────────────────
     await client.query(`
       CREATE TABLE IF NOT EXISTS meeting_details (
@@ -1125,7 +1185,12 @@ export const TABEL_WAJIB: readonly string[] = [
   "UserSessions",
   "Users",
   "ai_learning_logs",
+  // #703/#704 — dua tabel anak titik diskusi. Nama huruf kecil utuh karena
+  // `src/lib/db.ts` hanya mengutip nama dari daftar tetapnya (§3: daftar itu
+  // tidak boleh disentuh), jadi camelCase di sini akan dilipat Postgres.
+  "discussion_point_assignees",
   "discussion_point_comments",
+  "discussion_point_files",
   "meeting_details",
 ];
 

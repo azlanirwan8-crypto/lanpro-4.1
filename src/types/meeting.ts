@@ -1,3 +1,36 @@
+/**
+ * #703 (B1 = a) — satu tag menunjuk SATU isu dari Daftar Isu.
+ *
+ * `label` ikut dikirim dan disimpan, bukan diambil ulang dari daftar isu: isu
+ * boleh dihapus, dan catatan rapat tidak boleh kemudian menampilkan id mentah.
+ */
+export interface TagIsu {
+  id: string;
+  label: string;
+}
+
+/** #704 (B3) — tautan jamak. `url` sudah divalidasi http/https di server. */
+export interface TautanDiskusi {
+  id: string;
+  label?: string | null;
+  url: string;
+}
+
+/** #704 — satu berkas/gambar yang menempel pada satu titik diskusi. */
+export interface BerkasDiskusi {
+  id: string;
+  pointId?: string;
+  fileRef?: string | null;
+  name?: string | null;
+  originalName?: string | null;
+  mimetype?: string | null;
+  size?: number | null;
+  url?: string | null;
+  uploadedBy?: string | null;
+  uploadedByName?: string | null;
+  uploadedAt?: string;
+}
+
 export interface DiscussionPoint {
   id?: string;
   meetingId?: string;
@@ -7,6 +40,14 @@ export interface DiscussionPoint {
   authorId?: string;
   assignTo?: string;
   assignee_id?: string;
+  /** #703 (B2 = b) — penerima JAMAK. `assignTo` tetap berisi yang pertama. */
+  assigneeIds?: string[];
+  /** #703 — tag isu. */
+  tags?: TagIsu[] | null;
+  /** #704 — tautan jamak. */
+  links?: TautanDiskusi[] | null;
+  /** #704 — berkas/gambar jamak. */
+  files?: BerkasDiskusi[];
   concern: string;
   comment?: string;
   fitur?: string;
@@ -19,7 +60,7 @@ export interface DiscussionPoint {
   next_action?: string;
   tindakanLanjut?: string;
   tindakan_lanjut?: string;
-  status: 'pending' | 'completed';
+  status: "pending" | "completed";
   targetDate?: string;
   target_date?: string;
   tanggalUpdateStatus?: string;

@@ -16,6 +16,7 @@ import {
   updateDiscussionPointSchema,
   createCommentSchema,
   updateCommentSchema,
+  buatBerkasDiskusiSchema,
 } from "../schemas/discussion-points.schema";
 
 const router = Router();
@@ -77,6 +78,9 @@ router.post(
         status,
         targetDate,
         tanggalUpdateStatus,
+        assigneeIds,
+        tags,
+        links,
       } = req.body || {};
       const effectiveAuthorId = penulisDari(req).id || "guest";
       const newId = crypto.randomUUID();
@@ -86,7 +90,11 @@ router.post(
         meetingId: id,
         parentPointId: parentPointId || null,
         authorId: effectiveAuthorId,
-        assignTo: assignTo || null,
+        // #703 — `assignTo` TETAP diisi PIC pertama. Ia bukan lagi satu-satunya
+        // sumber kebenaran, tetapi pemakai lama (pemetaan AI, notifikasi, kartu
+        // mobile) membacanya; meninggalkannya kosong berarti membuat fitur itu
+        // tampak kehilangan penerima.
+        assignTo: assignTo || assigneeIds?.[0] || null,
         concern: concern || null,
         fitur: fitur || null,
         system: system || null,
@@ -96,6 +104,9 @@ router.post(
         status: status || "pending",
         targetDate: targetDate || null,
         tanggalUpdateStatus: tanggalUpdateStatus || null,
+        assigneeIds,
+        tags,
+        links,
       });
 
       res.json({ status: "success", data: { id: newId, meetingId: id } });
@@ -129,11 +140,20 @@ router.put(
         status,
         targetDate,
         tanggalUpdateStatus,
+        assigneeIds,
+        tags,
+        links,
       } = req.body;
+
+      // #703 — kalau daftar penerimanya dikirim, `assignTo` ikut daftar itu dan
+      // BUKAN lagi nilai yang berdiri sendiri. Tanpa baris ini, sunting PIC di
+      // form baru akan menyimpan `assigneeIds` yang benar sambil meninggalkan
+      // `assignTo` lama menunjuk orang yang sudah dilepas.
+      const penerimaBaru = Array.isArray(assigneeIds) ? assigneeIds : undefined;
 
       await discussionPointsRepository.updatePoint(pointId, {
         parentPointId,
-        assignTo,
+        assignTo: penerimaBaru ? penerimaBaru[0] || null : assignTo,
         concern,
         fitur,
         system,
@@ -143,6 +163,9 @@ router.put(
         status,
         targetDate,
         tanggalUpdateStatus,
+        assigneeIds: penerimaBaru,
+        tags,
+        links,
       });
 
       res.json({ status: "success", code: "srv.point_updated", message: "Point updated" });
@@ -165,6 +188,101 @@ router.delete(
       const { pointId } = req.params;
       await discussionPointsRepository.deletePoint(pointId);
       res.json({ status: "success", code: "srv.point_deleted", message: "Point deleted" });
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
+    }
+  }
+);
+
+// #704 — BERKAS/GAMBAR satu titik diskusi.
+//
+// Bayt-nya naik lewat `/api/v1/upload-document` (satu-satunya jalur yang
+// memvalidasi magic byte dan menulis lewat `storage.service.ts`); rute di bawah
+// hanya MENDAFTARKAN hasilnya ke `discussion_point_files`, di bawah penjaga
+// proyek yang sama dengan CRUD titik diskusi.
+router.get(
+  "/api/projects/:projectId/meetings/:id/discussionPoints/:pointId/files",
+  jagaProyek("meetingNotes", "R"),
+  async (req, res) => {
+    try {
+      const rows = await discussionPointsRepository.findFilesByPointId(req.params.pointId);
+      res.json({ status: "success", data: rows });
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
+    }
+  }
+);
+
+router.post(
+  "/api/projects/:projectId/meetings/:id/discussionPoints/:pointId/files",
+  jagaProyek("meetingNotes", "C"),
+  validasiBody(buatBerkasDiskusiSchema),
+  async (req, res) => {
+    try {
+      const { pointId } = req.params;
+      const { fileRef, name, originalName, mimetype, size, url } = req.body || {};
+      const penulis = penulisDari(req);
+      const baru = await discussionPointsRepository.createFile({
+        id: crypto.randomUUID(),
+        pointId,
+        fileRef,
+        name: name || originalName || fileRef,
+        originalName: originalName || null,
+        mimetype: mimetype || null,
+        size: typeof size === "number" ? size : 0,
+        url: url || null,
+        uploadedBy: penulis.id || null,
+        uploadedByName: penulis.nama || null,
+        uploadedAt: new Date().toISOString(),
+      });
+      res.json({ status: "success", data: baru });
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
+    }
+  }
+);
+
+router.delete(
+  "/api/projects/:projectId/meetings/:id/discussionPoints/:pointId/files/:fileId",
+  jagaProyek("meetingNotes", "D"),
+  async (req, res) => {
+    try {
+      const { pointId, fileId } = req.params;
+      // Sama seperti #248 di komentar: milik barisnya diperiksa SEBELUM hapus,
+      // dan yang dibandingkan adalah titik diskusi dari URL — bukan siapa
+      // pemanggilnya. Tanpa ini, satu id berkas milik rapat lain bisa dihapus
+      // oleh siapa pun yang punya akses tulis di proyek yang ia pegang.
+      const pemilik = await discussionPointsRepository.findFilePointId(fileId);
+      if (!pemilik || pemilik !== pointId) {
+        return res.status(404).json({
+          status: "error",
+          code: "srv.lampiran_tidak_ditemukan",
+          // Teksnya HARUS sama dengan entri kamus — `kode-server-150.test.ts`
+          // menolak satu kode dipakai untuk dua pesan berbeda.
+          message: "Lampiran tidak ditemukan.",
+        });
+      }
+      await discussionPointsRepository.deleteFile(fileId);
+      // `srv.point_deleted` TIDAK dipakai di sini: `kode-server-150.test.ts`
+      // menolak satu kode memikul dua pesan berbeda, dan kode itu sudah memegang
+      // "Point deleted". Yang dipakai adalah kode hapus berkas yang SUDAH ada
+      // (`documents.routes.ts:304`), dengan teks yang sama persis.
+      res.json({ status: "success", code: "srv.document_deleted", message: "Document deleted" });
     } catch (error: any) {
       console.error(error);
       res.status(500).json({

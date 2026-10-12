@@ -21,8 +21,18 @@ import { join } from "path";
 const AKAR = join(__dirname, "..", "..", "..");
 const baca = (relatif: string) => readFileSync(join(AKAR, relatif), "utf8").replace(/\r\n/g, "\n");
 
-const TABEL = "src/features/meeting-notes/DiscussionPointsTable.tsx";
+/* #703 memindahkan sel tabel ke `components/BarisDiskusi.tsx` dan laci ke
+ * berkas sendiri (§4: induknya 1.255 baris). JAMINAN test ini tidak berubah —
+ * hanya alamat yang diikuti. Kalau nanti sel itu pindah lagi, perbarui alamatnya,
+ * jangan hapus testnya. */
+const TABEL = "src/features/meeting-notes/components/BarisDiskusi.tsx";
 const KARTU = "src/features/meeting-notes/components/DiscussionPointMobileCardView.tsx";
+
+/** Nama PIC dirender dari ekspresi yang berbeda di tiap tampilan (#703). */
+const EKSPRESI_PIC: Record<string, string> = {
+  [TABEL]: "{assigneeName}",
+  [KARTU]: "{nama}",
+};
 
 /** Isi sel keterangan: baris tempat `p.keterangan` dirender, beserta pembungkusnya. */
 const selKeterangan = (isi: string) => {
@@ -48,8 +58,9 @@ describe("catatan rapat tampil penuh (#645)", () => {
   it("nama PIC tidak dipotong di kedua tampilan", () => {
     for (const berkas of [TABEL, KARTU]) {
       const isi = baca(berkas);
-      const i = isi.indexOf("{assigneeName}");
-      if (i < 0) throw new Error(`${berkas}: nama PIC tidak ditemukan`);
+      const ekspresi = EKSPRESI_PIC[berkas];
+      const i = isi.indexOf(ekspresi);
+      if (i < 0) throw new Error(`${berkas}: nama PIC (${ekspresi}) tidak ditemukan`);
       const tag = isi.slice(i - 220, i);
       expect(tag).not.toContain("truncate");
     }

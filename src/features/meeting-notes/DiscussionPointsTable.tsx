@@ -10,7 +10,11 @@ import {
   getDiscussionPointComments,
   createDiscussionPointComment,
   getUsers,
+  uploadDiscussionPointFile,
+  attachDiscussionPointFile,
+  deleteDiscussionPointFile,
 } from "../../services/meetingService";
+import { fetchTasks } from "../../services/taskService";
 import {
   type DiscussionPoint,
   type DiscussionPointComment,
@@ -20,28 +24,8 @@ import {
   type UserPermissions,
   type MasterData,
 } from "../../types";
-import { StyledDropdown } from "../../components/ui/CommonComponents";
-import { ListPerPageSelect } from "../../components/ui/ListPerPageSelect";
-import { LanproDatePicker } from "../../components/ui/LanproDatePicker";
-import { UserAvatar } from "../../components/ui/UserAvatar";
 import { AiMeetingCompanion } from "./AiMeetingCompanion";
-import { cn } from "../../lib/utils";
-import {
-  Plus,
-  Edit2,
-  Trash2,
-  MessageSquare,
-  Calendar,
-  Clock,
-  CheckCircle2,
-  X,
-  Send,
-  Sparkles,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  ArrowLeft,
-} from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { hasPermission } from "../../lib/permissions";
 import {
@@ -50,6 +34,12 @@ import {
 } from "../../lib/taskRefreshControl";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { DiscussionPointMobileCardView } from "./components/DiscussionPointMobileCardView";
+import { FormDiskusi } from "./components/FormDiskusi";
+import { BarisDiskusi } from "./components/BarisDiskusi";
+import { BarisCepat, BlokCepatMobile, type NilaiCepat } from "./components/BarisCepat";
+import { LaciUtas } from "./components/LaciUtas";
+import { KepalaPapan, KakiPapan } from "./components/BagianPapan";
+import type { OpsiJamak } from "./components/PemilihJamak";
 import { useMobileAction } from "../../contexts/MobileActionContext";
 
 interface DiscussionPointsTableProps {
@@ -79,12 +69,25 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [showAiAssistant, setShowAiAssistant] = useState(false);
 
-  // Inline Quick Add State (Live Table Row with separate uncombined fields)
-  const [quickConcern, setQuickConcern] = useState("");
-  const [quickCatatan, setQuickCatatan] = useState("");
-  const [quickAssignTo, setQuickAssignTo] = useState("Unassigned");
-  const [quickFitur, setQuickFitur] = useState("");
-  const [quickTargetDate, setQuickTargetDate] = useState("");
+  // Inline Quick Add State — #703: satu objek, bukan lima `useState` yang harus
+  // diingat satu per satu di dua tempat berbeda (baris desktop dan blok HP).
+  const [nilaiCepat, setNilaiCepat] = useState<NilaiCepat>({
+    concern: "",
+    keterangan: "",
+    assigneeIds: [],
+    tags: [],
+    targetDate: "",
+  });
+  const ubahCepat = (bagian: Partial<NilaiCepat>) =>
+    setNilaiCepat((lama) => ({ ...lama, ...bagian }));
+
+  /* #703 (keputusan B1 = a) — sumber dropdown "Context / Tags" adalah DAFTAR ISU
+   * proyek, bukan lagi label MasterData. Diambil sekali per proyek: isinya bisa
+   * ratusan, jadi ia tidak boleh di-refetch tiap ketikan di kotak cari. */
+  const [opsiIsu, setOpsiIsu] = useState<OpsiJamak[]>([]);
+  /* #704 — unggah bergantian, bukan serentak: setiap berkas butuh satu permintaan
+   * unggah lalu satu permintaan daftar, dan dua-duanya menulis daftar yang sama. */
+  const [sedangMengunggah, setSedangMengunggah] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -171,6 +174,40 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     }
   };
 
+  /**
+   * #703 (B1 = a) — daftar isu untuk dropdown Context/Tags.
+   *
+   * `rootsOnly: false`: yang dicari pemilih ini justru SEMUA isu, termasuk anak,
+   * karena titik diskusi paling sering menunjuk pekerjaan yang detail. Isu yang
+   * tidak punya tanggal pun tetap masuk — ini bukan papan, ini daftar rujukan.
+   */
+  useEffect(() => {
+    let batal = false;
+    (async () => {
+      try {
+        const data = await fetchTasks(projectId, { rootsOnly: false });
+        if (batal || data?.status !== "success") return;
+        const daftar = Array.isArray(data.data) ? data.data : [];
+        setOpsiIsu(
+          daftar
+            .filter((t: any) => t && t.id)
+            .map((t: any) => ({
+              id: String(t.id),
+              label: String(t.title || t.summary || t.name || t.id),
+              keterangan: t.key || t.taskKey || null,
+            }))
+        );
+      } catch (error) {
+        // Dropdown yang kosong lebih jujur daripada layar yang melempar: yang
+        // sedang dibaca pengguna adalah catatan rapat, bukan daftarnya.
+        console.error("Gagal memuat daftar isu untuk tag:", error);
+      }
+    })();
+    return () => {
+      batal = true;
+    };
+  }, [projectId]);
+
   const canAdd = hasPermission(userRole, "meetingNotes", "create", false, permissions);
 
   const { registerAction, unregisterAction } = useMobileAction();
@@ -215,7 +252,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       toast.error(t("toast.noPermAddPoint"));
       return;
     }
-    if (!quickConcern.trim()) {
+    if (!nilaiCepat.concern.trim()) {
       toast.error(t("toast.concernRequired"));
       return;
     }
@@ -224,11 +261,13 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     setIsSaving(true);
     const tempId = `temp-dp-${crypto.randomUUID()}`;
     const payload: any = {
-      concern: quickConcern.trim(),
-      keterangan: quickCatatan.trim(),
-      assignTo: quickAssignTo === "Unassigned" ? "" : quickAssignTo,
-      fitur: quickFitur || "",
-      targetDate: quickTargetDate || "",
+      concern: nilaiCepat.concern.trim(),
+      keterangan: nilaiCepat.keterangan.trim(),
+      // #703 — baris cepat kini mengirim PENERIAMA JAMAK dan TAG ISU.
+      assigneeIds: nilaiCepat.assigneeIds,
+      assignTo: nilaiCepat.assigneeIds[0] || "",
+      tags: nilaiCepat.tags,
+      targetDate: nilaiCepat.targetDate || "",
       status: "pending",
       authorId: currentUser.uid,
     };
@@ -242,11 +281,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
     suppressDiscussionPointsRefresh(8000);
     setPoints((prev) => [placeholder, ...prev]);
-    setQuickConcern("");
-    setQuickCatatan("");
-    setQuickAssignTo("Unassigned");
-    setQuickFitur("");
-    setQuickTargetDate("");
+    setNilaiCepat({ concern: "", keterangan: "", assigneeIds: [], tags: [], targetDate: "" });
     toast.success(t("alerts.pointAdded"));
 
     try {
@@ -271,10 +306,10 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     setEditForm(point);
   };
 
-  // Thread Comments Drawer State
+  // Thread Comments Drawer State — #703: teks kotak balas tidak lagi ikut di
+  // sini; ia milik `LaciUtas`, dan setiap ketikan tidak meredupkan seluruh tabel.
   const [activeThreadPoint, setActiveThreadPoint] = useState<DiscussionPoint | null>(null);
   const [threadComments, setThreadComments] = useState<DiscussionPointComment[]>([]);
-  const [newCommentText, setNewCommentText] = useState("");
   const [isSendingComment, setIsSendingComment] = useState(false);
   const [commentsMap, setCommentsMap] = useState<Record<string, DiscussionPointComment[]>>({});
 
@@ -291,16 +326,15 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
   const handleOpenThreadDrawer = async (point: DiscussionPoint) => {
     setActiveThreadPoint(point);
-    setNewCommentText("");
     if (point.id) {
       const comments = await fetchCommentsForPoint(point.id);
       setThreadComments(comments);
     }
   };
 
-  const handleSendThreadComment = async () => {
+  const handleSendThreadComment = async (teks: string) => {
     if (!activeThreadPoint?.id) return;
-    if (!newCommentText.trim()) {
+    if (!teks.trim()) {
       toast.error(t("toast.writeReplyFirst"));
       return;
     }
@@ -318,7 +352,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
         {
           userId: currentUser?.uid || (currentUser as any)?.id,
           userName,
-          commentText: newCommentText.trim(),
+          commentText: teks.trim(),
         },
         currentUser?.uid || (currentUser as any)?.id
       );
@@ -331,7 +365,6 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       // Konfirmasi tetap ada untuk aksi yang HASILNYA TIDAK LANGSUNG TERLIHAT —
       // menghapus poin, menyimpan perubahan, impor AI. Bedanya di situ, bukan
       // pada berhasil atau tidaknya.
-      setNewCommentText("");
       const updated = await fetchCommentsForPoint(activeThreadPoint.id);
       setThreadComments(updated);
     } catch (e: any) {
@@ -415,203 +448,107 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     }
   };
 
+  /**
+   * #704 — unggah satu gambar lalu DAFTARKAN ke titik diskusi.
+   *
+   * Dua permintaan, bukan satu, dan itu sengaja: hanya `/api/v1/upload-document`
+   * yang memvalidasi magic byte dan menulis lewat `storage.service.ts`. Rute
+   * pendaftaran ini berada di bawah `jagaProyek("meetingNotes", "C")` yang sama,
+   * jadi tidak ada pemeriksaan izin yang dilompati.
+   *
+   * Butuh `editingId`: baris `discussion_point_files` menunjuk `point_id`, jadi
+   * gambar tidak bisa ditempelkan pada titik diskusi yang belum ada. Itu sebabnya
+   * unggah hanya hidup di laci sunting, bukan di baris cepat.
+   */
+  const unggahBerkas = async (file: File) => {
+    if (!editingId || !currentUser) return;
+    setSedangMengunggah(true);
+    try {
+      const hasilUnggah: any = await uploadDiscussionPointFile(file);
+      const info = hasilUnggah?.data;
+      if (!info?.filename) throw new Error(t("toast.gagalUnggahBerkas"));
+      const baru = await attachDiscussionPointFile(
+        projectId,
+        meetingId,
+        editingId,
+        {
+          fileRef: info.filename,
+          name: info.originalName || file.name,
+          originalName: info.originalName || file.name,
+          mimetype: file.type || null,
+          size: typeof info.size === "number" ? info.size : file.size,
+          url: info.url || null,
+        },
+        currentUser.uid
+      );
+      setEditForm((lama) => ({ ...lama, files: [...(lama.files || []), baru] }));
+    } catch (error: any) {
+      toast.error(t("toast.gagalUnggahBerkas") + (error?.message || ""));
+    } finally {
+      setSedangMengunggah(false);
+    }
+  };
+
+  const hapusBerkas = async (fileId: string) => {
+    if (!editingId || !currentUser) return;
+    const sebelumnya = editForm.files || [];
+    setEditForm((lama) => ({ ...lama, files: (lama.files || []).filter((b) => b.id !== fileId) }));
+    try {
+      await deleteDiscussionPointFile(projectId, meetingId, editingId, fileId, currentUser.uid);
+    } catch (error: any) {
+      setEditForm((lama) => ({ ...lama, files: sebelumnya }));
+      toast.error(error?.message || t("toast.gagalUnggahBerkas"));
+    }
+  };
+
   const userOptions = projectMembers.map((m) => ({
     id: m?.uid || "",
     label: m?.displayName || m?.username || "Unknown User",
   }));
 
+  /* #703 — opsi pemilih jamak: anggota proyek (PIC) dan isu (Context/Tags). */
+  const opsiPenerima: OpsiJamak[] = projectMembers
+    .map((m) => ({
+      id: String(m?.uid || m?.id || ""),
+      label: m?.displayName || m?.username || m?.name || m?.email || "",
+    }))
+    .filter((o) => !!o.id && !!o.label);
+
   return (
     <div className="bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden flex-1 flex flex-col min-h-0 font-sans text-left">
-      {/* Header Bar — #369: AI icon-only di HP */}
-      <div className="px-3 sm:px-5 py-3 border-b border-border-subtle/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface-sunken/40 shrink-0">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-2xs shrink-0">
-            <MessageSquare className="w-4 h-4" />
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-sm font-medium text-content-strong tracking-tight truncate">
-              {t("discussion.heading2")}
-            </h3>
-            <p className="text-xs font-normal text-content-subtle hidden sm:block">
-              {t("discussion.subheading")}
-            </p>
-          </div>
-        </div>
+      {/* #703 — kepala dan kaki papan ikut keluar ke components/BagianPapan.tsx:
+          induknya masih melewati batas 800 baris §4 sesudah empat blok lain pergi,
+          dan keduanya tidak punya state sendiri — hanya props. */}
+      <KepalaPapan
+        tampilAI={showAiAssistant}
+        onToggleAI={() => setShowAiAssistant(!showAiAssistant)}
+        cari={searchQuery}
+        onCari={(teks) => {
+          setSearchQuery(teks);
+          setCurrentPage(1);
+        }}
+      />
 
-        <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
-          {!showAiAssistant && (
-            <div className="relative flex-1 min-w-0 sm:w-64 sm:flex-none">
-              <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder={t("discussion.searchPlaceholder")}
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="w-full min-w-0 pl-9 pr-3 py-2 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs"
-              />
-            </div>
-          )}
-
-          <button
-            onClick={() => setShowAiAssistant(!showAiAssistant)}
-            className={cn(
-              "inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-md text-xs font-normal transition-all border shadow-2xs cursor-pointer shrink-0",
-              showAiAssistant
-                ? "bg-surface-muted hover:bg-surface-strong text-content-body border-border-subtle"
-                : "bg-primary/10 hover:bg-primary/15 text-primary border-primary/20"
-            )}
-            title={showAiAssistant ? t("discussion.closeAiAssistant") : t("discussion.aiAssistant")}
-          >
-            {showAiAssistant ? (
-              <>
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{t("discussion.closeAiAssistant")}</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-3.5 h-3.5 text-primary" />
-                <span className="hidden sm:inline">{t("discussion.aiAssistant")}</span>
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Edit Modal Popup (When clicking edit icon on a row) */}
+      {/* #703/#704 — isinya pindah ke components/FormDiskusi.tsx: notes dan
+          follow-up jadi textarea, PIC jamak, Context/Tags dari Daftar Isu,
+          tautan jamak, dan unggah gambar. Induknya 1.255 baris (§4). */}
       {editingId !== null && (
-        <div className="fixed inset-0 bg-overlay/40 backdrop-blur-xs flex items-center justify-center p-4 z-[9999]">
-          <div className="bg-surface rounded-lg w-full max-w-2xl shadow-xl border border-border-subtle flex flex-col max-h-[90vh] overflow-hidden">
-            <div className="px-5 py-4 border-b border-border-faint flex items-center justify-between bg-surface-sunken/50 shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center border border-primary/20 text-primary">
-                  <Edit2 className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-content-strong tracking-tight">
-                    {t("discussion.editPoint")}
-                  </h3>
-                  <p className="text-xs text-content-muted font-normal">
-                    {t("discussion.editPointHint")}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingId(null);
-                  setEditForm({});
-                }}
-                className="p-1.5 text-content-subtle hover:text-content-secondary hover:bg-surface-muted rounded-md transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 overflow-y-auto flex-1 space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-normal">
-                  {t("discussion.concernTopic")} *
-                </label>
-                <textarea
-                  className="w-full px-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs font-normal text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 min-h-[80px] shadow-2xs"
-                  value={editForm.concern || ""}
-                  onChange={(e) => setEditForm({ ...editForm, concern: e.target.value })}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-normal">
-                    {t("discussion.notesLabel")}
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs font-normal text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 shadow-2xs"
-                    value={editForm.keterangan || ""}
-                    onChange={(e) => setEditForm({ ...editForm, keterangan: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-normal">
-                    {t("discussion.followUp")}
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs font-normal text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 shadow-2xs"
-                    value={editForm.tindakanLanjut || ""}
-                    onChange={(e) => setEditForm({ ...editForm, tindakanLanjut: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-normal">
-                    {t("discussion.picAssignedTo")}
-                  </label>
-                  <StyledDropdown
-                    value={editForm.assignTo || "Unassigned"}
-                    onChange={(val) => setEditForm({ ...editForm, assignTo: val })}
-                    options={[{ id: "Unassigned", label: t("newTask.unassigned") }, ...userOptions]}
-                    members={projectMembers}
-                    type="member"
-                    masterData={masterData}
-                    buttonClassName="w-full h-9 px-3 bg-surface border border-border-subtle text-xs text-left text-content-body rounded-md font-medium shadow-2xs"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-normal">
-                    {t("discussion.feature")}
-                  </label>
-                  <StyledDropdown
-                    value={editForm.fitur || ""}
-                    onChange={(val) => setEditForm({ ...editForm, fitur: val })}
-                    options={masterData
-                      .filter((m) => m.type?.toLowerCase() === "fitur")
-                      .map((m) => ({ id: m.label, label: m.label, color: m.color, icon: m.icon }))}
-                    type="fitur"
-                    masterData={masterData}
-                    buttonClassName="w-full h-9 px-3 bg-surface border border-border-subtle text-xs text-left text-content-body rounded-md font-medium shadow-2xs"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-normal">
-                    {t("discussion.targetDate")}
-                  </label>
-                  <LanproDatePicker
-                    value={editForm.targetDate || ""}
-                    onChange={(val) => setEditForm({ ...editForm, targetDate: val })}
-                    buttonClassName="w-full h-9 px-3 bg-surface border border-border-subtle text-xs text-left font-medium text-content-body rounded-md shadow-2xs"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="px-5 py-3.5 border-t border-border-faint flex justify-end gap-2.5 bg-surface-sunken shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingId(null);
-                  setEditForm({});
-                }}
-                className="px-4 py-2 text-xs font-medium text-content-secondary hover:bg-surface-muted rounded-md border border-border-subtle bg-surface transition-all cursor-pointer shadow-2xs"
-              >
-                {t("discussion.cancel")}
-              </button>
-              <button
-                type="button"
-                onClick={saveEdit}
-                disabled={isSaving}
-                className="px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs disabled:opacity-50 cursor-pointer"
-              >
-                {isSaving ? t("common.saving") : t("common.saveChanges2")}
-              </button>
-            </div>
-          </div>
-        </div>
+        <FormDiskusi
+          form={editForm}
+          onUbah={(bagian) => setEditForm((lama) => ({ ...lama, ...bagian }))}
+          onSave={saveEdit}
+          onBatal={() => {
+            setEditingId(null);
+            setEditForm({});
+          }}
+          isSaving={isSaving}
+          opsiPenerima={opsiPenerima}
+          opsiIsu={opsiIsu}
+          masterData={masterData}
+          onUnggah={unggahBerkas}
+          onHapusBerkas={hapusBerkas}
+          sedangMengunggah={sedangMengunggah}
+        />
       )}
 
       {/* AREA KONTEN UTAMA (AI ASSISTANT VS DISCUSSION TABLE) */}
@@ -634,72 +571,14 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
           {/* Mobile Card List View (< 640px) */}
           <div className="sm:hidden flex-1 overflow-y-auto p-4 space-y-3">
             {canAdd && (
-              <div
-                id="quick-add-section"
-                className="rounded-xl border border-primary/25 bg-primary-surface/5 p-3 space-y-2.5 shadow-2xs"
-              >
-                <div className="text-[11px] font-medium text-content-strong">
-                  {t("discussion.addPoint") || "Tambah Titik Diskusi"}
-                </div>
-                <input
-                  id="quick-add-concern"
-                  type="text"
-                  placeholder={t("discussion.newConcernPlaceholder")}
-                  value={quickConcern}
-                  onChange={(e) => setQuickConcern(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleLiveQuickAdd();
-                  }}
-                  className="w-full min-w-0 px-3 py-2.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs placeholder:text-content-subtle"
-                />
-                <input
-                  type="text"
-                  placeholder={t("discussion.notesPlaceholder")}
-                  value={quickCatatan}
-                  onChange={(e) => setQuickCatatan(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleLiveQuickAdd();
-                  }}
-                  className="w-full min-w-0 px-3 py-2.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-body outline-none placeholder:text-content-subtle shadow-2xs"
-                />
-                <div className="grid grid-cols-1 gap-2 min-w-0">
-                  <StyledDropdown
-                    value={quickFitur}
-                    onChange={(val) => setQuickFitur(val)}
-                    options={masterData
-                      .filter((m) => m.type?.toLowerCase() === "fitur")
-                      .map((m) => ({ id: m.label, label: m.label }))}
-                    className="text-xs w-full min-w-0"
-                  />
-                  <StyledDropdown
-                    value={quickAssignTo}
-                    onChange={(val) => setQuickAssignTo(val)}
-                    options={[
-                      { id: "Unassigned", label: t("newTask.unassigned") },
-                      ...projectMembers.map((m) => ({
-                        id: m.uid || m.id || "",
-                        label: m.displayName || m.username || m.name || "",
-                      })),
-                    ]}
-                    className="text-xs w-full min-w-0"
-                  />
-                  <input
-                    type="date"
-                    value={quickTargetDate}
-                    onChange={(e) => setQuickTargetDate(e.target.value)}
-                    className="w-full min-w-0 px-3 py-2.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-body outline-none shadow-2xs"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleLiveQuickAdd()}
-                  disabled={isSaving || !quickConcern.trim()}
-                  className="w-full min-h-11 px-3 py-2.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-40 text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>{t("discussion.add")}</span>
-                </button>
-              </div>
+              <BlokCepatMobile
+                nilai={nilaiCepat}
+                onUbah={ubahCepat}
+                onTambah={() => handleLiveQuickAdd()}
+                sedangMenyimpan={isSaving}
+                opsiPenerima={opsiPenerima}
+                opsiIsu={opsiIsu}
+              />
             )}
             {paginatedPoints.length === 0 ? (
               <div className="text-center py-12 text-content-subtle">
@@ -754,8 +633,14 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   <th className="py-3 px-4 min-w-[220px]">{t("discussion.thConcern")}</th>
                   <th className="py-3 px-4 min-w-[200px]">{t("discussion.thNotes")}</th>
                   <th className="py-3 px-4 min-w-[150px]">{t("discussion.thContextTags")}</th>
+                  {/* #703 butir 3 — Follow-up selama ini ADA di form dan ADA di
+                      basis data, tetapi tidak pernah punya kolom. */}
+                  <th className="py-3 px-4 min-w-[180px]">{t("discussion.followUp")}</th>
                   <th className="py-3 px-4 min-w-[140px]">{t("discussion.thPic")}</th>
                   <th className="py-3 px-4 min-w-[130px]">{t("discussion.thTargetDate")}</th>
+                  {/* #704 butir 5 dan 6 — dua kolom baru, keduanya bisa jamak. */}
+                  <th className="py-3 px-4 min-w-[160px]">{t("discussion.tautan")}</th>
+                  <th className="py-3 px-4 min-w-[130px]">{t("discussion.gambar")}</th>
                   <th className="py-3 px-4 w-24 text-center">{t("discussion.thThread")}</th>
                   <th className="py-3 px-4 w-28 text-center">{t("discussion.status")}</th>
                   <th className="py-3 px-4 w-24 text-center">{t("discussion.action")}</th>
@@ -764,7 +649,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               <tbody className="divide-y divide-border-faint text-content-body">
                 {paginatedPoints.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="text-center py-12 text-content-subtle">
+                    <td colSpan={12} className="text-center py-12 text-content-subtle">
                       <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-2 text-primary shadow-2xs">
                         <MessageSquare className="w-5 h-5" />
                       </div>
@@ -778,8 +663,22 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   </tr>
                 ) : (
                   paginatedPoints.map((p, index) => {
-                    const isCompleted = p.status === "completed";
                     const srNo = (currentPage - 1) * itemsPerPage + index + 1;
+                    // #703 (B2 = b) — penerimanya kini DAFTAR, bukan satu orang.
+                    // Baris lama tetap dipakai bila daftar jamak kosong, jadi data
+                    // yang sudah ada sebelum #703 tidak tiba-tiba yatim.
+                    const idPenerima =
+                      Array.isArray(p.assigneeIds) && p.assigneeIds.length > 0
+                        ? p.assigneeIds
+                        : p.assignTo || p.assignee_id
+                          ? [String(p.assignTo || p.assignee_id)]
+                          : [];
+                    const namaPenerima = idPenerima
+                      .map((id) => {
+                        const orang = projectMembers.find((m) => (m.uid || m.id) === id);
+                        return orang ? orang.displayName || orang.username || orang.name || id : id;
+                      })
+                      .filter(Boolean);
                     const assigneeUser = projectMembers.find(
                       (m) => (m.uid || m.id) === (p.assignTo || p.assignee_id)
                     );
@@ -789,464 +688,81 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                     const isOwner = p.authorId === (currentUser?.uid || "");
 
                     return (
-                      <tr
+                      <BarisDiskusi
                         key={p.id || index}
-                        className={`hover:bg-surface-sunken/60 transition-colors group ${
-                          isCompleted ? "opacity-75" : ""
-                        }`}
-                      >
-                        {/* No. */}
-                        <td className="py-3 px-4 text-center text-content-subtle font-normal align-middle">
-                          {String(srNo).padStart(2, "0")}
-                        </td>
-
-                        {/* Concern (Topic) */}
-                        <td className="py-3 px-4 align-middle">
-                          <div className="font-normal text-content-strong leading-snug">
-                            {p.concern}
-                          </div>
-                          {(p.tindakanLanjut || p.next_action) && (
-                            <div className="text-[11px] text-primary font-normal mt-0.5 flex items-center gap-1">
-                              <span className="text-content-subtle font-normal">
-                                {t("discussion.next")}
-                              </span>{" "}
-                              {p.tindakanLanjut || p.next_action}
-                            </div>
-                          )}
-                        </td>
-
-                        {/* Notes / Keterangan — #645: TIDAK boleh dipotong.
-                            Dulu `line-clamp-2 max-w-sm`, jadi catatan panjang
-                            ("... Analis…", "... via ema…") hilang di layar padahal
-                            tersimpan utuh di basis data (`keterangan TEXT`).
-                            Kartu mobile di berkas yang sama sudah menampilkan
-                            penuh, jadi tabel inilah yang menyimpang. */}
-                        <td className="py-3 px-4 align-middle text-content-body font-normal">
-                          <div className="whitespace-pre-wrap break-words">
-                            {p.keterangan || p.comment || "-"}
-                          </div>
-                        </td>
-
-                        {/* Context / Fitur Tag */}
-                        <td className="py-3 px-4 align-middle">
-                          <div className="flex flex-wrap gap-1 items-center">
-                            {p.fitur ? (
-                              <span className="px-2 py-0.5 rounded-md text-[10px] leading-none font-normal bg-primary/10 text-primary border border-primary/20">
-                                {(() => {
-                                  const meta = masterData.find(
-                                    (m) =>
-                                      m.type === "fitur" &&
-                                      (m.label?.toLowerCase() === p.fitur?.toLowerCase() ||
-                                        m.id === p.fitur)
-                                  );
-                                  return meta?.label || p.fitur;
-                                })()}
-                              </span>
-                            ) : (
-                              <span className="text-content-subtle italic text-[11px]">-</span>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* PIC (Assignee) */}
-                        <td className="py-3 px-4 align-middle text-content-body font-normal">
-                          <div className="flex items-center gap-1.5">
-                            {/* #645 — nama PIC dulu dipotong pada 120 px, jadi
-                                "Gloria Handoyo" tampil sebagai "Gloria Hand…".
-                                Kolomnya sudah punya `min-w-[140px]` dan pembungkus
-                                tabel bisa menggulir, jadi tidak ada alasan memotong. */}
-                            <span className="whitespace-nowrap">{assigneeName}</span>
-                          </div>
-                        </td>
-
-                        {/* Target Date */}
-                        <td className="py-3 px-4 align-middle text-content-muted font-normal whitespace-nowrap">
-                          {p.targetDate ? (
-                            <div className="flex items-center gap-1 text-[11px]">
-                              <Calendar className="w-3.5 h-3.5 text-content-subtle" />
-                              <span>{p.targetDate}</span>
-                            </div>
-                          ) : (
-                            <span className="text-content-subtle italic text-[11px]">-</span>
-                          )}
-                        </td>
-
-                        {/* Thread Comments */}
-                        <td className="py-3 px-4 text-center align-middle">
-                          {(() => {
-                            const count = (p.id && commentsMap[p.id]?.length) || 0;
-                            return (
-                              <button
-                                onClick={() => handleOpenThreadDrawer(p)}
-                                className={`inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs font-normal transition-all cursor-pointer border shadow-2xs active:scale-95 ${
-                                  count > 0
-                                    ? "bg-primary/10 hover:bg-primary/15 text-primary border-primary/20"
-                                    : "bg-surface-sunken hover:bg-surface-muted text-content-subtle border-border-subtle/60"
-                                }`}
-                                title={t("discussion.openThread")}
-                              >
-                                <MessageSquare
-                                  className={`w-3.5 h-3.5 ${count > 0 ? "text-primary fill-primary/20" : "text-content-subtle"}`}
-                                />
-                                <span>{count}</span>
-                              </button>
-                            );
-                          })()}
-                        </td>
-
-                        {/* Status Badge */}
-                        <td className="py-3 px-4 text-center align-middle">
-                          <button
-                            type="button"
-                            onClick={() => handleToggleStatus(p)}
-                            className="cursor-pointer transition-all active:scale-95 inline-block"
-                            title={t("discussion.toggleStatus")}
-                          >
-                            {isCompleted ? (
-                              <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 shadow-2xs hover:bg-emerald-500/15">
-                                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                                {t("discussion.statusDone")}
-                              </span>
-                            ) : (
-                              <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-amber-500/10 text-amber-700 border border-amber-500/30 shadow-2xs hover:bg-amber-500/15">
-                                <Clock className="w-3 h-3 text-amber-600" />
-                                {t("discussion.statusPending")}
-                              </span>
-                            )}
-                          </button>
-                        </td>
-
-                        {/* Actions */}
-                        <td className="py-3 px-4 text-center align-middle">
-                          <div className="flex items-center justify-center gap-1">
-                            {hasPermission(
-                              userRole,
-                              "meetingNotes",
-                              "update",
-                              isOwner,
-                              permissions
-                            ) && (
-                              <button
-                                onClick={() => startEdit(p)}
-                                className="p-1.5 text-content-muted hover:text-primary hover:bg-primary/10 rounded-md transition-all cursor-pointer"
-                                title={t("discussion.editRow")}
-                              >
-                                <Edit2 className="w-4 h-4" />
-                              </button>
-                            )}
-                            {hasPermission(
-                              userRole,
-                              "meetingNotes",
-                              "delete",
-                              isOwner,
-                              permissions
-                            ) && (
-                              <button
-                                onClick={() => handleDelete(p.id!)}
-                                className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
-                                title={t("discussion.deleteRow")}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
+                        p={p}
+                        nomor={String(srNo).padStart(2, "0")}
+                        assigneeName={assigneeName}
+                        namaPenerima={namaPenerima}
+                        masterData={masterData}
+                        jumlahKomentar={(p.id && commentsMap[p.id]?.length) || 0}
+                        bolehSunting={hasPermission(
+                          userRole,
+                          "meetingNotes",
+                          "update",
+                          isOwner,
+                          permissions
+                        )}
+                        bolehHapus={hasPermission(
+                          userRole,
+                          "meetingNotes",
+                          "delete",
+                          isOwner,
+                          permissions
+                        )}
+                        onOpenThread={() => handleOpenThreadDrawer(p)}
+                        onEdit={() => startEdit(p)}
+                        onDelete={() => handleDelete(p.id!)}
+                        onToggleStatus={() => handleToggleStatus(p)}
+                      />
                     );
                   })
                 )}
 
-                {/* LIVE QUICK ADD INLINE ROW (Separate columns matching headers) */}
+                {/* #703/#704 — baris cepat pindah ke components/BarisCepat.tsx:
+                    catatan kini textarea, PIC dan tag kini pemilih jamak. */}
                 {canAdd && (
-                  <tr className="bg-primary/10 hover:bg-primary/10 transition-colors">
-                    <td className="py-2.5 px-4 text-center text-primary text-xs align-middle font-normal">
-                      +
-                    </td>
-
-                    {/* Concern */}
-                    <td className="py-2.5 px-4 align-middle">
-                      <input
-                        id="quick-add-concern-desktop"
-                        type="text"
-                        placeholder={t("discussion.newConcernPlaceholder")}
-                        value={quickConcern}
-                        onChange={(e) => setQuickConcern(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") handleLiveQuickAdd();
-                        }}
-                        className="w-full px-3 py-1.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs placeholder:text-content-subtle"
-                      />
-                    </td>
-
-                    {/* Catatan / Keterangan */}
-                    <td className="py-2.5 px-4 align-middle">
-                      <input
-                        type="text"
-                        placeholder={t("discussion.notesPlaceholder")}
-                        value={quickCatatan}
-                        onChange={(e) => setQuickCatatan(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") handleLiveQuickAdd();
-                        }}
-                        className="w-full px-3 py-1.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-body outline-none placeholder:text-content-subtle shadow-2xs"
-                      />
-                    </td>
-
-                    {/* Context / Tags */}
-                    <td className="py-2.5 px-4 align-middle">
-                      <StyledDropdown
-                        value={quickFitur}
-                        onChange={(val) => setQuickFitur(val)}
-                        options={masterData
-                          .filter((m) => m.type?.toLowerCase() === "fitur")
-                          .map((m) => ({ id: m.label, label: m.label }))}
-                        className="text-xs"
-                      />
-                    </td>
-
-                    {/* PIC */}
-                    <td className="py-2.5 px-4 align-middle">
-                      <StyledDropdown
-                        value={quickAssignTo}
-                        onChange={(val) => setQuickAssignTo(val)}
-                        options={[
-                          { id: "Unassigned", label: t("newTask.unassigned") },
-                          ...projectMembers.map((m) => ({
-                            id: m.uid || m.id || "",
-                            label: m.displayName || m.username || m.name || "",
-                          })),
-                        ]}
-                        className="text-xs"
-                      />
-                    </td>
-
-                    {/* Target Date */}
-                    <td className="py-2.5 px-4 align-middle">
-                      <input
-                        type="date"
-                        value={quickTargetDate}
-                        onChange={(e) => setQuickTargetDate(e.target.value)}
-                        className="w-full px-2 py-1 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-body outline-none shadow-2xs"
-                      />
-                    </td>
-
-                    {/* Thread Placeholder */}
-                    <td className="py-2.5 px-4 text-center align-middle text-content-subtle text-xs">
-                      -
-                    </td>
-
-                    {/* Status */}
-                    <td className="py-2.5 px-4 text-center align-middle">
-                      <span className="px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-amber-500/10 text-amber-700 border border-amber-500/30">
-                        {t("discussion.statusPending")}
-                      </span>
-                    </td>
-
-                    {/* Action */}
-                    <td className="py-2.5 px-4 text-center align-middle">
-                      <button
-                        type="button"
-                        onClick={() => handleLiveQuickAdd()}
-                        disabled={isSaving || !quickConcern.trim()}
-                        className="px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-40 text-content-inverse rounded-md text-xs font-normal shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 mx-auto"
-                        title={t("discussion.addPoint")}
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>{t("discussion.add")}</span>
-                      </button>
-                    </td>
-                  </tr>
+                  <BarisCepat
+                    nilai={nilaiCepat}
+                    onUbah={ubahCepat}
+                    onTambah={() => handleLiveQuickAdd()}
+                    sedangMenyimpan={isSaving}
+                    opsiPenerima={opsiPenerima}
+                    opsiIsu={opsiIsu}
+                  />
                 )}
               </tbody>
             </ResponsiveTable>
           </div>
 
-          {/* Pagination Footer */}
-          <div className="px-5 py-3 bg-surface-sunken/40 border-t border-border-subtle flex items-center justify-between text-[11px] text-content-subtle font-normal shrink-0">
-            <div className="flex items-center gap-3">
-              <span>
-                {t("discussion.showingPoints", {
-                  shown: paginatedPoints.length,
-                  filtered: totalPoints,
-                  total: totalPoints,
-                })}
-              </span>
-              <ListPerPageSelect
-                value={itemsPerPage}
-                onChange={(jumlah) => {
-                  setItemsPerPage(jumlah);
-                  setCurrentPage(1);
-                }}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs cursor-pointer text-xs font-normal"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" /> {t("discussion.prev")}
-              </button>
-              <span className="px-3 py-1 bg-surface border border-border-subtle rounded-md text-primary shadow-2xs text-xs font-normal">
-                {currentPage} {t("common.of")} {totalPages}
-              </span>
-              <button
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                disabled={currentPage >= totalPages}
-                className="px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs cursor-pointer text-xs font-normal"
-              >
-                {t("discussion.nextPage")} <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
+          <KakiPapan
+            tampil={paginatedPoints.length}
+            total={totalPoints}
+            halaman={currentPage}
+            totalPages={totalPages}
+            perHalaman={itemsPerPage}
+            onPerHalaman={(jumlah) => {
+              setItemsPerPage(jumlah);
+              setCurrentPage(1);
+            }}
+            onHalaman={setCurrentPage}
+          />
         </div>
       )}
 
-      {/* THREAD DISCUSSIONS SLIDE-OVER SHEET */}
+      {/* #703 — laci utas pindah ke components/LaciUtas.tsx: induknya masih
+          melewati batas 800 baris §4 setelah tiga blok lain keluar, dan kotak
+          balas tidak perlu menjadi state seluruh tabel. */}
       {activeThreadPoint && (
-        <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs z-[9999] flex justify-end">
-          <div className="absolute inset-0" onClick={() => setActiveThreadPoint(null)} />
-          <div className="relative bg-surface w-full max-w-lg h-full shadow-2xl border-l border-border-subtle flex flex-col text-left">
-            <div className="p-5 border-b border-border-faint flex items-center justify-between bg-surface-sunken/80 shrink-0">
-              <div className="flex items-center gap-3 pr-4">
-                <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center border border-primary/20 shrink-0">
-                  <MessageSquare className="w-5 h-5" />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-xs sm:text-[10px] font-normal uppercase tracking-normal text-primary block">
-                    {t("discussion.threadDiscussions")}
-                  </span>
-                  <h3 className="text-sm font-medium text-content truncate">
-                    {activeThreadPoint.concern}
-                  </h3>
-                </div>
-              </div>
-              <button
-                onClick={() => setActiveThreadPoint(null)}
-                className="p-2 text-content-subtle hover:text-content-body hover:bg-surface-strong/60 rounded-xl transition-colors cursor-pointer shrink-0"
-                title={t("discussion.closeThread")}
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="flex-1 p-5 overflow-y-auto flex flex-col gap-4 bg-surface-sunken/30">
-              {threadComments.length === 0 ? (
-                <div className="text-center py-16 px-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-3 text-primary">
-                    <MessageSquare className="w-6 h-6" />
-                  </div>
-                  <h4 className="text-xs text-content-body">{t("discussion.noReplies")}</h4>
-                  <p className="text-xs sm:text-[11px] text-content-subtle mt-1 leading-normal">
-                    {t("discussion.noRepliesHint")}
-                  </p>
-                </div>
-              ) : (
-                threadComments.map((comment) => {
-                  const authorName =
-                    comment.userName ||
-                    comment.user_name ||
-                    (comment as any).authorName ||
-                    (comment as any).name ||
-                    "Member";
-                  const commentBody =
-                    comment.commentText ||
-                    comment.comment_text ||
-                    (comment as any).content ||
-                    (comment as any).text ||
-                    "";
-                  const commentDate = comment.createdAt || comment.created_at || new Date();
-                  const c = comment as any;
-                  const commentUserId = c.userId || c.user_id || c.authorId || c.author_id;
-                  const isMine =
-                    (commentUserId &&
-                      currentUser &&
-                      (commentUserId === currentUser.uid || commentUserId === currentUser.id)) ||
-                    (authorName &&
-                      currentUser &&
-                      (authorName === currentUser.displayName ||
-                        authorName === currentUser.username));
-
-                  return (
-                    <div
-                      key={comment.id || Math.random()}
-                      className={cn("flex w-full mb-2", isMine ? "justify-end" : "justify-start")}
-                    >
-                      <div
-                        className={cn(
-                          "flex flex-col max-w-[85%] md:max-w-xl",
-                          isMine ? "items-end" : "items-start"
-                        )}
-                      >
-                        {!isMine && (
-                          <div className="flex items-center gap-1.5 mb-1 ml-1">
-                            <UserAvatar
-                              uid={commentUserId}
-                              members={users}
-                              name={authorName}
-                              className="w-4 h-4 text-xs sm:text-[11px] sm:text-[9px]"
-                            />
-                            <span className="text-xs sm:text-[10px] text-content-muted font-medium">
-                              {authorName}
-                            </span>
-                          </div>
-                        )}
-                        <div
-                          className={cn(
-                            "px-3.5 py-2 rounded-2xl relative shadow-soft group",
-                            isMine
-                              ? "bg-primary-surface text-content-inverse rounded-br-sm"
-                              : "bg-surface text-content-strong border border-border-subtle rounded-bl-sm"
-                          )}
-                        >
-                          <p className="text-[13px] leading-relaxed whitespace-pre-wrap break-words min-w-[50px] pb-3.5">
-                            {commentBody}
-                          </p>
-                          <span
-                            className={cn(
-                              "absolute bottom-1 right-3 text-xs sm:text-[11px] sm:text-[9px]  tracking-tight",
-                              isMine ? "text-content-inverse/80" : "text-content-subtle"
-                            )}
-                          >
-                            {new Date(commentDate).toLocaleTimeString("id-ID", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-
-            <div className="p-4 border-t border-border-subtle bg-surface shrink-0">
-              <div className="flex items-center gap-2 bg-surface-muted rounded-full px-4 py-2">
-                <input
-                  type="text"
-                  placeholder={t("discussion.replyPlaceholder")}
-                  value={newCommentText}
-                  onChange={(e) => setNewCommentText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !isSendingComment && newCommentText.trim()) {
-                      handleSendThreadComment();
-                    }
-                  }}
-                  className="w-full bg-transparent border-0 focus:ring-0 outline-none text-xs font-normal text-content-strong placeholder:text-content-subtle py-1"
-                />
-                <button
-                  onClick={handleSendThreadComment}
-                  disabled={isSendingComment || !newCommentText.trim()}
-                  className="p-2 text-primary hover:text-primary-hover disabled:opacity-40 cursor-pointer rounded-full transition-colors shrink-0"
-                  title={t("discussion.sendReply")}
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <LaciUtas
+          titik={activeThreadPoint}
+          komentar={threadComments}
+          anggota={users}
+          pengguna={currentUser}
+          mengirim={isSendingComment}
+          onKirim={(teks) => handleSendThreadComment(teks)}
+          onTutup={() => setActiveThreadPoint(null)}
+        />
       )}
     </div>
   );

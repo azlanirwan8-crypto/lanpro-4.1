@@ -34,7 +34,9 @@ const KAKI_TABEL = [
   "src/features/flowchart/components/FlowchartDashboard.tsx",
   "src/features/wiki/WikiView.tsx",
   "src/features/meeting-notes/MeetingNotes.tsx",
-  "src/features/meeting-notes/DiscussionPointsTable.tsx",
+  // #703 memindahkan kaki papan diskusi ke komponen sendiri (§4: induknya
+  // 1.255 baris). JAMINAN-nya tidak berubah — hanya alamatnya.
+  "src/features/meeting-notes/components/BagianPapan.tsx",
 ];
 
 describe("ukuran halaman datatable (#639)", () => {

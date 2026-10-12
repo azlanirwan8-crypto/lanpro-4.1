@@ -9,6 +9,7 @@ import {
   Clock,
   User,
   Tag,
+  Link2,
 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { DiscussionPoint, DiscussionPointComment, UserProfile, MasterData } from "../../../types";
@@ -57,6 +58,25 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
         const assigneeName = assigneeUser
           ? assigneeUser.displayName || assigneeUser.name || assigneeUser.username
           : p.assignTo || t("newTask.unassigned");
+
+        /* #703 (B2 = b) — kartu HP menampilkan daftar penerima yang SAMA dengan
+         * tabel desktop. Aturan #645: satu field, satu perilaku, dua tampilan. */
+        const idPenerima =
+          Array.isArray(p.assigneeIds) && p.assigneeIds.length > 0
+            ? p.assigneeIds
+            : p.assignTo || p.assignee_id
+              ? [String(p.assignTo || p.assignee_id)]
+              : [];
+        const namaPenerima = idPenerima
+          .map((id) => {
+            const orang = projectMembers.find((m) => (m.uid || m.id) === id);
+            return orang ? orang.displayName || orang.name || orang.username || id : id;
+          })
+          .filter(Boolean);
+        const tag = Array.isArray(p.tags) ? p.tags : [];
+        const tautan = Array.isArray(p.links) ? p.links : [];
+        const berkas = Array.isArray(p.files) ? p.files : [];
+        const gambar = berkas.filter((b) => (b.mimetype || "").startsWith("image/"));
 
         const contextMeta = masterData.find(
           (m) =>
@@ -168,18 +188,38 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
               </div>
             )}
 
+            {/* Follow-up — #703 butir 3: kolomnya baru ada di desktop, kartunya
+                tidak boleh tertinggal (#645). */}
+            {p.tindakanLanjut && (
+              <div className="p-2 bg-primary-surface/5 rounded-md border border-primary/20 text-xs text-content-body leading-relaxed">
+                <span className="text-[10px] font-normal uppercase tracking-normal text-content-subtle block mb-0.5">
+                  {t("discussion.followUp")}
+                </span>
+                <p className="whitespace-pre-wrap break-words">{p.tindakanLanjut}</p>
+              </div>
+            )}
+
             {/* Meta Row: Feature Tag, PIC, Target Date */}
             <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-border-faint text-xs text-content-muted">
-              {/* Context Tag */}
-              <div className="flex items-center gap-1 min-w-0">
+              {/* Context / Tags — #703 (B1 = a): isu nyata dari Daftar Isu. */}
+              <div className="flex flex-wrap items-center gap-1 min-w-0">
+                {tag.map((s) => (
+                  <span
+                    key={s.id}
+                    className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 whitespace-normal break-words"
+                  >
+                    <Tag className="w-3 h-3 shrink-0" />
+                    {s.label}
+                  </span>
+                ))}
                 {p.fitur ? (
                   // #645 — label tag dan nama PIC tidak boleh dipotong; catatan
                   // di kartu ini sudah utuh, tinggal dua potongan ini yang tersisa.
-                  <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 whitespace-normal break-words">
-                    <Tag className="w-3 h-3 shrink-0" />
+                  <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-surface-sunken text-content-body border border-border-subtle whitespace-normal break-words">
                     {contextMeta?.label || p.fitur}
                   </span>
-                ) : (
+                ) : null}
+                {tag.length === 0 && !p.fitur && (
                   <span className="text-[10px] text-content-subtle italic">
                     {t("discussion.noTags")}
                   </span>
@@ -187,10 +227,14 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
               </div>
 
               <div className="flex items-center gap-3">
-                {/* PIC */}
-                <div className="flex items-center gap-1 text-[11px] text-content-body">
+                {/* PIC — #703: boleh lebih dari satu orang. */}
+                <div className="flex flex-wrap items-center gap-1 text-[11px] text-content-body min-w-0">
                   <User className="w-3 h-3 text-content-subtle shrink-0" />
-                  <span className="whitespace-nowrap">{assigneeName}</span>
+                  {(namaPenerima.length > 0 ? namaPenerima : [assigneeName]).map((nama) => (
+                    <span key={nama} className="break-words">
+                      {nama}
+                    </span>
+                  ))}
                 </div>
 
                 {/* Target Date */}
@@ -202,6 +246,42 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                 )}
               </div>
             </div>
+
+            {/* Tautan dan gambar — #704 butir 5 dan 6, supaya HP tidak tertinggal
+                dari desktop (#645: satu field, satu perilaku, dua tampilan). */}
+            {(tautan.length > 0 || gambar.length > 0) && (
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                {tautan.map((l) => (
+                  <a
+                    key={l.id}
+                    // `rel` wajib: nilai ini datang dari pengguna lain di proyek
+                    // yang sama dan ia menjadi `href`.
+                    href={l.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 max-w-full text-[10px] font-medium px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 break-all"
+                  >
+                    <Link2 className="w-3 h-3 shrink-0" />
+                    {l.label || l.url}
+                  </a>
+                ))}
+                {gambar.map((b) => (
+                  <a
+                    key={b.id}
+                    href={b.url || undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-14 h-14 rounded-md border border-border-subtle overflow-hidden bg-surface-sunken shrink-0"
+                  >
+                    <img
+                      src={b.url || ""}
+                      alt={b.name || b.originalName || ""}
+                      className="w-full h-full object-cover"
+                    />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         );
       })}
