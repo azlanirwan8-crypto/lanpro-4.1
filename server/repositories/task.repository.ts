@@ -180,8 +180,177 @@ export class TaskRepository {
   }
 
   /**
-   * Halaman root Issue List + seluruh keturunan root pada halaman itu (#318).
+   * Halaman Issue List: akar yang dipilih + keturunannya (#318).
    * Board/Kanban tetap memakai findTasksWithRelations penuh.
+   *
+   * #701 — fungsi ini sekarang HANYA jalur "semua tugas". Jalur "My Tasks"
+   * pindah ke `rantaiTugasSaya()` karena ia tidak bisa lagi berbagi syarat akar
+   * dengan jalur ini: lihat catatan di sana.
+   */
+  private async halamanAkar(
+    connection: any,
+    projectId: string,
+    pagination: PaginationParams,
+    search?: string
+  ): Promise<{ allowedIds: Set<string>; total: number }> {
+    const params: unknown[] = [projectId];
+    let rootWhere = "projectId = ? AND (parentId IS NULL OR parentId = '')";
+    if (search?.trim()) {
+      rootWhere +=
+        " AND (LOWER(COALESCE(title, '')) LIKE ? OR LOWER(COALESCE(taskKey, '')) LIKE ?)";
+      const term = `%${search.trim().toLowerCase()}%`;
+      params.push(term, term);
+    }
+
+    const [countRows]: any = await connection.query(
+      `SELECT COUNT(*)::int AS total FROM Tasks WHERE ${rootWhere}`,
+      params
+    );
+    const total = countRows?.[0]?.total ?? 0;
+
+    const [rootRows]: any = await connection.query(
+      `SELECT id FROM Tasks WHERE ${rootWhere} ORDER BY orderIndex ASC, createdAt DESC LIMIT ? OFFSET ?`,
+      [...params, pagination.limit, pagination.offset]
+    );
+    const rootIds: string[] = (rootRows || []).map((r: any) => r.id).filter(Boolean);
+    if (rootIds.length === 0) {
+      return { allowedIds: new Set<string>(), total };
+    }
+
+    const [treeRows]: any = await connection.query(
+      `WITH RECURSIVE tree AS (
+         SELECT id FROM Tasks WHERE id IN (${rootIds.map(() => "?").join(",")})
+         UNION ALL
+         SELECT c.id FROM Tasks c INNER JOIN tree p ON c.parentId = p.id
+       )
+       SELECT id FROM tree`,
+      rootIds
+    );
+    return { allowedIds: new Set<string>((treeRows || []).map((r: any) => r.id)), total };
+  }
+
+  /**
+   * #701 (S2) — "My Tasks" untuk Issue List: kartu milik pemanggil + mata rantai
+   * INDUKNYA, dan hanya itu.
+   *
+   * BUG ASLI. Syarat "milik saya" dulu ditempel ke `rootWhere`, yaitu ke baris
+   * AKAR saja. Kartu milik saya yang bergendong di bawah epik milik orang lain
+   * jadi tidak pernah dimuat — epiknya gugur di syarat akar, dan anak hanya bisa
+   * datang sebagai keturunannya. Gejala di layar: "My Tasks" kosong melompong
+   * padahal pengguna punya tugas.
+   *
+   * KENAPA DI SERVER. Issue List memakai halaman sisi server (`rootsOnly=1`),
+   * jadi leluhur itu tidak pernah sampai ke klien untuk ditutup di sana. Kanban
+   * dan Planning menyelesaikan masalah yang sama lewat `tutupLeluhur()`
+   * (`src/lib/tugasSaya.ts`). Ini aturan yang sama, diturunkan ke SQL, supaya
+   * satu tombol tidak berarti tiga hal tergantung modul yang dibuka.
+   *
+   * BATAS YANG DISENGAJA: subtree halaman DIPANGKAS ke rantai. Epik milik saya
+   * tidak menarik keluar semua anak orang lain — itu kebalikan dari "My Tasks".
+   * Konsekuensinya, epik milik saya yang anak-anaknya bukan milik saya tampil
+   * sebagai baris tunggal. Itu aturan, bukan cacat.
+   */
+  private async rantaiTugasSaya(
+    connection: any,
+    projectId: string,
+    pagination: PaginationParams,
+    search: string | undefined,
+    penugasanKepada: string[]
+  ): Promise<{ allowedIds: Set<string>; total: number }> {
+    const kosong = { allowedIds: new Set<string>(), total: 0 };
+    // Array KOSONG = identitas pemanggil tidak berhasil ditegakkan. Jawabannya
+    // harus kosong, bukan seluruh isi proyek (#688).
+    if (penugasanKepada.length === 0) return kosong;
+
+    const params: unknown[] = [projectId];
+    let milikWhere = "projectId = ?";
+    if (search?.trim()) {
+      milikWhere +=
+        " AND (LOWER(COALESCE(title, '')) LIKE ? OR LOWER(COALESCE(taskKey, '')) LIKE ?)";
+      const term = `%${search.trim().toLowerCase()}%`;
+      params.push(term, term);
+    }
+    // Kolom camelCase mengikuti konvensi yang SUDAH dipakai berkas ini
+    // (`projectId`, `parentId`, `orderIndex`, `taskKey`) — §5 AGENTS.md.
+    const tempat = penugasanKepada.map(() => "?").join(",");
+    milikWhere += ` AND (assigneeId IN (${tempat}) OR assigneeEmail IN (${tempat})`;
+    params.push(...penugasanKepada, ...penugasanKepada);
+    // Multi-assignee disimpan sebagai JSONB array-of-string; kecocokan pada
+    // elemen TERKUTIP supaya id yang kebetulan bagian dari id lain tidak ikut.
+    // Metakarakter LIKE di-escape + `ESCAPE '\'`: tanpa itu email ber-% berubah
+    // jadi wildcard "apa saja" dan filter ini memulangkan tugas orang lain.
+    for (const kunci of penugasanKepada) {
+      milikWhere += " OR assignees::text LIKE ? ESCAPE '\\'";
+      params.push(`%"${kunci.replace(/[\\%_]/g, (c) => `\\${c}`)}"%`);
+    }
+    milikWhere += ")";
+
+    const [milikRows]: any = await connection.query(
+      `SELECT id FROM Tasks WHERE ${milikWhere}`,
+      params
+    );
+    const milikIds: string[] = (milikRows || []).map((r: any) => r.id).filter(Boolean);
+    if (milikIds.length === 0) return kosong;
+
+    // Naik dari setiap kartu milik saya sampai induk tertingginya. `kedalaman`
+    // dibatasi: `parentId` yang melingkar (hasil impor yang buruk) akan membuat
+    // RECURSIVE berjalan tanpa akhir dan menahan satu dari 20 koneksi pool.
+    const [naikRows]: any = await connection.query(
+      `WITH RECURSIVE naik AS (
+         SELECT id, parentId, "orderIndex", "createdAt", 0 AS kedalaman
+           FROM Tasks WHERE id IN (${milikIds.map(() => "?").join(",")})
+         UNION ALL
+         SELECT p.id, p.parentId, p."orderIndex", p."createdAt", n.kedalaman + 1
+           FROM Tasks p INNER JOIN naik n ON p.id = n.parentId
+          WHERE n.kedalaman < 20
+       )
+       SELECT id, parentId, "orderIndex", "createdAt" FROM naik`,
+      milikIds
+    );
+    const rantai = (naikRows || []).filter((r: any) => r?.id);
+    const dalamRantai = new Set<string>(rantai.map((r: any) => r.id));
+
+    // Akar rantai = simpul yang induknya tidak ikut di dalam rantai. `parentId`
+    // yang menggantung (induknya tidak ada sama sekali) juga berhenti di sini,
+    // sama seperti aturan `akarDaftar()` di klien.
+    const akar = rantai.filter((r: any) => !r.parentId || !dalamRantai.has(r.parentId));
+    // Urutan harus sama dengan jalur "semua tugas": orderIndex ASC, createdAt
+    // DESC. Id jadi penentu terakhir supaya halaman tidak bertukar isi saat dua
+    // akar dibuat pada detik yang sama.
+    akar.sort((a: any, b: any) => {
+      const oa = Number(a.orderIndex || 0);
+      const ob = Number(b.orderIndex || 0);
+      if (oa !== ob) return oa - ob;
+      const ca = new Date(a.createdAt || 0).getTime();
+      const cb = new Date(b.createdAt || 0).getTime();
+      if (ca !== cb) return cb - ca;
+      return String(a.id).localeCompare(String(b.id));
+    });
+
+    const rootIds = akar
+      .slice(pagination.offset, pagination.offset + pagination.limit)
+      .map((r: any) => r.id);
+    if (rootIds.length === 0) return { allowedIds: new Set<string>(), total: akar.length };
+
+    // Turun dari akar halaman ini, lalu POTONG ke rantai.
+    const [treeRows]: any = await connection.query(
+      `WITH RECURSIVE tree AS (
+         SELECT id FROM Tasks WHERE id IN (${rootIds.map(() => "?").join(",")})
+         UNION ALL
+         SELECT c.id FROM Tasks c INNER JOIN tree p ON c.parentId = p.id
+       )
+       SELECT id FROM tree`,
+      rootIds
+    );
+    const allowedIds = new Set<string>(
+      (treeRows || []).map((r: any) => r.id).filter((id: string) => !!id && dalamRantai.has(id))
+    );
+    return { allowedIds, total: akar.length };
+  }
+
+  /**
+   * Halaman Issue List. #701: mode "My Tasks" memakai `rantaiTugasSaya()`,
+   * sisanya memakai `halamanAkar()`.
    */
   async findIssueListPage(
     projectId: string,
@@ -198,64 +367,12 @@ export class TaskRepository {
     let total = 0;
     let allowedIds = new Set<string>();
     try {
-      const params: unknown[] = [projectId];
-      let rootWhere = "projectId = ? AND (parentId IS NULL OR parentId = '')";
-      if (search?.trim()) {
-        rootWhere +=
-          " AND (LOWER(COALESCE(title, '')) LIKE ? OR LOWER(COALESCE(taskKey, '')) LIKE ?)";
-        const term = `%${search.trim().toLowerCase()}%`;
-        params.push(term, term);
-      }
-      if (penugasanKepada !== undefined) {
-        if (penugasanKepada.length === 0) {
-          return { items: [], total: 0 };
-        }
-        // Kolom camelCase di sini mengikuti konvensi yang SUDAH dipakai fungsi ini
-        // (`projectId`, `parentId`, `orderIndex`, `taskKey`). Menyimpang ke bentuk
-        // ber-kutip di tengah query yang sama justru berisiko (§5 AGENTS.md).
-        const tempat = penugasanKepada.map(() => "?").join(",");
-        rootWhere += ` AND (assigneeId IN (${tempat}) OR assigneeEmail IN (${tempat})`;
-        params.push(...penugasanKepada, ...penugasanKepada);
-        // Multi-assignee disimpan sebagai JSONB array-of-string. Kecocokan
-        // dilakukan pada elemen TERKUTIP supaya id yang kebetulan menjadi
-        // bagian dari id lain tidak ikut tersaring.
-        //
-        // Metakarakter LIKE di-escape dan `ESCAPE '\'` dipasang. Tanpa itu, akun
-        // yang emailnya mengandung `%` (pengguna boleh mengubah emailnya sendiri)
-        // berubah menjadi wildcard "apa saja": filter "My Tasks" justru
-        // memulangkan tugas orang lain.
-        for (const kunci of penugasanKepada) {
-          rootWhere += " OR assignees::text LIKE ? ESCAPE '\\'";
-          params.push(`%"${kunci.replace(/[\\%_]/g, (c) => `\\${c}`)}"%`);
-        }
-        rootWhere += ")";
-      }
-
-      const [countRows]: any = await connection.query(
-        `SELECT COUNT(*)::int AS total FROM Tasks WHERE ${rootWhere}`,
-        params
-      );
-      total = countRows?.[0]?.total ?? 0;
-
-      const [rootRows]: any = await connection.query(
-        `SELECT id FROM Tasks WHERE ${rootWhere} ORDER BY orderIndex ASC, createdAt DESC LIMIT ? OFFSET ?`,
-        [...params, pagination.limit, pagination.offset]
-      );
-      const rootIds: string[] = (rootRows || []).map((r: any) => r.id).filter(Boolean);
-      if (rootIds.length === 0) {
-        return { items: [], total };
-      }
-
-      const [treeRows]: any = await connection.query(
-        `WITH RECURSIVE tree AS (
-           SELECT id FROM Tasks WHERE id IN (${rootIds.map(() => "?").join(",")})
-           UNION ALL
-           SELECT c.id FROM Tasks c INNER JOIN tree p ON c.parentId = p.id
-         )
-         SELECT id FROM tree`,
-        rootIds
-      );
-      allowedIds = new Set<string>((treeRows || []).map((r: any) => r.id));
+      const hasil =
+        penugasanKepada === undefined
+          ? await this.halamanAkar(connection, projectId, pagination, search)
+          : await this.rantaiTugasSaya(connection, projectId, pagination, search, penugasanKepada);
+      allowedIds = hasil.allowedIds;
+      total = hasil.total;
     } finally {
       connection.release();
     }

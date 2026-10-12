@@ -52,38 +52,39 @@ describe("findIssueListPage dengan penugasan (#688)", () => {
     expect(sambungan.panggilan).toEqual([]);
   });
 
-  it("kunci yang sama dipakai di query COUNT dan query baris", async () => {
+  it("kunci pemanggil hanya punya SATU syarat, dan syarat itu tidak lagi menempel di akar", async () => {
     await taskRepository.findIssueListPage("p1", pagination, undefined, [
       "uid-1",
       "rina@contoh.test",
     ]);
 
-    const count = sambungan.panggilan.find((p) => /COUNT\(\*\)/i.test(p.sql))!;
-    const baris = sambungan.panggilan.find((p) => /ORDER BY orderIndex/i.test(p.sql))!;
-    expect(count).toBeDefined();
-    expect(baris).toBeDefined();
-
-    for (const q of [count, baris]) {
-      expect(q.sql).toContain("assigneeId IN (?,?)");
-      expect(q.sql).toContain("assigneeEmail IN (?,?)");
-      expect(q.sql).toContain("assignees::text LIKE ?");
-      expect(q.params).toEqual(expect.arrayContaining(["uid-1", "rina@contoh.test", '%"uid-1"%']));
-    }
+    const bersyarat = sambungan.panggilan.filter((p) => /assigneeId IN/i.test(p.sql));
+    // #701 — dulu syarat "milik saya" ditempel DUA kali (query COUNT dan query
+    // baris) dan keduanya ke baris AKAR. Satu syarat saja sekarang, dan ia
+    // berlaku di kedalaman mana pun.
+    expect(bersyarat).toHaveLength(1);
+    const q = bersyarat[0];
+    expect(q.sql).not.toMatch(/parentId IS NULL/);
+    expect(q.sql).toContain("assigneeId IN (?,?)");
+    expect(q.sql).toContain("assigneeEmail IN (?,?)");
+    expect(q.sql).toContain("assignees::text LIKE ?");
+    expect(q.params).toEqual(expect.arrayContaining(["uid-1", "rina@contoh.test", '%"uid-1"%']));
   });
 
-  it("total yang dibalik ikut tersaring, bukan jumlah seluruh proyek", async () => {
-    // WHERE di query COUNT dan query baris harus identik. Beda satu klausa saja
-    // membuat halaman berteriak "128 tugas" di atas tiga baris.
-    await taskRepository.findIssueListPage("p1", pagination, "login", ["uid-1"]);
+  it("total dihitung dari rantai milik pemanggil, bukan dari COUNT seluruh proyek", async () => {
+    // Jaminannya tetap sama seperti sebelum #701: angka di pager harus berasal
+    // dari predikat yang sama dengan daftar. Yang berubah: jumlahnya tidak lagi
+    // datang dari `SELECT COUNT(*)` atas akar, melainkan dari akar rantai yang
+    // dibangun oleh syarat "milik saya" itu sendiri.
+    const hasil = await taskRepository.findIssueListPage("p1", pagination, "login", ["uid-1"]);
 
-    const qCount = sambungan.panggilan.find((p) => /COUNT\(\*\)/i.test(p.sql))!;
-    const qBaris = sambungan.panggilan.find((p) => /ORDER BY orderIndex/i.test(p.sql))!;
-    const where = (sql: string) =>
-      sql.split("WHERE")[1].split("ORDER BY")[0].split("LIMIT")[0].trim();
-
-    expect(where(qCount.sql)).toBe(where(qBaris.sql));
-    // Parameter COUNT = parameter baris tanpa LIMIT/OFFSET di ujung.
-    expect(qBaris.params.slice(0, qCount.params.length)).toEqual(qCount.params);
+    // `COUNT(*)::int AS total` adalah bentuk kueri akar yang lama; yang masih
+    // boleh lewat hanyalah COUNT agregat milik findTasksWithRelations (komentar).
+    expect(sambungan.panggilan.some((p) => /COUNT\(\*\)::int AS total/i.test(p.sql))).toBe(false);
+    const syarat = sambungan.panggilan.find((p) => /assigneeId IN/i.test(p.sql))!;
+    expect(syarat.sql).toContain("LOWER(COALESCE(title, '')) LIKE ?");
+    // Mock mengembalikan satu akar (epic-1) untuk satu kartu milik saya.
+    expect(hasil.total).toBe(1);
   });
 
   it("tanpa kunci, tidak ada klausa assignee sama sekali (All Tasks)", async () => {
@@ -102,7 +103,7 @@ describe("findIssueListPage dengan penugasan (#688)", () => {
   it("metakarakter LIKE di kunci di-escape, tidak jadi wildcard", async () => {
     await taskRepository.findIssueListPage("p1", pagination, undefined, ["a%@contoh.test"]);
 
-    const baris = sambungan.panggilan.find((p) => /ORDER BY orderIndex/i.test(p.sql))!;
+    const baris = sambungan.panggilan.find((p) => /assignees::text LIKE/i.test(p.sql))!;
     expect(baris.sql).toContain("assignees::text LIKE ? ESCAPE");
     const pola = baris.params.find((p) => typeof p === "string" && p.startsWith('%"a'));
     expect(pola).toBe('%"a\\%@contoh.test"%');
