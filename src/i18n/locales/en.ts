@@ -1867,6 +1867,8 @@ export const en = {
     belumAdaGambar: "No images yet",
     hapusGambar: "Remove image",
     mengunggah: "Uploading…",
+    tautanButuhTersimpan: "Links are added from the edit drawer once the point is saved",
+    gambarButuhTersimpan: "Images are uploaded from the edit drawer once the point is saved",
     statusDone: "Done",
     statusPending: "Pending",
     prev: "Prev",

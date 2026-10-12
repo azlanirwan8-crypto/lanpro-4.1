@@ -74,6 +74,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
   const [nilaiCepat, setNilaiCepat] = useState<NilaiCepat>({
     concern: "",
     keterangan: "",
+    tindakanLanjut: "",
     assigneeIds: [],
     tags: [],
     targetDate: "",
@@ -263,10 +264,11 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     const payload: any = {
       concern: nilaiCepat.concern.trim(),
       keterangan: nilaiCepat.keterangan.trim(),
-      // #703 — baris cepat kini mengirim PENERIAMA JAMAK dan TAG ISU.
+      // #703 — baris cepat kini mengirim PENERIMA JAMAK dan TAG ISU.
       assigneeIds: nilaiCepat.assigneeIds,
       assignTo: nilaiCepat.assigneeIds[0] || "",
       tags: nilaiCepat.tags,
+      tindakanLanjut: nilaiCepat.tindakanLanjut.trim(),
       targetDate: nilaiCepat.targetDate || "",
       status: "pending",
       authorId: currentUser.uid,
@@ -281,7 +283,14 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
     suppressDiscussionPointsRefresh(8000);
     setPoints((prev) => [placeholder, ...prev]);
-    setNilaiCepat({ concern: "", keterangan: "", assigneeIds: [], tags: [], targetDate: "" });
+    setNilaiCepat({
+      concern: "",
+      keterangan: "",
+      tindakanLanjut: "",
+      assigneeIds: [],
+      tags: [],
+      targetDate: "",
+    });
     toast.success(t("alerts.pointAdded"));
 
     try {

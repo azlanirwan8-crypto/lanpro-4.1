@@ -20,6 +20,7 @@ import { cn } from "../../../lib/utils";
 export interface NilaiCepat {
   concern: string;
   keterangan: string;
+  tindakanLanjut: string;
   assigneeIds: string[];
   tags: { id: string; label: string }[];
   targetDate: string;
@@ -93,6 +94,20 @@ export const BarisCepat: React.FC<BarisCepatProps> = (props) => {
         />
       </td>
 
+      {/* #703 butir 3 — Follow-up akhirnya punya kolom di kepala tabel, jadi
+          baris cepatnya juga harus punya selnya. Kalau tidak, tombol "Add"
+          melorot tiga kolom ke kiri dan tidak lagi lurus dengan ACTION —
+          itulah yang ditangkap pemilik proyek 12 Okt malam. */}
+      <td className="py-2.5 px-4 align-middle">
+        <textarea
+          placeholder={t("discussion.followUp")}
+          value={nilai.tindakanLanjut}
+          onChange={(e) => onUbah({ tindakanLanjut: e.target.value })}
+          rows={2}
+          className={cn(isianKelas, "min-h-[42px] resize-y")}
+        />
+      </td>
+
       <td className="py-2.5 px-4 align-middle">
         <PemilihJamak
           nilai={nilai.assigneeIds}
@@ -110,6 +125,18 @@ export const BarisCepat: React.FC<BarisCepatProps> = (props) => {
           onChange={(val) => onUbah({ targetDate: val })}
           buttonClassName={tombolKelas}
         />
+      </td>
+
+      {/* #704 butir 5 dan 6 — tautan dan gambar LEBIH DULU butuh titik diskusi
+          yang sudah tersimpan (lampiran menempel pada pointId), jadi keduanya
+          belum bisa diisi dari baris cepat. Selnya tetap ADA supaya kolom di
+          bawahnya tidak bergeser, dan isinya dijelaskan lewat title. */}
+      <td className="py-2.5 px-4 text-center align-middle text-content-subtle text-xs">
+        <span title={t("discussion.tautanButuhTersimpan")}>-</span>
+      </td>
+
+      <td className="py-2.5 px-4 text-center align-middle text-content-subtle text-xs">
+        <span title={t("discussion.gambarButuhTersimpan")}>-</span>
       </td>
 
       <td className="py-2.5 px-4 text-center align-middle text-content-subtle text-xs">-</td>
@@ -164,6 +191,15 @@ export const BlokCepatMobile: React.FC<BarisCepatProps> = (props) => {
         placeholder={t("discussion.notesPlaceholder")}
         value={nilai.keterangan}
         onChange={(e) => onUbah({ keterangan: e.target.value })}
+        rows={2}
+        className={cn(isianMobile, "min-w-0 min-h-[56px] resize-y")}
+      />
+      {/* Satu sumber isian: apa yang ada di baris desktop ada juga di sini
+          (#645 — satu field jangan punya dua bentuk tergantung layar). */}
+      <textarea
+        placeholder={t("discussion.followUp")}
+        value={nilai.tindakanLanjut}
+        onChange={(e) => onUbah({ tindakanLanjut: e.target.value })}
         rows={2}
         className={cn(isianMobile, "min-w-0 min-h-[56px] resize-y")}
       />

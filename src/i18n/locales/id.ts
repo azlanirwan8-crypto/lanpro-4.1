@@ -1881,6 +1881,10 @@ export const id = {
     belumAdaGambar: "Belum ada gambar",
     hapusGambar: "Hapus gambar",
     mengunggah: "Mengunggah…",
+    // Baris cepat tidak bisa melampirkan tautan/gambar: keduanya menempel pada
+    // titik diskusi yang sudah punya id, jadi selnya hanya menjelaskan jalurnya.
+    tautanButuhTersimpan: "Tautan ditambahkan lewat laci sunting setelah titik diskusi tersimpan",
+    gambarButuhTersimpan: "Gambar diunggah lewat laci sunting setelah titik diskusi tersimpan",
     statusDone: "Selesai",
     statusPending: "Tertunda",
     prev: "Sebelumnya",

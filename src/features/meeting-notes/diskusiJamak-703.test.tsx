@@ -134,7 +134,12 @@ describe("#704 butir 5 dan 6 — tautan jamak dan gambar jamak", () => {
 
   it("rute berkas berada di bawah penjaga proyek yang sama dengan titiknya", () => {
     const isi = baca(RUTE);
-    const daftar = blok(isi, "// #704 — BERKAS/GAMBAR", "// DISCUSSION POINT THREADED", "rute berkas");
+    const daftar = blok(
+      isi,
+      "// #704 — BERKAS/GAMBAR",
+      "// DISCUSSION POINT THREADED",
+      "rute berkas"
+    );
     expect(daftar).toContain('jagaProyek("meetingNotes", "R")');
     expect(daftar).toContain('jagaProyek("meetingNotes", "C")');
     expect(daftar).toContain('jagaProyek("meetingNotes", "D")');
@@ -148,8 +153,8 @@ describe("skema (#703/#704) — nama huruf kecil utuh, bukan camelCase ber-kutip
     const isi = baca(MIGRASI);
     expect(isi).toContain("CREATE TABLE IF NOT EXISTS discussion_point_assignees");
     expect(isi).toContain("CREATE TABLE IF NOT EXISTS discussion_point_files");
-    expect(isi).toContain('ADD COLUMN IF NOT EXISTS tags JSONB');
-    expect(isi).toContain('ADD COLUMN IF NOT EXISTS links JSONB');
+    expect(isi).toContain("ADD COLUMN IF NOT EXISTS tags JSONB");
+    expect(isi).toContain("ADD COLUMN IF NOT EXISTS links JSONB");
   });
 
   it("kolom lama tidak dijatuhkan", () => {
@@ -157,6 +162,51 @@ describe("skema (#703/#704) — nama huruf kecil utuh, bukan camelCase ber-kutip
     for (const kolom of ['"assignTo"', "concern", "fitur", "keterangan", '"tindakanLanjut"']) {
       expect(isi).toContain(kolom);
     }
+  });
+});
+
+describe("#703/#704 lanjutan — baris cepat lurus dengan kepala, panel tidak terpotong", () => {
+  /* Dua cacat yang ditangkap pemilik proyek dari tangkapan layar 12 Okt malam:
+   * (1) kepala tabel sudah DUABELAS kolom sejak Follow-up, Tautan, dan Gambar
+   *     masuk, tetapi baris cepat masih sembilan sel — sisa kolom bergeser ke
+   *     kiri dan tombol "Add" mendarat di bawah THREAD, bukan di bawah ACTION;
+   * (2) panel pemilih jamak menempel di DOM sel, sementara wadahnya
+   *     `overflow-x-auto` (dua kali: di tabel dan di `ResponsiveTable`). CSS
+   *     melipat `overflow-y: visible` menjadi `auto` begitu sumbu satunya auto,
+   *     jadi panel apa pun yang menempel di baris terpotong tepi wadahnya. */
+  const jumlah = (isi: string, pola: RegExp) => (isi.match(pola) || []).length;
+
+  it("sel baris cepat sebanyak kolom kepala tabel", () => {
+    const kepala = blok(baca(TABEL), "<thead>", "</tbody>", "kepala tabel");
+    const kolom = jumlah(kepala, /<th[\s>]/g);
+    expect(kolom).toBe(12);
+    expect(jumlah(baca(CEPAT), /<td[\s>]/g)).toBe(kolom);
+  });
+
+  it("Follow-up dikirim baris cepat dan ikut dibersihkan sesudah tersimpan", () => {
+    const isi = baca(TABEL);
+    expect(isi).toContain("tindakanLanjut: nilaiCepat.tindakanLanjut.trim()");
+    expect(blok(isi, "setNilaiCepat({", "});", "reset baris cepat")).toContain("tindakanLanjut");
+  });
+
+  it("baris desktop dan blok HP sama-sama punya textarea Follow-up", () => {
+    const isi = baca(CEPAT);
+    expect(tag(isi, "value={nilai.tindakanLanjut}", "follow-up cepat")).toContain("textarea");
+    expect(jumlah(isi, /value=\{nilai\.tindakanLanjut\}/g)).toBe(2);
+  });
+
+  it("panel jamak diportal ke body dan dipasang dengan position fixed", () => {
+    const isi = baca(JAMAK);
+    expect(isi).toContain("createPortal(");
+    expect(isi).toContain('position: "fixed"');
+    // Bentuk lama — menempel di sel, dan karena itu terpotong.
+    expect(isi).not.toContain("absolute left-0 top-full");
+  });
+
+  it("panel dihitung ulang saat tabel digulir dan saat jendela diganti ukuran", () => {
+    const isi = baca(JAMAK);
+    expect(isi).toContain('addEventListener("scroll"');
+    expect(isi).toContain('addEventListener("resize"');
   });
 });
 
