@@ -161,29 +161,71 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
    * kedua kolom sepakat di angka lantainya — perilaku lama, bukan perilaku rusak.
    */
   const [tinggiRow, setTinggiRow] = useState<Record<string, number>>({});
+  /* #700 B4 — pemisah DUA hal yang selama ini tertukar di batang: memotong teks
+   * (dilarang pemilik, dua kali) dan memotong LEWAT BATAS (dilarang juga, 12 Okt:
+   * "brave nya itu kelewatan dari batas"). Judul sekarang boleh turun ke baris
+   * dua di DALAM batang; kalau masih tidak muat, ia TIDAK digambar sama sekali —
+   * namanya tetap terbaca utuh di kolom kiri dan di tooltip.
+   *
+   * Yang diukur di sini bukan tinggi baris (itu B1), melainkan apakah isi kotak
+   * label lebih besar dari kotaknya sendiri (`scrollHeight` > `clientHeight`).
+   * Menghilangkannya lewat `invisible`, bukan dengan melepas elemennya: `invisible`
+   * tidak mengubah layout, jadi hasil ukurnya tidak berubah setelah keputusan
+   * diambil. Kalau elemennya dicabut, ukurannya hilang dan ia akan muncul-hilang
+   * setiap keredupan. */
+  const [labelTidakMuat, setLabelTidakMuat] = useState<Record<string, boolean>>({});
   const pengamatRow = useRef<ResizeObserver | null>(null);
   const elRow = useRef(new Map<string, HTMLElement>());
+  const elBatang = useRef(new Map<string, HTMLElement>());
 
   useEffect(() => {
     if (typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver((entri) => {
-      setTinggiRow((lama) => {
-        let berubah = false;
-        const berikut = { ...lama };
-        for (const e of entri) {
-          const id = (e.target as HTMLElement).dataset.rowId;
-          const t = (e.target as HTMLElement).offsetHeight;
-          if (!id || !t) continue;
-          if (berikut[id] !== t) {
-            berikut[id] = t;
-            berubah = true;
-          }
+      const baris: Array<[string, number]> = [];
+      const batang: Array<[string, boolean]> = [];
+      for (const e of entri) {
+        const el = e.target as HTMLElement;
+        if (el.dataset.rowId) {
+          if (el.offsetHeight) baris.push([el.dataset.rowId, el.offsetHeight]);
+        } else if (el.dataset.batangId) {
+          batang.push([el.dataset.batangId, el.scrollHeight > el.clientHeight + 1]);
         }
-        return berubah ? berikut : lama;
-      });
+      }
+      if (baris.length > 0) {
+        setTinggiRow((lama) => {
+          let berubah = false;
+          const berikut = { ...lama };
+          for (const [id, t] of baris) {
+            if (berikut[id] !== t) {
+              berikut[id] = t;
+              berubah = true;
+            }
+          }
+          return berubah ? berikut : lama;
+        });
+      }
+      if (batang.length > 0) {
+        setLabelTidakMuat((lama) => {
+          let berubah = false;
+          const berikut = { ...lama };
+          for (const [id, muat] of batang) {
+            if (berikut[id] !== muat) {
+              berikut[id] = muat;
+              berubah = true;
+            }
+          }
+          return berubah ? berikut : lama;
+        });
+      }
     });
     pengamatRow.current = ro;
+    // Ref terpasang SEBELUM efek ini jalan, jadi pada mount keduanya masih kosong
+    // di mata pengukur. Sweep ini yang membuat baris DAN kotak label batang ikut
+    // terukur sejak render pertama — tanpa yang kedua, judul batang baru
+    // terukur setelah ia berubah ukuran, dan baris pertama papan tampil apa
+    // adanya sampai saat itu.
     elRow.current.forEach((el) => ro.observe(el));
+    elBatang.current.forEach((el) => ro.observe(el));
     return () => {
       ro.disconnect();
       pengamatRow.current = null;
@@ -209,6 +251,27 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
       }
     };
     pasangRef.current.set(id, pasang);
+    return pasang;
+  };
+
+  // #700 B4 — pengukur kotak label batang. Identitasnya juga harus TETAP per id
+  // untuk alasan yang sama seperti `ukurRow` di atas.
+  const pasangRefBatang = useRef(new Map<string, (el: HTMLDivElement | null) => void>());
+  const ukurBatang = (id: string) => {
+    const tersimpan = pasangRefBatang.current.get(id);
+    if (tersimpan) return tersimpan;
+    const pasang = (el: HTMLDivElement | null) => {
+      if (el) {
+        elBatang.current.set(id, el);
+        pengamatRow.current?.observe(el);
+      } else {
+        const lama = elBatang.current.get(id);
+        if (lama) pengamatRow.current?.unobserve(lama);
+        elBatang.current.delete(id);
+        pasangRefBatang.current.delete(id);
+      }
+    };
+    pasangRefBatang.current.set(id, pasang);
     return pasang;
   };
 
@@ -1235,6 +1298,10 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                     );
                     const isEpic = (task.type || "").toLowerCase() === "epic";
                     const hexStatus = warnaDariMaster(masterData, "status", task.status);
+                    // #700 B4 — batas tinggi batang adalah TINGGI BARISNYA, bukan
+                    // angka tetap. Baris yang sudah naik karena nama panjang
+                    // (B1) otomatis memberi batang ruang lebih.
+                    const tinggiBaris = tinggiRow[task.id] ?? GANTT_ROW_PX;
 
                     return (
                       <motion.div
@@ -1287,17 +1354,23 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             // hanyalah gabung spasi (src/lib/utils.ts:4), jadi
                             // `h-6` + `h-4` dimenangkan urutan stylesheet, bukan
                             // oleh niat penulisnya — pelajaran #692.
-                            // #700 B2 — `overflow-hidden` DIAMBIL DARI BATANG.
-                            // Selama kelas itu menempel di sini, judul yang lebih
-                            // panjang dari rentang tanggalnya dipangkas di tepi
-                            // batang; sekarang ia melewatinya dan yang memangkas
-                            // hanyalah barisnya, yaitu ujung kanan papan. Batang
-                            // tetap membulat tanpa kelas itu: radius memotong
-                            // latar, bukan anak yang meluber.
-                            "gantt-bar absolute top-1/2 -translate-y-1/2 flex items-center border shadow-soft",
-                            // Awalan `h-4` bukan gaya: pemindai #602 mengenali
-                            // sebuah string sebagai kelas dari token pertamanya.
-                            isEpic ? "h-4 rounded-md gantt-bar-epic" : "h-6 rounded-lg",
+                            // #700 B2 lalu B4 — `overflow-hidden` TIDAK boleh
+                            // kembali ke elemen ini: tooltip duduk di DALAM batang
+                            // (`-top-12`) dan akan terpotong bersamanya. Yang
+                            // memotong judul sekarang kotak label di bawahnya.
+                            //
+                            // `items-stretch`, bukan `items-center`: kotak label
+                            // harus setinggi batang supaya baris teks yang
+                            // kelebihan TERUKUR olehnya, bukan meluber diam-diam.
+                            "gantt-bar absolute top-1/2 -translate-y-1/2 flex items-stretch border shadow-soft",
+                            // Awalan `h-auto` bukan gaya, dan ia menahan dua hal:
+                            // pemindai #602 mengenali sebuah string sebagai kelas
+                            // dari token pertamanya, dan `h-6` yang kaku akan
+                            // melarang batang menampung baris kedua. Tingginya
+                            // bebas di antara `min-h` dan `maxHeight` di bawah.
+                            isEpic
+                              ? "h-auto min-h-4 rounded-md gantt-bar-epic"
+                              : "h-auto min-h-6 rounded-lg",
                             "group/bar",
                             timelineInteraction?.taskId === task.id && "gantt-bar-aktif",
                             timelineInteraction?.taskId === task.id
@@ -1309,6 +1382,15 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             left: `${left}%`,
                             width: `${width}%`,
                             minWidth: "24px",
+                            // #700 B4 — batang boleh lebih tinggi dari lantainya
+                            // untuk menampung baris kedua judul, tetapi TIDAK
+                            // boleh melewati barisnya sendiri. Baris ini sudah
+                            // `overflow-hidden`, jadi tanpa batas di bawah batang
+                            // yang kepanjangan akan terpotong diam-diam di tepi
+                            // atas/bawah baris; dengan batasnya, kelebihan itu
+                            // terukur dan judulnya disembunyikan (lihat
+                            // `labelTidakMuat`).
+                            maxHeight: tinggiBaris - 2,
                             ...(sedangDiseret(task.id)
                               ? { willChange: "transform, left, width" }
                               : {}),
@@ -1362,7 +1444,15 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
 
                           {/* Drag and Move Row Area */}
                           <div
-                            className="flex-1 h-full px-3 flex items-center justify-between cursor-grab active:cursor-grabbing"
+                            ref={ukurBatang(task.id)}
+                            data-batang-id={task.id}
+                            // #700 B4 — kotak INI yang memotong, bukan batangnya:
+                            // `overflow-hidden` + `min-w-0` memastikan tidak ada
+                            // satu huruf pun melewati tepi kanan, dan `items-stretch`
+                            // di induknya membuat tingginya sama dengan tinggi
+                            // batang sehingga baris yang tidak tertampung TERUKUR
+                            // (`scrollHeight` > `clientHeight`), bukan meluber.
+                            className="relative min-w-0 flex-1 overflow-hidden px-3 flex items-center cursor-grab active:cursor-grabbing"
                             onMouseDown={(e) => {
                               // Only trigger move if clicked outside the resize handles
                               const rect = e.currentTarget.getBoundingClientRect();
@@ -1379,11 +1469,24 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                               }
                             }}
                           >
-                            {/* #700 B2 — `truncate` keluar dari sini. Judul batang
-                                tidak dipangkas lagi di tepi batang: ia jalan terus
-                                ke kanan melewati ujungnya, persis seperti nama di
-                                kolom kiri yang sekarang tumbuh ke bawah. */}
-                            <span className="text-xs sm:text-[10.5px] font-semibold whitespace-nowrap tracking-tight select-none">
+                            {/* #700 B2 lalu B4 — judul TIDAK dipotong dan TIDAK
+                              melewati batas: dua aturan yang dulu tampak
+                              bertentangan dan ternyata ketemu di sini. Ia boleh
+                              turun ke baris dua seperti nama di kolom kiri (B1),
+                              tetapi di dalam batang. Kalau dua baris pun masih
+                              tidak muat, `invisible` memadamkannya — namanya
+                              tetap terbaca utuh di kolom kiri dan di tooltip,
+                              dan tidak ada satu kata pun yang hilang dari layar.
+                              `invisible` bukan `hidden`: layoutnya bertahan,
+                              jadi hasil ukurnya tidak berubah setelah keputusan
+                              diambil (kalau berubah, judul akan berkedip
+                              muncul-hilang tiap keredupan). */}
+                            <span
+                              className={cn(
+                                "text-xs sm:text-[10.5px] font-semibold tracking-tight select-none leading-tight break-words text-left",
+                                labelTidakMuat[task.id] && "invisible"
+                              )}
+                            >
                               {task.title}
                             </span>
                             {/* #698 — cakram inisial penerima dibuang. Ia mencetak

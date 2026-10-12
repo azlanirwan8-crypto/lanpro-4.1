@@ -350,20 +350,65 @@ describe("TimelinePanel — ikon kolom nama ikut jenis isu (Master Data, #700 B3
 });
 
 /**
- * #700 B2 — teks pada BATANG Gantt (12 Okt, pemilik proyek: "perbaiki teks pada
- * batang Gantt yang terpotong").
+ * #700 B2 (12 Okt, "perbaiki teks pada batang Gantt yang terpotong") lalu
+ * **B4** (12 Okt juga, pemilik proyek menunjuk hasil B2: "ini ke lewat batas ...
+ * brave nya itu kelwat dari batas").
  *
- * Bedanya dengan kolom nama: kolom nama adalah TABEL, jawabannya tumbuh ke
- * bawah (B1). Batang adalah TANDA GRAFIK yang lebarnya ditentukan rentang
- * tanggalnya, jadi tidak ada "ke bawah" di sana — yang ada hanya tepi batang
- * yang memotong. Yang dihapus karena itu bukan `truncate`-nya saja, melainkan
- * `overflow-hidden` pada batang: tanpa itu judul berjalan melewati ujung kanan
- * batang dan yang memangkas hanyalah baris, yaitu tepi kanan papan.
+ * B2 membaca keluhannya sebagai "jangan memotong", dan jawabannya melepas
+ * `overflow-hidden` dari batang: judul yang panjang sekarang berjalan MELEWATI
+ * ujung kanannya. Pemilik proyek menolak bagian itu. Dua permintaannya
+ * sebenarnya bukan hal yang sama:
+ *
+ *   1. tidak ada teks yang terpotong, dan
+ *   2. tidak ada teks yang melewati batas batangnya.
+ *
+ * Keduanya ketemu di satu tempat: judul TURUN KE BARIS DUA di dalam batang
+ * (aturan B1, diterapkan ke batang), batangnya boleh menumpang tinggi barisnya,
+ * dan kalau masih tidak muat pun judulnya TIDAK DIGAMBAR — bukan dipotong. Yang
+ * memotong bukan lagi batang (tooltip-nya duduk di dalam batang dan akan ikut
+ * terpotong), melainkan kotak label di dalamnya.
  */
-describe("TimelinePanel — judul batang tidak dipangkas tepi batang (#700 B2)", () => {
+describe("TimelinePanel — judul batang wrap di dalam, tidak melewati batas (#700 B4)", () => {
   const JUDUL = "Penyesuaian kode cabang sesuai dengan BRAVE";
 
-  const batang = () => {
+  class PengamatPalsu {
+    els = new Set<Element>();
+    cb: ResizeObserverCallback;
+    constructor(cb: ResizeObserverCallback) {
+      this.cb = cb;
+      instans.add(this);
+    }
+    observe(el: Element) {
+      this.els.add(el);
+    }
+    unobserve(el: Element) {
+      this.els.delete(el);
+    }
+    disconnect() {
+      this.els.clear();
+    }
+    kirim() {
+      this.cb(
+        [...this.els].map((el) => ({ target: el }) as ResizeObserverEntry),
+        this as unknown as ResizeObserver
+      );
+    }
+  }
+
+  const asli = global.ResizeObserver;
+  const instans = new Set<PengamatPalsu>();
+
+  beforeEach(() => {
+    instans.clear();
+    global.ResizeObserver = PengamatPalsu as unknown as typeof ResizeObserver;
+    (Element.prototype as unknown as { scrollTo: () => void }).scrollTo = () => {};
+  });
+
+  afterEach(() => {
+    global.ResizeObserver = asli;
+  });
+
+  const papan = () => {
     const { container } = render(
       <TimelinePanel
         tasks={[
@@ -385,27 +430,65 @@ describe("TimelinePanel — judul batang tidak dipangkas tepi batang (#700 B2)",
         currentUser={{ id: "u-1", role: "admin" }}
       />
     );
-    return container.querySelector(".gantt-bar") as HTMLElement;
-  };
-
-  it("batangnya tidak memotong anaknya sendiri", () => {
-    const el = batang();
-
-    expect(el).toBeTruthy();
-    expect(el.className).not.toContain("overflow-hidden");
-  });
-
-  it("judulnya satu baris utuh, bukan elipsis", () => {
-    const el = batang();
-    const label = Array.from(el.querySelectorAll("span")).find(
+    const batang = container.querySelector(".gantt-bar") as HTMLElement;
+    const kotak = container.querySelector("[data-batang-id]") as HTMLElement;
+    const label = Array.from(batang.querySelectorAll("span")).find(
       (s) => (s.textContent || "").trim() === JUDUL
     ) as HTMLElement;
+    // Bukan instans pertama: komponen ini punya pengukur lain (kepala papan).
+    // Yang dicari adalah yang benar-benar mengamati kotak label batang.
+    const pengamat = [...instans].find((o) => o.els.has(kotak));
+    return { batang, kotak, label, pengamat };
+  };
 
-    // Kontraknya sederhana: teks judul ADA utuh di dalam DOM dan tidak ada
-    // kelas yang memotongnya. Kalau `truncate` kembali menempel, judul ini
-    // tidak akan pernah ditemukan apa adanya.
+  it("judulnya boleh tumbuh ke bawah, bukan memanjang ke kanan", () => {
+    const { label } = papan();
+
+    // `whitespace-nowrap` adalah kelas yang membuat B2 meluber: teks satu baris
+    // yang lebih panjang dari batangnya tidak punya pilihan selain keluar.
     expect(label).toBeTruthy();
+    expect(label.className).not.toContain("whitespace-nowrap");
     expect(label.className).not.toContain("truncate");
-    expect(label.className).toContain("whitespace-nowrap");
+    expect(label.className).toContain("break-words");
+  });
+
+  it("yang memegang batas adalah kotak label, bukan batangnya", () => {
+    const { batang, kotak } = papan();
+
+    // Batang TETAP tidak boleh memakai `overflow-hidden` — bukan untuk judul,
+    // melainkan karena tooltip tanggalnya duduk di dalam batang (`-top-12`).
+    expect(kotak).toBeTruthy();
+    expect(kotak.className).toContain("overflow-hidden");
+    expect(kotak.className).toContain("min-w-0");
+    expect(batang.className).not.toContain("overflow-hidden");
+  });
+
+  it("batang tidak boleh lebih tinggi dari barisnya sendiri", () => {
+    const { batang } = papan();
+
+    // Lantai baris 40 px (#608); tanpa batas ini batang yang tumbuh ke baris
+    // tiga akan terpotong DIAM-DIAM oleh barisnya (barisnya `overflow-hidden`).
+    expect(batang.style.maxHeight).toBe("38px");
+  });
+
+  it("kalau tetap tidak muat, judulnya padam — bukan terpotong", async () => {
+    const { label, kotak, pengamat } = papan();
+
+    expect(label.className).not.toContain("invisible");
+
+    Object.defineProperty(kotak, "clientHeight", { value: 30, configurable: true });
+    Object.defineProperty(kotak, "scrollHeight", { value: 60, configurable: true });
+    act(() => {
+      pengamat!.kirim();
+    });
+    await waitFor(() => expect(label.className).toContain("invisible"));
+
+    // Diseret melebar: muat lagi, judulnya hidup lagi. `invisible` menahan
+    // layoutnya, jadi pengukuran berikutnya masih bisa dibandingkan.
+    Object.defineProperty(kotak, "scrollHeight", { value: 30, configurable: true });
+    act(() => {
+      pengamat!.kirim();
+    });
+    await waitFor(() => expect(label.className).not.toContain("invisible"));
   });
 });
