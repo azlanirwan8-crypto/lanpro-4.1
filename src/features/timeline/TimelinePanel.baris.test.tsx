@@ -290,6 +290,66 @@ describe("TimelinePanel — tinggi baris diukur, bukan dipaku (#700 B1)", () => 
 });
 
 /**
+ * #700 B3 — ikon kolom nama adalah ikon JENIS ISU baris itu, bukan bentuk
+ * generik "folder untuk epik, dokumen untuk tugas" yang saya pilih di #700.
+ * Pemilik proyek 12 Okt, menunjuk panel hierarki: "ini harusnya label issue nya
+ * donk, bukan icon ini. ganti icon issue nya berdasarkan issue nya".
+ *
+ * Yang dikunci di sini bukan nama ikonnya (itu hak Master Data), melainkan
+ * SUMBERNYA: baris `issue_type` yang sama menggerakkan ikon DAN warnanya, jadi
+ * mengubah ikon di menu Master Data mengubah Roadmap tanpa menyentuh kode.
+ * Warna dipakai sebagai bukti karena `Folder`/`FileText` lama membawa warnanya
+ * lewat kelas, bukan lewat gaya inline dari master data.
+ */
+describe("TimelinePanel — ikon kolom nama ikut jenis isu (Master Data, #700 B3)", () => {
+  const master: any[] = [
+    {
+      id: "it-1",
+      type: "issue_type",
+      label: "Task",
+      code: "task",
+      icon: "Bug",
+      color: "#EF4444",
+    },
+  ];
+
+  const renderDenganMaster = () =>
+    render(
+      <TimelinePanel
+        tasks={[epic, tugas]}
+        selectedProject={{ id: "proj-1", name: "Wondr" } as any}
+        updateTaskField={async () => {}}
+        setSelectedTaskForDetail={setSelectedTaskForDetail}
+        setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
+        currentUser={{ id: "u-1", role: "admin" }}
+        masterData={master}
+      />
+    );
+
+  it("ikonnya memakai warna baris master data jenisnya sendiri", () => {
+    const { container } = renderDenganMaster();
+    const judul = Array.from(container.querySelectorAll("button")).find((b) =>
+      (b.textContent || "").includes("Enhancement homepage")
+    ) as HTMLElement;
+    const kolomNama = judul.parentElement as HTMLElement;
+    const ikon = kolomNama.querySelector("svg") as SVGSVGElement;
+
+    expect(ikon).toBeTruthy();
+    // #EF4444 dari master data, bukan `text-primary`/`text-content-subtle` lama.
+    expect(ikon.getAttribute("style") || "").toMatch(/239, 68, 68|#ef4444/i);
+  });
+
+  it("tanpa master data pun ikonnya tetap ada — bukan teks kosong", () => {
+    const { container } = renderPanel();
+    const judul = Array.from(container.querySelectorAll("button")).find((b) =>
+      (b.textContent || "").includes("Enhancement homepage")
+    ) as HTMLElement;
+
+    expect((judul.parentElement as HTMLElement).querySelector("svg")).toBeTruthy();
+  });
+});
+
+/**
  * #700 B2 — teks pada BATANG Gantt (12 Okt, pemilik proyek: "perbaiki teks pada
  * batang Gantt yang terpotong").
  *

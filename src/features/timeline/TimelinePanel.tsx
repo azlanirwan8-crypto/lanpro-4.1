@@ -24,7 +24,6 @@ import {
   Image as ImageIcon,
   Plus,
   Minus,
-  Folder,
   Target,
   Calendar,
   Menu,
@@ -42,6 +41,7 @@ import {
 import { can } from "../../lib/permissions";
 import { gayaLabel, warnaDariMaster } from "../../lib/warnaLabel";
 import { PageHeader } from "../../components/ui/PageHeader";
+import { TypeIcon } from "../../components/ui/CommonComponents";
 import { TugasScopeToggle } from "../../components/ui/TugasScopeToggle";
 import { useLingkupTugas } from "../../hooks/useLingkupTugas";
 import { indeksAnak, sumbuWaktu, susunBaris } from "./lib/hirarkiBaris";
@@ -832,7 +832,6 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                 {renderedRows.map(({ task, isChild, depth, isLastChild }, rowIdx) => {
                   const hasChildren = indukDikenal.has(task.id);
                   const expanded = expandedEpics[task.id] !== false;
-                  const isEpic = (task.type || "").toLowerCase() === "epic";
                   // #564 — label status DAN batang Gantt memakai hex yang sama:
                   // warna labelnya sendiri (master data, lalu tabel baku).
                   const hexStatus = warnaDariMaster(masterData, "status", task.status);
@@ -919,9 +918,10 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
 
                       {/* #700 — KOLOM 1: nama. Indensi anak hidup di sini, bukan
                           di barisnya, supaya tiga kolom kanan tetap sejajar pada
-                          setiap kedalaman. Ikonnya jenis baris (folder = epik,
-                          dokumen = tugas) dan pindah ke kolom ini; chip status
-                          tinggal chip. Kode tugas tetap tidak ditampilkan (#562). */}
+                          setiap kedalaman. Ikonnya jenis isu baris itu sendiri
+                          (`TypeIcon`, dari Master Data — B3), dan ia pindah ke
+                          kolom ini; chip status tinggal chip. Kode tugas tetap
+                          tidak ditampilkan (#562). */}
                       <div
                         className="flex items-center gap-2 min-w-0 flex-1"
                         style={isChild ? { paddingLeft: `${14 + depth * 20}px` } : undefined}
@@ -942,11 +942,17 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                         ) : (
                           <div className="w-[22px] shrink-0" />
                         )}
-                        {isEpic ? (
-                          <Folder className="w-4 h-4 shrink-0 text-primary" />
-                        ) : (
-                          <FileText className="w-4 h-4 shrink-0 text-content-subtle" />
-                        )}
+                        {/* #700 B3 — ikonnya bukan "folder untuk epik, dokumen
+                            untuk tugas" lagi, melainkan ikon jenis isu baris itu
+                            sendiri: `TypeIcon` membaca baris `issue_type` Master
+                            Data (ikon + warnanya), sama seperti kolom WORK di
+                            Daftar Isu. Pemilik proyek 12 Okt: "ganti icon issue
+                            nya berdasarkan issue nya". */}
+                        <TypeIcon
+                          type={task.type || ""}
+                          className="w-4 h-4 shrink-0"
+                          masterData={masterData}
+                        />
                         {/* #700 B1 — nama TIDAK dipotong lagi. Pemilik proyek,
                             12 Okt: "tidak boleh ada yang kepotong ... kalau
                             panjang di buat ke bawah nya aja". Yang panjang jadi
