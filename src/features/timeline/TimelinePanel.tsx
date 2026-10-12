@@ -33,7 +33,12 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { MilestonePanel } from "./MilestonePanel";
-import { GANTT_ROW_PX, kumpulkanEdgeBlocks, pathSikuDep } from "./ganttDependencyEdges";
+import {
+  GANTT_ROW_PX,
+  kumpulkanEdgeBlocks,
+  pathSikuDep,
+  tengahBaris,
+} from "./ganttDependencyEdges";
 import { can } from "../../lib/permissions";
 import { gayaLabel, warnaDariMaster } from "../../lib/warnaLabel";
 import { PageHeader } from "../../components/ui/PageHeader";
@@ -140,6 +145,72 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
   // SEMUA baris berarti browser menyiapkan layer untuk ratusan elemen yang tidak
   // pernah bergerak; yang benar-benar bergerak hanya baris yang sedang diseret.
   const sedangDiseret = (id: string) => timelineInteraction?.taskId === id;
+
+  /* #700 B1 — tinggi baris tidak lagi dipaku ke `GANTT_ROW_PX`. Nama boleh
+   * turun ke baris dua, tiga, dan seterusnya, jadi PANEL HIERARKI yang mengukur
+   * dirinya sendiri dan lajur Gantt hanya MENGIKUTI angka hasil ukur itu.
+   *
+   * KENAPA HARUS DIUKUR, BUKAN DITETAPKAN. Kedua kolom adalah dua loop render
+   * yang terpisah dan hanya berbagi satu angka. Begitu satu baris lebih tinggi
+   * dari angka itu, seluruh baris di bawahnya bergeser — dan panah dependensi,
+   * yang menghitung `y` dari indeks baris, menunjuk ke pekerjaan yang salah.
+   * `GANTT_ROW_PX` tetap berlaku sebagai LANTAI (#608), bukan sebagai paku.
+   *
+   * jsdom tidak punya `ResizeObserver`. Tanpa penjagaan di bawah, seluruh test
+   * panel akan melempar; dengan penjagaan itu, peta hasil ukur tetap kosong dan
+   * kedua kolom sepakat di angka lantainya — perilaku lama, bukan perilaku rusak.
+   */
+  const [tinggiRow, setTinggiRow] = useState<Record<string, number>>({});
+  const pengamatRow = useRef<ResizeObserver | null>(null);
+  const elRow = useRef(new Map<string, HTMLElement>());
+
+  useEffect(() => {
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver((entri) => {
+      setTinggiRow((lama) => {
+        let berubah = false;
+        const berikut = { ...lama };
+        for (const e of entri) {
+          const id = (e.target as HTMLElement).dataset.rowId;
+          const t = (e.target as HTMLElement).offsetHeight;
+          if (!id || !t) continue;
+          if (berikut[id] !== t) {
+            berikut[id] = t;
+            berubah = true;
+          }
+        }
+        return berubah ? berikut : lama;
+      });
+    });
+    pengamatRow.current = ro;
+    elRow.current.forEach((el) => ro.observe(el));
+    return () => {
+      ro.disconnect();
+      pengamatRow.current = null;
+    };
+  }, []);
+
+  // Ref callback dengan IDENTITAS TETAP. Fungsi baru tiap render membuat React
+  // melepas lalu memasang pengukur di SETIAP baris pada SETIAP frame seretan
+  // tanggal — jalur paling panas di layar ini (#521/#545/#689).
+  const pasangRef = useRef(new Map<string, (el: HTMLDivElement | null) => void>());
+  const ukurRow = (id: string) => {
+    const tersimpan = pasangRef.current.get(id);
+    if (tersimpan) return tersimpan;
+    const pasang = (el: HTMLDivElement | null) => {
+      if (el) {
+        elRow.current.set(id, el);
+        pengamatRow.current?.observe(el);
+      } else {
+        const lama = elRow.current.get(id);
+        if (lama) pengamatRow.current?.unobserve(lama);
+        elRow.current.delete(id);
+        pasangRef.current.delete(id);
+      }
+    };
+    pasangRef.current.set(id, pasang);
+    return pasang;
+  };
 
   const [isDraggingToPan, setIsDraggingToPan] = useState(false);
   /** #309 gelombang 2 — hierarki jadi laci di bawah md agar Gantt punya lebar penuh. */
@@ -446,8 +517,15 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
     const edges = kumpulkanEdgeBlocks(renderedRows, tasks || []).filter(
       (e) => bars[e.fromIndex]?.hasDates && bars[e.toIndex]?.hasDates
     );
-    return { bars, edges, heightPx: renderedRows.length * GANTT_ROW_PX };
-  }, [renderedRows, tasks, tempDates, minDate, totalDays]);
+    // #700 B1 — `y` sebuah baris bukan lagi `indeks × 40`: sejak tinggi bisa
+    // berbeda per baris, posisinya adalah JUMLAH KUMULATIF tinggi baris di
+    // atasnya ditambah setengah tingginya sendiri.
+    // #700 B1 — `y` sebuah baris bukan lagi `indeks × 40`: sejak tinggi bisa
+    // berbeda per baris, rumusnya pindah ke `tengahBaris()` dan bahan bakunya
+    // adalah hasil ukur panel hierarki.
+    const geo = tengahBaris(renderedRows.map(({ task }) => tinggiRow[task.id] ?? GANTT_ROW_PX));
+    return { bars, edges, yTengah: geo.titik, heightPx: geo.total };
+  }, [renderedRows, tasks, tempDates, minDate, totalDays, tinggiRow]);
 
   const getEarliestTaskDate = () => {
     let earliest: Date | null = null;
@@ -718,11 +796,11 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
           <div
             className={cn(
               // #700 — lebar panel jadi PASTI, bukan `w-max` lagi. Empat kolom
-              // hanya bisa sejajar kalau lebarnya tidak ditentukan isi; konse-
-              // kuensinya judul panjang dipotong dengan `truncate` dan teks
-              // lengkapnya tetap ada di `title=` — pola yang sudah dipakai #647
-              // di Daftar Isu. Batas bawah/atas (#566) dipertahankan supaya satu
-              // judul 200 karakter tidak pernah memakan papan Gantt.
+              // hanya bisa sejajar kalau lebarnya tidak ditentukan isi. B1
+              // (12 Okt) mencabut konsekuensi yang dulu ditarik dari situ: judul
+              // panjang TIDAK dipotong, ia turun ke baris dua dan barisnya yang
+              // tumbuh — lihat `tinggiRow`. Batas bawah/atas (#566) dipertahankan
+              // supaya satu judul 200 karakter tidak pernah memakan papan Gantt.
               "w-[34rem] min-w-[30rem] max-w-[min(52vw,40rem)] shrink-0 border-r border-border-subtle/80 flex flex-col z-20 bg-surface relative",
               "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:w-[min(80vw,20rem)] max-md:shadow-xl max-md:border-y-0 max-md:border-l-0",
               "max-md:transition-transform max-md:duration-200",
@@ -775,12 +853,17 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                     : "";
                   const teksTanggal =
                     mulaiTampil && akhirTampil ? `${mulaiTampil} – ${akhirTampil}` : "—";
+                  // #700 B1 — lantai 40 px (#608) tetap; yang di atas itu adalah
+                  // hasil ukur baris ini sendiri, dan lajur Gantt membacanya.
+                  const tinggi = tinggiRow[task.id] ?? GANTT_ROW_PX;
 
                   return (
                     <motion.div
                       key={task.id}
+                      ref={ukurRow(task.id)}
+                      data-row-id={task.id}
                       initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: GANTT_ROW_PX, opacity: 1 }}
+                      animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
                       className={cn(
@@ -795,11 +878,12 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                           : "bg-surface hover:bg-surface-sunken/40",
                         isChild ? "pr-3" : "px-3"
                       )}
-                      style={
-                        sedangDiseret(task.id)
+                      style={{
+                        minHeight: GANTT_ROW_PX,
+                        ...(sedangDiseret(task.id)
                           ? { willChange: "transform, opacity, height" }
-                          : undefined
-                      }
+                          : undefined),
+                      }}
                     >
                       {isChild && (
                         <div
@@ -818,14 +902,13 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                                   style={{
                                     left: `${14 + i * 20}px`,
                                     // Garis vertikal anak terakhir berhenti di tengah baris.
-                                    height:
-                                      isCurrentDepth && isLastChild ? GANTT_ROW_PX / 2 : "100%",
+                                    height: isCurrentDepth && isLastChild ? tinggi / 2 : "100%",
                                   }}
                                 />
                                 {isCurrentDepth && (
                                   <div
                                     className="absolute w-[20px] h-[2px] bg-surface-strong/80 rounded-tr-lg"
-                                    style={{ left: `${14 + i * 20}px`, top: GANTT_ROW_PX / 2 - 1 }}
+                                    style={{ left: `${14 + i * 20}px`, top: tinggi / 2 - 1 }}
                                   />
                                 )}
                               </React.Fragment>
@@ -864,18 +947,20 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                         ) : (
                           <FileText className="w-4 h-4 shrink-0 text-content-subtle" />
                         )}
-                        {/* Nama dipotong dengan `title=` — konsekuensi langsung
-                            dari panel yang lebarnya pasti (#700). Teks lengkapnya
-                            tetap satu hover jauhnya, pola #647 di Daftar Isu. */}
+                        {/* #700 B1 — nama TIDAK dipotong lagi. Pemilik proyek,
+                            12 Okt: "tidak boleh ada yang kepotong ... kalau
+                            panjang di buat ke bawah nya aja". Yang panjang jadi
+                            dua baris atau lebih, dan barisnya yang tumbuh —
+                            lihat `tinggiRow` di atas. `truncate` + `title=`
+                            versionya sudah dicabut di sini. */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedTaskForDetail(task);
                             setIsTaskDetailModalOpen(true);
                           }}
-                          title={task.title}
                           className={cn(
-                            "min-w-0 flex-1 truncate text-left text-xs sm:text-[11px] font-medium leading-tight tracking-tight select-none hover:text-content-strong",
+                            "min-w-0 flex-1 break-words text-left text-xs sm:text-[11px] font-medium leading-tight tracking-tight select-none hover:text-content-strong",
                             isChild ? "text-content-secondary" : "text-content"
                           )}
                         >
@@ -1098,8 +1183,9 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                       return (
                         <motion.div
                           key={task.id}
+                          data-row-id={task.id}
                           initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: GANTT_ROW_PX, opacity: 1 }}
+                          animate={{ height: tinggiRow[task.id] ?? GANTT_ROW_PX, opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ duration: 0.2, ease: "easeInOut" }}
                           className="relative border-b border-border-faint bg-transparent flex items-center group/row hover:bg-surface-sunken/50 transition-colors overflow-hidden"
@@ -1141,8 +1227,9 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                     return (
                       <motion.div
                         key={task.id}
+                        data-row-id={task.id}
                         initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: GANTT_ROW_PX, opacity: 1 }}
+                        animate={{ height: tinggiRow[task.id] ?? GANTT_ROW_PX, opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2, ease: "easeInOut" }}
                         className="relative border-b border-border-faint bg-transparent flex items-center group/row hover:bg-surface-sunken/50 transition-colors overflow-hidden"
@@ -1333,8 +1420,8 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                       if (!from?.hasDates || !to?.hasDates) return null;
                       const x1 = from.left + from.width;
                       const x2 = to.left;
-                      const y1 = edge.fromIndex * GANTT_ROW_PX + GANTT_ROW_PX / 2;
-                      const y2 = edge.toIndex * GANTT_ROW_PX + GANTT_ROW_PX / 2;
+                      const y1 = ganttDepOverlay.yTengah[edge.fromIndex];
+                      const y2 = ganttDepOverlay.yTengah[edge.toIndex];
                       return (
                         <path
                           key={edge.id}

@@ -96,6 +96,26 @@ export function kumpulkanEdgeBlocks(
  */
 export const GANTT_ROW_PX = 40;
 
+/**
+ * #700 B1 — sejak 12 Okt angka di atas adalah LANTAI, bukan paku. Nama di panel
+ * hierarki boleh turun ke baris dua dan tiga, jadi tinggi tiap baris diukur dari
+ * isinya dan posisi vertikalnya tidak bisa lagi dihitung dengan `indeks × 40`.
+ *
+ * Fungsi ini satu-satunya tempat rumus itu hidup: `titik[i]` adalah jarak dari
+ * atas papan ke TENGAH baris ke-i (tempat panah dependensi berlabuh), dan
+ * `total` adalah tinggi papan seluruhnya. Bila semua tinggi sama dengan
+ * lantainya, hasilnya identik dengan rumus lama — itu dikunci test.
+ */
+export function tengahBaris(tinggi: number[]): { titik: number[]; total: number } {
+  const titik: number[] = [];
+  let akumulasi = 0;
+  for (const t of tinggi) {
+    titik.push(akumulasi + t / 2);
+    akumulasi += t;
+  }
+  return { titik, total: akumulasi };
+}
+
 /** Path siku orthogonal dalam viewBox x=0..100 (%), y=px. */
 export function pathSikuDep(x1: number, y1: number, x2: number, y2: number): string {
   const mid = x1 + Math.max(2, (x2 - x1) / 2);

@@ -1,4 +1,9 @@
-import { kumpulkanEdgeBlocks, pathSikuDep, GANTT_ROW_PX } from "./ganttDependencyEdges";
+import {
+  kumpulkanEdgeBlocks,
+  pathSikuDep,
+  GANTT_ROW_PX,
+  tengahBaris,
+} from "./ganttDependencyEdges";
 
 describe("ganttDependencyEdges #457", () => {
   const tasks = [
@@ -64,5 +69,33 @@ describe("ganttDependencyEdges #457", () => {
     // Tiga baris (hierarki + dua varian lajur Gantt) membaca konstanta yang sama,
     // termasuk geometri pohon yang dulu memakai top-7 / h-7.
     expect(sumber.match(/GANTT_ROW_PX/g)!.length).toBeGreaterThanOrEqual(5);
+  });
+});
+
+/**
+ * #700 B1 — sejak nama di panel hierarki boleh turun ke baris dua, tinggi baris
+ * diukur dari isinya. `indeks × 40` dengan itu tidak sah lagi sebagai rumus
+ * posisi, dan panah dependensi adalah korban pertamanya kalau rumusnya dibiarkan:
+ * garisnya tetap digambar, hanya saja ke baris yang salah.
+ */
+describe("tengahBaris — posisi y saat tinggi baris berbeda-beda (#700 B1)", () => {
+  it("bila semua baris setinggi lantainya, hasilnya identik dengan rumus lama", () => {
+    const seragam = [GANTT_ROW_PX, GANTT_ROW_PX, GANTT_ROW_PX, GANTT_ROW_PX];
+    const { titik, total } = tengahBaris(seragam);
+
+    expect(titik).toEqual([20, 60, 100, 140]);
+    expect(total).toBe(seragam.length * GANTT_ROW_PX);
+    titik.forEach((y, i) => expect(y).toBe(i * GANTT_ROW_PX + GANTT_ROW_PX / 2));
+  });
+
+  it("satu baris lebih tinggi menggeser baris di bawahnya, bukan menumpuknya", () => {
+    const { titik, total } = tengahBaris([64, 40, 40]);
+
+    expect(titik).toEqual([32, 84, 124]);
+    expect(total).toBe(144);
+  });
+
+  it("papan tanpa baris tidak punya tinggi", () => {
+    expect(tengahBaris([])).toEqual({ titik: [], total: 0 });
   });
 });
