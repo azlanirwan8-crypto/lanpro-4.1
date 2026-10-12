@@ -75,6 +75,26 @@ export function DashboardView(props: DashboardViewProps) {
   // `useMemo`/`useEffect` di bawah, dan array baru tiap render akan membuat
   // seluruh agregat dihitung ulang (dan bisa berputar) walau tidak ada yang berubah.
   const tasksDalamLingkup = useMemo(() => saringLingkup(props.tasks), [props.tasks, saringLingkup]);
+
+  /* #694 (A') — pilihan sprint dipindah ke ATAS titik potong, bukan digantung di
+   * dua diagram. Sebelumnya `filteredTasks` hanya dibaca rincian jenis dan
+   * status, sementara empat kartu KPI, Ringkasan Sprint, burndown, velocity dan
+   * beban tim membaca feed yang tidak tersaring: memilih "Sprint X" mengubah
+   * bagian bawah layar dan membiarkan "Total Tugas" di atas menghitung semua
+   * sprint. Yang TIDAK ikut tersaring sengaja tinggal dua: riwayat velocity
+   * lintas sprint dan panel yang menunjuk sprint tertentu — keduanya diberi
+   * feed kedua (`tasksSemuaSprint`) oleh `useDashboard`, lihat #694.
+   */
+  const [selectedSprintFilter, setSelectedSprintFilter] = useState<string>("ALL");
+  const sprintIdTerpilih = selectedSprintFilter === "ALL" ? null : selectedSprintFilter;
+  const tasksTersaring = useMemo(
+    () =>
+      sprintIdTerpilih
+        ? tasksDalamLingkup.filter((t) => String(t.sprintId || "") === sprintIdTerpilih)
+        : tasksDalamLingkup,
+    [tasksDalamLingkup, sprintIdTerpilih]
+  );
+
   const {
     tasks,
     nonEpicTasks,
@@ -85,6 +105,7 @@ export function DashboardView(props: DashboardViewProps) {
     totalTasks,
     completionPercentage,
     activeSprint,
+    sprintAcuan,
     sprintProgress,
     sprintTotalTasks,
     sprintCompletedTasks,
@@ -103,14 +124,12 @@ export function DashboardView(props: DashboardViewProps) {
     velocityData,
     estimationAccuracyData,
     estimationStats,
-  } = useDashboard({ ...props, tasks: tasksDalamLingkup });
-
-  const [selectedSprintFilter, setSelectedSprintFilter] = useState<string>("ALL");
-
-  const filteredTasks = useMemo(() => {
-    if (selectedSprintFilter === "ALL") return tasks;
-    return tasks.filter((t) => String(t.sprintId || "") === selectedSprintFilter);
-  }, [tasks, selectedSprintFilter]);
+  } = useDashboard({
+    ...props,
+    tasks: tasksTersaring,
+    tasksSemuaSprint: tasksDalamLingkup,
+    sprintIdTerpilih,
+  });
 
   // 1. KODE REFACTOR AGREGASI DATA (REACT / HELPER FUNCTION)
   const myPersonalMetrics = useMemo(() => {
@@ -214,7 +233,6 @@ export function DashboardView(props: DashboardViewProps) {
     if (filterRentang === "6M") return buildRangeActivity(90);
     return buildRangeActivity(90);
   }, [filterRentang, last7DaysData, buildRangeActivity]);
-
 
   const {
     selectedProject,
@@ -473,7 +491,7 @@ export function DashboardView(props: DashboardViewProps) {
   }, [selectedProject, currentUser]);
 
   const taskTypeBreakdown = useMemo(() => {
-    const scopeTasks = filteredTasks;
+    const scopeTasks = tasks;
     const counts: Record<string, number> = {
       epic: 0,
       story: 0,
@@ -524,10 +542,10 @@ export function DashboardView(props: DashboardViewProps) {
         pct: totalScopeCount ? Math.round(((counts.subtask || 0) / totalScopeCount) * 100) : 0,
       },
     ];
-  }, [filteredTasks, props.masterData]);
+  }, [tasks, props.masterData]);
 
   const statusBreakdown = useMemo(() => {
-    const scopeTasks = filteredTasks;
+    const scopeTasks = tasks;
     const statusMap: Record<string, number> = {
       "To Do": 0,
       "In Progress": 0,
@@ -551,7 +569,7 @@ export function DashboardView(props: DashboardViewProps) {
        *  daftar isu memperlihatkan warna lain untuk label yang sama. */
       color: warnaDariMaster(props.masterData, "status", name),
     }));
-  }, [filteredTasks, props.masterData]);
+  }, [tasks, props.masterData]);
 
   const epicsList = useMemo(() => {
     const epicTasks = tasks.filter(
@@ -615,10 +633,14 @@ export function DashboardView(props: DashboardViewProps) {
 
   const realVelocityChartData = useMemo(() => {
     if (velocityData && velocityData.length > 0) return velocityData;
-    if (activeSprint) {
+    // #694 (A') — `sprintTotalTasks`/`sprintCompletedTasks` sudah mengikuti
+    // sprint yang DITUNJUK, jadi nama di batang cadangan ini harus sumber yang
+    // sama; memakai `activeSprint` di sini mencetak nama sprint aktif di atas
+    // angka sprint yang sedang dipilih.
+    if (sprintAcuan) {
       return [
         {
-          name: activeSprint.name,
+          name: sprintAcuan.name,
           Planned: sprintTotalTasks,
           Completed: sprintCompletedTasks,
         },
@@ -633,7 +655,7 @@ export function DashboardView(props: DashboardViewProps) {
     ];
   }, [
     velocityData,
-    activeSprint,
+    sprintAcuan,
     sprintTotalTasks,
     sprintCompletedTasks,
     totalTasks,
@@ -740,181 +762,184 @@ export function DashboardView(props: DashboardViewProps) {
             ))}
           </div>
         ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6">
-          {/* Card 1: Total Tasks — putih + soft icon + hover lift (#415) */}
-          <Card
-            hoverLift
-            className="p-3 sm:p-5 shadow-2xs flex flex-col justify-between relative overflow-hidden"
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle">
-                  {t("dashboard.totalTasks")}
-                </span>
-                <h3 className="text-2xl font-semibold text-content-strong mt-1">{totalTasks}</h3>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6">
+            {/* Card 1: Total Tasks — putih + soft icon + hover lift (#415) */}
+            <Card
+              hoverLift
+              className="p-3 sm:p-5 shadow-2xs flex flex-col justify-between relative overflow-hidden"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle">
+                    {t("dashboard.totalTasks")}
+                  </span>
+                  <h3 className="text-2xl font-semibold text-content-strong mt-1">{totalTasks}</h3>
+                </div>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-success/10 flex items-center justify-center text-success-text border border-success/20">
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
               </div>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-success/10 flex items-center justify-center text-success-text border border-success/20">
-                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">
-              {/* #105 — panah NAIK hanya bila memang ada kenaikan. Saat 0%
+              <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">
+                {/* #105 — panah NAIK hanya bila memang ada kenaikan. Saat 0%
                   tidak ada yang tumbuh, jadi ikonnya netral dan warnanya bukan
                   hijau "bertumbuh". */}
-              <span
-                className={`flex items-center gap-1 font-medium ${
-                  completionPercentage > 0 ? "text-success-text" : "text-content-muted"
-                }`}
-              >
-                {completionPercentage > 0 ? (
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                ) : (
-                  <Minus className="w-3.5 h-3.5" />
-                )}{" "}
-                {t("dashboard.percentDone", { percent: completionPercentage })}
-              </span>
-              <button
-                onClick={() => props.setCurrentView("board")}
-                className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
-              >
-                {t("dashboard.viewAllTasks")}
-              </button>
-            </div>
-          </Card>
-
-          {/* Card 2: Running — varian solid primary ala Velzon Orders (#415) */}
-          <Card
-            variant="primary"
-            hoverLift
-            className="p-3 sm:p-5 flex flex-col justify-between relative overflow-hidden"
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-inverse/70">
-                  {t("dashboard.runningTasks")}
+                <span
+                  className={`flex items-center gap-1 font-medium ${
+                    completionPercentage > 0 ? "text-success-text" : "text-content-muted"
+                  }`}
+                >
+                  {completionPercentage > 0 ? (
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  ) : (
+                    <Minus className="w-3.5 h-3.5" />
+                  )}{" "}
+                  {t("dashboard.percentDone", { percent: completionPercentage })}
                 </span>
-                <h3 className="text-2xl font-semibold text-content-inverse mt-1">
-                  {nonEpicTasks.filter((t) => t.status !== "Done" && t.status !== "Selesai").length}
-                </h3>
+                <button
+                  onClick={() => props.setCurrentView("board")}
+                  className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
+                >
+                  {t("dashboard.viewAllTasks")}
+                </button>
               </div>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-surface/15 flex items-center justify-center text-content-inverse border border-border-inverse/40">
-                <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center justify-between text-xs border-t border-border-inverse/30 pt-3">
-              <span className="font-medium text-content-inverse/85">
-                {t("dashboard.notDoneYet", { count: inProgressTasks.length })}
-              </span>
-              <button
-                onClick={() => props.setCurrentView("board")}
-                className="text-content-inverse/90 hover:text-content-inverse hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-subtle text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
-              >
-                {t("dashboard.viewActiveBoard")}
-              </button>
-            </div>
-          </Card>
+            </Card>
 
-          {/* Card 3: Done — putih + soft primary icon */}
-          <Card
-            hoverLift
-            className="p-3 sm:p-5 shadow-2xs flex flex-col justify-between relative overflow-hidden"
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle">
-                  {t("dashboard.doneTasks")}
+            {/* Card 2: Running — varian solid primary ala Velzon Orders (#415) */}
+            <Card
+              variant="primary"
+              hoverLift
+              className="p-3 sm:p-5 flex flex-col justify-between relative overflow-hidden"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-inverse/70">
+                    {t("dashboard.runningTasks")}
+                  </span>
+                  <h3 className="text-2xl font-semibold text-content-inverse mt-1">
+                    {
+                      nonEpicTasks.filter((t) => t.status !== "Done" && t.status !== "Selesai")
+                        .length
+                    }
+                  </h3>
+                </div>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-surface/15 flex items-center justify-center text-content-inverse border border-border-inverse/40">
+                  <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+              </div>
+              <div className="mt-4 flex items-center justify-between text-xs border-t border-border-inverse/30 pt-3">
+                <span className="font-medium text-content-inverse/85">
+                  {t("dashboard.notDoneYet", { count: inProgressTasks.length })}
                 </span>
-                <h3 className="text-2xl font-semibold text-content-strong mt-1">
-                  {completedTasks.length}
-                </h3>
+                <button
+                  onClick={() => props.setCurrentView("board")}
+                  className="text-content-inverse/90 hover:text-content-inverse hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-subtle text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
+                >
+                  {t("dashboard.viewActiveBoard")}
+                </button>
               </div>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-warning/15 flex items-center justify-center text-warning-text border border-warning/25">
-                <PackageOpen className="w-4 h-4 sm:w-5 sm:h-5" />
+            </Card>
+
+            {/* Card 3: Done — putih + soft primary icon */}
+            <Card
+              hoverLift
+              className="p-3 sm:p-5 shadow-2xs flex flex-col justify-between relative overflow-hidden"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle">
+                    {t("dashboard.doneTasks")}
+                  </span>
+                  <h3 className="text-2xl font-semibold text-content-strong mt-1">
+                    {completedTasks.length}
+                  </h3>
+                </div>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-warning/15 flex items-center justify-center text-warning-text border border-warning/25">
+                  <PackageOpen className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
               </div>
-            </div>
-            <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">
-              {/* #105 — ikon pertumbuhan hanya saat memang ada kenaikan, DAN #692 —
+              <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">
+                {/* #105 — ikon pertumbuhan hanya saat memang ada kenaikan, DAN #692 —
                   kaki kartu ini tidak lagi mengulang persen yang sudah dibaca di
                   kartu Total. Dua kartu bersayap angka yang sama dengan label beda
                   membuat layar tidak bisa dibaca dalam tiga detik. */}
-              <span
-                className={`flex items-center gap-1 font-medium ${
-                  completionPercentage > 0 ? "text-success-text" : "text-content-muted"
-                }`}
-              >
-                {completionPercentage > 0 ? (
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                ) : (
-                  <Minus className="w-3.5 h-3.5" />
-                )}
-                {t("dashboard.doneOfTotal", {
-                  done: completedTasks.length,
-                  total: totalTasks,
-                })}
-              </span>
-              <button
-                onClick={() => props.setCurrentView("board")}
-                className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
-              >
-                {t("dashboard.viewDoneListLink")}
-              </button>
-            </div>
-          </Card>
-
-          {/* Card 4: Blocked — putih; angka danger hanya bila >0 */}
-          <Card
-            hoverLift
-            className="p-3 sm:p-5 shadow-2xs flex flex-col justify-between relative overflow-hidden"
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle">
-                  {t("dashboard.blockedTasks")}
+                <span
+                  className={`flex items-center gap-1 font-medium ${
+                    completionPercentage > 0 ? "text-success-text" : "text-content-muted"
+                  }`}
+                >
+                  {completionPercentage > 0 ? (
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  ) : (
+                    <Minus className="w-3.5 h-3.5" />
+                  )}
+                  {t("dashboard.doneOfTotal", {
+                    done: completedTasks.length,
+                    total: totalTasks,
+                  })}
                 </span>
-                {/* #111 — nol berarti TIDAK ADA yang tersumbat, itu kabar baik.
+                <button
+                  onClick={() => props.setCurrentView("board")}
+                  className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
+                >
+                  {t("dashboard.viewDoneListLink")}
+                </button>
+              </div>
+            </Card>
+
+            {/* Card 4: Blocked — putih; angka danger hanya bila >0 */}
+            <Card
+              hoverLift
+              className="p-3 sm:p-5 shadow-2xs flex flex-col justify-between relative overflow-hidden"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle">
+                    {t("dashboard.blockedTasks")}
+                  </span>
+                  {/* #111 — nol berarti TIDAK ADA yang tersumbat, itu kabar baik.
                     Mewarnainya merah membuat pemindaian sekilas menyimpulkan ada
                     masalah. Merah hanya bila memang ada yang tersumbat. Token
                     `danger-text` menggantikan `rose-600`: §22.3 menyebut peran
                     TEKS berwarna milik `{aksen}-text`, dan `rose-600` hanya
                     mencapai 3,84 di mode gelap. */}
-                <h3
-                  className={`text-2xl font-semibold mt-1 ${
+                  <h3
+                    className={`text-2xl font-semibold mt-1 ${
+                      blockedTasks.length + overdueTasks.length > 0
+                        ? "text-danger-text"
+                        : "text-content-strong"
+                    }`}
+                  >
+                    {blockedTasks.length + overdueTasks.length}
+                  </h3>
+                </div>
+                {/* Ikon menandai IDENTITAS kartu, bukan nilainya, jadi ia tetap
+                  merah di keadaan mana pun — hanya tokennya yang diselaraskan. */}
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-danger/10 flex items-center justify-center text-danger-text border border-danger/20">
+                  <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+              </div>
+              <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">
+                <span
+                  className={`font-medium ${
                     blockedTasks.length + overdueTasks.length > 0
                       ? "text-danger-text"
-                      : "text-content-strong"
+                      : "text-content-muted"
                   }`}
                 >
-                  {blockedTasks.length + overdueTasks.length}
-                </h3>
+                  {t("dashboard.blockedOverdueChip", {
+                    blocked: blockedTasks.length,
+                    overdue: overdueTasks.length,
+                  })}
+                </span>
+                <button
+                  onClick={() => props.setCurrentView("board")}
+                  className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
+                >
+                  {t("dashboard.handleBlockersLink")}
+                </button>
               </div>
-              {/* Ikon menandai IDENTITAS kartu, bukan nilainya, jadi ia tetap
-                  merah di keadaan mana pun — hanya tokennya yang diselaraskan. */}
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-danger/10 flex items-center justify-center text-danger-text border border-danger/20">
-                <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">
-              <span
-                className={`font-medium ${
-                  blockedTasks.length + overdueTasks.length > 0
-                    ? "text-danger-text"
-                    : "text-content-muted"
-                }`}
-              >
-                {t("dashboard.blockedOverdueChip", {
-                  blocked: blockedTasks.length,
-                  overdue: overdueTasks.length,
-                })}
-              </span>
-              <button
-                onClick={() => props.setCurrentView("board")}
-                className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
-              >
-                {t("dashboard.handleBlockersLink")}
-              </button>
-            </div>
-          </Card>
-        </div>
+            </Card>
+          </div>
         )}
 
         {/* Real-time Dashboard Panels Grid Layout */}
@@ -929,6 +954,12 @@ export function DashboardView(props: DashboardViewProps) {
                     <TrendingUp className="w-4 h-4 text-primary" />
                     {t("dashboard.sprintOverview")}
                   </h3>
+                  {/* #694 (A') — batang velocity memang lintas sprint. Tanpa
+                      baris ini, memilih satu sprint tampak seperti grafiknya
+                      rusak karena ia satu-satunya yang tidak ikut berubah. */}
+                  <p className="text-[11px] font-normal text-content-subtle mt-1">
+                    {t("dashboard.velocityHistory")}
+                  </p>
                 </div>
                 <div className="flex items-center gap-1 bg-surface-muted p-1 rounded-md">
                   {(["ALL", "1M", "6M", "1Y"] as const).map((filter) => (
@@ -948,14 +979,17 @@ export function DashboardView(props: DashboardViewProps) {
                 </div>
               </div>
 
-              {/* Active Sprint Sub-metrics Bar */}
+              {/* Sprint Sub-metrics Bar — #694 (A'): angka di bawah ini milik
+                  sprint yang DITUNJUK (pilihan header, atau sprint aktif bila
+                  header di "All Sprints"), jadi labelnya tidak boleh menyebut
+                  "aktif" ketika yang dipilih sprint lain. */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5 p-4 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
                 <div>
                   <span className="text-xs sm:text-[11px] font-normal text-content-subtle uppercase">
-                    {t("dashboard.activeSprint")}
+                    {t("dashboard.sprintDitampilkan")}
                   </span>
                   <p className="text-sm font-normal text-content-strong mt-0.5 truncate">
-                    {activeSprint?.name || "No Sprint"}
+                    {sprintAcuan?.name || t("dashboard.noActiveSprint")}
                   </p>
                 </div>
                 <div>
@@ -1123,7 +1157,6 @@ export function DashboardView(props: DashboardViewProps) {
                   </div>
                 </div>
               )}
-
             </Card>
 
             {/* Task Breakdown Grid (Jenis Task & Status Breakdown) */}

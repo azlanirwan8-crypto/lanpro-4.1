@@ -886,7 +886,9 @@ export const id = {
     handleBlockersLink: "Tangani hambatan",
     viewDoneListLink: "Lihat daftar selesai",
     sprintOverview: "Ringkasan Progres & Kecepatan Sprint",
-    burndownTitle: "Burndown sprint aktif",
+    velocityHistory: "Riwayat 5 sprint terakhir — tetap lintas sprint",
+    sprintDitampilkan: "Sprint Ditampilkan",
+    burndownTitle: "Burndown sprint yang ditampilkan",
     burndownHint:
       "Sisa pekerjaan vs garis ideal (poin story bila ada, selain itu hitungan tugas). Tanggal selesai diperkirakan dari updatedAt.",
     burndownIdeal: "Ideal",

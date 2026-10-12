@@ -11,6 +11,18 @@ export const useDashboard = (props: DashboardViewProps) => {
   const masterData: MasterData[] = Array.isArray(props.masterData) ? props.masterData : [];
   const tasks = Array.isArray(props.tasks) ? props.tasks : [];
   const nonEpicTasks = tasks.filter((t) => t && String(t.type || "").toLowerCase() !== "epic");
+  /* #694 (A') — layar ini sekarang punya DUA feed tugas, dan itu bukan gaya
+   * penulisan: ada panel yang secara hakikat tidak bisa ikut tersaring sprint.
+   * `tasks` sudah dipotong ruang lingkup + sprint oleh pemanggilnya; `tasksLingkup`
+   * hanya dipotong ruang lingkup. Yang membaca yang kedua: riwayat velocity (butuh
+   * lima sprint sekaligus), dan panel yang menunjuk sprint tertentu — burndown,
+   * beban per orang dalam sprint, akurasi estimasi. Bila feed kedua ini tidak
+   * diisi, semuanya jatuh ke `props.tasks` seperti sebelum #694.
+   */
+  const tasksLingkup = Array.isArray(props.tasksSemuaSprint) ? props.tasksSemuaSprint : tasks;
+  const nonEpicLingkup = tasksLingkup.filter(
+    (t) => t && String(t.type || "").toLowerCase() !== "epic"
+  );
   const sprints = Array.isArray(props.sprints) ? props.sprints : [];
   const projectMembers = Array.isArray(props.projectMembers) ? props.projectMembers : [];
   const activityLogs = Array.isArray(props.activityLogs) ? props.activityLogs : [];
@@ -56,13 +68,24 @@ export const useDashboard = (props: DashboardViewProps) => {
       String(s?.status || "").toLowerCase()
     )
   );
+  /* Sprint yang DITUNJUK layar ini: pilihan header bila ada, sprint aktif bila
+   * tidak ada. `activeSprint` tetap dihitung dan tetap dikembalikan apa adanya,
+   * karena chip "Sprint aktif" menyatakan fakta lain dari dropdown — papan #694
+   * butir (b) menuntut keduanya tidak saling menyangkal.
+   */
+  const sprintDipilih =
+    props.sprintIdTerpilih && props.sprintIdTerpilih !== "ALL"
+      ? sprints.find((s) => s.id === props.sprintIdTerpilih)
+      : undefined;
+  const sprintAcuan = sprintDipilih || activeSprint;
+
   let sprintProgress = 0;
   let sprintTotalTasks = 0;
   let sprintCompletedTasks = 0;
   let sprintDaysLeft = 0;
 
-  if (activeSprint) {
-    const sTasks = nonEpicTasks.filter((t) => t.sprintId === activeSprint.id);
+  if (sprintAcuan) {
+    const sTasks = nonEpicLingkup.filter((t) => t.sprintId === sprintAcuan.id);
     const metrik = metrikSprintHybrid(
       sTasks.map((t) => ({
         storyPoints: t.storyPoints,
@@ -72,8 +95,8 @@ export const useDashboard = (props: DashboardViewProps) => {
     sprintTotalTasks = metrik.total;
     sprintCompletedTasks = metrik.done;
     sprintProgress = metrik.progressPct;
-    if (activeSprint.endDate) {
-      sprintDaysLeft = Math.max(0, differenceInDays(ensureDate(activeSprint.endDate), now));
+    if (sprintAcuan.endDate) {
+      sprintDaysLeft = Math.max(0, differenceInDays(ensureDate(sprintAcuan.endDate), now));
     }
   }
 
@@ -174,8 +197,8 @@ export const useDashboard = (props: DashboardViewProps) => {
   });
   sprintUserWorkloadMap["unassigned"] = { name: "Unassigned", Done: 0, Active: 0 };
 
-  if (activeSprint) {
-    const sprintTasks = nonEpicTasks.filter((t) => t.sprintId === activeSprint.id);
+  if (sprintAcuan) {
+    const sprintTasks = nonEpicLingkup.filter((t) => t.sprintId === sprintAcuan.id);
     sprintTasks.forEach((t) => {
       const assignee = t.assigneeId || "unassigned";
       if (!sprintUserWorkloadMap[assignee]) {
@@ -190,13 +213,13 @@ export const useDashboard = (props: DashboardViewProps) => {
     .sort((a, b) => b.Done + b.Active - (a.Done + a.Active));
 
   const burndownData = (() => {
-    if (!activeSprint || !activeSprint.startDate || !activeSprint.endDate) return [];
-    const start = ensureDate(activeSprint.startDate);
-    const end = ensureDate(activeSprint.endDate);
+    if (!sprintAcuan || !sprintAcuan.startDate || !sprintAcuan.endDate) return [];
+    const start = ensureDate(sprintAcuan.startDate);
+    const end = ensureDate(sprintAcuan.endDate);
     const totalDays = differenceInDays(end, start);
     if (totalDays <= 0 || totalDays > 100) return [];
 
-    const sprintTasks = nonEpicTasks.filter((t) => t.sprintId === activeSprint.id);
+    const sprintTasks = nonEpicLingkup.filter((t) => t.sprintId === sprintAcuan.id);
     if (sprintTasks.length === 0) return [];
 
     // #464 — satuan sama dengan Planning: poin bila ada, else tugas
@@ -271,7 +294,6 @@ export const useDashboard = (props: DashboardViewProps) => {
   const last7DaysData = [...last7DaysDataRaw];
   const weeklyVelocity = last7DaysData.reduce((acc, curr) => acc + curr.Completed, 0);
 
-
   /**
    * #342 — deret aktivitas/selesai untuk filter rentang (hari).
    * ALL → 7 (sama last7Days); 1M→30; 6M→26 minggu diganti di UI jadi weekly.
@@ -306,7 +328,9 @@ export const useDashboard = (props: DashboardViewProps) => {
     })
     .slice(-5) // Last 5 sprints
     .map((sprint) => {
-      const sprintTasks = nonEpicTasks.filter((t) => t.sprintId === sprint.id);
+      // #694 (A') — riwayat memang lintas sprint: feed-nya TIDAK ikut dipotong
+      // pilihan header, kalau tidak empat batang lainnya jadi nol.
+      const sprintTasks = nonEpicLingkup.filter((t) => t.sprintId === sprint.id);
       const plannedPoints = sprintTasks.reduce((acc, t) => acc + (t.storyPoints || 0), 0);
       const completedTasks = sprintTasks.filter((t) => statusSelesai(t.status, masterData));
       const completedPoints = completedTasks.reduce((acc, t) => acc + (t.storyPoints || 0), 0);
@@ -321,8 +345,8 @@ export const useDashboard = (props: DashboardViewProps) => {
   // Estimation Accuracy Data
   const estimationAccuracyData = (() => {
     let targetTasks: Task[] = [];
-    if (activeSprint) {
-      targetTasks = nonEpicTasks.filter((t) => t.sprintId === activeSprint.id);
+    if (sprintAcuan) {
+      targetTasks = nonEpicLingkup.filter((t) => t.sprintId === sprintAcuan.id);
     } else {
       targetTasks = [...nonEpicTasks]
         .sort((a, b) => {
@@ -402,6 +426,7 @@ export const useDashboard = (props: DashboardViewProps) => {
     totalTasks,
     completionPercentage,
     activeSprint,
+    sprintAcuan,
     sprintProgress,
     sprintTotalTasks,
     sprintCompletedTasks,

@@ -875,7 +875,9 @@ export const en = {
     handleBlockersLink: "Resolve issues",
     viewDoneListLink: "View done list",
     sprintOverview: "Sprint Progress & Velocity Overview",
-    burndownTitle: "Active sprint burndown",
+    velocityHistory: "Last 5 sprints — always across sprints",
+    sprintDitampilkan: "Sprint Shown",
+    burndownTitle: "Shown sprint burndown",
     burndownHint:
       "Remaining work vs ideal line (story points when set, otherwise task count). Completion date approximated from updatedAt.",
     burndownIdeal: "Ideal",
