@@ -24,14 +24,12 @@ import {
   Image as ImageIcon,
   Plus,
   Minus,
-  Zap,
-  ListTodo,
+  Folder,
   Target,
   Calendar,
   Menu,
   X,
   Flag,
-  Maximize2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { MilestonePanel } from "./MilestonePanel";
@@ -65,6 +63,19 @@ interface TimelineProps {
  * yang SAMA dengan chip di sebelahnya (#564), dilukis oleh `.gantt-bar` di
  * `src/index.css`; bentuk epik vs tugas dibedakan lewat `gantt-bar-epic`.
  */
+
+/** #700 — tiga kolom tetap panel hierarki. Kepala DAN baris memakai objek yang
+ *  sama, jadi label tidak bisa melenceng dari isinya. Kolom nama sisanya
+ *  (`flex-1`) mengikuti lebar panel. Ketiganya `max-md:hidden`: laci hierarki di
+ *  HP hanya 20 rem (#309) dan memuat empat kolom di sana akan memakan namanya
+ *  sendiri. */
+const KOLOM = {
+  status: "w-24 shrink-0 max-md:hidden",
+  prioritas: "w-20 shrink-0 max-md:hidden",
+  tanggal: "w-28 shrink-0 max-md:hidden",
+};
+const LABEL_KEPALA =
+  "font-normal text-[11px] sm:text-[11px] text-content-muted uppercase tracking-normal";
 
 export const TimelinePanel: React.FC<TimelineProps> = ({
   tasks: tasksProp,
@@ -461,16 +472,6 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
     });
   };
 
-  /** #698 — "pas ke layar": satu tombol yang menghitung zoom dari lebar yang
-   *  benar-benar terlihat, bukan angka yang ditebak. Tanpa ini menyusut satu
-   *  sumbu setahun berarti menekan "−" belasan kali. */
-  const pasKeLayar = () => {
-    const el = timelineMainRef.current;
-    if (!el || !totalDays) return;
-    setPixelsPerDay(Math.max(4, Math.min(150, el.clientWidth / totalDays)));
-    el.scrollLeft = 0;
-  };
-
   /**
    * #698 — menu Ekspor dulu ditutup lewat `onBlur` pada tombolnya plus
    * `setTimeout(200)`: item menu lebih dulu membuat tombol kehilangan fokus,
@@ -587,15 +588,6 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                 title={t("roadmap.zoomIn")}
               >
                 <Plus className="w-3.5 h-3.5" />
-              </button>
-              <div className="w-px h-4 bg-surface-strong mx-0.5 md:mx-1" />
-              <button
-                type="button"
-                onClick={pasKeLayar}
-                className="min-h-11 min-w-11 inline-flex items-center justify-center text-xs text-content-muted hover:text-content-strong hover:bg-surface-muted rounded-md transition-colors cursor-pointer"
-                title={t("roadmap.fitView")}
-              >
-                <Maximize2 className="w-3.5 h-3.5" />
               </button>
             </div>
             {/* #426 — Add Milestone sejajar toolbar */}
@@ -725,22 +717,30 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
 
           <div
             className={cn(
-              // #565 — panelnya yang ikut panjang isi, bukan teksnya yang
-              // dipotong: `w-max` melebar sampai batas di bawah ini, dan hanya
-              // judul yang lebih panjang dari batas itu yang menggulir.
-              "w-max min-w-[16rem] max-w-[min(45vw,34rem)] md:min-w-[20rem] shrink-0 border-r border-border-subtle/80 flex flex-col z-20 bg-surface relative",
+              // #700 — lebar panel jadi PASTI, bukan `w-max` lagi. Empat kolom
+              // hanya bisa sejajar kalau lebarnya tidak ditentukan isi; konse-
+              // kuensinya judul panjang dipotong dengan `truncate` dan teks
+              // lengkapnya tetap ada di `title=` — pola yang sudah dipakai #647
+              // di Daftar Isu. Batas bawah/atas (#566) dipertahankan supaya satu
+              // judul 200 karakter tidak pernah memakan papan Gantt.
+              "w-[34rem] min-w-[30rem] max-w-[min(52vw,40rem)] shrink-0 border-r border-border-subtle/80 flex flex-col z-20 bg-surface relative",
               "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:w-[min(80vw,20rem)] max-md:shadow-xl max-md:border-y-0 max-md:border-l-0",
               "max-md:transition-transform max-md:duration-200",
               hierarchyOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full"
             )}
           >
-            <div className="sticky top-0 z-30 h-[73px] bg-surface-sunken/90 backdrop-blur-sm border-b border-border-subtle px-5 flex items-center justify-between">
-              <span className="font-normal text-xs sm:text-[11px] text-content-muted uppercase tracking-normal">
+            <div className="sticky top-0 z-30 h-[73px] bg-surface-sunken/90 backdrop-blur-sm border-b border-border-subtle px-3 flex items-center gap-2">
+              <span className={cn(LABEL_KEPALA, "min-w-0 flex-1")}>
                 {t("roadmap.itemHierarchy")}
               </span>
+              <span className={cn(LABEL_KEPALA, KOLOM.status)}>{t("roadmap.colStatus")}</span>
+              <span className={cn(LABEL_KEPALA, KOLOM.prioritas)}>
+                {t("roadmap.colPriority")}
+              </span>
+              <span className={cn(LABEL_KEPALA, KOLOM.tanggal)}>{t("roadmap.colStartEnd")}</span>
               <button
                 type="button"
-                className="md:hidden p-1.5 rounded-md text-content-muted hover:bg-surface-muted cursor-pointer"
+                className="md:hidden absolute right-2 top-1.5 p-1.5 rounded-md text-content-muted hover:bg-surface-muted cursor-pointer"
                 onClick={() => setHierarchyOpen(false)}
                 aria-label={t("roadmap.closeHierarchy", "Tutup hierarki")}
               >
@@ -761,6 +761,21 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                   // warna labelnya sendiri (master data, lalu tabel baku).
                   const hexStatus = warnaDariMaster(masterData, "status", task.status);
                   const hexPrioritas = warnaDariMaster(masterData, "priority", task.priority);
+                  // #700 — kolom "Start – End" membaca tanggal yang SAMA dengan
+                  // batang Gantt, termasuk `tempDates` ketika tanggal sedang
+                  // diseret, supaya angka di kolom dan posisi batang tidak pernah
+                  // berbeda cerita.
+                  const rentangTampil = tempDates[task.id] || {
+                    startDate: task.startDate,
+                    endDate: task.endDate,
+                  };
+                  const teksTanggal =
+                    rentangTampil.startDate && rentangTampil.endDate
+                      ? `${format(ensureDate(rentangTampil.startDate), "d MMM")} – ${format(
+                          ensureDate(rentangTampil.endDate),
+                          "d MMM"
+                        )}`
+                      : "—";
 
                   return (
                     <motion.div
@@ -770,18 +785,22 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
                       className={cn(
-                        "w-max min-w-full flex items-center gap-2 border-b border-border-faint transition-colors relative z-10 overflow-hidden",
+                        // #700 — `w-full`, bukan `w-max`: barisnya harus selebar
+                        // panel supaya tiga kolom kanannya duduk di tempat yang
+                        // sama pada setiap kedalaman. Indensi anak pindah ke
+                        // kolom pertama (lihat di bawah), garis penghubungnya
+                        // tetap milik baris.
+                        "w-full flex items-center gap-2 border-b border-border-faint transition-colors relative z-10 overflow-hidden",
                         rowIdx % 2 === 1
                           ? "bg-surface-sunken/40 hover:bg-surface-sunken/80"
                           : "bg-surface hover:bg-surface-sunken/40",
                         isChild ? "pr-3" : "px-3"
                       )}
-                      style={{
-                        ...(isChild ? { paddingLeft: `${14 + depth * 20}px` } : {}),
-                        ...(sedangDiseret(task.id)
+                      style={
+                        sedangDiseret(task.id)
                           ? { willChange: "transform, opacity, height" }
-                          : {}),
-                      }}
+                          : undefined
+                      }
                     >
                       {isChild && (
                         <div
@@ -816,50 +835,66 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                         </div>
                       )}
 
-                      {/* Spacer/Chevron for Tree Hierarchy */}
-                      {hasChildren ? (
-                        <button
-                          type="button"
-                          onClick={() => toggleEpic(task.id)}
-                          className="p-1 rounded hover:bg-surface-muted text-content-subtle hover:text-content-secondary transition-all shrink-0 active:scale-95 z-20 bg-inherit"
-                        >
-                          <ChevronRight
-                            className={cn(
-                              "w-3.5 h-3.5 transform transition-transform duration-200 ease-in-out",
-                              expanded ? "rotate-90 " : "text-content-subtle"
-                            )}
-                          />
-                        </button>
-                      ) : (
-                        // Spacer to align icons if there is no chevron trigger
-                        <div className="w-[22px] shrink-0" />
-                      )}
-
-                      {/* #565 — urutannya dibaca seperti baris tabel: status,
-                          prioritas, baru namanya. Kode tugas sengaja dibuang
-                          (28 Sep) dan pembuka detailnya tinggal di judul. Judul
-                          TIDAK dipotong lagi: barisnya yang melebar, dan panel
-                          ini digulir mendatar -- bukan teksnya yang hilang. */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedTaskForDetail(task);
-                          setIsTaskDetailModalOpen(true);
-                        }}
-                        title={task.title}
-                        className="flex items-center gap-2 min-w-0 flex-1 text-left group/row"
+                      {/* #700 — KOLOM 1: nama. Indensi anak hidup di sini, bukan
+                          di barisnya, supaya tiga kolom kanan tetap sejajar pada
+                          setiap kedalaman. Ikonnya jenis baris (folder = epik,
+                          dokumen = tugas) dan pindah ke kolom ini; chip status
+                          tinggal chip. Kode tugas tetap tidak ditampilkan (#562). */}
+                      <div
+                        className="flex items-center gap-2 min-w-0 flex-1"
+                        style={isChild ? { paddingLeft: `${14 + depth * 20}px` } : undefined}
                       >
+                        {hasChildren ? (
+                          <button
+                            type="button"
+                            onClick={() => toggleEpic(task.id)}
+                            className="p-1 rounded hover:bg-surface-muted text-content-subtle hover:text-content-secondary transition-all shrink-0 active:scale-95 z-20 bg-inherit"
+                          >
+                            <ChevronRight
+                              className={cn(
+                                "w-3.5 h-3.5 transform transition-transform duration-200 ease-in-out",
+                                expanded ? "rotate-90 " : "text-content-subtle"
+                              )}
+                            />
+                          </button>
+                        ) : (
+                          <div className="w-[22px] shrink-0" />
+                        )}
+                        {isEpic ? (
+                          <Folder className="w-4 h-4 shrink-0 text-primary" />
+                        ) : (
+                          <FileText className="w-4 h-4 shrink-0 text-content-subtle" />
+                        )}
+                        {/* Nama dipotong dengan `title=` — konsekuensi langsung
+                            dari panel yang lebarnya pasti (#700). Teks lengkapnya
+                            tetap satu hover jauhnya, pola #647 di Daftar Isu. */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedTaskForDetail(task);
+                            setIsTaskDetailModalOpen(true);
+                          }}
+                          title={task.title}
+                          className={cn(
+                            "min-w-0 flex-1 truncate text-left text-xs sm:text-[11px] font-medium leading-tight tracking-tight select-none hover:text-content-strong",
+                            isChild ? "text-content-secondary" : "text-content"
+                          )}
+                        >
+                          {task.title}
+                        </button>
+                      </div>
+
+                      {/* KOLOM 2 dan 3: labelnya tetap `label-chip` + `--lbr`,
+                          jadi warnanya masih dari MasterData (#564). */}
+                      <span className={cn(KOLOM.status, "flex items-center")}>
                         <span
                           style={gayaLabel(hexStatus)}
-                          className="label-chip shrink-0 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-tight"
+                          className="label-chip shrink-0 inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-tight"
                         >
-                          {isEpic ? (
-                            <Zap className="w-3 h-3 shrink-0" />
-                          ) : (
-                            <ListTodo className="w-3 h-3 shrink-0" />
-                          )}
                           {task.status}
                         </span>
+                      </span>
+                      <span className={cn(KOLOM.prioritas, "flex items-center")}>
                         {!!task.priority && (
                           <span
                             style={gayaLabel(hexPrioritas)}
@@ -868,17 +903,18 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             {task.priority}
                           </span>
                         )}
-                        <span
-                          className={cn(
-                            "text-xs sm:text-[11px] whitespace-nowrap leading-tight tracking-tight select-none group-hover/row:text-content-strong",
-                            isChild
-                              ? "font-medium text-content-secondary"
-                              : "font-medium text-content"
-                          )}
-                        >
-                          {task.title}
-                        </span>
-                      </button>
+                      </span>
+
+                      {/* KOLOM 4: rentang tanggal, sebelumnya hanya ada di
+                          tooltip batang. */}
+                      <span
+                        className={cn(
+                          KOLOM.tanggal,
+                          "text-[11px] leading-tight text-content-muted whitespace-nowrap"
+                        )}
+                      >
+                        {teksTanggal}
+                      </span>
                     </motion.div>
                   );
                 })}
