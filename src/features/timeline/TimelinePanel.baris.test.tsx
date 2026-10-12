@@ -147,6 +147,22 @@ describe("TimelinePanel — empat kolom pohon (#700)", () => {
     expect(baris.className).not.toContain("w-max");
   });
 
+  it("anak tertulis lebih kecil dari induknya, dan ukurannya tidak ditumpuk", () => {
+    const { container } = renderPanel();
+    const { judul } = barisTugas(container); // t-1 adalah ANAK dari p-1
+    const induk = Array.from(container.querySelectorAll("button")).find((b) =>
+      (b.textContent || "").includes("Onboarding NTB")
+    ) as HTMLElement;
+
+    expect(judul.className).toMatch(/sm:text-\[10px\]/);
+    expect(induk.className).toMatch(/sm:text-\[11px\]/);
+    // SATU ukuran per elemen. `cn()` di repo ini hanyalah gabung spasi
+    // (lib/utils.ts:4), jadi dua `sm:text-[..]` akan dimenangkan oleh urutan
+    // stylesheet, bukan oleh niat penulisnya — pelajaran #692.
+    expect(judul.className.match(/sm:text-\[\d+px\]/g)).toHaveLength(1);
+    expect(induk.className.match(/sm:text-\[\d+px\]/g)).toHaveLength(1);
+  });
+
   it("panel hierarki punya lebar pasti, dengan lantai dan batas", () => {
     const { container } = renderPanel();
     const panel = Array.from(container.querySelectorAll("div")).find(

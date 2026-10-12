@@ -960,8 +960,14 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             setIsTaskDetailModalOpen(true);
                           }}
                           className={cn(
-                            "min-w-0 flex-1 break-words text-left text-xs sm:text-[11px] font-medium leading-tight tracking-tight select-none hover:text-content-strong",
-                            isChild ? "text-content-secondary" : "text-content"
+                            // Ukuran huruf ikut CABANG dan tidak ditumpuk: `cn()`
+                            // di repo ini hanya gabung spasi (lib/utils.ts:4), jadi
+                            // dua `sm:text-[..]` dimenangkan urutan stylesheet,
+                            // bukan oleh niat penulisnya — pelajaran #692.
+                            "min-w-0 flex-1 break-words text-left font-medium leading-tight tracking-tight select-none hover:text-content-strong",
+                            isChild
+                              ? "text-xs sm:text-[10px] text-content-secondary"
+                              : "text-xs sm:text-[11px] text-content"
                           )}
                         >
                           {task.title}
