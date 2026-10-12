@@ -13,6 +13,7 @@ import {
   saveSessionFilters,
   type IssueFilterSnapshot,
 } from "./lib/issueFilterSnapshot";
+import { cocokJenisIsu } from "./lib/jenisIsu";
 
 export const useIssueList = (props: IssueListViewProps) => {
   const { tasks, roots, selectedProject, user, masterData, userRole } = props;
@@ -22,6 +23,8 @@ export const useIssueList = (props: IssueListViewProps) => {
   // UI state
   const [listFilterStatus, setListFilterStatus] = useState("All");
   const [listFilterPriority, setListFilterPriority] = useState("All");
+  // #705 — jenis isu. Nilainya kunci MasterData, pencocokannya lewat `cocokJenisIsu`.
+  const [listFilterType, setListFilterType] = useState("All");
   const [listFilterAssignee, setListFilterAssignee] = useState("All");
   const [listFilterCategory, setListFilterCategory] = useState("All");
   const [listFilterSprint, setListFilterSprint] = useState("All");
@@ -86,6 +89,7 @@ export const useIssueList = (props: IssueListViewProps) => {
     setIssueSearch(snap.search || "");
     setListFilterStatus(snap.status || "All");
     setListFilterPriority(snap.priority || "All");
+    setListFilterType(snap.type || "All");
     setListFilterAssignee(snap.assignee || "All");
     setListFilterCategory(snap.category || "All");
     setListFilterSprint(snap.sprint || "All");
@@ -106,6 +110,7 @@ export const useIssueList = (props: IssueListViewProps) => {
       search: issueSearch,
       status: listFilterStatus,
       priority: listFilterPriority,
+      type: listFilterType,
       assignee: listFilterAssignee,
       category: listFilterCategory,
       sprint: listFilterSprint,
@@ -123,6 +128,7 @@ export const useIssueList = (props: IssueListViewProps) => {
       issueSearch,
       listFilterStatus,
       listFilterPriority,
+      listFilterType,
       listFilterAssignee,
       listFilterCategory,
       listFilterSprint,
@@ -205,6 +211,9 @@ export const useIssueList = (props: IssueListViewProps) => {
           return false;
         if (listFilterPriority && listFilterPriority !== "All" && t.priority !== listFilterPriority)
           return false;
+        // #705 — jenis isu tidak dibandingkan sebagai string mentah: kolom `type`
+        // ditulis dari lebih dari satu sumber (lihat `lib/jenisIsu.ts`).
+        if (!cocokJenisIsu(mArr, t.type, listFilterType)) return false;
         if (listFilterAssignee && listFilterAssignee !== "All") {
           if (listFilterAssignee === "unassigned") {
             if (t.assigneeId) return false;
@@ -302,6 +311,7 @@ export const useIssueList = (props: IssueListViewProps) => {
     issueSearch,
     listFilterStatus,
     listFilterPriority,
+    listFilterType,
     listFilterAssignee,
     listFilterCategory,
     listFilterSprint,
@@ -462,6 +472,8 @@ export const useIssueList = (props: IssueListViewProps) => {
     setListFilterStatus,
     listFilterPriority,
     setListFilterPriority,
+    listFilterType,
+    setListFilterType,
     listFilterAssignee,
     setListFilterAssignee,
     listFilterCategory,

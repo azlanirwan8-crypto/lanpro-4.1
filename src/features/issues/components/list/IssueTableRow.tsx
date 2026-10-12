@@ -20,6 +20,7 @@ import {
   UncontrolledInput,
 } from "../../../../components/ui/CommonComponents";
 import { LanproDatePicker } from "../../../../components/ui/LanproDatePicker";
+import { cocokJenisIsu } from "../../lib/jenisIsu";
 import { gayaLabel, warnaDariMaster } from "../../../../lib/warnaLabel";
 import { Task, MasterData, UserProfile, Sprint } from "../../../../types";
 import { styles } from "../../styles";
@@ -75,6 +76,7 @@ interface IssueTableRowProps {
   listFilterProjectRisk?: string;
   listFilterRelease?: string;
   listFilterResolution?: string;
+  listFilterType?: string;
   listFilterLabel?: string;
   listFilterStartDate?: string;
   listFilterEndDate?: string;
@@ -132,6 +134,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
     listFilterProjectRisk,
     listFilterRelease,
     listFilterResolution,
+    listFilterType,
     listFilterLabel,
     listFilterStartDate,
     listFilterEndDate,
@@ -184,6 +187,9 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
         s.resolution !== listFilterResolution
       )
         return false;
+      // #705 — anak disaring dengan aturan yang SAMA seperti induknya; lihat
+      // `lib/jenisIsu.ts` kenapa ini tidak boleh perbandingan string mentah.
+      if (!cocokJenisIsu(mArr, s.type, listFilterType)) return false;
       if (listFilterLabel && listFilterLabel !== "All") {
         if (!s.labels || !Array.isArray(s.labels) || !s.labels.includes(listFilterLabel))
           return false;

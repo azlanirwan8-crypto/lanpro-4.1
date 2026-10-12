@@ -8,6 +8,8 @@ export type IssueFilterSnapshot = {
   search: string;
   status: string;
   priority: string;
+  /** #705 — jenis isu (Epic / Bug / Story …). Nilainya kunci MasterData. */
+  type: string;
   assignee: string;
   category: string;
   sprint: string;
@@ -33,6 +35,7 @@ export const DEFAULT_ISSUE_FILTER_SNAPSHOT: IssueFilterSnapshot = {
   search: "",
   status: "All",
   priority: "All",
+  type: "All",
   assignee: "All",
   category: "All",
   sprint: "All",
@@ -103,6 +106,7 @@ function asSnapshot(raw: unknown): IssueFilterSnapshot | null {
     search: typeof o.search === "string" ? o.search : "",
     status: typeof o.status === "string" ? o.status : "All",
     priority: typeof o.priority === "string" ? o.priority : "All",
+    type: typeof o.type === "string" ? o.type : "All",
     assignee: typeof o.assignee === "string" ? o.assignee : "All",
     category: typeof o.category === "string" ? o.category : "All",
     sprint: typeof o.sprint === "string" ? o.sprint : "All",

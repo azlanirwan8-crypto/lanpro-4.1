@@ -90,6 +90,23 @@ describe("issueFilterSnapshot (#468)", () => {
     expect(loadSessionFilters(projectId)).toEqual(snap);
   });
 
+  /**
+   * #705 — kunci `type` ditambahkan SETELAH filter sudah tersimpan di
+   * localStorage pengguna. Snapshot lama tidak punya kuncinya sama sekali:
+   * membacanya tidak boleh menjatuhkan seluruh pemulihan filter, dan `type`
+   * tidak boleh jatuh ke nilai yang diam-diam menyaring habis.
+   */
+  it("session filter lama tanpa kunci type dipulihkan sebagai Semua", () => {
+    localStorage.setItem(
+      sessionKey(projectId),
+      JSON.stringify({ search: "x", status: "To Do", priority: "High" })
+    );
+    const dipulihkan = loadSessionFilters(projectId);
+    expect(dipulihkan?.type).toBe("All");
+    expect(dipulihkan?.status).toBe("To Do");
+    expect(dipulihkan?.priority).toBe("High");
+  });
+
   it("named filters upsert + delete", () => {
     const snap = { ...DEFAULT_ISSUE_FILTER_SNAPSHOT, priority: "High" };
     upsertNamedFilter(projectId, "Mine", snap);

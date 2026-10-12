@@ -7,6 +7,7 @@ import { cn } from "../../lib/utils";
 import { reorderTasks } from "./services/issues.service";
 import { susunUrutanAkar } from "./lib/urutanAkar";
 import { akarDaftar } from "./lib/akarDaftar";
+import { rapikanOpsiJenisIsu } from "./lib/jenisIsu";
 import { keadaanDaftar, kunciPesanKosong } from "./lib/keadaanKosong";
 import { toast } from "sonner";
 import { Task } from "../../types";
@@ -97,6 +98,8 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
     setListFilterRelease,
     listFilterResolution,
     setListFilterResolution,
+    listFilterType,
+    setListFilterType,
     listFilterDateType,
     setListFilterDateType,
     listFilterStartDate,
@@ -355,6 +358,20 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
     () => opsiFilter("resolution", (t) => (t as { resolution?: string }).resolution),
     [opsiFilter]
   );
+  // #705 — jenis isu. Sumber pilihannya sama seperti sepuluh dropdown saudaranya
+  // (#146): MasterData sebagai benih, lalu nilai tugas yang tidak dikenal
+  // ikut muncul tanpa ikon supaya barisnya tidak jadi tak-tersaring.
+  // `rapikanOpsiJenisIsu` diperlukan di sini karena untuk kelompok ini benih
+  // dan nilai tugas hampir selalu beda huruf besar-kecil — tanpa itu satu jenis
+  // tampil dua kali di dropdown.
+  const allTypes = useMemo(
+    () =>
+      rapikanOpsiJenisIsu(
+        mArr,
+        opsiFilter("issue_type", (t) => t.type)
+      ),
+    [opsiFilter, mArr]
+  );
 
   return (
     <ListPageShell
@@ -393,6 +410,8 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
           setListFilterRelease={setListFilterRelease}
           listFilterResolution={listFilterResolution}
           setListFilterResolution={setListFilterResolution}
+          listFilterType={listFilterType}
+          setListFilterType={setListFilterType}
           listFilterDateType={listFilterDateType}
           setListFilterDateType={setListFilterDateType}
           listFilterStartDate={listFilterStartDate}
@@ -412,6 +431,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
           allProjectRisks={allProjectRisks}
           allReleases={allReleases}
           allResolutions={allResolutions}
+          allTypes={allTypes}
           setIsConfigureColumnsOpen={setIsConfigureColumnsOpen}
         />
 
@@ -643,6 +663,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                                     listFilterProjectRisk={listFilterProjectRisk}
                                     listFilterRelease={listFilterRelease}
                                     listFilterResolution={listFilterResolution}
+                                    listFilterType={listFilterType}
                                     listFilterLabel={listFilterLabel}
                                     listFilterStartDate={listFilterStartDate}
                                     listFilterEndDate={listFilterEndDate}
@@ -669,25 +690,25 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
             aksi mobile, jadi pengguna tanpa hak tetap melihat baris ini dan baru
             tahu ia ditolak setelah server membalas galat. */}
         {canCreateIssue && (
-        <IssueQuickCreateBar
-          quickCreateTitle={quickCreateTitle}
-          setQuickCreateTitle={setQuickCreateTitle}
-          createGlobalIssue={createGlobalIssue}
-          isCreating={isCreating}
-          inlineAddType={inlineAddType}
-          setInlineAddType={setInlineAddType}
-          isInlineTypeOpen={isInlineTypeOpen}
-          setIsInlineTypeOpen={setIsInlineTypeOpen}
-          inlineAddPriority={inlineAddPriority}
-          setInlineAddPriority={setInlineAddPriority}
-          inlineAddAssigneeId={inlineAddAssigneeId}
-          setInlineAddAssigneeId={setInlineAddAssigneeId}
-          inlineAddSprintId={inlineAddSprintId}
-          setInlineAddSprintId={setInlineAddSprintId}
-          masterData={mArr}
-          projectMembers={projectMembers}
-          sprints={sprints}
-        />
+          <IssueQuickCreateBar
+            quickCreateTitle={quickCreateTitle}
+            setQuickCreateTitle={setQuickCreateTitle}
+            createGlobalIssue={createGlobalIssue}
+            isCreating={isCreating}
+            inlineAddType={inlineAddType}
+            setInlineAddType={setInlineAddType}
+            isInlineTypeOpen={isInlineTypeOpen}
+            setIsInlineTypeOpen={setIsInlineTypeOpen}
+            inlineAddPriority={inlineAddPriority}
+            setInlineAddPriority={setInlineAddPriority}
+            inlineAddAssigneeId={inlineAddAssigneeId}
+            setInlineAddAssigneeId={setInlineAddAssigneeId}
+            inlineAddSprintId={inlineAddSprintId}
+            setInlineAddSprintId={setInlineAddSprintId}
+            masterData={mArr}
+            projectMembers={projectMembers}
+            sprints={sprints}
+          />
         )}
 
         {/* Pagination & Bulk Action Bar */}

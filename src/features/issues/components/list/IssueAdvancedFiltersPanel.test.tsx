@@ -5,6 +5,10 @@ import { IssueAdvancedFiltersPanel } from "./IssueAdvancedFiltersPanel";
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key: string) => key,
+    // #705 — panel yang DIBUKA merender LanproDatePicker, dan ia membaca
+    // `i18n.language`. Mock tanpa `i18n` membuat panel tertutup lolos dan panel
+    // terbuka pecah, jadi kunci itu ikut disediakan.
+    i18n: { language: "id", exists: () => true },
   }),
 }));
 
@@ -33,6 +37,8 @@ const dasar = {
   setListFilterRelease: jest.fn(),
   listFilterResolution: "All",
   setListFilterResolution: jest.fn(),
+  listFilterType: "All",
+  setListFilterType: jest.fn(),
   listFilterDateType: "any",
   setListFilterDateType: jest.fn(),
   listFilterStartDate: "",
@@ -46,6 +52,7 @@ const dasar = {
     search: "",
     status: "All",
     priority: "All",
+    type: "All",
     assignee: "All",
     category: "All",
     sprint: "All",
@@ -68,6 +75,7 @@ const dasar = {
   allProjectRisks: [] as never[],
   allReleases: [] as never[],
   allResolutions: [] as never[],
+  allTypes: [] as never[],
   setIsConfigureColumnsOpen: jest.fn(),
 };
 
@@ -77,5 +85,38 @@ describe("IssueAdvancedFiltersPanel (#484)", () => {
 
     expect(screen.getByPlaceholderText("filters.searchIssues")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "newTask.createIssue" })).not.toBeInTheDocument();
+  });
+
+  /**
+   * #705 — dulu Advanced Filters punya sepuluh penyaring dan TIDAK SATU PUN untuk
+   * jenis isu, padahal kolom WORK menampilkan ikon jenisnya. Test ini mengunci
+   * dropdown-nya benar-benar ada di panel yang dibuka, bukan hanya di state.
+   */
+  it("#705 panel terbuka menampilkan dropdown Tipe Isu", () => {
+    render(
+      <IssueAdvancedFiltersPanel
+        {...dasar}
+        isFiltersPanelOpen
+        allTypes={[
+          { id: "Bug", label: "Bug", icon: "AlertCircle", color: "#EF4444" },
+          { id: "Epic", label: "Epic", icon: "Layers", color: "#8B5CF6" },
+        ]}
+      />
+    );
+
+    // Teks pill terbagi beberapa text node ("filters.issueType" + "Bug"), jadi
+    // pencocok persis testing-library tidak dipakai di sini.
+    expect(screen.getAllByText(/filters\.issueType/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/filters\.allTypes/).length).toBeGreaterThan(0);
+  });
+
+  it("#705 jenis yang dipilih jadi pill dan ikut dihitung di tombol filter", () => {
+    render(<IssueAdvancedFiltersPanel {...dasar} listFilterType="Bug" />);
+
+    const pill = screen.getByText(/filters\.issueType/).closest("span");
+    expect(pill?.textContent).toContain("Bug");
+    // Tombol "Advanced Filters" memuat penghitung filter aktif.
+    const tombol = screen.getByRole("button", { name: "filters.toggleFilterPanel" });
+    expect(tombol.textContent).toContain("1");
   });
 });

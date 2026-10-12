@@ -34,6 +34,8 @@ interface IssueAdvancedFiltersPanelProps {
   setListFilterRelease: (val: string) => void;
   listFilterResolution: string;
   setListFilterResolution: (val: string) => void;
+  listFilterType: string;
+  setListFilterType: (val: string) => void;
   listFilterDateType: string;
   setListFilterDateType: (val: string) => void;
   listFilterStartDate: string;
@@ -53,6 +55,7 @@ interface IssueAdvancedFiltersPanelProps {
   allProjectRisks: { id: string; label: string; icon?: string; color?: string }[];
   allReleases: { id: string; label: string; icon?: string; color?: string }[];
   allResolutions: { id: string; label: string; icon?: string; color?: string }[];
+  allTypes: { id: string; label: string; icon?: string; color?: string }[];
   setIsConfigureColumnsOpen: (val: boolean) => void;
 }
 
@@ -81,6 +84,8 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
   setListFilterRelease,
   listFilterResolution,
   setListFilterResolution,
+  listFilterType,
+  setListFilterType,
   listFilterDateType,
   setListFilterDateType,
   listFilterStartDate,
@@ -100,6 +105,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
   allProjectRisks,
   allReleases,
   allResolutions,
+  allTypes,
   setIsConfigureColumnsOpen,
 }) => {
   const { t } = useTranslation();
@@ -114,6 +120,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
   if (listFilterProjectRisk !== "All") activeCount++;
   if (listFilterRelease !== "All") activeCount++;
   if (listFilterResolution !== "All") activeCount++;
+  if (listFilterType !== "All") activeCount++;
   if (listFilterStartDate) activeCount++;
   if (listFilterEndDate) activeCount++;
   if (listFilterOverdue) activeCount++;
@@ -321,6 +328,18 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
                 </button>
               </span>
             )}
+            {listFilterType !== "All" && (
+              <span className="text-xs sm:text-[11px] font-medium text-content-secondary bg-surface-muted px-2.5 py-1 rounded-full border border-border-subtle flex items-center gap-1 shadow-soft">
+                {t("filters.issueType")} {listFilterType}
+                <button
+                  type="button"
+                  onClick={() => setListFilterType("All")}
+                  className="hover:text-red-500 font-medium transition-colors outline-none inline-flex items-center"
+                >
+                  <X className="w-2.5 h-2.5 ml-0.5" />
+                </button>
+              </span>
+            )}
             {(listFilterStartDate || listFilterEndDate) && (
               <span className="text-[10px] leading-none font-medium text-amber-700 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/30 flex items-center gap-1 shadow-soft">
                 <Calendar className="w-3 h-3 text-amber-600 shrink-0" />
@@ -375,6 +394,8 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             setListFilterRelease={setListFilterRelease}
             listFilterResolution={listFilterResolution}
             setListFilterResolution={setListFilterResolution}
+            listFilterType={listFilterType}
+            setListFilterType={setListFilterType}
             listFilterDateType={listFilterDateType}
             setListFilterDateType={setListFilterDateType}
             listFilterStartDate={listFilterStartDate}
@@ -391,6 +412,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             allProjectRisks={allProjectRisks}
             allReleases={allReleases}
             allResolutions={allResolutions}
+            allTypes={allTypes}
           />
         )}
       </AnimatePresence>

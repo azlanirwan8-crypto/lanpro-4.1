@@ -27,6 +27,8 @@ interface IssueAdvancedFiltersExpandedProps {
   setListFilterRelease: (val: string) => void;
   listFilterResolution: string;
   setListFilterResolution: (val: string) => void;
+  listFilterType: string;
+  setListFilterType: (val: string) => void;
   listFilterDateType: string;
   setListFilterDateType: (val: string) => void;
   listFilterStartDate: string;
@@ -43,6 +45,7 @@ interface IssueAdvancedFiltersExpandedProps {
   allProjectRisks: { id: string; label: string; icon?: string; color?: string }[];
   allReleases: { id: string; label: string; icon?: string; color?: string }[];
   allResolutions: { id: string; label: string; icon?: string; color?: string }[];
+  allTypes: { id: string; label: string; icon?: string; color?: string }[];
 }
 
 export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpandedProps> = ({
@@ -66,6 +69,8 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
   setListFilterRelease,
   listFilterResolution,
   setListFilterResolution,
+  listFilterType,
+  setListFilterType,
   listFilterDateType,
   setListFilterDateType,
   listFilterStartDate,
@@ -82,6 +87,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
   allProjectRisks,
   allReleases,
   allResolutions,
+  allTypes,
 }) => {
   const { t } = useTranslation();
   const mArr = masterData || [];
@@ -342,6 +348,26 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-md h-[32px] px-2.5 hover:border-border-subtle"
             />
           </div>
+
+          {/* #705 — Issue Type Filter. Nilainya kunci MasterData, bukan label
+              mentah: lihat `lib/jenisIsu.ts`. */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-normal text-content-subtle">
+              {t("filters.issueType")}
+            </label>
+            <StyledDropdown
+              value={listFilterType}
+              onChange={(val: string) => setListFilterType(val)}
+              options={[
+                { id: "All", label: t("filters.allTypes"), icon: "Layers", color: "#6366F1" },
+                ...allTypes,
+              ]}
+              type="issue_type"
+              masterData={mArr}
+              className="w-full"
+              buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-md h-[32px] px-2.5 hover:border-border-subtle"
+            />
+          </div>
         </div>
 
         {/* Section 3: Date Ranges */}
@@ -417,6 +443,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
                 setListFilterProjectRisk("All");
                 setListFilterRelease("All");
                 setListFilterResolution("All");
+                setListFilterType("All");
                 setListFilterStartDate("");
                 setListFilterEndDate("");
                 setListFilterOverdue(false);
