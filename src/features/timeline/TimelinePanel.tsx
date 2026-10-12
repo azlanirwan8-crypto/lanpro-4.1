@@ -1281,7 +1281,14 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             // hanyalah gabung spasi (src/lib/utils.ts:4), jadi
                             // `h-6` + `h-4` dimenangkan urutan stylesheet, bukan
                             // oleh niat penulisnya — pelajaran #692.
-                            "gantt-bar absolute top-1/2 -translate-y-1/2 flex items-center border overflow-hidden shadow-soft",
+                            // #700 B2 — `overflow-hidden` DIAMBIL DARI BATANG.
+                            // Selama kelas itu menempel di sini, judul yang lebih
+                            // panjang dari rentang tanggalnya dipangkas di tepi
+                            // batang; sekarang ia melewatinya dan yang memangkas
+                            // hanyalah barisnya, yaitu ujung kanan papan. Batang
+                            // tetap membulat tanpa kelas itu: radius memotong
+                            // latar, bukan anak yang meluber.
+                            "gantt-bar absolute top-1/2 -translate-y-1/2 flex items-center border shadow-soft",
                             // Awalan `h-4` bukan gaya: pemindai #602 mengenali
                             // sebuah string sebagai kelas dari token pertamanya.
                             isEpic ? "h-4 rounded-md gantt-bar-epic" : "h-6 rounded-lg",
@@ -1349,7 +1356,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
 
                           {/* Drag and Move Row Area */}
                           <div
-                            className="flex-1 h-full px-3 flex items-center justify-between min-w-0 cursor-grab active:cursor-grabbing overflow-hidden"
+                            className="flex-1 h-full px-3 flex items-center justify-between cursor-grab active:cursor-grabbing"
                             onMouseDown={(e) => {
                               // Only trigger move if clicked outside the resize handles
                               const rect = e.currentTarget.getBoundingClientRect();
@@ -1366,7 +1373,11 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                               }
                             }}
                           >
-                            <span className="text-xs sm:text-[10.5px] font-semibold truncate tracking-tight select-none">
+                            {/* #700 B2 — `truncate` keluar dari sini. Judul batang
+                                tidak dipangkas lagi di tepi batang: ia jalan terus
+                                ke kanan melewati ujungnya, persis seperti nama di
+                                kolom kiri yang sekarang tumbuh ke bawah. */}
+                            <span className="text-xs sm:text-[10.5px] font-semibold whitespace-nowrap tracking-tight select-none">
                               {task.title}
                             </span>
                             {/* #698 — cakram inisial penerima dibuang. Ia mencetak

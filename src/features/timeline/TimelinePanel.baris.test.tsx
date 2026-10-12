@@ -288,3 +288,64 @@ describe("TimelinePanel — tinggi baris diukur, bukan dipaku (#700 B1)", () => 
     expect(panel.style.height).not.toBe("40px");
   });
 });
+
+/**
+ * #700 B2 — teks pada BATANG Gantt (12 Okt, pemilik proyek: "perbaiki teks pada
+ * batang Gantt yang terpotong").
+ *
+ * Bedanya dengan kolom nama: kolom nama adalah TABEL, jawabannya tumbuh ke
+ * bawah (B1). Batang adalah TANDA GRAFIK yang lebarnya ditentukan rentang
+ * tanggalnya, jadi tidak ada "ke bawah" di sana — yang ada hanya tepi batang
+ * yang memotong. Yang dihapus karena itu bukan `truncate`-nya saja, melainkan
+ * `overflow-hidden` pada batang: tanpa itu judul berjalan melewati ujung kanan
+ * batang dan yang memangkas hanyalah baris, yaitu tepi kanan papan.
+ */
+describe("TimelinePanel — judul batang tidak dipangkas tepi batang (#700 B2)", () => {
+  const JUDUL = "Penyesuaian kode cabang sesuai dengan BRAVE";
+
+  const batang = () => {
+    const { container } = render(
+      <TimelinePanel
+        tasks={[
+          {
+            id: "t-9",
+            title: JUDUL,
+            key: "WMIR-999",
+            status: "To Do",
+            type: "Task",
+            projectId: "proj-1",
+            startDate: "2026-09-09",
+            endDate: "2026-09-17",
+          } as any,
+        ]}
+        selectedProject={{ id: "proj-1", name: "Wondr" } as any}
+        updateTaskField={async () => {}}
+        setSelectedTaskForDetail={setSelectedTaskForDetail}
+        setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
+        currentUser={{ id: "u-1", role: "admin" }}
+      />
+    );
+    return container.querySelector(".gantt-bar") as HTMLElement;
+  };
+
+  it("batangnya tidak memotong anaknya sendiri", () => {
+    const el = batang();
+
+    expect(el).toBeTruthy();
+    expect(el.className).not.toContain("overflow-hidden");
+  });
+
+  it("judulnya satu baris utuh, bukan elipsis", () => {
+    const el = batang();
+    const label = Array.from(el.querySelectorAll("span")).find(
+      (s) => (s.textContent || "").trim() === JUDUL
+    ) as HTMLElement;
+
+    // Kontraknya sederhana: teks judul ADA utuh di dalam DOM dan tidak ada
+    // kelas yang memotongnya. Kalau `truncate` kembali menempel, judul ini
+    // tidak akan pernah ditemukan apa adanya.
+    expect(label).toBeTruthy();
+    expect(label.className).not.toContain("truncate");
+    expect(label.className).toContain("whitespace-nowrap");
+  });
+});
