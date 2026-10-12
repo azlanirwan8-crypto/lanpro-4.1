@@ -204,11 +204,6 @@
     "teks": "radial-gradient(circle, #94a3b8 1px, transparent 1px)",
     "jenis": "ternary"
   },
-  "features/flowchart/components/FlowchartNode.tsx:linear-gradient(135deg, ${colorPaletteHex[node.color]?.bg ||": {
-    "berkas": "features/flowchart/components/FlowchartNode.tsx",
-    "teks": "linear-gradient(135deg, ${colorPaletteHex[node.color]?.bg ||",
-    "jenis": "ternary"
-  },
   "features/flowchart/components/FlowchartNode.tsx:Langkah Alur Baru": {
     "berkas": "features/flowchart/components/FlowchartNode.tsx",
     "teks": "Langkah Alur Baru",
@@ -254,11 +249,6 @@
     "teks": "${node.label} (Salinan)",
     "jenis": "definisi"
   },
-  "features/flowchart/FlowchartContainer.tsx:Jalankan Simulasi Alur Kerja Visual": {
-    "berkas": "features/flowchart/FlowchartContainer.tsx",
-    "teks": "Jalankan Simulasi Alur Kerja Visual",
-    "jenis": "ternary"
-  },
   "features/flowchart/FlowchartContainer.tsx:Stop Sim": {
     "berkas": "features/flowchart/FlowchartContainer.tsx",
     "teks": "Stop Sim",
@@ -274,6 +264,11 @@
     "teks": "Sistem menelusuri alur kerja dari titik awal hingga akhir.",
     "jenis": "definisi"
   },
+  "features/flowchart/lib/shapes.tsx:drop-shadow(0 20px 25px rgba(0,0,0,0.18)) drop-shadow(0 10px 10px rgba(0,0,0,0.12))": {
+    "berkas": "features/flowchart/lib/shapes.tsx",
+    "teks": "drop-shadow(0 20px 25px rgba(0,0,0,0.18)) drop-shadow(0 10px 10px rgba(0,0,0,0.12))",
+    "jenis": "ternary"
+  },
   "features/flowchart/lib/shapes.tsx:drop-shadow(0 12px 20px rgba(244, 63, 94, 0.45))": {
     "berkas": "features/flowchart/lib/shapes.tsx",
     "teks": "drop-shadow(0 12px 20px rgba(244, 63, 94, 0.45))",
@@ -287,16 +282,6 @@
   "features/flowchart/lib/shapes.tsx:drop-shadow(0 10px 15px rgba(0,0,0,0.12))": {
     "berkas": "features/flowchart/lib/shapes.tsx",
     "teks": "drop-shadow(0 10px 15px rgba(0,0,0,0.12))",
-    "jenis": "ternary"
-  },
-  "features/flowchart/lib/shapes.tsx:drop-shadow(0 3px 6px rgba(0,0,0,0.06))": {
-    "berkas": "features/flowchart/lib/shapes.tsx",
-    "teks": "drop-shadow(0 3px 6px rgba(0,0,0,0.06))",
-    "jenis": "ternary"
-  },
-  "features/flowchart/lib/shapes.tsx:drop-shadow(0 20px 25px rgba(0,0,0,0.18)) drop-shadow(0 10px 10px rgba(0,0,0,0.12))": {
-    "berkas": "features/flowchart/lib/shapes.tsx",
-    "teks": "drop-shadow(0 20px 25px rgba(0,0,0,0.18)) drop-shadow(0 10px 10px rgba(0,0,0,0.12))",
     "jenis": "ternary"
   },
   "features/issues/components/list/IssueTableRow.tsx:tr-${task.id}-${depth}": {

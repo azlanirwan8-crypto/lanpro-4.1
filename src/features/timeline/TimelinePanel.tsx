@@ -734,9 +734,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                 {t("roadmap.itemHierarchy")}
               </span>
               <span className={cn(LABEL_KEPALA, KOLOM.status)}>{t("roadmap.colStatus")}</span>
-              <span className={cn(LABEL_KEPALA, KOLOM.prioritas)}>
-                {t("roadmap.colPriority")}
-              </span>
+              <span className={cn(LABEL_KEPALA, KOLOM.prioritas)}>{t("roadmap.colPriority")}</span>
               <span className={cn(LABEL_KEPALA, KOLOM.tanggal)}>{t("roadmap.colStartEnd")}</span>
               <button
                 type="button"
@@ -769,13 +767,14 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                     startDate: task.startDate,
                     endDate: task.endDate,
                   };
+                  const mulaiTampil = rentangTampil.startDate
+                    ? format(ensureDate(rentangTampil.startDate), "d MMM")
+                    : "";
+                  const akhirTampil = rentangTampil.endDate
+                    ? format(ensureDate(rentangTampil.endDate), "d MMM")
+                    : "";
                   const teksTanggal =
-                    rentangTampil.startDate && rentangTampil.endDate
-                      ? `${format(ensureDate(rentangTampil.startDate), "d MMM")} – ${format(
-                          ensureDate(rentangTampil.endDate),
-                          "d MMM"
-                        )}`
-                      : "—";
+                    mulaiTampil && akhirTampil ? `${mulaiTampil} – ${akhirTampil}` : "—";
 
                   return (
                     <motion.div
@@ -1190,7 +1189,9 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             // `h-6` + `h-4` dimenangkan urutan stylesheet, bukan
                             // oleh niat penulisnya — pelajaran #692.
                             "gantt-bar absolute top-1/2 -translate-y-1/2 flex items-center border overflow-hidden shadow-soft",
-                            isEpic ? "gantt-bar-epic h-4 rounded-md" : "h-6 rounded-lg",
+                            // Awalan `h-4` bukan gaya: pemindai #602 mengenali
+                            // sebuah string sebagai kelas dari token pertamanya.
+                            isEpic ? "h-4 rounded-md gantt-bar-epic" : "h-6 rounded-lg",
                             "group/bar",
                             timelineInteraction?.taskId === task.id && "gantt-bar-aktif",
                             timelineInteraction?.taskId === task.id
@@ -1226,9 +1227,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             {/* #698 — tanggal di dalam tooltip tidak lagi ikut
                                 rona status: latar tooltip sudah `surface-inverse-strong`,
                                 jadi teksnya cukup `content-inverse`. */}
-                            <span className="font-medium">
-                              {format(start, "dd MMM yyyy")}
-                            </span>
+                            <span className="font-medium">{format(start, "dd MMM yyyy")}</span>
                             <span className="text-content-inverse-muted">→</span>
                             <span className="font-medium">{format(end, "dd MMM yyyy")}</span>
                             <span className="font-medium px-1.5 py-0.5 rounded text-xs sm:text-[11px] sm:text-[9px] ml-1 bg-surface-inverse/60 text-content-inverse">
