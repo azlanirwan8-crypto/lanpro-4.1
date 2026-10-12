@@ -271,27 +271,6 @@ export const useDashboard = (props: DashboardViewProps) => {
   const last7DaysData = [...last7DaysDataRaw];
   const weeklyVelocity = last7DaysData.reduce((acc, curr) => acc + curr.Completed, 0);
 
-  /** #342 — throughput mingguan (tugas terminal per minggu), 8 minggu terakhir. */
-  const throughputWeeklyData = (() => {
-    const weeks = 8;
-    const msWeek = 7 * msInDay;
-    const end = now;
-    const data: { name: string; Completed: number }[] = [];
-    for (let w = weeks - 1; w >= 0; w--) {
-      const weekEnd = new Date(end.getTime() - w * msWeek);
-      const weekStart = new Date(weekEnd.getTime() - msWeek);
-      const completed = nonEpicTasks.filter((t) => {
-        if (!statusSelesai(t.status, masterData) || !t.updatedAt) return false;
-        const td = ensureDate(t.updatedAt).getTime();
-        return td > weekStart.getTime() && td <= weekEnd.getTime();
-      }).length;
-      data.push({
-        name: format(weekEnd, "dd MMM"),
-        Completed: completed,
-      });
-    }
-    return data;
-  })();
 
   /**
    * #342 — deret aktivitas/selesai untuk filter rentang (hari).
@@ -437,7 +416,6 @@ export const useDashboard = (props: DashboardViewProps) => {
     burndownData,
     last7DaysData,
     weeklyVelocity,
-    throughputWeeklyData,
     buildRangeActivity,
     velocityData,
     estimationAccuracyData,

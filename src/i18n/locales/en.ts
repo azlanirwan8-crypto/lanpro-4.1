@@ -880,8 +880,6 @@ export const en = {
       "Remaining work vs ideal line (story points when set, otherwise task count). Completion date approximated from updatedAt.",
     burndownIdeal: "Ideal",
     burndownActual: "Actual (remaining)",
-    throughputTitle: "Weekly throughput",
-    throughputHint: "Terminal-status tasks completed per week (last 8 weeks).",
     activeSprint: "Active Sprint",
     sprintProgress: "Sprint Progress",
     weeklyVelocity: "Weekly Velocity",

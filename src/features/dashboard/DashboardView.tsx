@@ -99,7 +99,6 @@ export function DashboardView(props: DashboardViewProps) {
     burndownData,
     last7DaysData,
     weeklyVelocity,
-    throughputWeeklyData,
     buildRangeActivity,
     velocityData,
     estimationAccuracyData,
@@ -216,11 +215,6 @@ export function DashboardView(props: DashboardViewProps) {
     return buildRangeActivity(90);
   }, [filterRentang, last7DaysData, buildRangeActivity]);
 
-  const rangedThroughput = useMemo(() => {
-    if (filterRentang === "ALL" || filterRentang === "1M") return throughputWeeklyData;
-    // 6M / 1Y: tetap 8 minggu terakhir (MVP tipis — tidak memuat 52 bar)
-    return throughputWeeklyData;
-  }, [filterRentang, throughputWeeklyData]);
 
   const {
     selectedProject,
@@ -1130,55 +1124,6 @@ export function DashboardView(props: DashboardViewProps) {
                 </div>
               )}
 
-              {/* #342 — Throughput mingguan */}
-              <div className="mt-6 pt-5 border-t border-border-faint">
-                <h4 className="text-xs font-normal text-content-strong uppercase tracking-normal mb-3 flex items-center gap-2">
-                  <Activity className="w-3.5 h-3.5 text-success-text" />
-                  {t("dashboard.throughputTitle")}
-                </h4>
-                <p className="text-[11px] text-content-muted mb-3">
-                  {t("dashboard.throughputHint")}
-                </p>
-                <div className="h-[260px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={rangedThroughput}
-                      margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis
-                        dataKey="name"
-                        tick={{ fontSize: 10, fill: "#64748b" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <YAxis
-                        allowDecimals={false}
-                        tick={{ fontSize: 10, fill: "#64748b" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          borderRadius: "0.5rem",
-                          border: "none",
-                          background: "#1e293b",
-                          color: "#fff",
-                          fontSize: "11px",
-                        }}
-                      />
-                      <Bar
-                        dataKey="Completed"
-                        name={t("dashboard.seriesCompleted")}
-                        fill="#10b981"
-                        radius={[4, 4, 0, 0]}
-                        maxBarSize={28}
-                        isAnimationActive={!reduceChartMotion}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
             </Card>
 
             {/* Task Breakdown Grid (Jenis Task & Status Breakdown) */}

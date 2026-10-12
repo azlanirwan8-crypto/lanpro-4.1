@@ -891,8 +891,6 @@ export const id = {
       "Sisa pekerjaan vs garis ideal (poin story bila ada, selain itu hitungan tugas). Tanggal selesai diperkirakan dari updatedAt.",
     burndownIdeal: "Ideal",
     burndownActual: "Aktual (sisa)",
-    throughputTitle: "Throughput mingguan",
-    throughputHint: "Jumlah tugas berstatus terminal yang diselesaikan per minggu (8 minggu).",
     activeSprint: "Sprint Aktif",
     sprintProgress: "Progres Sprint",
     weeklyVelocity: "Kecepatan Mingguan",
