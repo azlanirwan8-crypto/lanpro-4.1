@@ -117,12 +117,15 @@ export const FormDiskusi: React.FC<FormDiskusiProps> = ({
           {/* #703 — Notes dan Follow-up ikut jadi textarea. Keduanya dulu
               `<input type="text">` padahal kolomnya `TEXT` dan isinya bisa
               berparagraf: pemilik proyek, "ini dalam bentuk text area ya field
-              isian nya karena dia bisa jadi dalam paragraf". */}
+              isian nya karena dia bisa jadi dalam paragraf".
+              #708 — `leading-relaxed`: paragraf yang sama dibaca lebih tenang
+              dengan jarak baris longgar, dan di sinilah paragraf memang
+              ditulis — kotak baris cepat sengaja tetap rapat. */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className={labelKelas}>{t("discussion.notesLabel")}</label>
               <textarea
-                className={cn(isianKelas, "min-h-[72px]")}
+                className={cn(isianKelas, "min-h-[72px] leading-relaxed")}
                 value={form.keterangan || ""}
                 onChange={(e) => onUbah({ keterangan: e.target.value })}
               />
@@ -130,12 +133,13 @@ export const FormDiskusi: React.FC<FormDiskusiProps> = ({
             <div className="space-y-1.5">
               <label className={labelKelas}>{t("discussion.followUp")}</label>
               <textarea
-                className={cn(isianKelas, "min-h-[72px]")}
+                className={cn(isianKelas, "min-h-[72px] leading-relaxed")}
                 value={form.tindakanLanjut || ""}
                 onChange={(e) => onUbah({ tindakanLanjut: e.target.value })}
               />
             </div>
           </div>
+          <p className="text-[11px] text-content-subtle -mt-2">{t("discussion.hintParagraf")}</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* #703 (B2 = b) — PIC boleh lebih dari satu orang. */}

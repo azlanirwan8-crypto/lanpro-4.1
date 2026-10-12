@@ -12,13 +12,13 @@ import {
   Link2,
 } from "lucide-react";
 import { cn } from "../../../lib/utils";
-import { DiscussionPoint, DiscussionPointComment, UserProfile, MasterData } from "../../../types";
+import { DiscussionPoint, UserProfile, MasterData } from "../../../types";
+import { Paragraf } from "./Paragraf";
 
 interface DiscussionPointMobileCardViewProps {
   points: DiscussionPoint[];
   projectMembers: UserProfile[];
   masterData: MasterData[];
-  commentsMap: Record<string, DiscussionPointComment[]>;
   onOpenThread: (point: DiscussionPoint) => void;
   onEditPoint: (point: DiscussionPoint) => void;
   onDeletePoint: (id: string) => void;
@@ -33,7 +33,6 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
   points,
   projectMembers,
   masterData,
-  commentsMap,
   onOpenThread,
   onEditPoint,
   onDeletePoint,
@@ -84,7 +83,9 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
             (m.label?.toLowerCase() === p.fitur?.toLowerCase() || m.id === p.fitur)
         );
 
-        const pointComments = (p.id && commentsMap[p.id]) || [];
+        // #711 — balasannya ikut menempel pada titik diskusi (satu kueri untuk
+        // seluruh halaman), bukan hasil permintaan per baris seperti sebelumnya.
+        const pointComments = p.comments || [];
 
         return (
           <div
@@ -184,7 +185,9 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                 <span className="text-[10px] font-normal uppercase tracking-normal text-content-subtle block mb-0.5">
                   {t("discussion.thNotes")}
                 </span>
-                <p className="whitespace-pre-wrap">{p.keterangan}</p>
+                <div className="whitespace-pre-wrap">
+                  <Paragraf teks={p.keterangan} />
+                </div>
               </div>
             )}
 
@@ -195,7 +198,9 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                 <span className="text-[10px] font-normal uppercase tracking-normal text-content-subtle block mb-0.5">
                   {t("discussion.followUp")}
                 </span>
-                <p className="whitespace-pre-wrap break-words">{p.tindakanLanjut}</p>
+                <div className="whitespace-pre-wrap break-words">
+                  <Paragraf teks={p.tindakanLanjut} />
+                </div>
               </div>
             )}
 

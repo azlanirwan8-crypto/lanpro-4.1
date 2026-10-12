@@ -1203,6 +1203,9 @@ export const id = {
     allLabels: "Semua Label",
     allReleases: "Semua Rilis",
     allResolutions: "Semua Resolusi",
+    // #705 — filter jenis isu di Advanced Filters.
+    issueType: "Tipe Isu",
+    allTypes: "Semua Tipe",
     allRisks: "Semua Risiko",
     allSprints: "Semua Sprint",
     allStatuses: "Semua Status",
@@ -1881,10 +1884,15 @@ export const id = {
     belumAdaGambar: "Belum ada gambar",
     hapusGambar: "Hapus gambar",
     mengunggah: "Mengunggah…",
-    // Baris cepat tidak bisa melampirkan tautan/gambar: keduanya menempel pada
-    // titik diskusi yang sudah punya id, jadi selnya hanya menjelaskan jalurnya.
-    tautanButuhTersimpan: "Tautan ditambahkan lewat laci sunting setelah titik diskusi tersimpan",
-    gambarButuhTersimpan: "Gambar diunggah lewat laci sunting setelah titik diskusi tersimpan",
+    // #709 — baris cepat kini menampung tautan dan mengantre berkas. Dua kunci
+    // lama ("...lewat laci sunting setelah titik diskusi tersimpan") dicabut
+    // bersama jalurnya: sel itu tidak lagi kosong dan tidak lagi menjelaskan
+    // alasan, ia langsung berisi.
+    tambahLagi: "Tambah lagi",
+    // #708 — pemicu pemilih jamak hanya menampilkan dua chip; sisanya dihitung.
+    sisaJamak: "+{{jumlah}} lagi",
+    hintParagraf: "Baris kosong memulai paragraf baru; jaraknya dibuat seragam di tampilan.",
+    berkasDiantre: "{{jumlah}} gambar menunggu diunggah",
     statusDone: "Selesai",
     statusPending: "Tertunda",
     prev: "Sebelumnya",

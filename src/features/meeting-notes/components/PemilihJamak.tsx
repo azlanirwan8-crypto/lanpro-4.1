@@ -38,13 +38,14 @@ import { cn } from "../../../lib/utils";
  * ditiru di sini supaya dua kontrol yang duduk BERSEBELAHAN di baris yang sama
  * tidak punya dua perilaku yang berbeda.
  */
+/** #708 — jumlah chip yang masih muat pada satu baris pemicu. */
+const CHIP_TERPAKAI = 2;
+
 export interface OpsiJamak {
   id: string;
   label: string;
   /** Warna snapshot dari master data/daftar isu; boleh kosong. */
   warna?: string | null;
-  /** Baris kecil kedua di panel, misalnya kode tugas `WMIR-168`. */
-  keterangan?: string | null;
 }
 
 interface PemilihJamakProps {
@@ -82,7 +83,7 @@ export const PemilihJamak: React.FC<PemilihJamakProps> = ({
     lebar: number;
     atas?: number;
     bawah?: number;
-  }>({ kiri: 0, lebar: 240 });
+  }>({ kiri: 0, lebar: 280 });
 
   /* Tinggi panel diperkirakan dari isianya: satu baris cari plus daftar
    * `max-h-56`. Angka ini hanya dipakai untuk MEMILIH sisi buka, bukan untuk
@@ -96,7 +97,11 @@ export const PemilihJamak: React.FC<PemilihJamakProps> = ({
     if (!terbuka || !tombol.current) return;
     const perbarui = () => {
       const kotak = tombol.current!.getBoundingClientRect();
-      const lebar = Math.max(kotak.width, 240);
+      /* #708 — 280 px, bukan 240: judul isu panjang ("Status di wondr merchant
+       * itu sedang diproses, tapi di portal merchant inactive") memaksa tiga
+       * baris pada 240 px, dan tiga baris per opsi membuat satu layar penuh
+       * hanya memuat empat pilihan. */
+      const lebar = Math.max(kotak.width, 280);
       const ruangBawah = window.innerHeight - kotak.bottom;
       const keAtas = ruangBawah < TINGGI_PERKIRAAN && kotak.top > TINGGI_PERKIRAAN;
       setPosisi({
@@ -148,8 +153,7 @@ export const PemilihJamak: React.FC<PemilihJamakProps> = ({
   // tidak perlu dicari ulang di antara ratusan isu.
   const tersaring = useMemo(() => {
     const k = kueri.trim().toLowerCase();
-    const cocok = (o: OpsiJamak) =>
-      !k || o.label.toLowerCase().includes(k) || (o.keterangan || "").toLowerCase().includes(k);
+    const cocok = (o: OpsiJamak) => !k || o.label.toLowerCase().includes(k);
     const sisa = opsi.filter((o) => !nilai.includes(o.id) && cocok(o));
     const sudah = opsi.filter((o) => nilai.includes(o.id) && cocok(o));
     return [...sudah, ...sisa];
@@ -177,21 +181,33 @@ export const PemilihJamak: React.FC<PemilihJamakProps> = ({
           {terpilih.length === 0 ? (
             <span className="text-content-subtle italic">{kosong}</span>
           ) : (
-            terpilih.map((o) => (
-              <span
-                key={o.id}
-                className="inline-flex items-center gap-1 max-w-full px-1.5 py-0.5 rounded-md text-[10px] leading-tight font-normal bg-primary/10 text-primary border border-primary/20"
-              >
-                <span className="break-words">{o.label}</span>
-                <X
-                  className="w-3 h-3 shrink-0"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    ganti(o.id);
-                  }}
-                />
-              </span>
-            ))
+            <>
+              {/* #708 — pemicunya hanya menampung DUA chip. Yang tidak tampil
+                  tidak hilang: daftar lengkapnya ada satu klik jauhnya, dan
+                  setiap baris di sana sudah punya centang. Tanpa batas ini,
+                  empat anggota terpilih membuat tombolnya empat baris tinggi
+                  sementara kotak di sebelahnya tetap satu baris. */}
+              {terpilih.slice(0, CHIP_TERPAKAI).map((o) => (
+                <span
+                  key={o.id}
+                  className="inline-flex items-center gap-1 max-w-full px-1.5 py-0.5 rounded-md text-[10px] leading-tight font-normal bg-primary/10 text-primary border border-primary/20"
+                >
+                  <span className="break-words">{o.label}</span>
+                  <X
+                    className="w-3 h-3 shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      ganti(o.id);
+                    }}
+                  />
+                </span>
+              ))}
+              {terpilih.length > CHIP_TERPAKAI && (
+                <span className="shrink-0 px-1.5 py-0.5 rounded-md text-[10px] leading-tight font-normal bg-surface-sunken text-content-muted border border-border-subtle">
+                  {t("discussion.sisaJamak", { jumlah: terpilih.length - CHIP_TERPAKAI })}
+                </span>
+              )}
+            </>
           )}
         </span>
         <ChevronDown className="w-3.5 h-3.5 shrink-0 text-content-subtle" />
@@ -213,21 +229,21 @@ export const PemilihJamak: React.FC<PemilihJamakProps> = ({
             className="bg-surface border border-border-subtle rounded-md shadow-xl overflow-hidden"
           >
             {cari && (
-              <div className="relative shrink-0 border-b border-border-faint">
-                <Search className="w-3.5 h-3.5 text-content-subtle absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <div className="relative shrink-0 border-b border-border-faint bg-surface-sunken/60">
+                <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   autoFocus
                   value={kueri}
                   onChange={(e) => setKueri(e.target.value)}
                   placeholder={cari}
-                  className="w-full min-w-0 pl-8 pr-2.5 py-2 bg-surface text-content-strong outline-none text-xs font-normal placeholder:text-content-subtle"
+                  className="w-full min-w-0 pl-9 pr-3 py-2.5 bg-transparent text-content-strong outline-none text-xs font-normal placeholder:text-content-subtle"
                 />
               </div>
             )}
-            <div className="max-h-56 overflow-y-auto">
+            <div className="max-h-60 overflow-y-auto py-1">
               {tersaring.length === 0 ? (
-                <p className="px-3 py-2.5 text-xs text-content-subtle italic">
+                <p className="px-3 py-3 text-xs text-content-subtle italic">
                   {t("discussion.tidakAdaOpsi")}
                 </p>
               ) : (
@@ -237,31 +253,31 @@ export const PemilihJamak: React.FC<PemilihJamakProps> = ({
                     <button
                       key={o.id}
                       type="button"
+                      aria-pressed={aktif}
                       onClick={() => ganti(o.id)}
+                      /* #708 — barisnya `items-start`, bukan `items-center`:
+                       * judul isu panjang membungkus dua-tiga baris, dan kotak
+                       * centang yang ditengahkan melayang di samping baris
+                       * kedua. Penanda terpilih cukup dari latar beronda plus
+                       * centangnya; teksnya satu warna supaya daftar tidak
+                       * terlihat bergantian warna. */
                       className={cn(
-                        "w-full min-w-0 flex items-center gap-2 px-3 py-2 text-left text-xs font-normal transition-colors cursor-pointer",
-                        aktif
-                          ? "bg-primary/10 text-primary"
-                          : "text-content-body hover:bg-surface-muted"
+                        "w-full min-w-0 flex items-start gap-2.5 px-3 py-2 text-left text-xs font-normal leading-snug transition-colors cursor-pointer",
+                        aktif ? "bg-primary/10" : "hover:bg-surface-muted"
                       )}
                     >
                       <span
                         className={cn(
-                          "w-4 h-4 shrink-0 rounded-md border flex items-center justify-center",
+                          "w-4 h-4 shrink-0 mt-px rounded-md border flex items-center justify-center",
                           aktif
                             ? "border-primary bg-primary text-content-inverse"
-                            : "border-border-subtle"
+                            : "border-border-subtle bg-surface"
                         )}
                       >
                         {aktif && <Check className="w-3 h-3" />}
                       </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="break-words leading-snug">{o.label}</span>
-                        {o.keterangan && (
-                          <span className="block text-[10px] text-content-subtle break-words">
-                            {o.keterangan}
-                          </span>
-                        )}
+                      <span className="min-w-0 flex-1 break-words text-content-strong">
+                        {o.label}
                       </span>
                     </button>
                   );

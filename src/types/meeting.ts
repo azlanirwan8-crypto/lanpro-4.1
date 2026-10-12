@@ -65,6 +65,12 @@ export interface DiscussionPoint {
   target_date?: string;
   tanggalUpdateStatus?: string;
   createdAt?: any;
+  /**
+   * #711 — balasan satu titik diskusi, ditempel repository untuk SELURUH
+   * halaman dalam satu kueri. `commentsCount` ikut datang darinya supaya layar
+   * tidak perlu memanggil endpoint komentar per baris hanya untuk sebuah angka.
+   */
+  comments?: DiscussionPointComment[];
   commentsCount?: number;
 }
 

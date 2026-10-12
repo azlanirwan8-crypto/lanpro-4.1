@@ -26,6 +26,12 @@ const TABEL = "src/features/meeting-notes/DiscussionPointsTable.tsx";
 const JAMAK = "src/features/meeting-notes/components/PemilihJamak.tsx";
 const RUTE = "server/routes/discussion-points.routes.ts";
 const MIGRASI = "src/lib/pg-migrate.ts";
+/* #707 — `<thead>` pindah ke `components/BagianPapan.tsx` (`KepalaTabel`), dan
+ * yang pindah hanya ALAMATNYA: jumlah `<th>` dan kunci kamusnya tetap dikunci di
+ * sini. Induknya 780 baris dari batas 800 §4, dan kepala tabel adalah potongan
+ * berikutnya yang tidak punya state. Kalau nanti pindah lagi, perbarui alamatnya
+ * seperti yang diminta `catatanLengkap-645.test.ts` — jangan hapus testnya. */
+const KEPALA = "src/features/meeting-notes/components/BagianPapan.tsx";
 
 /** Potongan sumber mulai dari penanda sampai batas berikutnya. */
 const blok = (isi: string, mulai: string, selesai: string, nama: string) => {
@@ -94,8 +100,7 @@ describe("#703 butir 1 dan 2 — Context/Tags dari Daftar Isu, PIC jamak", () =>
 
 describe("#703 butir 3 — kolom Follow-up akhirnya tampil di tabel", () => {
   it("kepala tabel punya Follow-up, Tautan, dan Gambar", () => {
-    const isi = baca(TABEL);
-    const kepala = blok(isi, "<thead>", "</thead>", "kepala tabel");
+    const kepala = blok(baca(KEPALA), "<thead>", "</thead>", "kepala tabel");
     for (const kunci of [
       't("discussion.followUp")',
       't("discussion.tautan")',
@@ -106,7 +111,7 @@ describe("#703 butir 3 — kolom Follow-up akhirnya tampil di tabel", () => {
     // 12 kolom: No, Concern, Notes, Tags, Follow-up, PIC, Target, Tautan,
     // Gambar, Thread, Status, Action. Baris kosong tidak boleh bokek kolom.
     expect(kepala.match(/<th /g)).toHaveLength(12);
-    expect(isi).toContain("colSpan={12}");
+    expect(baca(TABEL)).toContain("colSpan={12}");
   });
 
   it("selnya memisahkan Follow-up dari Concern (#703: field ada, kolomnya tidak)", () => {
@@ -177,8 +182,7 @@ describe("#703/#704 lanjutan — baris cepat lurus dengan kepala, panel tidak te
   const jumlah = (isi: string, pola: RegExp) => (isi.match(pola) || []).length;
 
   it("sel baris cepat sebanyak kolom kepala tabel", () => {
-    const kepala = blok(baca(TABEL), "<thead>", "</tbody>", "kepala tabel");
-    const kolom = jumlah(kepala, /<th[\s>]/g);
+    const kolom = jumlah(baca(KEPALA), /<th[\s>]/g);
     expect(kolom).toBe(12);
     expect(jumlah(baca(CEPAT), /<td[\s>]/g)).toBe(kolom);
   });

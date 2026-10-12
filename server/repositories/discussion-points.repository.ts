@@ -27,6 +27,14 @@ export interface DiscussionPointEntity {
   links?: unknown;
   /** #704 — isi `discussion_point_files` untuk titik ini, ditempel saat dibaca. */
   files?: DiscussionPointFileEntity[];
+  /**
+   * #711 — isi `discussion_point_comments` untuk titik ini, ditempel untuk
+   * SELURUH halaman dalam satu kueri. Bukan kolom: tidak ada `comments` di
+   * `DiscussionPoints`, dan tidak akan pernah ada.
+   */
+  comments?: DiscussionPointCommentEntity[];
+  /** #711 — panjang `comments`, ikut ditempel supaya layar tidak menghitungnya lagi. */
+  commentsCount?: number;
   status?: string | null;
   targetDate?: string | null;
   tanggalUpdateStatus?: string | null;
@@ -97,7 +105,8 @@ export class DiscussionPointsRepository {
 
   /**
    * #703/#704 — tempel anak-anak sebuah titik diskusi: daftar penerima dan
-   * daftar berkas. DUA kueri untuk SELURUH halaman, bukan dua kueri per baris.
+   * daftar berkas. #711 menambah daftar komentar. TIGA kueri untuk SELURUH
+   * halaman, bukan tiga kueri per baris.
    *
    * `IN (?)` di sini BUKAN `IN (?,?,?)`: `convertToPostgres()` di `src/lib/db.ts:59`
    * mengubah `IN (?)` menjadi `= ANY(?)`, dan bentuk itu MENSYARATKAN array.
@@ -132,11 +141,48 @@ export class DiscussionPointsRepository {
       perBerkas.get(f.pointId)!.push(f);
     });
 
-    return points.map((p) => ({
-      ...p,
-      assigneeIds: perPoin.get(p.id) ?? (p.assignTo ? [String(p.assignTo)] : []),
-      files: perBerkas.get(p.id) ?? [],
-    }));
+    /* #711 — komentar SATU kueri untuk seluruh halaman, bukan satu kueri per
+     * baris. Sebelum ini frontend memanggil endpoint komentar untuk SETIAP
+     * titik diskusi yang tampil: sepuluh baris berarti sepuluh permintaan dan
+     * sepuluh render, hanya untuk mencetak angka di kolom Utas dan mengintip
+     * balasan di kartu HP. Presedennya `task.repository.ts:157-174` (#494), dan
+     * bentuk `IN (?)`-nya adalah yang sama seperti dua kueri di atas — bukan
+     * `IN (?,?,…)`.
+     *
+     * `pointid` huruf kecil utuh: kolom itu lahir dari identifier tanpa kutip
+     * (§5), dan `findCommentsByPointId()` sudah membacanya dengan cara yang
+     * sama. Alias ber-kutip di bawah meniru daftar kolom fungsi itu supaya
+     * bentuk yang diterima layar tidak berubah.
+     */
+    const [komentar]: any = await connection.query(
+      `SELECT id,
+              pointid     AS "pointId",
+              "userId"    AS "userId",
+              username    AS "userName",
+              commenttext AS "commentText",
+              "createdAt" AS "createdAt"
+         FROM discussion_point_comments
+        WHERE pointid IN (?)
+        ORDER BY "createdAt" ASC`,
+      [ids]
+    );
+    const perKomentar = new Map<string, DiscussionPointCommentEntity[]>();
+    (komentar || []).forEach((c: DiscussionPointCommentEntity) => {
+      if (!c.pointId) return;
+      if (!perKomentar.has(c.pointId)) perKomentar.set(c.pointId, []);
+      perKomentar.get(c.pointId)!.push(c);
+    });
+
+    return points.map((p) => {
+      const daftarKomentar = perKomentar.get(p.id) ?? [];
+      return {
+        ...p,
+        assigneeIds: perPoin.get(p.id) ?? (p.assignTo ? [String(p.assignTo)] : []),
+        files: perBerkas.get(p.id) ?? [],
+        comments: daftarKomentar,
+        commentsCount: daftarKomentar.length,
+      };
+    });
   }
 
   private buildPointWhere(meetingId: string, search?: string) {

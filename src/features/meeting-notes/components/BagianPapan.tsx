@@ -19,6 +19,10 @@ import { cn } from "../../../lib/utils";
  * data, baris cepat, dan laci utas keluar. Dua potong tata letak yang tidak
  * punya logika data adalah tempat paling aman untuk memotongnya, dan keduanya
  * memang sudah berbentuk begitu — hanya props yang masuk, tidak ada state.
+ *
+ * #707 menambahkan `KepalaTabel` ke berkas yang sama, dan itu bukan tempat
+ * parkir: kepala tabel adalah potongan ketiga yang tidak punya state, dan
+ * induknya sudah 780 baris dari batas 800 §4 sebelum item ini dimulai.
  */
 
 interface KepalaProps {
@@ -84,6 +88,86 @@ export const KepalaPapan: React.FC<KepalaProps> = ({ tampilAI, onToggleAI, cari,
         </button>
       </div>
     </div>
+  );
+};
+
+/**
+ * #707 — garis pemisah antar baris. Ia tinggal di sini karena dipakai DUA berkas
+ * (`BarisDiskusi` dan `BarisCepat`) dan keduanya harus bergerak bersamaan:
+ * tabelnya kini `border-separate` — syarat agar garis bawah kepala tabel ikut
+ * melekat — dan pada model terpisah CSS tidak menggambar border pada `<tr>`,
+ * sehingga `divide-y` di `<tbody>` diam-diam menghasilkan nol garis.
+ */
+export const SEL = "px-4 border-b border-border-faint";
+
+/**
+ * #707 — kepala tabel desktop. `position: sticky` hanya bekerja terhadap
+ * scrollport TERDEKAT, dan selama berkas ini masih dibungkus `ResponsiveTable`
+ * (satu `overflow-x-auto` lagi di dalam), scrollport terdekat itu adalah bungkus
+ * dalam yang tingginya mengikuti isi — jadi ia tidak pernah bergulir dan kepala
+ * tabel tetap ikut lolos ke atas. Yang menahan tampilan itu bukan kelasnya,
+ * melainkan jumlah wadahnya; lihat `DiscussionPointsTable.tsx`.
+ *
+ * Dua turunannya ikut ditangani di sini:
+ *  - Latar kepala harus OPAN. `bg-primary-surface/5` (standar #422) tembus
+ *    pandang, jadi baris yang lewat di bawahnya terlihat menembus. `surface-sunken`
+ *    adalah token latar terdekat yang tidak tembus, baik di mode terang maupun
+ *    gelap, dan tidak satu pun override mode gelap ditambahkan (§22).
+ *  - Garis bawah pindah dari baris ke sel kepala. Tabel ini kini
+ *    `border-separate` (tanpa itu garis bawah kepala ikut hilang bersama model
+ *    `border-collapse`), dan pada model terpisah border pada baris tidak digambar.
+ *
+ * Lebar kolom ditulis di sini dan hanya di sini: dengan `table-fixed` nilai
+ * inilah kolomnya, dan baris data tidak perlu menebak lagi.
+ */
+export const KepalaTabel: React.FC = () => {
+  const { t } = useTranslation();
+  const th =
+    "sticky top-0 z-20 bg-surface-sunken py-3 px-4 border-b border-border-subtle font-normal";
+  return (
+    <thead>
+      <tr className="text-xs text-content-subtle whitespace-nowrap">
+        <th scope="col" className={`${th} w-12 text-center`}>
+          {t("discussion.thNo")}
+        </th>
+        <th scope="col" className={`${th} w-[220px]`}>
+          {t("discussion.thConcern")}
+        </th>
+        <th scope="col" className={`${th} w-[280px]`}>
+          {t("discussion.thNotes")}
+        </th>
+        <th scope="col" className={`${th} w-[170px]`}>
+          {t("discussion.thContextTags")}
+        </th>
+        {/* #703 butir 3 — Follow-up selama ini ADA di form dan ADA di
+            basis data, tetapi tidak pernah punya kolom. */}
+        <th scope="col" className={`${th} w-[240px]`}>
+          {t("discussion.followUp")}
+        </th>
+        <th scope="col" className={`${th} w-[150px]`}>
+          {t("discussion.thPic")}
+        </th>
+        <th scope="col" className={`${th} w-[130px]`}>
+          {t("discussion.thTargetDate")}
+        </th>
+        {/* #704 butir 5 dan 6 — dua kolom baru, keduanya bisa jamak. */}
+        <th scope="col" className={`${th} w-[170px]`}>
+          {t("discussion.tautan")}
+        </th>
+        <th scope="col" className={`${th} w-[120px]`}>
+          {t("discussion.gambar")}
+        </th>
+        <th scope="col" className={`${th} w-[90px] text-center`}>
+          {t("discussion.thThread")}
+        </th>
+        <th scope="col" className={`${th} w-[110px] text-center`}>
+          {t("discussion.status")}
+        </th>
+        <th scope="col" className={`${th} w-[90px] text-center`}>
+          {t("discussion.action")}
+        </th>
+      </tr>
+    </thead>
   );
 };
 

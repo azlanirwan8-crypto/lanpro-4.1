@@ -1193,6 +1193,9 @@ export const en = {
     allLabels: "All Labels",
     allReleases: "All Releases",
     allResolutions: "All Resolutions",
+    // #705 — issue type filter in Advanced Filters.
+    issueType: "Issue Type",
+    allTypes: "All Types",
     allRisks: "All Risks",
     allSprints: "All Sprints",
     allStatuses: "All Statuses",
@@ -1867,8 +1870,14 @@ export const en = {
     belumAdaGambar: "No images yet",
     hapusGambar: "Remove image",
     mengunggah: "Uploading…",
-    tautanButuhTersimpan: "Links are added from the edit drawer once the point is saved",
-    gambarButuhTersimpan: "Images are uploaded from the edit drawer once the point is saved",
+    // #709 — the quick-add row now holds links and queues images. The two old
+    // keys ("... from the edit drawer once the point is saved") leave with the
+    // path they described: those cells are filled in, not explained.
+    tambahLagi: "Add another",
+    // #708 — the multi-select trigger shows two chips; the rest is counted.
+    sisaJamak: "+{{jumlah}} more",
+    hintParagraf: "A blank line starts a new paragraph; spacing is evened out in the view.",
+    berkasDiantre: "{{jumlah}} image(s) waiting to upload",
     statusDone: "Done",
     statusPending: "Pending",
     prev: "Prev",

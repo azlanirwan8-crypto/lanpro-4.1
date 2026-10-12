@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import type { DiscussionPoint, MasterData } from "../../../types";
 import { cn } from "../../../lib/utils";
+import { SEL } from "./BagianPapan";
+import { Paragraf } from "./Paragraf";
 
 /**
  * #703/#704 — satu baris data tabel titik diskusi, dikeluarkan dari
@@ -55,6 +57,18 @@ const kosong = (teks: string) => (
   <span className="text-content-subtle italic text-[11px]">{teks}</span>
 );
 
+/**
+ * #708 — tiga sel teks di bawah diberi plafon TINGGI (`max-h-32` + gulir),
+ * bukan plafon isi. Keputusan #645 melarang `line-clamp`/`truncate` pada catatan
+ * rapat dan larangan itu tetap berlaku: seluruh teks masih ada dan masih bisa
+ * dibaca, hanya barisnya yang tidak lagi memanjang tanpa batas. Bentuknya persis
+ * yang ditunjuk gerbang `audit:label` sebagai pengganti potongan teks — "satu
+ * baris + wadahnya yang menggulir" (#565/#566). Kelasnya ditulis HARFIAH di
+ * setiap sel, bukan lewat konstanta: `catatanLengkap-645.test.ts` membaca 400
+ * karakter sebelum ekspresi datanya, dan sebuah nama konstanta membuat jaminan
+ * itu terbaca hilang padahal tidak.
+ */
+
 export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
   p,
   nomor,
@@ -85,25 +99,27 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
       )}
     >
       {/* No. */}
-      <td className="py-3 px-4 text-center text-content-subtle font-normal align-middle">
+      <td className={cn(SEL, "py-3 text-center text-content-subtle font-normal align-top")}>
         {nomor}
       </td>
 
       {/* Concern — follow-up tidak lagi menumpang di sel ini; ia kolom sendiri (#703 butir 3). */}
-      <td className="py-3 px-4 align-middle">
-        <div className="font-normal text-content-strong leading-snug whitespace-pre-wrap break-words">
-          {p.concern}
+      <td className={cn(SEL, "py-3 align-top")}>
+        <div className="font-normal text-content-strong leading-snug whitespace-pre-wrap break-words max-h-32 overflow-y-auto">
+          <Paragraf teks={p.concern} />
         </div>
       </td>
 
       {/* Notes / Keterangan — #645: TIDAK boleh dipotong. */}
-      <td className="py-3 px-4 align-middle text-content-body font-normal">
-        <div className="whitespace-pre-wrap break-words">{p.keterangan || p.comment || "-"}</div>
+      <td className={cn(SEL, "py-3 align-top text-content-body font-normal")}>
+        <div className="whitespace-pre-wrap break-words max-h-32 overflow-y-auto">
+          <Paragraf teks={p.keterangan || p.comment || "-"} />
+        </div>
       </td>
 
       {/* Context / Tags — #703 (B1 = a): isu nyata dari Daftar Isu, plus label
           `fitur` lama yang datanya tetap ada di basis data. */}
-      <td className="py-3 px-4 align-middle">
+      <td className={cn(SEL, "py-3 align-top")}>
         <div className="flex flex-wrap gap-1 items-center">
           {tag.map((s) => (
             <span
@@ -131,16 +147,18 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
 
       {/* Follow-up — #703 butir 3: field-nya sudah ada dan sudah tersimpan
           (`"tindakanLanjut" TEXT`), hanya kolomnya yang belum pernah tampil. */}
-      <td className="py-3 px-4 align-middle text-content-body font-normal">
+      <td className={cn(SEL, "py-3 align-top text-content-body font-normal")}>
         {p.tindakanLanjut || p.next_action ? (
-          <div className="whitespace-pre-wrap break-words">{p.tindakanLanjut || p.next_action}</div>
+          <div className="whitespace-pre-wrap break-words max-h-32 overflow-y-auto">
+            <Paragraf teks={p.tindakanLanjut || p.next_action} />
+          </div>
         ) : (
           kosong("-")
         )}
       </td>
 
       {/* PIC — #703 (B2 = b): boleh lebih dari satu orang. */}
-      <td className="py-3 px-4 align-middle text-content-body font-normal">
+      <td className={cn(SEL, "py-3 align-top text-content-body font-normal")}>
         <div className="flex flex-wrap items-center gap-1">
           {namaPenerima.length > 0 ? (
             namaPenerima.map((nama) => (
@@ -161,7 +179,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
       </td>
 
       {/* Target Date */}
-      <td className="py-3 px-4 align-middle text-content-muted font-normal">
+      <td className={cn(SEL, "py-3 align-top text-content-muted font-normal")}>
         {p.targetDate ? (
           <div className="flex items-center gap-1 text-[11px]">
             <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />
@@ -173,11 +191,11 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
       </td>
 
       {/* Tautan — #704 (butir 5, B3): satu kolom khusus, isinya boleh banyak. */}
-      <td className="py-3 px-4 align-middle">
+      <td className={cn(SEL, "py-3 align-top")}>
         {tautan.length === 0 && bukanGambar.length === 0 ? (
           kosong("-")
         ) : (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
             {tautan.map((l) => (
               <a
                 key={l.id}
@@ -210,11 +228,11 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
       </td>
 
       {/* Gambar — #704 (butir 6): miniatur, bukan nama berkas. */}
-      <td className="py-3 px-4 align-middle">
+      <td className={cn(SEL, "py-3 align-top")}>
         {gambar.length === 0 ? (
           kosong("-")
         ) : (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
             {gambar.map((b) => (
               <a
                 key={b.id}
@@ -227,6 +245,14 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
                 <img
                   src={b.url || ""}
                   alt={b.name || b.originalName || ""}
+                  // #711 — miniatur hanya boleh diunduh saat ia mendekati
+                  // layar. Tanpa ini, baris yang punya banyak gambar menarik
+                  // seluruh berkas bersama muat pertama, dan tata letak kolom
+                  // berpindah setiap kali satu berkas selesai diunduh.
+                  loading="lazy"
+                  decoding="async"
+                  width={48}
+                  height={48}
                   className="w-full h-full object-cover"
                 />
               </a>
@@ -236,7 +262,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
       </td>
 
       {/* Thread Comments */}
-      <td className="py-3 px-4 text-center align-middle">
+      <td className={cn(SEL, "py-3 text-center align-top")}>
         <button
           onClick={onOpenThread}
           className={cn(
@@ -258,7 +284,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
       </td>
 
       {/* Status Badge */}
-      <td className="py-3 px-4 text-center align-middle">
+      <td className={cn(SEL, "py-3 text-center align-top")}>
         <button
           type="button"
           onClick={onToggleStatus}
@@ -280,7 +306,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
       </td>
 
       {/* Actions */}
-      <td className="py-3 px-4 text-center align-middle">
+      <td className={cn(SEL, "py-3 text-center align-top")}>
         <div className="flex items-center justify-center gap-1">
           {bolehSunting && (
             <button

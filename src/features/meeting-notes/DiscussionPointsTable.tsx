@@ -10,8 +10,6 @@ import {
   getDiscussionPointComments,
   createDiscussionPointComment,
   getUsers,
-  uploadDiscussionPointFile,
-  attachDiscussionPointFile,
   deleteDiscussionPointFile,
 } from "../../services/meetingService";
 import { fetchTasks } from "../../services/taskService";
@@ -23,6 +21,7 @@ import {
   type PeranEfektif,
   type UserPermissions,
   type MasterData,
+  type TautanDiskusi,
 } from "../../types";
 import { AiMeetingCompanion } from "./AiMeetingCompanion";
 import { MessageSquare } from "lucide-react";
@@ -32,13 +31,13 @@ import {
   suppressDiscussionPointsRefresh,
   shouldSuppressDiscussionPointsRefresh,
 } from "../../lib/taskRefreshControl";
-import { ResponsiveTable } from "../../components/ResponsiveTable";
+import { KepalaPapan, KakiPapan, KepalaTabel } from "./components/BagianPapan";
 import { DiscussionPointMobileCardView } from "./components/DiscussionPointMobileCardView";
 import { FormDiskusi } from "./components/FormDiskusi";
 import { BarisDiskusi } from "./components/BarisDiskusi";
 import { BarisCepat, BlokCepatMobile, type NilaiCepat } from "./components/BarisCepat";
 import { LaciUtas } from "./components/LaciUtas";
-import { KepalaPapan, KakiPapan } from "./components/BagianPapan";
+import { useLampiranDiskusi } from "./lib/lampiran";
 import type { OpsiJamak } from "./components/PemilihJamak";
 import { useMobileAction } from "../../contexts/MobileActionContext";
 
@@ -78,6 +77,8 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     assigneeIds: [],
     tags: [],
     targetDate: "",
+    links: [],
+    berkas: [],
   });
   const ubahCepat = (bagian: Partial<NilaiCepat>) =>
     setNilaiCepat((lama) => ({ ...lama, ...bagian }));
@@ -86,11 +87,18 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
    * proyek, bukan lagi label MasterData. Diambil sekali per proyek: isinya bisa
    * ratusan, jadi ia tidak boleh di-refetch tiap ketikan di kotak cari. */
   const [opsiIsu, setOpsiIsu] = useState<OpsiJamak[]>([]);
-  /* #704 — unggah bergantian, bukan serentak: setiap berkas butuh satu permintaan
-   * unggah lalu satu permintaan daftar, dan dua-duanya menulis daftar yang sama. */
-  const [sedangMengunggah, setSedangMengunggah] = useState(false);
+  /* #704/#709 — unggah satu berkas lalu daftarkan ke titik diskusi. Logikanya
+   * pindah ke `lib/lampiran.ts`: induknya 780 baris dari batas 800 §4 sebelum
+   * antrean berkas ini ada (§4: berkas di atas 800 harus dipecah). */
+  const { sedangMengunggah, lampirkanKePoin } = useLampiranDiskusi(
+    projectId,
+    meetingId,
+    currentUser?.uid
+  );
 
   const [searchQuery, setSearchQuery] = useState("");
+  /** #711 — versi yang sudah berhenti diketik dan boleh dikirim ke server. */
+  const [kueriTertunda, setKueriTertunda] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPoints, setTotalPoints] = useState(0);
   /** #639 — 5 tidak bisa diubah; kini 10 + pemilih seperti daftar lain. */
@@ -128,14 +136,30 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     setCurrentPage(1);
   }, [searchQuery, meetingId, projectId]);
 
+  /* #711 — jeda 350 ms antara ketikan dan permintaan. Sebelumnya `searchQuery`
+   * ikut menentukan kapan papan dimuat, jadi "payment gateway" mengirim belasan
+   * permintaan dan yang terakhir menang — dengan Neon yang putus-putus (§0.8)
+   * layar berkedip ke hasil sementara. Yang diketik dan yang dikirim kini dua
+   * state; kotak cari tetap instan karena ia membaca `searchQuery`. */
+  useEffect(() => {
+    const jeda = setTimeout(() => setKueriTertunda(searchQuery.trim()), 350);
+    return () => clearTimeout(jeda);
+  }, [searchQuery]);
+
   useEffect(() => {
     fetchPoints();
+  }, [meetingId, projectId, currentPage, kueriTertunda, itemsPerPage]);
+
+  /* #711 — `projectMembers` tidak lagi ikut menentukan kapan papan dimuat. Ia
+   * array dari induk, dan setiap render induk yang menyodorkan array baru
+   * membuat seluruh papan di-refetch padahal tidak ada isinya yang berubah. */
+  useEffect(() => {
     if (projectMembers.length > 0) {
       setUsers(projectMembers);
     } else {
       fetchUsers();
     }
-  }, [meetingId, projectId, projectMembers, currentPage, searchQuery, itemsPerPage]);
+  }, [projectId, projectMembers]);
 
   useEffect(() => {
     let socket: any;
@@ -195,7 +219,6 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             .map((t: any) => ({
               id: String(t.id),
               label: String(t.title || t.summary || t.name || t.id),
-              keterangan: t.key || t.taskKey || null,
             }))
         );
       } catch (error) {
@@ -261,6 +284,13 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
     setIsSaving(true);
     const tempId = `temp-dp-${crypto.randomUUID()}`;
+    /* #709 — berkas diantre lebih dulu dan baru naik SETELAH id sungguhan pulang;
+     * daftarnya dibaca dari state yang sama, jadi ia direkam sebelum isian ini
+     * dikosongkan di bawah. */
+    const berkasTunda = nilaiCepat.berkas;
+    const tautan: TautanDiskusi[] = nilaiCepat.links
+      .map((l) => ({ ...l, url: l.url.trim(), label: (l.label || "").trim() || null }))
+      .filter((l) => /^https?:\/\//i.test(l.url));
     const payload: any = {
       concern: nilaiCepat.concern.trim(),
       keterangan: nilaiCepat.keterangan.trim(),
@@ -268,6 +298,10 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       assigneeIds: nilaiCepat.assigneeIds,
       assignTo: nilaiCepat.assigneeIds[0] || "",
       tags: nilaiCepat.tags,
+      // #704 butir 5 + #709: tautan ikut dibuat bersama titiknya. Yang lolos
+      // hanya http/https — `tautanMasuk` di server menolak sisanya, dan
+      // menolak di sini berarti tidak membuang titiknya karena satu alamat salah.
+      links: tautan,
       tindakanLanjut: nilaiCepat.tindakanLanjut.trim(),
       targetDate: nilaiCepat.targetDate || "",
       status: "pending",
@@ -290,12 +324,23 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       assigneeIds: [],
       tags: [],
       targetDate: "",
+      links: [],
+      berkas: [],
     });
     toast.success(t("alerts.pointAdded"));
 
     try {
       const realId = await createDiscussionPoint(projectId, meetingId, payload, currentUser.uid);
       setPoints((prev) => prev.map((p) => (p.id === tempId ? { ...p, id: realId } : p)));
+      /* #709 — berkas menempel SETELAH titiknya ada. Baris
+       * `discussion_point_files` menunjuk `point_id`, jadi tidak ada jalur lain
+       * yang jujur: mengunggah sebelum titiknya ada akan meninggalkan berkas
+       * yatim di penyimpanan. Satu per satu, bukan serentak — setiap berkas
+       * butuh satu permintaan unggah lalu satu permintaan daftar. */
+      if (berkasTunda.length > 0) {
+        for (const berkas of berkasTunda) await lampirkanKePoin(realId, berkas);
+        await fetchPoints();
+      }
     } catch (error: any) {
       setPoints((prev) => prev.filter((p) => p.id !== tempId));
       console.error("Error saving point:", error);
@@ -320,13 +365,16 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
   const [activeThreadPoint, setActiveThreadPoint] = useState<DiscussionPoint | null>(null);
   const [threadComments, setThreadComments] = useState<DiscussionPointComment[]>([]);
   const [isSendingComment, setIsSendingComment] = useState(false);
-  const [commentsMap, setCommentsMap] = useState<Record<string, DiscussionPointComment[]>>({});
 
-  const fetchCommentsForPoint = async (pointId: string) => {
+  /**
+   * #711 — komentar hanya dimuat untuk satu titik diskusi: yang sedang dibuka
+   * di laci. Angka di kolom Utas tidak lagi membacanya, ia datang dari
+   * `commentsCount` yang ditempel repository untuk seluruh halaman dalam satu
+   * kueri. Sebelum ini setiap baris memanggil endpoint-nya sendiri.
+   */
+  const ambilKomentar = async (pointId: string): Promise<DiscussionPointComment[]> => {
     try {
-      const fetched = await getDiscussionPointComments(pointId, currentUser?.uid);
-      setCommentsMap((prev) => ({ ...prev, [pointId]: fetched }));
-      return fetched;
+      return await getDiscussionPointComments(pointId, currentUser?.uid);
     } catch (e) {
       console.error("Failed to fetch comments:", e);
       return [];
@@ -335,10 +383,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
   const handleOpenThreadDrawer = async (point: DiscussionPoint) => {
     setActiveThreadPoint(point);
-    if (point.id) {
-      const comments = await fetchCommentsForPoint(point.id);
-      setThreadComments(comments);
-    }
+    if (point.id) setThreadComments(await ambilKomentar(point.id));
   };
 
   const handleSendThreadComment = async (teks: string) => {
@@ -374,8 +419,15 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       // Konfirmasi tetap ada untuk aksi yang HASILNYA TIDAK LANGSUNG TERLIHAT —
       // menghapus poin, menyimpan perubahan, impor AI. Bedanya di situ, bukan
       // pada berhasil atau tidaknya.
-      const updated = await fetchCommentsForPoint(activeThreadPoint.id);
+      const updated = await ambilKomentar(activeThreadPoint.id);
       setThreadComments(updated);
+      /* #711 — angka di kolom Utas ikut naik tanpa menunggu muat ulang papan.
+       * Polanya sama seperti `AppContainer.tsx:3868` untuk komentar tugas. */
+      setPoints((prev) =>
+        prev.map((x) =>
+          x.id === activeThreadPoint.id ? { ...x, commentsCount: (x.commentsCount ?? 0) + 1 } : x
+        )
+      );
     } catch (e: any) {
       toast.error(t("toast.replySendFailed") + e.message);
     } finally {
@@ -388,14 +440,13 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       const result = await getDiscussionPoints(projectId, meetingId, currentUser?.uid, {
         page: currentPage,
         limit: itemsPerPage,
-        search: searchQuery,
+        search: kueriTertunda,
       });
       const fetchedPoints = result.data as DiscussionPoint[];
       setPoints(fetchedPoints);
       setTotalPoints(result.meta?.total ?? fetchedPoints.length);
-      fetchedPoints.forEach((p: DiscussionPoint) => {
-        if (p.id) fetchCommentsForPoint(p.id);
-      });
+      // #711 — tidak ada lagi `fetchCommentsForPoint()` per baris: angkanya
+      // sudah ikut menempel pada setiap titik diskusi (`commentsCount`).
     } catch (error: any) {
       console.error("Failed to fetch discussion points:", error);
     }
@@ -457,45 +508,12 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     }
   };
 
-  /**
-   * #704 — unggah satu gambar lalu DAFTARKAN ke titik diskusi.
-   *
-   * Dua permintaan, bukan satu, dan itu sengaja: hanya `/api/v1/upload-document`
-   * yang memvalidasi magic byte dan menulis lewat `storage.service.ts`. Rute
-   * pendaftaran ini berada di bawah `jagaProyek("meetingNotes", "C")` yang sama,
-   * jadi tidak ada pemeriksaan izin yang dilompati.
-   *
-   * Butuh `editingId`: baris `discussion_point_files` menunjuk `point_id`, jadi
-   * gambar tidak bisa ditempelkan pada titik diskusi yang belum ada. Itu sebabnya
-   * unggah hanya hidup di laci sunting, bukan di baris cepat.
-   */
+  /** Pemakaian laci sunting: hasil unggah langsung ditempel ke formulir.
+   *  Jalur unggahnya sendiri ada di `lib/lampiran.ts` (#704/#709, §4). */
   const unggahBerkas = async (file: File) => {
-    if (!editingId || !currentUser) return;
-    setSedangMengunggah(true);
-    try {
-      const hasilUnggah: any = await uploadDiscussionPointFile(file);
-      const info = hasilUnggah?.data;
-      if (!info?.filename) throw new Error(t("toast.gagalUnggahBerkas"));
-      const baru = await attachDiscussionPointFile(
-        projectId,
-        meetingId,
-        editingId,
-        {
-          fileRef: info.filename,
-          name: info.originalName || file.name,
-          originalName: info.originalName || file.name,
-          mimetype: file.type || null,
-          size: typeof info.size === "number" ? info.size : file.size,
-          url: info.url || null,
-        },
-        currentUser.uid
-      );
-      setEditForm((lama) => ({ ...lama, files: [...(lama.files || []), baru] }));
-    } catch (error: any) {
-      toast.error(t("toast.gagalUnggahBerkas") + (error?.message || ""));
-    } finally {
-      setSedangMengunggah(false);
-    }
+    if (!editingId) return;
+    const baru = await lampirkanKePoin(editingId, file);
+    if (baru) setEditForm((lama) => ({ ...lama, files: [...(lama.files || []), baru] }));
   };
 
   const hapusBerkas = async (fileId: string) => {
@@ -604,7 +622,6 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                 points={paginatedPoints}
                 projectMembers={projectMembers}
                 masterData={masterData}
-                commentsMap={commentsMap}
                 onOpenThread={(point) => handleOpenThreadDrawer(point)}
                 onEditPoint={(point) => startEdit(point)}
                 onDeletePoint={(id) => handleDelete(id)}
@@ -633,29 +650,21 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             )}
           </div>
 
-          {/* Desktop Table Container (>= 640px) */}
-          <div className="hidden sm:block overflow-x-auto flex-1">
-            <ResponsiveTable className="w-full border-collapse text-left text-xs">
-              <thead>
-                <tr className="bg-primary-surface/5 border-b border-border-subtle text-xs font-normal text-content-subtle whitespace-nowrap">
-                  <th className="py-3 px-4 w-12 text-center">{t("discussion.thNo")}</th>
-                  <th className="py-3 px-4 min-w-[220px]">{t("discussion.thConcern")}</th>
-                  <th className="py-3 px-4 min-w-[200px]">{t("discussion.thNotes")}</th>
-                  <th className="py-3 px-4 min-w-[150px]">{t("discussion.thContextTags")}</th>
-                  {/* #703 butir 3 — Follow-up selama ini ADA di form dan ADA di
-                      basis data, tetapi tidak pernah punya kolom. */}
-                  <th className="py-3 px-4 min-w-[180px]">{t("discussion.followUp")}</th>
-                  <th className="py-3 px-4 min-w-[140px]">{t("discussion.thPic")}</th>
-                  <th className="py-3 px-4 min-w-[130px]">{t("discussion.thTargetDate")}</th>
-                  {/* #704 butir 5 dan 6 — dua kolom baru, keduanya bisa jamak. */}
-                  <th className="py-3 px-4 min-w-[160px]">{t("discussion.tautan")}</th>
-                  <th className="py-3 px-4 min-w-[130px]">{t("discussion.gambar")}</th>
-                  <th className="py-3 px-4 w-24 text-center">{t("discussion.thThread")}</th>
-                  <th className="py-3 px-4 w-28 text-center">{t("discussion.status")}</th>
-                  <th className="py-3 px-4 w-24 text-center">{t("discussion.action")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border-faint text-content-body">
+          {/* Desktop Table Container (>= 640px)
+              #707 — satu wadah scroll, dua sumbu, dan ia harus yang TERDEKAT
+              dengan sel kepala yang melekat. Sebelumnya ada DUA: `overflow-x-auto`
+              di div ini (CSS melipat `overflow-y: visible` menjadi `auto` begitu
+              sumbu satunya auto) ditambah `overflow-x-auto` punyanya
+              `ResponsiveTable` di dalamnya. Sticky mengunci ke scrollport
+              terdekat, yaitu yang dalam — yang tingginya mengikuti isi sehingga
+              tidak pernah bergulir — jadi kepala tabel tetap ikut naik.
+              #708 — `table-fixed`: lebar kolom dibaca dari kepala saja
+              (`KepalaTabel`), bukan dari isi terpanjang, supaya satu catatan
+              sepanjang paragraf tidak lagi menggeser seluruh papan. */}
+          <div className="hidden sm:block flex-1 min-h-0 overflow-auto">
+            <table className="w-full min-w-[1818px] table-fixed border-separate border-spacing-0 text-left text-xs">
+              <KepalaTabel />
+              <tbody className="text-content-body">
                 {paginatedPoints.length === 0 ? (
                   <tr>
                     <td colSpan={12} className="text-center py-12 text-content-subtle">
@@ -704,7 +713,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                         assigneeName={assigneeName}
                         namaPenerima={namaPenerima}
                         masterData={masterData}
-                        jumlahKomentar={(p.id && commentsMap[p.id]?.length) || 0}
+                        jumlahKomentar={p.commentsCount ?? 0}
                         bolehSunting={hasPermission(
                           userRole,
                           "meetingNotes",
@@ -741,7 +750,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   />
                 )}
               </tbody>
-            </ResponsiveTable>
+            </table>
           </div>
 
           <KakiPapan
