@@ -121,8 +121,14 @@ describe("#708 lanjutan — baris cepat satu pita, bukan empat tinggi", () => {
   /* Pemilik proyek 12 Okt, tangkapan layar kedua: "ini kok field entry nya
    * tidak sama ukuran nya". Terukur: input 30 px, textarea 46 px, tombol
    * pemilih 32 px, tombol tambah tautan/gambar 18 px — empat garis dasar pada
-   * satu baris. Yang diseragamkan adalah TINGGI, bukan lebar: lebar kolom
-   * memang berbeda karena ia mengikuti kolom di atasnya. */
+   * satu baris. Yang diseragamkan adalah TINGGI.
+   *
+   * #712 mencatat batas aturan ini: menyeragamkan tinggi NYATA-NYATA tidak
+   * cukup, dan buktinya adalah baris yang sama tetap dilaporkan berantakan
+   * sesudah test ini hijau. Yang salah adalah jumlah lajur yang dipaksa muat
+   * satu baris, bukan angkanya. Test ini karena itu bertahan sebagai penjaga
+   * pita tinggi — sekarang pada sebuah BAR di luar tabel, bukan pada `<tr>`;
+   * bentuk barisnya dikunci `barTambah-712.test.ts`. */
   const CEPAT = "src/features/meeting-notes/components/BarisCepat.tsx";
   const JAMAK = "src/features/meeting-notes/components/PemilihJamak.tsx";
 
@@ -240,9 +246,15 @@ describe("#708 lanjutan — paragraf yang diketik sampai sebagai paragraf", () =
     expect(isi.slice(i - 400, i)).toContain("whitespace-pre-wrap");
   });
 
-  it("laci sunting memberi jarak baris longgar dan satu baris petunjuk", () => {
+  it("laci sunting memakai SATU tinggi textarea dan satu baris petunjuk", () => {
     const isi = baca(LAPOR);
-    expect(isi.match(/min-h-\[72px\] leading-relaxed/g)).toHaveLength(2);
+    /* #712 — Concern, Notes, dan Follow-up dulunya tiga angka (80/72/72 px).
+     * Ketiganya kini satu konstanta; yang dikunci di sini konstantanya DAN
+     * jumlah pemakaiannya, supaya tidak ada field yang menyelinap pulang. */
+    expect(isi).toContain(
+      "const textareaKelas = `${dasarIsian} min-h-[80px] py-2 leading-relaxed`;"
+    );
+    expect(isi.match(/className=\{textareaKelas\}/g)).toHaveLength(3);
     expect(isi).toContain('t("discussion.hintParagraf")');
   });
 });

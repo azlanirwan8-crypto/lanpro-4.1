@@ -40,6 +40,10 @@ import { cn } from "../../../lib/utils";
  */
 /** #708 — jumlah chip yang masih muat pada satu baris pemicu. */
 const CHIP_TERPAKAI = 2;
+/* #712 — pemicunya `overflow-hidden` (lihat kelas di bawah). `min-h` membolehkan
+ * kotak MEMBESAR kalau dua chip panjang butuh dua baris; yang tidak boleh lagi
+ * adalah chip menggambar di atas kolom tetangga saat kolomnya memang lebih
+ * sempit dari isinya. */
 
 export interface OpsiJamak {
   id: string;
@@ -173,7 +177,7 @@ export const PemilihJamak: React.FC<PemilihJamakProps> = ({
         onClick={() => setTerbuka((b) => !b)}
         aria-expanded={terbuka}
         className={cn(
-          "w-full min-w-0 flex items-center justify-between gap-1.5 text-left border border-border-subtle bg-surface text-content-body rounded-md shadow-2xs transition-colors cursor-pointer disabled:opacity-50",
+          "w-full min-w-0 flex items-center justify-between gap-1.5 text-left border border-border-subtle bg-surface text-content-body rounded-md shadow-2xs transition-colors cursor-pointer disabled:opacity-50 overflow-hidden",
           buttonClassName
         )}
       >

@@ -1850,7 +1850,6 @@ export const id = {
     searchPlaceholder: "Cari poin diskusi...",
     closeAiAssistant: "Tutup Asisten AI",
     editPoint: "Ubah Poin Diskusi",
-    editPointHint: "Ubah detail, catatan, atau penanggung jawab",
     concernTopic: "Topik / Persoalan",
     notesLabel: "Catatan / Keterangan",
     followUp: "Tindak Lanjut",
@@ -1893,6 +1892,10 @@ export const id = {
     sisaJamak: "+{{jumlah}} lagi",
     hintParagraf: "Baris kosong memulai paragraf baru; jaraknya dibuat seragam di tampilan.",
     berkasDiantre: "{{jumlah}} gambar menunggu diunggah",
+    // #712 — baris tambah menyimpan tautan & gambar di balik tombol penghitung,
+    // supaya lajurnya tetap setinggi satu baris apa pun yang dilampirkan.
+    lampiran: "Tautan & gambar",
+    lampiranJumlah: "{{tautan}} tautan, {{gambar}} gambar",
     statusDone: "Selesai",
     statusPending: "Tertunda",
     prev: "Sebelumnya",

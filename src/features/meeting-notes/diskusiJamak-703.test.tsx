@@ -170,7 +170,7 @@ describe("skema (#703/#704) — nama huruf kecil utuh, bukan camelCase ber-kutip
   });
 });
 
-describe("#703/#704 lanjutan — baris cepat lurus dengan kepala, panel tidak terpotong", () => {
+describe("#703/#704 lanjutan — isian papan lengkap, panel tidak terpotong", () => {
   /* Dua cacat yang ditangkap pemilik proyek dari tangkapan layar 12 Okt malam:
    * (1) kepala tabel sudah DUABELAS kolom sejak Follow-up, Tautan, dan Gambar
    *     masuk, tetapi baris cepat masih sembilan sel — sisa kolom bergeser ke
@@ -178,13 +178,43 @@ describe("#703/#704 lanjutan — baris cepat lurus dengan kepala, panel tidak te
    * (2) panel pemilih jamak menempel di DOM sel, sementara wadahnya
    *     `overflow-x-auto` (dua kali: di tabel dan di `ResponsiveTable`). CSS
    *     melipat `overflow-y: visible` menjadi `auto` begitu sumbu satunya auto,
-   *     jadi panel apa pun yang menempel di baris terpotong tepi wadahnya. */
+   *     jadi panel apa pun yang menempel di baris terpotong tepi wadahnya.
+   *
+   * #712 MENGAKHIRI bentuk `<tr>` dua belas sel itu. Yang tetap dikunci di sini
+   * adalah MAKSUD aslinya, bukan bentuknya: kepala punya dua belas kolom dan
+   * setiap isian papan harus ADA di jalur tambah. Yang dicabut hanya satu
+   * asumsinya — bahwa "ada di jalur tambah" berarti "duduk satu sel di bawah
+   * nama kolomnya". Asumsi itulah yang membuat Add tidak pernah terlihat
+   * bersamaan dengan yang sedang diketik, karena tabelnya 1.818 px lebar. */
   const jumlah = (isi: string, pola: RegExp) => (isi.match(pola) || []).length;
 
-  it("sel baris cepat sebanyak kolom kepala tabel", () => {
+  it("kepala tetap dua belas kolom, dan baris tambah bukan lagi `<tr>`", () => {
     const kolom = jumlah(baca(KEPALA), /<th[\s>]/g);
     expect(kolom).toBe(12);
-    expect(jumlah(baca(CEPAT), /<td[\s>]/g)).toBe(kolom);
+    const cepat = baca(CEPAT);
+    expect(jumlah(cepat, /<td[\s>]/g)).toBe(0);
+    expect(jumlah(cepat, /<tr[\s>]/g)).toBe(0);
+  });
+
+  it("delapan isian papan semuanya masih ada di baris tambah desktop", () => {
+    const desktop = blok(
+      baca(CEPAT),
+      "export const BarisCepat",
+      "export const BlokCepatMobile",
+      "baris tambah"
+    );
+    for (const ekspresi of [
+      "value={nilai.concern}",
+      "value={nilai.keterangan}",
+      "value={nilai.tindakanLanjut}",
+      "nilai={nilai.assigneeIds}",
+      "nilai={nilai.tags.map",
+      "value={nilai.targetDate}",
+      "nilai={nilai.links}",
+      "nilai={nilai.berkas}",
+    ]) {
+      expect(desktop).toContain(ekspresi);
+    }
   });
 
   it("Follow-up dikirim baris cepat dan ikut dibersihkan sesudah tersimpan", () => {

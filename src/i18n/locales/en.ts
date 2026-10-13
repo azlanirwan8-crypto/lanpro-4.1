@@ -1836,7 +1836,6 @@ export const en = {
     searchPlaceholder: "Search discussion points...",
     closeAiAssistant: "Close AI Assistant",
     editPoint: "Edit Discussion Point",
-    editPointHint: "Edit details, notes, or the person in charge",
     concernTopic: "Concern / Topic",
     notesLabel: "Notes / Remarks",
     followUp: "Follow Up",
@@ -1878,6 +1877,10 @@ export const en = {
     sisaJamak: "+{{jumlah}} more",
     hintParagraf: "A blank line starts a new paragraph; spacing is evened out in the view.",
     berkasDiantre: "{{jumlah}} image(s) waiting to upload",
+    // #712 — the add bar keeps links & images behind a counted toggle, so the
+    // row stays one line tall no matter how much is attached.
+    lampiran: "Links & images",
+    lampiranJumlah: "{{tautan}} link(s), {{gambar}} image(s)",
     statusDone: "Done",
     statusPending: "Pending",
     prev: "Prev",

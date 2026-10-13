@@ -92,13 +92,23 @@ export const KepalaPapan: React.FC<KepalaProps> = ({ tampilAI, onToggleAI, cari,
 };
 
 /**
- * #707 — garis pemisah antar baris. Ia tinggal di sini karena dipakai DUA berkas
- * (`BarisDiskusi` dan `BarisCepat`) dan keduanya harus bergerak bersamaan:
- * tabelnya kini `border-separate` — syarat agar garis bawah kepala tabel ikut
- * melekat — dan pada model terpisah CSS tidak menggambar border pada `<tr>`,
- * sehingga `divide-y` di `<tbody>` diam-diam menghasilkan nol garis.
+ * #707 — garis pemisah antar baris. Sejak #712 ia hanya dipakai `BarisDiskusi`:
+ * baris cepat keluar dari tabel dan tidak punya sel lagi. Bentuknya tetap di
+ * berkas ini karena tabelnya kini `border-separate` — syarat agar garis bawah
+ * kepala tabel ikut melekat — dan pada model terpisah CSS tidak menggambar
+ * border pada `<tr>`, sehingga `divide-y` di `<tbody>` diam-diam menghasilkan
+ * nol garis.
+ *
+ * #712 — `overflow-hidden` ditambahkan, dan itu bukan pemanis. Dengan
+ * `table-fixed` lebar kolom DIPATOK dari kepala, tetapi konten yang lebih lebar
+ * tidak dibuang maupun dipotong: ia tetap DIGAMBAR melewati tepi sel, di atas
+ * kolom tetangga. Itulah yang pemilik proyek lihat sebagai "dropdown lolos dari
+ * wadahnya" pada 13 Okt — kali ini bukan panelnya (itu sudah portal sejak
+ * `ea671294`), melainkan pemicunya dan chip nama berkas. `ea671294` menambal
+ * satu panel; yang dibutuhkan adalah pagar di setiap sel, supaya cacat yang sama
+ * tidak bisa lahir lagi di kolom berikutnya.
  */
-export const SEL = "px-4 border-b border-border-faint";
+export const SEL = "px-4 border-b border-border-faint overflow-hidden";
 
 /**
  * #707 — kepala tabel desktop. `position: sticky` hanya bekerja terhadap

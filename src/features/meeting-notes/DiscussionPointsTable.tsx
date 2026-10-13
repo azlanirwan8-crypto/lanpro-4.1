@@ -736,22 +736,25 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                     );
                   })
                 )}
-
-                {/* #703/#704 — baris cepat pindah ke components/BarisCepat.tsx:
-                    catatan kini textarea, PIC dan tag kini pemilih jamak. */}
-                {canAdd && (
-                  <BarisCepat
-                    nilai={nilaiCepat}
-                    onUbah={ubahCepat}
-                    onTambah={() => handleLiveQuickAdd()}
-                    sedangMenyimpan={isSaving}
-                    opsiPenerima={opsiPenerima}
-                    opsiIsu={opsiIsu}
-                  />
-                )}
               </tbody>
             </table>
           </div>
+
+          {/* #703/#704 — baris cepat pindah ke components/BarisCepat.tsx:
+              catatan kini textarea, PIC dan tag kini pemilih jamak.
+              #712 — ia keluar dari `<tbody>`: selama masih menjadi `<tr>`, ia
+              ikut wadah gulir `min-w-[1818px]` dan tombol Add-nya tidak pernah
+              terlihat bersamaan dengan yang sedang diketik. */}
+          {canAdd && (
+            <BarisCepat
+              nilai={nilaiCepat}
+              onUbah={ubahCepat}
+              onTambah={() => handleLiveQuickAdd()}
+              sedangMenyimpan={isSaving}
+              opsiPenerima={opsiPenerima}
+              opsiIsu={opsiIsu}
+            />
+          )}
 
           <KakiPapan
             tampil={paginatedPoints.length}

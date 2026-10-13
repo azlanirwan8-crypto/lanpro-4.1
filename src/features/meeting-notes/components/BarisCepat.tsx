@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Image as IkonGambar, Link2, Plus, Upload, X } from "lucide-react";
 import { LanproDatePicker } from "../../../components/ui/LanproDatePicker";
 import { PemilihJamak, type OpsiJamak } from "./PemilihJamak";
-import { SEL } from "./BagianPapan";
 import type { TautanDiskusi } from "../../../types";
 import { cn } from "../../../lib/utils";
 
@@ -70,11 +69,23 @@ interface BarisCepatProps {
  * dalam, sama seperti keputusan #708 pada sel data.
  */
 const TINGGI = "h-11";
-const isianKelas = `w-full min-w-0 ${TINGGI} px-3 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs placeholder:text-content-subtle`;
+/**
+ * #712 — `cn()` di repo ini hanya MERANGKAI string (`src/lib/utils.ts:3`), bukan
+ * `tailwind-merge`, jadi `min-w-0` dan `min-w-[240px]` yang ditulis bersama akan
+ * sama-sama terkirim dan pemenangnya ditentukan urutan stylesheet — bukan oleh
+ * maksud penulisnya. Karena itu kelas isian dipecah: yang sama di semua lajur
+ * ada di `dasarIsian`, yang menentukan LEBAR diputus di tempat pemakaiannya.
+ */
+const dasarIsian = `px-3 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs placeholder:text-content-subtle`;
+const isianKelas = `w-full min-w-0 ${TINGGI} ${dasarIsian}`;
 /* Tombol pemakai `min-h`, bukan `h`: isinya chip pilihan, dan dua nama panjang
  * boleh memakan dua baris. Yang dijamin sama adalah TINGGI MINIMUMNYA — saat
  * kosong, yang dilihat pengguna. */
 const tombolKelas = `w-full min-w-0 min-h-11 px-3 bg-surface border border-border-subtle text-xs text-left text-content-body rounded-md font-medium shadow-2xs`;
+/** Lajur yang tumbuh: judul, catatan, follow-up. */
+const lajurTumbuh = `grow min-w-[240px] ${TINGGI} ${dasarIsian}`;
+/** Lajur yang lebarnya tetap: pemilih tag, pemilih PIC, pemilih tanggal. */
+const lajurTetap = "shrink-0 w-[150px] sm:w-[170px] lg:w-[200px]";
 
 /** Kelas bersama untuk kontrol kecil di dalam sel baris cepat. */
 const kelasKecil =
@@ -213,135 +224,183 @@ const AntreanBerkas: React.FC<{
   );
 };
 
-/** Versi desktop: satu `<tr>` dengan sel yang sama rata dengan kepala tabel. */
+/**
+ * Versi desktop: SATU BAR, di luar wadah gulir tabel.
+ *
+ * #712 — bentuk sebelumnya adalah satu baris tabel dengan dua belas sel, satu per kolom
+ * kepala, dan pemilik proyek menilainya "berantakan tidak clean". Bentuk itu
+ * memang tidak bisa dirapikan dengan menggeser angkanya: tabelnya
+ * `min-w-[1818px]` (`BagianPapan.tsx`), jadi pada layar 1440 px ada 378 px yang
+ * SELALU terpotong sementara tombol Add duduk di kolom paling kanan. Menulis
+ * Concern membuat Add tergelincir ke luar layar, dan mengejar Add membuat
+ * Concern tergelincir ke kiri — itulah baris cepat pada tangkapan layar pemilik
+ * proyek: mulai dari TENGAH tabel, tanpa nama kolom yang terlihat.
+ *
+ * #708 sudah menyeragamkan TINGGI kontrol di dalam baris tabel itu dan hasilnya tetap
+ * berantakan, sebab yang salah bukan tingginya melainkan jumlah lajur yang
+ * dipaksa muat satu baris. Yang berubah sekarang bentuknya: isian keluar dari
+ * tabel, dan karena itu tidak lagi ikut bergulir.
+ *
+ * Acuan yang ditiru adalah `IssueQuickCreateBar.tsx` — baris tambah milik Daftar
+ * Isu: satu bar rounded di luar gulir, judul tumbuh, pilihan berlebar tetap.
+ * `IssueTableInlineAddRow.tsx` mengutip sebab yang sama dari arah berlawanan:
+ * Save/Cancel-nya dipindah ke sel DEPAN justru karena sel terakhir terpotong
+ * gulir horizontal.
+ *
+ * Notes dan Follow-up TETAP textarea di lajur kedua (#703 butir 4 tidak dicabut)
+ * dan tautan/berkas TETAP bisa diisi dari sini (#709 tidak dicabut) — keduanya
+ * hanya pindah ke panel yang dibuka, supaya tidak ada lagi satu sel yang
+ * tumbuh sendiri sementara tetangganya tetap pendek.
+ */
 export const BarisCepat: React.FC<BarisCepatProps> = (props) => {
   const { nilai, onUbah, onTambah, sedangMenyimpan, opsiPenerima, opsiIsu } = props;
   const { t } = useTranslation();
+  const [lampiranTerbuka, setLampiranTerbuka] = useState(false);
+  const tautanTerisi = nilai.links.filter((l) => l.url.trim()).length;
+  const jumlahLampiran = tautanTerisi + nilai.berkas.length;
 
   return (
-    <tr className="bg-primary/10 hover:bg-primary/10 transition-colors">
-      <td className={cn(SEL, "py-2.5 text-center text-primary text-xs align-middle font-normal")}>
-        +
-      </td>
+    <div className="hidden sm:block p-2 bg-surface border-t border-border-subtle shrink-0">
+      <div className="rounded-xl border border-border-subtle bg-surface-sunken p-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <input
+            id="quick-add-concern-desktop"
+            type="text"
+            placeholder={t("discussion.newConcernPlaceholder")}
+            aria-label={t("discussion.thConcern")}
+            value={nilai.concern}
+            onChange={(e) => onUbah({ concern: e.target.value })}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") onTambah();
+            }}
+            className={lajurTumbuh}
+          />
 
-      <td className={cn(SEL, "py-2.5 align-middle")}>
-        <input
-          id="quick-add-concern-desktop"
-          type="text"
-          placeholder={t("discussion.newConcernPlaceholder")}
-          value={nilai.concern}
-          onChange={(e) => onUbah({ concern: e.target.value })}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") onTambah();
-          }}
-          className={isianKelas}
-        />
-      </td>
-
-      {/* #703 — catatan jadi textarea; Enter tidak lagi menyimpan dari sini.
-          #708 — tingginya dikunci sama seperti kontrol di sebelahnya, dan teks
-          yang melebihi dua baris menggulir di dalam kotak, bukan memanjangkan
-          baris. */}
-      <td className={cn(SEL, "py-2.5 align-middle")}>
-        <textarea
-          placeholder={t("discussion.notesPlaceholder")}
-          value={nilai.keterangan}
-          onChange={(e) => onUbah({ keterangan: e.target.value })}
-          rows={2}
-          className={cn(isianKelas, "resize-none overflow-y-auto py-1 leading-snug")}
-        />
-      </td>
-
-      <td className={cn(SEL, "py-2.5 align-middle")}>
-        <PemilihJamak
-          nilai={nilai.tags.map((s) => s.id)}
-          opsi={opsiIsu}
-          onChange={(id) =>
-            onUbah({
-              tags: id
-                .map((s) => {
-                  const o = opsiIsu.find((x) => x.id === s);
-                  return o ? { id: o.id, label: o.label } : null;
+          <div className={lajurTetap}>
+            <PemilihJamak
+              nilai={nilai.tags.map((s) => s.id)}
+              opsi={opsiIsu}
+              onChange={(id) =>
+                onUbah({
+                  tags: id
+                    .map((s) => {
+                      const o = opsiIsu.find((x) => x.id === s);
+                      return o ? { id: o.id, label: o.label } : null;
+                    })
+                    .filter((s): s is { id: string; label: string } => !!s),
                 })
-                .filter((s): s is { id: string; label: string } => !!s),
-            })
-          }
-          kosong={t("discussion.belumAdaTag")}
-          cari={t("discussion.cariIsu")}
-          buttonClassName={tombolKelas}
-        />
-      </td>
+              }
+              kosong={t("discussion.belumAdaTag")}
+              cari={t("discussion.cariIsu")}
+              buttonClassName={tombolKelas}
+            />
+          </div>
 
-      {/* #703 butir 3 — Follow-up akhirnya punya kolom di kepala tabel, jadi
-          baris cepatnya juga harus punya selnya. Kalau tidak, tombol "Add"
-          melorot tiga kolom ke kiri dan tidak lagi lurus dengan ACTION —
-          itulah yang ditangkap pemilik proyek 12 Okt malam. */}
-      <td className={cn(SEL, "py-2.5 align-middle")}>
-        <textarea
-          placeholder={t("discussion.followUp")}
-          value={nilai.tindakanLanjut}
-          onChange={(e) => onUbah({ tindakanLanjut: e.target.value })}
-          rows={2}
-          className={cn(isianKelas, "resize-none overflow-y-auto py-1 leading-snug")}
-        />
-      </td>
+          <div className={lajurTetap}>
+            <PemilihJamak
+              nilai={nilai.assigneeIds}
+              opsi={opsiPenerima}
+              onChange={(id) => onUbah({ assigneeIds: id })}
+              kosong={t("newTask.unassigned")}
+              cari={t("discussion.cariAnggota")}
+              buttonClassName={tombolKelas}
+            />
+          </div>
 
-      <td className={cn(SEL, "py-2.5 align-middle")}>
-        <PemilihJamak
-          nilai={nilai.assigneeIds}
-          opsi={opsiPenerima}
-          onChange={(id) => onUbah({ assigneeIds: id })}
-          kosong={t("newTask.unassigned")}
-          cari={t("discussion.cariAnggota")}
-          buttonClassName={tombolKelas}
-        />
-      </td>
+          <div className="shrink-0 w-[150px]">
+            <LanproDatePicker
+              value={nilai.targetDate}
+              onChange={(val) => onUbah({ targetDate: val })}
+              buttonClassName={tombolKelas}
+            />
+          </div>
 
-      <td className={cn(SEL, "py-2.5 align-middle")}>
-        <LanproDatePicker
-          value={nilai.targetDate}
-          onChange={(val) => onUbah({ targetDate: val })}
-          buttonClassName={tombolKelas}
-        />
-      </td>
+          {/* #712 — tautan dan berkas tidak lagi menempati lajur sendiri. Di
+              baris tabel lama keduanya tumbuh ke bawah (dua input per tautan, satu
+              baris per berkas) sementara lajur lain tetap 44 px, dan nama
+              berkas panjang menggambar di atas kolom sebelah. Yang tersisa di
+              lajur utama hanyalah penghitungnya. */}
+          <button
+            type="button"
+            onClick={() => setLampiranTerbuka((buka) => !buka)}
+            aria-expanded={lampiranTerbuka}
+            className={`shrink-0 ${TINGGI} px-3 inline-flex items-center gap-1.5 rounded-md text-xs font-normal border transition-colors cursor-pointer ${
+              jumlahLampiran > 0
+                ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/15"
+                : "bg-surface text-content-muted border-border-subtle hover:bg-surface-muted"
+            }`}
+            title={t("discussion.lampiran")}
+          >
+            <Link2 className="w-3.5 h-3.5 shrink-0" />
+            <IkonGambar className="w-3.5 h-3.5 shrink-0" />
+            <span className="whitespace-nowrap">
+              {jumlahLampiran > 0
+                ? t("discussion.lampiranJumlah", {
+                    tautan: tautanTerisi,
+                    gambar: nilai.berkas.length,
+                  })
+                : t("discussion.lampiran")}
+            </span>
+          </button>
 
-      {/* #709 — tautan dan gambar akhirnya bisa diisi dari sini. Yang berubah
-          bukan kemungkinan teknisnya (berkas tetap butuh `point_id`), melainkan
-          jalurnya: tautan ikut payload pembuatan, berkas diantre lalu ditempel
-          setelah id sungguhan pulang. */}
-      <td className={cn(SEL, "py-2.5 align-middle")}>
-        <PenyuntingTautan nilai={nilai.links} onUbah={(daftar) => onUbah({ links: daftar })} />
-      </td>
+          <button
+            type="button"
+            onClick={onTambah}
+            disabled={sedangMenyimpan || !nilai.concern.trim()}
+            className="shrink-0 h-11 px-4 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-40 text-content-inverse rounded-md text-xs font-normal shadow-xs transition-all cursor-pointer inline-flex items-center justify-center gap-1"
+            title={t("discussion.addPoint")}
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>{t("discussion.add")}</span>
+          </button>
+        </div>
 
-      <td className={cn(SEL, "py-2.5 align-middle")}>
-        <AntreanBerkas
-          nilai={nilai.berkas}
-          onUbah={(daftar) => onUbah({ berkas: daftar })}
-          sedangMengunggah={sedangMenyimpan}
-        />
-      </td>
+        <div className="flex flex-wrap items-start gap-1.5 mt-1.5">
+          <textarea
+            placeholder={t("discussion.notesPlaceholder")}
+            aria-label={t("discussion.notesLabel")}
+            value={nilai.keterangan}
+            onChange={(e) => onUbah({ keterangan: e.target.value })}
+            rows={2}
+            className={`${lajurTumbuh} resize-none overflow-y-auto py-1 leading-snug`}
+          />
+          <textarea
+            placeholder={t("discussion.followUp")}
+            aria-label={t("discussion.followUp")}
+            value={nilai.tindakanLanjut}
+            onChange={(e) => onUbah({ tindakanLanjut: e.target.value })}
+            rows={2}
+            className={`${lajurTumbuh} resize-none overflow-y-auto py-1 leading-snug`}
+          />
+        </div>
 
-      <td className={cn(SEL, "py-2.5 text-center align-middle text-content-subtle text-xs")}>-</td>
-
-      <td className={cn(SEL, "py-2.5 text-center align-middle")}>
-        <span className="px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-amber-500/10 text-amber-700 border border-amber-500/30">
-          {t("discussion.statusPending")}
-        </span>
-      </td>
-
-      <td className={cn(SEL, "py-2.5 text-center align-middle")}>
-        <button
-          type="button"
-          onClick={onTambah}
-          disabled={sedangMenyimpan || !nilai.concern.trim()}
-          className="px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-40 text-content-inverse rounded-md text-xs font-normal shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 mx-auto"
-          title={t("discussion.addPoint")}
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>{t("discussion.add")}</span>
-        </button>
-      </td>
-    </tr>
+        {lampiranTerbuka && (
+          <div className="flex flex-wrap items-start gap-3 mt-1.5 pt-2 border-t border-border-faint">
+            <div className="grow min-w-[240px]">
+              <div className="flex items-center gap-1.5 mb-1 text-[10px] uppercase text-content-muted">
+                <Link2 className="w-3 h-3" />
+                {t("discussion.tautan")}
+              </div>
+              <PenyuntingTautan
+                nilai={nilai.links}
+                onUbah={(daftar) => onUbah({ links: daftar })}
+              />
+            </div>
+            <div className="grow min-w-[220px]">
+              <div className="flex items-center gap-1.5 mb-1 text-[10px] uppercase text-content-muted">
+                <IkonGambar className="w-3 h-3" />
+                {t("discussion.gambar")}
+              </div>
+              <AntreanBerkas
+                nilai={nilai.berkas}
+                onUbah={(daftar) => onUbah({ berkas: daftar })}
+                sedangMengunggah={sedangMenyimpan}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
