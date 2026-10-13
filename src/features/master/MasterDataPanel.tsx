@@ -30,6 +30,7 @@ import { cn } from "../../lib/utils";
 import { useMobileAction } from "../../contexts/MobileActionContext";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { enterUntukSimpan } from "../../lib/enterSimpan";
+import { tingkatDariDeskripsi, tuliskanTingkat, type Tingkat } from "../../lib/tingkatIsu";
 import {
   fetchProjectModules as fetchProjectModulesApi,
   createProjectModule,
@@ -1513,7 +1514,7 @@ export const MasterDataPanel = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normalst mb-1.5 ml-1">
+                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                   {t("master.labelName")}
                 </label>
                 <Input
@@ -1528,7 +1529,7 @@ export const MasterDataPanel = ({
                 />
               </div>
               <div>
-                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normalst mb-1.5 ml-1">
+                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                   {t("master.colorAccent")}
                 </label>
                 <div className="flex gap-2">
@@ -1566,8 +1567,37 @@ export const MasterDataPanel = ({
               </div>
             </div>
 
+            {/* #724 — level hierarki DULU hanya ada di form tambah dan tidak
+                pernah dibaca siapa pun. Sekarang ia adalah sumber kebenaran
+                aturan "siapa boleh jadi anak siapa" (`hierarkiTipe.ts`), jadi
+                baris yang sudah disimpan harus bisa dibaca ULANG di sini —
+                kalau tidak, satu-satunya jalan mengubah level adalah menghapus
+                dan membuat ulang jenisnya. */}
+            {editingMaster.type === "issue_type" && (
+              <div>
+                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+                  {t("master.hierarchyLevel")}
+                </label>
+                <StyledDropdown
+                  value={tingkatDariDeskripsi(editingMaster.description) ?? "Standard"}
+                  onChange={(val) =>
+                    setEditingMaster({
+                      ...editingMaster,
+                      description: tuliskanTingkat(editingMaster.description, val as Tingkat),
+                    })
+                  }
+                  options={[
+                    { id: "Epic", label: "Epic" },
+                    { id: "Standard", label: "Standard" },
+                    { id: "Subtask", label: "Subtask" },
+                  ]}
+                  buttonClassName="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm text-left font-normal text-content-strong"
+                />
+              </div>
+            )}
+
             <div>
-              <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normalst mb-1.5 ml-1">
+              <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                 {t("master.colorPalette")}
               </label>
               <div className="flex flex-wrap gap-2 p-2.5 bg-surface-sunken border border-border-subtle rounded-xl">
@@ -1617,7 +1647,7 @@ export const MasterDataPanel = ({
 
             <div>
               <div className="flex items-center justify-between mb-1.5 ml-1">
-                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normalst">
+                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
                   Ikon ({filteredEditIcons.length} tersedia)
                 </label>
               </div>

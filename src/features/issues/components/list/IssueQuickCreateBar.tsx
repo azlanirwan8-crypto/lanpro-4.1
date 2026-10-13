@@ -6,6 +6,7 @@ import { StyledDropdown } from "../../../../components/ui/CommonComponents";
 import { MasterData, UserProfile, Sprint } from "../../../../types";
 import { enterUntukSimpan } from "../../../../lib/enterSimpan";
 import { tipeBoleDitawarkan, tipeBawaan } from "../../hierarkiTipe";
+import { petaTingkat } from "../../../../lib/tingkatIsu";
 
 interface IssueQuickCreateBarProps {
   quickCreateTitle: string;
@@ -71,15 +72,18 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
    * tidak legal di puncak (mis. "Sub-task" sisa baris anak tadi, atau "Task"
    * bawaan lama) — pilihan yang masih legal dibiarkan apa adanya.
    */
-  const labelTipe = useMemo(
-    () => mArr.filter((m) => m.type === "issue_type").map((m) => m.label),
-    [mArr]
+  const barisTipe = useMemo(() => mArr.filter((m) => m.type === "issue_type"), [mArr]);
+  const labelTipe = useMemo(() => barisTipe.map((m) => m.label), [barisTipe]);
+  // #724 — level hierarki dibaca dari Master Data, bukan dari nama jenisnya.
+  const tingkat = useMemo(() => petaTingkat(barisTipe), [barisTipe]);
+  const legal = useMemo(
+    () => tipeBoleDitawarkan(null, labelTipe, tingkat).join("|"),
+    [labelTipe, tingkat]
   );
-  const legal = useMemo(() => tipeBoleDitawarkan(null, labelTipe).join("|"), [labelTipe]);
   useEffect(() => {
     if (!legal) return;
     if (legal.split("|").includes(inlineAddType)) return;
-    setInlineAddType(tipeBawaan(null, labelTipe) || "");
+    setInlineAddType(tipeBawaan(null, labelTipe, tingkat) || "");
     // `legal` dibaca supaya efek ini bangun lagi saat daftar tipe master berubah.
   }, [legal, inlineAddType]);
 

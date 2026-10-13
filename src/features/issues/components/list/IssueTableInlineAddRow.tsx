@@ -9,7 +9,8 @@ import { gayaLabel, warnaDariMaster, warnaLabel } from "../../../../lib/warnaLab
 import { MasterData, UserProfile } from "../../../../types";
 import { styles } from "../../styles";
 import { enterUntukSimpan } from "../../../../lib/enterSimpan";
-import { kunciTipe, tipeBoleDitawarkan } from "../../hierarkiTipe";
+import { tipeBoleDitawarkan } from "../../hierarkiTipe";
+import { kunciTipe, petaTingkat } from "../../../../lib/tingkatIsu";
 
 interface IssueTableInlineAddRowProps {
   taskId: string;
@@ -72,13 +73,15 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
   // minta Sub-task), jadi kedua efek saling menimpa tanpa henti: chip tipe
   // berkedik dan ikonnya jatuh ke bentuk cadangan. Itu laporan pemilik proyek
   // 03 Okt: "kok label[i]nya ini error gerak aja, cek di icon jenis task".
-  const labelTipe = useMemo(
-    () => mArr.filter((m) => m.type === "issue_type").map((m) => m.label),
-    [mArr]
-  );
+  const barisTipe = useMemo(() => mArr.filter((m) => m.type === "issue_type"), [mArr]);
+  const labelTipe = useMemo(() => barisTipe.map((m) => m.label), [barisTipe]);
+  // #724 — "Sub Bug" buatan pemilik proyek pernah hilang DIAM-DIAM dari daftar
+  // ini karena tabel kunci hanya mengenali lima nama tetap. Levelnya sekarang
+  // dibaca dari Master Data, tempat beliau memilihnya.
+  const tingkat = useMemo(() => petaTingkat(barisTipe), [barisTipe]);
   const tipeLegalList = useMemo(
-    () => tipeBoleDitawarkan(tipeInduk, labelTipe),
-    [tipeInduk, labelTipe]
+    () => tipeBoleDitawarkan(tipeInduk, labelTipe, tingkat),
+    [tipeInduk, labelTipe, tingkat]
   );
   const daftarLegal = tipeLegalList.map(kunciTipe).join("|");
 
