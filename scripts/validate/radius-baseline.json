@@ -158,5 +158,8 @@
     "src/routes/AppRoutes.tsx": ["full", "xl"],
     "src/utils/notificationFormatter.tsx": ["default", "full", "md"]
   },
-  "arbitrer": {}
+  "arbitrer": {
+    "src/features/flowchart/components/FlowchartMinimap.tsx": 1,
+    "src/i18n/LanguageSwitcher.tsx": 2
+  }
 }

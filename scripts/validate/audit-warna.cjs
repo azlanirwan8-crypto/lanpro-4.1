@@ -30,6 +30,11 @@
  * ini dimatikan orang. Daftarnya ada di `DIKECUALIKAN` beserta alasannya —
  * bukan supaya lolos, melainkan supaya alasannya tertulis dan bisa dibantah.
  *
+ * YANG DIHITUNG TAPI TIDAK DIHAKIMI. Keluarga kromatik (`emerald`, `rose`,
+ * `amber`, …) ikut dicetak sebagai HITUNGAN sejak #719, lengkap dengan
+ * selisihnya terhadap rekaman terakhir — tetapi tidak memengaruhi kode keluar.
+ * Baca blok komentar `KELUARGA_KROMATIK` di bawah untuk alasannya.
+ *
  * MEMPERBARUI GARIS DASAR: `npm run audit:warna -- --perbarui`. Itu tindakan
  * SADAR. Menjalankannya untuk "membuat gerbang hijau" berarti mematikan
  * gerbangnya sendiri.
@@ -64,6 +69,43 @@ const DIKECUALIKAN = [
 
 const dikecualikan = (kelas) => DIKECUALIKAN.some((d) => d.pola.test(kelas));
 
+/**
+ * #719 — KELUARGA KROMATIK: HITUNGAN, BUKAN KELULUSAN.
+ *
+ * POLA di atas hanya mengenali warna NETRAL (white/black/slate/gray/zinc/
+ * neutral/stone). Akibatnya gerbang ini pernah menulis LULUS di atas 147 kelas
+ * kromatik di Flowchart dan 29 di layar rincian Isu: bagi POLA, `bg-emerald-500`
+ * sama tidak adanya dengan `bg-teal-300` yang sudah dihapus. Padahal keduanya
+ * sama-sama warna keras yang tidak ikut berpindah saat tema berubah — sebab yang
+ * sama sudah tercatat di #696.
+ *
+ * Angka di bawah SENGAJA tidak ikut memutuskan lulus/gagal. Menyalakan ratchet
+ * pada ±976 kelas sekaligus membuat gerbang merah di menit pertama, dan gerbang
+ * yang merah tanpa jalan keluar akan dimatikan orang (pelajaran #688). Yang
+ * dibeli hitungan ini adalah KETERLIHATAN: ia dicetak setiap pelaksanaan,
+ * direkam di `warna-kromatik.json`, dan selisihnya terhadap rekaman terakhir
+ * ikut ditampilkan — jadi kenaikannya tidak bisa lagi bersembunyi di balik kata
+ * LULUS. Memindahkannya menjadi ratchet per berkas adalah keputusan tersendiri
+ * (AUDIT.md #719 catatan ii).
+ *
+ * Berbeda dari ratchet netral, gradasi (`from-/via-/to-`) IKUT dihitung di sini.
+ * Pengecualian di sana ada karena gradasi tidak boleh diratakan ke token, bukan
+ * karena warnanya tidak keras.
+ */
+const KELUARGA_KROMATIK = [
+  "red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal",
+  "cyan", "sky", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose",
+];
+const POLA_KROMATIK = new RegExp(
+  `\\b(?:bg|text|border|ring|divide|placeholder|from|via|to)-` +
+    `(?:${KELUARGA_KROMATIK.join("|")})-\\d{2,3}(?:/\\d+)?\\b`,
+  "g"
+);
+/** Lubang yang sama lewat pintu lain: nilai hex/rgb arbitrer, bukan palet bernama. */
+const POLA_HEX_ARBITRER =
+  /\b(?:bg|text|border|ring|divide|from|via|to|shadow|fill|stroke)-\[(?:#[0-9a-fA-F]{3,8}|rgba?\([^]\s]*\)|hsla?\([^]\s]*\))\]/g;
+const REKAMAN_KROMATIK = path.join(__dirname, "warna-kromatik.json");
+
 function telusuri(dir, keluar = []) {
   for (const nama of fs.readdirSync(dir)) {
     const p = path.join(dir, nama);
@@ -74,10 +116,84 @@ function telusuri(dir, keluar = []) {
 }
 
 const sekarang = {};
+const kromatik = { keluarga: {}, perBerkas: {}, hexArbitrer: {} };
+
 for (const p of telusuri(SRC)) {
   const relatif = path.relative(AKAR, p).split(path.sep).join("/");
-  const cocok = (fs.readFileSync(p, "utf8").match(POLA) || []).filter((k) => !dikecualikan(k));
+  const isi = fs.readFileSync(p, "utf8");
+
+  const cocok = (isi.match(POLA) || []).filter((k) => !dikecualikan(k));
   if (cocok.length) sekarang[relatif] = cocok.length;
+
+  const krom = isi.match(POLA_KROMATIK) || [];
+  if (krom.length) {
+    kromatik.perBerkas[relatif] = krom.length;
+    for (const k of krom) {
+      const fam = KELUARGA_KROMATIK.find((f) => k.includes(`-${f}-`));
+      kromatik.keluarga[fam] = (kromatik.keluarga[fam] || 0) + 1;
+    }
+  }
+  const hexLiar = isi.match(POLA_HEX_ARBITRER) || [];
+  if (hexLiar.length) kromatik.hexArbitrer[relatif] = hexLiar.length;
+}
+
+const jumlah = (o) => Object.values(o).reduce((a, b) => a + b, 0);
+const totalKromatik = jumlah(kromatik.perBerkas);
+const totalHex = jumlah(kromatik.hexArbitrer);
+
+/**
+ * Dicetak di SETIAP jalur keluar — termasuk `--perbarui` — supaya tidak ada
+ * keadaan di mana gerbang ini berbicara tanpa menyebut angka yang dulu tidak
+ * bisa dilihatnya. Rekaman dibuat sendiri bila belum ada; menghapus berkasnya
+ * hanya menghapus pembanding, tidak meloloskan apa pun.
+ */
+function laporKromatik() {
+  const ada = fs.existsSync(REKAMAN_KROMATIK);
+  const lama = ada ? JSON.parse(fs.readFileSync(REKAMAN_KROMATIK, "utf8")) : null;
+  if (!lama) fs.writeFileSync(REKAMAN_KROMATIK, JSON.stringify(kromatik, null, 2) + "\n");
+  const totalLama = lama ? jumlah(lama.perBerkas || {}) : null;
+
+  console.log(warna.kuning(`\x1b[1mHitungan warna kromatik — #719, LAPORAN SAJA\x1b[0m`));
+  console.log(
+    warna.redup(
+      `  ${totalKromatik} kelas kromatik di ${Object.keys(kromatik.perBerkas).length} berkas · ` +
+        `${totalHex} hex/rgb arbitrer di ${Object.keys(kromatik.hexArbitrer).length} berkas`
+    )
+  );
+  console.log(
+    warna.redup(
+      `  keluarga: ` +
+        Object.entries(kromatik.keluarga)
+          .sort((a, b) => b[1] - a[1])
+          .map(([k, v]) => `${k} ${v}`)
+          .join(" · ")
+    )
+  );
+  console.log(
+    warna.redup(
+      `  terberat: ` +
+        Object.entries(kromatik.perBerkas)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([k, v]) => `${k.split("/").pop()} ${v}`)
+          .join(" · ")
+    )
+  );
+  if (totalLama === null) {
+    console.log(warna.redup(`  rekaman pertama dibuat di scripts/validate/warna-kromatik.json`));
+  } else if (totalKromatik !== totalLama) {
+    const arah = totalKromatik > totalLama ? "NAIK" : "turun";
+    const cetak = totalKromatik > totalLama ? warna.kuning : warna.hijau;
+    console.log(cetak(`  ${arah} ${totalLama} → ${totalKromatik} sejak rekaman terakhir`));
+  } else {
+    console.log(warna.redup(`  tidak berubah sejak rekaman terakhir (${totalLama})`));
+  }
+  console.log(
+    warna.redup(
+      `  Angka ini TIDAK memutuskan lulus/gagal — dengan sengaja, lihat #719 catatan (ii).`
+    )
+  );
+  console.log("");
 }
 
 const totalSekarang = Object.values(sekarang).reduce((a, b) => a + b, 0);
@@ -93,6 +209,8 @@ if (perbarui || !fs.existsSync(GARIS_DASAR)) {
   );
   console.log(warna.redup("  Memperbarui garis dasar untuk membuat gerbang hijau"));
   console.log(warna.redup("  berarti mematikan gerbangnya sendiri.\n"));
+  if (perbarui) fs.writeFileSync(REKAMAN_KROMATIK, JSON.stringify(kromatik, null, 2) + "\n");
+  laporKromatik();
   process.exit(0);
 }
 
@@ -126,7 +244,8 @@ for (const [b, d, n] of turun.slice(0, 5))
 if (turun.length > 5) console.log(warna.redup(`         … dan ${turun.length - 5} berkas lagi`));
 for (const b of hilang.slice(0, 3)) console.log(`  ${warna.hijau("bersih")} ${b}`);
 
-console.log("");
+laporKromatik();
+
 console.log("──────────────────────────────────────────────────────────");
 
 if (naik.length || baru.length) {

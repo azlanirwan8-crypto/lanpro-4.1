@@ -3,11 +3,13 @@
  * GERBANG RITME RADIUS — `npm run audit:radius`  (item #525)
  *
  * KENAPA ADA. `rounded-*` dipakai 1 749 kali di `src/` dan memakai ENAM langkah
- * sekaligus (sm 3 · default 237 · md 528 · lg 339 · xl 271 · 2xl 23) ditambah 13
- * nilai arbitrer `rounded-[...]`. Tidak ada satu pun gerbang yang melihat ini:
- * `audit:warna` hanya menghitung kelas WARNA, `tsc` dan test tidak peduli
- * sudut kartu. Artinya ritme bisa terus mengembang tanpa ada yang mengeluh —
- * persis pola yang membuat `dark:` pernah tumbuh sampai 532 (§19.46).
+ * sekaligus (sm 3 · default 237 · md 528 · lg 339 · xl 271 · 2xl 23) ditambah
+ * belasan nilai arbitrer `rounded-[...]` yang sebagian besar dulu TIDAK
+ * TERLIHAT karena seluruh folder flowchart dikecualikan (#719). Tidak ada satu
+ * pun gerbang yang melihat ini: `audit:warna` hanya menghitung kelas WARNA,
+ * `tsc` dan test tidak peduli sudut kartu. Artinya ritme bisa terus mengembang
+ * tanpa ada yang mengeluh — persis pola yang membuat `dark:` pernah tumbuh
+ * sampai 532 (§19.46).
  *
  * Yang TIDAK dilakukan gerbang ini: mengklaim "Velzon memakai dua ritme".
  * Tidak ada sumber yang bisa dikutip di repo ini maupun di dokumentasi publik
@@ -19,7 +21,9 @@
  *   1. berapa LANGKAH radius berbeda yang dipakai serentak di seluruh `src/`
  *      (global, 8 hari ini) — hanya boleh turun;
  *   2. nilai ARBITRER `rounded-[...]` per berkas: hanya yang benar-benar
- *      geometri bentuk (`IZIN_GEOMETRI`) yang boleh, dan tidak boleh bertambah.
+ *      geometri bentuk yang boleh, dan izinnya DAFTAR BERKAS EKSPLISIT
+ *      (`IZIN_GEOMETRI`), bukan pengecualian satu folder — sejak #719.
+ *      Yang tidak berizin tidak boleh bertambah.
  *
  * GARIS DASAR: `npm run audit:radius -- --perbarui`. Angka yang TURUN memang
  * harus diikuti `--perbarui` (sama seperti #288: ratchet yang tidak pernah
@@ -33,7 +37,14 @@ const AKAR = path.join(__dirname, "..", "..");
 const SRC = path.join(AKAR, "src");
 const GARIS_DASAR = path.join(__dirname, "radius-baseline.json");
 
-const POLA_STEP = /\brounded-?(sm|md|lg|xl|2xl|3xl|full|none)?\b/g;
+/**
+ * `xs` ikut didaftar (#719). Tanpa itu `rounded-xs` — langkah sungguhan di
+ * Tailwind v4, 0.125rem — cocok sebagai `rounded` tanpa sufiks dan terhitung
+ * sebagai langkah "default", jadi inventaris langkahnya berbohong tentang dari
+ * mana sudut 2 px berasal. Nol pemakaian hari ini, jadi angka garis dasar tidak
+ * bergerak; yang berubah hanya kejujuran hitungannya besok.
+ */
+const POLA_STEP = /\brounded-?(xs|sm|md|lg|xl|2xl|3xl|full|none)?\b/g;
 const POLA_ARBITER = /\brounded(?:-[tblr]{1,2})?-\[[^\]]+\]/g;
 
 /**
@@ -42,11 +53,28 @@ const POLA_ARBITER = /\brounded(?:-[tblr]{1,2})?-\[[^\]]+\]/g;
  * Kanvas flowchart menggambar cylinder/document/cloud: `rounded-t-[20px]`
  * adalah belahan tabung, bukan sudut kartu. Menggantinya dengan token akan
  * membuat bentuknya tidak lagi menyerupai bentuk itu.
+ *
+ * DAFTARNYA PER BERKAS, BUKAN PER FOLDER (#719). Sebelumnya yang dikecualikan
+ * adalah seluruh `src/features/flowchart/`, dan itu cacat dengan cara yang khas:
+ * berkas ke-17, ke-30, dan seterusnya di folder itu boleh memakai radius
+ * arbitrer apa pun tanpa pernah terlihat, karena pengecualiannya ikut tumbuh
+ * bersama foldernya. Sekarang setiap izin adalah satu baris bernama dengan
+ * alasannya, sehingga menambah satu lagi berarti satu baris diff yang harus
+ * bisa dijelaskan kepada pemilik proyek.
+ *
+ * Dua bekas penghuni daftar itu DIPINDAHKAN menjadi utang yang terlihat, bukan
+ * dihapus diam-diam: `FlowchartMinimap.tsx` dan `LanguageSwitcher.tsx` sama-sama
+ * memakai `rounded-[2px]`, dan 2 px adalah `rounded-xs` — langkah yang memang
+ * ada di Tailwind v4. Menyebutnya "geometri" adalah cara untuk tidak melihatnya.
+ * Angkanya kini tercatat di `radius-baseline.json` dan terkunci di sana (calan
+ * pekerjaan #717), jadi tidak ada kelas aplikasi yang berubah di item ini.
  */
-const IZIN_GEOMETRI = [
-  /[/\\]features[/\\]flowchart[/\\]/,
-  /[/\\]i18n[/\\]LanguageSwitcher\.tsx$/, // sudut bendera SVG 2 px
-];
+const IZIN_GEOMETRI = {
+  "src/features/flowchart/lib/nodeTheme.ts":
+    "cylinder/document/cloud — rounded-t-[20px] dan rounded-[28px] adalah bentuk, bukan sudut kartu",
+  "src/features/flowchart/components/FlowchartNode.tsx":
+    "rounded-[inherit] mengikuti sudut bentuk induk, plus tutup cylinder 18px",
+};
 
 function telusuri(dir, keluar = []) {
   for (const nama of fs.readdirSync(dir)) {
@@ -57,7 +85,7 @@ function telusuri(dir, keluar = []) {
   return keluar;
 }
 
-const LANGKAH_DIIZINKAN = new Set(["", "sm", "md", "lg", "xl", "2xl", "3xl", "full", "none"]);
+const LANGKAH_DIIZINKAN = new Set(["", "xs", "sm", "md", "lg", "xl", "2xl", "3xl", "full", "none"]);
 
 const sekarang = {};
 const arbitrer = {};
@@ -67,7 +95,7 @@ for (const p of telusuri(SRC)) {
   const lang = new Set();
   for (const m of isi.matchAll(POLA_STEP)) if (LANGKAH_DIIZINKAN.has(m[1] || "")) lang.add(m[1] || "default");
   if (lang.size) sekarang[relatif] = [...lang].sort();
-  const liar = [...isi.matchAll(POLA_ARBITER)].filter(() => !IZIN_GEOMETRI.some((re) => re.test(p)));
+  const liar = Object.hasOwn(IZIN_GEOMETRI, relatif) ? [] : [...isi.matchAll(POLA_ARBITER)];
   if (liar.length) arbitrer[relatif] = liar.length;
 }
 
@@ -110,7 +138,11 @@ console.log(
         .sort((a, b) => b[1] - a[1])
         .map(([k, v]) => `${k} ${v}`)
         .join(" · ") +
-      `\n  ${total(arbitrer)} nilai arbitrer liar di luar geometri yang diizinkan (garis dasar ${total(dasarArbitrer)})`
+      `\n  ${total(arbitrer)} nilai arbitrer liar di luar geometri yang diizinkan (garis dasar ${total(dasarArbitrer)})` +
+      `\n  izin geometri — daftar eksplisit per berkas (#719), menambahnya butuh alasan:` +
+      Object.entries(IZIN_GEOMETRI)
+        .map(([b, alasan]) => `\n    ${b.split("/").pop()} — ${alasan}`)
+        .join("")
   )
 );
 console.log("");
