@@ -661,13 +661,19 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               #708 — `table-fixed`: lebar kolom dibaca dari kepala saja
               (`KepalaTabel`), bukan dari isi terpanjang, supaya satu catatan
               sepanjang paragraf tidak lagi menggeser seluruh papan. */}
+          {/* #714 — `min-w` turun dari 1.818 ke 1.468 px bersama delapan kolom
+              baru. Angka itu adalah JUMLAH lebar yang ditulis di `KepalaTabel`,
+              dan dengan `table-fixed` ia harus persis sama: lebih kecil dan
+              kolom ikut melebar sendiri, lebih besar dan tabel mulai terpotong
+              lagi — persis cacang yang membuat STATUS dan ACTION tidak pernah
+              terlihat pada layar 12 Okt sampai 13 Okt. */}
           <div className="hidden sm:block flex-1 min-h-0 overflow-auto">
-            <table className="w-full min-w-[1818px] table-fixed border-separate border-spacing-0 text-left text-xs">
+            <table className="w-full min-w-[1468px] table-fixed border-separate border-spacing-0 text-left text-xs">
               <KepalaTabel />
               <tbody className="text-content-body">
                 {paginatedPoints.length === 0 ? (
                   <tr>
-                    <td colSpan={12} className="text-center py-12 text-content-subtle">
+                    <td colSpan={8} className="text-center py-12 text-content-subtle">
                       <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-2 text-primary shadow-2xs">
                         <MessageSquare className="w-5 h-5" />
                       </div>

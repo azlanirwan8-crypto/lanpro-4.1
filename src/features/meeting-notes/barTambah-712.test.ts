@@ -95,8 +95,9 @@ describe("#712 — sel tidak boleh menggambar di atas kolom tetangga", () => {
    * layar 13 Okt. `ea671294` menambal PANEL-nya (portal); yang belum adalah
    * PEMICUNYA dan pagar umum di setiap sel. */
   it("kelas SEL mengunci luberan di tingkat sel", () => {
+    // #714 menambahkan garis pemisah antar kolom pada kelas yang sama.
     expect(baca(KEPALA)).toContain(
-      'export const SEL = "px-4 border-b border-border-faint overflow-hidden"'
+      'export const SEL = "px-4 border-b border-border-faint border-r last:border-r-0 overflow-hidden"'
     );
   });
 

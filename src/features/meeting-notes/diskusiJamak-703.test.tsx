@@ -99,19 +99,34 @@ describe("#703 butir 1 dan 2 — Context/Tags dari Daftar Isu, PIC jamak", () =>
 });
 
 describe("#703 butir 3 — kolom Follow-up akhirnya tampil di tabel", () => {
-  it("kepala tabel punya Follow-up, Tautan, dan Gambar", () => {
+  /* #714 menurunkan papan dari dua belas ke delapan kolom. Yang TETAP dikunci di
+   * sini adalah maksud butir 3 dan butir 5-6 #703/#704: Follow-up punya tempat di
+   * tabel, dan tautan serta gambar juga punya tempat. Yang berubah adalah bahwa
+   * "punya tempat" tidak lagi berarti "punya kolom sendiri" — ketiganya sekarang
+   * tinggal di sel yang berbagi dengan tetangga sepaham. */
+  it("kepala tabel punya Follow-up, dan lampiran punya sel sendiri", () => {
     const kepala = blok(baca(KEPALA), "<thead>", "</thead>", "kepala tabel");
-    for (const kunci of [
-      't("discussion.followUp")',
-      't("discussion.tautan")',
-      't("discussion.gambar")',
-    ]) {
-      expect(kepala).toContain(kunci);
-    }
-    // 12 kolom: No, Concern, Notes, Tags, Follow-up, PIC, Target, Tautan,
-    // Gambar, Thread, Status, Action. Baris kosong tidak boleh bokek kolom.
-    expect(kepala.match(/<th /g)).toHaveLength(12);
-    expect(baca(TABEL)).toContain("colSpan={12}");
+    expect(kepala).toContain('t("discussion.followUp")');
+    expect(kepala).toContain('t("discussion.thLampiran")');
+    // 8 kolom: No, Concern, Notes, Follow-up, Tags, PIC & Target, Lampiran,
+    // Status & Action. Baris kosong tidak boleh bokek kolom.
+    expect(kepala.match(/<th /g)).toHaveLength(8);
+    expect(baca(TABEL)).toContain("colSpan={8}");
+  });
+
+  it("tautan dan gambar tetap dirender penuh di sel Lampiran (#704 tidak dicabut)", () => {
+    const sel = blok(
+      baca(BARIS),
+      "tautan.length === 0 && berkas.length === 0",
+      "</td>",
+      "sel lampiran"
+    );
+    expect(sel).toContain("{l.label || l.url}"); // tautan, dengan labelnya
+    expect(sel).toContain('rel="noopener noreferrer"');
+    expect(sel).toContain('loading="lazy"'); // miniatur gambar (#711)
+    // Satu sel, satu wadah — bukan dua kolom yang pada papan ini keduanya
+    // hanya berisi "-".
+    expect(sel.match(/max-h-32 overflow-y-auto/g)).toHaveLength(1);
   });
 
   it("selnya memisahkan Follow-up dari Concern (#703: field ada, kolomnya tidak)", () => {
@@ -188,9 +203,11 @@ describe("#703/#704 lanjutan — isian papan lengkap, panel tidak terpotong", ()
    * bersamaan dengan yang sedang diketik, karena tabelnya 1.818 px lebar. */
   const jumlah = (isi: string, pola: RegExp) => (isi.match(pola) || []).length;
 
-  it("kepala tetap dua belas kolom, dan baris tambah bukan lagi `<tr>`", () => {
+  it("kepala tabel delapan kolom, dan baris tambah bukan lagi `<tr>`", () => {
     const kolom = jumlah(baca(KEPALA), /<th[\s>]/g);
-    expect(kolom).toBe(12);
+    // #714 menurunkan ini dari 12 ke 8; penjaga di berkas ini membaca NAMA
+    // kolom, bukan posisi, jadi penurunan jumlah tidak membuat yang lain kabur.
+    expect(kolom).toBe(8);
     const cepat = baca(CEPAT);
     expect(jumlah(cepat, /<td[\s>]/g)).toBe(0);
     expect(jumlah(cepat, /<tr[\s>]/g)).toBe(0);

@@ -88,13 +88,27 @@ describe("#707 — kepala tabel melekat", () => {
   });
 });
 
-describe("#708 — dua belas kolom yang tidak lagi memanjang tanpa batas", () => {
+describe("#708 — sel teks tidak lagi memanjang tanpa batas", () => {
   it("lebar kolom ditetapkan dari kepala, dan tabelnya table-fixed", () => {
     const kepala = blok(baca(KEPALA), "<thead>", "</thead>", "kepala tabel");
     expect(baca(TABEL)).toContain("table-fixed");
     // Tanpa `table-fixed`, `width` pada sel kepala hanya sebuah saran dan
     // isi terpanjang tetap menentukan lebar kolomnya.
-    expect(kepala.match(/w-\[\d+px\]/g)?.length).toBeGreaterThanOrEqual(11);
+    // #714 menurunkan jumlah kolom dari dua belas ke delapan — yang dijaga di
+    // sini adalah PRINSIPNYA (lebar ditulis literal di kepala, bukan ditebak
+    // dari isi), bukan angka dua belasnya.
+    const lebar = (kepala.match(/w-\[\d+px\]/g) || []).map((s) =>
+      Number(/\[(\d+)px\]/.exec(s)![1])
+    );
+    expect(lebar.length).toBe(8);
+    expect(kepala.match(/w-\[\d+px\]/g)?.length).toBeGreaterThanOrEqual(7);
+    /* #714 — dan yang lebih penting: jumlah lebar itu harus PERSIS sama dengan
+     * `min-w` wadah gulir. Selama dua angka ini dijaga terpisah, keduanya boleh
+     * menyimpang diam-diam — itu persis cara 1.818 px lahir. Satu angka ditulis
+     * di kepala, angka lain ditulis di induk, dan tidak ada yang mengurungnya. */
+    const total = lebar.reduce((a, b) => a + b, 0);
+    const wadah = Number(/min-w-\[(\d+)px\]/.exec(baca(TABEL))?.[1] ?? -1);
+    expect(wadah).toBe(total);
   });
 
   it.each([
@@ -113,7 +127,8 @@ describe("#708 — dua belas kolom yang tidak lagi memanjang tanpa batas", () =>
 
   it("sel teks rata atas supaya baris yang berbeda tinggi tidak bergeser", () => {
     const isi = baca(BARIS);
-    expect(isi.match(/align-top/g)?.length).toBeGreaterThanOrEqual(9);
+    // #714: delapan kolom, jadi delapan sel — sebelumnya sembilan dari dua belas.
+    expect(isi.match(/align-top/g)?.length).toBeGreaterThanOrEqual(8);
   });
 });
 

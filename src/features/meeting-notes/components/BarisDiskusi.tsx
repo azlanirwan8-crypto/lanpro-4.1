@@ -157,7 +157,11 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
         )}
       </td>
 
-      {/* PIC — #703 (B2 = b): boleh lebih dari satu orang. */}
+      {/* #714 — PIC dan Target Date satu sel. Keduanya menjawab "siapa" dan
+          "kapan", dan selama keduanya berdiri sendiri, kolom PIC yang 150 px itu
+          memaksa setiap nama turun ke barisnya sendiri sementara kolom tanggal
+          hampir selalu kosong satu baris. Nama TETAP tampil penuh: #645 melarang
+          memotongnya, dan larangan itu dijaga catatanLengkap-645.test.ts. */}
       <td className={cn(SEL, "py-3 align-top text-content-body font-normal")}>
         <div className="flex flex-wrap items-center gap-1">
           {namaPenerima.length > 0 ? (
@@ -176,26 +180,23 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
             <span className="break-words">{assigneeName}</span>
           )}
         </div>
-      </td>
-
-      {/* Target Date */}
-      <td className={cn(SEL, "py-3 align-top text-content-muted font-normal")}>
         {p.targetDate ? (
-          <div className="flex items-center gap-1 text-[11px]">
+          <div className="mt-1.5 flex items-center gap-1 text-[11px] text-content-muted">
             <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />
             <span className="break-words">{p.targetDate}</span>
           </div>
-        ) : (
-          kosong("-")
-        )}
+        ) : null}
       </td>
 
-      {/* Tautan — #704 (butir 5, B3): satu kolom khusus, isinya boleh banyak. */}
+      {/* #704 butir 5 dan 6, sekarang satu sel "Lampiran" (#714). Isinya tetap
+          lengkap: tautan dan berkas bukan-gambar sebagai chip, gambar sebagai
+          miniatur. Yang berhenti adalah dua kolom terpisah yang keduanya hampir
+          selalu berisi "-". */}
       <td className={cn(SEL, "py-3 align-top")}>
-        {tautan.length === 0 && bukanGambar.length === 0 ? (
+        {tautan.length === 0 && berkas.length === 0 ? (
           kosong("-")
         ) : (
-          <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
+          <div className="flex flex-wrap items-start gap-1.5 max-h-32 overflow-y-auto">
             {tautan.map((l) => (
               <a
                 key={l.id}
@@ -217,22 +218,13 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
                 href={b.url || undefined}
                 target="_blank"
                 rel="noopener noreferrer"
+                title={b.name || b.originalName || ""}
                 className="inline-flex items-center gap-1 max-w-full px-2 py-0.5 rounded-md text-[10px] leading-snug font-normal bg-surface-sunken text-content-body border border-border-subtle break-all"
               >
                 <IkonGambar className="w-3 h-3 shrink-0 text-content-subtle" />
                 <span className="break-words">{b.name || b.originalName || b.fileRef}</span>
               </a>
             ))}
-          </div>
-        )}
-      </td>
-
-      {/* Gambar — #704 (butir 6): miniatur, bukan nama berkas. */}
-      <td className={cn(SEL, "py-3 align-top")}>
-        {gambar.length === 0 ? (
-          kosong("-")
-        ) : (
-          <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
             {gambar.map((b) => (
               <a
                 key={b.id}
@@ -240,7 +232,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
                 target="_blank"
                 rel="noopener noreferrer"
                 title={b.name || b.originalName || ""}
-                className="block w-12 h-12 rounded-md border border-border-subtle overflow-hidden bg-surface-sunken"
+                className="block w-10 h-10 shrink-0 rounded-md border border-border-subtle overflow-hidden bg-surface-sunken"
               >
                 <img
                   src={b.url || ""}
@@ -251,8 +243,8 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
                   // berpindah setiap kali satu berkas selesai diunduh.
                   loading="lazy"
                   decoding="async"
-                  width={48}
-                  height={48}
+                  width={40}
+                  height={40}
                   className="w-full h-full object-cover"
                 />
               </a>
@@ -261,53 +253,49 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
         )}
       </td>
 
-      {/* Thread Comments */}
-      <td className={cn(SEL, "py-3 text-center align-top")}>
-        <button
-          onClick={onOpenThread}
-          className={cn(
-            "inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs font-normal transition-all cursor-pointer border shadow-2xs active:scale-95",
-            jumlahKomentar > 0
-              ? "bg-primary/10 hover:bg-primary/15 text-primary border-primary/20"
-              : "bg-surface-sunken hover:bg-surface-muted text-content-subtle border-border-subtle/60"
-          )}
-          title={t("discussion.openThread")}
-        >
-          <MessageSquare
-            className={cn(
-              "w-3.5 h-3.5",
-              jumlahKomentar > 0 ? "text-primary fill-primary/20" : "text-content-subtle"
+      {/* #714 — Thread, Status, dan Action satu sel di kanan. Ketiganya adalah
+          "apa berikutnya", dan selama berdiri sendiri mereka menempati tiga
+          kolom paling kanan yang justru tidak terlihat tanpa gulir horizontal. */}
+      <td className={cn(SEL, "py-3 align-top")}>
+        <div className="flex flex-wrap items-center justify-end gap-1.5">
+          <button
+            type="button"
+            onClick={onToggleStatus}
+            className="cursor-pointer transition-all active:scale-95 inline-block"
+            title={t("discussion.toggleStatus")}
+          >
+            {isCompleted ? (
+              <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 shadow-2xs hover:bg-emerald-500/15">
+                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                {t("discussion.statusDone")}
+              </span>
+            ) : (
+              <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-amber-500/10 text-amber-700 border border-amber-500/30 shadow-2xs hover:bg-amber-500/15">
+                <Clock className="w-3 h-3 text-amber-600" />
+                {t("discussion.statusPending")}
+              </span>
             )}
-          />
-          <span>{jumlahKomentar}</span>
-        </button>
-      </td>
+          </button>
 
-      {/* Status Badge */}
-      <td className={cn(SEL, "py-3 text-center align-top")}>
-        <button
-          type="button"
-          onClick={onToggleStatus}
-          className="cursor-pointer transition-all active:scale-95 inline-block"
-          title={t("discussion.toggleStatus")}
-        >
-          {isCompleted ? (
-            <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 shadow-2xs hover:bg-emerald-500/15">
-              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-              {t("discussion.statusDone")}
-            </span>
-          ) : (
-            <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-amber-500/10 text-amber-700 border border-amber-500/30 shadow-2xs hover:bg-amber-500/15">
-              <Clock className="w-3 h-3 text-amber-600" />
-              {t("discussion.statusPending")}
-            </span>
-          )}
-        </button>
-      </td>
+          <button
+            onClick={onOpenThread}
+            className={cn(
+              "inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs font-normal transition-all cursor-pointer border shadow-2xs active:scale-95",
+              jumlahKomentar > 0
+                ? "bg-primary/10 hover:bg-primary/15 text-primary border-primary/20"
+                : "bg-surface-sunken hover:bg-surface-muted text-content-subtle border-border-subtle/60"
+            )}
+            title={t("discussion.openThread")}
+          >
+            <MessageSquare
+              className={cn(
+                "w-3.5 h-3.5",
+                jumlahKomentar > 0 ? "text-primary fill-primary/20" : "text-content-subtle"
+              )}
+            />
+            <span>{jumlahKomentar}</span>
+          </button>
 
-      {/* Actions */}
-      <td className={cn(SEL, "py-3 text-center align-top")}>
-        <div className="flex items-center justify-center gap-1">
           {bolehSunting && (
             <button
               onClick={onEdit}

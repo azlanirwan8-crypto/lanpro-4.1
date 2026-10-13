@@ -1860,9 +1860,11 @@ export const id = {
     thConcern: "Topik",
     thNotes: "Catatan / Keterangan",
     thContextTags: "Konteks / Tag",
-    thPic: "PIC",
-    thTargetDate: "Tanggal Target",
-    thThread: "Utas",
+    // #714 — papan turun dari dua belas ke delapan kolom: "siapa" dan "kapan"
+    // satu sel, tautan dan gambar satu sel, dan aksi duduk di kanan.
+    thPicTanggal: "PIC & tanggal target",
+    thLampiran: "Lampiran",
+    thStatusAksi: "Status & aksi",
     thStatus: "Status",
     thAction: "Aksi",
     next: "Berikutnya:",

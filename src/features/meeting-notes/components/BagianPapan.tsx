@@ -107,8 +107,14 @@ export const KepalaPapan: React.FC<KepalaProps> = ({ tampilAI, onToggleAI, cari,
  * `ea671294`), melainkan pemicunya dan chip nama berkas. `ea671294` menambal
  * satu panel; yang dibutuhkan adalah pagar di setiap sel, supaya cacat yang sama
  * tidak bisa lahir lagi di kolom berikutnya.
+ *
+ * #714 — `border-r` menjadikan garis pemisah antar kolom. Dua belas kolom tanpa
+ * satu pun garis vertikal, dengan tinggi sel yang berbeda-beda, membuat mata
+ * tidak bisa menelusuri satu baris dari kiri ke kanan; Delapan kolom dengan
+ * garis tipis bisa. `last:border-r-0` melepas garis pada kolom terakhir supaya
+ * tepi kanan tabel tetap hanya satu garis.
  */
-export const SEL = "px-4 border-b border-border-faint overflow-hidden";
+export const SEL = "px-4 border-b border-border-faint border-r last:border-r-0 overflow-hidden";
 
 /**
  * #707 — kepala tabel desktop. `position: sticky` hanya bekerja terhadap
@@ -129,52 +135,55 @@ export const SEL = "px-4 border-b border-border-faint overflow-hidden";
  *
  * Lebar kolom ditulis di sini dan hanya di sini: dengan `table-fixed` nilai
  * inilah kolomnya, dan baris data tidak perlu menebak lagi.
+ *
+ * #714 — dari DUA BELAS kolom menjadi DELAPAN, dan lebarnya tidak lagi
+ * ditentukan oleh nama kolomnya melainkan oleh teks yang benar-benar duduk di
+ * dalamnya. Chip PIC memakai `px-2 text-[10px]`: "Mohamad Rifky Pramadanianto"
+ * (27 karakter) butuh ±153 px termasuk padding, sementara kolomnya dipatok
+ * 150 px — jadi secara matematis TIDAK PERNAH bisa berbagi baris dengan chip
+ * lain. Tiga PIC berarti tiga lajur, dan satu baris tabel naik ke enam lajur
+ * tinggi. Pada saat yang sama Notes/Remarks memegang 280 px — kolom terlebar
+ * kedua di papan — dan kosong pada kedua baris papan yang difoto. Karena itu
+ * tiga pasang yang satu niat digabung: "siapa" dan "kapan" (PIC + Target Date),
+ * bahan tempelan (Tautan + Gambar), dan "apa berikutnya" (Thread + Status +
+ * Action). Total 1.818 px turun ke 1.468 px, dan kolom aksi tidak lagi terbuang
+ * ke luar layar.
  */
 export const KepalaTabel: React.FC = () => {
   const { t } = useTranslation();
   const th =
-    "sticky top-0 z-20 bg-surface-sunken py-3 px-4 border-b border-border-subtle font-normal";
+    "sticky top-0 z-20 bg-surface-sunken py-3 px-4 border-b border-r border-border-subtle font-normal";
   return (
     <thead>
       <tr className="text-xs text-content-subtle whitespace-nowrap">
-        <th scope="col" className={`${th} w-12 text-center`}>
+        <th scope="col" className={`${th} w-[48px] text-center`}>
           {t("discussion.thNo")}
         </th>
-        <th scope="col" className={`${th} w-[220px]`}>
+        <th scope="col" className={`${th} w-[230px]`}>
           {t("discussion.thConcern")}
         </th>
-        <th scope="col" className={`${th} w-[280px]`}>
+        <th scope="col" className={`${th} w-[200px]`}>
           {t("discussion.thNotes")}
         </th>
-        <th scope="col" className={`${th} w-[170px]`}>
-          {t("discussion.thContextTags")}
-        </th>
-        {/* #703 butir 3 — Follow-up selama ini ADA di form dan ADA di
-            basis data, tetapi tidak pernah punya kolom. */}
-        <th scope="col" className={`${th} w-[240px]`}>
+        {/* #703 butir 3 — Follow-up selama ini ADA di form dan ADA di basis
+            data, tetapi tidak pernah punya kolom. */}
+        <th scope="col" className={`${th} w-[230px]`}>
           {t("discussion.followUp")}
         </th>
-        <th scope="col" className={`${th} w-[150px]`}>
-          {t("discussion.thPic")}
+        <th scope="col" className={`${th} w-[200px]`}>
+          {t("discussion.thContextTags")}
         </th>
-        <th scope="col" className={`${th} w-[130px]`}>
-          {t("discussion.thTargetDate")}
+        {/* #714 — "siapa" dan "kapan" satu niat, satu sel. */}
+        <th scope="col" className={`${th} w-[210px]`}>
+          {t("discussion.thPicTanggal")}
         </th>
-        {/* #704 butir 5 dan 6 — dua kolom baru, keduanya bisa jamak. */}
-        <th scope="col" className={`${th} w-[170px]`}>
-          {t("discussion.tautan")}
+        {/* #704 butir 5 dan 6 bertemu #714: keduanya bahan tempelan, jadi
+            keduanya satu sel. Isinya tetap tampil penuh, bukan angka. */}
+        <th scope="col" className={`${th} w-[140px]`}>
+          {t("discussion.thLampiran")}
         </th>
-        <th scope="col" className={`${th} w-[120px]`}>
-          {t("discussion.gambar")}
-        </th>
-        <th scope="col" className={`${th} w-[90px] text-center`}>
-          {t("discussion.thThread")}
-        </th>
-        <th scope="col" className={`${th} w-[110px] text-center`}>
-          {t("discussion.status")}
-        </th>
-        <th scope="col" className={`${th} w-[90px] text-center`}>
-          {t("discussion.action")}
+        <th scope="col" className={`${th} w-[210px] text-right`}>
+          {t("discussion.thStatusAksi")}
         </th>
       </tr>
     </thead>
