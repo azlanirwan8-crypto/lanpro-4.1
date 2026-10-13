@@ -4,6 +4,7 @@ import path from "path";
 import multer from "multer";
 import jwt from "jsonwebtoken";
 import { authenticateJWT, getJwtSecret } from "../middleware/auth";
+import { identitasWajib } from "../middleware/identitas";
 import { validasiQuery } from "../middleware/validate";
 import { fileSecureStreamQuerySchema } from "../schemas/file.schema";
 import {
@@ -73,6 +74,11 @@ router.post(
         });
       }
 
+      // #674 — identitas dibaca SEBELUM berkas disimpan supaya permintaan tanpa
+      // identitas ditolak tanpa meninggalkan blob yatim di penyimpanan.
+      const userId = identitasWajib(req, res);
+      if (!userId) return;
+
       const fileBuffer = fs.readFileSync(file.path);
       const validation = validateFileBuffer(fileBuffer, file.originalname);
 
@@ -97,7 +103,6 @@ router.post(
         /* diabaikan */
       }
 
-      const userId = req.user?.id || req.user?.uid || "guest";
       // #490 — masa berlaku lampiran dokumen 1 tahun (525600 menit) agar tidak kadaluarsa dalam 1 jam
       const presignedUrl = generatePresignedUrl(safeFilename, userId, 525600);
 

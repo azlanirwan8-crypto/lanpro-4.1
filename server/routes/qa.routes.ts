@@ -4,6 +4,7 @@ import fs from "fs";
 import multer from "multer";
 import { validateFileBuffer, sanitizeFilename } from "../../src/lib/fileSecurity";
 import { jagaProyek } from "../middleware/jagaProyek";
+import { identitasWajib } from "../middleware/identitas";
 import { generateContentWithFallback } from "../services/ai.service";
 import { simpanBerkas } from "../services/storage.service";
 import {
@@ -593,7 +594,8 @@ export function setupQARoutes(
             .json({ status: "error", code: "srv.status_required", message: "Status required" });
         }
 
-        const userIdStr = req.user?.uid || req.user?.id || req.headers["x-user-id"] || "guest";
+        const userIdStr = identitasWajib(req, res);
+        if (!userIdStr) return;
         const result = await qaRepository.updateTestCaseStatusWithBug(
           projectId,
           id,

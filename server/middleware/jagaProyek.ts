@@ -36,23 +36,11 @@
 import db from "../../src/lib/db";
 import { createAuditLog } from "../services/audit.service";
 import { catatPenjagaMatriks } from "./daftarPeranRute";
-
-/**
- * Identitas pemanggil — HANYA dari token yang sudah diverifikasi. #54.
- *
- * Penjaga lama menerima `x-user-id` dari header dan `userId` dari query maupun
- * body sebagai cadangan. Saya MENYALIN cadangan itu ke ketiga penjaga baru
- * tanpa memeriksanya — kesalahan yang baru ketahuan saat #54 dibaca ulang.
- *
- * Cadangan itu berbahaya bukan karena hari ini bisa ditembus — seluruh rute
- * berlingkup proyek berada di balik gerbang `/api/*` yang mengisi `req.user`.
- * Ia berbahaya karena bersandar pada lapisan LAIN untuk keselamatannya, dan
- * itu persis bentuk asumsi yang melahirkan #49 dan #68: sebuah penjaga yang
- * aman "selama ada yang menjaganya lebih dulu".
- *
- * Sebuah header yang bisa ditulis klien tidak boleh pernah menjadi identitas.
- */
-const identitasPemanggil = (req: any): string | undefined => req.user?.id || req.user?.uid;
+// #54 — penjaga lama menerima `x-user-id` dari header dan `userId` dari query
+// maupun body sebagai cadangan, dan cadangan itu sempat tersalin ke ketiga
+// penjaga baru. Definisinya kini satu di `./identitas.ts` supaya tidak ada lagi
+// salinan yang bisa menyimpang (#674).
+import { identitasPemanggil } from "./identitas";
 import { normalkanPeran } from "../../src/types/roles";
 import {
   bolehDiProyek,

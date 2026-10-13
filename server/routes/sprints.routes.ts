@@ -1,6 +1,7 @@
 import { Express } from "express";
 import crypto from "crypto";
 import { jagaProyek } from "../middleware/jagaProyek";
+import { identitasWajib } from "../middleware/identitas";
 import { sprintRepository } from "../repositories/sprint.repository";
 import { projectRepository } from "../repositories/project.repository";
 import { validasiBody, validasiQuery } from "../middleware/validate";
@@ -56,6 +57,11 @@ export function setupSprintsRoutes(
       try {
         const { projectId } = req.params;
         const { name, goal, startDate, endDate, status } = req.body;
+        // #674 — identitas actor audit diambil dari token, bukan dari header
+        // kiriman klien. Dibaca SEBELUM ada yang ditulis supaya permintaan tanpa
+        // identitas ditolak sebelum sprint-nya terlanjur lahir.
+        const userIdStr = identitasWajib(req, res);
+        if (!userIdStr) return;
 
         const category = await projectRepository.getCategory(projectId);
         if (adalahWaterfall(category)) {
@@ -78,22 +84,14 @@ export function setupSprintsRoutes(
           status: status || "planned",
         });
 
-        const userIdStr = req.headers["x-user-id"] || "guest";
-
         res.json({
           status: "success",
           data: created,
         });
 
-        void createAuditLog(
-          userIdStr as string,
-          projectId,
-          "CREATE",
-          "Sprints",
-          newId,
-          null,
-          req.body
-        ).catch((err) => console.error("[SPRINT CREATE] audit log gagal:", err));
+        void createAuditLog(userIdStr, projectId, "CREATE", "Sprints", newId, null, req.body).catch(
+          (err) => console.error("[SPRINT CREATE] audit log gagal:", err)
+        );
       } catch (error: any) {
         console.error("LOG ANOMALI CRITICAL: POST /api/projects/:projectId/sprints error:", error);
         res.status(500).json({

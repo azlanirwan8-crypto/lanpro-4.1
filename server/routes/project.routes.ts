@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { buatProyekDemoBni } from "../services/demo-seed.service";
 import { authenticateJWT, verifyGlobalAdmin } from "../middleware/auth";
 import { jagaHapusProyek, jagaProyek, jagaSetelanProyek } from "../middleware/jagaProyek";
+import { identitasWajib } from "../middleware/identitas";
 import { createAuditLog } from "../services/audit.service";
 import { validasiBody } from "../middleware/validate";
 import {
@@ -134,6 +135,10 @@ router.put(
   async (req, res) => {
     try {
       const { id } = req.params;
+      // #674 — identitas actor audit dari token, dibaca SEBELUM ada yang ditulis
+      // supaya permintaan tanpa identitas tidak meninggalkan perubahan tanpa jejak.
+      const userId = identitasWajib(req, res);
+      if (!userId) return;
       const {
         name,
         description,
@@ -168,8 +173,7 @@ router.put(
         dashboardLayout,
       });
 
-      const userId = req.headers["x-user-id"] || "guest";
-      await createAuditLog(userId as string, id, "UPDATE", "Projects", id, null, changedFields);
+      await createAuditLog(userId, id, "UPDATE", "Projects", id, null, changedFields);
 
       res.json({ status: "success", code: "srv.project_updated", message: "Project updated" });
     } catch (error: any) {
@@ -192,7 +196,8 @@ router.post(
     try {
       const { projectId } = req.params;
       const { methodology, matrixScores } = req.body;
-      const userId = req.user?.id || req.user?.uid || req.headers["x-user-id"] || "guest";
+      const userId = identitasWajib(req, res);
+      if (!userId) return;
 
       if (!methodology) {
         return res.status(400).json({

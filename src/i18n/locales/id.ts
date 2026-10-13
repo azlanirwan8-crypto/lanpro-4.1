@@ -17,6 +17,7 @@ export const id = {
     "srv.akses_ditolak": "Akses ditolak",
     "srv.akses_ditolak_project_id_wajib": "Akses ditolak: projectId wajib disertakan.",
     "srv.akses_ditolak_bukan_anggota": "Akses ditolak: Anda bukan anggota project ini.",
+    "srv.akses_ditolak_identitas": "Akses ditolak: token tidak memuat identitas pengguna.",
     "srv.proyek_tidak_ditemukan": "Proyek tidak ditemukan.",
     "srv.cron_belum_dikonfigurasi": "Penjadwal cron belum dikonfigurasi.",
     "srv.cron_secret_tidak_valid": "Akses ditolak: rahasia cron tidak valid.",

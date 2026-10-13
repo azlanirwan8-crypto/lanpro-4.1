@@ -7,6 +7,7 @@ import { Router } from "express";
 import crypto from "crypto";
 import { createAuditLog } from "../services/audit.service";
 import { jagaProyek } from "../middleware/jagaProyek";
+import { identitasWajib } from "../middleware/identitas";
 import { milestoneRepository } from "../repositories/milestone.repository";
 import { validasiBody, validasiQuery } from "../middleware/validate";
 import { paginationQuerySchema } from "../schemas/pagination.schema";
@@ -48,7 +49,8 @@ router.post(
     try {
       const { projectId } = req.params;
       const { name, description, dueDate, sprintIds } = req.body;
-      const userId = req.headers["x-user-id"] || req.query.userId || "guest";
+      const userId = identitasWajib(req, res);
+      if (!userId) return;
       const milestoneId = crypto.randomUUID();
 
       await milestoneRepository.create({
@@ -61,7 +63,7 @@ router.post(
         sprintIds,
       });
 
-      await createAuditLog(userId as string, projectId, "CREATE", "Milestones", milestoneId, null, {
+      await createAuditLog(userId, projectId, "CREATE", "Milestones", milestoneId, null, {
         name,
         sprintIds,
       });
@@ -86,7 +88,8 @@ router.put(
     try {
       const { id, projectId } = req.params;
       const { name, description, dueDate, status, sprintIds } = req.body;
-      const userId = req.headers["x-user-id"] || "guest";
+      const userId = identitasWajib(req, res);
+      if (!userId) return;
 
       await milestoneRepository.update(id, {
         name,
@@ -96,7 +99,7 @@ router.put(
         sprintIds,
       });
 
-      await createAuditLog(userId as string, projectId, "UPDATE", "Milestones", id, null, req.body);
+      await createAuditLog(userId, projectId, "UPDATE", "Milestones", id, null, req.body);
       res.json({ status: "success", code: "srv.milestone_updated", message: "Milestone updated" });
     } catch (error: any) {
       res.status(500).json({
@@ -114,9 +117,10 @@ router.delete(
   async (req, res) => {
     try {
       const { id, projectId } = req.params;
-      const userId = req.headers["x-user-id"] || "guest";
+      const userId = identitasWajib(req, res);
+      if (!userId) return;
 
-      await createAuditLog(userId as string, projectId, "DELETE", "Milestones", id, null, null);
+      await createAuditLog(userId, projectId, "DELETE", "Milestones", id, null, null);
       await milestoneRepository.delete(id);
 
       res.json({ status: "success", code: "srv.milestone_deleted", message: "Milestone deleted" });

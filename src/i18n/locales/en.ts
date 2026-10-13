@@ -16,6 +16,7 @@ export const en = {
     "srv.akses_ditolak": "Access denied",
     "srv.akses_ditolak_project_id_wajib": "Access denied: projectId is required.",
     "srv.akses_ditolak_bukan_anggota": "Access denied: you are not a member of this project.",
+    "srv.akses_ditolak_identitas": "Access denied: the token carries no user identity.",
     "srv.proyek_tidak_ditemukan": "Project not found.",
     "srv.cron_belum_dikonfigurasi": "Cron scheduler is not configured.",
     "srv.cron_secret_tidak_valid": "Access denied: invalid cron secret.",

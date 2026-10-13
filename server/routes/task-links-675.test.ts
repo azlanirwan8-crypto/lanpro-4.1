@@ -85,6 +85,16 @@ import { masterDataRepository } from "../repositories/master-data.repository";
 const buatApp = () => {
   const app = express();
   app.use(express.json());
+  // Gerbang JWT global di server.ts mengisi `req.user` untuk SEMUA rute /api/*,
+  // termasuk yang tidak memasang `authenticateJWT` sendiri (komentar, work log).
+  // #674 membuat identitas wajib, jadi tiruannya harus sama rata.
+  app.use((req: any, _res, next) => {
+    if (!req.user) {
+      const id = String(req.headers["x-test-user"] || "outsider");
+      req.user = { id, uid: id, username: `${id}-name`, role: "user" };
+    }
+    next();
+  });
   app.use(taskRoutes);
   return app;
 };

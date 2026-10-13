@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import db from "../../src/lib/db";
 import { getJwtSecret } from "./auth";
 import { catatPenjaga } from "./daftarPeranRute";
+import { identitasPemanggil } from "./identitas";
 
 /**
  * ⚠️ PENJAGA LAMA — PENSIUN 16 Agu 2026. NOL rute memakainya. §19.8 tahap 4.
@@ -53,12 +54,10 @@ export const verifyProjectAccess = (allowedRoles: string[]) => {
         }
       }
 
-      let userId =
-        req.user?.id ||
-        req.user?.uid ||
-        req.headers["x-user-id"] ||
-        req.query.userId ||
-        req.body.userId;
+      // #674 — header `x-user-id`, `?userId=`, dan `body.userId` TIDAK dibaca.
+      // Ketiganya bisa ditulis klien, jadi menerimanya berarti membiarkan
+      // pemanggil memilih sendiri identitas yang akan diperiksa izinnya.
+      let userId = identitasPemanggil(req);
 
       if (!userId) {
         if (allowedRoles.includes("*")) {
@@ -125,13 +124,11 @@ export const verifyProjectAccess = (allowedRoles: string[]) => {
         .json({ status: "error", code: "srv.akses_ditolak", message: "Akses ditolak" });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: RBAC Middleware error:", error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.gagal_memverifikasi_hak_akses",
-          message: "Gagal memverifikasi hak akses.",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.gagal_memverifikasi_hak_akses",
+        message: "Gagal memverifikasi hak akses.",
+      });
     } finally {
       if (connection) connection.release();
     }

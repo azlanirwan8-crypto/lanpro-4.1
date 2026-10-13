@@ -19,6 +19,8 @@ import { saringHasilAnalisisTempel } from "../services/meeting-ai-filter";
 import { MULTIMODAL_ANALYSIS_SCHEMA } from "../services/meeting-ai.schema";
 import { ekstensiPerluMp3UntukGemini, perintahFfmpegKeMp3 } from "../services/meeting-transcode";
 import { jagaProyek } from "../middleware/jagaProyek";
+import { identitasWajib } from "../middleware/identitas";
+import { matchesCaller } from "../services/task.service";
 import { meetingRepository } from "../repositories/meeting.repository";
 import { discussionPointsRepository } from "../repositories/discussion-points.repository";
 import { exec } from "child_process";
@@ -1157,8 +1159,11 @@ router.post(
   async (req, res) => {
     try {
       const { projectId } = req.params;
-      const { title, description, meetingLink, authorId, fileData, fileName, fileType } = req.body;
-      const effectiveAuthorId = authorId || req.headers["x-user-id"] || "guest";
+      const { title, description, meetingLink, fileData, fileName, fileType } = req.body;
+      // #674 — `authorId` dari body diabaikan: kolom ini menentukan siapa yang
+      // boleh mengubah/menghapus rapat nanti, jadi nilainya hanya dari token.
+      const effectiveAuthorId = identitasWajib(req, res);
+      if (!effectiveAuthorId) return;
       const newId = crypto.randomUUID();
 
       await meetingRepository.create({
@@ -1211,11 +1216,12 @@ router.put(
           .json({ status: "error", code: "srv.meeting_not_found", message: "Meeting not found" });
       }
 
-      const currentUserId = req.user?.id || req.user?.uid || req.headers["x-user-id"];
       const userRole = (req.user?.role || req.user?.system_role || "").toUpperCase();
       const isAdmin = userRole === "ADMIN";
       const authorId = item.authorId || (item as any).author_id;
-      const isAuthor = authorId === currentUserId;
+      // #674 — kepemilikan dibandingkan lewat matchesCaller: baris lama bisa
+      // menyimpan `uid` sementara token memberi `id`, dan keduanya sama orang.
+      const isAuthor = matchesCaller(req.user, authorId);
 
       if (!isAuthor && !isAdmin) {
         return res.status(403).json({
@@ -1297,11 +1303,12 @@ router.delete(
           .json({ status: "error", code: "srv.meeting_not_found", message: "Meeting not found" });
       }
 
-      const currentUserId = req.user?.id || req.user?.uid || req.headers["x-user-id"];
       const userRole = (req.user?.role || req.user?.system_role || "").toUpperCase();
       const isAdmin = userRole === "ADMIN";
       const authorId = item.authorId || (item as any).author_id;
-      const isAuthor = authorId === currentUserId;
+      // #674 — kepemilikan dibandingkan lewat matchesCaller: baris lama bisa
+      // menyimpan `uid` sementara token memberi `id`, dan keduanya sama orang.
+      const isAuthor = matchesCaller(req.user, authorId);
 
       if (!isAuthor && !isAdmin) {
         return res.status(403).json({

@@ -37,7 +37,7 @@ describe("Item #497: Facebook-style Threaded Comments & parentId", () => {
   });
 
   it("task.routes.ts menerima parentId dan mengembalikannya dalam respon", () => {
-    expect(routesContent).toContain("const { authorId, parentId } = req.body;");
+    expect(routesContent).toContain("const { parentId } = req.body;");
     expect(routesContent).toContain("parentId: parentId || null");
   });
 

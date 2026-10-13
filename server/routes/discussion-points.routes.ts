@@ -6,6 +6,7 @@
 import { Router } from "express";
 import crypto from "crypto";
 import { jagaProyek } from "../middleware/jagaProyek";
+import { identitasPemanggil, identitasWajib } from "../middleware/identitas";
 import { discussionPointsRepository } from "../repositories/discussion-points.repository";
 import { matchesCaller } from "../services/task.service";
 import { validasiBody, validasiQuery } from "../middleware/validate";
@@ -29,7 +30,7 @@ const router = Router();
  * langsung dari token mencegah pemalsuan kepemilikan.
  */
 const penulisDari = (req: any) => ({
-  id: String(req.user?.id || req.user?.uid || ""),
+  id: identitasPemanggil(req) || "",
   nama: req.user?.displayName || req.user?.username || "Member",
 });
 
@@ -82,7 +83,10 @@ router.post(
         tags,
         links,
       } = req.body || {};
-      const effectiveAuthorId = penulisDari(req).id || "guest";
+      // #674 — tanpa cadangan `"guest"`: permintaan tanpa identitas ditolak,
+      // bukan disimpan atas nama pengguna fiktif.
+      const effectiveAuthorId = identitasWajib(req, res);
+      if (!effectiveAuthorId) return;
       const newId = crypto.randomUUID();
 
       await discussionPointsRepository.createPoint({

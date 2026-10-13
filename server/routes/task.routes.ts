@@ -15,6 +15,7 @@ import xss from "xss";
 import { generateContentWithFallback } from "../services/ai.service";
 import { checkUserPermissionBackend, isTaskParticipant } from "../services/task.service";
 import { jagaProyek } from "../middleware/jagaProyek";
+import { identitasWajib } from "../middleware/identitas";
 import { validasiBody, validasiQuery } from "../middleware/validate";
 import { paginationQuerySchema, taskListQuerySchema } from "../schemas/pagination.schema";
 import { respondWithProjectList } from "../lib/listResponse";
@@ -180,8 +181,10 @@ router.post(
         attachments,
       } = req.body;
 
-      const authenticatedUserStr =
-        (req as any).user?.uid || (req as any).user?.id || req.headers["x-user-id"];
+      // #674 — identitas dari token saja; `x-user-id` kiriman klien tidak dibaca.
+      // Dibaca SEBELUM createTask supaya task tidak lahir dengan reporter "guest".
+      const authenticatedUserStr = identitasWajib(req, res);
+      if (!authenticatedUserStr) return;
 
       // #461 — jangan buat tugas langsung ke sprint aktif/selesai
       if (sprintId) {
@@ -225,8 +228,6 @@ router.post(
         attachments,
       });
 
-      const userIdStr = authenticatedUserStr || resolvedReporterId || "guest";
-
       res.json({
         status: "success",
         data: {
@@ -251,7 +252,7 @@ router.post(
 
       // Audit & notifikasi tidak menahan respons create — sub-issue harus tampil cepat (#317).
       void createAuditLog(
-        userIdStr as string,
+        authenticatedUserStr,
         projectId,
         "CREATE",
         "Tasks",
@@ -260,7 +261,7 @@ router.post(
         req.body
       ).catch((err) => console.error("[TASK CREATE] audit log gagal:", err));
 
-      void sendProjectActivityNotification(projectId, userIdStr, "create_task", {
+      void sendProjectActivityNotification(projectId, authenticatedUserStr, "create_task", {
         taskId: newId,
       }).catch((err) => console.error("Create task notification broadcast failed:", err));
     } catch (error: any) {
@@ -1294,13 +1295,11 @@ router.post(
         return res.status(400).json({ status: "fail", message: "Comment text is required" });
       }
 
-      const { authorId, parentId } = req.body;
-      const effectiveAuthorId =
-        authorId ||
-        (req as any).user?.uid ||
-        (req as any).user?.id ||
-        req.headers["x-user-id"] ||
-        "guest";
+      const { parentId } = req.body;
+      // #674 — `authorId` dari body diabaikan: kolom `Comments.userId` menentukan
+      // siapa yang boleh mengubah/menghapus komentarnya nanti.
+      const effectiveAuthorId = identitasWajib(req, res);
+      if (!effectiveAuthorId) return;
 
       const newId = crypto.randomUUID();
       await taskRepository.createComment({
@@ -1311,7 +1310,7 @@ router.post(
         parentId: parentId || null,
       });
 
-      sendProjectActivityNotification(projectId, effectiveAuthorId as string, "comment_task", {
+      sendProjectActivityNotification(projectId, effectiveAuthorId, "comment_task", {
         taskId,
         commentContent: content,
       }).catch((err) => console.error("Comment notification broadcast failed:", err));

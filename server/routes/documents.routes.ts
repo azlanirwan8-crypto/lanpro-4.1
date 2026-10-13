@@ -6,6 +6,8 @@
 import { Router } from "express";
 import crypto from "crypto";
 import { jagaProyek } from "../middleware/jagaProyek";
+import { identitasWajib } from "../middleware/identitas";
+import { matchesCaller } from "../services/task.service";
 import { documentRepository } from "../repositories/document.repository";
 import { validasiBody, validasiQuery } from "../middleware/validate";
 import { createDocumentSchema, updateDocumentSchema } from "../schemas/document.schema";
@@ -109,18 +111,8 @@ router.post(
   async (req: any, res) => {
     try {
       const { projectId } = req.params;
-      const {
-        title,
-        description,
-        type,
-        link,
-        fileData,
-        fileName,
-        fileType,
-        canvasData,
-        category,
-        createdBy,
-      } = req.body;
+      const { title, description, type, link, fileData, fileName, fileType, canvasData, category } =
+        req.body;
       // Item #268 — id dan nama pembuat disimpan TERPISAH.
       //
       // Sebelumnya keduanya berebut satu kolom: klien mengirim `createdBy`
@@ -136,8 +128,12 @@ router.post(
       //
       // Id tetap yang menentukan otorisasi (tidak berubah saat pengguna ganti
       // nama tampilan); nama hanya untuk ditampilkan.
-      const currentUserId = req.user?.id || req.user?.uid || "guest";
-      const currentUserName = req.user?.displayName || req.user?.username || createdBy || null;
+      //
+      // #674 — `createdBy` dari body tidak dibaca lagi, bahkan sebagai cadangan
+      // nama: keduanya kini hanya dari token yang sudah diverifikasi.
+      const currentUserId = identitasWajib(req, res);
+      if (!currentUserId) return;
+      const currentUserName = req.user?.displayName || req.user?.username || null;
       const newId = crypto.randomUUID();
       // #348 — sanitasi teks wiki sebelum simpan
       const safeTitle = sanitizeUserText(title);
@@ -200,11 +196,12 @@ router.put(
           .json({ status: "error", code: "srv.document_not_found", message: "Document not found" });
       }
 
-      const currentUserId = req.user?.id || req.user?.uid || req.headers["x-user-id"];
       const userRole = (req.user?.role || req.user?.system_role || "").toUpperCase();
       const isAdmin = userRole === "ADMIN";
       const authorId = item.createdBy || (item as any).author_id || (item as any).authorId;
-      const isAuthor = authorId === currentUserId;
+      // #674 — kepemilikan dibandingkan lewat matchesCaller (menerima `id` dan
+      // `uid`), dan header `x-user-id` kiriman klien tidak lagi dibaca.
+      const isAuthor = matchesCaller(req.user, authorId);
 
       if (!isAuthor && !isAdmin) {
         return res.status(403).json({
@@ -287,11 +284,12 @@ router.delete(
           .json({ status: "error", code: "srv.document_not_found", message: "Document not found" });
       }
 
-      const currentUserId = req.user?.id || req.user?.uid || req.headers["x-user-id"];
       const userRole = (req.user?.role || req.user?.system_role || "").toUpperCase();
       const isAdmin = userRole === "ADMIN";
       const authorId = item.createdBy || (item as any).author_id || (item as any).authorId;
-      const isAuthor = authorId === currentUserId;
+      // #674 — kepemilikan dibandingkan lewat matchesCaller (menerima `id` dan
+      // `uid`), dan header `x-user-id` kiriman klien tidak lagi dibaca.
+      const isAuthor = matchesCaller(req.user, authorId);
 
       if (!isAuthor && !isAdmin) {
         return res.status(403).json({

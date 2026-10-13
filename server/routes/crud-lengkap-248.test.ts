@@ -198,8 +198,11 @@ describe("#248 penulis komentar diambil dari token, bukan dari kiriman klien", (
     const i = diskusi.indexOf("const penulisDari");
     expect(i).toBeGreaterThan(-1);
     const helper = diskusi.slice(i, diskusi.indexOf("\n});", i));
-    expect(helper).toContain("req.user?.id");
-    expect(helper).toContain("req.user?.uid");
+    // #674 — pembacaan token dipusatkan di `middleware/identitas.ts`, supaya
+    // rantai `req.user?.id || req.user?.uid || <kiriman klien>` tidak lagi
+    // punya beberapa salinan yang bisa berbeda-beda sendiri.
+    expect(helper).toContain("identitasPemanggil(req)");
+    expect(helper).not.toContain('req.headers["x-user-id"]');
   });
 
   it("handler pembuat komentar tidak lagi membaca userId dari body", () => {
