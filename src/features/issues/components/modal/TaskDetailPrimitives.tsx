@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { cn } from "../../../../lib/utils";
+import { TEXTAREA_ISIAN, TEXTAREA_KACA } from "../../../../components/ui/gayaForm";
 
 export const Button = ({
   children,
@@ -11,17 +12,22 @@ export const Button = ({
 }: any) => {
   const variants = {
     primary:
-      "bg-primary-surface text-content-inverse hover:bg-primary-surface-hover active:bg-primary-active shadow-xs border-transparent",
+      "btn-primary text-content-inverse hover:bg-primary-surface-hover active:bg-primary-surface-active shadow-xs border-transparent",
     secondary:
-      "bg-surface text-content-body border-border-subtle/80 hover:bg-surface-sunken shadow-xs",
-    ghost: "bg-transparent text-content-muted hover:bg-surface-muted border-transparent",
-    danger: "bg-red-500/10 text-red-600 border-red-500/30 hover:bg-red-500/15 shadow-xs",
+      "bg-surface text-content-body border-border-subtle hover:bg-surface-sunken shadow-2xs",
+    ghost:
+      "bg-transparent text-content-muted hover:bg-surface-muted border-transparent shadow-none",
+    danger: "bg-danger/10 text-danger-text border-danger/30 hover:bg-danger/15 shadow-2xs",
   };
 
+  /* #721 — skalanya sama dengan `CoreUI.tsx:92-96` (sm h-8, md h-9, lg h-11).
+     Sebelumnya tombol di layar ini memakai `h-8` dan `h-9` bergantian lewat
+     `className` di tempat pemanggil, sehingga dua tombol berdampingan bisa
+     berbeda tinggi tanpa ada yang menulisnya. */
   const sizes = {
-    sm: "px-2.5 py-1 text-xs",
-    md: "px-3.5 py-1.5 text-xs font-medium",
-    lg: "px-5 py-2 text-sm font-medium",
+    sm: "h-8 px-3 text-xs",
+    md: "h-9 px-3.5 text-xs",
+    lg: "h-11 px-5 text-sm",
   };
 
   return (
@@ -29,7 +35,7 @@ export const Button = ({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "inline-flex items-center justify-center font-medium rounded-md border transition-all duration-150 cursor-pointer disabled:opacity-50 disabled:pointer-events-none",
+        "inline-flex items-center justify-center gap-2 rounded-lg border font-medium transition-all duration-150 cursor-pointer disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 active:scale-[0.98]",
         variants[variant as keyof typeof variants],
         sizes[size as keyof typeof sizes],
         className
@@ -40,16 +46,20 @@ export const Button = ({
   );
 };
 
-export const Textarea = ({ value, onChange, placeholder, rows = 3, className = "" }: any) => (
+export const Textarea = ({
+  value,
+  onChange,
+  placeholder,
+  rows = 3,
+  className = "",
+  tanpaBingkai = false,
+}: any) => (
   <textarea
     value={value}
     onChange={onChange}
     placeholder={placeholder}
     rows={rows}
-    className={cn(
-      "w-full bg-surface border border-border-subtle rounded-md px-3 py-2 text-xs focus:ring-1 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none font-medium text-content-body shadow-2xs",
-      className
-    )}
+    className={cn(tanpaBingkai ? TEXTAREA_KACA : TEXTAREA_ISIAN, className)}
   />
 );
 

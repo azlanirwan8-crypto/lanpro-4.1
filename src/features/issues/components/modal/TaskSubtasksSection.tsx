@@ -4,6 +4,7 @@ import { Layout, Trash2 } from "lucide-react";
 import { cn } from "../../../../lib/utils";
 import { UncontrolledInput } from "./TaskDetailPrimitives";
 import { UserAvatar } from "../../../../components/ui/UserAvatar";
+import { ISIAN_KACA, KARTU_SECTION, JUDUL_SECTION } from "../../../../components/ui/gayaForm";
 import { PriorityIcon } from "../../../../components/ui/CommonComponents";
 import { confirmDeleteAlert, showSuccessAlert } from "../../../../lib/sweetalert";
 import { Task, MasterData, UserProfile } from "../../../../types";
@@ -33,19 +34,19 @@ export const TaskSubtasksSection: React.FC<TaskSubtasksSectionProps> = ({
   const childSubtasks = tasks.filter((t) => t.parentId === task.id);
 
   return (
-    <div className="space-y-4">
+    <div className={cn(KARTU_SECTION, "p-4 md:p-5 space-y-4")}>
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-normal text-content uppercase tracking-normal flex items-center gap-2">
-          <Layout className="w-4 h-4 text-blue-500" />
+        <h3 className={JUDUL_SECTION}>
+          <Layout className="w-4 h-4 text-info" />
           {t("subtasks.list")}
         </h3>
       </div>
-      <div className="space-y-3 p-4 bg-surface-sunken/50 rounded-lg border border-dashed border-border-subtle shadow-xs">
+      <div className="space-y-3 p-4 bg-surface-sunken/40 rounded-lg border border-dashed border-border-subtle">
         {childSubtasks.map((st, stIdx) => (
           <div
             key={st.id ? `${st.id}-${stIdx}` : `sub-${stIdx}`}
             className={cn(
-              "flex items-center gap-4 p-3 bg-surface hover:bg-primary/10 rounded-xl group border border-border-faint transition-all shadow-soft",
+              "flex items-center gap-4 p-3 bg-surface hover:bg-primary/10 rounded-xl group border border-border-subtle transition-all shadow-soft",
               isUpdatingTask?.[st.id] ? "opacity-50 pointer-events-none" : "hover:border-primary/30"
             )}
           >
@@ -60,7 +61,7 @@ export const TaskSubtasksSection: React.FC<TaskSubtasksSectionProps> = ({
             />
             <UncontrolledInput
               className={cn(
-                "text-[13px] font-medium text-content-body bg-transparent border-none focus:ring-0 flex-1 min-w-0 disabled:text-content-subtle transition-all",
+                cn(ISIAN_KACA, "flex-1 min-w-0 disabled:text-content-subtle"),
                 st.status === "Done" && "line-through opacity-50"
               )}
               initialValue={st.title}

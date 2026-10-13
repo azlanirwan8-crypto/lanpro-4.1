@@ -23,6 +23,15 @@ import { confirmDeleteAlert, showSuccessAlert } from "../../../../lib/sweetalert
 import { Task, MasterData, UserProfile, Sprint } from "../../../../types";
 import { fetchMilestones, type Milestone } from "../../../timeline/milestone.service";
 import { fetchTaskWorkLogs, createTaskWorkLog } from "../../../../services/taskService";
+import {
+  ISIAN,
+  ISIAN_PENUH,
+  LABEL,
+  PEMICU,
+  TOMBOL_BAHAYA,
+  TOMBOL_KECIL,
+  TOMBOL_TEKS,
+} from "../../../../components/ui/gayaForm";
 import { toast } from "sonner";
 
 interface TaskDetailSidebarProps {
@@ -136,7 +145,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
   return (
     <div
       className={cn(
-        "lg:col-span-4 bg-surface-sunken/70/40 p-3.5 sm:p-4 md:p-5 space-y-3 sm:space-y-4 border-t lg:border-t-0 lg:border-l border-border-subtle/80 min-h-full transition-opacity text-left",
+        "lg:col-span-4 bg-surface-sunken/60 p-3.5 sm:p-4 md:p-5 space-y-3 sm:space-y-4 border-t lg:border-t-0 lg:border-l border-border-subtle min-h-full transition-opacity text-left",
         isUpdatingTask?.[task.id] && "opacity-50 pointer-events-none"
       )}
     >
@@ -150,7 +159,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
 
       {/* Main Lifecycle Status Select */}
       <div className="space-y-1">
-        <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
+        <label className={LABEL}>
           <Activity className="w-3 h-3 text-content-subtle" />
           {t("issueDetail.lifecycleStatus")}
         </label>
@@ -164,7 +173,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
           onChange={(val) => updateTaskField(task.id, "status", val)}
           disabled={!isEditable}
           className="w-full"
-          buttonClassName="h-[32px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-2.5 text-xs font-normal"
+          buttonClassName={PEMICU}
         />
       </div>
 
@@ -174,7 +183,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
       <div className="space-y-3">
         {/* Assignee */}
         <div className="space-y-1">
-          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
+          <label className={LABEL}>
             <User className="w-3 h-3 text-content-subtle" />
             {t("issueDetail.assignee")}
           </label>
@@ -192,14 +201,14 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
             type="member"
             masterData={[]}
             className={cn("w-full", !canManage && "pointer-events-none opacity-80")}
-            buttonClassName="h-[32px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-2.5 text-xs font-normal text-content-body"
+            buttonClassName={PEMICU}
             disabled={!canManage}
           />
         </div>
 
         {/* Reporter */}
         <div className="space-y-1">
-          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
+          <label className={LABEL}>
             <User className="w-3 h-3 text-content-subtle" />
             {t("issueDetail.reporter")}
           </label>
@@ -217,7 +226,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
             type="member"
             masterData={[]}
             className={cn("w-full", !canChangeReporter && "pointer-events-none opacity-80")}
-            buttonClassName="h-[32px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-2.5 text-xs font-normal text-content-body"
+            buttonClassName={PEMICU}
             disabled={!canChangeReporter}
           />
         </div>
@@ -225,7 +234,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
         {/* Priority & Points Grid */}
         <div className="grid grid-cols-2 gap-2.5">
           <div className="space-y-1">
-            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
+            <label className={LABEL}>
               <Zap className="w-3 h-3 text-content-subtle" />
               {t("issueDetail.priority")}
             </label>
@@ -244,7 +253,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
               onChange={(val) => updateTaskField(task.id, "priority", val)}
               disabled={!isEditable || blockMember}
               className={cn("w-full", blockMember && "pointer-events-none opacity-80")}
-              buttonClassName="h-[32px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-2.5 text-xs font-normal"
+              buttonClassName={PEMICU}
             />
           </div>
           <div className="space-y-1">
@@ -253,10 +262,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
                 {t("issueDetail.points")}
               </label>
               {isEditable && (!isProjectMember || isReporter) && (
-                <button
-                  onClick={() => handleSuggestStoryPoints(task)}
-                  className="text-[10px] font-normal text-primary hover:text-primary flex items-center gap-0.5"
-                >
+                <button onClick={() => handleSuggestStoryPoints(task)} className={TOMBOL_TEKS}>
                   <Sparkles className="w-3 h-3" /> AI
                 </button>
               )}
@@ -265,7 +271,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
               type="number"
               initialValue={task.storyPoints || ""}
               onSave={(val: any) => updateTaskField(task.id, "storyPoints", parseInt(val) || 0)}
-              className="h-[32px] w-full text-xs font-normal bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2.5 focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all shadow-2xs outline-none text-content-body"
+              className={ISIAN_PENUH}
               disabled={!isEditable || blockMember}
               placeholder="0"
             />
@@ -274,7 +280,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
 
         {/* Blocked Status */}
         <div className="space-y-1">
-          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
+          <label className={LABEL}>
             <ShieldAlert className="w-3 h-3 text-content-subtle" />
             {t("issueDetail.blockedStatus")}
           </label>
@@ -282,10 +288,10 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
             onClick={() => toggleBlockedStatus(task.id)}
             disabled={!isEditable || blockMember}
             className={cn(
-              "h-[32px] w-full flex items-center justify-between px-2.5 rounded-md border transition-all text-xs font-normal tracking-tight shadow-2xs",
+              cn(PEMICU, "tracking-tight"),
               task.isBlocked
-                ? "bg-red-500/10 border-red-500/30 text-red-600 shadow-xs"
-                : "bg-surface border-border-subtle/80 text-content-muted hover:border-red-500/30 hover:text-red-500",
+                ? "bg-danger/10 border-danger/30 text-danger-text shadow-xs"
+                : "bg-surface border-border-subtle/80 text-content-muted hover:border-danger/30 hover:text-danger-text",
               blockMember && "pointer-events-none opacity-80"
             )}
           >
@@ -296,9 +302,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
             <div
               className={cn(
                 "w-2 h-2 rounded-full",
-                task.isBlocked
-                  ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
-                  : "bg-surface-marker"
+                task.isBlocked ? "bg-danger shadow-2xs" : "bg-surface-marker"
               )}
             />
           </button>
@@ -306,7 +310,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
 
         {/* Current Sprint */}
         <div className="space-y-1">
-          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
+          <label className={LABEL}>
             <Layers className="w-3 h-3 text-content-subtle" />
             {t("issueDetail.currentSprint")}
           </label>
@@ -325,13 +329,13 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
             masterData={masterData}
             disabled={!isEditable || blockMember}
             className={cn("w-full", blockMember && "pointer-events-none opacity-80")}
-            buttonClassName="h-[32px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-2.5 text-xs font-normal text-content-body"
+            buttonClassName={PEMICU}
           />
         </div>
 
         {/* Release (MasterData) — terpisah dari Milestone tabel */}
         <div className="space-y-1">
-          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
+          <label className={LABEL}>
             <Tag className="w-3 h-3 text-content-subtle" />
             {t("issueDetail.releaseMilestone")}
           </label>
@@ -352,13 +356,13 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
             masterData={masterData}
             disabled={!isEditable || blockMember}
             className={cn("w-full", blockMember && "pointer-events-none opacity-80")}
-            buttonClassName="h-[32px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-2.5 text-xs font-normal text-content-body"
+            buttonClassName={PEMICU}
           />
         </div>
 
         {/* Milestone (tabel Milestones / #312) */}
         <div className="space-y-1">
-          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
+          <label className={LABEL}>
             <Flag className="w-3 h-3 text-content-subtle" />
             {t("issueDetail.milestone")}
           </label>
@@ -377,29 +381,26 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
             masterData={masterData}
             disabled={!isEditable || blockMember}
             className={cn("w-full", blockMember && "pointer-events-none opacity-80")}
-            buttonClassName="h-[32px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-2.5 text-xs font-normal text-content-body"
+            buttonClassName={PEMICU}
           />
         </div>
 
         {/* Dates Grid */}
         <div className="grid grid-cols-2 gap-2.5">
           <div className="space-y-1">
-            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
+            <label className={LABEL}>
               <Calendar className="w-3 h-3 text-content-subtle" />
               {t("issueDetail.startDate")}
             </label>
             <LanproDatePicker
               value={task.startDate ? format(ensureDate(task.startDate), "yyyy-MM-dd") : ""}
               onChange={(val) => updateTaskField(task.id, "startDate", val)}
-              buttonClassName={cn(
-                "h-[32px] w-full text-xs font-normal bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2 shadow-2xs text-content-body",
-                blockMember && "opacity-70 cursor-not-allowed"
-              )}
+              buttonClassName={cn(PEMICU, blockMember && "opacity-70 cursor-not-allowed")}
               disabled={!isEditable || blockMember}
             />
           </div>
           <div className="space-y-1">
-            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
+            <label className={LABEL}>
               <Calendar className="w-3 h-3 text-content-subtle" />
               {t("issueDetail.endDate")}
             </label>
@@ -409,10 +410,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
               minDate={
                 task.startDate ? format(ensureDate(task.startDate), "yyyy-MM-dd") : undefined
               }
-              buttonClassName={cn(
-                "h-[32px] w-full text-xs font-normal bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2 shadow-2xs text-content-body",
-                blockMember && "opacity-70 cursor-not-allowed"
-              )}
+              buttonClassName={cn(PEMICU, blockMember && "opacity-70 cursor-not-allowed")}
               disabled={!isEditable || blockMember}
             />
           </div>
@@ -420,7 +418,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
 
         <div className="grid grid-cols-2 gap-2.5">
           <div className="space-y-1">
-            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
+            <label className={LABEL}>
               <Calendar className="w-3 h-3 text-content-subtle" />
               {t("issueDetail.dueDate")}
             </label>
@@ -430,15 +428,12 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
               minDate={
                 task.startDate ? format(ensureDate(task.startDate), "yyyy-MM-dd") : undefined
               }
-              buttonClassName={cn(
-                "h-[32px] w-full text-xs font-normal bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2 shadow-2xs text-content-body",
-                blockMember && "opacity-70 cursor-not-allowed"
-              )}
+              buttonClassName={cn(PEMICU, blockMember && "opacity-70 cursor-not-allowed")}
               disabled={!isEditable || blockMember}
             />
           </div>
           <div className="space-y-1">
-            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
+            <label className={LABEL}>
               <Tag className="w-3 h-3 text-content-subtle" />
               {t("issueDetail.labels")}
             </label>
@@ -455,7 +450,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
                 )
               }
               placeholder={t("issueDetail.addTags")}
-              className="h-[32px] w-full text-xs font-normal bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2.5 focus:ring-1 focus:ring-primary/20 focus:border-primary shadow-2xs outline-none text-content-body"
+              className={ISIAN_PENUH}
               disabled={!isEditable}
             />
           </div>
@@ -464,7 +459,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
         {/* Time Tracking Grid */}
         <div className="grid grid-cols-2 gap-2.5">
           <div className="space-y-1">
-            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
+            <label className={LABEL}>
               <Clock className="w-3 h-3 text-content-subtle" />
               {t("issueDetail.estHours")}
             </label>
@@ -476,13 +471,13 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
               onSave={(val: any) =>
                 updateTaskField(task.id, "estimatedHours", parseFloat(val) || 0)
               }
-              className="h-[32px] w-full text-xs font-normal bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2.5 focus:ring-1 focus:ring-primary/20 focus:border-primary shadow-2xs outline-none text-content-body"
+              className={ISIAN_PENUH}
               disabled={!isEditable}
               placeholder={t("issueDetail.egHours")}
             />
           </div>
           <div className="space-y-1">
-            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
+            <label className={LABEL}>
               <LineChart className="w-3 h-3 text-primary" />
               {t("issueDetail.loggedHours")}
             </label>
@@ -492,7 +487,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
               step="0.5"
               initialValue={task.loggedHours || ""}
               onSave={(val: any) => updateTaskField(task.id, "loggedHours", parseFloat(val) || 0)}
-              className="h-[32px] w-full text-xs font-normal bg-primary/10 border border-primary/30 hover:border-primary/30 rounded-md px-2.5 focus:ring-1 focus:ring-primary/20 focus:border-primary shadow-2xs outline-none text-primary"
+              className={cn(ISIAN_PENUH, "bg-primary/5 border-primary/30 text-primary")}
               disabled={!isEditable}
               placeholder={t("issueDetail.egLogged")}
             />
@@ -514,7 +509,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
                 onChange={(e) => setLogHours(e.target.value)}
                 onKeyDown={submitLogOnEnter}
                 placeholder="h"
-                className="w-16 h-8 text-xs rounded-md border border-border-subtle bg-surface-muted px-2 text-content"
+                className={cn(ISIAN, "w-16 bg-surface-muted")}
               />
               <input
                 type="text"
@@ -522,13 +517,13 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
                 onChange={(e) => setLogNote(e.target.value)}
                 onKeyDown={submitLogOnEnter}
                 placeholder={t("issueDetail.workLogNote", "Catatan (opsional)")}
-                className="flex-1 min-w-0 h-8 text-xs rounded-md border border-border-subtle bg-surface-muted px-2 text-content"
+                className={cn(ISIAN, "flex-1 min-w-0 bg-surface-muted")}
               />
               <button
                 type="button"
                 disabled={logSaving || !logHours}
                 onClick={() => void submitWorkLog()}
-                className="h-8 px-2.5 text-[10px] font-medium rounded-md bg-primary text-content-inverse disabled:opacity-50 shrink-0"
+                className={TOMBOL_KECIL}
               >
                 {t("issueDetail.workLogAdd", "Tambah")}
               </button>
@@ -538,7 +533,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
                 {workLogs.slice(0, 8).map((w) => (
                   <li
                     key={w.id}
-                    className="flex justify-between gap-2 text-[10px] text-content-muted border-t border-border-faint pt-1"
+                    className="flex justify-between gap-2 text-[10px] text-content-muted border-t border-border-subtle pt-1"
                   >
                     <span className="truncate">
                       {Number(w.hours)}h{w.note ? ` — ${w.note}` : ""}
@@ -573,7 +568,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
         {canDelete && (
           <div className="pt-2">
             <button
-              className="w-full h-8 text-xs font-normal text-red-600 bg-red-500/10 hover:bg-red-500/15 border border-red-500/30 rounded-md transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+              className={TOMBOL_BAHAYA}
               onClick={async () => {
                 const isConfirmed = await confirmDeleteAlert(
                   "Hapus Task / Issue Permanen?",

@@ -14,6 +14,7 @@ import { motion } from "motion/react";
 import { cn } from "../../../../lib/utils";
 import { UserAvatar } from "../../../../components/ui/UserAvatar";
 import { Button, Textarea } from "./TaskDetailPrimitives";
+import { KARTU_SECTION } from "../../../../components/ui/gayaForm";
 import { UserProfile, ActivityLog } from "../../../../types";
 import {
   formatActivityDetailsUntukTampilan,
@@ -92,8 +93,8 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
   };
 
   return (
-    <div className="space-y-6 pt-6 border-t border-border-faint">
-      <div className="flex items-center gap-6 border-b border-border-faint">
+    <div className={cn(KARTU_SECTION, "p-4 md:p-5 space-y-4")}>
+      <div className="flex items-center gap-6 border-b border-border-subtle">
         <button
           className={cn(
             "pb-4 text-xs font-normal uppercase tracking-normal transition-all relative",
@@ -141,7 +142,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
             />
             <div className="flex-1 relative">
               <div className="border border-border-subtle rounded-xl bg-surface focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-xs overflow-hidden">
-                <div className="flex items-center gap-1 p-2 border-b border-border-faint bg-surface-sunken/40 overflow-x-auto">
+                <div className="flex items-center gap-1 p-2 border-b border-border-subtle bg-surface-sunken/40 overflow-x-auto">
                   <button className="flex items-center gap-1.5 px-2 py-1 hover:bg-surface-strong rounded text-xs sm:text-[11px] font-normal text-content-secondary transition-colors shrink-0">
                     <Sparkles className="w-3 h-3 text-primary" />
                     {t("comments.improveWriting")}
@@ -185,13 +186,14 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                   value={newCommentText}
                   onChange={handleCommentChange}
                   placeholder={t("comments.editorPlaceholder")}
-                  className="border-none shadow-none focus:ring-0 !ring-0 !outline-none p-4 resize-none bg-surface text-[13px] font-normal leading-relaxed min-h-[90px] w-full"
+                  tanpaBingkai
+                  className="min-h-[90px]"
                 />
               </div>
 
               {mentionState.active && (
                 <div className="absolute z-50 w-72 bg-surface rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden transform bottom-[110%] left-0 animate-dropdown">
-                  <div className="p-3 bg-surface-sunken border-b border-border-faint text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+                  <div className="p-3 bg-surface-sunken border-b border-border-subtle text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
                     {t("comments.suggestedPeople")}
                   </div>
                   <div className="max-h-60 overflow-y-auto py-1">
@@ -397,7 +399,8 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                                       }))
                                     }
                                     placeholder={`Tulis balasan untuk @${rootUsername || rootDisplayName}...`}
-                                    className="border-none shadow-none focus:ring-0 !ring-0 !outline-none px-3 py-2 resize-none bg-surface text-xs leading-relaxed min-h-[60px] w-full"
+                                    tanpaBingkai
+                                    className="px-3 py-2 min-h-[60px]"
                                     autoFocus
                                   />
                                 </div>
@@ -462,7 +465,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                     className="w-7 h-7 shrink-0 shadow-2xs border border-surface relative z-10"
                   />
                   {i < filteredLogs.length - 1 && (
-                    <div className="absolute top-7 left-1/2 -content-x-1/2 w-0.5 h-full bg-surface-strong/60 z-0" />
+                    <div className="absolute top-7 left-1/2 -translate-x-1/2 w-0.5 h-full bg-surface-strong/60 z-0" />
                   )}
                 </div>
                 <div className="space-y-0.5 py-0.5">

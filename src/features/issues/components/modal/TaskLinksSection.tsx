@@ -5,6 +5,8 @@ import { motion } from "motion/react";
 import { Button } from "./TaskDetailPrimitives";
 import { StyledDropdown } from "../../../../components/ui/CommonComponents";
 import { Task, MasterData, LinkedTask } from "../../../../types";
+import { PEMICU, KARTU_SECTION, JUDUL_SECTION } from "../../../../components/ui/gayaForm";
+import { cn } from "../../../../lib/utils";
 
 interface TaskLinksSectionProps {
   task: Task;
@@ -74,9 +76,9 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
   };
 
   return (
-    <div className="space-y-4 pt-4 border-t border-border-faint">
+    <div className={cn(KARTU_SECTION, "p-4 md:p-5 space-y-4")}>
       <div className="flex items-center justify-between">
-        <h4 className="text-xs sm:text-[10px] font-normal uppercase tracking-normal text-content-subtle flex items-center gap-1.5">
+        <h4 className={JUDUL_SECTION}>
           <GitBranch className="w-3.5 h-3.5 text-primary" />
           {t("issues.dependenciesPanel", t("issues.relatedIssues"))}
         </h4>
@@ -109,7 +111,7 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
                 return (
                   <div
                     key={link.id ? `${link.id}-${linkIdx}` : `link-${linkIdx}`}
-                    className="p-3 bg-surface rounded-xl border border-border-faint shadow-soft space-y-2 group/link relative"
+                    className="p-3 bg-surface rounded-xl border border-border-subtle shadow-soft space-y-2 group/link relative"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="text-xs font-medium text-content-body truncate flex-1">
@@ -149,7 +151,7 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
             ]}
             masterData={masterData}
             className="w-full"
-            buttonClassName="text-[13px] font-medium bg-surface border border-border-subtle rounded-xl px-4 py-2 shadow-soft"
+            buttonClassName={PEMICU}
           />
           <StyledDropdown
             value={taskLinkTargetId}
@@ -165,7 +167,7 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
             ]}
             masterData={masterData}
             className="w-full"
-            buttonClassName="text-[13px] font-medium bg-surface border border-border-subtle rounded-xl px-4 py-2 shadow-soft"
+            buttonClassName={PEMICU}
           />
           <div className="flex gap-2 justify-end">
             <Button size="sm" variant="secondary" onClick={() => setIsAddingTaskLinkLocal(false)}>

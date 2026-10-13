@@ -21,6 +21,7 @@ import { Task, Attachment } from "../../../../types";
 import { uploadAttachmentDocument, addTaskAttachment } from "../../services/issues.service";
 import { toast } from "sonner";
 import { ImagePreviewModal } from "./ImagePreviewModal";
+import { KARTU_SECTION, TOMBOL_IKON, ISIAN_PENUH } from "../../../../components/ui/gayaForm";
 
 interface TaskAttachmentsSectionProps {
   task: Task;
@@ -48,22 +49,22 @@ function isImageAttachment(att: Attachment): boolean {
 
 function getFileIcon(att: Attachment) {
   if (att.type === "link") {
-    return <LinkIcon className="w-4 h-4 text-blue-500" />;
+    return <LinkIcon className="w-4 h-4 text-info" />;
   }
   const name = (att.name || att.filename || "").toLowerCase();
   const ext = name.split("?")[0].split(".").pop() || "";
 
   if (isImageAttachment(att)) {
-    return <ImageIcon className="w-4 h-4 text-emerald-500" />;
+    return <ImageIcon className="w-4 h-4 text-success" />;
   }
   if (["pdf", "doc", "docx", "txt", "rtf"].includes(ext)) {
-    return <FileText className="w-4 h-4 text-rose-500" />;
+    return <FileText className="w-4 h-4 text-danger-text" />;
   }
   if (["xls", "xlsx", "csv"].includes(ext)) {
-    return <FileSpreadsheet className="w-4 h-4 text-emerald-600" />;
+    return <FileSpreadsheet className="w-4 h-4 text-success-text" />;
   }
   if (["zip", "rar", "7z", "tar", "gz"].includes(ext)) {
-    return <FileArchive className="w-4 h-4 text-amber-500" />;
+    return <FileArchive className="w-4 h-4 text-warning-text" />;
   }
   return <FileIcon className="w-4 h-4 text-primary" />;
 }
@@ -210,7 +211,7 @@ export const TaskAttachmentsSection: React.FC<TaskAttachmentsSectionProps> = ({
   const attachments = task.attachments || [];
 
   return (
-    <div className="bg-surface border border-border-subtle/80 rounded-lg p-4 md:p-5 shadow-2xs space-y-4">
+    <div className={cn(KARTU_SECTION, "p-4 md:p-5 space-y-4")}>
       {/* Hidden File Input */}
       <input
         type="file"
@@ -307,13 +308,13 @@ export const TaskAttachmentsSection: React.FC<TaskAttachmentsSectionProps> = ({
         >
           <input
             placeholder={t("attachments.resourceTitle")}
-            className="w-full text-xs font-normal border border-border-subtle rounded-md bg-surface p-2 focus:outline-none focus:ring-1 focus:ring-primary"
+            className={ISIAN_PENUH}
             value={newLinkTitle}
             onChange={(e) => setNewLinkTitle(e.target.value)}
           />
           <input
             placeholder={t("attachments.urlPlaceholder")}
-            className="w-full text-xs font-normal border border-border-subtle rounded-md bg-surface p-2 focus:outline-none focus:ring-1 focus:ring-primary"
+            className={ISIAN_PENUH}
             value={newLinkUrl}
             onChange={(e) => setNewLinkUrl(e.target.value)}
           />
@@ -412,7 +413,10 @@ export const TaskAttachmentsSection: React.FC<TaskAttachmentsSectionProps> = ({
                   <button
                     type="button"
                     onClick={() => handleRemoveAttachment?.(att.id)}
-                    className="p-1.5 rounded-md text-content-subtle hover:text-rose-500 hover:bg-rose-500/10 opacity-70 group-hover:opacity-100 transition-all"
+                    className={cn(
+                      TOMBOL_IKON,
+                      "opacity-70 group-hover:opacity-100 hover:text-danger-text hover:bg-danger/10"
+                    )}
                     title={t("attachments.delete")}
                   >
                     <Trash2 className="w-4 h-4" />
