@@ -228,7 +228,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
           dragOverImport
             ? "border-primary bg-primary/5 text-primary scale-[1.01]"
             : parsedImportData
-              ? "border-emerald-400/50 bg-emerald-500/5 text-emerald-700"
+              ? "border-success/40 bg-success/5 text-success-text"
               : "border-border-subtle hover:border-primary/40 hover:bg-surface-sunken text-content-muted"
         )}
       >
@@ -244,7 +244,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
 
         <div className="text-center space-y-1">
           {parsedImportData ? (
-            <p className="text-sm font-semibold text-emerald-700">{t("flowchart.importReadOk")}</p>
+            <p className="text-sm font-semibold text-success-text">{t("flowchart.importReadOk")}</p>
           ) : dragOverImport ? (
             <p className="text-sm font-semibold text-primary">{t("flowchart.importDropHere")}</p>
           ) : (
@@ -269,12 +269,12 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
 
       {/* Preview result after parsing */}
       {parsedImportData && (
-        <div className="bg-emerald-500/5 border border-emerald-400/40 rounded-xl p-4 space-y-3">
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-emerald-700 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-400/30 inline-block">
+        <div className="bg-success/5 border border-success/40 rounded-xl p-4 space-y-3">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-success-text bg-success/10 px-2 py-0.5 rounded-full border border-success/30 inline-block">
             ✅ Siap Diterapkan
           </span>
           <div className="grid grid-cols-2 gap-2.5">
-            <div className="bg-surface rounded-lg border border-emerald-400/30 px-3 py-2.5 flex items-center gap-2.5 shadow-inner">
+            <div className="bg-surface rounded-lg border border-success/30 px-3 py-2.5 flex items-center gap-2.5 shadow-inner">
               <span className="text-lg">🔷</span>
               <div>
                 <div className="text-sm font-bold text-content-strong">
@@ -285,7 +285,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
                 </div>
               </div>
             </div>
-            <div className="bg-surface rounded-lg border border-emerald-400/30 px-3 py-2.5 flex items-center gap-2.5 shadow-inner">
+            <div className="bg-surface rounded-lg border border-success/30 px-3 py-2.5 flex items-center gap-2.5 shadow-inner">
               <span className="text-lg">↗️</span>
               <div>
                 <div className="text-sm font-bold text-content-strong">
@@ -351,7 +351,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
               </p>
             </div>
           )}
-          <p className="text-[10px] text-emerald-700 italic leading-relaxed">
+          <p className="text-[10px] text-success-text italic leading-relaxed">
             Pilih <strong>Gabung ke Kanvas</strong> untuk menambahkan ke diagram yang ada, atau{" "}
             <strong>Ganti Kanvas</strong> untuk memulai baru.
           </p>

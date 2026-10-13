@@ -255,7 +255,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
           setConnectSourceId(node.id);
           toast.info(t("toast.connectFromShape", { nama: node.label }));
         }}
-        className="p-1 text-content-muted hover:text-amber-500 rounded hover:bg-amber-500/10"
+        className="p-1 text-content-muted hover:text-warning-text rounded hover:bg-warning/10"
         title={t("shapes.startConnector")}
       >
         <ArrowRight className="w-3.5 h-3.5" />
@@ -266,7 +266,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
       {/* Delete shape */}
       <button
         onClick={handleDeleteSelected}
-        className="p-1 hover:text-rose-600 rounded hover:bg-rose-500/10"
+        className="p-1 hover:text-danger-text rounded hover:bg-danger/10"
         title={t("shapes.deleteShape")}
       >
         <Trash2 className="w-3.5 h-3.5" />

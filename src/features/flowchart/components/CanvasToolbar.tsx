@@ -137,7 +137,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           <button
             type="button"
             onClick={handleExportJPG}
-            className="flex items-center gap-1 px-2 py-1.5 text-emerald-700 hover:bg-emerald-500/10 rounded-md text-[10px] leading-none font-medium transition-all cursor-pointer"
+            className="flex items-center gap-1 px-2 py-1.5 text-success-text hover:bg-success/10 rounded-md text-[10px] leading-none font-medium transition-all cursor-pointer"
             title={t("flowchart.export")}
           >
             <Download className="w-3.5 h-3.5" />

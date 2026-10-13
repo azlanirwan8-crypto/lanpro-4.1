@@ -141,7 +141,7 @@ export const EdgeStyleBar: React.FC<EdgeStyleBarProps> = ({
             <div className="w-px h-4 bg-surface-strong mx-0.5" />
 
             <Tombol aktif={false} judul={t("flowchart.disconnectFlow")} onClick={onDelete}>
-              <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+              <Trash2 className="w-3.5 h-3.5 text-danger" />
             </Tombol>
           </>
         )}

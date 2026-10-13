@@ -4327,7 +4327,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           {/* RENDER MARQUEE SELECTION BOX */}
                           {marqueeBox && (
                             <div
-                              className="absolute border border-blue-500 bg-blue-500/10 z-[100] pointer-events-none"
+                              className="absolute border border-info bg-info/10 z-[100] pointer-events-none"
                               style={{
                                 left:
                                   (Math.min(marqueeBox.startX, marqueeBox.currentX) -
@@ -4459,8 +4459,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               false ? "left-[356px]" : "left-4"
             )}>
               <span className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs sm:text-[11px] text-emerald-400 font-normal uppercase tracking-normal">{t("flowchart.canvas")}</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                <span className="text-xs sm:text-[11px] text-success-text font-normal uppercase tracking-normal">{t("flowchart.canvas")}</span>
               </span>
               <div className="w-px h-3.5" />
               <span className="font-medium">X: <span className="text-content-inverse-strong">{hoverCoords.x}</span> Y: <span className="text-content-inverse-strong">{hoverCoords.y}</span></span>
@@ -4550,8 +4550,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             className={cn(
                               "p-1 px-2 rounded-xl transition-all flex items-center gap-1 active:scale-95 text-xs sm:text-[10px] font-medium",
                               isSimulating
-                                ? "bg-red-500/10 text-red-600 hover:bg-red-500/15 border  shadow-soft"
-                                : "text-content-body hover:bg-surface-muted hover:text-emerald-600"
+                                ? "bg-danger/10 text-danger-text hover:bg-danger/15 border  shadow-soft"
+                                : "text-content-body hover:bg-surface-muted hover:text-success-text"
                             )}
                             title={
                               isSimulating
@@ -4563,8 +4563,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               className={cn(
                                 "w-3.5 h-3.5",
                                 isSimulating
-                                  ? "text-red-500 fill-red-200 animate-pulse"
-                                  : "text-emerald-500 fill-emerald-200"
+                                  ? "text-danger fill-danger/20 animate-pulse"
+                                  : "text-success fill-success/20"
                               )}
                             />
                             <span className="hidden sm:inline">
@@ -4577,28 +4577,28 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           {/* Export JPG Image */}
                           <button
                             onClick={handleExportJPG}
-                            className="p-2 text-content-muted hover:bg-surface-muted hover:text-emerald-600 rounded-xl transition-all flex items-center justify-center active:scale-95"
+                            className="p-2 text-content-muted hover:bg-surface-muted hover:text-success-text rounded-xl transition-all flex items-center justify-center active:scale-95"
                             title={t("flowchart.downloadJpg")}
                           >
-                            <ImageIcon className="w-3.5 h-3.5 text-emerald-500" />
+                            <ImageIcon className="w-3.5 h-3.5 text-success" />
                           </button>
 
                           {/* Download JSON backup */}
                           <button
                             onClick={handleExportJSON}
-                            className="p-2 text-content-muted hover:bg-surface-muted hover:text-blue-600 rounded-xl transition-all flex items-center justify-center active:scale-95"
+                            className="p-2 text-content-muted hover:bg-surface-muted hover:text-info-text rounded-xl transition-all flex items-center justify-center active:scale-95"
                             title={t("flowchart.exportJson")}
                           >
-                            <Download className="w-3.5 h-3.5 text-blue-500" />
+                            <Download className="w-3.5 h-3.5 text-info" />
                           </button>
 
                           {/* #659 - berkas .drawio, keluaran yang bisa dibuka draw.io */}
                           <button
                             onClick={handleExportDrawIo}
-                            className="p-2 text-content-muted hover:bg-surface-muted hover:text-violet-600 rounded-xl transition-all flex items-center justify-center active:scale-95"
+                            className="p-2 text-content-muted hover:bg-surface-muted hover:text-primary rounded-xl transition-all flex items-center justify-center active:scale-95"
                             title={t("flowchart.exportDrawio")}
                           >
-                            <FileDown className="w-3.5 h-3.5 text-violet-500" />
+                            <FileDown className="w-3.5 h-3.5 text-primary" />
                           </button>
                           {/*
                 Impor diagram dari Draw.io, Miro, atau JSON.
@@ -4610,10 +4610,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               */}
                           <button
                             onClick={openImportModal}
-                            className="p-2 text-content-muted hover:bg-surface-muted hover:text-emerald-600 rounded-xl transition-all flex items-center justify-center active:scale-95"
+                            className="p-2 text-content-muted hover:bg-surface-muted hover:text-success-text rounded-xl transition-all flex items-center justify-center active:scale-95"
                             title={t("flowchart.importDiagram")}
                           >
-                            <Upload className="w-3.5 h-3.5 text-emerald-500" />
+                            <Upload className="w-3.5 h-3.5 text-success" />
                           </button>
 
                           {/* Simpan Alur DB */}
@@ -4632,7 +4632,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span
                                   className={`hidden lg:inline text-[10px] leading-none font-medium tabular-nums ${
                                     statusSimpan === "gagal"
-                                      ? "text-amber-700"
+                                      ? "text-warning-text"
                                       : "text-content-subtle"
                                   }`}
                                   title={t("flowchart.autosaveHint")}
@@ -4643,7 +4643,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             </>
                           ) : (
                             <div
-                              className="px-2.5 py-1.5 bg-amber-500/10 text-amber-700 border border-amber-500/30 rounded-xl flex items-center gap-1 text-[10px] leading-none font-medium shadow-2xs"
+                              className="px-2.5 py-1.5 bg-warning/10 text-warning-text border border-warning/30 rounded-xl flex items-center gap-1 text-[10px] leading-none font-medium shadow-2xs"
                               title={
                                 currentFlowMetadata?.muatGagal
                                   ? t("flowchart.kunciMuatGagal")
@@ -4652,7 +4652,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                     : undefined
                               }
                             >
-                              <Eye className="w-3.5 h-3.5 text-amber-500" />
+                              <Eye className="w-3.5 h-3.5 text-warning" />
                               <span className="hidden sm:inline">
                                 {currentFlowMetadata?.muatGagal
                                   ? t("flowchart.kunciMuatGagal")
@@ -4687,10 +4687,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           {/* Clear Canvas */}
                           <button
                             onClick={handleClearWhiteboard}
-                            className="p-2 text-content-subtle hover:bg-rose-500/10 hover:text-rose-600 rounded-xl transition-all flex items-center justify-center active:scale-95"
+                            className="p-2 text-content-subtle hover:bg-danger/10 hover:text-danger-text rounded-xl transition-all flex items-center justify-center active:scale-95"
                             title={t("flowchart.clearCanvas")}
                           >
-                            <RefreshCw className="w-3.5 h-3.5 text-rose-500" />
+                            <RefreshCw className="w-3.5 h-3.5 text-danger" />
                           </button>
 
                           <div className="w-px h-5 bg-surface-strong mx-1" />
@@ -4737,7 +4737,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             className={cn(
                               "p-2 rounded-xl transition-all flex items-center justify-center",
                               isKeyboardHelpOpen
-                                ? "bg-amber-500/10 text-amber-600 border "
+                                ? "bg-warning/10 text-warning-text border "
                                 : "text-content-muted hover:bg-surface-muted"
                             )}
                             title={t("flowchart.helpNav")}
@@ -4880,7 +4880,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               <button
                                 type="button"
                                 onClick={handleDeleteSelected}
-                                className="p-2 bg-rose-500/10 rounded-lg hover:bg-rose-500/15 text-rose-600 transition-all active:scale-95 shadow-soft border"
+                                className="p-2 bg-danger/10 rounded-lg hover:bg-danger/15 text-danger-text transition-all active:scale-95 shadow-soft border"
                                 title={t("flowchart.deleteShape")}
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -5103,7 +5103,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             {isWorkspaceEditable && (
                               <button
                                 onClick={handlePutuskanGaris}
-                                className="w-full p-2 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/30 text-rose-700 font-medium rounded text-xs flex items-center justify-center gap-2 transition-all"
+                                className="w-full p-2 bg-danger/10 hover:bg-danger/15 border border-danger/30 text-danger-text font-medium rounded text-xs flex items-center justify-center gap-2 transition-all"
                               >
                                 <Trash2 className="w-3.5 h-3.5" /> {t("flowchart.disconnectFlow")}
                               </button>
@@ -5267,7 +5267,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                   lampiran 5 MB menjadi ~6,7 MB teks di kolom canvasData. */}
               <div className="space-y-1.5">
                 <label className="block text-xs sm:text-[11px] font-medium text-content-body">
-                  {t("flowchart.linkDokumen")} <span className="text-rose-500">*</span>
+                  {t("flowchart.linkDokumen")} <span className="text-danger-text">*</span>
                 </label>
                 <div className="relative">
                   <LinkIcon className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
