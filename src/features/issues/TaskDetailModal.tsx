@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { cn, ensureDate } from "../../lib/utils";
 import { format, formatDistanceToNow } from "date-fns";
+import { localeTanggal } from "../../lib/localeTanggal";
 import { DescriptionEditor } from "../../components/DescriptionEditor";
 import { TaskDetailModalProps } from "./types";
 import { Task } from "../../types";
@@ -78,7 +79,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   setNewLinkUrl,
   deleteTask,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState<"comments" | "history" | "activity">("comments");
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [isEditingAcceptanceCriteria, setIsEditingAcceptanceCriteria] = useState(false);
@@ -136,7 +137,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   const safeFormat = (date: any, formatStr: string, fallback = "--") => {
     try {
       if (!date) return fallback;
-      return format(ensureDate(date), formatStr);
+      return format(ensureDate(date), formatStr, { locale: localeTanggal(i18n.language) });
     } catch {
       return fallback;
     }
@@ -252,7 +253,10 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       <Clock className="w-3.5 h-3.5 text-content-subtle" />
                       {t("rakit.updatedPrefix")}{" "}
                       {task.updatedAt
-                        ? formatDistanceToNow(ensureDate(task.updatedAt), { addSuffix: true })
+                        ? formatDistanceToNow(ensureDate(task.updatedAt), {
+                            addSuffix: true,
+                            locale: localeTanggal(i18n.language),
+                          })
                         : "Never"}
                     </div>
                   </div>
