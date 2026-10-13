@@ -1162,8 +1162,22 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     showSuccessAlert(t("alerts.successTitle"), t("alerts.canvasCleared"));
   };
 
-  // Filter Tasks which are "epics" to hook them up
-  const availableEpics = tasks.filter((t) => t.type === "epic");
+  /* #718 — pemilik proyek 13 Okt: "pada linked to epic, ini harusnya linked to
+     issue, jadi semua issue bukan hanya epic saja". Baris ini dulu membuang
+     segalanya kecuali epic, dan itu dengan perbandingan string MENTAH, sementara
+     kolom jenis tugas menyimpan "Epic", "epic", atau kode MasterData — lihat
+     komentar pembuka src/features/issues/lib/jenisIsu.ts. Akibatnya daftar
+     pilihan bisa KOSONG tanpa galat apa pun di proyek yang labelnya diubah.
+
+     Yang berubah: tidak ada filter lagi, dan epic hanya diurutkan lebih dulu.
+     Urutan itu sengaja boleh best-effort — kalau penanda epic tidak cocok, yang
+     hilang cuma urutan, bukan isinya. Kunci JSON yang disimpan TETAP
+     "epicTaskId": nilai itu hidup di dalam kolom canvasData baris Documents yang
+     lama, dan memindahkannya meng-orphan data yang sudah ada. */
+  const jenisLama = (t: { type?: string }) => (t.type || "").trim().toLowerCase();
+  const opsiTautanIsu = [...tasks].sort(
+    (a, b) => Number(jenisLama(b) === "epic") - Number(jenisLama(a) === "epic")
+  );
 
   /**
    * #582 — salin-tempel papan.
@@ -3672,7 +3686,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     return tasks.find((t) => t.id === taskId);
   };
 
-  const linkedEpic = currentFlowMetadata?.epicTaskId
+  const linkedIsu = currentFlowMetadata?.epicTaskId
     ? tasks.find((t) => t.id === currentFlowMetadata.epicTaskId)
     : null;
 
@@ -3879,14 +3893,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         {currentFlowMetadata?.lastEditedAt || currentFlowMetadata?.createdAt}
                       </span>
 
-                      {linkedEpic && (
+                      {linkedIsu && (
                         <>
                           <span className="text-content-subtle">•</span>
                           <span
                             className="text-[10px] font-medium bg-primary/10 border border-primary/30 px-2.5 py-[3px] rounded-full truncate max-w-[180px]"
-                            title={linkedEpic.title}
+                            title={linkedIsu.title}
                           >
-                            {t("flowchart.epic")} {linkedEpic.title}
+                            {t("flowchart.issue")} {linkedIsu.title}
                           </span>
                         </>
                       )}
@@ -3948,7 +3962,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       <FlowchartDetail
                         konteks={currentFlowMetadata?.konteks}
                         kategori={currentFlowMetadata?.category}
-                        judulEpic={linkedEpic?.title}
                         onEdit={() =>
                           currentFlowMetadata &&
                           openEditModal(currentFlowMetadata, {
@@ -5149,7 +5162,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         opsiKategoriDokumen={opsiKategoriDokumen}
         flowEpicId={flowEpicId}
         setFlowEpicId={setFlowEpicId}
-        availableEpics={availableEpics}
+        opsiTautanIsu={opsiTautanIsu}
         flowKonteks={flowKonteks}
         setFlowKonteks={setFlowKonteks}
       />

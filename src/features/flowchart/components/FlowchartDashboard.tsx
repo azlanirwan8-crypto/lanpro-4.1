@@ -16,6 +16,7 @@ import { Workflow, Search, Plus, Eye, Edit3, Trash2 } from "lucide-react";
 import { ResponsiveTable } from "../../../components/ResponsiveTable";
 import { getInitials } from "../lib/nodeTheme";
 import { tampilanNamaPembuat } from "../lib/authorIdentity";
+import { labelTautanIsu } from "../lib/tautanIsu";
 import { FlowchartMobileCardView } from "./FlowchartMobileCardView";
 import { useMobileAction } from "../../../contexts/MobileActionContext";
 import { PageHeader } from "../../../components/ui/PageHeader";
@@ -133,7 +134,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
               <th className="py-3 px-4 min-w-[180px] max-w-[280px]">
                 {t("flowchart.thDescription")}
               </th>
-              <th className="py-3 px-4 w-44">{t("flowchart.thLinkedEpic")}</th>
+              <th className="py-3 px-4 w-44">{t("flowchart.thLinkedIssue")}</th>
               <th className="py-3 px-4 w-40">{t("flowchart.thAuthor")}</th>
               <th className="py-3 px-4 w-36">{t("wiki.thLastUpdated")}</th>
               <th className="py-3 px-4 w-28 text-center">{t("flowchart.thAction")}</th>
@@ -178,7 +179,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                 };
                 const lastEditedAt = formatDateSafe(fw.lastEditedAt || fw.createdAt);
                 const initials = getInitials(createdBy);
-                const linkedEpic = tasks.find((t) => t.id === fw.epicTaskId);
+                const linkedIsu = tasks.find((t) => t.id === fw.epicTaskId);
 
                 return (
                   <tr
@@ -230,12 +231,13 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                       )}
                     </td>
                     <td className="py-3 px-4 whitespace-nowrap">
-                      {linkedEpic ? (
+                      {linkedIsu ? (
                         <span
                           className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary border border-primary/30 text-[10px] leading-snug font-medium rounded-md max-w-[200px] whitespace-normal break-words"
-                          title={linkedEpic.title}
+                          title={linkedIsu.title}
                         >
-                          🎯 {linkedEpic.title}
+                          <Workflow className="w-3 h-3 shrink-0" />
+                          {labelTautanIsu(linkedIsu.key, linkedIsu.title)}
                         </span>
                       ) : (
                         <span className="text-content-subtle font-normal text-xs">-</span>
@@ -280,7 +282,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                             </button>
                             <button
                               onClick={(e) => handleDeleteFlowchart(fw.id, e)}
-                              className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
+                              className="p-1.5 text-content-muted hover:text-danger-text hover:bg-danger/10 rounded-md transition-all cursor-pointer"
                               title={t("flowchart.deleteFlowchart")}
                             >
                               <Trash2 className="w-4 h-4" />

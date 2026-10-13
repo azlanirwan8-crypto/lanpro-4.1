@@ -13,11 +13,19 @@ import { CircleAlert, Layers, Lightbulb, Target, TrendingUp, Workflow, X } from 
 import { StyledDropdown } from "../../../components/ui/CommonComponents";
 import { warnaLabel } from "../../../lib/warnaLabel";
 import type { KonteksFlowchart } from "../types";
+import { labelTautanIsu } from "../lib/tautanIsu";
 
-interface EpicOption {
+/**
+ * #718 — satu pilihan pada tautan "Isu Terkait". Dulu bernama EpicOption dan
+ * hanya berisi epic; sekarang semua isu proyek masuk dan `type` ikut dibawa
+ * supaya lencana warnanya ikut jenis isu yang sebenarnya, bukan warna epic
+ * untuk semua baris.
+ */
+interface OpsiTautanIsu {
   id: string;
-  key?: string;
+  key: string;
   title: string;
+  type?: string;
 }
 
 interface FlowchartDocumentModalProps {
@@ -32,7 +40,7 @@ interface FlowchartDocumentModalProps {
   opsiKategoriDokumen: { id: string; label: string }[];
   flowEpicId: string;
   setFlowEpicId: (v: string) => void;
-  availableEpics: EpicOption[];
+  opsiTautanIsu: OpsiTautanIsu[];
   flowKonteks: KonteksFlowchart;
   setFlowKonteks: (v: KonteksFlowchart) => void;
 }
@@ -62,9 +70,14 @@ const KOTAK = `${KONTROL_DASAR} py-2 resize-y leading-relaxed`;
 
 const LABEL = "flex items-center gap-1.5 text-xs font-medium text-content-body";
 
-/** Ikon dan warna jenis "epic" — standar yang sama dipakai tabel Isu (#564). */
-const IKON_EPIC = "Zap";
-const WARNA_EPIC = warnaLabel({ kelompok: "issue_type", label: "Epic" });
+/**
+ * #718 — warna lencana ikut JENIS isu yang sebenarnya, lewat fungsi yang sama
+ * dengan tabel Isu dan badge WORK (`warnaLabel`, `src/lib/warnaLabel.ts:120`).
+ * Yang tidak dipakai lagi: satu ikon Zap dan satu warna epic untuk SEMUA baris —
+ * begitu daftarnya berisi semua isu, keduanya akan mengklaim setiap baris
+ * sebagai epic.
+ */
+const warnaJenis = (jenis?: string) => warnaLabel({ kelompok: "issue_type", label: jenis });
 
 export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
   open,
@@ -78,7 +91,7 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
   opsiKategoriDokumen,
   flowEpicId,
   setFlowEpicId,
-  availableEpics,
+  opsiTautanIsu,
   flowKonteks,
   setFlowKonteks,
 }) => {
@@ -149,7 +162,7 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className={LABEL}>
-                  {t("flowchart.docNameLabel")} <span className="text-rose-500">*</span>
+                  {t("flowchart.docNameLabel")} <span className="text-danger-text">*</span>
                 </label>
                 <input
                   type="text"
@@ -163,7 +176,7 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
 
               <div className="space-y-1.5">
                 <label className={LABEL}>
-                  {t("flowchart.docCategoryLabel")} <span className="text-rose-500">*</span>
+                  {t("flowchart.docCategoryLabel")} <span className="text-danger-text">*</span>
                 </label>
                 <StyledDropdown
                   value={flowCategory}
@@ -180,27 +193,27 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
             <div className="space-y-1.5">
               <label className={LABEL}>
                 <Workflow className="w-4 h-4 text-primary" />
-                {t("flowchart.linkedEpicLabel")}
+                {t("flowchart.linkedIssueLabel")}
               </label>
               <StyledDropdown
                 value={flowEpicId}
                 onChange={setFlowEpicId}
                 options={[
-                  { id: "", label: t("flowchart.connectWithEpic") },
-                  ...availableEpics.map((epic) => ({
-                    id: epic.id,
-                    label: `[${epic.key}] ${epic.title}`,
-                    icon: IKON_EPIC,
-                    color: WARNA_EPIC,
+                  { id: "", label: t("flowchart.connectWithIssue") },
+                  ...opsiTautanIsu.map((isu) => ({
+                    id: isu.id,
+                    label: labelTautanIsu(isu.key, isu.title),
+                    icon: "Workflow",
+                    color: warnaJenis(isu.type),
                   })),
                 ]}
                 className="w-full"
                 buttonClassName={KONTROL}
               />
               <p className="text-[11px] text-content-subtle leading-normal">
-                {availableEpics.length > 0
-                  ? t("flowchart.linkedEpicHint", { jumlah: availableEpics.length })
-                  : t("flowchart.linkedEpicKosong")}
+                {opsiTautanIsu.length > 0
+                  ? t("flowchart.linkedIssueHint", { jumlah: opsiTautanIsu.length })
+                  : t("flowchart.linkedIssueKosong")}
               </p>
             </div>
 

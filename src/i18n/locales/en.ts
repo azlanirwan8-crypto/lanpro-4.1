@@ -1503,7 +1503,7 @@ export const en = {
     editDiagram: "Edit Flowchart",
     deleteDiagram: "Delete Flowchart",
     thCategory: "Category",
-    thLinkedEpic: "Linked Epic",
+    thLinkedIssue: "Linked Issue",
     thAuthor: "Author",
     thAction: "Action",
     thTitle: "Flowchart Title",
@@ -1623,7 +1623,7 @@ export const en = {
     detailDokumen: "Document Detail",
     modalSubtitle: "These four blocks are what people read before opening the board.",
     requiredNote: "Name and category are required.",
-    linkedEpicKosong: "No epic on this board yet. Add an Epic issue first if you want to link one.",
+    linkedIssueKosong: "No issue in this project yet - nothing to link.",
     tabDetail: "Detail",
     editDetail: "Edit Detail",
     blokKosong: "Not filled in",
@@ -1639,10 +1639,10 @@ export const en = {
     editDocDetail: "Edit Document Detail",
     docNameLabel: "Document / Flowchart Name",
     docCategoryLabel: "Document Category",
-    linkedEpicLabel: "Linked Epic",
-    connectWithEpic: "-- Connect with an Epic --",
-    linkedEpicHint:
-      "Every row in this list is an epic ({{jumlah}} epics in this project's backlog) - pick the parent epic for this diagram.",
+    linkedIssueLabel: "Linked Issue",
+    connectWithIssue: "-- Connect with an issue --",
+    linkedIssueHint:
+      "{{jumlah}} issues in this project backlog - epics are listed first, then the rest.",
     createDocument: "Create Document",
     saveChanges: "Save Changes",
     addDocument: "Add Document",
@@ -1680,7 +1680,7 @@ export const en = {
     pickADocumentInThe:
       "Pick a document in the sidebar or create a new one to preview and design a flow.",
     flowDiagram: "Flow diagram",
-    epic: "🎯 Epic:",
+    issue: "Issue:",
     linkTheShapeToThe: "Link the shape to the sprint backlog so its status stays in sync.",
     disconnectFlow: "Disconnect flow",
     clickAShapeStickyNote:

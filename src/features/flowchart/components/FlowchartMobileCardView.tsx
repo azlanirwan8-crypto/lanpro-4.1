@@ -1,9 +1,10 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Workflow, Calendar, Edit3, Trash2, ArrowRight, Layers } from "lucide-react";
+import { Workflow, Calendar, Edit3, Trash2, ArrowRight } from "lucide-react";
 import type { FlowchartData } from "../types";
 import type { Task } from "../../../types";
 import { tampilanNamaPembuat } from "../lib/authorIdentity";
+import { labelTautanIsu } from "../lib/tautanIsu";
 import { LabelChip } from "../../../components/ui/CommonComponents";
 
 interface FlowchartMobileCardViewProps {
@@ -29,10 +30,10 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
 }) => {
   const { t } = useTranslation();
 
-  const getLinkedEpicName = (epicId?: string) => {
-    if (!epicId) return null;
-    const task = tasks.find((t) => t.id === epicId);
-    return task?.title || epicId;
+  const namaIsuTertaut = (idIsu?: string) => {
+    if (!idIsu) return null;
+    const isu = tasks.find((t) => t.id === idIsu);
+    return isu ? labelTautanIsu(isu.key, isu.title) : idIsu;
   };
 
   const formatDate = (date: any) => {
@@ -71,7 +72,7 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
     <div className="flex flex-col gap-3">
       {flowcharts.map((flow, index) => {
         const canModify = canModifyFlowchart(flow);
-        const epicName = getLinkedEpicName(flow.epicTaskId);
+        const namaIsu = namaIsuTertaut(flow.epicTaskId);
         const author = tampilanNamaPembuat(flow, getResolvedAuthor());
 
         return (
@@ -106,7 +107,7 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
                     type="button"
                     onClick={(e) => onEditFlowchart(flow, e)}
                     aria-label={t("flowchart.editDiagram") || "Edit Diagram"}
-                    className="p-1.5 rounded-md hover:bg-surface-sunken text-content-subtle hover:text-amber-600 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-md hover:bg-surface-sunken text-content-subtle hover:text-warning-text transition-colors cursor-pointer"
                   >
                     <Edit3 className="w-4 h-4" />
                   </button>
@@ -117,7 +118,7 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
                     type="button"
                     onClick={(e) => onDeleteFlowchart(flow.id, e)}
                     aria-label={t("flowchart.deleteDiagram") || "Delete Diagram"}
-                    className="p-1.5 rounded-md hover:bg-surface-sunken text-content-subtle hover:text-rose-600 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-md hover:bg-surface-sunken text-content-subtle hover:text-danger-text transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -125,14 +126,14 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
               </div>
             </div>
 
-            {/* Category badge & Linked Epic */}
+            {/* Category badge & linked issue */}
             <div className="flex flex-wrap items-center gap-2 text-xs">
               {flow.category && <LabelChip kelompok="jenis_dokumen" nilai={flow.category} />}
 
-              {epicName && (
+              {namaIsu && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-sunken border border-border-subtle text-content-muted text-[11px] font-medium whitespace-normal break-words max-w-full">
-                  <Layers className="w-3 h-3 text-primary shrink-0" />
-                  <span>{epicName}</span>
+                  <Workflow className="w-3 h-3 text-primary shrink-0" />
+                  <span>{namaIsu}</span>
                 </span>
               )}
             </div>

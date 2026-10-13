@@ -1514,7 +1514,7 @@ export const id = {
     editDiagram: "Ubah Diagram Alur",
     deleteDiagram: "Hapus Diagram Alur",
     thCategory: "Kategori",
-    thLinkedEpic: "Epic Terkait",
+    thLinkedIssue: "Isu Terkait",
     thAuthor: "Pembuat",
     thAction: "Aksi",
     thTitle: "Judul Diagram Alur",
@@ -1634,8 +1634,7 @@ export const id = {
     detailDokumen: "Detail Dokumen",
     modalSubtitle: "Empat blok ini yang dibaca orang sebelum membuka papannya.",
     requiredNote: "Nama dan kategori wajib diisi.",
-    linkedEpicKosong:
-      "Belum ada epic di papan ini. Tambahkan isu berjenis Epic lebih dulu bila ingin menautkannya.",
+    linkedIssueKosong: "Belum ada isu di proyek ini - tidak ada yang bisa ditautkan.",
     tabDetail: "Detail",
     editDetail: "Sunting Detail",
     blokKosong: "Belum diisi",
@@ -1651,10 +1650,10 @@ export const id = {
     editDocDetail: "Sunting Detail Dokumen",
     docNameLabel: "Nama Dokumen / Flowchart",
     docCategoryLabel: "Kategori Dokumen",
-    linkedEpicLabel: "Link Epic Terkait",
-    connectWithEpic: "-- Hubungkan dengan Epic --",
-    linkedEpicHint:
-      "Semua baris di daftar ini berjenis epic ({{jumlah}} epic pada backlog proyek ini) — pilih epic induk diagram ini.",
+    linkedIssueLabel: "Isu Terkait",
+    connectWithIssue: "-- Hubungkan dengan isu --",
+    linkedIssueHint:
+      "{{jumlah}} isu pada backlog proyek ini — epic didaftarkan lebih dulu, lalu sisanya.",
     createDocument: "Buat Dokumen",
     saveChanges: "Simpan Perubahan",
     addDocument: "Tambah Dokumen",
@@ -1692,7 +1691,7 @@ export const id = {
     pickADocumentInThe:
       "Pilih dokumen di panel samping atau buat baru untuk melihat pratinjau dan merancang alur.",
     flowDiagram: "Diagram Alur",
-    epic: "🎯 Epic:",
+    issue: "Isu:",
     linkTheShapeToThe: "Hubungkan bentuk dengan backlog fase agar statusnya tersinkron otomatis.",
     disconnectFlow: "Putuskan Alur",
     clickAShapeStickyNote:

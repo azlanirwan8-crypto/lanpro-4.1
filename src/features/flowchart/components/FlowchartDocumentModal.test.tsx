@@ -1,11 +1,17 @@
 /**
- * #583 — modal metadata flowchart.
+ * #583 dan #718 — modal metadata flowchart.
  *
- * Yang dijaga di sini justru yang DIHAPUS: pemilik proyek meminta External Link
- * dan Architecture Description dibuang dan diganti empat blok yang ia tulis di
- * slide (Problem Statement, Pain Point, How, Benefit). Tanpa test, field lama
- * punya cara sendiri untuk kembali — ia masih hidup di kolom `link` dan
- * `description` pada baris database.
+ * Dua hal dijaga di sini, dan keduanya adalah hal yang pernah DICABUT.
+ *
+ * #583 membuang "External Link" dan "Architecture Description" dan menggantinya
+ * dengan empat blok yang pemilik proyek tulis di slide-nya (Problem Statement,
+ * Pain Point, How, Benefit). Tanpa test, field lama punya cara sendiri untuk
+ * kembali — ia masih hidup di kolom `link` dan `description` pada baris database.
+ *
+ * #718 membalik keputusan #583 pada SATU titiknya: pemilik proyek 13 Okt minta
+ * "linked to epic" menjadi "linked to issue, jadi semua issue bukan hanya epic
+ * saja". Test lama mengunci kata "epic" di empat tempat, jadi ia ditulis ulang
+ * bersama keputusannya — bukan dilemahkan.
  */
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
@@ -24,7 +30,7 @@ const props = (over: Record<string, unknown> = {}) => ({
   opsiKategoriDokumen: [{ id: "Panduan", label: "Panduan" }],
   flowEpicId: "",
   setFlowEpicId: jest.fn(),
-  availableEpics: [{ id: "e1", key: "PRJ-3", title: "Pembayaran QRIS" }],
+  opsiTautanIsu: [{ id: "e1", key: "PRJ-3", title: "Pembayaran QRIS", type: "epic" }],
   flowKonteks: KONTEKS_KOSONG,
   setFlowKonteks: jest.fn(),
   ...over,
@@ -41,21 +47,45 @@ describe("FlowchartDocumentModal — empat blok detail (#583)", () => {
     expect(screen.queryByText(/Deskripsi Arsitektur|Architecture Description/i)).toBeNull();
     expect(document.querySelector('input[type="file"]')).toBeNull();
   });
+});
 
-  it("Linked Epic tetap mengisi dari epic issue list papan ini", async () => {
-    render(<FlowchartDocumentModal {...props()} />);
+describe("#718 — tautannya ke ISU, bukan hanya ke epic", () => {
+  it("semua jenis isu masuk, bukan hanya yang berjenis epic", async () => {
+    render(
+      <FlowchartDocumentModal
+        {...props({
+          opsiTautanIsu: [
+            { id: "e1", key: "PRJ-3", title: "Pembayaran QRIS", type: "Epic" },
+            { id: "b1", key: "WMIR-167", title: "Report EDC", type: "bug" },
+            { id: "s1", key: "PRJ-4", title: "Transaksi NFC", type: "story" },
+          ],
+        })}
+      />
+    );
 
     // Pilihan dropdown baru dirender saat terbuka (CommonComponents:336).
-    const pemicu = screen.getAllByText(/Hubungkan dengan Epic/i)[0].closest("button");
+    const pemicu = screen
+      .getAllByText(/Hubungkan dengan isu|Connect with an issue/i)[0]
+      .closest("button");
     fireEvent.click(pemicu as HTMLElement);
 
+    // Yang lama membuang dua baris terakhir tanpa memberi tahu siapa pun.
     expect(await screen.findByText("[PRJ-3] Pembayaran QRIS")).toBeTruthy();
+    expect(screen.getByText("[WMIR-167] Report EDC")).toBeTruthy();
+    expect(screen.getByText("[PRJ-4] Transaksi NFC")).toBeTruthy();
   });
 
-  it("tanpa epic di papan, petunjuknya jujur — bukan dropdown kosong tanpa sebab", () => {
-    render(<FlowchartDocumentModal {...props({ availableEpics: [] })} />);
+  it("label dan petunjuk tidak lagi mengklaim epik", () => {
+    render(<FlowchartDocumentModal {...props()} />);
 
-    expect(screen.getByText(/Belum ada epic/i)).toBeTruthy();
+    expect(screen.getByText(/Isu Terkait|Linked Issue/i)).toBeTruthy();
+    expect(screen.queryByText(/Linked Epic|Link Epic/i)).toBeNull();
+  });
+
+  it("tanpa isu di proyek, petunjuknya jujur — bukan dropdown kosong tanpa sebab", () => {
+    render(<FlowchartDocumentModal {...props({ opsiTautanIsu: [] })} />);
+
+    expect(screen.getByText(/Belum ada isu|No issue in this project/i)).toBeTruthy();
   });
 
   it("setiap blok menulis bidangnya sendiri, tidak ada yang menimpa tetangganya", () => {
@@ -89,7 +119,7 @@ describe("FlowchartDocumentModal — empat blok detail (#583)", () => {
     const { container } = render(<FlowchartDocumentModal {...props()} />);
 
     const pemicu = Array.from(container.querySelectorAll("button")).filter((b) =>
-      /Panduan|Hubungkan dengan Epic/i.test(b.textContent || "")
+      /Panduan|Hubungkan dengan isu|Connect with an issue/i.test(b.textContent || "")
     );
     expect(pemicu.length).toBe(2);
 
@@ -100,27 +130,27 @@ describe("FlowchartDocumentModal — empat blok detail (#583)", () => {
     }
   });
 
-  it("baris epic membawa penanda jenis dan jumlahnya disebut di petunjuk", async () => {
+  it("baris isu membawa penanda jenisnya sendiri dan jumlahnya disebut di petunjuk", async () => {
     render(
       <FlowchartDocumentModal
         {...props({
-          availableEpics: [
-            { id: "e1", key: "PRJ-3", title: "Pembayaran QRIS" },
-            { id: "e2", key: "WMIR-166", title: "Onboarding EDC" },
+          opsiTautanIsu: [
+            { id: "e1", key: "PRJ-3", title: "Pembayaran QRIS", type: "epic" },
+            { id: "e2", key: "WMIR-166", title: "Onboarding EDC", type: "story" },
           ],
         })}
       />
     );
 
-    expect(screen.getByText(/2 epic/i)).toBeTruthy();
+    expect(screen.getByText(/2 isu/i)).toBeTruthy();
 
     fireEvent.click(
-      screen.getAllByText(/Hubungkan dengan Epic/i)[0].closest("button") as HTMLElement
+      screen.getAllByText(/Hubungkan dengan isu/i)[0].closest("button") as HTMLElement
     );
     const baris = (await screen.findByText("[PRJ-3] Pembayaran QRIS")).closest(
       "button"
     ) as HTMLElement;
-    // Ikon jenis di kiri baris — pembedanya, bukan hanya kata "epic".
+    // Ikon jenis di kiri baris — pembedanya, bukan hanya kata "isu".
     expect(baris.querySelector("svg")).toBeTruthy();
   });
 });

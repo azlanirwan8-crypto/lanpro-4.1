@@ -39,13 +39,32 @@ const baca = (relatif: string) => readFileSync(join(AKAR, relatif), "utf8").repl
 /** Kelas tag yang merender `ekspresi`. Jangkar "didahului bukan `=` dan bukan
  *  huruf" membuat pencarian tidak tertukar dengan prop bernama sama
  *  (`name={author.name}`) tapi tetap menemukan yang didahului teks lain, seperti
- *  chip epic `🎯 {linkedEpic.title}`. `\s*` menampung gaya prettier yang
- *  menaruh ekspresi di barisnya sendiri. */
+ *  chip tertaut `{labelTautanIsu(isu.key, isu.title)}`. `\s*` menampung gaya
+ *  prettier yang menaruh ekspresi di barisnya sendiri.
+ *
+ *  `<` TERAKHIR sebelum ekspresi tidak selalu milik tag pembungkus: sejak #718
+ *  chip menaruh ikon di kiri teks, jadi `<` terakhir adalah `<Workflow … />`
+ *  — adik, bukan induk. Kalau yang dibaca kelas adik, guard ini diam-diam
+ *  berhenti memeriksa sel yang ia jaga. Karena itu tag penutup dan elemen
+ *  self-closing dilewati sampai ketemu tag pembuka yang sebenarnya. */
 const kelasTag = (isi: string, ekspresi: string, berkas: string): string => {
   const pola = new RegExp(`(?<![=\\w])${ekspresi.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`);
   const ketemu = pola.exec(isi);
   if (!ketemu) throw new Error(`${berkas}: ${ekspresi} tidak ditemukan — jangan hilangkan datanya`);
-  const buka = isi.lastIndexOf("<", ketemu.index);
+  let buka = -1;
+  let cari = ketemu.index;
+  for (;;) {
+    const kandidat = isi.lastIndexOf("<", cari - 1);
+    if (kandidat < 0) break;
+    const tutup = isi.indexOf(">", kandidat);
+    const tag = isi.slice(kandidat, tutup + 1);
+    const saudara = tag.startsWith("</") || tag.endsWith("/>");
+    if (!saudara) {
+      buka = kandidat;
+      break;
+    }
+    cari = kandidat;
+  }
   if (buka < 0) throw new Error(`${berkas}: tag pembungkus ${ekspresi} tidak ketemu`);
   return isi.slice(buka, ketemu.index + 1);
 };
@@ -128,6 +147,9 @@ const DAFTAR_MEETING = "src/features/meeting-notes/MeetingNotes.tsx";
 const TABEL_FLOW = "src/features/flowchart/components/FlowchartDashboard.tsx";
 const KARTU_FLOW = "src/features/flowchart/components/FlowchartMobileCardView.tsx";
 const KARTU_MEETING = "src/features/meeting-notes/components/MeetingMobileCardView.tsx";
+const MODAL_DOKUMEN = "src/features/flowchart/components/FlowchartDocumentModal.tsx";
+const EN = "src/i18n/locales/en.ts";
+const ID = "src/i18n/locales/id.ts";
 
 describe("kartu Document List flowchart (#646 -> #648)", () => {
   const isi = baca(PAPAN);
@@ -182,10 +204,10 @@ describe("daftar Meeting Notes tampil penuh (#647)", () => {
 describe("daftar flowchart tampil penuh (#647)", () => {
   const isi = baca(TABEL_FLOW);
 
-  it("nama, deskripsi, dan epic tertaut tidak dipotong", () => {
+  it("nama, deskripsi, dan isu tertaut tidak dipotong", () => {
     tanpaPotong(isi, "{fw.name}", TABEL_FLOW);
     tanpaPotong(isi, "{fw.description ? (", TABEL_FLOW);
-    tanpaPotong(isi, "{linkedEpic.title}", TABEL_FLOW);
+    tanpaPotong(isi, "{labelTautanIsu(linkedIsu.key, linkedIsu.title)}", TABEL_FLOW);
   });
 
   it("nama pembuat tidak dipotong", () => {
@@ -204,7 +226,36 @@ describe("daftar flowchart tampil penuh (#647)", () => {
     // Updated, dan Action (screenshot 08 Okt).
     bolehMelebar(isi, "{fw.name}", TABEL_FLOW);
     bolehMelebar(isi, "{fw.description ? (", TABEL_FLOW);
-    bolehMelebar(isi, "{linkedEpic.title}", TABEL_FLOW);
+    bolehMelebar(isi, "{labelTautanIsu(linkedIsu.key, linkedIsu.title)}", TABEL_FLOW);
+  });
+
+  // #718 — pemilik proyek: "pada linked to epic, ini harusnya linked to issue,
+  // jadi semua issue bukan hanya epic saja". #583 pernah mempersempit dropdown
+  // ke epic; keputusan itu DIBALIK. Yang dikunci di sini adalah bentuk yang
+  // membuat pembalikan itu tidak bisa diam-diam kembali.
+  it("tautan memilih isu, bukan hanya epic (#718)", () => {
+    const papan = baca(PAPAN);
+    const modal = baca(MODAL_DOKUMEN);
+    const kamus = baca(EN) + baca(ID);
+
+    // Menyaring = membuang jenis lain. Sorter boleh menyebut "epic" (ia
+    // menaikkannya ke atas), `filter` tidak.
+    const penyaring = /(?:\bfilter|\bfind)\s*\([^)]{0,80}["']epic["']/i;
+    expect(papan).not.toMatch(penyaring);
+    expect(modal).not.toMatch(penyaring);
+
+    // Nama field dan kunci kamus ikut berpindah. Yang tertinggal membaca
+    // properti yang tidak ada dan menampilkan "-" tanpa galat apa pun.
+    expect([papan, modal, kamus].join("\n")).not.toMatch(
+      /\b(?:flowLinkedEpic|opsiEpicTautan|thLinkedEpic|linkedEpicLabel|connectWithEpic)\b/
+    );
+    for (const kunci of ["thLinkedIssue", "linkedIssueLabel", "connectWithIssue"]) {
+      expect(kamus).toContain(`${kunci}:`);
+    }
+
+    // Epic tetap paling atas — tanpa membuang jenis lain.
+    expect(papan).toMatch(/const opsiTautanIsu[\s\S]{0,200}=== "epic"/);
+    expect(modal).toContain("opsiTautanIsu");
   });
 });
 
@@ -241,8 +292,8 @@ describe("kartu mobile tampil penuh (#647)", () => {
     tanpaPotong(meeting, "{meeting.description}", KARTU_MEETING);
   });
 
-  it("epic dan penulis kartu tidak dipotong", () => {
-    tanpaPotong(flow, "{epicName}", KARTU_FLOW);
+  it("isu tertaut dan penulis kartu tidak dipotong", () => {
+    tanpaPotong(flow, "{namaIsu}", KARTU_FLOW);
     tanpaPotong(flow, "{author}", KARTU_FLOW, true);
     tanpaPotong(meeting, "{authorName}", KARTU_MEETING, true);
   });
