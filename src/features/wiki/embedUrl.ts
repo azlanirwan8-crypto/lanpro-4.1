@@ -40,8 +40,12 @@ export function urlSematanGoogle(url?: string): string {
 
   if (u.hostname === "drive.google.com") {
     const id = u.pathname.match(/\/file\/d\/([^/?#]+)/)?.[1] ?? u.searchParams.get("id");
+    // Segmen `d/` BUKAN hiasan: `drive.google.com/file/<id>/preview` tidak
+    // dirutekan Google dan memulangkan halaman "berkas tidak ditemukan" dengan
+    // status 200 — Pemeriksa #633 membacanya sebagai publik, jadi bingkai
+    // dipasang dan yang tampil kotak abu-abu 🚫. Bentuk kanoniknya `/file/d/`.
     return id && id.length >= PANJANG_MIN_ID && POLA_ID.test(id)
-      ? `https://drive.google.com/file/${id}/preview`
+      ? `https://drive.google.com/file/d/${id}/preview`
       : trimmed;
   }
 
@@ -90,6 +94,29 @@ export function urlSematBolehDiuji(url?: string): boolean {
   try {
     const u = new URL(url);
     return u.protocol === "https:" && HOST_SEMAT_BOLEH.has(u.hostname);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * #725 — apakah nilai ini bisa dipakai sebagai `src` bingkai?
+ *
+ * KENAPA DIPISAH dari `urlSematanGoogle`. Fungsi itu memulangkan apa adanya
+ * untuk nilai yang bukan URL (sengaja: #600 tidak boleh mengarang alamat dari
+ * teks bebas), jadi pemanggil tidak bisa membedakan "tautan yang tidak kita
+ * kenal" dari "kolom tautan berisi teks". Panel pratinjau selama ini memperlakukan
+ * keduanya sama: memasang `<iframe>` dan membiarkan Google atau server kita yang
+ * membalas halaman kosong.
+ *
+ * Hanya http/https. `data:` dan `javascript:` tidak pernah dipasang ke bingkai —
+ * kolom tautan diisi pengguna, dan nilai mereka bukan kode yang kita percaya.
+ */
+export function tautanBolehDibingkai(url?: string | null): boolean {
+  const trimmed = (url || "").trim();
+  if (!/^https?:\/\//i.test(trimmed)) return false;
+  try {
+    return Boolean(new URL(trimmed).hostname);
   } catch {
     return false;
   }

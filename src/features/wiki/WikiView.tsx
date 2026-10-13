@@ -16,13 +16,11 @@ import {
   Calendar,
   User,
   Eye,
-  FileCheck,
-  FileSpreadsheet,
-  Layers,
   Search,
   ExternalLink,
   Copy,
   BookOpen,
+  CircleAlert,
   Paperclip,
   Info,
   Maximize2,
@@ -49,7 +47,7 @@ import {
 } from "../../components/ui/ListPageShell";
 import { ListPerPageSelect } from "../../components/ui/ListPerPageSelect";
 import { WikiMobileCardView } from "./components/WikiMobileCardView";
-import { urlSematanDokumen, urlSematBolehDiuji } from "./embedUrl";
+import { urlSematanDokumen, urlSematBolehDiuji, tautanBolehDibingkai } from "./embedUrl";
 import { hasPermission } from "../../lib/permissions";
 import { useMobileAction } from "../../contexts/MobileActionContext";
 import { loadProjectDocuments, peekProjectDocuments } from "../../lib/moduleDataCache";
@@ -168,10 +166,15 @@ export const WikiView: React.FC<WikiViewProps> = ({
   /**
    * #633 — keadaan sematan tautan. `menunggu` dipasang lebih dulu supaya
    * halaman penolakan Google tidak sempat terlihat sekilas.
+   *
+   * #725 menambahkan `bukan-tautan`: kolom tautan selama ini menerima NILAI APA
+   * PUN (`link: editLink.trim()`), dan yang bukan alamat http/https ikut dipasang ke
+   * `<iframe src>` — peramban resolve relatif ke aplikasi kita dan panelnya
+   * jadi kotak abu-abu tanpa satu pun keterangan.
    */
   const [sematTautan, setSematTautan] = useState<{
     tautan: string;
-    status: "menunggu" | "bisa" | "tertutup";
+    status: "menunggu" | "bisa" | "tertutup" | "bukan-tautan";
   }>({ tautan: "", status: "bisa" });
   const [notesText, setNotesText] = useState("");
   const [isEditingNotes, setIsEditingNotes] = useState(false);
@@ -585,6 +588,13 @@ export const WikiView: React.FC<WikiViewProps> = ({
       setSematTautan({ tautan: "", status: "bisa" });
       return;
     }
+    // #725 — nilai yang bukan alamat http/https tidak punya apa pun untuk
+    // dibingkai. Memasangnya juga berarti membiarkan Google atau server kita
+    // yang menjawab, dan jawabannya selalu terbaca sebagai aplikasi rusak.
+    if (!tautanBolehDibingkai(tautan)) {
+      setSematTautan({ tautan, status: "bukan-tautan" });
+      return;
+    }
     // Hanya tautan Google yang diuji; selain itu tidak ada yang berubah dari
     // perilaku lama, jadi jangan pernah mencabut bingkainya.
     const semat = urlSematanDokumen(tautan);
@@ -703,6 +713,16 @@ export const WikiView: React.FC<WikiViewProps> = ({
       );
       return;
     }
+    // #725 — kolom tautan dulu menerima teks apa pun dan nilainya berakhir di
+    // `<iframe src>`. Aturan yang sama dipakai #583 di form flowchart: hanya
+    // http/https, ditolak di muka dengan pesan, bukan disimpan lalu jadi
+    // panel abu-abu.
+    const tautanForm = editLink.trim();
+    if (tautanForm && !tautanBolehDibingkai(tautanForm)) {
+      toast.error(t("toast.wikiTautanHarusHttp"));
+      return;
+    }
+
     setLoading(true);
     try {
       let fileData = null;
@@ -910,46 +930,6 @@ export const WikiView: React.FC<WikiViewProps> = ({
     }
   };
 
-  const getCategoryIcon = (type: string) => {
-    switch (type?.toUpperCase()) {
-      case "PRD":
-        return (
-          <Layers className="w-3.5 h-3.5 text-primary group-hover:scale-110 transition-transform duration-300" />
-        );
-      case "PANDUAN":
-        return (
-          <BookOpen className="w-3.5 h-3.5 text-blue-600 group-hover:scale-110 transition-transform duration-300" />
-        );
-      case "LAPORAN":
-        return (
-          <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 group-hover:scale-110 transition-transform duration-300" />
-        );
-      case "SPESIFIKASI":
-        return (
-          <FileCheck className="w-3.5 h-3.5 text-violet-600 group-hover:scale-110 transition-transform duration-300" />
-        );
-      default:
-        return (
-          <FileText className="w-3.5 h-3.5 text-content-muted group-hover:scale-110 transition-transform duration-300" />
-        );
-    }
-  };
-
-  const getCategoryGlow = (type: string) => {
-    switch (type?.toUpperCase()) {
-      case "PRD":
-        return "from-primary/80 via-primary to-primary/80";
-      case "PANDUAN":
-        return "from-blue-400/80 via-blue-500/80 to-blue-400/80";
-      case "LAPORAN":
-        return "from-emerald-400/80 via-emerald-500/80 to-emerald-400/80";
-      case "SPESIFIKASI":
-        return "from-violet-400/80 via-violet-500/80 to-violet-400/80";
-      default:
-        return "from-slate-400/80 via-slate-500/80 to-slate-400/80";
-    }
-  };
-
   return (
     <div className="w-full flex-1 flex flex-col min-h-0 overflow-hidden relative">
       {!activeDocId ? (
@@ -990,16 +970,16 @@ export const WikiView: React.FC<WikiViewProps> = ({
             <ResponsiveTable className="w-full text-left border-collapse min-w-[880px]">
               <thead>
                 <tr className={LIST_THEAD_ROW_CLASS}>
-                  <th className="py-3 px-4 w-14 text-center">No</th>
-                  <th className="py-3 px-4 min-w-[200px] max-w-[320px]">{t("wiki.thTitle")}</th>
-                  <th className="py-3 px-4 w-44">{t("wiki.thCategory")}</th>
-                  <th className="py-3 px-4 w-44">{t("wiki.thFile")}</th>
-                  <th className="py-3 px-4 w-40">{t("meetings.thAuthor")}</th>
-                  <th className="py-3 px-4 w-36">{t("wiki.thLastUpdated")}</th>
-                  <th className="py-3 px-4 w-28 text-center">{t("discussion.action")}</th>
+                  <th className="px-4 py-2.5 w-14 text-center">No</th>
+                  <th className="px-4 py-2.5 min-w-[200px] max-w-[320px]">{t("wiki.thTitle")}</th>
+                  <th className="px-4 py-2.5 w-44">{t("wiki.thCategory")}</th>
+                  <th className="px-4 py-2.5 w-44">{t("wiki.thFile")}</th>
+                  <th className="px-4 py-2.5 w-40">{t("meetings.thAuthor")}</th>
+                  <th className="px-4 py-2.5 w-36">{t("wiki.thLastUpdated")}</th>
+                  <th className="px-4 py-2.5 w-28 text-center">{t("discussion.action")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-faint text-xs font-medium text-content-body">
+              <tbody className="divide-y divide-border-subtle text-xs font-medium text-content-body">
                 {galatDaftar && currentDocs.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="text-center py-16 text-content-subtle">
@@ -1074,15 +1054,13 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           setActiveDocId(doc.id);
                           setMobileActiveView("detail");
                         }}
-                        className="hover:bg-surface-sunken/80 transition-colors duration-150 group cursor-pointer whitespace-nowrap h-12"
+                        className="hover:bg-surface-sunken/80 transition-colors duration-150 group cursor-pointer"
                       >
                         <td className="py-2.5 px-4 text-center text-content-subtle font-medium whitespace-nowrap">
                           {String(srNo).padStart(2, "0")}
                         </td>
-                        <td className="py-2.5 px-4 font-medium text-content group-hover:text-primary transition-colors max-w-[320px]">
-                          <div className="line-clamp-1" title={doc.title}>
-                            {doc.title}
-                          </div>
+                        <td className="py-2.5 px-4 font-medium text-content group-hover:text-primary transition-colors max-w-[320px] whitespace-normal break-words">
+                          <div title={doc.title}>{doc.title}</div>
                         </td>
                         <td className="py-2.5 px-4">
                           <LabelChip
@@ -1095,14 +1073,11 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           {doc.fileName ? (
                             <button
                               onClick={() => handleDownload(doc.id, doc.fileName || undefined)}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-success/10 hover:bg-success/15 text-success-text border border-success/30 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs whitespace-normal break-words text-left"
                               title={t("meetings.clickToDownload")}
                             >
-                              <Download className="w-3.5 h-3.5 shrink-0 text-emerald-600 group-hover/file:scale-110 transition-transform" />
-                              <span
-                                className="truncate max-w-[130px]"
-                                title={doc.fileName || t("wiki.attachment")}
-                              >
+                              <Download className="w-3.5 h-3.5 shrink-0 text-success group-hover/file:scale-110 transition-transform" />
+                              <span className="max-w-[220px] whitespace-normal break-words">
                                 {doc.fileName || t("wiki.attachment")}
                               </span>
                             </button>
@@ -1118,7 +1093,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                               name={creatorName}
                               className="w-6 h-6 text-xs sm:text-[10px]"
                             />
-                            <span className="truncate max-w-[130px]" title={creatorName}>
+                            <span className="whitespace-nowrap" title={creatorName}>
                               {creatorName}
                             </span>
                           </div>
@@ -1150,7 +1125,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                 </button>
                                 <button
                                   onClick={(e) => handleDeleteClick(doc, e)}
-                                  className="p-1.5 text-content-subtle hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
+                                  className="p-1.5 text-content-subtle hover:text-danger-text hover:bg-danger/10 rounded-md transition-all cursor-pointer"
                                   title={t("wiki.deleteDocument")}
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -1270,7 +1245,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         <button
                           type="button"
                           onClick={() => handleDownload(activeDoc.id, activeDoc.fileName)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 font-medium text-xs border border-emerald-500/30 rounded-md transition-all cursor-pointer whitespace-nowrap shadow-2xs"
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-success/10 hover:bg-success/15 text-success-text font-medium text-xs border border-success/30 rounded-md transition-all cursor-pointer whitespace-nowrap shadow-2xs"
                           title={t("wiki.downloadAttachment")}
                         >
                           <Download className="w-3.5 h-3.5" />
@@ -1338,7 +1313,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 </Card>
 
                 {/* Split-Pane Dual Workspace Layout — #406 Card */}
-                <Card className="shadow-2xs flex-1 flex flex-col md:flex-row min-h-[500px] md:min-h-[600px] overflow-hidden p-3 gap-3 rounded-lg">
+                <Card className="shadow-soft flex-1 flex flex-col md:flex-row min-h-[500px] md:min-h-[600px] overflow-hidden p-3 gap-3 rounded-lg">
                   {/* LEFT PANE / MAIN VIEW (DOCUMENT VIEWER) */}
                   <div
                     className={cn(
@@ -1353,7 +1328,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         {t("wiki.mainPreview")}
                       </span>
                       {activeDoc.fileName && (
-                        <span className="text-[10px] leading-none sm:text-[8px] font-normal bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 px-2 py-[3px] rounded-md uppercase tracking-normal">
+                        <span className="text-[10px] leading-none font-normal bg-success/10 text-success-text border border-success/30 px-2 py-[3px] rounded-md uppercase tracking-normal">
                           {t("wiki.pinned", {
                             type: activeDoc.fileType.split("/")[1]?.toUpperCase() || "FILE",
                           })}
@@ -1386,16 +1361,16 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         /* Embedded Document Viewer with Bulletproof Safe View Actions */
                         <div className="flex-1 flex flex-col relative bg-surface-sunken min-h-0 overflow-hidden">
                           {/* Safe View Toolbar Info Bar */}
-                          <div className="bg-amber-500/10 border-b border-amber-500/30 p-3 sm:px-4 sm:py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs z-10 shrink-0">
+                          <div className="bg-warning/10 border-b border-warning/30 p-3 sm:px-4 sm:py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs z-10 shrink-0">
                             <div className="flex items-start gap-2.5">
-                              <span className="p-1 bg-amber-500/15 text-amber-800 rounded-md mt-0.5 shrink-0">
+                              <span className="p-1 bg-warning/15 text-warning-text rounded-md mt-0.5 shrink-0">
                                 <Info className="w-3.5 h-3.5" />
                               </span>
                               <div>
-                                <p className="font-medium text-amber-950 leading-tight">
+                                <p className="font-medium text-warning-text leading-tight">
                                   {t("wiki.pdfLimited")}
                                 </p>
-                                <p className="text-xs sm:text-[10px] text-amber-800/90 font-medium mt-0.5 leading-normal">
+                                <p className="text-xs text-warning-text font-medium mt-0.5 leading-normal">
                                   {t("wiki.pdfBlockedHint")}
                                 </p>
                               </div>
@@ -1450,7 +1425,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                               rel="noopener noreferrer"
                               title={activeDoc.link}
                               data-testid="pratinjau-tautan"
-                              className="min-w-0 truncate text-content-body hover:text-primary underline decoration-border-faint underline-offset-2"
+                              className="min-w-0 whitespace-normal break-all text-content-body hover:text-primary underline decoration-border-faint underline-offset-2"
                             >
                               {activeDoc.link}
                             </a>
@@ -1511,6 +1486,21 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                   <ExternalLink className="w-3 h-3" />
                                   {t("wiki.openNewTab")}
                                 </a>
+                              </div>
+                            )}
+
+                            {sematTautan.status === "bukan-tautan" && (
+                              <div
+                                className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-8 text-center select-none"
+                                data-testid="pratinjau-bukan-tautan"
+                              >
+                                <CircleAlert className="w-7 h-7 text-warning" />
+                                <p className="text-xs font-medium text-content-strong">
+                                  {t("wiki.sematBukanTautan")}
+                                </p>
+                                <p className="text-xs text-content-subtle max-w-sm leading-normal">
+                                  {t("wiki.sematBukanTautanCara")}
+                                </p>
                               </div>
                             )}
 
@@ -1656,7 +1646,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                   </p>
                                   <span
                                     className={cn(
-                                      "absolute bottom-1 right-3 text-xs sm:text-[11px] sm:text-[9px] font-medium tracking-tight",
+                                      "absolute bottom-1 right-3 text-xs sm:text-[10px] font-medium tracking-tight",
                                       isMine ? "text-content-inverse/70" : "text-content-subtle"
                                     )}
                                   >
@@ -1707,7 +1697,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
               </>
             ) : (
               /* Workspace Empty State — #406 Card */
-              <Card className="flex-1 flex flex-col items-center justify-center p-8 text-center shadow-2xs select-none rounded-lg">
+              <Card className="flex-1 flex flex-col items-center justify-center p-8 text-center shadow-soft select-none rounded-lg">
                 <div className="w-14 h-14 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center mb-4 text-primary shadow-2xs">
                   <BookOpen className="w-7 h-7" />
                 </div>
@@ -1743,10 +1733,10 @@ export const WikiView: React.FC<WikiViewProps> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="bg-surface rounded-lg shadow-xl border border-border-subtle max-w-2xl w-full flex flex-col relative overflow-hidden my-auto max-h-[90vh]"
+              className="bg-surface rounded-xl shadow-xl border border-border-subtle max-w-2xl w-full flex flex-col relative overflow-hidden my-auto max-h-[90vh]"
             >
               {/* Modal header decor */}
-              <div className="bg-surface-sunken/80 px-5 py-3.5 border-b border-border-faint flex justify-between items-center select-none">
+              <div className="bg-surface-sunken/80 px-5 py-3.5 border-b border-border-subtle flex justify-between items-center select-none">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 bg-primary/10 border border-primary/20 text-primary rounded-md flex items-center justify-center shadow-2xs">
                     {isNew ? <Plus className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
@@ -1783,7 +1773,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       if (!loading && editTitle.trim()) handleSave();
                     })}
                     placeholder={t("wiki.titlePlaceholder")}
-                    className="w-full bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 py-2 rounded-md text-xs font-normal text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
+                    className="w-full bg-surface border border-border-subtle h-9 focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 rounded-md text-xs font-normal text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
                   />
                 </div>
 
@@ -1793,7 +1783,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-normal block">
                       {t("wiki.summaryLabel")}
                     </label>
-                    <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-subtle bg-surface-sunken px-1.5 py-0.5 rounded border border-border-subtle">
+                    <span className="text-xs sm:text-[10px] font-medium text-content-subtle bg-surface-sunken px-1.5 py-0.5 rounded border border-border-subtle">
                       {t("wiki.markdownSupport")}
                     </span>
                   </div>
@@ -1818,7 +1808,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       options={documentTypes}
                       masterData={masterData}
                       className="w-full"
-                      buttonClassName="h-[38px] bg-surface rounded-md border border-border-subtle hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
+                      buttonClassName="h-9 bg-surface rounded-md border border-border-subtle hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
                     />
                   </div>
 
@@ -1832,7 +1822,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       value={editLink}
                       onChange={(e) => setEditLink(e.target.value)}
                       placeholder={t("wiki.googleLinkPlaceholder")}
-                      className="w-full h-[38px] bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 rounded-md text-xs font-normal text-content-body outline-none transition-all placeholder:text-content-subtle font-mono shadow-2xs"
+                      className="w-full h-9 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 rounded-md text-xs font-normal text-content-body outline-none transition-all placeholder:text-content-subtle font-mono shadow-2xs"
                     />
                   </div>
                 </div>
@@ -1869,7 +1859,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           <Paperclip className="w-3 h-3" />
                           {editFile.name}
                         </p>
-                        <p className="text-xs sm:text-[10px] sm:text-[8px] font-normal text-content-subtle uppercase tracking-normal mt-1">
+                        <p className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mt-1">
                           {t("wiki.clickToReplace")}
                         </p>
                       </div>
@@ -1880,12 +1870,12 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       <div className="space-y-1">
                         <div className="flex items-center gap-1.5 bg-surface-muted border border-border-subtle px-2.5 py-1 rounded-md justify-center w-max mx-auto">
                           <FileText className="w-3 h-3 text-content-muted" />
-                          <p className="text-xs sm:text-[11px] font-medium text-content-body max-w-[150px] truncate">
+                          <p className="text-xs sm:text-[11px] font-medium text-content-body max-w-[240px] whitespace-normal break-words text-center">
                             {documents.find((d) => d.id === editId)?.fileName}
                           </p>
                         </div>
                         <div className="flex items-center justify-center gap-2">
-                          <p className="text-xs sm:text-[10px] sm:text-[8px] font-normal text-content-subtle uppercase tracking-normal">
+                          <p className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
                             {t("wiki.clickToUpload")}
                           </p>
                           <button
@@ -1895,7 +1885,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                               setShouldRemoveFile(true);
                               toast.info(t("toast.oldAttachmentWillBeRemoved"));
                             }}
-                            className="text-[10px] leading-none sm:text-[8px] font-medium text-rose-600 bg-rose-500/10 border border-rose-500/30 p-0.5 px-1.5 rounded hover:bg-rose-500/15 transition-colors"
+                            className="text-[10px] leading-none font-medium text-danger-text bg-danger/10 border border-danger/30 p-0.5 px-1.5 rounded hover:bg-danger/15 transition-colors"
                           >
                             {t("wiki.remove")}
                           </button>
@@ -1906,14 +1896,14 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         <h4 className="text-xs font-medium text-content-body group-hover:text-primary transition-colors">
                           {t("wiki.pickFromComputer")}
                         </h4>
-                        <p className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-medium leading-normal">
+                        <p className="text-xs sm:text-[10px] text-content-subtle font-medium leading-normal">
                           {t("wiki.dragDrop")}
                         </p>
                       </div>
                     )}
 
                     {shouldRemoveFile && !editFile && (
-                      <div className="p-0.5 px-2 bg-rose-500/10 text-rose-700 border border-rose-500/30 rounded text-[10px] leading-none sm:text-[8px] font-medium">
+                      <div className="p-0.5 px-2 bg-danger/10 text-danger-text border border-danger/30 rounded text-[10px] leading-none font-medium">
                         {t("wiki.oldAttachmentRemoved")}
                       </div>
                     )}
@@ -1944,7 +1934,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
               </div>
 
               {/* Action Buttons Footer */}
-              <div className="px-5 py-3.5 bg-surface-sunken border-t border-border-faint flex items-center justify-end gap-2.5 shrink-0 select-none rounded-b-lg">
+              <div className="px-5 py-3.5 bg-surface-sunken border-t border-border-subtle flex items-center justify-end gap-2.5 shrink-0 select-none rounded-b-xl">
                 <button
                   onClick={() => setShowFormModal(false)}
                   className="px-4 py-2 bg-surface hover:bg-surface-muted border border-border-subtle text-content-secondary hover:text-content rounded-md text-xs font-medium transition-all cursor-pointer shadow-2xs"

@@ -57,7 +57,7 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
 
   if (documents.length === 0) {
     return (
-      <Card className="p-8 text-center shadow-2xs rounded-lg">
+      <Card className="p-8 text-center shadow-soft rounded-lg">
         <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-3 text-primary shadow-2xs">
           <BookOpen className="w-6 h-6" />
         </div>
@@ -86,19 +86,19 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
           <Card
             key={doc.id || index}
             onClick={() => onSelectDoc(doc.id)}
-            className="p-4 shadow-2xs hover:border-primary/40 hover:shadow-xs transition-all cursor-pointer flex flex-col gap-3 rounded-lg"
+            className="p-4 shadow-soft hover:border-primary/40 hover:shadow-soft-lg transition-all cursor-pointer flex flex-col gap-3 rounded-lg"
           >
             {/* Header: Title & Action buttons */}
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
                 <h4
-                  className="text-sm font-semibold text-content-strong line-clamp-2 leading-snug"
+                  className="text-sm font-semibold text-content-strong leading-snug whitespace-normal break-words"
                   title={doc.title}
                 >
                   {doc.title}
                 </h4>
                 {doc.description && (
-                  <p className="text-xs text-content-muted line-clamp-2 mt-1 leading-relaxed">
+                  <p className="text-xs text-content-muted mt-1 leading-relaxed whitespace-normal break-words">
                     {doc.description}
                   </p>
                 )}
@@ -123,7 +123,7 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
                     type="button"
                     onClick={(e) => onEditDoc(doc, e)}
                     aria-label={t("wiki.editDoc") || "Edit"}
-                    className="p-1.5 rounded-md hover:bg-surface-sunken text-content-subtle hover:text-amber-600 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-md hover:bg-surface-sunken text-content-subtle hover:text-warning-text transition-colors cursor-pointer"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
@@ -134,7 +134,7 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
                     type="button"
                     onClick={(e) => onDeleteDoc(doc, e)}
                     aria-label={t("wiki.deleteDoc") || "Delete"}
-                    className="p-1.5 rounded-md hover:bg-surface-sunken text-content-subtle hover:text-rose-600 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-md hover:bg-surface-sunken text-content-subtle hover:text-danger-text transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -158,10 +158,10 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
                     e.stopPropagation();
                     onDownloadDoc(doc.id, doc.fileName);
                   }}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 font-medium hover:underline cursor-pointer"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success/10 border border-success/30 text-success-text font-medium hover:underline cursor-pointer"
                 >
                   <Download className="w-3 h-3" />
-                  <span className="truncate max-w-[140px]" title={doc.fileName}>
+                  <span className="whitespace-normal break-words" title={doc.fileName}>
                     {doc.fileName}
                   </span>
                 </button>
@@ -185,7 +185,10 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
             <div className="pt-2 border-t border-border-faint flex items-center justify-between gap-2 text-xs text-content-subtle">
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="text-[11px]">{t("meetings.thAuthor")}:</span>
-                <span className="font-medium text-content truncate" title={authorName}>
+                <span
+                  className="font-medium text-content whitespace-normal break-words"
+                  title={authorName}
+                >
                   {authorName}
                 </span>
               </div>

@@ -260,10 +260,11 @@ describe("daftar flowchart tampil penuh (#647)", () => {
 });
 
 describe("baris data tidak boleh memaksa satu baris (#649, ratchet seluruh src)", () => {
-  /** Garis dasar: satu situs WARISAN yang belum dikerjakan dan belum ada
-   *  itemnya di papan — `WikiView.tsx` memakai `whitespace-nowrap h-12` pada
-   *  baris datanya. Angka ini boleh MENYUSUT, tidak boleh bertambah. */
-  const GARIS_DASAR = ["src/features/wiki/WikiView.tsx"];
+  /** Garis dasar DULU berisi satu situs WARISAN: `WikiView.tsx` memaksa
+   *  `whitespace-nowrap h-12` pada baris datanya dan tidak pernah punya item di
+   *  papan. #726 menutupnya, jadi daftar ini KOSONG — menambah satu berkas ke
+   *  sini sekarang berarti menambah temuan baru, bukan "melanjutkan pekerjaan". */
+  const GARIS_DASAR: string[] = [];
 
   it("tidak ada baris DATA baru yang membawa whitespace-nowrap", () => {
     const temuan = [

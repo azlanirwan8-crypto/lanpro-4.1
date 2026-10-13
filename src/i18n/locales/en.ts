@@ -780,6 +780,8 @@ export const en = {
     noPermDeleteTask: "Failed: You do not have permission to delete this task.",
     noPermAddDoc: "Failed: You do not have permission to create documents in this project.",
     noPermEditDoc: "Failed: You do not have permission to edit this document.",
+    wikiTautanHarusHttp:
+      "The document link must start with http:// or https:// - a title or a note does not belong in that field.",
     relationNeedTask: "Failed to add relation, make sure a task is selected.",
     relationSelf: "Cannot create a relation to this task itself.",
     relationExists: "This relation already exists.",
@@ -1789,6 +1791,9 @@ export const en = {
     sematTertutupCara:
       'Google only embeds files shared with "Anyone with the link". ' +
       "Change the sharing setting in Google Drive, or open it with the link above.",
+    sematBukanTautan: "This entry is not a link",
+    sematBukanTautanCara:
+      "The document link field holds text, not an address. Paste the full share URL starting with https://, or attach the file itself.",
     downloadPdf: "Download PDF",
     noAttachment: "No File Attachment Yet",
     notesComments: "Discussion Notes & Comments",

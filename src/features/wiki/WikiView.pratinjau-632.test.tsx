@@ -195,3 +195,51 @@ describe("SharePoint langsung dibingkai lewat penampil Office (#634)", () => {
     expect(buka).toHaveLength(1);
   });
 });
+
+/**
+ * #725 — "preview document kenapa masih tidak bisa, saya minta wajib tampil doc nya".
+ *
+ * Dua sebab, dan keduanya TERBUKTI di kode — bukan pengaturan berbagi:
+ * (1) tautan Drive dirakit jadi `drive.google.com/file/<id>/preview`, tanpa
+ *     segmen `d/`. Route itu tidak ada, Google memulangkan halaman "berkas
+ *     tidak ditemukan" dengan status 200, jadi pemeriksa #633 mengiranya publik
+ *     dan bingkai tetap dipasang — kotak abu-abu 🚫.
+ * (2) kolom tautan tidak divalidasi (`link: editLink.trim()`), dan nilainya
+ *     dituang apa adanya ke <iframe src>. Teks bebas menjadi `src` relatif,
+ *     dan panelnya tidak berkata apa-apa.
+ */
+describe("tautan Drive dan nilai yang bukan tautan (#725)", () => {
+  const ID_DRIVE = "1aBcDeFgHiJkLmNoPqRsTuVwXyZ0";
+  const DRIVE = `https://drive.google.com/file/d/${ID_DRIVE}/view?usp=sharing`;
+
+  const pakaiTautan = async (tautan: string, judul: string) => {
+    const baris = [{ ...DOKUMEN[0], link: tautan, title: judul }];
+    (peekProjectDocuments as jest.Mock).mockReturnValue(baris);
+    (loadProjectDocuments as jest.Mock).mockResolvedValue({ data: baris });
+    renderView();
+    const ketemu = await screen.findAllByText(judul);
+    fireEvent.click(ketemu[0]);
+  };
+
+  it("Drive memakai bentuk kanonik /file/d/<id>/preview — bukan /file/<id>/preview", async () => {
+    await pakaiTautan(DRIVE, "Error List Drive");
+    await screen.findByTestId("pratinjau-tautan");
+
+    await waitFor(() => expect(document.querySelector("iframe")).toBeTruthy());
+    const frame = document.querySelector("iframe") as HTMLIFrameElement;
+    expect(frame.getAttribute("src")).toBe(`https://drive.google.com/file/d/${ID_DRIVE}/preview`);
+    // Yang ditanyakan ke server pun harus bentuk yang sama; kalau tidak,
+    // vonis "publik" diambil dari URL yang tidak akan pernah dipakai bingkai.
+    expect((cekSematBisa as jest.Mock).mock.calls[0][2]).toBe(frame.getAttribute("src"));
+  });
+
+  it("teks bebas di kolom tautan TIDAK jadi src iframe — panel berkata jujur", async () => {
+    await pakaiTautan("QRIS Infrastructure Stabilization (Fase 2)", "Error List Teks");
+    await screen.findByTestId("pratinjau-tautan");
+
+    expect(await screen.findByTestId("pratinjau-bukan-tautan")).toBeTruthy();
+    expect(document.querySelector("iframe")).toBeNull();
+    // Tidak ada gunanya menanyakan kelayakan sematan ke server untuk bukan-URL.
+    expect(cekSematBisa).not.toHaveBeenCalled();
+  });
+});

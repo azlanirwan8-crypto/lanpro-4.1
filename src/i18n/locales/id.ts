@@ -790,6 +790,8 @@ export const id = {
     noPermDeleteTask: "Gagal: Anda tidak memiliki izin untuk menghapus tugas ini.",
     noPermAddDoc: "Gagal: Anda tidak memiliki izin untuk membuat dokumen di proyek ini.",
     noPermEditDoc: "Gagal: Anda tidak memiliki izin untuk menyunting dokumen ini.",
+    wikiTautanHarusHttp:
+      "Tautan dokumen harus diawali http:// atau https:// - judul atau catatan bukan tempatnya di kolom itu.",
     relationNeedTask: "Gagal menambahkan relasi, pastikan sebuah tugas dipilih.",
     relationSelf: "Tidak bisa membuat relasi ke tugas ini sendiri.",
     relationExists: "Relasi ini sudah ada.",
@@ -1802,6 +1804,9 @@ export const id = {
     sematTertutupCara:
       'Google hanya mau menampilkan berkas yang dibagi "Siapa saja dengan tautan". ' +
       "Ubah baginya di Google Drive, atau buka lewat tautan di atas.",
+    sematBukanTautan: "Isian ini bukan tautan",
+    sematBukanTautanCara:
+      "Kolom tautan dokumen berisi teks, bukan alamat. Tempel tautan berbagi lengkap yang diawali https://, atau lampirkan berkasnya langsung.",
     downloadPdf: "Unduh PDF",
     noAttachment: "Belum Ada Lampiran Berkas",
     notesComments: "Catatan & Komentar Diskusi",

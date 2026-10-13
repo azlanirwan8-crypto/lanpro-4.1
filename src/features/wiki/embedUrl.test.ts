@@ -81,10 +81,18 @@ describe("urlSematanGoogle — aplikasi Google lain (#600)", () => {
 
   it("tautan Drive (file/d/.../view dan open?id=) ke penampil Drive", () => {
     expect(urlSematanGoogle(`https://drive.google.com/file/d/${ID}/view?usp=sharing`)).toBe(
-      `https://drive.google.com/file/${ID}/preview`
+      `https://drive.google.com/file/d/${ID}/preview`
     );
     expect(urlSematanGoogle(`https://drive.google.com/open?id=${ID}`)).toBe(
-      `https://drive.google.com/file/${ID}/preview`
+      `https://drive.google.com/file/d/${ID}/preview`
+    );
+    // #725 — bentuk tanpa `d/` adalah salah ketik yang pernah dikunci test ini
+    // sendiri. Google TIDAK merutekan `/file/<id>/preview` dan memulangkan
+    // halaman "berkas tidak ditemukan" dengan status 200, jadi pemeriksa #633
+    // mengiranya publik dan bingkai tetap dipasang: dokumen pemilik proyek
+    // tidak pernah tampil walau URL-nya benar. Garis ini yang menjaga `d/`.
+    expect(urlSematanGoogle(`https://drive.google.com/file/d/${ID}/view`)).not.toMatch(
+      /\/file\/[^/]+\/preview$/
     );
   });
 });
@@ -138,7 +146,32 @@ describe("urlSematanGoogle — yang TIDAK boleh disentuh (#600)", () => {
  * Office dipasang apa adanya ke iframe dan Office menolaknya. Yang boleh
  * dibingkai adalah penampil Office for the Web.
  */
-import { urlSematanDokumen, urlSematanKantor } from "./embedUrl";
+import { urlSematanDokumen, urlSematanKantor, tautanBolehDibingkai } from "./embedUrl";
+
+/**
+ * #725 — pagar sebelum `<iframe src>` diisi.
+ *
+ * `urlSematanGoogle` SENGAJA memulangkan teks bebas apa adanya (#600 tidak
+ * boleh mengarang alamat dari apa yang bukan URL). Itu berarti pemanggil tidak
+ * bisa membedakan "host yang tidak kita kenal" dari "kolom tautan diisi judul".
+ * Pagar ini yang memisahnya, dan ia dipakai dua kali: saat menyimpan dan saat
+ * memasang bingkai.
+ */
+describe("tautanBolehDibingkai (#725)", () => {
+  it("hanya http/https berauthority", () => {
+    expect(tautanBolehDibingkai("https://docs.google.com/document/d/1aBc/edit")).toBe(true);
+    expect(tautanBolehDibingkai("  http://bankbnitbk.sharepoint.com/:x:/s/a/b ")).toBe(true);
+  });
+
+  it("teks bebas, skema lain, dan kosong ditolak", () => {
+    expect(tautanBolehDibingkai("QRIS Infrastructure Stabilization (Fase 2)")).toBe(false);
+    expect(tautanBolehDibingkai("nanti saya tempel linknya")).toBe(false);
+    expect(tautanBolehDibingkai("data:text/html,<h1>halo</h1>")).toBe(false);
+    expect(tautanBolehDibingkai("javascript:alert(1)")).toBe(false);
+    expect(tautanBolehDibingkai("")).toBe(false);
+    expect(tautanBolehDibingkai(undefined)).toBe(false);
+  });
+});
 
 const TAKAR = (u: string) => encodeURIComponent(u);
 
