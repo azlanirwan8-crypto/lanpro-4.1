@@ -271,7 +271,7 @@ export const FormDiskusi: React.FC<FormDiskusiProps> = ({
                 type="button"
                 onClick={() => hapusTautan(l.id)}
                 title={t("discussion.hapusTautan")}
-                className="p-1.5 mt-1 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer shrink-0"
+                className="p-1.5 mt-1 text-content-muted hover:text-danger-text hover:bg-danger/10 rounded-md transition-all cursor-pointer shrink-0"
               >
                 <Trash2 className="w-4 h-4" />
               </button>

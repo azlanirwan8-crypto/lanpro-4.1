@@ -1846,9 +1846,10 @@ export const en = {
     thConcern: "Concern",
     thNotes: "Notes / Remarks",
     thContextTags: "Context / Tags",
-    // #714 — papan turun dari dua belas ke delapan kolom: "siapa" dan "kapan"
-    // satu sel, tautan dan gambar satu sel, dan aksi duduk di kanan.
-    thPicTanggal: "PIC & target date",
+    // #714 — papan turun dari dua belas ke delapan kolom. #715 mengembalikan PIC
+    // dan tanggal ke kolomnya sendiri: pemilik proyek menolaknya digabung.
+    thPic: "PIC",
+    thTargetDate: "Target Date",
     thLampiran: "Attachments",
     thStatusAksi: "Status & actions",
     thStatus: "Status",

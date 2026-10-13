@@ -95,10 +95,13 @@ describe("#712 — sel tidak boleh menggambar di atas kolom tetangga", () => {
    * layar 13 Okt. `ea671294` menambal PANEL-nya (portal); yang belum adalah
    * PEMICUNYA dan pagar umum di setiap sel. */
   it("kelas SEL mengunci luberan di tingkat sel", () => {
-    // #714 menambahkan garis pemisah antar kolom pada kelas yang sama.
-    expect(baca(KEPALA)).toContain(
-      'export const SEL = "px-4 border-b border-border-faint border-r last:border-r-0 overflow-hidden"'
-    );
+    // #714 menambahkan `overflow-hidden` dan garis pemisah antar kolom.
+    // Diambil lewat regex, bukan literal utuh: yang penting kelasnya MEMUANG
+    // pagar, bukan bagaimana prettier menata barisnya.
+    const sel = /export const SEL =\s*\n?\s*"([^"]+)"/.exec(baca(KEPALA))![1];
+    expect(sel).toContain("overflow-hidden");
+    expect(sel).toContain("border-r");
+    expect(sel).toContain("last:border-r-0");
   });
 
   it("pemicu pemilih jamak mengunci luberan chip", () => {

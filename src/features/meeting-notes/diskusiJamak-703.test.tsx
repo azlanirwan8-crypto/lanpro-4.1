@@ -99,7 +99,9 @@ describe("#703 butir 1 dan 2 — Context/Tags dari Daftar Isu, PIC jamak", () =>
 });
 
 describe("#703 butir 3 — kolom Follow-up akhirnya tampil di tabel", () => {
-  /* #714 menurunkan papan dari dua belas ke delapan kolom. Yang TETAP dikunci di
+  /* #714 menurunkan papan dari dua belas kolom; #715 menaikkan lagi ke SEMBILAN
+   * setelah PIC dan Target Date dipisah kembali atas permintaan pemilik proyek.
+   * Yang TETAP dikunci di
    * sini adalah maksud butir 3 dan butir 5-6 #703/#704: Follow-up punya tempat di
    * tabel, dan tautan serta gambar juga punya tempat. Yang berubah adalah bahwa
    * "punya tempat" tidak lagi berarti "punya kolom sendiri" — ketiganya sekarang
@@ -110,8 +112,8 @@ describe("#703 butir 3 — kolom Follow-up akhirnya tampil di tabel", () => {
     expect(kepala).toContain('t("discussion.thLampiran")');
     // 8 kolom: No, Concern, Notes, Follow-up, Tags, PIC & Target, Lampiran,
     // Status & Action. Baris kosong tidak boleh bokek kolom.
-    expect(kepala.match(/<th /g)).toHaveLength(8);
-    expect(baca(TABEL)).toContain("colSpan={8}");
+    expect(kepala.match(/<th /g)).toHaveLength(9);
+    expect(baca(TABEL)).toContain("colSpan={9}");
   });
 
   it("tautan dan gambar tetap dirender penuh di sel Lampiran (#704 tidak dicabut)", () => {
@@ -203,11 +205,11 @@ describe("#703/#704 lanjutan — isian papan lengkap, panel tidak terpotong", ()
    * bersamaan dengan yang sedang diketik, karena tabelnya 1.818 px lebar. */
   const jumlah = (isi: string, pola: RegExp) => (isi.match(pola) || []).length;
 
-  it("kepala tabel delapan kolom, dan baris tambah bukan lagi `<tr>`", () => {
+  it("kepala tabel sembilan kolom, dan baris tambah bukan lagi `<tr>`", () => {
     const kolom = jumlah(baca(KEPALA), /<th[\s>]/g);
-    // #714 menurunkan ini dari 12 ke 8; penjaga di berkas ini membaca NAMA
-    // kolom, bukan posisi, jadi penurunan jumlah tidak membuat yang lain kabur.
-    expect(kolom).toBe(8);
+    // #714 menurunkan ini dari 12, #715 menaikkan ke 9 setelah PIC dan tanggal
+    // dipisah lagi; penjaga di berkas ini membaca NAMA kolom, bukan posisi.
+    expect(kolom).toBe(9);
     const cepat = baca(CEPAT);
     expect(jumlah(cepat, /<td[\s>]/g)).toBe(0);
     expect(jumlah(cepat, /<tr[\s>]/g)).toBe(0);

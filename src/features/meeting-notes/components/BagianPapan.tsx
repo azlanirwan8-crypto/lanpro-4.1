@@ -99,7 +99,7 @@ export const KepalaPapan: React.FC<KepalaProps> = ({ tampilAI, onToggleAI, cari,
  * border pada `<tr>`, sehingga `divide-y` di `<tbody>` diam-diam menghasilkan
  * nol garis.
  *
- * #712 — `overflow-hidden` ditambahkan, dan itu bukan pemanis. Dengan
+ * #714 — `overflow-hidden` ditambahkan, dan itu bukan pemanis. Dengan
  * `table-fixed` lebar kolom DIPATOK dari kepala, tetapi konten yang lebih lebar
  * tidak dibuang maupun dipotong: ia tetap DIGAMBAR melewati tepi sel, di atas
  * kolom tetangga. Itulah yang pemilik proyek lihat sebagai "dropdown lolos dari
@@ -108,13 +108,24 @@ export const KepalaPapan: React.FC<KepalaProps> = ({ tampilAI, onToggleAI, cari,
  * satu panel; yang dibutuhkan adalah pagar di setiap sel, supaya cacat yang sama
  * tidak bisa lahir lagi di kolom berikutnya.
  *
- * #714 — `border-r` menjadikan garis pemisah antar kolom. Dua belas kolom tanpa
- * satu pun garis vertikal, dengan tinggi sel yang berbeda-beda, membuat mata
- * tidak bisa menelusuri satu baris dari kiri ke kanan; Delapan kolom dengan
- * garis tipis bisa. `last:border-r-0` melepas garis pada kolom terakhir supaya
- * tepi kanan tabel tetap hanya satu garis.
+ * #714 menambahkan `border-r` sebagai pemisah antar kolom.
+ *
+ * #715 memindahkan papan ini ke keputusan #699 dan #678b yang sudah lama berlaku
+ * untuk Daftar Isu, dan itu mengubah DUA garis sekaligus:
+ *  - Garis pemisah BARIS naik dari `border-border-faint` ke `border-border-subtle`.
+ *    #699 mengukur yang pertama hanya 1,096:1 terhadap putih — mata tidak
+ *    membacanya sebagai pemisah, jadi baris-baris papan ini seperti mengalir ke
+ *    satu sama lain. Itu sebagian dari "berantakan" yang dilaporkan.
+ *  - Garis pemisah KOLOM tetap `border-border-faint` (#678b: "garis setajam garis
+ *    kontrol di setiap kolom akan mengubah tabel menjadi kisi").
+ * Karena dua sisi butuh warna berbeda, kelasnya ditulis PER SISI
+ * (`border-b-border-subtle`, `border-r-border-faint`). Menulis
+ * `border-border-subtle border-border-faint` tidak akan bekerja: keduanya
+ * mengatur `border-color` untuk semua sisi, dan yang menang ditentukan urutan
+ * stylesheet, bukan maksud penulisnya.
  */
-export const SEL = "px-4 border-b border-border-faint border-r last:border-r-0 overflow-hidden";
+export const SEL =
+  "px-4 border-b border-b-border-subtle border-r border-r-border-faint last:border-r-0 overflow-hidden";
 
 /**
  * #707 — kepala tabel desktop. `position: sticky` hanya bekerja terhadap
@@ -136,53 +147,89 @@ export const SEL = "px-4 border-b border-border-faint border-r last:border-r-0 o
  * Lebar kolom ditulis di sini dan hanya di sini: dengan `table-fixed` nilai
  * inilah kolomnya, dan baris data tidak perlu menebak lagi.
  *
- * #714 — dari DUA BELAS kolom menjadi DELAPAN, dan lebarnya tidak lagi
+ * #714 — dari DUA BELAS kolom menjadi lebih sedikit, dan lebarnya tidak lagi
  * ditentukan oleh nama kolomnya melainkan oleh teks yang benar-benar duduk di
  * dalamnya. Chip PIC memakai `px-2 text-[10px]`: "Mohamad Rifky Pramadanianto"
  * (27 karakter) butuh ±153 px termasuk padding, sementara kolomnya dipatok
  * 150 px — jadi secara matematis TIDAK PERNAH bisa berbagi baris dengan chip
  * lain. Tiga PIC berarti tiga lajur, dan satu baris tabel naik ke enam lajur
  * tinggi. Pada saat yang sama Notes/Remarks memegang 280 px — kolom terlebar
- * kedua di papan — dan kosong pada kedua baris papan yang difoto. Karena itu
- * tiga pasang yang satu niat digabung: "siapa" dan "kapan" (PIC + Target Date),
- * bahan tempelan (Tautan + Gambar), dan "apa berikutnya" (Thread + Status +
- * Action). Total 1.818 px turun ke 1.468 px, dan kolom aksi tidak lagi terbuang
- * ke luar layar.
+ * kedua di papan — dan kosong pada kedua baris papan yang difoto.
+ *
+ * #715 — dua koreksi atas #714, keduanya laporan pemilik proyek dari layar.
+ *
+ * (1) URUTAN KEPALA ADALAH KONTRAK, dan #714 melanggarnya. Kepala ditulis
+ * `Notes → Follow-up → Tags` sementara sel baris ditulis `Notes → Tags →
+ * Follow-up`, jadi kolom "FOLLOW UP" menampilkan TAG dan "CONTEXT / TAGS"
+ * menampilkan teks follow-up: dua kolom bertukar isi dan tidak satu pun perkakas
+ * berteriak — `tsc` tidak tahu kolom mana berisi apa, dan build tetap hijau.
+ * `kepalaSelSejajar-715.test.ts` sekarang menahan urutan itu.
+ *
+ * (2) PIC dan Target Date dipisah lagi. #714 menggabungkannya atas nama
+ * "siapa dan kapan satu niat"; pemilik proyek menolaknya ("datetime kenapa di
+ * gabung dengan pic, kolom pisah saja"), dan ia benar: tanggal adalah data yang
+ * diurutkan dan dibaca cepat, bukan keterangan tambahan di samping nama.
+ *
+ * Sekalian kepala papan ini dipindah ke kit gaya rumah
+ * (`src/features/issues/styles.ts`, `tableHeaderCell`): `text-[10px] font-normal
+ * py-2.5` dengan pemisah kolom `border-border-faint`. Sebelumnya ia `text-xs
+ * py-3` — huruf lebih besar dan baris lebih gemuk daripada tabel mana pun lain
+ * di aplikasi yang sama, dan itu bagian dari "tidak Velzon".
+ *
+ * Jumlahnya jadi sembilan kolom: 48, 220, 190, 200, 220, 200, 150, 130, 230 =
+ * 1.588 px. `min-w` wadah gulir WAJIB sama dengan jumlah ini; test menguncinya.
  */
 export const KepalaTabel: React.FC = () => {
   const { t } = useTranslation();
   const th =
-    "sticky top-0 z-20 bg-surface-sunken py-3 px-4 border-b border-r border-border-subtle font-normal";
+    "sticky top-0 z-30 bg-surface-sunken px-4 py-2.5 text-[10px] font-normal text-content-subtle whitespace-nowrap border-b border-b-border-subtle border-r border-r-border-faint last:border-r-0";
   return (
     <thead>
-      <tr className="text-xs text-content-subtle whitespace-nowrap">
+      <tr className="text-content-subtle">
         <th scope="col" className={`${th} w-[48px] text-center`}>
           {t("discussion.thNo")}
         </th>
-        <th scope="col" className={`${th} w-[230px]`}>
+        <th scope="col" className={`${th} w-[220px]`}>
           {t("discussion.thConcern")}
         </th>
-        <th scope="col" className={`${th} w-[200px]`}>
+        <th scope="col" className={`${th} w-[190px]`}>
           {t("discussion.thNotes")}
         </th>
-        {/* #703 butir 3 — Follow-up selama ini ADA di form dan ADA di basis
-            data, tetapi tidak pernah punya kolom. */}
-        <th scope="col" className={`${th} w-[230px]`}>
-          {t("discussion.followUp")}
-        </th>
+        {/* URUTAN INI yang salah di #714: tag dulu, baru follow-up — persis
+            seperti urutan sel di `BarisDiskusi`. */}
         <th scope="col" className={`${th} w-[200px]`}>
           {t("discussion.thContextTags")}
         </th>
-        {/* #714 — "siapa" dan "kapan" satu niat, satu sel. */}
-        <th scope="col" className={`${th} w-[210px]`}>
-          {t("discussion.thPicTanggal")}
+        {/* #703 butir 3 — Follow-up selama ini ADA di form dan ADA di basis
+            data, tetapi tidak pernah punya kolom. */}
+        <th scope="col" className={`${th} w-[220px]`}>
+          {t("discussion.followUp")}
         </th>
-        {/* #704 butir 5 dan 6 bertemu #714: keduanya bahan tempelan, jadi
-            keduanya satu sel. Isinya tetap tampil penuh, bukan angka. */}
-        <th scope="col" className={`${th} w-[140px]`}>
+        <th scope="col" className={`${th} w-[200px]`}>
+          {t("discussion.thPic")}
+        </th>
+        {/* #715 — 130 px sempat jadi angka yang tampak aman padahal tidak:
+            kepala digambar `uppercase` dengan `letter-spacing: 0.05em`
+            (`index.css:595`), dan "TANGGAL TARGET" — label terpanjang yang bisa
+            duduk di kolom ini — adalah 14 karakter × ±7 px + `px-4` = ±130 px.
+            Kepalanya persis menyentuh tepi, `whitespace-nowrap`, dan satu
+            pixel bahasa lain langsung luber ke pemisah kolom. */}
+        <th scope="col" className={`${th} w-[150px]`}>
+          {t("discussion.thTargetDate")}
+        </th>
+        {/* #704 butir 5 dan 6: tautan dan gambar satu sel "Lampiran". Isinya
+            tetap tampil penuh, bukan angka. */}
+        <th scope="col" className={`${th} w-[130px]`}>
           {t("discussion.thLampiran")}
         </th>
-        <th scope="col" className={`${th} w-[210px] text-right`}>
+        {/* #715 — kolom aksi dinaikkan dari 210 ke 230 karena yang diukur bukan
+            judulnya melainkan ISINYA: pil status (ikon + kata + padding), tombol
+            utas berangka, dan dua tombol ikon. Dengan `gap-1.5` dan padding lama
+            susunan itu ±214 px, jadi selnya turun dua lajur di SETIAP baris —
+            persis tinggi baris yang membuat papan dibaca berantakan. Ruang diambil
+            dari Concern dan Follow-up, dua-duanya kolom teks yang sudah punya
+            gulir sendiri dan tidak kehilangan satu karakter pun. */}
+        <th scope="col" className={`${th} w-[230px] text-right`}>
           {t("discussion.thStatusAksi")}
         </th>
       </tr>

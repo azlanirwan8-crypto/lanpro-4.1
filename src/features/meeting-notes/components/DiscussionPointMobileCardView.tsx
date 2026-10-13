@@ -90,10 +90,10 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
         return (
           <div
             key={p.id || index}
-            className={cn(
-              "p-3.5 bg-surface hover:bg-surface-sunken/60 active:bg-surface-sunken transition-all flex flex-col gap-2.5",
-              isCompleted && "opacity-80"
-            )}
+            // #715 — kartu mobile mengikuti papan: hover naik ke `surface-strong`
+            // dan baris selesai tidak lagi diturunkan opasitasnya, karena pil
+            // status sudah menyatakannya dengan kata.
+            className="p-3.5 bg-surface hover:bg-surface-strong/60 active:bg-surface-sunken transition-all flex flex-col gap-2.5"
           >
             {/* Header: No Badge, Status Toggle, & Actions */}
             <div className="flex items-center justify-between gap-2">
@@ -110,16 +110,16 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                   className={cn(
                     "text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center gap-1 transition-all",
                     isCompleted
-                      ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 hover:bg-emerald-500/15"
-                      : "bg-amber-500/10 text-amber-700 border border-amber-500/30 hover:bg-amber-500/15",
+                      ? "bg-success/10 text-success-text border border-success/30 hover:bg-success/15"
+                      : "bg-warning/10 text-warning-text border border-warning/30 hover:bg-warning/15",
                     !canToggleStatus && "cursor-default"
                   )}
                   title={canToggleStatus ? t("discussion.toggleStatus") : undefined}
                 >
                   {isCompleted ? (
-                    <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="w-3 h-3 text-success-text shrink-0" />
                   ) : (
-                    <Clock className="w-3 h-3 text-amber-600 shrink-0" />
+                    <Clock className="w-3 h-3 text-warning-text shrink-0" />
                   )}
                   <span>
                     {isCompleted ? t("discussion.statusDone") : t("discussion.statusPending")}
@@ -155,7 +155,7 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                   <button
                     type="button"
                     onClick={() => p.id && onDeletePoint(p.id)}
-                    className="p-1 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
+                    className="p-1 text-content-muted hover:text-danger-text hover:bg-danger/10 rounded-md transition-all cursor-pointer"
                     title={t("discussion.deleteRow")}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -169,12 +169,12 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
               <span className="text-[10px] font-normal uppercase tracking-normal text-content-subtle block mb-0.5">
                 {t("discussion.thConcern")}
               </span>
-              <p
-                className={cn(
-                  "text-xs font-semibold text-content-strong leading-relaxed",
-                  isCompleted && "line-through text-content-muted"
-                )}
-              >
+              {/* #715 — mencoret judul untuk menandai "selesai" hanya ada di HP,
+                  sementara papan tidak melakukannya: dua tampilan untuk data yang
+                  sama tidak boleh memberi meaning berbeda (#645). Pil status di
+                  kepala kartu sudah menyatakan selesai, dan coretan pada teks
+                  concern justru dibaca "dibatalkan", bukan "sudah beres". */}
+              <p className="text-xs font-semibold text-content-strong leading-relaxed">
                 {p.concern}
               </p>
             </div>

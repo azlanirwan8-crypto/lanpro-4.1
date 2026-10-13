@@ -92,26 +92,28 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
   const bukanGambar = berkas.filter((b) => !(b.mimetype || "").startsWith("image/"));
 
   return (
-    <tr
-      className={cn(
-        "hover:bg-surface-sunken/60 transition-colors group",
-        isCompleted && "opacity-75"
-      )}
-    >
+    /* #715 — baris papan ikut `tableRow` kit rumah (`styles.ts` Daftar Isu):
+       latar gulir `surface-strong`, bukan `surface-sunken`. Yang terakhir adalah
+       warna KEPALA tabel, jadi selama hover memakainya baris yang disorot justru
+       menyatu dengan kepala saat digulir — dan `opacity-75` pada baris selesai
+       dibuang: pil "SELESAI" sudah menyatakan statusnya dengan kata, sementara
+       opasitas 75 % menurunkan kontras catatan panjang yang justru paling banyak
+       ditulis baris selesai (#645 melarang memotong teks, dan ini saudaranya). */
+    <tr className="group hover:bg-surface-strong/60 transition-all duration-150 cursor-default">
       {/* No. */}
-      <td className={cn(SEL, "py-3 text-center text-content-subtle font-normal align-top")}>
+      <td className={cn(SEL, "py-2.5 text-center text-content-subtle font-normal align-top")}>
         {nomor}
       </td>
 
       {/* Concern — follow-up tidak lagi menumpang di sel ini; ia kolom sendiri (#703 butir 3). */}
-      <td className={cn(SEL, "py-3 align-top")}>
+      <td className={cn(SEL, "py-2.5 align-top")}>
         <div className="font-normal text-content-strong leading-snug whitespace-pre-wrap break-words max-h-32 overflow-y-auto">
           <Paragraf teks={p.concern} />
         </div>
       </td>
 
       {/* Notes / Keterangan — #645: TIDAK boleh dipotong. */}
-      <td className={cn(SEL, "py-3 align-top text-content-body font-normal")}>
+      <td className={cn(SEL, "py-2.5 align-top text-content-body font-normal")}>
         <div className="whitespace-pre-wrap break-words max-h-32 overflow-y-auto">
           <Paragraf teks={p.keterangan || p.comment || "-"} />
         </div>
@@ -119,7 +121,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
 
       {/* Context / Tags — #703 (B1 = a): isu nyata dari Daftar Isu, plus label
           `fitur` lama yang datanya tetap ada di basis data. */}
-      <td className={cn(SEL, "py-3 align-top")}>
+      <td className={cn(SEL, "py-2.5 align-top")}>
         <div className="flex flex-wrap gap-1 items-center">
           {tag.map((s) => (
             <span
@@ -147,7 +149,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
 
       {/* Follow-up — #703 butir 3: field-nya sudah ada dan sudah tersimpan
           (`"tindakanLanjut" TEXT`), hanya kolomnya yang belum pernah tampil. */}
-      <td className={cn(SEL, "py-3 align-top text-content-body font-normal")}>
+      <td className={cn(SEL, "py-2.5 align-top text-content-body font-normal")}>
         {p.tindakanLanjut || p.next_action ? (
           <div className="whitespace-pre-wrap break-words max-h-32 overflow-y-auto">
             <Paragraf teks={p.tindakanLanjut || p.next_action} />
@@ -157,12 +159,12 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
         )}
       </td>
 
-      {/* #714 — PIC dan Target Date satu sel. Keduanya menjawab "siapa" dan
-          "kapan", dan selama keduanya berdiri sendiri, kolom PIC yang 150 px itu
-          memaksa setiap nama turun ke barisnya sendiri sementara kolom tanggal
-          hampir selalu kosong satu baris. Nama TETAP tampil penuh: #645 melarang
-          memotongnya, dan larangan itu dijaga catatanLengkap-645.test.ts. */}
-      <td className={cn(SEL, "py-3 align-top text-content-body font-normal")}>
+      {/* PIC — #703 (B2 = b): boleh lebih dari satu orang. #714 pernah
+          menggabungkannya dengan Target Date; pemilik proyek menolaknya pada
+          13 Okt ("datetime kenapa di gabung dengan pic, kolom pisah saja") dan
+          ia kembali berdiri sendiri. Yang menahan tinggi baris bukan tanggalnya,
+          melainkan lebar kolom PIC — itu yang naik dari 150 ke 200 px. */}
+      <td className={cn(SEL, "py-2.5 align-top text-content-body font-normal")}>
         <div className="flex flex-wrap items-center gap-1">
           {namaPenerima.length > 0 ? (
             namaPenerima.map((nama) => (
@@ -180,19 +182,26 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
             <span className="break-words">{assigneeName}</span>
           )}
         </div>
+      </td>
+
+      {/* Target Date — kolom sendiri, dan tetap satu baris tanggal yang bisa
+          dibaca cepat. */}
+      <td className={cn(SEL, "py-2.5 align-top text-content-muted font-normal")}>
         {p.targetDate ? (
-          <div className="mt-1.5 flex items-center gap-1 text-[11px] text-content-muted">
+          <div className="flex items-center gap-1 text-[11px]">
             <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />
             <span className="break-words">{p.targetDate}</span>
           </div>
-        ) : null}
+        ) : (
+          kosong("-")
+        )}
       </td>
 
       {/* #704 butir 5 dan 6, sekarang satu sel "Lampiran" (#714). Isinya tetap
           lengkap: tautan dan berkas bukan-gambar sebagai chip, gambar sebagai
           miniatur. Yang berhenti adalah dua kolom terpisah yang keduanya hampir
           selalu berisi "-". */}
-      <td className={cn(SEL, "py-3 align-top")}>
+      <td className={cn(SEL, "py-2.5 align-top")}>
         {tautan.length === 0 && berkas.length === 0 ? (
           kosong("-")
         ) : (
@@ -256,8 +265,8 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
       {/* #714 — Thread, Status, dan Action satu sel di kanan. Ketiganya adalah
           "apa berikutnya", dan selama berdiri sendiri mereka menempati tiga
           kolom paling kanan yang justru tidak terlihat tanpa gulir horizontal. */}
-      <td className={cn(SEL, "py-3 align-top")}>
-        <div className="flex flex-wrap items-center justify-end gap-1.5">
+      <td className={cn(SEL, "py-2.5 align-top")}>
+        <div className="flex flex-wrap items-center justify-end gap-1">
           <button
             type="button"
             onClick={onToggleStatus}
@@ -265,13 +274,19 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
             title={t("discussion.toggleStatus")}
           >
             {isCompleted ? (
-              <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 shadow-2xs hover:bg-emerald-500/15">
-                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+              /* #715 — pil status pindah dari palet Tailwind ke TOKEN rumah,
+                 sama seperti yang dipakai `CoreUI.tsx:290` untuk varian
+                 `success` dan `styles.ts` Daftar Isu untuk `filterPillAmber`.
+                 Kelas lama datang dari palet mentah dan tidak punya padanan mode
+                 gelap, jadi teksnya ikut gelap di atas kartu gelap;
+                 `--color-*-text` sudah diturunkan untuk kedua mode (§22). */
+              <span className="flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[10px] leading-none font-normal bg-success/10 text-success-text border border-success/30 shadow-2xs hover:bg-success/15">
+                <CheckCircle2 className="w-3 h-3 text-success-text" />
                 {t("discussion.statusDone")}
               </span>
             ) : (
-              <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-amber-500/10 text-amber-700 border border-amber-500/30 shadow-2xs hover:bg-amber-500/15">
-                <Clock className="w-3 h-3 text-amber-600" />
+              <span className="flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[10px] leading-none font-normal bg-warning/10 text-warning-text border border-warning/30 shadow-2xs hover:bg-warning/15">
+                <Clock className="w-3 h-3 text-warning-text" />
                 {t("discussion.statusPending")}
               </span>
             )}
@@ -280,7 +295,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
           <button
             onClick={onOpenThread}
             className={cn(
-              "inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs font-normal transition-all cursor-pointer border shadow-2xs active:scale-95",
+              "inline-flex items-center justify-center gap-1 px-2 py-1 rounded-md text-xs font-normal transition-all cursor-pointer border shadow-2xs active:scale-95",
               jumlahKomentar > 0
                 ? "bg-primary/10 hover:bg-primary/15 text-primary border-primary/20"
                 : "bg-surface-sunken hover:bg-surface-muted text-content-subtle border-border-subtle/60"
@@ -308,7 +323,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
           {bolehHapus && (
             <button
               onClick={onDelete}
-              className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
+              className="p-1.5 text-content-muted hover:text-danger-text hover:bg-danger/10 rounded-md transition-all cursor-pointer"
               title={t("discussion.deleteRow")}
             >
               <Trash2 className="w-4 h-4" />

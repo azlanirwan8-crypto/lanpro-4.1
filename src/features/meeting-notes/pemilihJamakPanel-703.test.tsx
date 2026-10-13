@@ -95,7 +95,11 @@ describe("#703 — panel pemilih jamak tidak terpotong wadahnya", () => {
 
   it("berbalik ke atas saat ruang di bawah habis", () => {
     const tinggiAsli = window.innerHeight;
-    Object.defineProperty(window, "innerHeight", { value: 720, writable: true, configurable: true });
+    Object.defineProperty(window, "innerHeight", {
+      value: 720,
+      writable: true,
+      configurable: true,
+    });
     const { pemicu } = pasang();
     pemicu.getBoundingClientRect = kotak(660, 688);
     fireEvent.click(pemicu);

@@ -65,10 +65,12 @@ const pasang = (p: Partial<DiscussionPoint> = {}) =>
     </table>
   );
 
-describe("#714 — baris data delapan sel", () => {
-  it("DELAPAN sel, bukan dua belas", () => {
+describe("#714/#715 — baris data sembilan sel", () => {
+  it("SEMBILAN sel, bukan dua belas dan bukan delapan", () => {
     const { container } = pasang();
-    expect(container.querySelectorAll("tbody > tr > td")).toHaveLength(8);
+    // #714 menurunkan ke delapan dengan menggabung PIC dan tanggal; #715
+    // mengembalikan tanggal ke kolomnya sendiri.
+    expect(container.querySelectorAll("tbody > tr > td")).toHaveLength(9);
   });
 
   it("tiga nama PIC tampil UTUH, tidak satu pun dipotong", () => {
@@ -80,19 +82,20 @@ describe("#714 — baris data delapan sel", () => {
     }
   });
 
-  it("tanggal target duduk di sel PIC yang sama, bukan kolom sendiri", () => {
+  it("tanggal dan PIC duduk di SEL TERSENDIRI, sesuai urutan kepala", () => {
     const { container } = pasang();
     const sel = container.querySelectorAll("tbody > tr > td");
-    const picTanggal = sel[5];
-    for (const nama of TIGA_PIC) expect(picTanggal.textContent).toContain(nama);
-    expect(picTanggal.textContent).toContain("2026-10-13");
-    // Sel tanggal-sendiri yang lama tidak ada lagi.
-    expect(container.querySelectorAll("tbody > tr > td")).toHaveLength(8);
+    // #714 pernah menggabung keduanya; #715 memisahkannya kembali atas
+    // permintaan pemilik proyek. Urutan ini ADALAH urutan kepala — dan
+    // `kepalaSelSejajar-715.test.ts` yang menjaganya.
+    for (const nama of TIGA_PIC) expect(sel[5].textContent).toContain(nama);
+    expect(sel[5].textContent).not.toContain("2026-10-13");
+    expect(sel[6].textContent).toContain("2026-10-13");
   });
 
   it("status, utas, sunting, dan hapus satu sel di kanan", () => {
     const { container } = pasang();
-    const aksi = container.querySelectorAll("tbody > tr > td")[7];
+    const aksi = container.querySelectorAll("tbody > tr > td")[8];
     expect(aksi.querySelector("button[title='discussion.toggleStatus']")).not.toBeNull();
     expect(aksi.querySelector("button[title='discussion.openThread']")).not.toBeNull();
     expect(aksi.querySelector("button[title='discussion.editRow']")).not.toBeNull();
@@ -103,13 +106,13 @@ describe("#714 — baris data delapan sel", () => {
 
   it("tanpa lampiran, selnya berbintang '-' — dan tautan tetap aman diklik", () => {
     const { container } = pasang();
-    const lampiran = container.querySelectorAll("tbody > tr > td")[6];
+    const lampiran = container.querySelectorAll("tbody > tr > td")[7];
     expect(lampiran.textContent?.trim()).toBe("-");
 
     const { container: ada } = pasang({
       links: [{ id: "l1", label: "Portal merchant", url: "https://example.com/x" }],
     });
-    const tautan = ada.querySelector("tbody > tr > td:nth-child(7) a") as HTMLAnchorElement;
+    const tautan = ada.querySelector("tbody > tr > td:nth-child(8) a") as HTMLAnchorElement;
     expect(tautan.textContent).toContain("Portal merchant");
     expect(tautan.getAttribute("rel")).toBe("noopener noreferrer");
     expect(tautan.getAttribute("target")).toBe("_blank");

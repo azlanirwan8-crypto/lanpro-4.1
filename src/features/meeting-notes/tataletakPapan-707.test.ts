@@ -76,12 +76,16 @@ describe("#707 — kepala tabel melekat", () => {
 
   it("garis kepala dan garis baris hidup di SEL, bukan di baris", () => {
     const isi = baca(KEPALA);
-    expect(isi).toContain("border-b border-border-subtle");
+    /* #715 — dua garis ini sekarang berwarna BERBEDA per sisi, mengikuti keputusan
+     * #699 (pemisah baris harus terbaca: `border-border-faint` hanya 1,096:1
+     * terhadap putih) dan #678b (pemisah kolom harus tipis, kalau tidak tabel
+     * jadi kisi). Bentuknya `border-b-border-subtle` dan `border-r-border-faint`;
+     * `border-border-*` tidak bisa dipakai karena ia mengatur semua sisi
+     * sekaligus dan pemenangnya ditentukan urutan stylesheet. */
+    expect(isi).toContain("border-b border-b-border-subtle border-r border-r-border-faint");
     // `border-separate` (syarat garis kepala ikut melekat) membuat border pada
     // baris tidak digambar — jadi `divide-y` di tbody menghasilkan nol garis.
-    // Pemisah baris karenanya pindah ke `SEL`, yang dipakai baris data DAN
-    // baris cepat supaya keduanya bergerak bersamaan.
-    expect(isi).toContain("border-b border-border-faint");
+    // Pemisah baris karenanya hidup di SEL, yang dipakai baris data.
     expect(baca(TABEL)).toContain("border-separate");
     expect(baca(TABEL)).not.toContain("divide-y");
     expect(baca(BARIS)).toContain("cn(SEL,");
@@ -94,21 +98,16 @@ describe("#708 — sel teks tidak lagi memanjang tanpa batas", () => {
     expect(baca(TABEL)).toContain("table-fixed");
     // Tanpa `table-fixed`, `width` pada sel kepala hanya sebuah saran dan
     // isi terpanjang tetap menentukan lebar kolomnya.
-    // #714 menurunkan jumlah kolom dari dua belas ke delapan — yang dijaga di
-    // sini adalah PRINSIPNYA (lebar ditulis literal di kepala, bukan ditebak
-    // dari isi), bukan angka dua belasnya.
+    // #714 menurunkan jumlah kolom dari dua belas — yang dijaga di sini adalah
+    // PRINSIPNYA (lebar ditulis literal di kepala, bukan ditebak dari isi),
+    // bukan berapa banyaknya. Jumlah dan kecocokannya dengan `min-w` wadah
+    // dipindah ke `kepalaSelSejajar-715.test.ts` supaya tidak ada dua tempat
+    // yang mengunci angka yang sama dengan cara yang berbeda.
     const lebar = (kepala.match(/w-\[\d+px\]/g) || []).map((s) =>
       Number(/\[(\d+)px\]/.exec(s)![1])
     );
-    expect(lebar.length).toBe(8);
-    expect(kepala.match(/w-\[\d+px\]/g)?.length).toBeGreaterThanOrEqual(7);
-    /* #714 — dan yang lebih penting: jumlah lebar itu harus PERSIS sama dengan
-     * `min-w` wadah gulir. Selama dua angka ini dijaga terpisah, keduanya boleh
-     * menyimpang diam-diam — itu persis cara 1.818 px lahir. Satu angka ditulis
-     * di kepala, angka lain ditulis di induk, dan tidak ada yang mengurungnya. */
-    const total = lebar.reduce((a, b) => a + b, 0);
-    const wadah = Number(/min-w-\[(\d+)px\]/.exec(baca(TABEL))?.[1] ?? -1);
-    expect(wadah).toBe(total);
+    expect(lebar.length).toBeGreaterThanOrEqual(7);
+    expect(lebar.every((n) => n > 0)).toBe(true);
   });
 
   it.each([
@@ -127,8 +126,8 @@ describe("#708 — sel teks tidak lagi memanjang tanpa batas", () => {
 
   it("sel teks rata atas supaya baris yang berbeda tinggi tidak bergeser", () => {
     const isi = baca(BARIS);
-    // #714: delapan kolom, jadi delapan sel — sebelumnya sembilan dari dua belas.
-    expect(isi.match(/align-top/g)?.length).toBeGreaterThanOrEqual(8);
+    // #715: sembilan kolom (PIC dan tanggal dipisah lagi), sebelumnya delapan.
+    expect(isi.match(/align-top/g)?.length).toBeGreaterThanOrEqual(9);
   });
 });
 
