@@ -3957,7 +3957,7 @@ function AppContainer() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="md:hidden bg-overlay/50 fixed inset-0 z-40"
+              className="md:hidden bg-overlay/50 fixed inset-0 z-[45]"
               onClick={() => setIsMobileMenuOpen(false)}
             />
           )}
@@ -4011,7 +4011,14 @@ function AppContainer() {
 
           {/* Global Top Header Bar */}
           {/* #445 — border-b seperti Velzon: garis antara topbar dan PageHeader */}
-          <header className="flex items-center justify-between w-full px-4 md:px-5 py-2 bg-surface-raised border-b border-border-subtle shrink-0 pl-14 md:pl-5 text-content-strong transition-all z-20">
+          {/* #729 — ANGGARAN STACKING, ditulis sekali di sini dan dipatuhi semua
+              layar: krom aplikasi (bar ini plus menu-menunya) berada DI ATAS
+              setiap sticky konten (tertinggi hari ini kepala tabel z-30, #606);
+              scrim sidebar mobile di atas bar ini supaya bar ikut redup saat
+              laci terbuka; sidebar dan overlay modal tetap paling atas. Bar ini
+              flex item, jadi z-indexnya menjadi LANGIT-LANGIT bagi menu di
+              dalamnya — menaikkan z panel menu saja tidak menolong apa-apa. */}
+          <header className="flex items-center justify-between w-full px-4 md:px-5 py-2 bg-surface-raised border-b border-border-subtle shrink-0 pl-14 md:pl-5 text-content-strong transition-all z-40">
             <div className="flex items-center gap-3 min-w-0">
               {selectedProject &&
               ![
