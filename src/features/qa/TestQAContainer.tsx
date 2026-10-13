@@ -119,7 +119,6 @@ export function TestQAPanel({
   const [bugModalTestCase, setBugModalTestCase] = useState<QATestCase | null>(null);
   const [bugTitleInput, setBugTitleInput] = useState("");
   const [bugSelectedParentId, setBugSelectedParentId] = useState("");
-  const [parentSearchTerm, setParentSearchTerm] = useState("");
   const [bugPriorityInput, setBugPriorityInput] = useState("High");
   const [bugAssigneeInput, setBugAssigneeInput] = useState("");
   const [bugDescriptionInput, setBugDescriptionInput] = useState("");
@@ -923,8 +922,6 @@ export function TestQAPanel({
         setBugTitleInput={setBugTitleInput}
         bugSelectedParentId={bugSelectedParentId}
         setBugSelectedParentId={setBugSelectedParentId}
-        parentSearchTerm={parentSearchTerm}
-        setParentSearchTerm={setParentSearchTerm}
         bugPriorityInput={bugPriorityInput}
         setBugPriorityInput={setBugPriorityInput}
         bugAssigneeInput={bugAssigneeInput}

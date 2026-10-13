@@ -88,7 +88,16 @@ describe("EditCaseModal — Enter menyimpan (#593)", () => {
   });
 });
 
-describe("CreateBugTicketModal — Enter di pencarian TIDAK membuat tiket (#593)", () => {
+describe("CreateBugTicketModal — Enter di pencarian TIDAK membuat tiket (#593, #727)", () => {
+  /**
+   * #727 memensiunkan combobox inline: pencarian kini hidup di dalam
+   * `StyledDropdown`, yang menyalakannya sendiri di atas 8 opsi — jadi fixture
+   * ini memberi 10 tugas induk supaya kotak carinya benar-benar ada. Perilaku
+   * yang dijaga #593 tidak berubah, hanya CARA menjaganya: panel dropdown
+   * di-portal ke `document.body`, DI LUAR `<form>`, sehingga Enter saat
+   * menyaring tidak mungkin lagi mengirim form — invariant struktural, bukan
+   * lagi `preventDefault` di satu input.
+   */
   const props = () => {
     const onSubmit = jest.fn();
     return {
@@ -101,8 +110,6 @@ describe("CreateBugTicketModal — Enter di pencarian TIDAK membuat tiket (#593)
         onTitleChange: jest.fn(),
         selectedParentId: "",
         onParentSelect: jest.fn(),
-        parentSearchTerm: "Laporan",
-        onSearchTermChange: jest.fn(),
         priorityInput: "Medium",
         onPriorityChange: jest.fn(),
         assigneeInput: "",
@@ -110,24 +117,32 @@ describe("CreateBugTicketModal — Enter di pencarian TIDAK membuat tiket (#593)
         descriptionInput: "",
         onDescriptionChange: jest.fn(),
         isSubmitting: false,
-        tasks: [] as any[],
+        tasks: Array.from({ length: 10 }, (_, i) => ({
+          id: `t${i}`,
+          key: `PRJ-${i + 1}`,
+          title: `Tugas induk ${i + 1}`,
+          projectId: "p1",
+          type: "task",
+        })) as any[],
         projectMembers: [] as any[],
         selectedProject: { id: "p1", name: "Proyek Uji" } as any,
       },
     };
   };
 
+  const pemicuInduk = () => screen.getByRole("button", { name: /Pilih Target|Select Target/i });
   const bukaPencarian = () => {
-    fireEvent.click(screen.getByRole("button", { name: /Pilih Target|Select Target/i }));
-    return screen.getByPlaceholderText(/Cari nama Epic|Search .*Epic/i);
+    fireEvent.click(pemicuInduk());
+    return screen.getByPlaceholderText(/Ketik untuk mencari|Type to search/i);
   };
 
-  it("Enter saat menyaring tugas induk dicegah tindakan bawaannya", () => {
+  it("kotak cari duduk DI LUAR form, jadi Enter saat menyaring tidak mengirim", () => {
     const { onSubmit, lain } = props();
     render(<CreateBugTicketModal {...({ ...lain, onSubmit } as any)} />);
     const cari = bukaPencarian();
 
-    expect(fireEvent.keyDown(cari, { key: "Enter" })).toBe(false);
+    expect(cari.closest("form")).toBeNull();
+    fireEvent.keyDown(cari, { key: "Enter" });
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
@@ -139,16 +154,15 @@ describe("CreateBugTicketModal — Enter di pencarian TIDAK membuat tiket (#593)
     expect(fireEvent.keyDown(judul, { key: "Enter" })).toBe(true);
   });
 
-  it("pemilih tugas induk bisa dibuka dengan keyboard (#594)", () => {
+  it("pemilih tugas induk bisa dibuka dengan papan ketik (#594)", () => {
     const { onSubmit, lain } = props();
     render(<CreateBugTicketModal {...({ ...lain, onSubmit } as any)} />);
-    const pemicu = screen.getByRole("button", { name: /Pilih Target|Select Target/i });
+    const pemicu = pemicuInduk();
 
-    expect(pemicu.getAttribute("tabindex")).toBe("0");
     expect(pemicu.getAttribute("aria-expanded")).toBe("false");
-    fireEvent.keyDown(pemicu, { key: "Enter" });
+    fireEvent.keyDown(pemicu, { key: "ArrowDown" });
 
-    expect(screen.queryByPlaceholderText(/Cari nama Epic|Search .*Epic/i)).not.toBeNull();
+    expect(screen.queryByPlaceholderText(/Ketik untuk mencari|Type to search/i)).not.toBeNull();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 });

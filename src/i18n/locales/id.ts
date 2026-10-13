@@ -2967,8 +2967,7 @@ export const id = {
   bugTicket: {
     title: "Buat Tiket Bug Terstruktur",
     ticketTitle: "JUDUL TIKET BUG",
-    searchTarget: "Cari nama Epic atau Tugas...",
-    noTarget: "Tidak ada tugas target yang cocok.",
+    selectTargetParent: "-- Pilih Target Epic / Task Utama --",
     severity: "SEVERITAS BUG",
     assigneeDev: "DEVELOPER PENANGGUNG JAWAB",
     description: "DESKRIPSI BUG",
@@ -3315,6 +3314,8 @@ export const id = {
     yesDelete: "Ya, Hapus",
     uploadFile: "Unggah berkas",
     noOptions: "Tidak ada pilihan tersedia",
+    searchOptions: "Ketik untuk mencari…",
+    noMatchFound: "Tidak ada pilihan yang cocok",
     errorTitle: "Terjadi Kesalahan Sistem",
     reloadPage: "Muat Ulang Halaman",
     viewCrashTitle: "Modul ini gagal dimuat",

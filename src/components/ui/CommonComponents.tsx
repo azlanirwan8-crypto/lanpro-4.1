@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
-import React, { useState, useEffect, useId, useRef, useLayoutEffect } from "react";
+import React, { useState, useEffect, useId, useMemo, useRef, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import {
   ChevronDown,
@@ -15,6 +15,7 @@ import {
   CircleDot,
   Bug,
   Users,
+  Search,
   FileText,
   User as UserIcon,
 } from "lucide-react";
@@ -206,6 +207,19 @@ const hexChip = (
     kode: baris?.code,
     warnaMaster: baris?.color ?? opsi?.color,
   });
+/**
+ * #727 — di atas ambang ini sebuah dropdown mendapat kotak cari sendiri di
+ * kepala panelnya. Angka ini bukan selera: daftar 3-5 opsi (status, prioritas,
+ * jenis) lebih cepat dipindai mata daripada diketik, dan kedua test penjaga
+ * dropdown (#594, #268b) memakai fixture 3 opsi — jadi ambang apa pun di atas
+ * 3 menjaga mereka tetap di jalur lama TANPA diubah. Daftar yang hari ini
+ * melewati ambang: semua-isu, anggota, bentuk flowchart (27), label, sprint.
+ */
+const AMBANG_CARI = 8;
+
+/** Huruf kecil tanpa spasi/hubung/underscore — "sub bug" menemukan "Sub Bug". */
+const kunciCari = (s: string) => s.toLowerCase().replace(/[\s_-]+/g, "");
+
 export const StyledDropdown = ({
   value,
   onChange,
@@ -217,6 +231,7 @@ export const StyledDropdown = ({
   disabled,
   members = [],
   customButton,
+  cari,
 }: {
   value: string;
   onChange: (val: string) => void;
@@ -228,6 +243,13 @@ export const StyledDropdown = ({
   disabled?: boolean;
   members?: UserProfile[];
   customButton?: (selected: any) => React.ReactNode;
+  /**
+   * Penimpa ambang #727: `true` memaksa kotak cari hidup walau daftar pendek,
+   * `false` mematikannya walau daftar panjang (pemilih bentuk flowchart punya
+   * kotak cari sendiri di kanvasnya). Tanpa prop ini, cari menyala sendiri
+   * bila opsi melewati `AMBANG_CARI`.
+   */
+  cari?: boolean;
 }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -246,6 +268,21 @@ export const StyledDropdown = ({
   // De-duplicate options to prevent duplicate key errors
   const safeOptions = Array.from(new Map((options || []).map((o) => [o.id, o])).values());
   const selected = safeOptions.find((o) => o.id === value);
+
+  /**
+   * #727 — kotak cari menyaring DAFTAR TAMPIL, bukan daftar sumbernya.
+   * `safeOptions` tetap menjadi kebenaran untuk nilai terpilih dan chip
+   * pemicu; yang berubah hanya apa yang kelihatan di panel, supaya pilihan
+   * yang sedang terpakai tidak pernah "hilang" hanya karena tidak cocok
+   * dengan kata yang diketik.
+   */
+  const [kataCari, setKataCari] = useState("");
+  const pakaiCari = cari ?? safeOptions.length > AMBANG_CARI;
+  const daftarTampil = useMemo(() => {
+    const kata = kunciCari(kataCari.trim());
+    if (!pakaiCari || !kata) return safeOptions;
+    return safeOptions.filter((o) => kunciCari(o.label).includes(kata));
+  }, [pakaiCari, kataCari, safeOptions]);
   const idDaftar = `dd-${uid}`;
   const idOpsi = (i: number) => `${idDaftar}-${i}`;
 
@@ -261,7 +298,7 @@ export const StyledDropdown = ({
    * tombolnya, dan pembaca layar menyebutkan opsi yang sedang disorot.
    */
   const geserFokusOpsi = (i: number) => {
-    const akhir = safeOptions.length - 1;
+    const akhir = daftarTampil.length - 1;
     const target = Math.min(Math.max(i, 0), akhir);
     setAktif(target);
     dariPapanKetik.current = true;
@@ -281,11 +318,12 @@ export const StyledDropdown = ({
     if (k === "ArrowDown" || k === "ArrowUp" || k === "Home" || k === "End") {
       e.preventDefault();
       dariPapanKetik.current = true;
-      const terpilih = safeOptions.findIndex((o) => o.id === value);
+      const terpilih = daftarTampil.findIndex((o) => o.id === value);
       if (!isOpen) {
         /* Konvensi daftar pilihan: panah bawah membuka di nilai yang terpilih
            (atau baris pertama), panah ATAS membuka di baris terakhir. */
-        setAktif(k === "ArrowUp" ? safeOptions.length - 1 : terpilih < 0 ? 0 : terpilih);
+        setKataCari("");
+        setAktif(k === "ArrowUp" ? daftarTampil.length - 1 : terpilih < 0 ? 0 : terpilih);
         setIsOpen(true);
         return;
       }
@@ -293,7 +331,7 @@ export const StyledDropdown = ({
         k === "Home"
           ? 0
           : k === "End"
-            ? safeOptions.length - 1
+            ? daftarTampil.length - 1
             : k === "ArrowDown"
               ? aktif + 1
               : aktif - 1
@@ -374,7 +412,9 @@ export const StyledDropdown = ({
           ref={buttonRef}
           onClick={(e) => {
             e.stopPropagation();
-            !disabled && setIsOpen(!isOpen);
+            if (disabled) return;
+            setKataCari("");
+            setIsOpen(!isOpen);
           }}
           className="cursor-pointer"
         >
@@ -392,6 +432,7 @@ export const StyledDropdown = ({
             /* e.detail === 0 artinya klik ini hasil Enter/Space pada tombol. */
             dariPapanKetik.current = e.detail === 0;
             const bukaSekarang = !isOpen;
+            setKataCari("");
             if (bukaSekarang) {
               const terpilih = safeOptions.findIndex((o) => o.id === value);
               setAktif(terpilih < 0 ? 0 : terpilih);
@@ -510,12 +551,45 @@ export const StyledDropdown = ({
                 induknya DAN tidak bisa digulir sama sekali. Paling terasa di
                 pemilih bentuk flowchart yang punya 27 opsi (~810px).
               */}
+              {/*
+                #727 — kotak cari duduk sebagai anak flex PERTAMA panel, jadi
+                daftar di bawahnya (yang `min-h-0`, #294) menyusut sendiri dan
+                tidak ada pekerjaan posisi baru. `autoFocus` hanya hidup bila
+                `pakaiCari`, jadi daftar pendek tetap membuka persis seperti
+                sebelum item ini — fokus tidak dicuri dari pemicunya.
+              */}
+              {pakaiCari && (
+                <div className="relative shrink-0 border-b border-border-faint">
+                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-content-subtle pointer-events-none" />
+                  <input
+                    type="text"
+                    autoFocus
+                    value={kataCari}
+                    aria-label={t("ui.searchOptions")}
+                    placeholder={t("ui.searchOptions")}
+                    onChange={(e) => {
+                      setKataCari(e.target.value);
+                      setAktif(0);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "ArrowDown") {
+                        e.preventDefault();
+                        geserFokusOpsi(0);
+                      } else if (e.key === "Escape") {
+                        e.preventDefault();
+                        tutupKembaliKePemicu();
+                      }
+                    }}
+                    className="w-full h-9 pl-8 pr-2.5 bg-surface text-xs font-normal text-content-body placeholder:text-content-subtle focus:outline-none"
+                  />
+                </div>
+              )}
               <div
                 id={idDaftar}
                 role="listbox"
                 className="min-h-0 overflow-y-auto p-1.5 custom-scrollbar"
               >
-                {safeOptions.map((opt, optIdx) => {
+                {daftarTampil.map((opt, optIdx) => {
                   const isActive = opt.id === value;
                   const adalahAktif = optIdx === aktif;
                   /** Titik/ikon daftar ikut warna label yang sama dengan chipnya. */
@@ -559,7 +633,7 @@ export const StyledDropdown = ({
                             k === "Home"
                               ? 0
                               : k === "End"
-                                ? safeOptions.length - 1
+                                ? daftarTampil.length - 1
                                 : k === "ArrowDown"
                                   ? optIdx + 1
                                   : optIdx - 1
@@ -631,6 +705,11 @@ export const StyledDropdown = ({
                 {safeOptions.length === 0 && (
                   <div className="p-4 text-center text-xs text-content-subtle italic font-normal">
                     {t("ui.noOptions")}
+                  </div>
+                )}
+                {safeOptions.length > 0 && daftarTampil.length === 0 && (
+                  <div className="p-4 text-center text-xs text-content-subtle italic font-normal">
+                    {t("ui.noMatchFound")}
                   </div>
                 )}
               </div>

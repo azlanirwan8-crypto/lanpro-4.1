@@ -2943,8 +2943,7 @@ export const en = {
   bugTicket: {
     title: "Create Structured Bug Ticket",
     ticketTitle: "BUG TICKET TITLE",
-    searchTarget: "Search an Epic or Task name...",
-    noTarget: "No matching target task.",
+    selectTargetParent: "-- Select Target Epic / Parent Task --",
     severity: "BUG SEVERITY",
     assigneeDev: "ASSIGNEE DEVELOPER",
     description: "BUG DESCRIPTION",
@@ -3289,6 +3288,8 @@ export const en = {
     yesDelete: "Yes, Delete",
     uploadFile: "Upload file",
     noOptions: "No options available",
+    searchOptions: "Type to search…",
+    noMatchFound: "No matching options",
     errorTitle: "A System Error Occurred",
     reloadPage: "Reload Page",
     viewCrashTitle: "This module failed to load",

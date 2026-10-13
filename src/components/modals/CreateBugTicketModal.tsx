@@ -1,11 +1,12 @@
 import { useTranslation } from "react-i18next";
-import React, { useState } from "react";
-import { Search, CheckCircle2, Bug, ChevronDown } from "lucide-react";
+import React from "react";
+import { Bug } from "lucide-react";
 import { QATestCase } from "../../features/qa/types";
 import { StyledDropdown } from "../ui/CommonComponents";
 import { Modal } from "../ui/Modal";
 import { Button } from "../ui/CoreUI";
 import { enterUntukSimpan } from "../../lib/enterSimpan";
+import { labelIndukTugas } from "../../lib/labelIndukTugas";
 
 interface CreateBugTicketModalProps {
   isOpen: boolean;
@@ -17,8 +18,6 @@ interface CreateBugTicketModalProps {
   onTitleChange: (title: string) => void;
   selectedParentId: string;
   onParentSelect: (parentId: string) => void;
-  parentSearchTerm: string;
-  onSearchTermChange: (term: string) => void;
   priorityInput: string;
   onPriorityChange: (priority: string) => void;
   assigneeInput: string;
@@ -42,8 +41,6 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
   onTitleChange,
   selectedParentId,
   onParentSelect,
-  parentSearchTerm,
-  onSearchTermChange,
   priorityInput,
   onPriorityChange,
   assigneeInput,
@@ -57,19 +54,10 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
   selectedProject,
 }) => {
   const { t } = useTranslation();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const parentCandidates = (tasks || []).filter(
     (t: any) => (t.projectId === selectedProject?.id || !t.projectId) && t.type !== "subtask"
   );
-  const filteredParents = parentCandidates.filter((p: any) => {
-    if (!parentSearchTerm.trim()) return true;
-    const term = parentSearchTerm.toLowerCase();
-    const titleMatch = p.title?.toLowerCase().includes(term);
-    const keyMatch = (p.key || p.taskKey || "").toLowerCase().includes(term);
-    return titleMatch || keyMatch;
-  });
-  const selectedParentTask = parentCandidates.find((pt: any) => pt.id === selectedParentId);
 
   if (!isOpen || !testCase) return null;
 
@@ -120,87 +108,31 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
           />
         </div>
 
-        {/* Parent Task Searchable Combobox */}
-        <div className="space-y-1.5 relative">
+        {/* #727 — pemilih induk ini DULU combobox bercari yang ditulis inline
+            sendirian: gaya sendiri, warna keras palet rose, dan `truncate`
+            pada judul tugas. Pencarian kini hidup di `StyledDropdown` (menyala
+            sendiri di atas 8 opsi), jadi blok 80 baris itu jadi 12 baris dan
+            perilaku #593 terjaga secara struktural: panel dropdown di-portal
+            ke `document.body`, DI LUAR `<form>`, sehingga Enter saat menyaring
+            tidak mungkin lagi mengirim form. */}
+        <div className="space-y-1.5">
           <label className="text-xs sm:text-[10px] font-normal text-danger-text uppercase tracking-normal block">
             {t("bugTicket.targetEpicParentTaskRequired")}
           </label>
-
-          <div
-            role="button"
-            tabIndex={0}
-            aria-expanded={isDropdownOpen}
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                setIsDropdownOpen(!isDropdownOpen);
-              }
-            }}
-            className="w-full text-xs p-3 bg-surface-sunken border border-border-subtle rounded-md font-medium text-content-strong flex items-center justify-between cursor-pointer hover:border-primary"
-          >
-            <span className="truncate">
-              {selectedParentTask
-                ? `[${selectedParentTask.key || selectedParentTask.taskKey || "TASK"}] ${selectedParentTask.title}`
-                : "-- Pilih Target Epic / Task Utama --"}
-            </span>
-            <ChevronDown className="w-4 h-4 text-content-subtle shrink-0" />
-          </div>
-
-          {isDropdownOpen && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
-              <div className="absolute left-0 right-0 top-full mt-1 bg-surface border border-border-subtle rounded-md shadow-2xl p-2 z-50 animate-dropdown">
-                <div className="relative mb-2">
-                  <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-content-subtle" />
-                  {/* Kolom ini duduk di dalam <form id="create-bug-ticket-form">, jadi
-                      Enter-nya mengirim form = tiket bug jadi dibuat (#593). */}
-                  <input
-                    autoFocus
-                    type="text"
-                    placeholder={t("bugTicket.searchTarget")}
-                    value={parentSearchTerm}
-                    onChange={(e) => onSearchTermChange(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.nativeEvent.isComposing) e.preventDefault();
-                    }}
-                    className="w-full text-xs pl-8 pr-3 py-1.5 bg-surface-sunken border border-border-subtle rounded-md focus:outline-none"
-                  />
-                </div>
-
-                <div className="max-h-48 overflow-y-auto border border-border-faint rounded-md divide-y divide-border-faint bg-surface custom-scrollbar">
-                  {filteredParents.length === 0 ? (
-                    <div className="p-3 text-center text-xs text-content-subtle">
-                      {t("bugTicket.noTarget")}
-                    </div>
-                  ) : (
-                    filteredParents.map((pt: any) => (
-                      <div
-                        key={pt.id}
-                        onClick={() => {
-                          onParentSelect(pt.id);
-                          setIsDropdownOpen(false);
-                        }}
-                        className={`p-2.5 text-xs font-medium flex items-center justify-between cursor-pointer transition-colors ${
-                          selectedParentId === pt.id
-                            ? "bg-rose-500/10 text-danger-text"
-                            : "hover:bg-surface-sunken text-content-body"
-                        }`}
-                      >
-                        <span className="truncate">
-                          [{pt.key || pt.taskKey || (pt.type ? pt.type.toUpperCase() : "TASK")}]{" "}
-                          {pt.title}
-                        </span>
-                        {selectedParentId === pt.id && (
-                          <CheckCircle2 className="w-4 h-4 text-danger-text shrink-0" />
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </>
-          )}
+          <StyledDropdown
+            value={selectedParentId}
+            onChange={(val) => onParentSelect(val)}
+            options={[
+              { id: "", label: t("bugTicket.selectTargetParent") },
+              ...parentCandidates.map((pt: any) => ({
+                id: pt.id,
+                label: labelIndukTugas(pt),
+              })),
+            ]}
+            masterData={[]}
+            className="w-full"
+            buttonClassName="w-full text-xs p-3 bg-surface-sunken border border-border-subtle rounded-md font-medium text-content-strong text-left"
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-3">

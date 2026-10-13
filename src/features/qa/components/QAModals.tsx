@@ -71,8 +71,6 @@ interface QAModalsProps {
   setBugTitleInput: (title: string) => void;
   bugSelectedParentId: string;
   setBugSelectedParentId: (parentId: string) => void;
-  parentSearchTerm: string;
-  setParentSearchTerm: (term: string) => void;
   bugPriorityInput: string;
   setBugPriorityInput: (priority: string) => void;
   bugAssigneeInput: string;
@@ -160,8 +158,6 @@ export const QAModals: React.FC<QAModalsProps> = ({
   setBugTitleInput,
   bugSelectedParentId,
   setBugSelectedParentId,
-  parentSearchTerm,
-  setParentSearchTerm,
   bugPriorityInput,
   setBugPriorityInput,
   bugAssigneeInput,
@@ -252,8 +248,6 @@ export const QAModals: React.FC<QAModalsProps> = ({
         onTitleChange={setBugTitleInput}
         selectedParentId={bugSelectedParentId}
         onParentSelect={setBugSelectedParentId}
-        parentSearchTerm={parentSearchTerm}
-        onSearchTermChange={setParentSearchTerm}
         priorityInput={bugPriorityInput}
         onPriorityChange={setBugPriorityInput}
         assigneeInput={bugAssigneeInput}
