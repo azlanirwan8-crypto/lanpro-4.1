@@ -7,7 +7,7 @@ import { cn } from "../../lib/utils";
 import { reorderTasks } from "./services/issues.service";
 import { susunUrutanAkar } from "./lib/urutanAkar";
 import { akarDaftar } from "./lib/akarDaftar";
-import { rapikanOpsiJenisIsu } from "./lib/jenisIsu";
+import { rapikanOpsiJenisIsu } from "../../lib/jenisIsu";
 import { keadaanDaftar, kunciPesanKosong } from "./lib/keadaanKosong";
 import { toast } from "sonner";
 import { Task } from "../../types";

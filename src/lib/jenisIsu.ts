@@ -1,5 +1,14 @@
 /**
- * #705 — SATU pencocok "isu ini jenisnya apa" untuk filter Daftar Isu.
+ * #705 — SATU pencocok "isu ini jenisnya apa" untuk seluruh layar.
+ *
+ * KENAPA DI `src/lib` (#730). Mulanya berkas ini hidup di
+ * `features/issues/lib` karena pemakai pertamanya filter Daftar Isu. Kartu
+ * TASK BREAKDOWN BY TYPE di dashboard kemudian butuh pencocok yang SAMA —
+ * sebelum pindah, ia membandingkan string mentah terhadap lima nama harfiah
+ * dan melipat semua jenis lain ke "Task" (lihat baris #730 di AUDIT.md).
+ * Memakai pencocok ini lintas fitur berarti impor melintasi batas folder,
+ * dan §4 melarang itu; presedennya persis berkas ini: `warnaLabel.ts` dan
+ * `tingkatIsu.ts` berdiri di `src/lib` karena dipakai lebih dari satu fitur.
  *
  * KENAPA BERDIRI SENDIRI. Kolom `type` pada tugas TIDAK ditulis dari satu sumber,
  * dan keempat penulisnya tidak sepakat soal huruf besar-kecil. `hooks.ts:381` dan
@@ -22,8 +31,8 @@
  * §3 AGENTS.md: daftar jenis isu berasal dari MasterData. Berkas ini tidak
  * menyimpan daftar apa pun — ia hanya menormalkan.
  */
-import { MasterData } from "../../../types";
-import { cariMaster } from "../../../lib/warnaLabel";
+import { MasterData } from "../types";
+import { cariMaster } from "./warnaLabel";
 
 /** Nilai togel "semua jenis" — sebutan yang sama dengan sepuluh dropdown saudaranya. */
 export const SEMUA_JENIS = "All";

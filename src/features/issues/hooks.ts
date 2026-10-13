@@ -13,7 +13,7 @@ import {
   saveSessionFilters,
   type IssueFilterSnapshot,
 } from "./lib/issueFilterSnapshot";
-import { cocokJenisIsu } from "./lib/jenisIsu";
+import { cocokJenisIsu } from "../../lib/jenisIsu";
 
 export const useIssueList = (props: IssueListViewProps) => {
   const { tasks, roots, selectedProject, user, masterData, userRole } = props;
@@ -212,7 +212,7 @@ export const useIssueList = (props: IssueListViewProps) => {
         if (listFilterPriority && listFilterPriority !== "All" && t.priority !== listFilterPriority)
           return false;
         // #705 — jenis isu tidak dibandingkan sebagai string mentah: kolom `type`
-        // ditulis dari lebih dari satu sumber (lihat `lib/jenisIsu.ts`).
+        // ditulis dari lebih dari satu sumber (lihat `src/lib/jenisIsu.ts`).
         if (!cocokJenisIsu(mArr, t.type, listFilterType)) return false;
         if (listFilterAssignee && listFilterAssignee !== "All") {
           if (listFilterAssignee === "unassigned") {

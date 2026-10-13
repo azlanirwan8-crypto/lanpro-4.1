@@ -7,7 +7,7 @@
  * galat, hanya daftar kosong.
  */
 import { cocokJenisIsu, kunciJenisIsu, rapikanOpsiJenisIsu, SEMUA_JENIS } from "./jenisIsu";
-import type { MasterData } from "../../../types";
+import type { MasterData } from "../types";
 
 const baris = (b: Partial<MasterData> & { label: string }): MasterData => ({
   id: b.id ?? `md-${b.label}`,

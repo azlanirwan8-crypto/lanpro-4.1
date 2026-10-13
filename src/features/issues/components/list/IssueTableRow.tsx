@@ -20,7 +20,7 @@ import {
   UncontrolledInput,
 } from "../../../../components/ui/CommonComponents";
 import { LanproDatePicker } from "../../../../components/ui/LanproDatePicker";
-import { cocokJenisIsu } from "../../lib/jenisIsu";
+import { cocokJenisIsu } from "../../../../lib/jenisIsu";
 import { gayaLabel, warnaDariMaster } from "../../../../lib/warnaLabel";
 import { Task, MasterData, UserProfile, Sprint } from "../../../../types";
 import { styles } from "../../styles";
@@ -188,7 +188,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
       )
         return false;
       // #705 — anak disaring dengan aturan yang SAMA seperti induknya; lihat
-      // `lib/jenisIsu.ts` kenapa ini tidak boleh perbandingan string mentah.
+      // `src/lib/jenisIsu.ts` kenapa ini tidak boleh perbandingan string mentah.
       if (!cocokJenisIsu(mArr, s.type, listFilterType)) return false;
       if (listFilterLabel && listFilterLabel !== "All") {
         if (!s.labels || !Array.isArray(s.labels) || !s.labels.includes(listFilterLabel))

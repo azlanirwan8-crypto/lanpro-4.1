@@ -216,7 +216,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               />
             </div>
 
-            {/* #705 — Nilainya kunci MasterData, bukan label mentah: `lib/jenisIsu.ts`. */}
+            {/* #705 — Nilainya kunci MasterData, bukan label mentah: `src/lib/jenisIsu.ts`. */}
             <div className="flex flex-col gap-1.5">
               <label className={LABEL}>{t("filters.issueType")}</label>
               <StyledDropdown

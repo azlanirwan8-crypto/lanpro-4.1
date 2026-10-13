@@ -41,6 +41,7 @@ import { styles } from "./styles";
 import { ensureDate } from "../../lib/utils";
 import { cn } from "../../lib/utils";
 import { warnaDariMaster } from "../../lib/warnaLabel";
+import { kunciJenisIsu } from "../../lib/jenisIsu";
 import {
   loadProjectMeetings,
   loadProjectDocuments,
@@ -490,58 +491,53 @@ export function DashboardView(props: DashboardViewProps) {
       .catch(console.error);
   }, [selectedProject, currentUser]);
 
+  /**
+   * #730 — O1: baris kartu diambil dari baris `issue_type` MasterData dan tiap
+   * tugas dihitung lewat `kunciJenisIsu`, supaya varian code/label/huruf/
+   * tanda baca mendarat di ember yang sama. Sebelumnya lima nama harfiah
+   * dipaku di sini dan setiap jenis lain dilipat diam-diam ke "Task" —
+   * jenis buatan pemilik proyek tidak pernah punya baris sama sekali.
+   */
   const taskTypeBreakdown = useMemo(() => {
-    const scopeTasks = tasks;
-    const counts: Record<string, number> = {
-      epic: 0,
-      story: 0,
-      task: 0,
-      bug: 0,
-      subtask: 0,
-    };
-    scopeTasks.forEach((t) => {
-      const type = (t.type || "task").toLowerCase();
-      if (counts[type] !== undefined) counts[type]++;
-      else counts["task"]++;
-    });
+    const master = props.masterData || [];
+    const hitungan = new Map<string, number>();
+    const namaMentah = new Map<string, string>();
+    for (const t of tasks) {
+      const mentah = t.type || "task";
+      const kunci = kunciJenisIsu(master, mentah) || mentah.trim().toLowerCase();
+      hitungan.set(kunci, (hitungan.get(kunci) || 0) + 1);
+      if (!namaMentah.has(kunci)) namaMentah.set(kunci, mentah);
+    }
 
-    const totalScopeCount = Object.values(counts).reduce((a, b) => a + b, 0);
+    const kunciMaster = new Map<string, string>();
+    for (const m of master) {
+      if (m.type !== "issue_type") continue;
+      const acuan = m.code || m.label;
+      const kunci = kunciJenisIsu(master, acuan) || acuan.trim().toLowerCase();
+      if (!kunciMaster.has(kunci)) kunciMaster.set(kunci, m.label);
+    }
 
     /** #564 — legenda ikut warna label di layar lain; dulu hex lokal di sini. */
-    const hexJenis = (nama: string) => warnaDariMaster(props.masterData, "issue_type", nama);
+    const hexJenis = (nama: string) => warnaDariMaster(master, "issue_type", nama);
 
-    return [
-      {
-        name: "Epic",
-        value: counts.epic || 0,
-        color: hexJenis("Epic"),
-        pct: totalScopeCount ? Math.round(((counts.epic || 0) / totalScopeCount) * 100) : 0,
-      },
-      {
-        name: "Story",
-        value: counts.story || 0,
-        color: hexJenis("Story"),
-        pct: totalScopeCount ? Math.round(((counts.story || 0) / totalScopeCount) * 100) : 0,
-      },
-      {
-        name: "Task",
-        value: counts.task || 0,
-        color: hexJenis("Task"),
-        pct: totalScopeCount ? Math.round(((counts.task || 0) / totalScopeCount) * 100) : 0,
-      },
-      {
-        name: "Bug",
-        value: counts.bug || 0,
-        color: hexJenis("Bug"),
-        pct: totalScopeCount ? Math.round(((counts.bug || 0) / totalScopeCount) * 100) : 0,
-      },
-      {
-        name: "Subtask",
-        value: counts.subtask || 0,
-        color: hexJenis("Subtask"),
-        pct: totalScopeCount ? Math.round(((counts.subtask || 0) / totalScopeCount) * 100) : 0,
-      },
-    ];
+    const totalScopeCount = tasks.length;
+    const persen = (value: number) =>
+      totalScopeCount ? Math.round((value / totalScopeCount) * 100) : 0;
+
+    const baris: { name: string; value: number; color: string; pct: number }[] = [];
+    for (const [kunci, label] of kunciMaster) {
+      const value = hitungan.get(kunci) || 0;
+      baris.push({ name: label, value, color: hexJenis(label), pct: persen(value) });
+    }
+    /* Jenis yang hidup di tugas tetapi tidak dikenal master tetap mendapat
+       barisnya sendiri (meniru kartu status): nol karena lipat adalah bug,
+       nol karena memang tiada adalah jujur. */
+    for (const [kunci, value] of hitungan) {
+      if (kunciMaster.has(kunci)) continue;
+      const name = namaMentah.get(kunci) || kunci;
+      baris.push({ name, value, color: hexJenis(name), pct: persen(value) });
+    }
+    return baris;
   }, [tasks, props.masterData]);
 
   const statusBreakdown = useMemo(() => {

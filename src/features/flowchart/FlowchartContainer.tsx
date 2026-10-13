@@ -1166,7 +1166,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
      issue, jadi semua issue bukan hanya epic saja". Baris ini dulu membuang
      segalanya kecuali epic, dan itu dengan perbandingan string MENTAH, sementara
      kolom jenis tugas menyimpan "Epic", "epic", atau kode MasterData — lihat
-     komentar pembuka src/features/issues/lib/jenisIsu.ts. Akibatnya daftar
+     komentar pembuka src/lib/jenisIsu.ts. Akibatnya daftar
      pilihan bisa KOSONG tanpa galat apa pun di proyek yang labelnya diubah.
 
      Yang berubah: tidak ada filter lagi, dan epic hanya diurutkan lebih dulu.
