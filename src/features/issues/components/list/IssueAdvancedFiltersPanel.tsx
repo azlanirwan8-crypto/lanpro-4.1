@@ -190,7 +190,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
                 <button
                   type="button"
                   onClick={() => setListFilterStatus("All")}
-                  className="hover:text-red-500 font-medium transition-colors outline-none inline-flex items-center"
+                  className="hover:text-danger-text font-medium transition-colors outline-none inline-flex items-center"
                 >
                   <X className="w-2.5 h-2.5 ml-1" />
                 </button>
@@ -207,7 +207,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
                 <button
                   type="button"
                   onClick={() => setListFilterPriority("All")}
-                  className="hover:text-red-500 font-medium transition-colors outline-none inline-flex items-center"
+                  className="hover:text-danger-text font-medium transition-colors outline-none inline-flex items-center"
                 >
                   <X className="w-2.5 h-2.5 ml-1" />
                 </button>
@@ -223,19 +223,19 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
                 <button
                   type="button"
                   onClick={() => setListFilterAssignee("All")}
-                  className="hover:text-red-500 font-medium transition-colors outline-none inline-flex items-center"
+                  className="hover:text-danger-text font-medium transition-colors outline-none inline-flex items-center"
                 >
                   <X className="w-2.5 h-2.5 ml-0.5" />
                 </button>
               </span>
             )}
             {listFilterOverdue && (
-              <span className="text-[10px] leading-none font-medium text-rose-700 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/30 flex items-center gap-1 shadow-soft">
+              <span className="text-[10px] leading-none font-medium text-danger-text bg-danger/10 px-2.5 py-1 rounded-full border border-danger/30 flex items-center gap-1 shadow-soft">
                 {t("filters.overdueOnly")}
                 <button
                   type="button"
                   onClick={() => setListFilterOverdue(false)}
-                  className="hover:text-red-500 font-medium transition-colors outline-none inline-flex items-center"
+                  className="hover:text-danger-text font-medium transition-colors outline-none inline-flex items-center"
                 >
                   <X className="w-2.5 h-2.5 ml-0.5" />
                 </button>
@@ -250,79 +250,79 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
                 <button
                   type="button"
                   onClick={() => setListFilterSprint("All")}
-                  className="hover:text-red-500 font-medium transition-colors outline-none inline-flex items-center"
+                  className="hover:text-danger-text font-medium transition-colors outline-none inline-flex items-center"
                 >
                   <X className="w-2.5 h-2.5 ml-0.5" />
                 </button>
               </span>
             )}
             {listFilterCategory !== "All" && (
-              <span className="text-[10px] leading-none font-medium text-emerald-600 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1 shadow-soft">
+              <span className="text-[10px] leading-none font-medium text-success-text bg-success/10 px-2.5 py-1 rounded-full border border-success/30 flex items-center gap-1 shadow-soft">
                 {t("filters.category")} {listFilterCategory}
                 <button
                   type="button"
                   onClick={() => setListFilterCategory("All")}
-                  className="hover:text-red-500 font-medium transition-colors outline-none inline-flex items-center"
+                  className="hover:text-danger-text font-medium transition-colors outline-none inline-flex items-center"
                 >
                   <X className="w-2.5 h-2.5 ml-0.5" />
                 </button>
               </span>
             )}
             {listFilterLabel !== "All" && (
-              <span className="text-xs sm:text-[11px] font-medium text-sky-600 bg-sky-500/10 px-2.5 py-1 rounded-full border border-sky-500/30 flex items-center gap-1 shadow-soft">
+              <span className="text-xs sm:text-[11px] font-medium text-info-text bg-info/10 px-2.5 py-1 rounded-full border border-info/30 flex items-center gap-1 shadow-soft">
                 {t("filters.label2")} {listFilterLabel}
                 <button
                   type="button"
                   onClick={() => setListFilterLabel("All")}
-                  className="hover:text-red-500 font-medium transition-colors outline-none inline-flex items-center"
+                  className="hover:text-danger-text font-medium transition-colors outline-none inline-flex items-center"
                 >
                   <X className="w-2.5 h-2.5 ml-0.5" />
                 </button>
               </span>
             )}
             {listFilterEnvironment !== "All" && (
-              <span className="text-xs sm:text-[11px] font-medium text-orange-600 bg-orange-500/10 px-2.5 py-1 rounded-full border border-orange-500/30 flex items-center gap-1 shadow-soft">
+              <span className="text-xs sm:text-[11px] font-medium text-warning-text bg-warning/10 px-2.5 py-1 rounded-full border border-warning/30 flex items-center gap-1 shadow-soft">
                 {t("filters.environment")} {listFilterEnvironment}
                 <button
                   type="button"
                   onClick={() => setListFilterEnvironment("All")}
-                  className="hover:text-red-500 font-medium transition-colors outline-none inline-flex items-center"
+                  className="hover:text-danger-text font-medium transition-colors outline-none inline-flex items-center"
                 >
                   <X className="w-2.5 h-2.5 ml-0.5" />
                 </button>
               </span>
             )}
             {listFilterProjectRisk !== "All" && (
-              <span className="text-[10px] leading-none font-medium text-rose-600 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/30 flex items-center gap-1 shadow-soft">
+              <span className="text-[10px] leading-none font-medium text-danger-text bg-danger/10 px-2.5 py-1 rounded-full border border-danger/30 flex items-center gap-1 shadow-soft">
                 {t("filters.risk")} {listFilterProjectRisk}
                 <button
                   type="button"
                   onClick={() => setListFilterProjectRisk("All")}
-                  className="hover:text-red-500 font-medium transition-colors outline-none inline-flex items-center"
+                  className="hover:text-danger-text font-medium transition-colors outline-none inline-flex items-center"
                 >
                   <X className="w-2.5 h-2.5 ml-0.5" />
                 </button>
               </span>
             )}
             {listFilterRelease !== "All" && (
-              <span className="text-xs sm:text-[11px] font-medium text-teal-600 bg-teal-500/10 px-2.5 py-1 rounded-full border border-teal-500/30 flex items-center gap-1 shadow-soft">
+              <span className="text-xs sm:text-[11px] font-medium text-success-text bg-success/10 px-2.5 py-1 rounded-full border border-success/30 flex items-center gap-1 shadow-soft">
                 {t("filters.release")} {listFilterRelease}
                 <button
                   type="button"
                   onClick={() => setListFilterRelease("All")}
-                  className="hover:text-red-500 font-medium transition-colors outline-none inline-flex items-center"
+                  className="hover:text-danger-text font-medium transition-colors outline-none inline-flex items-center"
                 >
                   <X className="w-2.5 h-2.5 ml-0.5" />
                 </button>
               </span>
             )}
             {listFilterResolution !== "All" && (
-              <span className="text-[10px] leading-none font-medium text-violet-600 bg-violet-500/10 px-2.5 py-1 rounded-full border border-violet-500/30 flex items-center gap-1 shadow-soft">
+              <span className="text-[10px] leading-none font-medium text-info-text bg-info/10 px-2.5 py-1 rounded-full border border-info/30 flex items-center gap-1 shadow-soft">
                 {t("filters.resolution")} {listFilterResolution}
                 <button
                   type="button"
                   onClick={() => setListFilterResolution("All")}
-                  className="hover:text-red-500 font-medium transition-colors outline-none inline-flex items-center"
+                  className="hover:text-danger-text font-medium transition-colors outline-none inline-flex items-center"
                 >
                   <X className="w-2.5 h-2.5 ml-0.5" />
                 </button>
@@ -334,15 +334,15 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
                 <button
                   type="button"
                   onClick={() => setListFilterType("All")}
-                  className="hover:text-red-500 font-medium transition-colors outline-none inline-flex items-center"
+                  className="hover:text-danger-text font-medium transition-colors outline-none inline-flex items-center"
                 >
                   <X className="w-2.5 h-2.5 ml-0.5" />
                 </button>
               </span>
             )}
             {(listFilterStartDate || listFilterEndDate) && (
-              <span className="text-[10px] leading-none font-medium text-amber-700 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/30 flex items-center gap-1 shadow-soft">
-                <Calendar className="w-3 h-3 text-amber-600 shrink-0" />
+              <span className="text-[10px] leading-none font-medium text-content-secondary bg-surface-muted px-2.5 py-1 rounded-full border border-border-subtle flex items-center gap-1 shadow-soft">
+                <Calendar className="w-3 h-3 text-content-muted shrink-0" />
                 Date (
                 {listFilterDateType === "dueDate"
                   ? "Due"
@@ -360,7 +360,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
                     setListFilterStartDate("");
                     setListFilterEndDate("");
                   }}
-                  className="hover:text-red-500 font-medium transition-colors outline-none inline-flex items-center"
+                  className="hover:text-danger-text font-medium transition-colors outline-none inline-flex items-center"
                 >
                   <X className="w-2.5 h-2.5 ml-0.5" />
                 </button>
