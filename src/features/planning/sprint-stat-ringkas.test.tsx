@@ -109,7 +109,7 @@ const barisAnggota = (nama: string) => {
 };
 
 const lebarBar = (nama: string) => {
-  const bar = barisAnggota(nama).querySelector<HTMLElement>("span[style*='width']");
+  const bar = barisAnggota(nama).querySelector<HTMLElement>("[style*='width']");
   return bar?.style.width ?? "";
 };
 
@@ -161,6 +161,26 @@ describe("panel beban per anggota", () => {
     pasang();
     expect(lebarBar("Siti Aminah")).toBe("100%");
     expect(lebarBar("Budi")).toBe("50%");
+  });
+
+  it("kartu anggota satu baris berukuran sama dan menggulir ke samping", () => {
+    pasang();
+    const kartu = barisAnggota("Siti Aminah");
+    const deret = kartu.parentElement;
+    expect(deret?.className).toContain("overflow-x-auto");
+    expect(kartu.className).toContain("flex-1");
+    expect(kartu.className).toContain("min-w-[8.5rem]");
+    // Semua kartu berbagi induk yang sama, jadi lebarnya sama rata.
+    expect(deret?.children).toHaveLength(3);
+    expect(barisAnggota("Budi").parentElement).toBe(deret);
+  });
+
+  it("persentase tidak dicetak permanen — hanya gelembung hover di atas bar", () => {
+    pasang();
+    const gelembung = barisAnggota("Siti Aminah").querySelector(".group\\/bar > span");
+    expect(gelembung?.textContent).toBe("100%");
+    expect(gelembung?.className).toContain("opacity-0");
+    expect(gelembung?.className).toContain("group-hover/bar:opacity-100");
   });
 
   it("tugas tanpa penanggung jawab tetap terlihat, tidak hilang dari hitungan", () => {

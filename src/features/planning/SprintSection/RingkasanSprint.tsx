@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Calendar, CheckCircle2, CirclePause, PieChart, Users } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
@@ -36,6 +36,11 @@ export const RingkasanSprint: React.FC<RingkasanSprintProps> = ({
   completionPercentage,
 }) => {
   const { t } = useTranslation();
+
+  /* Bar beban lahir selebar 0 lalu melebar ke porsinya sesudah mount, supaya
+   * transisinya terlihat sebagai animasi, bukan angka yang tiba-tiba ada. */
+  const [barSiap, setBarSiap] = useState(false);
+  useEffect(() => setBarSiap(true), []);
 
   /* "Hold" adalah salah satu prioritas di MasterData, dan tiap instalasi boleh
    * memberi kode/label sendiri — jadi dicocokkan lewat baris masternya, bukan
@@ -165,42 +170,55 @@ export const RingkasanSprint: React.FC<RingkasanSprintProps> = ({
             {t("planning.perMemberEmpty", "Belum ada tugas yang ditugaskan")}
           </div>
         ) : (
-          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar grid grid-cols-1 xl:grid-cols-2 gap-x-3 gap-y-1.5 content-start pr-0.5">
+          /* Satu baris kartu berukuran sama: `flex-1` membagi rata saat anggota
+           * sedikit, `min-w` memaksa lebar yang sama dan menggulir ke samping
+           * saat mereka tidak muat — bukan mengecil tak terbaca. */
+          <div className="flex-1 min-h-0 flex items-stretch gap-2 overflow-x-auto custom-scrollbar pb-0.5">
             {beban.map((b) => (
               <div
                 key={b.uid || "tanpa-penanggung"}
-                className="group flex items-center gap-2 min-w-0"
+                className="group flex-1 min-w-[8.5rem] bg-surface-sunken/60 border border-border-subtle/70 rounded-lg px-2.5 py-2 flex flex-col gap-2 transition-all duration-200 hover:-translate-y-px hover:shadow-xs hover:border-border-default hover:bg-surface-sunken"
               >
-                {b.uid ? (
-                  <UserAvatar
-                    uid={b.uid}
-                    members={projectMembers}
-                    size="xs"
-                    className="transition-transform duration-200 group-hover:scale-110"
-                  />
-                ) : (
-                  <span className="w-5 h-5 rounded-full bg-surface-sunken border border-border-subtle flex items-center justify-center shrink-0">
-                    <Users className="w-3 h-3 text-content-muted" />
-                  </span>
-                )}
-                <span
-                  className="flex-1 min-w-0 truncate text-[11px] font-normal text-content-strong"
-                  title={b.nama}
-                >
-                  {b.nama}
-                </span>
-                <span className="text-[11px] font-semibold text-content-subtle tabular-nums shrink-0">
-                  {b.jumlah}
-                </span>
-                <span className="block w-14 h-1.5 rounded-full bg-surface-sunken overflow-hidden shrink-0">
+                <div className="flex items-center gap-2 min-w-0">
+                  {b.uid ? (
+                    <UserAvatar
+                      uid={b.uid}
+                      members={projectMembers}
+                      size="xs"
+                      className="transition-transform duration-200 group-hover:scale-110"
+                    />
+                  ) : (
+                    <span className="w-5 h-5 rounded-full bg-surface border border-border-subtle flex items-center justify-center shrink-0">
+                      <Users className="w-3 h-3 text-content-muted" />
+                    </span>
+                  )}
                   <span
-                    className={cn(
-                      "block h-full rounded-full transition-all duration-700 ease-out",
-                      b.uid ? "bg-primary" : "bg-primary/40"
-                    )}
-                    style={{ width: `${b.persen}%` }}
-                  />
-                </span>
+                    className="flex-1 min-w-0 truncate text-[11px] font-medium text-content-strong"
+                    title={b.nama}
+                  >
+                    {b.nama}
+                  </span>
+                  <span className="text-[11px] font-semibold text-content-subtle tabular-nums shrink-0">
+                    {b.jumlah}/{totalTasks}
+                  </span>
+                </div>
+                <div className="group/bar relative mt-auto">
+                  <div className="h-1.5 rounded-full bg-surface overflow-hidden">
+                    <div
+                      className={cn(
+                        "h-full rounded-full transition-[width] duration-700 ease-out",
+                        b.uid ? "bg-primary" : "bg-primary/40"
+                      )}
+                      style={{ width: `${barSiap ? b.persen : 0}%` }}
+                    />
+                  </div>
+                  {/* Persentase sengaja tidak dicetak permanen: kartu ini sempit
+                      dan angkanya sudah terbaca dari rasio di kanan atas. Ia
+                      muncul sebagai gelembung hanya saat bar disentuh kursor. */}
+                  <span className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-content-inverse tabular-nums shadow-2xs opacity-0 transition-opacity duration-200 group-hover/bar:opacity-100">
+                    {b.persen}%
+                  </span>
+                </div>
               </div>
             ))}
           </div>
