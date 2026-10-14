@@ -24,12 +24,14 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("All Priorities");
-  // Default TERBUKA: yang disimpan adalah kelompok yang DITUTUP pengguna.
-  // Bila default tertutup, kartu Draggable tidak dirender dan drag-drop mati.
-  const [collapsedParents, setCollapsedParents] = useState<Set<string>>(new Set());
+  // Permintaan pemilik 15 Okt: kelompok (epic/standalone) default TERTUTUP —
+  // pengguna sendiri yang membuka lewat chevron; simpul pohon di dalamnya tetap
+  // default terbuka supaya begitu kelompok terbuka, drag-drop langsung hidup.
+  // Yang disimpan hanya kunci yang di-toggle dari defaultnya.
+  const [diToggle, setDiToggle] = useState<Set<string>>(new Set());
 
   const toggleExpand = (parentId: string) => {
-    setCollapsedParents((prev) => {
+    setDiToggle((prev) => {
       const next = new Set(prev);
       if (next.has(parentId)) {
         next.delete(parentId);
@@ -39,6 +41,9 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
       return next;
     });
   };
+
+  const terbuka = (kunci: string) =>
+    kunci.startsWith("node-") ? !diToggle.has(kunci) : diToggle.has(kunci);
 
   // #689 butir (g) — satu kali jalan, bukan saringan berulang per baris.
   // Dulu: `backlogTasks` (n), `filteredBacklogTasks` (n), `epics` (n), lalu
@@ -134,7 +139,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
   const renderPohon = (task: Task, depth: number): React.ReactNode => {
     const anak = anakPeta.get(task.id) ?? [];
     const kunci = `node-${task.id}`;
-    const terbuka = !collapsedParents.has(kunci);
+    const isOpen = terbuka(kunci);
     const dndIndex = _draggablesRenderedCount++;
 
     return (
@@ -152,7 +157,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
               onClick={() => toggleExpand(kunci)}
               className="w-4 h-4 shrink-0 flex items-center justify-center text-content-muted hover:text-content-strong cursor-pointer rounded-sm"
             >
-              {terbuka ? (
+              {isOpen ? (
                 <ChevronDown className="w-3.5 h-3.5" aria-hidden />
               ) : (
                 <ChevronRight className="w-3.5 h-3.5" aria-hidden />
@@ -167,23 +172,23 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
           )}
           <div className="flex-1 min-w-0">{renderDraggableTask(task, dndIndex, "card")}</div>
         </div>
-        {terbuka && anak.map((a) => renderPohon(a, depth + 1))}
+        {isOpen && anak.map((a) => renderPohon(a, depth + 1))}
       </div>
     );
   };
 
   return (
     <>
-      <div className="p-4 border-b border-border-subtle/80 flex flex-col gap-3 shrink-0 bg-surface shadow-2xs">
+      <div className="px-4 py-3 border-b border-border-subtle/80 flex flex-col gap-2.5 shrink-0 bg-surface shadow-2xs">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <LayoutGrid className="w-4 h-4 text-content-muted shrink-0" />
+            <LayoutGrid className="w-3.5 h-3.5 text-content-muted shrink-0" />
             <h3 className="font-semibold text-content-strong text-xs tracking-tight truncate">
               {t("planning.backlogTasks")}
             </h3>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="h-7 px-2 inline-flex items-center bg-primary/10 border border-primary/30 rounded-md text-[11px] font-medium text-primary">
+          <div className="flex items-center gap-1.5 shrink-0">
+            <div className="h-6 px-2 inline-flex items-center bg-primary/10 border border-primary/30 rounded-md text-[10px] font-medium text-primary">
               {t("planning.issueCount", { count: filteredBacklogTasks.length })}
             </div>
             {canEditPlanning && onAddSprint && (
@@ -191,9 +196,9 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
                 type="button"
                 onClick={onAddSprint}
                 title={t("planning.newSprint")}
-                className="h-7 px-2 sm:px-2.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-[11px] font-medium shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                className="h-6 px-2 sm:px-2.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-[10px] font-medium shadow-xs transition-all flex items-center gap-1 cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5 shrink-0" />
+                <Plus className="w-3 h-3 shrink-0" />
                 <span className="hidden sm:inline">{t("planning.newSprint")}</span>
               </button>
             )}
@@ -202,17 +207,17 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
 
         <div className="flex items-center gap-2 min-w-0">
           <div className="relative min-w-0 flex-1">
-            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-content-subtle pointer-events-none" />
+            <Search className="w-3 h-3 absolute left-2.5 top-1/2 -translate-y-1/2 text-content-subtle pointer-events-none" />
             <input
               placeholder={t("planning.searchBacklog")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-8 pr-2 h-[32px] bg-surface-sunken/70 border border-border-subtle/80 rounded-md text-xs font-normal outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 focus:bg-surface transition-all shadow-2xs"
+              className="w-full pl-7 pr-2 h-7 bg-surface-sunken/70 border border-border-subtle/80 rounded-md text-[11px] font-normal outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 focus:bg-surface transition-all shadow-2xs"
             />
           </div>
           <div className="w-[42%] max-w-[9.5rem] shrink-0 flex items-center gap-1.5 min-w-0">
             <Filter
-              className="w-3.5 h-3.5 text-content-subtle shrink-0 hidden xs:block"
+              className="w-3 h-3 text-content-subtle shrink-0 hidden xs:block"
               aria-hidden
             />
             <div className="min-w-0 flex-1">
@@ -228,7 +233,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
                 type="priority"
                 masterData={masterData}
                 className="w-full"
-                buttonClassName="h-[32px] w-full bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-2 text-xs font-normal"
+                buttonClassName="h-7 w-full bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-2 text-[11px] font-normal"
               />
             </div>
           </div>
@@ -240,7 +245,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
           const items = getTasksForParent(epic.id);
           if (items.length === 0) return [];
 
-          const isExpanded = !collapsedParents.has(`epic-${epic.id}`);
+          const isExpanded = terbuka(`epic-${epic.id}`);
           // #564 — warna baris epik mengikuti PRIORITY epiknya sendiri, supaya
           // sembilan epik tidak lagi tampil satu warna; hex issue_type hanya
           // jatuh balik untuk epik tanpa priority. Ikon tetap pilihan Master
@@ -271,7 +276,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
                 {epic.title}
               </span>
               <div
-                className="ml-auto text-[10px] leading-none font-normal px-2 py-1 rounded-md border"
+                className="ml-auto text-[10px] leading-none font-normal px-1.5 py-1 rounded-md border"
                 style={{
                   color: hexEpic,
                   backgroundColor: `${hexEpic}1A`,
@@ -297,7 +302,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
           const items = getTasksForParent("standalone");
           if (items.length === 0) return [];
           
-          const isExpanded = !collapsedParents.has("standalone");
+          const isExpanded = terbuka("standalone");
 
           return [
             <div 
@@ -314,7 +319,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
               <span className="text-xs font-normal text-content-secondary leading-none">
                 {t("planning.standaloneBacklog")}
               </span>
-              <div className="ml-auto text-xs sm:text-[10px] font-normal text-content-secondary bg-surface-muted px-2 py-0.2 rounded-md border border-border-subtle/60">
+              <div className="ml-auto text-[10px] font-normal text-content-secondary bg-surface-muted px-1.5 py-1 rounded-md border border-border-subtle/60">
                 {items.length}
               </div>
             </div>,

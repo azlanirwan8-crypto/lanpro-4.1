@@ -10,7 +10,7 @@
  * sampai ke DOM pada garis kiri kartu, chip priority/status, dan kepala epik.
  */
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { PlanningView } from "./index";
 import { useProjectStore } from "../../store/stores";
 import type { MasterData, Task, UserProfile } from "../../types";
@@ -108,11 +108,13 @@ describe("#564 warna Planning mengikuti Master Data", () => {
 
   it("garis kiri kartu memakai hex priority milik Master Data", () => {
     render(<PlanningView {...(props as any)} />);
+    fireEvent.click(screen.getByText("Epik Uji"));
     expect(kartu("Judul anak-1").style.borderLeftColor).toBe(rgb(HEX_PRIORITAS));
   });
 
   it("chip priority memakai hex & label milik Master Data", () => {
     const { container } = render(<PlanningView {...(props as any)} />);
+    fireEvent.click(screen.getByText("Epik Uji"));
     const chip = [...container.querySelectorAll<HTMLElement>(".label-chip")].find((c) =>
       c.textContent?.includes("High")
     );
@@ -122,6 +124,7 @@ describe("#564 warna Planning mengikuti Master Data", () => {
 
   it("chip status memakai hex & label milik Master Data", () => {
     const { container } = render(<PlanningView {...(props as any)} />);
+    fireEvent.click(screen.getByText("Epik Uji"));
     const chip = [...container.querySelectorAll<HTMLElement>(".label-chip")].find((c) =>
       c.textContent?.includes("To Do")
     );

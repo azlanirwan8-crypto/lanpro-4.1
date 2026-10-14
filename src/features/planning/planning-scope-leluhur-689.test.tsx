@@ -17,7 +17,7 @@
  * sama dengan kartu yang benar-benar tampil.
  */
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { PlanningView } from "./index";
 import { useProjectStore } from "../../store/stores";
 import type { MasterData, Task, UserProfile } from "../../types";
@@ -75,12 +75,20 @@ const props = {
   handleDragEndPlanning: () => {},
 };
 
+// Kelompok default TERTUTUP (permintaan pemilik 15 Okt), jadi kartu baru ada di
+// DOM sesudah kelompoknya dibuka — buka dulu, baru hitung.
+const bukaKelompok = () => {
+  fireEvent.click(screen.getByText("Judul epic-orang"));
+  fireEvent.click(screen.getByText("Backlog Mandiri"));
+};
+
 describe("#689 lingkup Planning tidak boleh menyembunyikan tugas sendiri", () => {
   beforeEach(() => useProjectStore.getState().setLingkupTugas("all"));
   afterEach(() => useProjectStore.getState().setLingkupTugas("all"));
 
   it("all: semua kartu tampil seperti biasa", () => {
     render(<PlanningView {...(props as any)} />);
+    bukaKelompok();
     expect(screen.getByText("Judul punya-saya")).toBeInTheDocument();
     expect(screen.getByText("Judul anak-saya")).toBeInTheDocument();
     expect(screen.getByText("Judul anak-orang")).toBeInTheDocument();
@@ -89,6 +97,7 @@ describe("#689 lingkup Planning tidak boleh menyembunyikan tugas sendiri", () =>
   it("mine: tugas saya tetap tampil walau epiknya milik orang lain", () => {
     useProjectStore.getState().setLingkupTugas("mine");
     render(<PlanningView {...(props as any)} />);
+    bukaKelompok();
 
     // Ini yang hilang di kode saat ini: kartanya tersaring masuk, baris induknya
     // tidak, jadi kartu itu tidak punya tempat duduk sama sekali.

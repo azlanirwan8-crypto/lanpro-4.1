@@ -81,7 +81,15 @@ describe("#689 keadaan Backlog di Planning", () => {
 
     const terender = pasang(tasks);
 
-    expect([...terender].sort()).toEqual(["anak-1a", "anak-1b", "anak-2a", "mandiri-1"].sort());
+    // Kelompok default TERTUTUP (permintaan pemilik 15 Okt): kartu baru dirender
+    // sesudah penggunanya membuka kelompoknya, jadi buka dulu sebelum menghitung.
+    // `terender` mencatat setiap render (kartu yang sudah terbuka ikut terdorong
+    // ulang pada render berikutnya), maka yang dibandingkan himpunan uniknya.
+    expect(terender).toEqual([]);
+    fireEvent.click(screen.getByText("Judul epic-1"));
+    fireEvent.click(screen.getByText("Judul epic-2"));
+
+    expect([...new Set(terender)].sort()).toEqual(["anak-1a", "anak-1b", "anak-2a"].sort());
     expect(terender).not.toContain("epic-1");
     expect(terender).not.toContain("yatim");
   });
@@ -107,6 +115,7 @@ describe("#689 keadaan Backlog di Planning", () => {
 
   it("filter prioritas yang tidak cocok juga disebut saringan, bukan kekosongan", () => {
     const terender = pasang([tugas("mandiri-1", { priority: "Medium" })]);
+    fireEvent.click(screen.getByText("Backlog Mandiri"));
     expect(terender).toEqual(["mandiri-1"]);
     expect(screen.queryByTestId("backlog-tidak-cocok")).toBeNull();
   });

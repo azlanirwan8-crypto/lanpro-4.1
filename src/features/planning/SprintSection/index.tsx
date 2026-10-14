@@ -56,8 +56,10 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
 }) => {
   const { t } = useTranslation();
   const [activeSprintMenuId, setActiveSprintMenuId] = useState<string | null>(null);
-  // Default TERBUKA per sprint: yang disimpan adalah kelompok yang DITUTUP.
-  // Bila default tertutup, baris Draggable tidak dirender dan drag-drop mati.
+  // Permintaan pemilik 15 Okt: kelompok (epic/standalone) default TERTUTUP —
+  // pengguna sendiri yang membuka lewat chevron; simpul pohon di dalamnya tetap
+  // default terbuka. Yang disimpan hanya kunci yang di-toggle dari defaultnya,
+  // jadi satu Set per sprint cukup untuk kedua arah.
   const [collapsedParents, setCollapsedParents] = useState<Record<string, Set<string>>>({});
 
   const toggleExpand = (sprintId: string, parentId: string) => {
@@ -78,7 +80,8 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
    * di lingkup dalam menutupi fungsi ini — itulah yang membuat `tsc --noEmit`
    * merah di `main` ("Type 'Boolean' has no call signatures"). */
   const indukTerbuka = (sprintId: string, parentId: string) => {
-    return !collapsedParents[sprintId]?.has(parentId);
+    const diToggle = collapsedParents[sprintId]?.has(parentId) ?? false;
+    return parentId.startsWith("node-") ? !diToggle : diToggle;
   };
 
   return (
@@ -541,7 +544,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                           </span>
                                         </div>
                                         <div
-                                          className="text-[10px] font-normal px-2 py-1 rounded-md border bg-surface"
+                                          className="text-[10px] font-normal px-1.5 py-1 rounded-md border bg-surface"
                                           style={{
                                             color: hexEpic,
                                             borderColor: `${hexEpic}4D`,
@@ -592,7 +595,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                             {t("planning.standaloneTasks")}
                                           </span>
                                         </div>
-                                        <div className="text-[10px] font-normal text-content-secondary bg-surface border border-border-subtle/60 px-2 py-1 rounded-md">
+                                        <div className="text-[10px] font-normal text-content-secondary bg-surface border border-border-subtle/60 px-1.5 py-1 rounded-md">
                                           {items.length}
                                         </div>
                                       </div>,
