@@ -43,6 +43,11 @@ export const MilestonePanel: React.FC<MilestonePanelProps> = ({
   const [internalExpanded, setInternalExpanded] = useState(() =>
     typeof window !== "undefined" ? window.matchMedia("(min-width: 768px)").matches : true
   );
+  /** #736 — panel tanpa milestone default tertutup: form kosong plus baris
+   *  "No milestones yet" adalah noise saat tidak ada yang ditampilkan. */
+  useEffect(() => {
+    if (!loading && items.length === 0) setInternalExpanded(false);
+  }, [loading, items.length]);
   const expanded = controlledExpanded ?? internalExpanded;
   const setExpanded = onToggleExpanded ?? setInternalExpanded;
 

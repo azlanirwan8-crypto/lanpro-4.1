@@ -75,9 +75,9 @@ interface TimelineProps {
  *  HP hanya 20 rem (#309) dan memuat empat kolom di sana akan memakan namanya
  *  sendiri. */
 const KOLOM = {
-  status: "w-24 shrink-0 max-md:hidden",
-  prioritas: "w-20 shrink-0 max-md:hidden",
-  tanggal: "w-28 shrink-0 max-md:hidden",
+  status: "w-20 shrink-0 max-md:hidden",
+  prioritas: "w-16 shrink-0 max-md:hidden",
+  tanggal: "w-24 shrink-0 max-md:hidden",
 };
 const LABEL_KEPALA =
   "font-normal text-[11px] sm:text-[11px] text-content-muted uppercase tracking-normal";
@@ -291,6 +291,9 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
 
   const timelineListRef = useRef<HTMLDivElement>(null);
   const timelineMainRef = useRef<HTMLDivElement>(null);
+  // #736 — scroller VERTIKAL pane kanan dipisah dari scroller horizontal supaya
+  // kepala minggu tidak perlu `sticky`: ia di luar body, jadi tidak ikut tergulir.
+  const timelineMainBodyRef = useRef<HTMLDivElement>(null);
   const timelineContainerRef = useRef<HTMLDivElement>(null);
 
   const timelineZoom = pixelsPerDay >= 45 ? "days" : pixelsPerDay >= 15 ? "weeks" : "months";
@@ -457,10 +460,10 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
 
   const handleTimelineVerticalScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
-    if (timelineListRef.current && target === timelineMainRef.current) {
+    if (timelineListRef.current && target === timelineMainBodyRef.current) {
       timelineListRef.current.scrollTop = target.scrollTop;
-    } else if (timelineMainRef.current && target === timelineListRef.current) {
-      timelineMainRef.current.scrollTop = target.scrollTop;
+    } else if (timelineMainBodyRef.current && target === timelineListRef.current) {
+      timelineMainBodyRef.current.scrollTop = target.scrollTop;
     }
   };
 
@@ -864,13 +867,13 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               // panjang TIDAK dipotong, ia turun ke baris dua dan barisnya yang
               // tumbuh — lihat `tinggiRow`. Batas bawah/atas (#566) dipertahankan
               // supaya satu judul 200 karakter tidak pernah memakan papan Gantt.
-              "w-[34rem] min-w-[30rem] max-w-[min(52vw,40rem)] shrink-0 border-r border-border-subtle/80 flex flex-col z-20 bg-surface relative",
+              "w-[38rem] min-w-[32rem] max-w-[min(56vw,44rem)] shrink-0 border-r border-border-subtle/80 flex flex-col z-20 bg-surface relative",
               "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:w-[min(80vw,20rem)] max-md:shadow-xl max-md:border-y-0 max-md:border-l-0",
               "max-md:transition-transform max-md:duration-200",
               hierarchyOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full"
             )}
           >
-            <div className="sticky top-0 z-30 h-[73px] bg-surface-sunken/90 backdrop-blur-sm border-b border-border-subtle px-3 flex items-center gap-2">
+            <div className="z-30 h-[73px] bg-surface-sunken/90 backdrop-blur-sm border-b border-border-subtle px-3 flex items-center gap-2">
               <span className={cn(LABEL_KEPALA, "min-w-0 flex-1")}>
                 {t("roadmap.itemHierarchy")}
               </span>
@@ -887,7 +890,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               </button>
             </div>
             <div
-              className="flex-1 overflow-y-auto overflow-x-auto no-scrollbar pb-10 pt-4 border-t border-border-subtle"
+              className="flex-1 overflow-y-auto overflow-x-auto no-scrollbar pb-10 pt-4"
               ref={timelineListRef}
               onScroll={handleTimelineVerticalScroll}
             >
@@ -1081,7 +1084,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
             </div>
           </div>
           <div
-            className={`flex-1 flex flex-col overflow-auto relative bg-surface min-w-0 touch-pan-x ${isDraggingToPan ? "cursor-grabbing" : "cursor-grab"}`}
+            className={`flex-1 flex flex-col overflow-x-auto overflow-y-hidden relative bg-surface min-w-0 touch-pan-x ${isDraggingToPan ? "cursor-grabbing" : "cursor-grab"}`}
             ref={timelineMainRef}
             onScroll={handleTimelineVerticalScroll}
             onMouseDown={handleDragPanMouseDown}
@@ -1091,16 +1094,15 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               initial={{ opacity: 0.3, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
-              className="min-w-max relative"
+              className="min-w-max relative h-full flex flex-col"
               style={{
                 width: `${totalDays * pixelsPerDay}px`,
-                minHeight: "100%",
                 ...(timelineInteraction || isDraggingToPan
                   ? { willChange: "transform, opacity" }
                   : {}),
               }}
             >
-              <div className="sticky top-0 z-30 h-[73px] bg-surface-sunken/90 backdrop-blur-sm border-b border-border-subtle shadow-soft box-border flex flex-col">
+              <div className="shrink-0 z-30 h-[73px] bg-surface-sunken/90 backdrop-blur-sm border-b border-border-subtle shadow-soft box-border flex flex-col">
                 <div className="flex h-8 border-b border-border-subtle/50">
                   {timelineZoom !== "months"
                     ? timelineMonths.map((m: any) => {
@@ -1205,271 +1207,282 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                     })}
                 </div>
               </div>
-              <div className="absolute inset-0 pointer-events-none flex z-10 pt-[73px]">
-                {timelineZoom === "days" &&
-                  timelineDays.map((d: any, i: number) => (
-                    <div
-                      key={"grid-" + d.toISOString()}
-                      className={`shrink-0 border-r ${d.getDay() === 0 || d.getDay() === 6 ? "bg-surface-muted/40 border-border-subtle/50" : "border-border-faint/50"}`}
-                      style={{ width: `${pixelsPerDay}px` }}
-                    />
-                  ))}
-                {timelineZoom === "weeks" &&
-                  timelineWeeks.map((w: any, i: number) => {
-                    const wStart = startOfWeek(w);
-                    const actualStart = wStart < minDate ? minDate : wStart;
-                    const wEnd = endOfWeek(w);
-                    const expectedEnd =
-                      wEnd > addDays(minDate, totalDays) ? addDays(minDate, totalDays) : wEnd;
-                    const actualDays = differenceInDays(expectedEnd, actualStart) + 1;
-                    return (
-                      <div
-                        key={"grid-" + w.toISOString()}
-                        className="shrink-0 border-r border-border-faint/50"
-                        style={{ width: `${actualDays * pixelsPerDay}px` }}
-                      />
-                    );
-                  })}
-                {timelineZoom === "months" &&
-                  timelineMonths.map((m: any, i: number) => {
-                    const mStart = startOfMonth(m);
-                    const actualStart = mStart < minDate ? minDate : mStart;
-                    const mEnd = endOfMonth(m);
-                    const expectedEnd =
-                      mEnd > addDays(minDate, totalDays) ? addDays(minDate, totalDays) : mEnd;
-                    const actualDays = differenceInDays(expectedEnd, actualStart) + 1;
-                    return (
-                      <div
-                        key={"grid-" + m.toISOString()}
-                        className="shrink-0 border-r border-border-faint/50"
-                        style={{ width: `${actualDays * pixelsPerDay}px` }}
-                      />
-                    );
-                  })}
-              </div>
-              <div className="relative pt-4 z-20 pb-10 border-t border-border-subtle">
-                <AnimatePresence initial={false}>
-                  {renderedRows.map(({ task, isChild }) => {
-                    const dates = tempDates[task.id] || {
-                      startDate: task.startDate,
-                      endDate: task.endDate,
-                    };
-                    if (!dates.startDate || !dates.endDate) {
-                      return (
-                        <motion.div
-                          key={task.id}
-                          data-row-id={task.id}
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: tinggiRow[task.id] ?? GANTT_ROW_PX, opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.2, ease: "easeInOut" }}
-                          className="relative border-b border-border-faint bg-transparent flex items-center group/row hover:bg-surface-sunken/50 transition-colors overflow-hidden"
-                          style={
-                            sedangDiseret(task.id)
-                              ? { willChange: "transform, opacity, height" }
-                              : undefined
-                          }
-                        >
-                          <motion.button
-                            whileHover={{
-                              scale: 1.04,
-                              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-                            }}
-                            whileTap={{ scale: 0.96 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                            onClick={() => {
-                              setSelectedTaskForDetail(task);
-                              setIsTaskDetailModalOpen(true);
-                            }}
-                            className="absolute left-6 h-6 px-4 rounded-xl flex items-center bg-surface-sunken/60 border border-border-subtle border-dashed hover:border-primary hover:bg-surface group-hover/row:bg-surface text-xs sm:text-[10px] font-medium text-content-subtle hover:text-primary hover:shadow-soft transition-all cursor-pointer gap-2"
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full bg-surface-marker group-hover/row:bg-primary/100 animate-pulse transition-colors" />
-                            {t("roadmap.notPlotted")}
-                          </motion.button>
-                        </motion.div>
-                      );
-                    }
-                    const start = ensureDate(dates.startDate);
-                    const end = ensureDate(dates.endDate);
-                    const left = (differenceInDays(start, minDate) / (totalDays || 1)) * 100;
-                    const width = Math.max(
-                      0.5,
-                      ((differenceInDays(end, start) + 1) / (totalDays || 1)) * 100
-                    );
-                    const isEpic = (task.type || "").toLowerCase() === "epic";
-                    const hexStatus = warnaDariMaster(masterData, "status", task.status);
-                    // #700 B4 — batas tinggi batang adalah TINGGI BARISNYA, bukan
-                    // angka tetap. Baris yang sudah naik karena nama panjang
-                    // (B1) otomatis memberi batang ruang lebih.
-                    const tinggiBaris = tinggiRow[task.id] ?? GANTT_ROW_PX;
-
-                    return (
-                      <motion.div
-                        key={task.id}
-                        data-row-id={task.id}
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: tinggiRow[task.id] ?? GANTT_ROW_PX, opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2, ease: "easeInOut" }}
-                        className="relative border-b border-border-faint bg-transparent flex items-center group/row hover:bg-surface-sunken/50 transition-colors overflow-hidden"
-                        style={
-                          sedangDiseret(task.id)
-                            ? { willChange: "transform, opacity, height" }
-                            : undefined
+              <div
+                ref={timelineMainBodyRef}
+                onScroll={handleTimelineVerticalScroll}
+                className="flex-1 min-h-0 overflow-y-auto relative"
+              >
+                <div className="relative min-h-full">
+                  <div className="absolute inset-0 pointer-events-none flex z-10">
+                    {timelineZoom === "days" &&
+                      timelineDays.map((d: any, i: number) => (
+                        <div
+                          key={"grid-" + d.toISOString()}
+                          className={`shrink-0 border-r ${d.getDay() === 0 || d.getDay() === 6 ? "bg-surface-muted/40 border-border-subtle/50" : "border-border-faint/50"}`}
+                          style={{ width: `${pixelsPerDay}px` }}
+                        />
+                      ))}
+                    {timelineZoom === "weeks" &&
+                      timelineWeeks.map((w: any, i: number) => {
+                        const wStart = startOfWeek(w);
+                        const actualStart = wStart < minDate ? minDate : wStart;
+                        const wEnd = endOfWeek(w);
+                        const expectedEnd =
+                          wEnd > addDays(minDate, totalDays) ? addDays(minDate, totalDays) : wEnd;
+                        const actualDays = differenceInDays(expectedEnd, actualStart) + 1;
+                        return (
+                          <div
+                            key={"grid-" + w.toISOString()}
+                            className="shrink-0 border-r border-border-faint/50"
+                            style={{ width: `${actualDays * pixelsPerDay}px` }}
+                          />
+                        );
+                      })}
+                    {timelineZoom === "months" &&
+                      timelineMonths.map((m: any, i: number) => {
+                        const mStart = startOfMonth(m);
+                        const actualStart = mStart < minDate ? minDate : mStart;
+                        const mEnd = endOfMonth(m);
+                        const expectedEnd =
+                          mEnd > addDays(minDate, totalDays) ? addDays(minDate, totalDays) : mEnd;
+                        const actualDays = differenceInDays(expectedEnd, actualStart) + 1;
+                        return (
+                          <div
+                            key={"grid-" + m.toISOString()}
+                            className="shrink-0 border-r border-border-faint/50"
+                            style={{ width: `${actualDays * pixelsPerDay}px` }}
+                          />
+                        );
+                      })}
+                  </div>
+                  <div className="relative pt-4 z-20 pb-10">
+                    <AnimatePresence initial={false}>
+                      {renderedRows.map(({ task, isChild }) => {
+                        const dates = tempDates[task.id] || {
+                          startDate: task.startDate,
+                          endDate: task.endDate,
+                        };
+                        if (!dates.startDate || !dates.endDate) {
+                          return (
+                            <motion.div
+                              key={task.id}
+                              data-row-id={task.id}
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: tinggiRow[task.id] ?? GANTT_ROW_PX, opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.2, ease: "easeInOut" }}
+                              className="relative border-b border-border-faint bg-transparent flex items-center group/row hover:bg-surface-sunken/50 transition-colors overflow-hidden"
+                              style={
+                                sedangDiseret(task.id)
+                                  ? { willChange: "transform, opacity, height" }
+                                  : undefined
+                              }
+                            >
+                              <motion.button
+                                whileHover={{
+                                  scale: 1.04,
+                                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+                                }}
+                                whileTap={{ scale: 0.96 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                                onClick={() => {
+                                  setSelectedTaskForDetail(task);
+                                  setIsTaskDetailModalOpen(true);
+                                }}
+                                className="absolute left-6 h-6 px-3 rounded-xl flex items-center bg-surface-sunken/60 border border-border-subtle border-dashed hover:border-primary hover:bg-surface group-hover/row:bg-surface text-xs sm:text-[10px] font-medium text-content-subtle hover:text-primary hover:shadow-soft transition-all cursor-pointer gap-2"
+                                aria-label={t("roadmap.notPlotted")}
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full bg-surface-marker group-hover/row:bg-primary/100 animate-pulse transition-colors" />
+                                <span className="max-w-0 overflow-hidden whitespace-nowrap transition-all duration-200 group-hover/row:max-w-[16rem] group-focus-within/row:max-w-[16rem]">
+                                  {t("roadmap.notPlotted")}
+                                </span>
+                              </motion.button>
+                            </motion.div>
+                          );
                         }
-                      >
-                        {/* #689 butir (f) — geser tanggal bersifat optimistik:
+                        const start = ensureDate(dates.startDate);
+                        const end = ensureDate(dates.endDate);
+                        const left = (differenceInDays(start, minDate) / (totalDays || 1)) * 100;
+                        const width = Math.max(
+                          0.5,
+                          ((differenceInDays(end, start) + 1) / (totalDays || 1)) * 100
+                        );
+                        const isEpic = (task.type || "").toLowerCase() === "epic";
+                        const hexStatus = warnaDariMaster(masterData, "status", task.status);
+                        // #700 B4 — batas tinggi batang adalah TINGGI BARISNYA, bukan
+                        // angka tetap. Baris yang sudah naik karena nama panjang
+                        // (B1) otomatis memberi batang ruang lebih.
+                        const tinggiBaris = tinggiRow[task.id] ?? GANTT_ROW_PX;
+
+                        return (
+                          <motion.div
+                            key={task.id}
+                            data-row-id={task.id}
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: tinggiRow[task.id] ?? GANTT_ROW_PX, opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2, ease: "easeInOut" }}
+                            className="relative border-b border-border-faint bg-transparent flex items-center group/row hover:bg-surface-sunken/50 transition-colors overflow-hidden"
+                            style={
+                              sedangDiseret(task.id)
+                                ? { willChange: "transform, opacity, height" }
+                                : undefined
+                            }
+                          >
+                            {/* #689 butir (f) — geser tanggal bersifat optimistik:
                             barisnya pindah SEBELUM server menjawab. Tanpa penanda
                             ini, permintaan yang masih di jalan (atau yang sedang
                             diantre jaringan) tampak seperti sudah tersimpan. */}
-                        {isUpdatingTask[task.id] && (
-                          <span
-                            data-testid={`roadmap-menyimpan-${task.id}`}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 z-40 inline-flex items-center px-1.5 py-0.5 rounded border border-border-subtle bg-surface text-[10px] font-medium text-content-muted"
-                          >
-                            {t("roadmap.savingDates")}
-                          </span>
-                        )}
-                        <motion.div
-                          whileHover={{
-                            scale: 1.02,
-                            y: "-50%",
-                            boxShadow:
-                              "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)",
-                          }}
-                          transition={
-                            timelineInteraction?.taskId === task.id
-                              ? { type: "tween", duration: 0 }
-                              : { type: "spring", stiffness: 350, damping: 25 }
-                          }
-                          className={cn(
-                            // #698 — warna batang datang dari `--lbr` (hex label
-                            // dari master data) lewat `.gantt-bar`, bukan dari
-                            // enam set gradien. Epik lebih pucat dan ramping
-                            // karena ia RENTANG, bukan satu pekerjaan; ujungnya
-                            // yang menandai batas awal–akhir.
-                            //
-                            // Bentuk epik dan bentuk tugas ditulis SALING
-                            // EKSKLUSIF, bukan ditumpuk: `cn()` di repo ini
-                            // hanyalah gabung spasi (src/lib/utils.ts:4), jadi
-                            // `h-6` + `h-4` dimenangkan urutan stylesheet, bukan
-                            // oleh niat penulisnya — pelajaran #692.
-                            // #700 B2 lalu B4 — `overflow-hidden` TIDAK boleh
-                            // kembali ke elemen ini: tooltip duduk di DALAM batang
-                            // (`-top-12`) dan akan terpotong bersamanya. Yang
-                            // memotong judul sekarang kotak label di bawahnya.
-                            //
-                            // `items-stretch`, bukan `items-center`: kotak label
-                            // harus setinggi batang supaya baris teks yang
-                            // kelebihan TERUKUR olehnya, bukan meluber diam-diam.
-                            "gantt-bar absolute top-1/2 -translate-y-1/2 flex items-stretch border shadow-soft",
-                            // Awalan `h-auto` bukan gaya, dan ia menahan dua hal:
-                            // pemindai #602 mengenali sebuah string sebagai kelas
-                            // dari token pertamanya, dan `h-6` yang kaku akan
-                            // melarang batang menampung baris kedua. Tingginya
-                            // bebas di antara `min-h` dan `maxHeight` di bawah.
-                            isEpic
-                              ? "h-auto min-h-4 rounded-md gantt-bar-epic"
-                              : "h-auto min-h-6 rounded-lg",
-                            "group/bar",
-                            timelineInteraction?.taskId === task.id && "gantt-bar-aktif",
-                            timelineInteraction?.taskId === task.id
-                              ? "scale-[1.01] shadow-md z-30"
-                              : "transition-all"
-                          )}
-                          style={{
-                            ...gayaLabel(hexStatus),
-                            left: `${left}%`,
-                            width: `${width}%`,
-                            minWidth: "24px",
-                            // #700 B4 — batang boleh lebih tinggi dari lantainya
-                            // untuk menampung baris kedua judul, tetapi TIDAK
-                            // boleh melewati barisnya sendiri. Baris ini sudah
-                            // `overflow-hidden`, jadi tanpa batas di bawah batang
-                            // yang kepanjangan akan terpotong diam-diam di tepi
-                            // atas/bawah baris; dengan batasnya, kelebihan itu
-                            // terukur dan judulnya disembunyikan (lihat
-                            // `labelTidakMuat`).
-                            maxHeight: tinggiBaris - 2,
-                            ...(sedangDiseret(task.id)
-                              ? { willChange: "transform, left, width" }
-                              : {}),
-                          }}
-                        >
-                          {isEpic && (
-                            <>
-                              <div className="gantt-bar-ujung pointer-events-none absolute left-0 top-0 bottom-0 w-[3px]" />
-                              <div className="gantt-bar-ujung pointer-events-none absolute right-0 top-0 bottom-0 w-[3px]" />
-                            </>
-                          )}
-                          {/* Dynamic Floating Tooltip */}
-                          <div
-                            className={cn(
-                              "absolute -top-12 left-1/2 -translate-x-1/2 bg-surface-inverse-strong border border-border-inverse text-content-inverse text-xs sm:text-[10px] font-medium px-2.5 py-1.5 rounded-lg shadow-xl pointer-events-none z-50 flex items-center gap-1.5 whitespace-nowrap transition-all duration-150 origin-bottom scale-90 opacity-0",
-                              "group-hover/bar:opacity-100 group-hover/bar:scale-100",
-                              timelineInteraction?.taskId === task.id
-                                ? "opacity-100 scale-100 ring-2"
-                                : ""
+                            {isUpdatingTask[task.id] && (
+                              <span
+                                data-testid={`roadmap-menyimpan-${task.id}`}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 z-40 inline-flex items-center px-1.5 py-0.5 rounded border border-border-subtle bg-surface text-[10px] font-medium text-content-muted"
+                              >
+                                {t("roadmap.savingDates")}
+                              </span>
                             )}
-                          >
-                            {/* #698 — tanggal di dalam tooltip tidak lagi ikut
+                            <motion.div
+                              whileHover={{
+                                scale: 1.02,
+                                y: "-50%",
+                                boxShadow:
+                                  "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)",
+                              }}
+                              transition={
+                                timelineInteraction?.taskId === task.id
+                                  ? { type: "tween", duration: 0 }
+                                  : { type: "spring", stiffness: 350, damping: 25 }
+                              }
+                              className={cn(
+                                // #698 — warna batang datang dari `--lbr` (hex label
+                                // dari master data) lewat `.gantt-bar`, bukan dari
+                                // enam set gradien. Epik lebih pucat dan ramping
+                                // karena ia RENTANG, bukan satu pekerjaan; ujungnya
+                                // yang menandai batas awal–akhir.
+                                //
+                                // Bentuk epik dan bentuk tugas ditulis SALING
+                                // EKSKLUSIF, bukan ditumpuk: `cn()` di repo ini
+                                // hanyalah gabung spasi (src/lib/utils.ts:4), jadi
+                                // `h-6` + `h-4` dimenangkan urutan stylesheet, bukan
+                                // oleh niat penulisnya — pelajaran #692.
+                                // #700 B2 lalu B4 — `overflow-hidden` TIDAK boleh
+                                // kembali ke elemen ini: tooltip duduk di DALAM batang
+                                // (`-top-12`) dan akan terpotong bersamanya. Yang
+                                // memotong judul sekarang kotak label di bawahnya.
+                                //
+                                // `items-stretch`, bukan `items-center`: kotak label
+                                // harus setinggi batang supaya baris teks yang
+                                // kelebihan TERUKUR olehnya, bukan meluber diam-diam.
+                                "gantt-bar absolute top-1/2 -translate-y-1/2 flex items-stretch border shadow-soft",
+                                // Awalan `h-auto` bukan gaya, dan ia menahan dua hal:
+                                // pemindai #602 mengenali sebuah string sebagai kelas
+                                // dari token pertamanya, dan `h-6` yang kaku akan
+                                // melarang batang menampung baris kedua. Tingginya
+                                // bebas di antara `min-h` dan `maxHeight` di bawah.
+                                isEpic
+                                  ? "h-auto min-h-4 rounded-md gantt-bar-epic"
+                                  : "h-auto min-h-6 rounded-lg",
+                                "group/bar",
+                                timelineInteraction?.taskId === task.id && "gantt-bar-aktif",
+                                timelineInteraction?.taskId === task.id
+                                  ? "scale-[1.01] shadow-md z-30"
+                                  : "transition-all"
+                              )}
+                              style={{
+                                ...gayaLabel(hexStatus),
+                                left: `${left}%`,
+                                width: `${width}%`,
+                                minWidth: "24px",
+                                // #700 B4 — batang boleh lebih tinggi dari lantainya
+                                // untuk menampung baris kedua judul, tetapi TIDAK
+                                // boleh melewati barisnya sendiri. Baris ini sudah
+                                // `overflow-hidden`, jadi tanpa batas di bawah batang
+                                // yang kepanjangan akan terpotong diam-diam di tepi
+                                // atas/bawah baris; dengan batasnya, kelebihan itu
+                                // terukur dan judulnya disembunyikan (lihat
+                                // `labelTidakMuat`).
+                                maxHeight: tinggiBaris - 2,
+                                ...(sedangDiseret(task.id)
+                                  ? { willChange: "transform, left, width" }
+                                  : {}),
+                              }}
+                            >
+                              {isEpic && (
+                                <>
+                                  <div className="gantt-bar-ujung pointer-events-none absolute left-0 top-0 bottom-0 w-[3px]" />
+                                  <div className="gantt-bar-ujung pointer-events-none absolute right-0 top-0 bottom-0 w-[3px]" />
+                                </>
+                              )}
+                              {/* Dynamic Floating Tooltip */}
+                              <div
+                                className={cn(
+                                  "absolute -top-12 left-1/2 -translate-x-1/2 bg-surface-inverse-strong border border-border-inverse text-content-inverse text-xs sm:text-[10px] font-medium px-2.5 py-1.5 rounded-lg shadow-xl pointer-events-none z-50 flex items-center gap-1.5 whitespace-nowrap transition-all duration-150 origin-bottom scale-90 opacity-0",
+                                  "group-hover/bar:opacity-100 group-hover/bar:scale-100",
+                                  timelineInteraction?.taskId === task.id
+                                    ? "opacity-100 scale-100 ring-2"
+                                    : ""
+                                )}
+                              >
+                                {/* #698 — tanggal di dalam tooltip tidak lagi ikut
                                 rona status: latar tooltip sudah `surface-inverse-strong`,
                                 jadi teksnya cukup `content-inverse`. */}
-                            <span className="font-medium">{format(start, "dd MMM yyyy")}</span>
-                            <span className="text-content-inverse-muted">→</span>
-                            <span className="font-medium">{format(end, "dd MMM yyyy")}</span>
-                            <span className="font-medium px-1.5 py-0.5 rounded text-xs sm:text-[11px] sm:text-[9px] ml-1 bg-surface-inverse/60 text-content-inverse">
-                              {t("rakit.daysCount", { count: differenceInDays(end, start) + 1 })}
-                            </span>
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-x-4 border-t-4 border-x-transparent border-t-surface-inverse-strong" />
-                          </div>
+                                <span className="font-medium">{format(start, "dd MMM yyyy")}</span>
+                                <span className="text-content-inverse-muted">→</span>
+                                <span className="font-medium">{format(end, "dd MMM yyyy")}</span>
+                                <span className="font-medium px-1.5 py-0.5 rounded text-xs sm:text-[11px] sm:text-[9px] ml-1 bg-surface-inverse/60 text-content-inverse">
+                                  {t("rakit.daysCount", {
+                                    count: differenceInDays(end, start) + 1,
+                                  })}
+                                </span>
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-x-4 border-t-4 border-x-transparent border-t-surface-inverse-strong" />
+                              </div>
 
-                          {/* Visually Rich Left Resize Handle */}
-                          <div
-                            className="absolute left-0 top-0 bottom-0 w-3 flex items-center justify-center cursor-ew-resize z-25 transition-colors hover:bg-surface-strong/10 active:bg-surface-strong/25 group/l-handle"
-                            onMouseDown={(e) => {
-                              e.stopPropagation();
-                              setTimelineInteraction({
-                                taskId: task.id,
-                                type: "resize-start",
-                                startX: e.clientX,
-                                initialStart: start,
-                                initialEnd: end,
-                              });
-                            }}
-                            title={t("roadmap.dragLeft")}
-                          >
-                            <div className="gantt-bar-ujung w-[3px] h-3.5 rounded-full transition-colors shadow-soft group-hover/l-handle:opacity-80" />
-                          </div>
+                              {/* Visually Rich Left Resize Handle */}
+                              <div
+                                className="absolute left-0 top-0 bottom-0 w-3 flex items-center justify-center cursor-ew-resize z-25 transition-colors hover:bg-surface-strong/10 active:bg-surface-strong/25 group/l-handle"
+                                onMouseDown={(e) => {
+                                  e.stopPropagation();
+                                  setTimelineInteraction({
+                                    taskId: task.id,
+                                    type: "resize-start",
+                                    startX: e.clientX,
+                                    initialStart: start,
+                                    initialEnd: end,
+                                  });
+                                }}
+                                title={t("roadmap.dragLeft")}
+                              >
+                                <div className="gantt-bar-ujung w-[3px] h-3.5 rounded-full transition-colors shadow-soft group-hover/l-handle:opacity-80" />
+                              </div>
 
-                          {/* Drag and Move Row Area */}
-                          <div
-                            ref={ukurBatang(task.id)}
-                            data-batang-id={task.id}
-                            // #700 B4 — kotak INI yang memotong, bukan batangnya:
-                            // `overflow-hidden` + `min-w-0` memastikan tidak ada
-                            // satu huruf pun melewati tepi kanan, dan `items-stretch`
-                            // di induknya membuat tingginya sama dengan tinggi
-                            // batang sehingga baris yang tidak tertampung TERUKUR
-                            // (`scrollHeight` > `clientHeight`), bukan meluber.
-                            className="relative min-w-0 flex-1 overflow-hidden px-3 flex items-center cursor-grab active:cursor-grabbing"
-                            onMouseDown={(e) => {
-                              // Only trigger move if clicked outside the resize handles
-                              const rect = e.currentTarget.getBoundingClientRect();
-                              const clickX = e.clientX - rect.left;
-                              if (clickX > 12 && clickX < rect.width - 12) {
-                                e.stopPropagation();
-                                setTimelineInteraction({
-                                  taskId: task.id,
-                                  type: "move",
-                                  startX: e.clientX,
-                                  initialStart: start,
-                                  initialEnd: end,
-                                });
-                              }
-                            }}
-                          >
-                            {/* #700 B2 lalu B4 — judul TIDAK dipotong dan TIDAK
+                              {/* Drag and Move Row Area */}
+                              <div
+                                ref={ukurBatang(task.id)}
+                                data-batang-id={task.id}
+                                // #700 B4 — kotak INI yang memotong, bukan batangnya:
+                                // `overflow-hidden` + `min-w-0` memastikan tidak ada
+                                // satu huruf pun melewati tepi kanan, dan `items-stretch`
+                                // di induknya membuat tingginya sama dengan tinggi
+                                // batang sehingga baris yang tidak tertampung TERUKUR
+                                // (`scrollHeight` > `clientHeight`), bukan meluber.
+                                className="relative min-w-0 flex-1 overflow-hidden px-3 flex items-center cursor-grab active:cursor-grabbing"
+                                onMouseDown={(e) => {
+                                  // Only trigger move if clicked outside the resize handles
+                                  const rect = e.currentTarget.getBoundingClientRect();
+                                  const clickX = e.clientX - rect.left;
+                                  if (clickX > 12 && clickX < rect.width - 12) {
+                                    e.stopPropagation();
+                                    setTimelineInteraction({
+                                      taskId: task.id,
+                                      type: "move",
+                                      startX: e.clientX,
+                                      initialStart: start,
+                                      initialEnd: end,
+                                    });
+                                  }
+                                }}
+                              >
+                                {/* #700 B2 lalu B4 — judul TIDAK dipotong dan TIDAK
                               melewati batas: dua aturan yang dulu tampak
                               bertentangan dan ternyata ketemu di sini. Ia boleh
                               turun ke baris dua seperti nama di kolom kiri (B1),
@@ -1481,108 +1494,110 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                               jadi hasil ukurnya tidak berubah setelah keputusan
                               diambil (kalau berubah, judul akan berkedip
                               muncul-hilang tiap keredupan). */}
-                            <span
-                              className={cn(
-                                "text-xs sm:text-[10.5px] font-semibold tracking-tight select-none leading-tight break-words text-left",
-                                labelTidakMuat[task.id] && "invisible"
-                              )}
-                            >
-                              {task.title}
-                            </span>
-                            {/* #698 — cakram inisial penerima dibuang. Ia mencetak
+                                <span
+                                  className={cn(
+                                    "text-xs sm:text-[10.5px] font-semibold tracking-tight select-none leading-tight break-words text-left",
+                                    labelTidakMuat[task.id] && "invisible"
+                                  )}
+                                >
+                                  {task.title}
+                                </span>
+                                {/* #698 — cakram inisial penerima dibuang. Ia mencetak
                                 dua karakter PERDANA `assigneeId` (bukan nama), dan
                                 "AL" yang tampil di semua batang tanpa penerima itu
                                 string keras di JSX. Nama penerima sudah terbaca di
                                 detail tugas; batang yang bersih lebih berguna. */}
-                          </div>
+                              </div>
 
-                          {/* Visually Rich Right Resize Handle */}
-                          <div
-                            className="absolute right-0 top-0 bottom-0 w-3 flex items-center justify-center cursor-ew-resize z-25 rounded-r-lg transition-colors hover:bg-surface-strong/10 active:bg-surface-strong/25 group/r-handle"
-                            onMouseDown={(e) => {
-                              e.stopPropagation();
-                              setTimelineInteraction({
-                                taskId: task.id,
-                                type: "resize-end",
-                                startX: e.clientX,
-                                initialStart: start,
-                                initialEnd: end,
-                              });
-                            }}
-                            title={t("roadmap.dragRight")}
-                          >
-                            <div className="gantt-bar-ujung w-[3px] h-3.5 rounded-full transition-colors shadow-soft group-hover/r-handle:opacity-80" />
-                          </div>
-                        </motion.div>
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
-                {/* #457 — garis dependency blocks (iris tipis, bukan CPM) */}
-                {ganttDepOverlay.edges.length > 0 && ganttDepOverlay.heightPx > 0 && (
-                  <svg
-                    className="absolute left-0 right-0 top-4 pointer-events-none z-[25] overflow-visible"
-                    style={{ height: ganttDepOverlay.heightPx }}
-                    viewBox={`0 0 100 ${ganttDepOverlay.heightPx}`}
-                    preserveAspectRatio="none"
-                    aria-hidden
-                  >
-                    <defs>
-                      <marker
-                        id="gantt-dep-arrow-457"
-                        markerWidth="6"
-                        markerHeight="6"
-                        refX="5"
-                        refY="3"
-                        orient="auto"
-                        markerUnits="strokeWidth"
+                              {/* Visually Rich Right Resize Handle */}
+                              <div
+                                className="absolute right-0 top-0 bottom-0 w-3 flex items-center justify-center cursor-ew-resize z-25 rounded-r-lg transition-colors hover:bg-surface-strong/10 active:bg-surface-strong/25 group/r-handle"
+                                onMouseDown={(e) => {
+                                  e.stopPropagation();
+                                  setTimelineInteraction({
+                                    taskId: task.id,
+                                    type: "resize-end",
+                                    startX: e.clientX,
+                                    initialStart: start,
+                                    initialEnd: end,
+                                  });
+                                }}
+                                title={t("roadmap.dragRight")}
+                              >
+                                <div className="gantt-bar-ujung w-[3px] h-3.5 rounded-full transition-colors shadow-soft group-hover/r-handle:opacity-80" />
+                              </div>
+                            </motion.div>
+                          </motion.div>
+                        );
+                      })}
+                    </AnimatePresence>
+                    {/* #457 — garis dependency blocks (iris tipis, bukan CPM) */}
+                    {ganttDepOverlay.edges.length > 0 && ganttDepOverlay.heightPx > 0 && (
+                      <svg
+                        className="absolute left-0 right-0 top-4 pointer-events-none z-[25] overflow-visible"
+                        style={{ height: ganttDepOverlay.heightPx }}
+                        viewBox={`0 0 100 ${ganttDepOverlay.heightPx}`}
+                        preserveAspectRatio="none"
+                        aria-hidden
                       >
-                        <path d="M0,0 L6,3 L0,6 Z" fill="var(--color-primary)" />
-                      </marker>
-                    </defs>
-                    {ganttDepOverlay.edges.map((edge) => {
-                      const from = ganttDepOverlay.bars[edge.fromIndex];
-                      const to = ganttDepOverlay.bars[edge.toIndex];
-                      if (!from?.hasDates || !to?.hasDates) return null;
-                      const x1 = from.left + from.width;
-                      const x2 = to.left;
-                      const y1 = ganttDepOverlay.yTengah[edge.fromIndex];
-                      const y2 = ganttDepOverlay.yTengah[edge.toIndex];
-                      return (
-                        <path
-                          key={edge.id}
-                          d={pathSikuDep(x1, y1, x2, y2)}
-                          fill="none"
-                          stroke="var(--color-primary)"
-                          strokeWidth={1.25}
-                          strokeOpacity={0.55}
-                          vectorEffect="non-scaling-stroke"
-                          markerEnd="url(#gantt-dep-arrow-457)"
-                        />
-                      );
-                    })}
-                  </svg>
-                )}
-              </div>
-              {todayLeft >= 0 && todayLeft <= 100 && (
-                <div
-                  className="absolute top-0 bottom-0 z-20 border-l-2 border-danger border-dashed pointer-events-none"
-                  style={{ left: `${todayLeft}%` }}
-                >
-                  <div className="bg-danger-surface text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-md absolute top-1.5 -translate-x-1/2 shadow-soft flex items-center gap-1 z-30 tracking-wider">
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-surface opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-surface"></span>
-                    </span>
-                    {t("roadmap.todayMarker")}
+                        <defs>
+                          <marker
+                            id="gantt-dep-arrow-457"
+                            markerWidth="6"
+                            markerHeight="6"
+                            refX="5"
+                            refY="3"
+                            orient="auto"
+                            markerUnits="strokeWidth"
+                          >
+                            <path d="M0,0 L6,3 L0,6 Z" fill="var(--color-primary)" />
+                          </marker>
+                        </defs>
+                        {ganttDepOverlay.edges.map((edge) => {
+                          const from = ganttDepOverlay.bars[edge.fromIndex];
+                          const to = ganttDepOverlay.bars[edge.toIndex];
+                          if (!from?.hasDates || !to?.hasDates) return null;
+                          const x1 = from.left + from.width;
+                          const x2 = to.left;
+                          const y1 = ganttDepOverlay.yTengah[edge.fromIndex];
+                          const y2 = ganttDepOverlay.yTengah[edge.toIndex];
+                          return (
+                            <path
+                              key={edge.id}
+                              d={pathSikuDep(x1, y1, x2, y2)}
+                              fill="none"
+                              stroke="var(--color-primary)"
+                              strokeWidth={1.25}
+                              strokeOpacity={0.55}
+                              vectorEffect="non-scaling-stroke"
+                              markerEnd="url(#gantt-dep-arrow-457)"
+                            />
+                          );
+                        })}
+                      </svg>
+                    )}
                   </div>
-                  {/* Glowing pulsing indicator dot right below sticky header */}
-                  <div className="absolute top-[73px] -translate-x-1/2 flex items-center justify-center w-4 h-4 z-30">
-                    <span className="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-danger/60 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-danger-surface shadow-2xs"></span>
-                  </div>
+                  {todayLeft >= 0 && todayLeft <= 100 && (
+                    <div
+                      className="absolute top-0 bottom-0 z-20 border-l-2 border-danger border-dashed pointer-events-none"
+                      style={{ left: `${todayLeft}%` }}
+                    >
+                      <div className="bg-danger-surface text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-md absolute top-1.5 -translate-x-1/2 shadow-soft flex items-center gap-1 z-30 tracking-wider">
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-surface opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-surface"></span>
+                        </span>
+                        {t("roadmap.todayMarker")}
+                      </div>
+                      {/* Glowing pulsing indicator dot right below the today label */}
+                      <div className="absolute top-8 -translate-x-1/2 flex items-center justify-center w-4 h-4 z-30">
+                        <span className="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-danger/60 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-danger-surface shadow-2xs"></span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </motion.div>
           </div>
         </div>
