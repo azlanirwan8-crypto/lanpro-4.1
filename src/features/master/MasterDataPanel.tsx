@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
+import { DefaultChildTypeField } from "./DefaultChildTypeField";
 import React from "react";
 import {
   Settings,
@@ -130,6 +131,8 @@ export const MasterDataPanel = ({
   const [newMasterIcon, setNewMasterIcon] = React.useState("CircleDot");
   const [newMasterShortCode, setNewMasterShortCode] = React.useState("");
   const [newMasterHierarchy, setNewMasterHierarchy] = React.useState("Standard");
+  // #737 — jenis anak bawaan untuk baris issue_type baru (kode jenis tujuan).
+  const [newMasterDefaultChild, setNewMasterDefaultChild] = React.useState("");
   const [newMasterStatusGroup, setNewMasterStatusGroup] = React.useState("To Do");
   const [newMasterIsTerminal, setNewMasterIsTerminal] = React.useState(false);
   const [newMasterBaseUrl, setNewMasterBaseUrl] = React.useState("");
@@ -455,6 +458,8 @@ export const MasterDataPanel = ({
         description,
         role_type: newMasterType === "project_role" ? newMasterRoleType : null,
         isTerminal: newMasterType === "status" ? newMasterIsTerminal : false,
+        defaultChildCode:
+          newMasterType === "issue_type" && newMasterDefaultChild ? newMasterDefaultChild : null,
         createdBy: currentUserProfile?.uid || "system",
       };
 
@@ -467,6 +472,7 @@ export const MasterDataPanel = ({
       setNewMasterShortCode("");
       setNewMasterBaseUrl("");
       setNewMasterIsTerminal(false);
+      setNewMasterDefaultChild("");
       onRefresh();
     } catch (e: any) {
       console.error(e);
@@ -511,6 +517,7 @@ export const MasterDataPanel = ({
         color: editingMaster.color,
         icon: editingMaster.icon,
         description: editingMaster.description,
+        defaultChildCode: editingMaster.defaultChildCode || null,
         isTerminal: !!editingMaster.isTerminal,
         role_type:
           editingMaster.type === "project_role"
@@ -1298,6 +1305,14 @@ export const MasterDataPanel = ({
               </div>
             )}
 
+            {selectedType === "issue_type" && (
+              <DefaultChildTypeField
+                value={newMasterDefaultChild}
+                onChange={setNewMasterDefaultChild}
+                baris={masterData}
+              />
+            )}
+
             {selectedType === "status" && (
               <div className="space-y-3">
                 <div>
@@ -1594,6 +1609,17 @@ export const MasterDataPanel = ({
                   buttonClassName="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm text-left font-normal text-content-strong"
                 />
               </div>
+            )}
+
+            {editingMaster.type === "issue_type" && (
+              <DefaultChildTypeField
+                value={editingMaster.defaultChildCode || ""}
+                onChange={(val) =>
+                  setEditingMaster({ ...editingMaster, defaultChildCode: val || null })
+                }
+                baris={masterData}
+                kecualiId={editingMaster.id}
+              />
             )}
 
             <div>

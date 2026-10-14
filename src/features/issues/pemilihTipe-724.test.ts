@@ -45,13 +45,16 @@ describe("sambungan level Master Data ke pemilih jenis (#724)", () => {
       const s = isi(berkas);
       const panggilan = s.match(/\btipe(?:BoleDitawarkan|Bawaan)\([^)]*\)/g) || [];
       expect(panggilan.length).toBeGreaterThan(0);
-      for (const p of panggilan) expect(p).toMatch(/,\s*tingkat\s*\)$/);
+      // #737 — peta level tidak harus lagi jadi argumen TERAKHIR: baris tambah
+      // anak menambahkan peta anak bawaan di belakangnya. Yang dikunci tetap
+      // satu hal: peta levelnya ikut diserahkan, bukan dibuang.
+      for (const p of panggilan) expect(p).toMatch(/,\s*tingkat\s*[,)]/);
     }
   });
 
   it("peta level ikut menjadi dependensi memo, jadi sunting Master Data terasa", () => {
     const s = isi(BARIS);
-    expect(s).toMatch(/\[tipeInduk,\s*labelTipe,\s*tingkat\]/);
+    expect(s).toMatch(/\[tipeInduk,\s*labelTipe,\s*tingkat,\s*anakBawaan\]/);
   });
 });
 

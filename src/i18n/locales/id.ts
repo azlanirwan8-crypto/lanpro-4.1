@@ -1153,6 +1153,8 @@ export const id = {
     shortCode: "Kode Singkat",
     shortCodePlaceholder: "misal: P0, P1, CRIT",
     hierarchyLevel: "Tingkat Hierarki",
+    defaultChildType: "Jenis anak bawaan",
+    defaultChildNone: "(tidak ada — ikut tingkat hierarki)",
     endpointBaseUrl: "Endpoint / Base URL",
     endpointPlaceholder: "https://staging.enterprise.com",
     colorAccent: "Warna / Aksen",

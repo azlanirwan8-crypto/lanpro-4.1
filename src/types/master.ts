@@ -16,4 +16,6 @@ export interface MasterData {
   is_system_reserved?: boolean;
   /** #313 — status mengakhiri siklus (Done/UAT/…). */
   isTerminal?: boolean;
+  /** #737 — code jenis anak bawaan saat menambah anak di bawah jenis ini. */
+  defaultChildCode?: string | null;
 }

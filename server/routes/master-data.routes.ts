@@ -60,6 +60,7 @@ router.post(
         role_type,
         roleType,
         isTerminal,
+        defaultChildCode,
       } = req.body;
       const rType = role_type || roleType || null;
 
@@ -129,6 +130,10 @@ router.post(
               ["done", "selesai", "uat", "completed", "resolved", "closed"].includes(
                 String(kodeFinal || itemLabel).toLowerCase()
               ),
+        defaultChildCode:
+          typeof defaultChildCode === "string" && defaultChildCode.trim()
+            ? defaultChildCode.trim()
+            : null,
       });
 
       res.json({ status: "success", data: created });
@@ -167,6 +172,7 @@ router.put(
         roleType,
         type,
         isTerminal,
+        defaultChildCode,
       } = req.body;
       const rType = role_type || roleType || null;
 
@@ -225,6 +231,7 @@ router.put(
         dropdownOptions: dropdownOptions || null,
         role_type: rType,
         ...(typeof isTerminal === "boolean" ? { isTerminal } : {}),
+        ...(defaultChildCode !== undefined ? { defaultChildCode: defaultChildCode || null } : {}),
       });
 
       res.json({

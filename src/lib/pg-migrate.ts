@@ -103,6 +103,9 @@ export async function runMigrations(pool: Pool): Promise<void> {
       ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS role_type VARCHAR(20);
       -- #313 — status terminal (Done/UAT/…) tanpa hardcode string di aplikasi
       ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS "isTerminal" BOOLEAN DEFAULT FALSE;
+      -- #737 — jenis anak bawaan per baris issue_type, dikonfigurasi di Master
+      -- Data: induk Task menyodorkan Sub-task, induk Bug menyodorkan Sub Bug.
+      ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS "defaultChildCode" VARCHAR(50);
     `);
 
     // Seed flag terminal untuk status yang sudah ada (UAT = terminal, keputusan #313)
@@ -118,6 +121,25 @@ export async function runMigrations(pool: Pool): Promise<void> {
       `);
     } catch (e: any) {
       console.warn("[PG-MIGRATE] isTerminal seed warning:", e.message);
+    }
+
+    // #737 — isi sekali lewat konvensi penamaan "Sub X" = anak dari X supaya
+    // data lama langsung berperilaku benar; pemilik proyek tetap bisa mengubah
+    // atau mengosongkannya dari layar Master Data.
+    try {
+      await client.query(`
+        UPDATE "MasterData" m
+        SET "defaultChildCode" = c.code
+        FROM "MasterData" c
+        WHERE m.type = 'issue_type'
+          AND c.type = 'issue_type'
+          AND m."defaultChildCode" IS NULL
+          AND COALESCE(c.code, '') <> ''
+          AND regexp_replace(lower(c.label), '[\\s_-]+', '', 'g')
+              = 'sub' || regexp_replace(lower(m.label), '[\\s_-]+', '', 'g')
+      `);
+    } catch (e: any) {
+      console.warn("[PG-MIGRATE] defaultChildCode seed warning:", e.message);
     }
 
     // ── Projects ────────────────────────────────────────────────────────────

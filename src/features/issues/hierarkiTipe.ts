@@ -82,7 +82,8 @@ const BUTUH_INDUK = new Set(["subtask"]);
 export function tipeBoleDitawarkan(
   tipeInduk: string | null | undefined,
   semuaLabel: string[],
-  tingkat?: Map<string, Tingkat>
+  tingkat?: Map<string, Tingkat>,
+  anakBawaan?: Map<string, string>
 ): string[] {
   const tingkatDari = (label: string): Tingkat | null =>
     tingkat?.get(kunciTipe(label)) ?? tingkatDariKunci(kunciTipe(label));
@@ -90,7 +91,7 @@ export function tipeBoleDitawarkan(
   const kunciInduk = kunciTipe(tipeInduk);
   const induk = tipeInduk ? tingkatDari(tipeInduk) : null;
 
-  return semuaLabel.filter((l) => {
+  const hasil = semuaLabel.filter((l) => {
     if (!l) return false;
     const kunci = kunciTipe(l);
 
@@ -112,15 +113,47 @@ export function tipeBoleDitawarkan(
     const acuan = induk ?? "Standard";
     return ANGKA[anak ?? "Standard"] >= ANGKA[acuan];
   });
+
+  // #737 — jenis anak yang DIPILIH pemilik proyek di Master Data menjadi saran
+  // PERTAMA (urutan = saran, dan `tipeBawaan` mengambil kepala daftar). Konfigurasi
+  // yang menunjuk jenis tidak legal di sini DIABAIKAN, bukan dipaksakan: pagar
+  // level di atas tetap kebenaran.
+  const pilihan = kunciInduk ? anakBawaan?.get(kunciInduk) : undefined;
+  if (pilihan) {
+    const idx = hasil.findIndex((l) => kunciTipe(l) === pilihan);
+    if (idx > 0) hasil.unshift(hasil.splice(idx, 1)[0]);
+  }
+  return hasil;
+}
+
+/**
+ * #737 — peta induk→anak dari konfigurasi Master Data: kunci jenis induk ke
+ * kunci jenis yang tersimpan di `defaultChildCode`-nya. Baris tanpa konfigurasi
+ * atau menunjuk code yang tidak ada tidak masuk peta, jadi perilaku lama tetap
+ * menjadi jaring pengaman.
+ */
+export function petaAnakBawaan(
+  baris: { label: string; code?: string | null; defaultChildCode?: string | null }[]
+): Map<string, string> {
+  const kodeKeKunci = new Map<string, string>();
+  for (const b of baris || []) if (b.code) kodeKeKunci.set(b.code, kunciTipe(b.label));
+  const peta = new Map<string, string>();
+  for (const b of baris || []) {
+    if (!b.defaultChildCode) continue;
+    const anak = kodeKeKunci.get(b.defaultChildCode);
+    if (anak) peta.set(kunciTipe(b.label), anak);
+  }
+  return peta;
 }
 
 /** Tipe bawaan sebuah baris baru: yang PERTAMA dari daftar yang legal. */
 export function tipeBawaan(
   tipeInduk: string | null | undefined,
   semuaLabel: string[],
-  tingkat?: Map<string, Tingkat>
+  tingkat?: Map<string, Tingkat>,
+  anakBawaan?: Map<string, string>
 ): string | null {
-  const boleh = tipeBoleDitawarkan(tipeInduk, semuaLabel, tingkat);
+  const boleh = tipeBoleDitawarkan(tipeInduk, semuaLabel, tingkat, anakBawaan);
   return boleh[0] ?? null;
 }
 

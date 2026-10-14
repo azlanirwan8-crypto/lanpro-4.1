@@ -9,7 +9,7 @@ import { gayaLabel, warnaDariMaster, warnaLabel } from "../../../../lib/warnaLab
 import { MasterData, UserProfile } from "../../../../types";
 import { styles } from "../../styles";
 import { enterUntukSimpan } from "../../../../lib/enterSimpan";
-import { tipeBoleDitawarkan } from "../../hierarkiTipe";
+import { tipeBoleDitawarkan, petaAnakBawaan } from "../../hierarkiTipe";
 import { kunciTipe, petaTingkat } from "../../../../lib/tingkatIsu";
 
 interface IssueTableInlineAddRowProps {
@@ -79,9 +79,13 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
   // ini karena tabel kunci hanya mengenali lima nama tetap. Levelnya sekarang
   // dibaca dari Master Data, tempat beliau memilihnya.
   const tingkat = useMemo(() => petaTingkat(barisTipe), [barisTipe]);
+  // #737 — jenis anak bawaan konfigurasi Master Data (induk Task → Sub-task,
+  // induk Bug → Sub Bug) menjadi kepala daftar tawaran, jadi `tipeLegalList[0]`
+  // di bawah otomatis menjadi bawaan yang benar.
+  const anakBawaan = useMemo(() => petaAnakBawaan(barisTipe), [barisTipe]);
   const tipeLegalList = useMemo(
-    () => tipeBoleDitawarkan(tipeInduk, labelTipe, tingkat),
-    [tipeInduk, labelTipe, tingkat]
+    () => tipeBoleDitawarkan(tipeInduk, labelTipe, tingkat, anakBawaan),
+    [tipeInduk, labelTipe, tingkat, anakBawaan]
   );
   const daftarLegal = tipeLegalList.map(kunciTipe).join("|");
 

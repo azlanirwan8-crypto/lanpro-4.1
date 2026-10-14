@@ -1143,6 +1143,8 @@ export const en = {
     shortCode: "Short Code",
     shortCodePlaceholder: "e.g. P0, P1, CRIT",
     hierarchyLevel: "Hierarchy Level",
+    defaultChildType: "Default child type",
+    defaultChildNone: "(none — follow hierarchy level)",
     endpointBaseUrl: "Endpoint / Base URL",
     endpointPlaceholder: "https://staging.enterprise.com",
     colorAccent: "Colour / Accent",

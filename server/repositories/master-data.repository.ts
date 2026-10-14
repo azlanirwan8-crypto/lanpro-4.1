@@ -16,6 +16,8 @@ export interface MasterDataEntity {
   is_system_default?: boolean | number;
   /** #313 — status terminal (burndown, tutup sprint, gerbang fase). */
   isTerminal?: boolean | number | null;
+  /** #737 — code jenis anak bawaan saat menambah anak di bawah jenis ini. */
+  defaultChildCode?: string | null;
 }
 
 export class MasterDataRepository {
@@ -63,8 +65,8 @@ export class MasterDataRepository {
     const connection = await db.getConnection();
     try {
       await connection.query(
-        `INSERT INTO MasterData (id, type, label, code, color, icon, \`order\`, description, fieldType, dropdownOptions, role_type, "isTerminal")
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO MasterData (id, type, label, code, color, icon, \`order\`, description, fieldType, dropdownOptions, role_type, "isTerminal", "defaultChildCode")
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           item.id,
           item.type || "general",
@@ -82,6 +84,7 @@ export class MasterDataRepository {
             : null,
           item.role_type || null,
           item.isTerminal === true || item.isTerminal === 1 ? true : false,
+          item.defaultChildCode || null,
         ]
       );
       return item;
@@ -113,9 +116,13 @@ export class MasterDataRepository {
         updates.isTerminal !== undefined
           ? updates.isTerminal === true || updates.isTerminal === 1
           : existing?.isTerminal === true || existing?.isTerminal === 1;
+      const defaultChildCode =
+        updates.defaultChildCode !== undefined
+          ? updates.defaultChildCode || null
+          : existing?.defaultChildCode || null;
 
       await connection.query(
-        `UPDATE MasterData SET label=?, color=?, icon=?, \`order\`=?, description=?, fieldType=?, dropdownOptions=?, role_type=?, "isTerminal"=? WHERE id=?`,
+        `UPDATE MasterData SET label=?, color=?, icon=?, \`order\`=?, description=?, fieldType=?, dropdownOptions=?, role_type=?, "isTerminal"=?, "defaultChildCode"=? WHERE id=?`,
         [
           label,
           color || null,
@@ -130,6 +137,7 @@ export class MasterDataRepository {
             : null,
           role_type || null,
           !!isTerminal,
+          defaultChildCode || null,
           id,
         ]
       );

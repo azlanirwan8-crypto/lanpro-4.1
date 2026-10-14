@@ -10,7 +10,7 @@
  * Label di bawah memakai label Master Data asli proyek ini (Epic, Story, Task,
  * Bug, Sub-task) supaya yang diuji adalah data pemilik, bukan terkaan.
  */
-import { tipeBoleDitawarkan, tipeBawaan, tipeLegal } from "./hierarkiTipe";
+import { tipeBoleDitawarkan, tipeBawaan, tipeLegal, petaAnakBawaan } from "./hierarkiTipe";
 import { kunciTipe, petaTingkat, tingkatDariDeskripsi, tingkatTipe } from "../../lib/tingkatIsu";
 
 const SEMUA = ["Epic", "Story", "Task", "Bug", "Sub-task"];
@@ -156,5 +156,57 @@ describe("tipeBoleDitawarkan dengan level Master Data (#724)", () => {
   it("induk yang levelnya tidak terbaca tetap longgar, daftar tidak pernah kosong", () => {
     const petaKosong = petaTingkat([]);
     expect(tipeBoleDitawarkan("Sub Bug", ["Sub Bug", "Task"], petaKosong)).toContain("Sub Bug");
+  });
+});
+
+/**
+ * #737 — jenis anak bawaan DIPILIH pemilik proyek di Master Data, bukan jatuh
+ * ke urutan daftar master. Laporan 14 Okt: baris tambah anak di bawah Task
+ * membuka dengan "Sub Bug" karena `tipeBawaan` mengambil kepala daftar sah dan
+ * urutan daftar = urutan Master Data, tempat "Sub Bug" kebetulan lebih dulu.
+ * Aturan pemilik: "jika task maka di bawahnya sub task, jika bug bawahnya
+ * sub bug" — sekarang itu konfigurasi per baris (`defaultChildCode`).
+ */
+describe("jenis anak bawaan konfigurasi Master Data (#737)", () => {
+  const baris = [
+    { label: "Epic", code: "epic" },
+    { label: "Story", code: "story" },
+    { label: "Task", code: "task", defaultChildCode: "subtask" },
+    { label: "Bug", code: "bug", defaultChildCode: "subbug" },
+    // Sengaja LEBIH DULU daripada Sub-task: persis urutan yang menjebak #737.
+    { label: "Sub Bug", code: "subbug", description: "Hierarchy: Subtask" },
+    { label: "Sub-task", code: "subtask" },
+  ];
+  const SEMUA_LABEL = baris.map((b) => b.label);
+  const peta = petaTingkat(baris);
+  const bawaan = petaAnakBawaan(baris);
+
+  it("peta induk→anak dibaca dari defaultChildCode, bukan dari nama", () => {
+    expect(bawaan.get("task")).toBe("subtask");
+    expect(bawaan.get("bug")).toBe("subbug");
+    expect(bawaan.has("epic")).toBe(false);
+  });
+
+  it("anak bawaan menjadi kepala tawaran walau urutannya belakangan di master", () => {
+    expect(tipeBoleDitawarkan("Task", SEMUA_LABEL, peta, bawaan)).toEqual(["Sub-task", "Sub Bug"]);
+    expect(tipeBoleDitawarkan("Bug", SEMUA_LABEL, peta, bawaan)[0]).toBe("Sub Bug");
+    expect(tipeBawaan("Task", SEMUA_LABEL, peta, bawaan)).toBe("Sub-task");
+    expect(tipeBawaan("Bug", SEMUA_LABEL, peta, bawaan)).toBe("Sub Bug");
+  });
+
+  it("konfigurasi yang menunjuk jenis tidak legal DIABAIKAN, pagar level tetap menang", () => {
+    const ngawur = petaAnakBawaan([
+      { label: "Task", code: "task", defaultChildCode: "epic" },
+      { label: "Epic", code: "epic" },
+      { label: "Sub-task", code: "subtask" },
+    ]);
+    expect(tipeBawaan("Task", ["Task", "Epic", "Sub-task"], petaTingkat(baris), ngawur)).toBe(
+      "Sub-task"
+    );
+  });
+
+  it("tanpa konfigurasi perilaku lama tidak berubah", () => {
+    expect(tipeBawaan("Task", SEMUA_LABEL, peta)).toBe("Sub Bug");
+    expect(tipeBawaan("Task", SEMUA_LABEL, peta, new Map())).toBe("Sub Bug");
   });
 });
