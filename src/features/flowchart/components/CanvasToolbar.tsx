@@ -137,7 +137,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           <button
             type="button"
             onClick={handleExportJPG}
-            className="flex items-center gap-1 px-2 py-1.5 text-success-text hover:bg-success/10 rounded-md text-[10px] leading-none font-medium transition-all cursor-pointer"
+            className="min-h-11 flex items-center gap-1 px-2 py-1.5 text-success-text hover:bg-success/10 rounded-md text-[10px] leading-none font-medium transition-all cursor-pointer"
             title={t("flowchart.export")}
           >
             <Download className="w-3.5 h-3.5" />
@@ -150,7 +150,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             aria-label={t(isFullscreen ? "common.exitFullscreen" : "common.fullscreen")}
             title={t(isFullscreen ? "common.exitFullscreen" : "common.fullscreen")}
             className={cn(
-              "p-1.5 rounded-md transition-all cursor-pointer",
+              "min-h-11 min-w-11 p-1.5 rounded-md transition-all cursor-pointer flex items-center justify-center",
               isFullscreen
                 ? "bg-primary/15 text-primary border border-primary/30"
                 : "text-content-secondary hover:bg-surface-muted hover:text-primary border border-transparent"
@@ -166,7 +166,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           <button
             type="button"
             onClick={handleExportJSON}
-            className="flex items-center gap-1 px-2 py-1.5 text-primary hover:bg-primary/10 rounded-md text-[10px] leading-none font-medium transition-all cursor-pointer"
+            className="min-h-11 flex items-center gap-1 px-2 py-1.5 text-primary hover:bg-primary/10 rounded-md text-[10px] leading-none font-medium transition-all cursor-pointer"
             title={t("flowchart.backup")}
           >
             <Database className="w-3.5 h-3.5" />
@@ -177,7 +177,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           <button
             type="button"
             onClick={handleExportDrawIo}
-            className="flex items-center gap-1 px-2 py-1.5 text-primary hover:bg-primary/10 rounded-md text-[10px] leading-none font-medium transition-all cursor-pointer"
+            className="min-h-11 flex items-center gap-1 px-2 py-1.5 text-primary hover:bg-primary/10 rounded-md text-[10px] leading-none font-medium transition-all cursor-pointer"
             title={t("flowchart.exportDrawio")}
           >
             <FileDown className="w-3.5 h-3.5" />
@@ -189,7 +189,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           type="button"
           onClick={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
           className={cn(
-            "p-2 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 shadow-[0_6px_18px_rgba(0,0,0,0.05)] rounded-lg transition-all duration-300 cursor-pointer",
+            "min-h-11 min-w-11 p-2 flex items-center justify-center bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 shadow-[0_6px_18px_rgba(0,0,0,0.05)] rounded-lg transition-all duration-300 cursor-pointer",
             isRightSidebarOpen
               ? "bg-primary-surface text-content-inverse border-primary"
               : "text-content-secondary hover:text-primary"
