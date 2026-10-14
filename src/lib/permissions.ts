@@ -15,6 +15,42 @@ const RU_ACCESS: ModulePermission = { create: false, read: true, update: true, d
 const READ_ONLY: ModulePermission = { create: false, read: true, update: false, delete: false };
 const NO_ACCESS: ModulePermission = { create: false, read: false, update: false, delete: false };
 
+const DAFTAR_AKSI = ["create", "read", "update", "delete"] as const;
+
+/**
+ * #676 — LANGIT-LANGIT IZIN. Keputusan pemilik proyek 14 Okt: matriks adalah
+ * satu-satunya sumber kebenaran, dan kolom `Users.permissions` hanya boleh
+ * MENURUNKAN izin dari bawaan perannya — tidak pernah menaikkan.
+ *
+ * Sebelumnya nilai custom ditumpuk di atas bawaan (`{...bawaan, ...custom}`),
+ * jadi `viewer` dengan `{"list":{"delete":true}}` tersimpan di database benar-
+ * benar dapat `delete` di seluruh pemeriksaan klien. Sekarang hasilnya adalah
+ * irisannya: bit yang tidak diberikan peran tidak bisa dinyalakan oleh custom.
+ *
+ * `plafon` adalah bawaan peran. Diukur 14 Okt baris per baris terhadap matriks:
+ * untuk delapan peran proyek selain `admin` keduanya IDENTIK, dan
+ * `permissions-plafon-676.test.ts` menguncinya supaya tidak menyimpang lagi.
+ * Dua selisih yang diketahui dan sengaja ditinggal: (i) `admin.dashboard`
+ * C/U/D di bawaan vs R di matriks — inert, sebab `admin` punya God Mode (§19.6
+ * langkah 3b) sehingga `can()` menjawab true sebelum matriks dibaca, dan
+ * `getUserPermissions` juga memintas ke bawaan admin tanpa membaca custom;
+ * (ii) peran SISTEM `user` tidak punya baris di `MATRIKS_PROYEK` karena ia
+ * bukan peran proyek, jadi bawaannya memberi akses proyek yang matriks tolak —
+ * itulah jalur jatuh `can()` bila peran proyek tidak terselesaikan. Mengubah
+ * keduanya berarti mengubah siapa yang boleh masuk proyek, bukan #676.
+ */
+const hanyaBolehMenurunkan = (
+  plafon: ModulePermission,
+  custom: ModulePermission
+): ModulePermission => {
+  const gabungan: any = { ...plafon, ...custom };
+  const hasil: any = {};
+  for (const aksi of DAFTAR_AKSI) {
+    hasil[aksi] = Boolean(plafon[aksi]) && Boolean(gabungan[aksi]);
+  }
+  return hasil as ModulePermission;
+};
+
 /**
  * Izin bawaan per peran — diselaraskan penuh dengan MATRIKS_PROYEK dan MATRIKS_SISTEM (§19.4 & §19.5).
  */
@@ -142,7 +178,13 @@ export const DEFAULT_PERMISSIONS: Partial<Record<PeranEfektif, UserPermissions>>
     dashboard: READ_ONLY,
     meetingNotes: CRU_ACCESS,
     wiki: READ_ONLY,
-    list: CRU_ACCESS,
+    // #676 (keputusan pemilik 14 Okt, opsi A) — plafon delete dinaikkan supaya
+    // #483 tetap hidup di bawah aturan "custom hanya boleh MENURUNKAN". Tanpa
+    // ini, anggota tidak bisa menghapus issue yang ia laporkan sendiri:
+    // langit-langit `false` membuat checklist tidak pernah bisa memberi izin,
+    // dan server (yang plafonnya ikut dinaikkan) menolak. Kepemilikan tetap
+    // dijaga `canDeleteIssue` — plafon ini bukan izin menghapus sembarang task.
+    list: FULL_ACCESS,
     sprints: READ_ONLY,
     board: RU_ACCESS,
     qa: READ_ONLY,
@@ -297,10 +339,7 @@ export function getUserPermissions(
           return;
         }
 
-        merged[normKey] = {
-          ...(merged[normKey] || NO_ACCESS),
-          ...valToMerge,
-        };
+        merged[normKey] = hanyaBolehMenurunkan(merged[normKey] || NO_ACCESS, valToMerge);
       }
     });
   }

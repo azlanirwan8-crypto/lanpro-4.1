@@ -137,7 +137,12 @@ const DEFAULT_PERMISSIONS = {
   admin: { list: { create: true, read: true, update: true, delete: true } },
   head: { list: { create: false, read: true, update: false, delete: false } },
   manager: { list: { create: true, read: true, update: true, delete: true } },
-  user: { list: { create: true, read: true, update: true, delete: false } },
+  // #676 (keputusan pemilik 14 Okt, opsi A) — plafon `user` dinaikkan agar
+  // #483 tetap hidup di bawah aturan "custom hanya boleh menurunkan". Anggota
+  // boleh menghapus task yang ia laporkan/ditugaskan padanya (kepemilikan
+  // dijaga `bolehUbahTask` sebelum sampai ke sini); checklist berubah fungsi
+  // jadi PENCABUT, bukan pemberi.
+  user: { list: { create: true, read: true, update: true, delete: true } },
   viewer: { list: { create: false, read: true, update: false, delete: false } },
 };
 
@@ -149,6 +154,14 @@ export function checkUserPermissionBackend(
   const userRole = (role || "viewer").toLowerCase();
   const roleDefaults = (DEFAULT_PERMISSIONS as any)[userRole] || DEFAULT_PERMISSIONS.viewer;
   const defaultVal = roleDefaults.list[action];
+
+  // #676 — LANGIT-LANGIT. Keputusan pemilik proyek 14 Okt: `Users.permissions`
+  // hanya boleh MENURUNKAN izin dari bawaan peran, tidak pernah menaikkan.
+  // Sebelumnya nilai custom MENGGANTIKAN bawaan (`return !!customList[action]`),
+  // jadi `viewer` dengan `{"list":{"delete":true}}` di kolom JSON itu benar-benar
+  // bisa menghapus task lewat API — inilah satu-satunya tempat `Users.permissions`
+  // ditegakkan di server (§19.8 Tahap 6: 2 sel, `list.update` dan `list.delete`).
+  if (!defaultVal) return false;
 
   if (customPermissions) {
     const customList = customPermissions.list || customPermissions.issueList;

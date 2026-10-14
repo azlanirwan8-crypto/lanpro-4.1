@@ -28,6 +28,7 @@ import {
   PeranEfektif,
 } from "./types";
 import { hasPermission, resolveProjectRole } from "./lib/permissions";
+import { canDeleteIssue } from "./features/issues/issuePermissions";
 import { adalahWaterfall } from "./lib/methodology";
 import { validateFileClient } from "./lib/fileSecurity";
 import {
@@ -3698,19 +3699,19 @@ function AppContainer() {
     const taskToDelete = tasks.find((t) => t.id === taskId);
     if (!taskToDelete) return;
 
-    // #483 — Administrator sistem full akses; non-admin ikut checklist list.delete
-    const systemRole = String(
-      currentUserProfile?.role || user?.role || currentUser?.role || ""
-    ).toLowerCase();
-    const isSystemAdmin = systemRole === "admin";
-    const mayDeleteByChecklist = hasPermission(
-      (systemRole || "user") as PeranEfektif,
-      "list",
-      "delete",
-      false,
-      currentUserProfile?.permissions
-    );
-    if (!isSystemAdmin && !mayDeleteByChecklist) {
+    // #483 + #676 — gerbang hapus yang sama dengan baris isu, jangan salinan
+    // kedua. Dulu blok ini menulis ulang aturan #483 di tempat (peran sistem +
+    // checklist, tanpa memeriksa reporter/assignee sama sekali), dan mengirim
+    // `isOwner = false`; sejak plafon `user.list.delete` dinaikkan (keputusan
+    // pemilik 14 Okt, opsi A) salinan itu menolak anggota yang tombolnya justru
+    // tampak dan yang API-nya mengizinkan. `canDeleteIssue` sudah memuat
+    // kepemilikan + checklist sebagai pencabut.
+    const mayDelete = canDeleteIssue(taskToDelete, {
+      currentUserProfile,
+      user,
+      hasPermission,
+    });
+    if (!mayDelete) {
       toast.error(t("toast.noPermDeleteTask"));
       return;
     }

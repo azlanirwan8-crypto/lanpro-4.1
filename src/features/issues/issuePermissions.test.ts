@@ -2,8 +2,10 @@
  * Item #200/#201 — manage/Assignee.
  * Item #482 — Reporter hanya Administrator sistem.
  * Item #483 — Hapus: admin sistem full · user ikut checklist.
+ * Item #676 — checklist hanya boleh MENCABUT (keputusan pemilik 14 Okt, opsi A).
  */
 import { Task } from "../../types";
+import { hasPermission } from "../../lib/permissions";
 import {
   isUserReporter,
   isUserAssignee,
@@ -180,8 +182,54 @@ describe("issuePermissions", () => {
       expect(calls[0][0]).toBe("user");
       expect(calls[0][1]).toBe("list");
       expect(calls[0][2]).toBe("delete");
-      expect(calls[0][3]).toBe(false);
+      // #676 opsi A — kepemilikan sudah dipastikan di baris sebelumnya
+      // (reporter/assignee), jadi yang dikirim `true`; bit hasil plafon yang
+      // memutuskan. Mengirim `false` membuat permissions.ts menolak tanpa
+      // membaca checklist, sehingga pencabutan tidak pernah berlaku.
+      expect(calls[0][3]).toBe(true);
       expect(calls[0][4]).toEqual(expect.objectContaining({ list: expect.anything() }));
+    });
+  });
+
+  describe("canDeleteIssue dengan hasPermission SUNGGUHAN (#676 opsi A)", () => {
+    const ctxAsli = (userId: string, permissions?: any): IssuePermissionContext => {
+      const c = ctx(userId, "user", "user");
+      c.hasPermission = hasPermission as any;
+      if (permissions) {
+        c.currentUserProfile = { ...c.currentUserProfile!, permissions } as any;
+        c.user = { ...c.user!, permissions };
+      }
+      return c;
+    };
+
+    it("reporter boleh delete tanpa checklist apa pun (bawaan peran memberi)", () => {
+      expect(canDeleteIssue(buatIssue(), ctxAsli("user-reporter"))).toBe(true);
+    });
+
+    it("assignee boleh delete tanpa checklist apa pun", () => {
+      expect(canDeleteIssue(buatIssue(), ctxAsli("user-assignee"))).toBe(true);
+    });
+
+    it("checklist berubah fungsi jadi PENCABUT", () => {
+      expect(
+        canDeleteIssue(buatIssue(), ctxAsli("user-reporter", { list: { delete: false } }))
+      ).toBe(false);
+    });
+
+    it("user tak terkait tetap ditolak walau checklist memberi", () => {
+      expect(canDeleteIssue(buatIssue(), ctxAsli("orang-lain", { list: { delete: true } }))).toBe(
+        false
+      );
+    });
+
+    it("viewer tidak bisa diberi hak delete lewat checklist", () => {
+      const c = ctx("user-reporter", "viewer", "viewer");
+      c.hasPermission = hasPermission as any;
+      c.currentUserProfile = {
+        ...c.currentUserProfile!,
+        permissions: { list: { delete: true } },
+      } as any;
+      expect(canDeleteIssue(buatIssue(), c)).toBe(false);
     });
   });
 });

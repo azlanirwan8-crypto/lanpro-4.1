@@ -108,8 +108,11 @@ export function canEditIssue(issue: Task | null | undefined, ctx: IssuePermissio
 }
 
 /**
- * #483 — Hapus: Administrator sistem selalu boleh; selain itu HANYA checklist
- * `list.delete` (Users.permissions). Peran proyek TIDAK membuka tombol.
+ * #483 — Hapus: Administrator sistem selalu boleh; selain itu hanya untuk issue
+ * yang ia laporkan/ditugaskan padanya, dan bit `list.delete` (Users.permissions)
+ * yang memutuskan. Peran proyek TIDAK membuka tombol.
+ * Sejak #676 opsi A bit itu adalah PENCABUT: bawaan peran `user` memberi izin,
+ * checklist yang menuliskan `false` mencabutnya.
  * Memakai `systemRoleOf` saat memanggil `hasPermission` supaya project
  * `admin` tidak kena short-circuit God Mode di permissions.ts.
  */
@@ -121,11 +124,18 @@ export function canDeleteIssue(
   if (isSystemAdmin(ctx)) return true;
   if (!isUserReporter(issue, ctx) && !isUserAssignee(issue, ctx)) return false;
   const custom = ctx.currentUserProfile?.permissions ?? ctx.user?.permissions ?? undefined;
+  // #676 (keputusan pemilik 14 Okt, opsi A) — kepemilikan SUDAH dipastikan baris
+  // di atas, jadi `isOwner` dikirim `true`. Dengan begitu yang menentukan adalah
+  // bit hasil plafon: bawaan peran memberi, checklist hanya bisa MENCABUT.
+  // Mengirim `false` di sini membuat cabang "general users can only delete data
+  // they own" di permissions.ts menolak tanpa membaca checklist sama sekali,
+  // sehingga pencabutan lewat checklist tidak pernah berlaku dan UI menyembunyikan
+  // tombol yang sebenarnya diberikan API.
   const allowed = ctx.hasPermission(
     (systemRoleOf(ctx) || "user") as any,
     "list",
     "delete",
-    false,
+    true,
     custom
   );
   return Boolean(allowed);
