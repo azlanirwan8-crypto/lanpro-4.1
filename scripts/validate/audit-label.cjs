@@ -17,9 +17,12 @@
  *       memberi WARNA pada jarak tiga baris di bawahnya. Itu pemetaan manual
  *       ke-17. Yang sah: `warnaLabel()` / `warnaDariMaster()` / `cariMaster()`.
  *
- *   R2  `truncate` berpasangan dengan `max-w-[NNpx]` pada satu baris kelas —
- *       pola yang membuat "Pengaturan kasir di wo…" dan bukan teksnya yang
- *       hilang. Yang sah: satu baris + wadahnya menggulir.
+ *   R2  Kelas pemotong teks pada satu baris kelas — pola yang membuat
+ *       "Pengaturan kasir di wo…" dan bukan teksnya yang hilang. Sejak #661
+ *       yang dikenali bukan hanya `truncate` + `max-w-[NNpx]`, melainkan juga
+ *       `line-clamp-N`, `text-ellipsis` / `textOverflow:` inline, dan
+ *       `overflow-hidden` yang disandingkan `whitespace-nowrap` atau
+ *       `max-w-[…]`. Yang sah: satu baris + wadahnya menggulir.
  *
  * MEKANISMENYA RATCHET, BUKAN DITOLAK MENTAH.
  *
@@ -50,7 +53,15 @@ const warna = {
   redup: (t) => `\x1b[2m${t}\x1b[0m`,
 };
 
-const AKAR = path.resolve(__dirname, "..", "..");
+const AKAR = (() => {
+  const i = process.argv.indexOf("--akar");
+  /* #661 — gerbang ini harus bisa dibuktikan MERAH tanpa menyentuh sumber repo
+   * (§0.5 aturan 4). Test-nya menunjuk `--akar` ke direktori fixture di luar
+   * repo; tanpa argumen ini, perilakunya persis seperti sebelumnya. */
+  return i > -1 && process.argv[i + 1]
+    ? path.resolve(process.argv[i + 1])
+    : path.resolve(__dirname, "..", "..");
+})();
 const SRC = path.join(AKAR, "src");
 const GARIS_DASAR = path.join(__dirname, "label-baseline.json");
 const PERBARUI = process.argv.includes("--perbarui");
@@ -86,8 +97,25 @@ const POLA_LABEL =
 const POLA_WARNA =
   /(?:["'`]#[0-9a-fA-F]{3,8}\b|\b(?:bg|text|border|ring|from|to|via|fill|stroke)-(?:success|danger|warning|info|primary|secondary|emerald|rose|violet|purple|sky|cyan|amber|green|red|blue|indigo|teal)\b)/;
 
+/* #661 — R2 dulu hanya mengenali `truncate` yang berpasangan `max-w-[NNpx]`
+ * pada satu baris. Tiga pola pemotong lain lolos, dan justru yang paling sering
+ * muncul kembali:
+ *
+ *   - `line-clamp-N`           pemotongan dua baris atau lebih;
+ *   - `text-ellipsis` dan `textOverflow:` inline — resep yang sama tanpa kata
+ *                              `truncate`;
+ *   - `overflow-hidden` yang disandingkan `whitespace-nowrap` ATAU `max-w-[…]`
+ *                              pada satu baris kelas: inilah resep CSS "satu
+ *                              baris lalu dipotong" yang tidak menyebut
+ *                              `truncate` sama sekali.
+ *
+ * `overflow-hidden` SENDIRIAN sengaja tidak dihitung — ia juga dipakai untuk
+ * membulatkan sudut wadah dan jumlahnya akan menenggelamkan garis dasar, dan
+ * garis dasar yang gemuk adalah gerbang yang mati. Pasangan kelasnya diharuskan
+ * berada dalam satu rentang tanpa tanda kutip, artinya satu string kelas yang
+ * sama. */
 const POLA_POTONG =
-  /\btruncate\b[^"'`]*\bmax-w-\[\d+px\]|\bmax-w-\[\d+px\][^"'`]*\btruncate\b/;
+  /\btruncate\b[^"'`]*\bmax-w-\[\d+px\]|\bmax-w-\[\d+px\][^"'`]*\btruncate\b|\bline-clamp-\d\b|\btext-ellipsis\b|textOverflow\s*:|\bwhitespace-nowrap\b[^"'`]*\boverflow-hidden\b|\boverflow-hidden\b[^"'`]*\bwhitespace-nowrap\b|\boverflow-hidden\b[^"'`]*\bmax-w-\[|\bmax-w-\[[^"'`]*\boverflow-hidden\b/;
 
 function daftarBerkas(dir, keluar = []) {
   for (const nama of fs.readdirSync(dir)) {

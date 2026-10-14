@@ -9,9 +9,14 @@
  *
  * `whitespace-nowrap` pada data panjang adalah kembar dari `truncate`: keduanya
  * membuat teks tidak tampil — yang satu menghilangkannya diam-diam, yang satu
- * lagi membuangnya keluar wadahnya. Gerbang `audit:label` R2 hanya mengenali
- * `truncate` + `max-w-[NNpx]`, jadi pola nowrap ini lolos dari penjaga; itu
- * sebab test ini ada, dan itu juga isi usulan #651.
+ * lagi membuangnya keluar wadahnya. Gerbang `audit:label` R2 dulu hanya
+ * mengenali `truncate` + `max-w-[NNpx]`, jadi pola nowrap ini lolos dari
+ * penjaga; itu sebab test ini ada, dan itu juga isi usulan #651. #661
+ * memperlebar R2 (line-clamp, text-ellipsis/textOverflow, dan `overflow-hidden`
+ * yang disandingkan nowrap atau `max-w-[…]`), tetapi `whitespace-nowrap`
+ * SENDIRIAN tetap sengaja tidak dihitung gerbang itu — ia sah pada nama orang
+ * dan pada wadah yang memang boleh melebar. Penjaga di bawah ini yang menutup
+ * sisanya, per tag yang merender nilai data.
  *
  * DAN SEKARANG ADA BUKTI KEDUANYA. #647 melepas `truncate` pada tiga sel tabel
  * flowchart TAPI MENINGGALKAN `whitespace-nowrap` pada `<tr>`-nya. Penjaga ini

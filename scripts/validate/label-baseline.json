@@ -11,23 +11,27 @@
     "r1": 0,
     "r2": 2
   },
+  "src/components/UserProfileDropdown.tsx": {
+    "r1": 0,
+    "r2": 1
+  },
+  "src/features/activity/ActivityLogPanel.tsx": {
+    "r1": 0,
+    "r2": 1
+  },
   "src/features/backup/BackupPanel.tsx": {
     "r1": 3,
-    "r2": 0
+    "r2": 2
+  },
+  "src/features/dashboard/components/SidebarWidgetsStack.tsx": {
+    "r1": 0,
+    "r2": 6
   },
   "src/features/dashboard/DashboardView.tsx": {
     "r1": 4,
     "r2": 0
   },
   "src/features/explorer/DbExplorerPanel.tsx": {
-    "r1": 0,
-    "r2": 1
-  },
-  "src/features/flowchart/components/FlowchartDashboard.tsx": {
-    "r1": 0,
-    "r2": 4
-  },
-  "src/features/flowchart/components/FlowchartMobileCardView.tsx": {
     "r1": 0,
     "r2": 1
   },
@@ -41,31 +45,51 @@
   },
   "src/features/issues/components/list/IssueMobileCardView.tsx": {
     "r1": 0,
-    "r2": 2
+    "r2": 3
   },
-  "src/features/meeting-notes/components/DiscussionPointMobileCardView.tsx": {
+  "src/features/issues/components/list/IssueTableRow.tsx": {
     "r1": 0,
-    "r2": 2
+    "r2": 1
   },
-  "src/features/meeting-notes/DiscussionPointsTable.tsx": {
+  "src/features/kanban/components/KanbanCard.tsx": {
     "r1": 0,
     "r2": 1
   },
   "src/features/meeting-notes/MeetingNotes.tsx": {
     "r1": 0,
-    "r2": 5
+    "r2": 4
   },
   "src/features/planning/index.tsx": {
     "r1": 11,
-    "r2": 0
+    "r2": 1
   },
   "src/features/planning/SprintSection/index.tsx": {
     "r1": 1,
-    "r2": 0
+    "r2": 1
+  },
+  "src/features/qa/components/QADetailDrawer.tsx": {
+    "r1": 0,
+    "r2": 1
   },
   "src/features/qa/components/QASuiteSidebar.tsx": {
     "r1": 0,
-    "r2": 2
+    "r2": 3
+  },
+  "src/features/qa/components/QATestCaseMobileCardView.tsx": {
+    "r1": 0,
+    "r2": 1
+  },
+  "src/features/qa/components/QATestCaseTable.tsx": {
+    "r1": 0,
+    "r2": 1
+  },
+  "src/features/timeline/MilestonePanel.tsx": {
+    "r1": 0,
+    "r2": 1
+  },
+  "src/features/timeline/TimelinePanel.tsx": {
+    "r1": 0,
+    "r2": 1
   },
   "src/features/users/AdminUserPanel.tsx": {
     "r1": 2,
@@ -73,19 +97,11 @@
   },
   "src/features/users/UserDetailView.tsx": {
     "r1": 3,
-    "r2": 1
+    "r2": 5
   },
   "src/features/users/UserSessionsPanel.tsx": {
     "r1": 0,
     "r2": 2
-  },
-  "src/features/wiki/components/WikiMobileCardView.tsx": {
-    "r1": 0,
-    "r2": 1
-  },
-  "src/features/wiki/WikiView.tsx": {
-    "r1": 0,
-    "r2": 3
   },
   "src/utils/notificationFormatter.tsx": {
     "r1": 5,
