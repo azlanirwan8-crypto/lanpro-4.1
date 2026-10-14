@@ -14,6 +14,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { cn } from "../../../lib/utils";
+import { colorPaletteHex, colorPalettes } from "../constants";
 
 /** Arah tata lapisan (#615). `naik`/`turun` satu tingkat, `depan`/`belakang` ke ujung. */
 export type ArahLayers = "depan" | "naik" | "turun" | "belakang";
@@ -58,19 +59,11 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const colorsList = [
-    { name: "indigo", bg: "bg-indigo-500" },
-    { name: "blue", bg: "bg-blue-500" },
-    { name: "sky", bg: "bg-sky-500" },
-    { name: "green", bg: "bg-emerald-500" },
-    { name: "yellow", bg: "bg-amber-400" },
-    { name: "orange", bg: "bg-orange-500" },
-    { name: "pink", bg: "bg-pink-500" },
-    { name: "rose", bg: "bg-rose-500" },
-    { name: "violet", bg: "bg-violet-500" },
-    { name: "purple", bg: "bg-purple-500" },
-    { name: "slate", bg: "bg-surface-strong" },
-  ];
+  /* #663 — menu ini dulu menyimpan daftar warnanya sendiri: 11 entri berkelas
+   * Tailwind keras sementara `colorPaletteHex` (dikunci #638) punya 12, jadi
+   * `amber` tidak bisa dipilih dari sini dan petak yang tampil tidak sama
+   * dengan warna bentuknya. Satu sumber, dibaca apa adanya. */
+  const colorsList = Object.keys(colorPaletteHex);
 
   // Adjust coordinates so it doesn't overflow screen boundaries
   const adjustedX = Math.min(x, window.innerWidth - 210);
@@ -191,24 +184,29 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
 
       {/* Color Circle Grid Picker */}
       <div className="grid grid-cols-4 gap-1.5 p-2 bg-surface-sunken/50 rounded-xl border border-border-faint/80 my-1">
-        {colorsList.map((c) => {
-          const isSelected = nodeColor === c.name;
+        {colorsList.map((nama) => {
+          const isSelected = nodeColor === nama;
           return (
             <button
-              key={c.name}
+              key={nama}
               onClick={() => {
-                onChangeColor(nodeId, c.name);
+                onChangeColor(nodeId, nama);
                 onClose();
+              }}
+              style={{
+                backgroundColor: colorPaletteHex[nama]?.bg,
+                borderColor: colorPaletteHex[nama]?.stroke,
               }}
               className={cn(
                 "w-7 h-7 rounded-lg transition-transform hover:scale-110 active:scale-95 flex items-center justify-center relative shadow-soft cursor-pointer border",
-                c.bg,
-                isSelected ? "ring-2 ring-primary border-surface scale-105" : "border-transparent"
+                isSelected && "ring-2 ring-primary scale-105"
               )}
-              title={c.name.toUpperCase()}
+              title={t("flowchart.changeColorTo", { warna: nama })}
             >
               {isSelected && (
-                <Check className="w-3.5 h-3.5 text-content-inverse stroke-[3.5px] drop-shadow-sm" />
+                /* Centangnya memakai warna TEKS palet yang sama (#677): isian
+                 * pastel membuat `text-content-inverse` nyaris tak terlihat. */
+                <Check className={cn("w-3.5 h-3.5 stroke-[3.5px]", colorPalettes[nama]?.text)} />
               )}
             </button>
           );
