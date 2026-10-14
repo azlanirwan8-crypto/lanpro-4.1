@@ -12,7 +12,20 @@
  */
 import { useTranslation } from "react-i18next";
 import React from "react";
-import { Upload, FileText } from "lucide-react";
+import {
+  Upload,
+  FileText,
+  Workflow,
+  Presentation,
+  FileCode,
+  Database,
+  Lightbulb,
+  Package,
+  FolderOpen,
+  CheckCircle,
+  Shapes,
+  MoveUpRight,
+} from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { Modal } from "../../../components/ui/Modal";
 import { Button } from "../../../components/ui/CoreUI";
@@ -48,11 +61,28 @@ interface ImportDiagramModalProps {
   batasImpor: BatasKonversi | null;
 }
 
-/** Daftar format yang didukung, lengkap dengan label, warna, dan ekstensi. */
-const FORMAT_OPTIONS = [
+/**
+ * Daftar format yang didukung, lengkap dengan label, warna, dan ekstensi.
+ *
+ * #532 — kolom `emoji` diganti ikon lucide. Glyph emoji adalah elemen
+ * antarmuka yang tidak bisa diwarnai token, tidak ikut ukuran teks, dan
+ * tampilannya berbeda di tiap platform (Windows/macOS/Android), jadi satu-satunya
+ * chrome papan yang tidak tunduk pada §22. Ikonnya diambil dari keluarga yang
+ * sudah dipakai di berkas ini.
+ */
+const FORMAT_OPTIONS: {
+  key: "drawio" | "miro" | "native";
+  Ikon: React.ComponentType<{ className?: string }>;
+  label: string;
+  subLabel: string;
+  accept: string;
+  hint: string;
+  activeClass: string;
+  dotClass: string;
+}[] = [
   {
-    key: "drawio" as "drawio" | "miro" | "native",
-    emoji: "📊",
+    key: "drawio",
+    Ikon: Workflow,
     label: "Draw.io",
     subLabel: ".drawio  ·  .xml",
     accept: ".xml,.drawio",
@@ -61,8 +91,8 @@ const FORMAT_OPTIONS = [
     dotClass: "bg-orange-400",
   },
   {
-    key: "miro" as "drawio" | "miro" | "native",
-    emoji: "🟡",
+    key: "miro",
+    Ikon: Presentation,
     label: "Miro",
     subLabel: ".json  ·  .csv",
     accept: ".json,.csv",
@@ -71,8 +101,8 @@ const FORMAT_OPTIONS = [
     dotClass: "bg-amber-400",
   },
   {
-    key: "native" as "drawio" | "miro" | "native",
-    emoji: "✏️",
+    key: "native",
+    Ikon: FileCode,
     label: "Mermaid",
     subLabel: ".mmd  ·  .txt",
     accept: ".mmd,.mermaid,.txt",
@@ -81,8 +111,8 @@ const FORMAT_OPTIONS = [
     dotClass: "bg-violet-400",
   },
   {
-    key: "native" as "drawio" | "miro" | "native",
-    emoji: "🔮",
+    key: "native",
+    Ikon: Database,
     label: "LanPro",
     subLabel: ".json",
     accept: ".json",
@@ -192,7 +222,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
                   )}
                 />
               )}
-              <span className="text-lg leading-none">{fmt.emoji}</span>
+              <fmt.Ikon className="w-4 h-4" />
               <div className="text-[10px] font-semibold uppercase tracking-wide leading-none mt-0.5">
                 {fmt.label}
               </div>
@@ -205,8 +235,9 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
       </div>
 
       {/* Hint box */}
-      <div className="bg-surface-sunken border border-border-subtle rounded-xl px-3.5 py-2.5 text-[11px] leading-relaxed text-content-body">
-        💡 {activeFormat.hint}
+      <div className="bg-surface-sunken border border-border-subtle rounded-xl px-3.5 py-2.5 text-[11px] leading-relaxed text-content-body flex items-start gap-1.5">
+        <Lightbulb className="w-3.5 h-3.5 shrink-0 mt-px text-content-subtle" />
+        <span>{activeFormat.hint}</span>
       </div>
 
       {/* Drag and Drop / Click to upload zone */}
@@ -233,9 +264,9 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
         )}
       >
         {parsedImportData ? (
-          <span className="text-3xl animate-bounce">📦</span>
+          <Package className="w-8 h-8 text-success-text animate-bounce" />
         ) : dragOverImport ? (
-          <span className="text-3xl">📂</span>
+          <FolderOpen className="w-8 h-8 text-primary" />
         ) : (
           <div className="p-3 rounded-full bg-surface-muted border border-border-subtle">
             <Upload className="w-5 h-5 text-content-subtle" />
@@ -270,12 +301,13 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
       {/* Preview result after parsing */}
       {parsedImportData && (
         <div className="bg-success/5 border border-success/40 rounded-xl p-4 space-y-3">
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-success-text bg-success/10 px-2 py-0.5 rounded-full border border-success/30 inline-block">
-            ✅ Siap Diterapkan
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-success-text bg-success/10 px-2 py-0.5 rounded-full border border-success/30 inline-flex items-center gap-1">
+            <CheckCircle className="w-3 h-3" />
+            Siap Diterapkan
           </span>
           <div className="grid grid-cols-2 gap-2.5">
             <div className="bg-surface rounded-lg border border-success/30 px-3 py-2.5 flex items-center gap-2.5 shadow-inner">
-              <span className="text-lg">🔷</span>
+              <Shapes className="w-4 h-4 shrink-0 text-content-subtle" />
               <div>
                 <div className="text-sm font-bold text-content-strong">
                   {parsedImportData.nodes.length}
@@ -286,7 +318,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
               </div>
             </div>
             <div className="bg-surface rounded-lg border border-success/30 px-3 py-2.5 flex items-center gap-2.5 shadow-inner">
-              <span className="text-lg">↗️</span>
+              <MoveUpRight className="w-4 h-4 shrink-0 text-content-subtle" />
               <div>
                 <div className="text-sm font-bold text-content-strong">
                   {parsedImportData.edges.length}
