@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
-import { Zap, Search, Target, LayoutGrid, Filter, Plus } from "lucide-react";
+import { Zap, Search, Target, LayoutGrid, Filter, Plus, ChevronRight, ChevronDown } from "lucide-react";
 import { Task, MasterData } from "../../../types";
 import { StyledDropdown } from "../../../components/ui/CommonComponents";
 import { getAllDescendants, getTaskDepth } from "../../../lib/utils";
@@ -23,6 +23,20 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("All Priorities");
+  // State untuk track parent task mana yang di-expand
+  const [expandedParents, setExpandedParents] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (parentId: string) => {
+    setExpandedParents((prev) => {
+      const next = new Set(prev);
+      if (next.has(parentId)) {
+        next.delete(parentId);
+      } else {
+        next.add(parentId);
+      }
+      return next;
+    });
+  };
 
   // #689 butir (g) — satu kali jalan, bukan saringan berulang per baris.
   // Dulu: `backlogTasks` (n), `filteredBacklogTasks` (n), `epics` (n), lalu
@@ -157,17 +171,38 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
         {epics.flatMap((epic) => {
           const items = getTasksForParent(epic.id);
           if (items.length === 0) return [];
+          
+          const isExpanded = expandedParents.has(`epic-${epic.id}`);
+          
+          // Kelompokkan task berdasarkan direct parent untuk collapsible
+          const directChildrenMap = new Map<string, { task: Task; depth: number }[]>();
+          items.forEach((item) => {
+            const parentKey = item.task.parentId || "root";
+            if (!directChildrenMap.has(parentKey)) {
+              directChildrenMap.set(parentKey, []);
+            }
+            directChildrenMap.get(parentKey)!.push(item);
+          });
+
           return [
-            <div key={`header-${epic.id}`} className="flex items-center gap-2 px-1 mt-3 mb-2">
+            <div 
+              key={`header-${epic.id}`} 
+              className="flex items-center gap-2 px-1 mt-3 mb-2 cursor-pointer hover:bg-purple-500/5 rounded-md py-1 transition-colors"
+              onClick={() => toggleExpand(`epic-${epic.id}`)}
+            >
+              {isExpanded ? (
+                <ChevronDown className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+              ) : (
+                <ChevronRight className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+              )}
               <Zap className="w-3.5 h-3.5 text-purple-600" />
               <span className="text-xs font-normal text-purple-700 leading-none">{epic.title}</span>
               <div className="ml-auto text-[10px] leading-none font-normal text-purple-600 bg-purple-500/10 px-2 py-0.2 rounded-md border border-purple-500/30">
                 {items.length}
               </div>
             </div>,
-            ...items.map(({ task, depth }) => {
+            ...(isExpanded ? items.map(({ task, depth }) => {
               const dndIndex = _draggablesRenderedCount++;
-              // Indentasi bertingkat: 8px per level depth
               const indentPx = depth * 8;
               const borderColor =
                 depth === 1
@@ -192,15 +227,27 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
                   )}
                 </div>
               );
-            }),
+            }) : []),
           ];
         })}
 
         {(() => {
           const items = getTasksForParent("standalone");
           if (items.length === 0) return [];
+          
+          const isExpanded = expandedParents.has("standalone");
+
           return [
-            <div key="header-standalone" className="flex items-center gap-2 px-1 mt-3 mb-2">
+            <div 
+              key="header-standalone" 
+              className="flex items-center gap-2 px-1 mt-3 mb-2 cursor-pointer hover:bg-surface-muted/50 rounded-md py-1 transition-colors"
+              onClick={() => toggleExpand("standalone")}
+            >
+              {isExpanded ? (
+                <ChevronDown className="w-3.5 h-3.5 text-content-muted shrink-0" />
+              ) : (
+                <ChevronRight className="w-3.5 h-3.5 text-content-muted shrink-0" />
+              )}
               <Target className="w-3.5 h-3.5 text-content-muted" />
               <span className="text-xs font-normal text-content-secondary leading-none">
                 {t("planning.standaloneBacklog")}
@@ -209,7 +256,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
                 {items.length}
               </div>
             </div>,
-            ...items.map(({ task, depth }) => {
+            ...(isExpanded ? items.map(({ task, depth }) => {
               const dndIndex = _draggablesRenderedCount++;
               const indentPx = depth * 8;
 
@@ -226,7 +273,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
                   {renderDraggableTask(task, dndIndex, "card")}
                 </div>
               );
-            }),
+            }) : []),
           ];
         })()}
 

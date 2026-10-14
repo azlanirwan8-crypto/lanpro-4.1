@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   Calendar,
   ChevronDown,
+  ChevronRight,
   Edit2,
   Trash2,
   Zap,
@@ -53,6 +54,25 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
 }) => {
   const { t } = useTranslation();
   const [activeSprintMenuId, setActiveSprintMenuId] = useState<string | null>(null);
+  // State untuk track parent task mana yang di-expand per sprint
+  const [expandedParents, setExpandedParents] = useState<Record<string, Set<string>>>({});
+
+  const toggleExpand = (sprintId: string, parentId: string) => {
+    setExpandedParents((prev) => {
+      const sprintSet = prev[sprintId] || new Set();
+      const next = new Set(sprintSet);
+      if (next.has(parentId)) {
+        next.delete(parentId);
+      } else {
+        next.add(parentId);
+      }
+      return { ...prev, [sprintId]: next };
+    });
+  };
+
+  const isExpanded = (sprintId: string, parentId: string) => {
+    return expandedParents[sprintId]?.has(parentId) || false;
+  };
 
   return (
     <div className="flex-1 overflow-auto space-y-3.5 pb-16 pr-1 min-h-0 custom-scrollbar">
@@ -350,7 +370,12 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                               sprintTasks.some((st) => st.parentId === t.id)
                           );
 
-                          const getSprintTasksForParent = (parentId: string | null) => {
+                          /* `string`, bukan `string | null`: kedua pemanggil
+                           * mengirim `epic.id` atau penanda "standalone", dan
+                           * `getAllDescendants` di bawah hanya menerima string.
+                           * Tipe yang lebih lebar dari kenyataannya inilah yang
+                           * membuat `tsc --noEmit` merah di `main`. */
+                          const getSprintTasksForParent = (parentId: string) => {
                             if (parentId === "standalone") {
                               // Standalone: tasks tanpa parent dan bukan epic
                               return sprintTasks
@@ -397,12 +422,21 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                   {sprintEpics.flatMap((epic) => {
                                     const items = getSprintTasksForParent(epic.id);
                                     if (items.length === 0) return [];
+                                    
+                                    const epicExpanded = isExpanded(sprint.id, `epic-${epic.id}`);
+                                    
                                     return [
                                       <div
                                         key={`sprint-header-${epic.id}`}
-                                        className="flex items-center justify-between px-3 py-1.5 bg-purple-500/10 border border-purple-500/30 rounded-md mb-2 mt-2 first:mt-0"
+                                        className="flex items-center justify-between px-3 py-1.5 bg-purple-500/10 border border-purple-500/30 rounded-md mb-2 mt-2 first:mt-0 cursor-pointer hover:bg-purple-500/15 transition-colors"
+                                        onClick={() => toggleExpand(sprint.id, `epic-${epic.id}`)}
                                       >
                                         <div className="flex items-center gap-2">
+                                          {epicExpanded ? (
+                                            <ChevronDown className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                                          ) : (
+                                            <ChevronRight className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                                          )}
                                           <Zap className="w-3.5 h-3.5 text-purple-600" />
                                           <span className="text-xs font-normal text-purple-700 leading-none">
                                             {epic.title}
@@ -412,7 +446,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                           {items.length}
                                         </div>
                                       </div>,
-                                      ...items.map(({ task, depth }) => {
+                                      ...(epicExpanded ? items.map(({ task, depth }) => {
                                         const dndIndex = _draggablesRenderedCount++;
                                         const indentPx = depth * 8;
                                         const borderColor =
@@ -438,19 +472,28 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                             )}
                                           </div>
                                         );
-                                      }),
+                                      }) : []),
                                     ];
                                   })}
 
                                   {(() => {
                                     const items = getSprintTasksForParent("standalone");
                                     if (items.length === 0) return [];
+                                    
+                                    const standaloneExpanded = isExpanded(sprint.id, "standalone");
+                                    
                                     return [
                                       <div
                                         key="sprint-header-standalone"
-                                        className="flex items-center justify-between px-3 py-1.5 bg-surface-muted/70 border border-border-subtle/60 rounded-md mb-2 mt-2 first:mt-0"
+                                        className="flex items-center justify-between px-3 py-1.5 bg-surface-muted/70 border border-border-subtle/60 rounded-md mb-2 mt-2 first:mt-0 cursor-pointer hover:bg-surface-muted transition-colors"
+                                        onClick={() => toggleExpand(sprint.id, "standalone")}
                                       >
                                         <div className="flex items-center gap-2">
+                                          {standaloneExpanded ? (
+                                            <ChevronDown className="w-3.5 h-3.5 text-content-muted shrink-0" />
+                                          ) : (
+                                            <ChevronRight className="w-3.5 h-3.5 text-content-muted shrink-0" />
+                                          )}
                                           <Target className="w-3.5 h-3.5 text-content-muted" />
                                           <span className="text-xs font-normal text-content-secondary leading-none">
                                             {t("planning.standaloneTasks")}
@@ -460,7 +503,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                           {items.length}
                                         </div>
                                       </div>,
-                                      ...items.map(({ task, depth }) => {
+                                      ...(standaloneExpanded ? items.map(({ task, depth }) => {
                                         const dndIndex = _draggablesRenderedCount++;
                                         const indentPx = depth * 8;
 
@@ -479,7 +522,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                             {renderDraggableTask(task, dndIndex, "row")}
                                           </div>
                                         );
-                                      }),
+                                      }) : []),
                                     ];
                                   })()}
                                 </>
