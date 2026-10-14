@@ -55,11 +55,12 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
 }) => {
   const { t } = useTranslation();
   const [activeSprintMenuId, setActiveSprintMenuId] = useState<string | null>(null);
-  // State untuk track parent task mana yang di-expand per sprint
-  const [expandedParents, setExpandedParents] = useState<Record<string, Set<string>>>({});
+  // Default TERBUKA per sprint: yang disimpan adalah kelompok yang DITUTUP.
+  // Bila default tertutup, baris Draggable tidak dirender dan drag-drop mati.
+  const [collapsedParents, setCollapsedParents] = useState<Record<string, Set<string>>>({});
 
   const toggleExpand = (sprintId: string, parentId: string) => {
-    setExpandedParents((prev) => {
+    setCollapsedParents((prev) => {
       const sprintSet = prev[sprintId] || new Set();
       const next = new Set(sprintSet);
       if (next.has(parentId)) {
@@ -71,8 +72,12 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
     });
   };
 
-  const isExpanded = (sprintId: string, parentId: string) => {
-    return expandedParents[sprintId]?.has(parentId) || false;
+  /* `indukTerbuka`, bukan `isExpanded`: di dalam `.map(sprint => ...)` di bawah
+   * ada `const isExpanded` boolean untuk sprint-nya sendiri, dan nama yang sama
+   * di lingkup dalam menutupi fungsi ini — itulah yang membuat `tsc --noEmit`
+   * merah di `main` ("Type 'Boolean' has no call signatures"). */
+  const indukTerbuka = (sprintId: string, parentId: string) => {
+    return !collapsedParents[sprintId]?.has(parentId);
   };
 
   return (
@@ -423,11 +428,12 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                   {sprintEpics.flatMap((epic) => {
                                     const items = getSprintTasksForParent(epic.id);
                                     if (items.length === 0) return [];
-                                    
-                                    const epicExpanded = isExpanded(sprint.id, `epic-${epic.id}`);
+
+                                    const epicExpanded = indukTerbuka(sprint.id, `epic-${epic.id}`);
                                     const EpicIcon = getIconForTaskType("epic", masterData);
                                     const epicColor = getColorForTaskType("epic", masterData);
-                                    const epicColorClass = epicColor.colorClass || "text-purple-600";
+                                    const epicColorClass =
+                                      epicColor.colorClass || "text-purple-600";
 
                                     return [
                                       <div
@@ -465,44 +471,51 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                           {items.length}
                                         </div>
                                       </div>,
-                                      ...(epicExpanded ? items.map(({ task, depth }) => {
-                                        const dndIndex = _draggablesRenderedCount++;
-                                        const indentPx = depth * 8;
-                                        const borderColor =
-                                          depth === 1
-                                            ? "rgb(var(--color-primary) / 0.4)"
-                                            : depth === 2
-                                              ? "rgb(var(--color-primary) / 0.25)"
-                                              : "rgb(var(--color-primary) / 0.15)";
+                                      ...(epicExpanded
+                                        ? items.map(({ task, depth }) => {
+                                            const dndIndex = _draggablesRenderedCount++;
+                                            const indentPx = depth * 8;
+                                            const borderColor =
+                                              depth === 1
+                                                ? "rgb(var(--color-primary) / 0.4)"
+                                                : depth === 2
+                                                  ? "rgb(var(--color-primary) / 0.25)"
+                                                  : "rgb(var(--color-primary) / 0.15)";
 
-                                        return (
-                                          <div
-                                            key={task.id}
-                                            className="mb-2 max-w-full overflow-hidden relative"
-                                            style={{
-                                              paddingLeft: `${indentPx}px`,
-                                              borderLeft:
-                                                depth > 0 ? `2px solid ${borderColor}` : undefined,
-                                            }}
-                                          >
-                                            {renderDraggableTask(task, dndIndex, "row")}
-                                            {depth >= 2 && (
-                                              <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-primary/40" />
-                                            )}
-                                          </div>
-                                        );
-                                      }) : []),
+                                            return (
+                                              <div
+                                                key={task.id}
+                                                className="mb-2 max-w-full overflow-hidden relative"
+                                                style={{
+                                                  paddingLeft: `${indentPx}px`,
+                                                  borderLeft:
+                                                    depth > 0
+                                                      ? `2px solid ${borderColor}`
+                                                      : undefined,
+                                                }}
+                                              >
+                                                {renderDraggableTask(task, dndIndex, "row")}
+                                                {depth >= 2 && (
+                                                  <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-primary/40" />
+                                                )}
+                                              </div>
+                                            );
+                                          })
+                                        : []),
                                     ];
                                   })}
 
                                   {(() => {
                                     const items = getSprintTasksForParent("standalone");
                                     if (items.length === 0) return [];
-                                    
-                                    const standaloneExpanded = isExpanded(sprint.id, "standalone");
+
+                                    const standaloneExpanded = indukTerbuka(
+                                      sprint.id,
+                                      "standalone"
+                                    );
                                     const StandaloneIcon = getIconForTaskType("task", masterData);
                                     const standaloneColor = "text-content-muted";
-                                    
+
                                     return [
                                       <div
                                         key="sprint-header-standalone"
@@ -511,11 +524,19 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                       >
                                         <div className="flex items-center gap-2">
                                           {standaloneExpanded ? (
-                                            <ChevronDown className={`w-3.5 h-3.5 shrink-0 ${standaloneColor}`} />
+                                            <ChevronDown
+                                              className={`w-3.5 h-3.5 shrink-0 ${standaloneColor}`}
+                                            />
                                           ) : (
-                                            <ChevronRight className={`w-3.5 h-3.5 shrink-0 ${standaloneColor}`} />
+                                            <ChevronRight
+                                              className={`w-3.5 h-3.5 shrink-0 ${standaloneColor}`}
+                                            />
                                           )}
-                                          {StandaloneIcon && <StandaloneIcon className={`w-3.5 h-3.5 ${standaloneColor}`} />}
+                                          {StandaloneIcon && (
+                                            <StandaloneIcon
+                                              className={`w-3.5 h-3.5 ${standaloneColor}`}
+                                            />
+                                          )}
                                           <span className="text-xs font-normal text-content-secondary leading-none">
                                             {t("planning.standaloneTasks")}
                                           </span>
@@ -524,26 +545,28 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                           {items.length}
                                         </div>
                                       </div>,
-                                      ...(standaloneExpanded ? items.map(({ task, depth }) => {
-                                        const dndIndex = _draggablesRenderedCount++;
-                                        const indentPx = depth * 8;
+                                      ...(standaloneExpanded
+                                        ? items.map(({ task, depth }) => {
+                                            const dndIndex = _draggablesRenderedCount++;
+                                            const indentPx = depth * 8;
 
-                                        return (
-                                          <div
-                                            key={task.id}
-                                            className="mb-2 max-w-full overflow-hidden relative"
-                                            style={{
-                                              paddingLeft: `${indentPx}px`,
-                                              borderLeft:
-                                                depth > 0
-                                                  ? "2px solid rgb(var(--color-primary) / 0.4)"
-                                                  : undefined,
-                                            }}
-                                          >
-                                            {renderDraggableTask(task, dndIndex, "row")}
-                                          </div>
-                                        );
-                                      }) : []),
+                                            return (
+                                              <div
+                                                key={task.id}
+                                                className="mb-2 max-w-full overflow-hidden relative"
+                                                style={{
+                                                  paddingLeft: `${indentPx}px`,
+                                                  borderLeft:
+                                                    depth > 0
+                                                      ? "2px solid rgb(var(--color-primary) / 0.4)"
+                                                      : undefined,
+                                                }}
+                                              >
+                                                {renderDraggableTask(task, dndIndex, "row")}
+                                              </div>
+                                            );
+                                          })
+                                        : []),
                                     ];
                                   })()}
                                 </>

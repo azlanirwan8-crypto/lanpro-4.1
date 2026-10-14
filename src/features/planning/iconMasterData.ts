@@ -21,7 +21,10 @@ const ICON_MAP: Record<
   List,
 };
 
-export const findTypeData = (taskType: string, masterData: MasterData[]) => {
+/* Tidak di-export: hanya dipakai dua fungsi di berkas ini. `audit:logika`
+ * menghitung export tanpa import sebagai kode mati dan menggagalkan hook
+ * pre-commit untuk SELURUH repo, bukan hanya berkas ini. */
+const findTypeData = (taskType: string, masterData: MasterData[]) => {
   if (!Array.isArray(masterData)) return undefined;
   return masterData.find(
     (m) =>

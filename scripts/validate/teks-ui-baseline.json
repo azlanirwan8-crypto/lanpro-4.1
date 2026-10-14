@@ -119,11 +119,6 @@
     "teks": "Contoh: dev@company.com",
     "jenis": "atribut"
   },
-  "components/modals/CreateBugTicketModal.tsx:[${selectedParentTask.key || selectedParentTask.taskKey ||": {
-    "berkas": "components/modals/CreateBugTicketModal.tsx",
-    "teks": "[${selectedParentTask.key || selectedParentTask.taskKey ||",
-    "jenis": "ternary"
-  },
   "components/ModalTenggatLogin.tsx:${item.judul} — ${item.proyek}": {
     "berkas": "components/ModalTenggatLogin.tsx",
     "teks": "${item.judul} — ${item.proyek}",
@@ -193,11 +188,6 @@
     "berkas": "features/explorer/DbExplorerPanel.tsx",
     "teks": "PostgreSQL (Neon Cloud)",
     "jenis": "jsx"
-  },
-  "features/flowchart/components/FlowchartDocumentModal.tsx:[${epic.key}] ${epic.title}": {
-    "berkas": "features/flowchart/components/FlowchartDocumentModal.tsx",
-    "teks": "[${epic.key}] ${epic.title}",
-    "jenis": "definisi"
   },
   "features/flowchart/components/FlowchartMinimap.tsx:radial-gradient(circle, #94a3b8 1px, transparent 1px)": {
     "berkas": "features/flowchart/components/FlowchartMinimap.tsx",
