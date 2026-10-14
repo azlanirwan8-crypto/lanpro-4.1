@@ -81,9 +81,10 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
       (m) => m.type.toLowerCase() === "issue_type" && m.label.toLowerCase() === taskType.toLowerCase()
     );
     
-    if (typeData?.icon) {
-      const IconComponent = (LucideIcons as any)[typeData.icon];
-      if (IconComponent) {
+    if (typeData?.icon && typeof typeData.icon === 'string') {
+      const iconName = typeData.icon.charAt(0).toUpperCase() + typeData.icon.slice(1);
+      const IconComponent = (LucideIcons as any)[iconName];
+      if (IconComponent && typeof IconComponent === 'function') {
         return IconComponent;
       }
     }
