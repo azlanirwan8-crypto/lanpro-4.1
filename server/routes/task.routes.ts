@@ -383,7 +383,39 @@ router.put(
       const { projectId } = req.params;
       const { orderedIds } = req.body;
 
-      await taskRepository.reorderTasks(projectId, orderedIds);
+      // #684 — `orderedIds` adalah daftar kiriman klien dan dulu seluruhnya
+      // ditulis ke `orderIndex`, jadi anggota biasa bisa menggeser urutan task
+      // milik orang lain (dan melihat urutan orang lain lewat selisihnya).
+      // Yang boleh bergeser hanya task milik pemanggil: sisanya disaring keluar
+      // sebelum sampai ke transaksi, sehingga slot yang mereka tempati tidak
+      // pernah disentuh. Admin sistem tetap boleh semuanya.
+      const userId = identitasWajib(req, res);
+      if (!userId) return;
+
+      const user = await userRepository.findByIdOrUid(userId);
+      const isAdminSistem = normalkanPeran(user?.role) === "admin";
+
+      const diminta = Array.from(new Set((orderedIds as unknown[]).map(String)));
+      let bolehDigeser = diminta;
+      if (!isAdminSistem) {
+        const baris = await taskRepository.findTasksByIds(diminta, projectId);
+        const identitas = identitasTaskPemanggil((req as any).user, user);
+        const milikPemanggil = new Set(
+          baris
+            .filter((task: any) => isTaskParticipant(task, identitas))
+            .map((task: { id: string }) => task.id)
+        );
+        bolehDigeser = diminta.filter((id) => milikPemanggil.has(id));
+        if (bolehDigeser.length === 0) {
+          return res.status(403).json({
+            status: "error",
+            code: "srv.akses_ditolak",
+            message: "Akses ditolak",
+          });
+        }
+      }
+
+      await taskRepository.reorderTasks(projectId, bolehDigeser);
 
       const io = req.app.get("io");
       if (io) {

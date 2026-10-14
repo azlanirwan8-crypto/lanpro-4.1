@@ -52,10 +52,25 @@ jest.mock("../middleware/jagaProyek", () => ({
   jagaHapusProyek: () => (_req: any, _res: any, next: any) => next(),
 }));
 
+/**
+ * #684 — rute reorder kini membaca baris Users untuk memutuskan apakah
+ * pemanggil admin sistem. Tanpa mock ini pemanggil jatuh ke jalur non-admin,
+ * dan `findTasksByIds` (yang menjawab `[[]]` dari koneksi tiruan) membuat
+ * seluruh id tersaring keluar → 403, sehingga keempat test #64 di bawah
+ * berubah arti. Di sini pemanggilnya admin, jadi yang diuji tetap jalur
+ * `reorderTasks` sungguhan terhadap koneksi tiruan.
+ */
+jest.mock("../repositories/user.repository", () => ({
+  __esModule: true,
+  userRepository: { findByIdOrUid: jest.fn() },
+}));
+
 import express from "express";
 import request from "supertest";
 import taskRoutes from "./task.routes";
 import db from "../../src/lib/db";
+import { userRepository } from "../repositories/user.repository";
+import { BATAS_DAFTAR_TANPA_PAGINATION } from "../lib/pagination";
 
 /**
  * `io` yang MELEDAK saat memancarkan event. Ini mensimulasikan kegagalan
@@ -83,6 +98,12 @@ describe("#64 tasks/reorder — koneksi dilepas tepat sekali", () => {
     koneksiTiruan.rollback.mockResolvedValue(undefined);
     koneksiTiruan.release.mockImplementation(() => undefined);
     (db as any).getConnection.mockResolvedValue(koneksiTiruan);
+    (userRepository.findByIdOrUid as jest.Mock).mockResolvedValue({
+      id: "user-1",
+      uid: "user-1",
+      role: "admin",
+      permissions: null,
+    });
   });
 
   it("melepas koneksi TEPAT SEKALI pada jalur sukses", async () => {
@@ -126,6 +147,21 @@ describe("#64 tasks/reorder — koneksi dilepas tepat sekali", () => {
     const res = await request(buatApp())
       .put("/api/projects/proyek-A/tasks/reorder")
       .send({ orderedIds: "bukan-array" });
+
+    expect(res.status).toBe(400);
+    expect(koneksiTiruan.beginTransaction).not.toHaveBeenCalled();
+    expect(koneksiTiruan.release).not.toHaveBeenCalled();
+  });
+
+  it("orderedIds melewati batas ditolak 400 tanpa membuka transaksi (#684)", async () => {
+    const res = await request(buatApp())
+      .put("/api/projects/proyek-A/tasks/reorder")
+      .send({
+        orderedIds: Array.from(
+          { length: BATAS_DAFTAR_TANPA_PAGINATION + 1 },
+          (_, posisi) => `t${posisi}`
+        ),
+      });
 
     expect(res.status).toBe(400);
     expect(koneksiTiruan.beginTransaction).not.toHaveBeenCalled();

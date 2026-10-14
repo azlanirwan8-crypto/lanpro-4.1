@@ -50,6 +50,7 @@ jest.mock("../repositories/task.repository", () => ({
     findCommentsByTaskId: jest.fn(),
     listWorkLogs: jest.fn(),
     reorderTasks: jest.fn(),
+    findTasksByIds: jest.fn(),
   },
 }));
 
@@ -344,18 +345,46 @@ describe("komentar dan work log per task (#675)", () => {
   });
 });
 
-describe("urutan backlog (/tasks/reorder) — karakterisasi #675", () => {
+describe("urutan backlog (/tasks/reorder) — karakterisasi #675 + #684", () => {
+  beforeEach(() => {
+    // #684 membuat rute membaca relasi task sebelum menulis urutan. Barisnya
+    // hanya ada untuk id yang memang milik project-1, persis aturan yang sudah
+    // dipakai `findTaskOwnership` di atas — jadi tiruan ini ikut mengunci
+    // pembatasan lintas proyek.
+    (taskRepository.findTasksByIds as jest.Mock).mockImplementation(
+      async (ids: string[], projectId: string) => {
+        if (projectId !== "project-1") return [];
+        return ids
+          .filter((id) => tugasDalamProyek[id])
+          .map((id) => ({ id, projectId, ...tugasDalamProyek[id] }));
+      }
+    );
+    (taskRepository.reorderTasks as jest.Mock).mockResolvedValue(undefined);
+  });
+
   it("selalu membatasi tulis pada proyek di URL", async () => {
     const app = buatApp();
-    (taskRepository.reorderTasks as jest.Mock).mockResolvedValue(undefined);
+
+    const response = await request(app)
+      .put("/api/projects/project-1/tasks/reorder")
+      .set("x-test-user", "creator")
+      .send({ orderedIds: ["task-a", "task-b"] });
+
+    expect(response.status).toBe(200);
+    expect(taskRepository.findTasksByIds).toHaveBeenCalledWith(["task-a", "task-b"], "project-1");
+    expect(taskRepository.reorderTasks).toHaveBeenCalledWith("project-1", ["task-a", "task-b"]);
+  });
+
+  it("pemanggil yang tidak berpihak pada task mana pun tidak menulis urutan (#684)", async () => {
+    const app = buatApp();
 
     const response = await request(app)
       .put("/api/projects/project-1/tasks/reorder")
       .set("x-test-user", "outsider")
       .send({ orderedIds: ["task-a", "task-c"] });
 
-    expect(response.status).toBe(200);
-    expect(taskRepository.reorderTasks).toHaveBeenCalledWith("project-1", ["task-a", "task-c"]);
+    expect(response.status).toBe(403);
+    expect(taskRepository.reorderTasks).not.toHaveBeenCalled();
   });
 
   it("menolak daftar kosong sehingga tidak ada satu baris pun ditulis", async () => {

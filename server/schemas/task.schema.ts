@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { BATAS_DAFTAR_TANPA_PAGINATION } from "../lib/pagination";
 
 export const createTaskSchema = z.object({
   title: z.string().min(1, "Judul task tidak boleh kosong"),
@@ -60,8 +61,18 @@ export const updateTaskSchema = z.object({
   projectRisk: z.string().optional().nullable(),
 });
 
+// #684 — tanpa batas atas, satu permintaan bisa membuka transaksi berisi
+// ribuan UPDATE. Angkanya sama dengan jendela slot yang memang dibaca
+// `reorderTasks` (`task.repository.ts`), jadi id di luar batas itu tidak akan
+// pernah punya slot untuk digeser.
 export const reorderTaskIdsSchema = z.object({
-  orderedIds: z.array(z.string()).min(1, "Daftar urutan tidak boleh kosong"),
+  orderedIds: z
+    .array(z.string())
+    .min(1, "Daftar urutan tidak boleh kosong")
+    .max(
+      BATAS_DAFTAR_TANPA_PAGINATION,
+      `Daftar urutan maksimal ${BATAS_DAFTAR_TANPA_PAGINATION} task`
+    ),
 });
 
 /** #675 — relasi yang dikenal `src/types/task.ts`; nilai lain ditolak sebelum DB. */
