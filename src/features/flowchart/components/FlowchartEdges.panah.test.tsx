@@ -19,6 +19,7 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react";
 import i18n from "../../../i18n";
 import { FlowchartEdges } from "./FlowchartEdges";
+import { PENANDA_ABAI_EKSPOR } from "../lib/abaikanEkspor";
 import type { FlowEdge, FlowNode } from "../types";
 
 const bentuk = (id: string, x: number): FlowNode => ({
@@ -204,5 +205,28 @@ describe("FlowchartEdges — bilah gaya saat garis diklik (#529)", () => {
     expect(onEdgePatch).toHaveBeenCalledWith("e1", { connector: "orthogonal" });
 
     expect(onEdgePatch).not.toHaveBeenCalledWith("e1", { label: expect.anything() });
+  });
+});
+
+describe("FlowchartEdges — bilah gaya menandai diri untuk ekspor gambar (#537)", () => {
+  it("bilah yang terbuka membawa penanda yang dibaca penyaring ekspor", () => {
+    const el = render(<FlowchartEdges {...propsUntuk({ selectedEdgeId: "e1" })} />)
+      .container as HTMLElement;
+
+    // Penanda dibaca oleh `abaikanChromeEkspor` di `lib/abaikanEkspor.ts`, yang
+    // dipakai `handleExportJPG`. Tanpa penanda ini bilah ikut terpotret ke JPG.
+    const bertanda = el.querySelectorAll(`[${PENANDA_ABAI_EKSPOR}]`);
+    expect(bertanda).toHaveLength(1);
+    // Yang ditandai adalah AKAR bilahnya, bukan salah satu tombolnya: penyaring
+    // html-to-image membuang seluruh subtree simpul yang ditolak.
+    expect(bertanda[0].querySelector("button")).toBeTruthy();
+  });
+
+  it("tidak ada yang berpenanda saat tidak ada garis yang dipilih", () => {
+    const el = render(<FlowchartEdges {...propsUntuk()} />).container as HTMLElement;
+
+    expect(el.querySelectorAll(`[${PENANDA_ABAI_EKSPOR}]`)).toHaveLength(0);
+    // Garisnya sendiri tetap digambar — penanda itu milik bilah, bukan garis.
+    expect(jalurTerlihat(el)).toBeTruthy();
   });
 });

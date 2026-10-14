@@ -85,6 +85,13 @@ export const EdgeStyleBar: React.FC<EdgeStyleBarProps> = ({
 
   return (
     <div
+      /* #537 — penanda untuk `handleExportJPG`. Bilah ini dirender DI DALAM
+       * subtree kanvas yang dipotret `toJpeg`, jadi tanpa penanda ia ikut
+       * terekam: klik satu garis lalu tekan Ekspor JPG menghasilkan berkas
+       * dengan bilah melayang di tengah diagram. Chrome lain (minimap, dock,
+       * flap Editor Properti) sudah berada di luar subtree itu dan tidak
+       * butuh penanda. */
+      data-abai-ekspor=""
       className="absolute z-30 pointer-events-none"
       style={{
         left: titik.x,
