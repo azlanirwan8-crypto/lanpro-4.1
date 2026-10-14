@@ -2,9 +2,9 @@ import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Search, LayoutGrid, Filter, Plus, ChevronRight, ChevronDown } from "lucide-react";
 import { Task, MasterData } from "../../../types";
-import { StyledDropdown } from "../../../components/ui/CommonComponents";
+import { StyledDropdown, TypeIcon } from "../../../components/ui/CommonComponents";
 import { getAllDescendants, getTaskDepth } from "../../../lib/taskTree";
-import { getIconForTaskType, getColorForTaskType } from "../iconMasterData";
+import { warnaDariMaster } from "../../../lib/warnaLabel";
 
 interface BacklogSectionProps {
   tasks: Task[];
@@ -241,37 +241,33 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
           if (items.length === 0) return [];
 
           const isExpanded = !collapsedParents.has(`epic-${epic.id}`);
-          const EpicIcon = getIconForTaskType("epic", masterData);
-          const epicColor = getColorForTaskType("epic", masterData);
-          const epicColorClass = epicColor.colorClass || "text-purple-600";
+          // #564 — ikon & warna epik datang dari MasterData: TypeIcon memilih
+          // ikonnya sendiri, hex di sini hanya untuk chevron, judul, dan badge.
+          const jenisEpic = epic.type || "epic";
+          const hexEpic = warnaDariMaster(masterData, "issue_type", jenisEpic);
 
           return [
             <div
               key={`header-${epic.id}`}
-              className="flex items-center gap-2 px-1 mt-3 mb-2 cursor-pointer hover:bg-purple-500/5 rounded-md py-1 transition-colors"
+              className="group flex items-center gap-2 px-1 mt-3 mb-2 cursor-pointer hover:bg-surface-muted/60 rounded-md py-1 transition-colors"
               onClick={() => toggleExpand(`epic-${epic.id}`)}
             >
               {isExpanded ? (
-                <ChevronDown
-                  className={`w-3.5 h-3.5 shrink-0 ${epicColorClass}`}
-                  style={epicColor.colorStyle}
-                />
+                <ChevronDown className="w-3.5 h-3.5 shrink-0" style={{ color: hexEpic }} />
               ) : (
-                <ChevronRight
-                  className={`w-3.5 h-3.5 shrink-0 ${epicColorClass}`}
-                  style={epicColor.colorStyle}
-                />
+                <ChevronRight className="w-3.5 h-3.5 shrink-0" style={{ color: hexEpic }} />
               )}
-              <EpicIcon className={`w-3.5 h-3.5 ${epicColorClass}`} style={epicColor.colorStyle} />
-              <span
-                className={`text-xs font-normal leading-none ${epicColorClass}`}
-                style={epicColor.colorStyle}
-              >
+              <TypeIcon type={jenisEpic} className="w-3.5 h-3.5 shrink-0" masterData={masterData} />
+              <span className="text-xs font-normal leading-none" style={{ color: hexEpic }}>
                 {epic.title}
               </span>
               <div
-                className={`ml-auto text-[10px] leading-none font-normal ${epicColorClass} bg-purple-500/10 px-2 py-0.2 rounded-md border border-purple-500/30`}
-                style={epicColor.colorStyle}
+                className="ml-auto text-[10px] leading-none font-normal px-2 py-1 rounded-md border"
+                style={{
+                  color: hexEpic,
+                  backgroundColor: `${hexEpic}1A`,
+                  borderColor: `${hexEpic}4D`,
+                }}
               >
                 {items.length}
               </div>
@@ -293,8 +289,6 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
           if (items.length === 0) return [];
           
           const isExpanded = !collapsedParents.has("standalone");
-          const StandaloneIcon = getIconForTaskType("task", masterData);
-          const standaloneColor = "text-content-muted";
 
           return [
             <div 
@@ -303,11 +297,12 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
               onClick={() => toggleExpand("standalone")}
             >
               {isExpanded ? (
-                <ChevronDown className={`w-3.5 h-3.5 shrink-0 ${standaloneColor}`} />
+                <ChevronDown className="w-3.5 h-3.5 shrink-0 text-content-muted" />
               ) : (
-                <ChevronRight className={`w-3.5 h-3.5 shrink-0 ${standaloneColor}`} />
+                <ChevronRight className="w-3.5 h-3.5 shrink-0 text-content-muted" />
               )}
-              {StandaloneIcon && <StandaloneIcon className={`w-3.5 h-3.5 ${standaloneColor}`} />}              <span className="text-xs font-normal text-content-secondary leading-none">
+              <TypeIcon type="task" className="w-3.5 h-3.5 shrink-0" masterData={masterData} />
+              <span className="text-xs font-normal text-content-secondary leading-none">
                 {t("planning.standaloneBacklog")}
               </span>
               <div className="ml-auto text-xs sm:text-[10px] font-normal text-content-secondary bg-surface-muted px-2 py-0.2 rounded-md border border-border-subtle/60">

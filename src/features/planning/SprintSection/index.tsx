@@ -17,7 +17,8 @@ import {
 import { format } from "date-fns";
 import { cn, ensureDate } from "../../../lib/utils";
 import { getAllDescendants, getTaskDepth } from "../../../lib/taskTree";
-import { getIconForTaskType, getColorForTaskType } from "../iconMasterData";
+import { TypeIcon } from "../../../components/ui/CommonComponents";
+import { warnaDariMaster } from "../../../lib/warnaLabel";
 import { Task, Sprint, MasterData } from "../../../types";
 import { statusSelesai } from "../../../lib/statusSelesai";
 import { Droppable as _Droppable } from "@hello-pangea/dnd";
@@ -496,43 +497,54 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                     if (items.length === 0) return [];
 
                                     const epicExpanded = indukTerbuka(sprint.id, `epic-${epic.id}`);
-                                    const EpicIcon = getIconForTaskType("epic", masterData);
-                                    const epicColor = getColorForTaskType("epic", masterData);
-                                    const epicColorClass =
-                                      epicColor.colorClass || "text-purple-600";
+                                    // #564 — ikon & warna epik milik MasterData.
+                                    const jenisEpic = epic.type || "epic";
+                                    const hexEpic = warnaDariMaster(
+                                      masterData,
+                                      "issue_type",
+                                      jenisEpic
+                                    );
 
                                     return [
                                       <div
                                         key={`sprint-header-${epic.id}`}
-                                        className="flex items-center justify-between px-3 py-1.5 bg-purple-500/10 border border-purple-500/30 rounded-md mb-2 mt-2 first:mt-0 cursor-pointer hover:bg-purple-500/15 transition-colors"
+                                        className="flex items-center justify-between px-3 py-1.5 border rounded-md mb-2 mt-2 first:mt-0 cursor-pointer hover:brightness-[0.985] transition-colors"
+                                        style={{
+                                          backgroundColor: `${hexEpic}1A`,
+                                          borderColor: `${hexEpic}4D`,
+                                        }}
                                         onClick={() => toggleExpand(sprint.id, `epic-${epic.id}`)}
                                       >
                                         <div className="flex items-center gap-2">
                                           {epicExpanded ? (
                                             <ChevronDown
-                                              className={`w-3.5 h-3.5 shrink-0 ${epicColorClass}`}
-                                              style={epicColor.colorStyle}
+                                              className="w-3.5 h-3.5 shrink-0"
+                                              style={{ color: hexEpic }}
                                             />
                                           ) : (
                                             <ChevronRight
-                                              className={`w-3.5 h-3.5 shrink-0 ${epicColorClass}`}
-                                              style={epicColor.colorStyle}
+                                              className="w-3.5 h-3.5 shrink-0"
+                                              style={{ color: hexEpic }}
                                             />
                                           )}
-                                          <EpicIcon
-                                            className={`w-3.5 h-3.5 ${epicColorClass}`}
-                                            style={epicColor.colorStyle}
+                                          <TypeIcon
+                                            type={jenisEpic}
+                                            className="w-3.5 h-3.5 shrink-0"
+                                            masterData={masterData}
                                           />
                                           <span
-                                            className={`text-xs font-normal leading-none ${epicColorClass}`}
-                                            style={epicColor.colorStyle}
+                                            className="text-xs font-normal leading-none"
+                                            style={{ color: hexEpic }}
                                           >
                                             {epic.title}
                                           </span>
                                         </div>
                                         <div
-                                          className={`text-[10px] font-normal ${epicColorClass} bg-surface border border-purple-500/30 px-2 py-0.2 rounded-md`}
-                                          style={epicColor.colorStyle}
+                                          className="text-[10px] font-normal px-2 py-1 rounded-md border bg-surface"
+                                          style={{
+                                            color: hexEpic,
+                                            borderColor: `${hexEpic}4D`,
+                                          }}
                                         >
                                           {items.length}
                                         </div>
@@ -557,8 +569,6 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                       sprint.id,
                                       "standalone"
                                     );
-                                    const StandaloneIcon = getIconForTaskType("task", masterData);
-                                    const standaloneColor = "text-content-muted";
 
                                     return [
                                       <div
@@ -568,24 +578,20 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                       >
                                         <div className="flex items-center gap-2">
                                           {standaloneExpanded ? (
-                                            <ChevronDown
-                                              className={`w-3.5 h-3.5 shrink-0 ${standaloneColor}`}
-                                            />
+                                            <ChevronDown className="w-3.5 h-3.5 shrink-0 text-content-muted" />
                                           ) : (
-                                            <ChevronRight
-                                              className={`w-3.5 h-3.5 shrink-0 ${standaloneColor}`}
-                                            />
+                                            <ChevronRight className="w-3.5 h-3.5 shrink-0 text-content-muted" />
                                           )}
-                                          {StandaloneIcon && (
-                                            <StandaloneIcon
-                                              className={`w-3.5 h-3.5 ${standaloneColor}`}
-                                            />
-                                          )}
+                                          <TypeIcon
+                                            type="task"
+                                            className="w-3.5 h-3.5 shrink-0"
+                                            masterData={masterData}
+                                          />
                                           <span className="text-xs font-normal text-content-secondary leading-none">
                                             {t("planning.standaloneTasks")}
                                           </span>
                                         </div>
-                                        <div className="text-[10px] font-normal text-content-secondary bg-surface border border-border-subtle/60 px-2 py-0.2 rounded-md">
+                                        <div className="text-[10px] font-normal text-content-secondary bg-surface border border-border-subtle/60 px-2 py-1 rounded-md">
                                           {items.length}
                                         </div>
                                       </div>,

@@ -12,8 +12,10 @@ const Droppable = _Droppable as any;
 const Draggable = _Draggable as any;
 
 import { cn, ensureDate } from "../../lib/utils";
+import { warnaDariMaster } from "../../lib/warnaLabel";
 import { Task } from "../../types";
 import { UserAvatar } from "../../components/ui/UserAvatar";
+import { LabelChip } from "../../components/ui/CommonComponents";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { PlanningViewProps } from "./types";
 import { usePlanning } from "./hooks";
@@ -112,6 +114,10 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
 
   const renderDraggableTask = (task: Task, index: number, variant: "card" | "row" = "card") => {
     const isDragDisabled = !canDragTask(task);
+    // #564 — warna garis kiri & rona kartu datang dari MasterData, bukan kamus
+    // Tailwind lokal: kartu = hex priority, baris = hex status.
+    const hexPrioritas = warnaDariMaster(masterData, "priority", task.priority);
+    const hexStatus = warnaDariMaster(masterData, "status", task.status);
     return (
       <Draggable key={task.id} draggableId={task.id} index={index} isDragDisabled={isDragDisabled}>
         {(provided: any, snapshot: any) => (
@@ -128,43 +134,19 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                 setIsTaskDetailModalOpen(false);
                 useAppStore.getState().setCurrentView("issueDetail" as any);
               }}
+              style={
+                task.isBlocked
+                  ? undefined
+                  : variant === "card"
+                    ? { borderLeftColor: hexPrioritas, backgroundColor: `${hexPrioritas}0F` }
+                    : { borderLeftColor: hexStatus, backgroundColor: `${hexStatus}0F` }
+              }
               className={cn(
-                "transition-all duration-200 ease-out select-none",
+                "transition-all duration-200 ease-out select-none border border-border-subtle/80 border-l-4",
                 variant === "card"
-                  ? cn(
-                      "group p-3 rounded-lg shadow-2xs cursor-pointer hover:shadow-xs",
-                      (() => {
-                        if (task.isBlocked)
-                          return "border-l-4 border-l-danger bg-danger/5 border border-danger/30 hover:border-danger";
-                        const p = (task.priority || "").toLowerCase();
-                        if (p === "highest" || p === "high")
-                          return "border-l-4 border-l-danger bg-danger/5 border border-border-subtle/80 hover:border-danger/60";
-                        if (p === "medium")
-                          return "border-l-4 border-l-warning bg-warning/5 border border-border-subtle/80 hover:border-warning/60";
-                        return "border-l-4 border-l-primary bg-primary/5 border border-border-subtle/80 hover:border-primary/60";
-                      })()
-                    )
-                  : cn(
-                      "group flex items-center justify-between p-2.5 px-3 rounded-lg shadow-2xs cursor-pointer hover:bg-surface-sunken/70",
-                      (() => {
-                        if (task.isBlocked)
-                          return "border-l-4 border-l-danger bg-danger/5 border border-danger/30";
-                        const s = (task.status || "").toLowerCase();
-                        if (s === "done" || s === "completed" || s === "selesai")
-                          return "border-l-4 border-l-success bg-success/5 border border-border-subtle/80";
-                        if (s === "in progress" || s === "in_progress" || s === "sedang dikerjakan")
-                          return "border-l-4 border-l-primary bg-primary/5 border border-border-subtle/80";
-                        if (s === "in review" || s === "testing" || s === "qa")
-                          return "border-l-4 border-l-info bg-info/5 border border-border-subtle/80";
-                        const p = (task.priority || "").toLowerCase();
-                        if (p === "highest" || p === "high")
-                          return "border-l-4 border-l-danger bg-danger/5 border border-border-subtle/80";
-                        if (p === "medium")
-                          return "border-l-4 border-l-warning bg-warning/5 border border-border-subtle/80";
-                        return "border-l-4 border-l-border-subtle bg-surface border border-border-subtle/80";
-                      })()
-                    ),
-                task.isBlocked && "ring-1 ring-danger/50",
+                  ? "group p-3 rounded-lg shadow-2xs cursor-pointer hover:shadow-xs hover:brightness-[0.985]"
+                  : "group flex items-center justify-between p-2.5 px-3 rounded-lg shadow-2xs cursor-pointer hover:brightness-[0.985]",
+                task.isBlocked && "border-l-danger bg-danger/5 border-danger/30 ring-1 ring-danger/50",
                 snapshot.isDragging &&
                   "shadow-xl ring-2 ring-primary/20 scale-[1.02] z-50 bg-surface border-primary"
               )}
@@ -205,25 +187,14 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
                       {task.priority && (
-                        <span
-                          className={cn(
-                            "text-[10px] leading-none font-medium px-1.5 py-[3px] rounded border",
-                            (() => {
-                              const p = (task.priority || "").toLowerCase();
-                              if (p === "highest" || p === "high")
-                                return "text-danger-text bg-danger/10 border-danger/30";
-                              if (p === "medium")
-                                return "text-warning-text bg-warning/10 border-warning/30";
-                              return "text-primary bg-primary/10 border-primary/30";
-                            })()
-                          )}
-                        >
-                          {task.priority}
-                        </span>
+                        <LabelChip
+                          kelompok="priority"
+                          nilai={task.priority}
+                          masterData={masterData}
+                          ikon
+                        />
                       )}
-                      <span className="text-[10px] leading-none font-medium text-content-body bg-surface-sunken px-1.5 py-[3px] rounded border border-border-subtle">
-                        {task.status}
-                      </span>
+                      <LabelChip kelompok="status" nilai={task.status} masterData={masterData} />
                     </div>
                   </div>
                 </div>
@@ -249,25 +220,14 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                       </div>
                     )}
                     {task.priority && (
-                      <span
-                        className={cn(
-                          "text-[10px] leading-none font-medium px-1.5 py-[3px] rounded border",
-                          (() => {
-                            const p = (task.priority || "").toLowerCase();
-                            if (p === "highest" || p === "high")
-                              return "text-danger-text bg-danger/10 border-danger/30";
-                            if (p === "medium")
-                              return "text-warning-text bg-warning/10 border-warning/30";
-                            return "text-primary bg-primary/10 border-primary/30";
-                          })()
-                        )}
-                      >
-                        {task.priority}
-                      </span>
+                      <LabelChip
+                        kelompok="priority"
+                        nilai={task.priority}
+                        masterData={masterData}
+                        ikon
+                      />
                     )}
-                    <span className="px-2 py-0.5 bg-surface-sunken border border-border-subtle/70 rounded-md text-xs sm:text-[10px] font-medium text-content-body">
-                      {task.status}
-                    </span>
+                    <LabelChip kelompok="status" nilai={task.status} masterData={masterData} />
                     <div className="w-5 h-5 rounded-full bg-surface-muted flex items-center justify-center">
                       {task.assigneeId ? (
                         <UserAvatar
