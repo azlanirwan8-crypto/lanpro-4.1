@@ -183,6 +183,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { format } from "date-fns";
 import { Droppable as _Droppable, Draggable as _Draggable } from "@hello-pangea/dnd";
 import { Modal } from "./components/ui/Modal";
+import { TopbarMenuPortal } from "./components/ui/TopbarMenuPortal";
 import { ConfirmationModal } from "./components/ui/ConfirmationModal";
 const Droppable = _Droppable as any;
 const Draggable = _Draggable as any;
@@ -476,20 +477,10 @@ function AppContainer() {
   const setLoginStatusText = setHookLoginStatusText;
   const isAuthLoading = hookIsAuthLoading;
   const [isInitialDataLoading, setIsInitialDataLoading] = useState(false);
-  // #392 — overflow Settings/bahasa/tema di bawah md
+  // #392 — overflow Settings/bahasa/tema di bawah md. Buka-tutup dan klik-di-luar
+  // menu More dipindah ke TopbarMenuPortal (#672): panel di-portal ke document.body.
   const [isHeaderMoreOpen, setIsHeaderMoreOpen] = useState(false);
   const headerMoreRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!isHeaderMoreOpen) return;
-    const onDoc = (e: MouseEvent) => {
-      if (headerMoreRef.current && !headerMoreRef.current.contains(e.target as Node)) {
-        setIsHeaderMoreOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, [isHeaderMoreOpen]);
 
   const {
     notifications,
@@ -4023,12 +4014,14 @@ function AppContainer() {
           {/* Global Top Header Bar */}
           {/* #445 — border-b seperti Velzon: garis antara topbar dan PageHeader */}
           {/* #729 — ANGGARAN STACKING, ditulis sekali di sini dan dipatuhi semua
-              layar: krom aplikasi (bar ini plus menu-menunya) berada DI ATAS
-              setiap sticky konten (tertinggi hari ini kepala tabel z-30, #606);
-              scrim sidebar mobile di atas bar ini supaya bar ikut redup saat
-              laci terbuka; sidebar dan overlay modal tetap paling atas. Bar ini
-              flex item, jadi z-indexnya menjadi LANGIT-LANGIT bagi menu di
-              dalamnya — menaikkan z panel menu saja tidak menolong apa-apa. */}
+              layar: krom aplikasi (bar ini) berada DI ATAS setiap sticky konten
+              (tertinggi hari ini kepala tabel z-30, #606); scrim sidebar mobile
+              di atas bar ini supaya bar ikut redup saat laci terbuka; sidebar dan
+              overlay modal tetap paling atas. Bar ini flex item, jadi z-indexnya
+              menjadi LANGIT-LANGIT bagi anak-anaknya — karena itu menu-menu
+              topbar (profil, notifikasi, web apps, More) #672 dirender lewat
+              portal ke document.body di z-[44]: di atas bar dan sticky konten,
+              di bawah scrim (z-[45]) dan modal (z-50). */}
           <header className="flex items-center justify-between w-full px-4 md:px-5 py-2 bg-surface-raised border-b border-border-subtle shrink-0 pl-14 md:pl-5 text-content-strong transition-all z-40">
             <div className="flex items-center gap-3 min-w-0">
               {selectedProject &&
@@ -4126,8 +4119,15 @@ function AppContainer() {
                 >
                   <MoreHorizontal className="w-5 h-5" />
                 </button>
+                {/* #672 — panel lewat portal ke document.body; klik-di-luar
+                    ditangani TopbarMenuPortal (ref pemicu + ref panel). */}
                 {isHeaderMoreOpen && (
-                  <div className="absolute right-0 top-full mt-1 z-50 min-w-[11rem] rounded-lg border border-border-subtle bg-surface shadow-soft-lg py-1">
+                  <TopbarMenuPortal
+                    open={isHeaderMoreOpen}
+                    onClose={() => setIsHeaderMoreOpen(false)}
+                    triggerRef={headerMoreRef}
+                    className="z-[44] min-w-[11rem] rounded-lg border border-border-subtle bg-surface shadow-soft-lg py-1"
+                  >
                     {selectedProject &&
                       hasPermission(
                         userRoleForProject,
@@ -4176,7 +4176,7 @@ function AppContainer() {
                       )}
                       {isDarkMode() ? t("appShell.toLightMode") : t("appShell.toDarkMode")}
                     </button>
-                  </div>
+                  </TopbarMenuPortal>
                 )}
               </div>
 
@@ -4195,6 +4195,7 @@ function AppContainer() {
                 <NotificationsDropdown
                   isNotificationsOpen={isNotificationsOpen}
                   setIsNotificationsOpen={setIsNotificationsOpen}
+                  triggerRef={notificationsRef}
                   notifications={notifications}
                   currentUser={currentUser}
                   user={user}

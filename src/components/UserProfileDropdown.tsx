@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { motion, AnimatePresence } from "motion/react";
 import { User, MessageSquare, HelpCircle, LogOut, ChevronDown } from "lucide-react";
 import { cn } from "../lib/utils";
 import { UserAvatar } from "./ui/UserAvatar";
+import { TopbarMenuPortal } from "./ui/TopbarMenuPortal";
 import { UserProfile, PeranEfektif } from "../types";
 
 export interface UserProfileDropdownProps {
@@ -65,20 +65,8 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
   // First name for friendly greeting
   const firstName = displayName.split(" ")[0] || "User";
 
-  // Close dropdown on click outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen]);
+  // #672 — buka-tutup dan klik-di-luar dipindah ke TopbarMenuPortal: panel
+  // kini di-portal ke document.body, jadi ref lama tidak lagi berisi panel.
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -120,85 +108,81 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
         />
       </button>
 
-      {/* Pop-up Dropdown Menu ala Velzon */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.98, y: -4 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.98, y: -4 }}
-            transition={{ duration: 0.12, ease: "easeOut" }}
-            className="absolute right-0 mt-1.5 w-auto min-w-52 max-w-[min(22rem,90vw)] bg-surface rounded-md shadow-soft-lg border border-border-subtle z-50 py-1 overflow-hidden origin-top-right"
-            role="menu"
+      {/* Pop-up Dropdown Menu ala Velzon — #672: lewat portal ke document.body
+          (z-[44], posisi fixed di bawah kanan pemicu) supaya tidak terkunci
+          stacking context bar header z-40. */}
+      <TopbarMenuPortal
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        triggerRef={dropdownRef}
+        className="z-[44] w-auto min-w-52 max-w-[min(22rem,90vw)] bg-surface rounded-md shadow-soft-lg border border-border-subtle py-1 overflow-hidden origin-top-right"
+      >
+        {/* Header Greeting ala Velzon (hanya Welcome nama lengkap, tanpa background/border tebal) */}
+        <div className="px-4 pt-2.5 pb-1.5">
+          <p className="text-xs font-semibold text-content-subtle whitespace-nowrap">
+            {t("userMenu.welcome", { name: displayName })}
+          </p>
+        </div>
+
+        <div className="py-0.5">
+          {/* Profile */}
+          <button
+            onClick={() => {
+              setIsOpen(false);
+              onOpenProfile();
+            }}
+            className="w-full text-left px-4 py-2 min-h-9 text-xs font-medium hover:bg-surface-sunken flex items-center gap-3 transition-colors text-content-body hover:text-content-strong cursor-pointer"
+            role="menuitem"
           >
-            {/* Header Greeting ala Velzon (hanya Welcome nama lengkap, tanpa background/border tebal) */}
-            <div className="px-4 pt-2.5 pb-1.5">
-              <p className="text-xs font-semibold text-content-subtle whitespace-nowrap">
-                {t("userMenu.welcome", { name: displayName })}
-              </p>
-            </div>
+            <User className="w-4 h-4 text-content-subtle shrink-0" />
+            <span>{t("userMenu.profile")}</span>
+          </button>
 
-            <div className="py-0.5">
-              {/* Profile */}
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  onOpenProfile();
-                }}
-                className="w-full text-left px-4 py-2 min-h-9 text-xs font-medium hover:bg-surface-sunken flex items-center gap-3 transition-colors text-content-body hover:text-content-strong cursor-pointer"
-                role="menuitem"
-              >
-                <User className="w-4 h-4 text-content-subtle shrink-0" />
-                <span>{t("userMenu.profile")}</span>
-              </button>
+          {/* Messages */}
+          <button
+            onClick={() => {
+              setIsOpen(false);
+              if (onOpenMessages) onOpenMessages();
+            }}
+            className="w-full text-left px-4 py-2 min-h-9 text-xs font-medium hover:bg-surface-sunken flex items-center gap-3 transition-colors text-content-body hover:text-content-strong cursor-pointer"
+            role="menuitem"
+          >
+            <MessageSquare className="w-4 h-4 text-content-subtle shrink-0" />
+            <span>{t("userMenu.messages")}</span>
+          </button>
 
-              {/* Messages */}
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  if (onOpenMessages) onOpenMessages();
-                }}
-                className="w-full text-left px-4 py-2 min-h-9 text-xs font-medium hover:bg-surface-sunken flex items-center gap-3 transition-colors text-content-body hover:text-content-strong cursor-pointer"
-                role="menuitem"
-              >
-                <MessageSquare className="w-4 h-4 text-content-subtle shrink-0" />
-                <span>{t("userMenu.messages")}</span>
-              </button>
+          {/* Help */}
+          <button
+            onClick={() => {
+              setIsOpen(false);
+              if (onOpenHelp) onOpenHelp();
+            }}
+            className="w-full text-left px-4 py-2 min-h-9 text-xs font-medium hover:bg-surface-sunken flex items-center gap-3 transition-colors text-content-body hover:text-content-strong cursor-pointer"
+            role="menuitem"
+          >
+            <HelpCircle className="w-4 h-4 text-content-subtle shrink-0" />
+            <span>{t("userMenu.help")}</span>
+          </button>
+        </div>
 
-              {/* Help */}
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  if (onOpenHelp) onOpenHelp();
-                }}
-                className="w-full text-left px-4 py-2 min-h-9 text-xs font-medium hover:bg-surface-sunken flex items-center gap-3 transition-colors text-content-body hover:text-content-strong cursor-pointer"
-                role="menuitem"
-              >
-                <HelpCircle className="w-4 h-4 text-content-subtle shrink-0" />
-                <span>{t("userMenu.help")}</span>
-              </button>
-            </div>
+        {/* Divider */}
+        <div className="border-t border-border-subtle my-1" />
 
-            {/* Divider */}
-            <div className="border-t border-border-subtle my-1" />
-
-            {/* Logout */}
-            <div className="py-0.5">
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  handleLogout();
-                }}
-                className="w-full text-left px-4 py-2 min-h-9 text-xs font-medium hover:bg-danger-surface/20 flex items-center gap-3 transition-colors text-danger-hover hover:text-danger cursor-pointer"
-                role="menuitem"
-              >
-                <LogOut className="w-4 h-4 text-danger-hover shrink-0" />
-                <span>{t("userMenu.logout")}</span>
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        {/* Logout */}
+        <div className="py-0.5">
+          <button
+            onClick={() => {
+              setIsOpen(false);
+              handleLogout();
+            }}
+            className="w-full text-left px-4 py-2 min-h-9 text-xs font-medium hover:bg-danger-surface/20 flex items-center gap-3 transition-colors text-danger-hover hover:text-danger cursor-pointer"
+            role="menuitem"
+          >
+            <LogOut className="w-4 h-4 text-danger-hover shrink-0" />
+            <span>{t("userMenu.logout")}</span>
+          </button>
+        </div>
+      </TopbarMenuPortal>
     </div>
   );
 };

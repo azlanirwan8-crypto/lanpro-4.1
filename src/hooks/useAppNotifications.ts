@@ -32,9 +32,7 @@ export const useAppNotifications = ({ userId, currentUserId }: UseAppNotificatio
     try {
       const data = await apiRequest(`/api/users/${effectiveUserId}/notifications`);
       if (data.status === "success") {
-        setNotifications(
-          data.data.map((d: any) => ({ ...d, read: d.isRead === 1 || d.read }))
-        );
+        setNotifications(data.data.map((d: any) => ({ ...d, read: d.isRead === 1 || d.read })));
       }
     } catch (error: any) {
       if (isNetworkOrAuthError(error)) {
@@ -60,23 +58,8 @@ export const useAppNotifications = ({ userId, currentUserId }: UseAppNotificatio
     };
   }, [currentUserId, userId]);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        notificationsRef.current &&
-        !notificationsRef.current.contains(event.target as Node)
-      ) {
-        setIsNotificationsOpen(false);
-      }
-    }
-    if (isNotificationsOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isNotificationsOpen]);
-
+  // #672 — klik-di-luar panel notifikasi ditangani TopbarMenuPortal (yang
+  // mengecek ref pemicu DAN ref panel); ref lama kini hanya jangkar posisi portal.
   return {
     notifications,
     setNotifications,

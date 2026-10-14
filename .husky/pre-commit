@@ -49,6 +49,12 @@ npm run audit:label || exit 1
 # GitHub di dalam `if:`. Jadi aturannya ditegakkan sendiri, di sini.
 npm run audit:workflow || exit 1
 
+# Item #673 — tangga z (#729). Setiap angka z di src adalah keputusan:
+# bar 40, menu portaled 44, scrim 45, modal 50, kepala tabel 30. Sebelum
+# gerbang ini, `z-[37]` atau `z-[999]` baru di berkas mana pun tidak dilihat
+# siapa pun. Nilai dibekukan, jumlah per berkas hanya boleh menyusut.
+npm run audit:z || exit 1
+
 # CATATAN. Ketiga gerbang di atas TIDAK membuktikan aplikasinya benar.
 # `npm test` dan `npm run build` sengaja TIDAK dijalankan di sini agar commit
 # tidak berubah jadi menit-menitan — keduanya tetap WAJIB sebelum merge ke

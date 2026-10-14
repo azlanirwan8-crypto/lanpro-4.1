@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { MapPin, ExternalLink } from "lucide-react";
+import { TopbarMenuPortal } from "../ui/TopbarMenuPortal";
 
 export interface WebAppItem {
   id: string;
@@ -37,23 +38,8 @@ export const WebAppsDropdown: React.FC<WebAppsDropdownProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Close when clicking outside
-  useEffect(() => {
-    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener("mousedown", handlePointerDown);
-      document.addEventListener("touchstart", handlePointerDown);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("touchstart", handlePointerDown);
-    };
-  }, [isOpen]);
+  // #672 — klik-di-luar dan posisi panel dipindah ke TopbarMenuPortal (panel
+  // di-portal ke document.body); yang tinggal di sini hanya Escape.
 
   // Close on Escape key
   useEffect(() => {
@@ -95,51 +81,50 @@ export const WebAppsDropdown: React.FC<WebAppsDropdownProps> = ({
         </svg>
       </button>
 
-      {isOpen && (
-        <div
-          className="absolute right-0 top-full mt-2 z-50 w-72 rounded-xl border border-border-subtle bg-surface shadow-soft-lg p-3 animate-in fade-in zoom-in-95 duration-150"
-          role="menu"
-          aria-orientation="vertical"
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-1 pb-2.5 mb-2 border-b border-border-subtle">
-            <span className="text-xs font-semibold text-content-strong">
-              {t("appShell.webApps", "Web Apps")}
-            </span>
-            <span className="text-[10px] font-medium text-content-muted bg-surface-sunken px-1.5 py-0.5 rounded">
-              {apps.length}
-            </span>
-          </div>
-
-          {/* Grid Aplikasi */}
-          <div className="grid grid-cols-1 gap-1.5">
-            {apps.map((app) => (
-              <a
-                key={app.id}
-                href={app.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setIsOpen(false)}
-                className="group flex items-center gap-3 p-2 rounded-lg hover:bg-surface-sunken transition-all text-content-body hover:text-content-strong text-left border border-transparent hover:border-border-subtle"
-                role="menuitem"
-              >
-                <div className="shrink-0">{app.icon}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-semibold truncate text-content-strong group-hover:text-primary transition-colors">
-                      {app.name}
-                    </span>
-                    <ExternalLink className="w-3 h-3 text-content-muted opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-                  </div>
-                  {app.description && (
-                    <p className="text-[11px] text-content-muted truncate">{app.description}</p>
-                  )}
-                </div>
-              </a>
-            ))}
-          </div>
+      <TopbarMenuPortal
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        triggerRef={containerRef}
+        className="z-[44] w-72 rounded-xl border border-border-subtle bg-surface shadow-soft-lg p-3 animate-in fade-in zoom-in-95 duration-150"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-1 pb-2.5 mb-2 border-b border-border-subtle">
+          <span className="text-xs font-semibold text-content-strong">
+            {t("appShell.webApps", "Web Apps")}
+          </span>
+          <span className="text-[10px] font-medium text-content-muted bg-surface-sunken px-1.5 py-0.5 rounded">
+            {apps.length}
+          </span>
         </div>
-      )}
+
+        {/* Grid Aplikasi */}
+        <div className="grid grid-cols-1 gap-1.5">
+          {apps.map((app) => (
+            <a
+              key={app.id}
+              href={app.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setIsOpen(false)}
+              className="group flex items-center gap-3 p-2 rounded-lg hover:bg-surface-sunken transition-all text-content-body hover:text-content-strong text-left border border-transparent hover:border-border-subtle"
+              role="menuitem"
+            >
+              <div className="shrink-0">{app.icon}</div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-semibold truncate text-content-strong group-hover:text-primary transition-colors">
+                    {app.name}
+                  </span>
+                  <ExternalLink className="w-3 h-3 text-content-muted opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                </div>
+                {app.description && (
+                  <p className="text-[11px] text-content-muted truncate">{app.description}</p>
+                )}
+              </div>
+            </a>
+          ))}
+        </div>
+      </TopbarMenuPortal>
     </div>
   );
 };

@@ -39,6 +39,7 @@
     "audit:logika": "node scripts/validate/audit-logika.cjs",
     "audit:radius": "node scripts/validate/audit-radius.cjs",
     "audit:label": "node scripts/validate/audit-label.cjs",
+    "audit:z": "node scripts/validate/audit-z.cjs",
     "openapi:generate": "tsx scripts/generate-openapi.ts",
     "test:load": "node scripts/test/load-baseline-322.cjs",
     "sapu:teks": "node scripts/validate/sapu-teks-ui.cjs"

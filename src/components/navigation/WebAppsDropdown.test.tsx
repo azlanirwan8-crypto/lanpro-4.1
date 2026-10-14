@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { WebAppsDropdown } from "./WebAppsDropdown";
 
 describe("WebAppsDropdown", () => {
@@ -10,7 +10,7 @@ describe("WebAppsDropdown", () => {
     expect(trigger).toHaveAttribute("aria-expanded", "false");
   });
 
-  it("membuka dan menutup dropdown saat trigger diklik", () => {
+  it("membuka dan menutup dropdown saat trigger diklik", async () => {
     render(<WebAppsDropdown />);
     const trigger = screen.getByRole("button", { name: /web apps/i });
 
@@ -24,13 +24,14 @@ describe("WebAppsDropdown", () => {
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
 
-    // Klik lagi untuk menutup
+    // Klik lagi untuk menutup — panel #672 menutup dengan animasi keluar
+    // (AnimatePresence di TopbarMenuPortal), jadi kepergiannya ditunggu.
     fireEvent.click(trigger);
     expect(trigger).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByText("Maps Cabang")).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText("Maps Cabang")).not.toBeInTheDocument());
   });
 
-  it("menutup dropdown saat menekan tombol Escape", () => {
+  it("menutup dropdown saat menekan tombol Escape", async () => {
     render(<WebAppsDropdown />);
     const trigger = screen.getByRole("button", { name: /web apps/i });
 
@@ -38,6 +39,6 @@ describe("WebAppsDropdown", () => {
     expect(screen.getByText("Maps Cabang")).toBeInTheDocument();
 
     fireEvent.keyDown(window, { key: "Escape" });
-    expect(screen.queryByText("Maps Cabang")).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText("Maps Cabang")).not.toBeInTheDocument());
   });
 });
