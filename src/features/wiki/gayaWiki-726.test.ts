@@ -20,6 +20,17 @@
  *
  * Test ini MEMBACA SUMBER. jsdom tidak menghitung layout, jadi yang dikunci
  * adalah kelasnya, bukan tampilannya.
+ *
+ * Verifikasi visual 14 Okt (pemegang dua tangkapan layar daftar + rincian):
+ * chip kategori "BUSINESS REQUIREMENTS DOCUMENT (BRD)" terlihat melipat tiga
+ * baris di dalam sel, dan baris tabel ikut tiga tinggi. Penyebabnya bukan
+ * keputusan #649 — sel judul memang sengaja boleh melipat — melainkan chip
+ * (komponen `LabelChip`) tidak pernah menyatakan perilaku barisnya, dan kolom
+ * `w-44` terlalu sempit untuk label terpanjang kosakata `jenis_dokumen`.
+ * Perbaikannya: chip kategori dan tombol nama berkas dipaksa SATU baris di call
+ * site tabel ini saja (`LabelChip` dipakai 10+ layar lain; mengubah komponennya
+ * global = churn di luar otoritas item), wadah `overflow-x-auto` menyerap
+ * kelebaran kolom. Dua test di bawah mengunci bentuk baru ini.
  */
 import { readdirSync, readFileSync } from "fs";
 import { join } from "path";
@@ -84,7 +95,17 @@ describe("data tampil penuh di tabel DOCUMENTATION (#645 -> #726)", () => {
   it("sel yang melebar menyatakan sendiri izin berganti barisnya (#649)", () => {
     const s = isi(DAFTAR);
     expect(s).toMatch(/max-w-\[320px\] whitespace-normal break-words/);
-    expect(s).toMatch(/<span className="max-w-\[220px\] whitespace-normal break-words">/);
+  });
+
+  it("chip kategori dan nama berkas SATU baris (verifikasi visual 14 Okt)", () => {
+    const s = isi(DAFTAR);
+    // Chip kategori: kosakata terkendali — nowrap di call site tabel, kolom
+    // melebar, wadah overflow-x-auto menyerap. Bukan di komponen LabelChip.
+    const chipTabel = s.slice(s.indexOf("<LabelChip"), s.indexOf("/>", s.indexOf("<LabelChip")));
+    expect(chipTabel).toContain('className="whitespace-nowrap"');
+    // Tombol unduh berkas: satu baris penuh, span pembatas/pemotongnya cabut.
+    expect(s).toMatch(/shadow-2xs whitespace-nowrap text-left/);
+    expect(s).not.toContain("max-w-[220px]");
   });
 
   it("kartu mobile ikut tidak memotong", () => {

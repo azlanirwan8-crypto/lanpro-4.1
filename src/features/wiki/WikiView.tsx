@@ -1063,23 +1063,26 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           <div title={doc.title}>{doc.title}</div>
                         </td>
                         <td className="py-2.5 px-4">
+                          {/* #726 verifikasi visual — chip kategori SATU baris: label
+                              jenis_dokumen adalah kosakata terkendali dan wadah tabel
+                              sudah overflow-x-auto, jadi kolom melebar mengikuti isi
+                              alih-alih melipat chip jadi tiga tinggi. */}
                           <LabelChip
                             kelompok="jenis_dokumen"
                             nilai={doc.type}
                             kosong={t("wiki.uncategorized")}
+                            className="whitespace-nowrap"
                           />
                         </td>
                         <td className="py-2.5 px-4" onClick={(e) => e.stopPropagation()}>
                           {doc.fileName ? (
                             <button
                               onClick={() => handleDownload(doc.id, doc.fileName || undefined)}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-success/10 hover:bg-success/15 text-success-text border border-success/30 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs whitespace-normal break-words text-left"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-success/10 hover:bg-success/15 text-success-text border border-success/30 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs whitespace-nowrap text-left"
                               title={t("meetings.clickToDownload")}
                             >
                               <Download className="w-3.5 h-3.5 shrink-0 text-success group-hover/file:scale-110 transition-transform" />
-                              <span className="max-w-[220px] whitespace-normal break-words">
-                                {doc.fileName || t("wiki.attachment")}
-                              </span>
+                              {doc.fileName || t("wiki.attachment")}
                             </button>
                           ) : (
                             <span className="text-content-subtle italic text-xs">—</span>
