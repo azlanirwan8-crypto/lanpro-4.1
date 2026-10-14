@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Zap, Search, Target, LayoutGrid, Filter, Plus } from "lucide-react";
 import { Task, MasterData } from "../../../types";
 import { StyledDropdown } from "../../../components/ui/CommonComponents";
+import { getAllDescendants, getTaskDepth } from "../../../lib/utils";
 
 interface BacklogSectionProps {
   tasks: Task[];
@@ -29,6 +30,8 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
   // epik yang dirender (e × n). Pada 600 backlog dengan 40 epik itu ±24.000
   // iterasi per render, dan render terjadi setiap kali satu karakter diketik di
   // kotak pencarian atau satu kartu diseret.
+  // UPDATE: Sekarang mengumpulkan SEMUA descendant secara rekursif (bukan hanya direct children)
+  // untuk menampilkan hierarki sub-task bertingkat lengkap.
   const { filteredBacklogTasks, epics, kelompok } = React.useMemo(() => {
     const backlog = tasks.filter((t) => !t.sprintId && (t.type || "").toLowerCase() !== "epic");
     const kata = search.toLowerCase();
@@ -40,25 +43,45 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
       return true;
     });
 
-    const peta = new Map<string, Task[]>();
-    const dorong = (kunci: string, t: Task) => {
+    // Kumpulkan semua epic
+    const epicsList = tasks.filter((t) => (t.type || "").toLowerCase() === "epic");
+
+    // Untuk setiap epic, kumpulkan SEMUA descendant (bukan hanya direct children)
+    const peta = new Map<string, { task: Task; depth: number }[]>();
+
+    const dorong = (kunci: string, task: Task, depth: number) => {
       const wadah = peta.get(kunci);
-      if (wadah) wadah.push(t);
-      else peta.set(kunci, [t]);
+      if (wadah) wadah.push({ task, depth });
+      else peta.set(kunci, [{ task, depth }]);
     };
-    tersaring.forEach((t) => {
-      if (t.parentId) dorong(t.parentId, t);
-      else if ((t.type || "").toLowerCase() !== "epic") dorong("standalone", t);
+
+    // Proses setiap epic: kumpulkan semua descendant
+    epicsList.forEach((epic) => {
+      const allDescendants = getAllDescendants(epic.id, tasks);
+      // Filter hanya yang ada di backlog (tidak di sprint)
+      const backlogDescendants = allDescendants.filter((t) => !t.sprintId);
+
+      backlogDescendants.forEach((descendant) => {
+        const depth = getTaskDepth(descendant, tasks);
+        dorong(epic.id, descendant, depth);
+      });
     });
+
+    // Standalone tasks (tanpa parent dan bukan epic)
+    const standaloneTasks = tersaring.filter(
+      (t) => !t.parentId && (t.type || "").toLowerCase() !== "epic"
+    );
+    standaloneTasks.forEach((t) => dorong("standalone", t, 0));
 
     return {
       filteredBacklogTasks: tersaring,
-      epics: tasks.filter((t) => (t.type || "").toLowerCase() === "epic"),
+      epics: epicsList,
       kelompok: peta,
     };
   }, [tasks, search, priorityFilter]);
 
-  const getTasksForParent = (parentId: string | null) => kelompok.get(parentId ?? "") ?? [];
+  const getTasksForParent = (parentId: string | null) =>
+    kelompok.get(parentId ?? "") ?? [];
 
   // #689 butir (g) — "backlog kosong" dan "tidak ada yang cocok" adalah dua
   // kabar yang berbeda; yang pertama berarti tidak ada kerja, yang kedua berarti
@@ -142,11 +165,31 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
                 {items.length}
               </div>
             </div>,
-            ...items.map((task) => {
+            ...items.map(({ task, depth }) => {
               const dndIndex = _draggablesRenderedCount++;
+              // Indentasi bertingkat: 8px per level depth
+              const indentPx = depth * 8;
+              const borderColor =
+                depth === 1
+                  ? "rgb(var(--color-primary) / 0.4)"
+                  : depth === 2
+                    ? "rgb(var(--color-primary) / 0.25)"
+                    : "rgb(var(--color-primary) / 0.15)";
+
               return (
-                <div key={task.id} className="mb-2 pl-2 relative border-l-2 border-primary/40">
+                <div
+                  key={task.id}
+                  className="mb-2 relative"
+                  style={{
+                    paddingLeft: `${indentPx + 8}px`,
+                    borderLeft: depth > 0 ? `2px solid ${borderColor}` : undefined,
+                  }}
+                >
                   {renderDraggableTask(task, dndIndex, "card")}
+                  {/* Dot indicator untuk sub-task level 2+ */}
+                  {depth >= 2 && (
+                    <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-primary/40" />
+                  )}
                 </div>
               );
             }),
@@ -166,10 +209,20 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
                 {items.length}
               </div>
             </div>,
-            ...items.map((task) => {
+            ...items.map(({ task, depth }) => {
               const dndIndex = _draggablesRenderedCount++;
+              const indentPx = depth * 8;
+
               return (
-                <div key={task.id} className="mb-2 pl-2 relative border-l-2 border-primary/40">
+                <div
+                  key={task.id}
+                  className="mb-2 relative"
+                  style={{
+                    paddingLeft: `${indentPx + 8}px`,
+                    borderLeft:
+                      depth > 0 ? "2px solid rgb(var(--color-primary) / 0.4)" : undefined,
+                  }}
+                >
                   {renderDraggableTask(task, dndIndex, "card")}
                 </div>
               );

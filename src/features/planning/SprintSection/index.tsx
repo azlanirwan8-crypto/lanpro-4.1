@@ -15,7 +15,7 @@ import {
   MoreVertical,
 } from "lucide-react";
 import { format } from "date-fns";
-import { cn, ensureDate } from "../../../lib/utils";
+import { cn, ensureDate, getAllDescendants, getTaskDepth } from "../../../lib/utils";
 import { Task, Sprint, MasterData } from "../../../types";
 import { statusSelesai } from "../../../lib/statusSelesai";
 import { Droppable as _Droppable } from "@hello-pangea/dnd";
@@ -351,11 +351,23 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                           );
 
                           const getSprintTasksForParent = (parentId: string | null) => {
-                            if (parentId === "standalone")
-                              return sprintTasks.filter(
-                                (t) => !t.parentId && t.type?.toLowerCase() !== "epic"
-                              );
-                            return sprintTasks.filter((t) => t.parentId === parentId);
+                            if (parentId === "standalone") {
+                              // Standalone: tasks tanpa parent dan bukan epic
+                              return sprintTasks
+                                .filter((t) => !t.parentId && t.type?.toLowerCase() !== "epic")
+                                .map((t) => ({ task: t, depth: 0 }));
+                            }
+
+                            // Untuk epic/parent: kumpulkan SEMUA descendant secara rekursif
+                            const allDescendants = getAllDescendants(parentId, tasks);
+                            const sprintDescendants = allDescendants.filter((t) =>
+                              sprintTasks.some((st) => st.id === t.id)
+                            );
+
+                            return sprintDescendants.map((t) => ({
+                              task: t,
+                              depth: getTaskDepth(t, tasks),
+                            }));
                           };
 
                           let _draggablesRenderedCount = 0;
@@ -400,14 +412,30 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                           {items.length}
                                         </div>
                                       </div>,
-                                      ...items.map((task) => {
+                                      ...items.map(({ task, depth }) => {
                                         const dndIndex = _draggablesRenderedCount++;
+                                        const indentPx = depth * 8;
+                                        const borderColor =
+                                          depth === 1
+                                            ? "rgb(var(--color-primary) / 0.4)"
+                                            : depth === 2
+                                              ? "rgb(var(--color-primary) / 0.25)"
+                                              : "rgb(var(--color-primary) / 0.15)";
+
                                         return (
                                           <div
                                             key={task.id}
-                                            className="mb-2 max-w-full overflow-hidden"
+                                            className="mb-2 max-w-full overflow-hidden relative"
+                                            style={{
+                                              paddingLeft: `${indentPx}px`,
+                                              borderLeft:
+                                                depth > 0 ? `2px solid ${borderColor}` : undefined,
+                                            }}
                                           >
                                             {renderDraggableTask(task, dndIndex, "row")}
+                                            {depth >= 2 && (
+                                              <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-primary/40" />
+                                            )}
                                           </div>
                                         );
                                       }),
@@ -432,12 +460,21 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                           {items.length}
                                         </div>
                                       </div>,
-                                      ...items.map((task) => {
+                                      ...items.map(({ task, depth }) => {
                                         const dndIndex = _draggablesRenderedCount++;
+                                        const indentPx = depth * 8;
+
                                         return (
                                           <div
                                             key={task.id}
-                                            className="mb-2 max-w-full overflow-hidden"
+                                            className="mb-2 max-w-full overflow-hidden relative"
+                                            style={{
+                                              paddingLeft: `${indentPx}px`,
+                                              borderLeft:
+                                                depth > 0
+                                                  ? "2px solid rgb(var(--color-primary) / 0.4)"
+                                                  : undefined,
+                                            }}
                                           >
                                             {renderDraggableTask(task, dndIndex, "row")}
                                           </div>

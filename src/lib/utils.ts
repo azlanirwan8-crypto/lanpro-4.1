@@ -1,5 +1,6 @@
 import i18n from "../i18n";
 import { format } from "date-fns";
+import { Task } from "../types";
 
 export const cn = (...classes: any[]) => classes.filter(Boolean).join(" ");
 
@@ -14,6 +15,38 @@ export const ensureDate = (dateValue: any): Date => {
   }
   const d = new Date(dateValue);
   return isNaN(d.getTime()) ? new Date() : d;
+};
+
+/**
+ * Mengumpulkan semua descendant dari sebuah parent task secara rekursif.
+ * @param parentId - ID dari parent task
+ * @param allTasks - Seluruh array tasks yang tersedia
+ * @returns Array berisi semua descendant (direct + nested)
+ */
+export const getAllDescendants = (parentId: string, allTasks: Task[]): Task[] => {
+  const directChildren = allTasks.filter((t) => t.parentId === parentId);
+  let allDescendants: Task[] = [...directChildren];
+
+  for (const child of directChildren) {
+    allDescendants = [...allDescendants, ...getAllDescendants(child.id, allTasks)];
+  }
+
+  return allDescendants;
+};
+
+/**
+ * Menghitung kedalaman hierarki sebuah task.
+ * @param task - Task yang akan dihitung depth-nya
+ * @param allTasks - Seluruh array tasks untuk mencari parent
+ * @returns Depth level (0 = standalone, 1 = direct child, dst)
+ */
+export const getTaskDepth = (task: Task, allTasks: Task[]): number => {
+  if (!task.parentId) return 0;
+
+  const parent = allTasks.find((t) => t.id === task.parentId);
+  if (!parent) return 0;
+
+  return 1 + getTaskDepth(parent, allTasks);
 };
 
 export const safeFormat = (dateValue: any, formatStr: string, fallback: string = "-") => {
