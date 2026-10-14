@@ -7,14 +7,13 @@ import {
   ChevronRight,
   Edit2,
   Trash2,
-  Zap,
-  Target,
   CheckCircle2,
   Rocket,
   Star,
   PieChart,
   MoreVertical,
 } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { format } from "date-fns";
 import { cn, ensureDate, getAllDescendants, getTaskDepth } from "../../../lib/utils";
 import { Task, Sprint, MasterData } from "../../../types";
@@ -72,6 +71,35 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
 
   const isExpanded = (sprintId: string, parentId: string) => {
     return expandedParents[sprintId]?.has(parentId) || false;
+  };
+
+  // Helper untuk mendapatkan icon dari MasterData berdasarkan type task
+  const getIconForTaskType = (taskType: string | undefined, masterData: MasterData[]) => {
+    if (!taskType) return null;
+    
+    const typeData = masterData.find(
+      (m) => m.type.toLowerCase() === "issue_type" && m.label.toLowerCase() === taskType.toLowerCase()
+    );
+    
+    if (typeData?.icon) {
+      const IconComponent = (LucideIcons as any)[typeData.icon];
+      if (IconComponent) {
+        return IconComponent;
+      }
+    }
+    
+    if (taskType.toLowerCase() === "epic") return LucideIcons.Zap;
+    return LucideIcons.Target;
+  };
+
+  const getColorForTaskType = (taskType: string | undefined, masterData: MasterData[]) => {
+    if (!taskType) return "text-content-muted";
+    
+    const typeData = masterData.find(
+      (m) => m.type.toLowerCase() === "issue_type" && m.label.toLowerCase() === taskType.toLowerCase()
+    );
+    
+    return typeData?.color || "text-content-muted";
   };
 
   return (
@@ -424,6 +452,8 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                     if (items.length === 0) return [];
                                     
                                     const epicExpanded = isExpanded(sprint.id, `epic-${epic.id}`);
+                                    const EpicIcon = getIconForTaskType("epic", masterData);
+                                    const epicColor = getColorForTaskType("epic", masterData);
                                     
                                     return [
                                       <div
@@ -433,16 +463,16 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                       >
                                         <div className="flex items-center gap-2">
                                           {epicExpanded ? (
-                                            <ChevronDown className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                                            <ChevronDown className={`w-3.5 h-3.5 shrink-0 ${epicColor}`} />
                                           ) : (
-                                            <ChevronRight className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                                            <ChevronRight className={`w-3.5 h-3.5 shrink-0 ${epicColor}`} />
                                           )}
-                                          <Zap className="w-3.5 h-3.5 text-purple-600" />
-                                          <span className="text-xs font-normal text-purple-700 leading-none">
+                                          {EpicIcon && <EpicIcon className={`w-3.5 h-3.5 ${epicColor}`} />}
+                                          <span className={`text-xs font-normal leading-none ${epicColor}`}>
                                             {epic.title}
                                           </span>
                                         </div>
-                                        <div className="text-[10px] font-normal text-purple-600 bg-surface border border-purple-500/30 px-2 py-0.2 rounded-md">
+                                        <div className={`text-[10px] font-normal ${epicColor} bg-surface border border-purple-500/30 px-2 py-0.2 rounded-md`}>
                                           {items.length}
                                         </div>
                                       </div>,
@@ -481,6 +511,8 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                     if (items.length === 0) return [];
                                     
                                     const standaloneExpanded = isExpanded(sprint.id, "standalone");
+                                    const StandaloneIcon = getIconForTaskType("task", masterData);
+                                    const standaloneColor = "text-content-muted";
                                     
                                     return [
                                       <div
@@ -490,11 +522,11 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                       >
                                         <div className="flex items-center gap-2">
                                           {standaloneExpanded ? (
-                                            <ChevronDown className="w-3.5 h-3.5 text-content-muted shrink-0" />
+                                            <ChevronDown className={`w-3.5 h-3.5 shrink-0 ${standaloneColor}`} />
                                           ) : (
-                                            <ChevronRight className="w-3.5 h-3.5 text-content-muted shrink-0" />
+                                            <ChevronRight className={`w-3.5 h-3.5 shrink-0 ${standaloneColor}`} />
                                           )}
-                                          <Target className="w-3.5 h-3.5 text-content-muted" />
+                                          {StandaloneIcon && <StandaloneIcon className={`w-3.5 h-3.5 ${standaloneColor}`} />}
                                           <span className="text-xs font-normal text-content-secondary leading-none">
                                             {t("planning.standaloneTasks")}
                                           </span>

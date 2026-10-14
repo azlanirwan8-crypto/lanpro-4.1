@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
-import { Zap, Search, Target, LayoutGrid, Filter, Plus, ChevronRight, ChevronDown } from "lucide-react";
+import { Search, LayoutGrid, Filter, Plus, ChevronRight, ChevronDown } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { Task, MasterData } from "../../../types";
 import { StyledDropdown } from "../../../components/ui/CommonComponents";
 import { getAllDescendants, getTaskDepth } from "../../../lib/utils";
@@ -36,6 +37,39 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
       }
       return next;
     });
+  };
+
+  // Helper untuk mendapatkan icon dari MasterData berdasarkan type task
+  const getIconForTaskType = (taskType: string | undefined, masterData: MasterData[]) => {
+    if (!taskType) return null;
+    
+    // Cari di master data yang tipenya "issue_type" atau sejenisnya
+    const typeData = masterData.find(
+      (m) => m.type.toLowerCase() === "issue_type" && m.label.toLowerCase() === taskType.toLowerCase()
+    );
+    
+    if (typeData?.icon) {
+      // Convert icon name string ke component Lucide
+      const IconComponent = (LucideIcons as any)[typeData.icon];
+      if (IconComponent) {
+        return IconComponent;
+      }
+    }
+    
+    // Fallback: gunakan icon default berdasarkan type
+    if (taskType.toLowerCase() === "epic") return LucideIcons.Zap;
+    return LucideIcons.Target;
+  };
+
+  // Helper untuk mendapatkan warna dari MasterData
+  const getColorForTaskType = (taskType: string | undefined, masterData: MasterData[]) => {
+    if (!taskType) return "text-content-muted";
+    
+    const typeData = masterData.find(
+      (m) => m.type.toLowerCase() === "issue_type" && m.label.toLowerCase() === taskType.toLowerCase()
+    );
+    
+    return typeData?.color || "text-content-muted";
   };
 
   // #689 butir (g) — satu kali jalan, bukan saringan berulang per baris.
@@ -173,6 +207,8 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
           if (items.length === 0) return [];
           
           const isExpanded = expandedParents.has(`epic-${epic.id}`);
+          const EpicIcon = getIconForTaskType("epic", masterData);
+          const epicColor = getColorForTaskType("epic", masterData);
           
           // Kelompokkan task berdasarkan direct parent untuk collapsible
           const directChildrenMap = new Map<string, { task: Task; depth: number }[]>();
@@ -191,13 +227,13 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
               onClick={() => toggleExpand(`epic-${epic.id}`)}
             >
               {isExpanded ? (
-                <ChevronDown className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                <ChevronDown className={`w-3.5 h-3.5 shrink-0 ${epicColor}`} />
               ) : (
-                <ChevronRight className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                <ChevronRight className={`w-3.5 h-3.5 shrink-0 ${epicColor}`} />
               )}
-              <Zap className="w-3.5 h-3.5 text-purple-600" />
-              <span className="text-xs font-normal text-purple-700 leading-none">{epic.title}</span>
-              <div className="ml-auto text-[10px] leading-none font-normal text-purple-600 bg-purple-500/10 px-2 py-0.2 rounded-md border border-purple-500/30">
+              {EpicIcon && <EpicIcon className={`w-3.5 h-3.5 ${epicColor}`} />}
+              <span className={`text-xs font-normal leading-none ${epicColor}`}>{epic.title}</span>
+              <div className={`ml-auto text-[10px] leading-none font-normal ${epicColor} bg-purple-500/10 px-2 py-0.2 rounded-md border border-purple-500/30`}>
                 {items.length}
               </div>
             </div>,
@@ -236,6 +272,8 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
           if (items.length === 0) return [];
           
           const isExpanded = expandedParents.has("standalone");
+          const StandaloneIcon = getIconForTaskType("task", masterData);
+          const standaloneColor = "text-content-muted";
 
           return [
             <div 
@@ -244,11 +282,11 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
               onClick={() => toggleExpand("standalone")}
             >
               {isExpanded ? (
-                <ChevronDown className="w-3.5 h-3.5 text-content-muted shrink-0" />
+                <ChevronDown className={`w-3.5 h-3.5 shrink-0 ${standaloneColor}`} />
               ) : (
-                <ChevronRight className="w-3.5 h-3.5 text-content-muted shrink-0" />
+                <ChevronRight className={`w-3.5 h-3.5 shrink-0 ${standaloneColor}`} />
               )}
-              <Target className="w-3.5 h-3.5 text-content-muted" />
+              {StandaloneIcon && <StandaloneIcon className={`w-3.5 h-3.5 ${standaloneColor}`} />}
               <span className="text-xs font-normal text-content-secondary leading-none">
                 {t("planning.standaloneBacklog")}
               </span>
