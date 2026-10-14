@@ -401,7 +401,73 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                             }));
                           };
 
+                          const sprintIds = new Set(sprintTasks.map((t) => t.id));
+                          const anakPeta = new Map<string, Task[]>();
+                          for (const t of sprintTasks) {
+                            if (!t.parentId || (t.type || "").toLowerCase() === "epic") continue;
+                            const wadah = anakPeta.get(t.parentId);
+                            if (wadah) wadah.push(t);
+                            else anakPeta.set(t.parentId, [t]);
+                          }
+
                           let _draggablesRenderedCount = 0;
+
+                          const garisTepi = (depth: number) =>
+                            depth === 1
+                              ? "rgb(var(--color-primary) / 0.4)"
+                              : depth === 2
+                                ? "rgb(var(--color-primary) / 0.25)"
+                                : "rgb(var(--color-primary) / 0.15)";
+
+                          // Pohon rekursif: tiap task ber-anak mendapat chevron
+                          // sendiri sehingga sub-sub bisa dibuka/tutup per induk.
+                          // Chevron DI LUAR Draggable agar toggle tidak mulai drag.
+                          const renderPohon = (task: Task, depth: number): React.ReactNode => {
+                            const anak = anakPeta.get(task.id) ?? [];
+                            const kunci = `node-${task.id}`;
+                            const terbuka = indukTerbuka(sprint.id, kunci);
+                            const dndIndex = _draggablesRenderedCount++;
+
+                            return (
+                              <div key={task.id}>
+                                <div
+                                  className="mb-2 max-w-full overflow-hidden relative flex items-center gap-1"
+                                  style={{
+                                    paddingLeft: `${depth * 8}px`,
+                                    borderLeft:
+                                      depth > 0 ? `2px solid ${garisTepi(depth)}` : undefined,
+                                  }}
+                                >
+                                  {anak.length > 0 ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleExpand(sprint.id, kunci)}
+                                      className="w-4 h-4 shrink-0 flex items-center justify-center text-content-muted hover:text-content-strong cursor-pointer rounded-sm"
+                                    >
+                                      {terbuka ? (
+                                        <ChevronDown className="w-3.5 h-3.5" aria-hidden />
+                                      ) : (
+                                        <ChevronRight className="w-3.5 h-3.5" aria-hidden />
+                                      )}
+                                    </button>
+                                  ) : depth >= 2 ? (
+                                    <span
+                                      className="w-4 shrink-0 flex items-center justify-center"
+                                      aria-hidden
+                                    >
+                                      <span className="w-1 h-1 rounded-full bg-primary/40" />
+                                    </span>
+                                  ) : (
+                                    <span className="w-4 shrink-0" aria-hidden />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    {renderDraggableTask(task, dndIndex, "row")}
+                                  </div>
+                                </div>
+                                {terbuka && anak.map((a) => renderPohon(a, depth + 1))}
+                              </div>
+                            );
+                          };
 
                           return (
                             <div
@@ -472,35 +538,13 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                         </div>
                                       </div>,
                                       ...(epicExpanded
-                                        ? items.map(({ task, depth }) => {
-                                            const dndIndex = _draggablesRenderedCount++;
-                                            const indentPx = depth * 8;
-                                            const borderColor =
-                                              depth === 1
-                                                ? "rgb(var(--color-primary) / 0.4)"
-                                                : depth === 2
-                                                  ? "rgb(var(--color-primary) / 0.25)"
-                                                  : "rgb(var(--color-primary) / 0.15)";
-
-                                            return (
-                                              <div
-                                                key={task.id}
-                                                className="mb-2 max-w-full overflow-hidden relative"
-                                                style={{
-                                                  paddingLeft: `${indentPx}px`,
-                                                  borderLeft:
-                                                    depth > 0
-                                                      ? `2px solid ${borderColor}`
-                                                      : undefined,
-                                                }}
-                                              >
-                                                {renderDraggableTask(task, dndIndex, "row")}
-                                                {depth >= 2 && (
-                                                  <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-primary/40" />
-                                                )}
-                                              </div>
-                                            );
-                                          })
+                                        ? items
+                                            .filter(
+                                              (i) =>
+                                                i.task.parentId === epic.id ||
+                                                !sprintIds.has(i.task.parentId as string)
+                                            )
+                                            .map((i) => renderPohon(i.task, i.depth))
                                         : []),
                                     ];
                                   })}
@@ -546,26 +590,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                         </div>
                                       </div>,
                                       ...(standaloneExpanded
-                                        ? items.map(({ task, depth }) => {
-                                            const dndIndex = _draggablesRenderedCount++;
-                                            const indentPx = depth * 8;
-
-                                            return (
-                                              <div
-                                                key={task.id}
-                                                className="mb-2 max-w-full overflow-hidden relative"
-                                                style={{
-                                                  paddingLeft: `${indentPx}px`,
-                                                  borderLeft:
-                                                    depth > 0
-                                                      ? "2px solid rgb(var(--color-primary) / 0.4)"
-                                                      : undefined,
-                                                }}
-                                              >
-                                                {renderDraggableTask(task, dndIndex, "row")}
-                                              </div>
-                                            );
-                                          })
+                                        ? items.map((i) => renderPohon(i.task, i.depth))
                                         : []),
                                     ];
                                   })()}

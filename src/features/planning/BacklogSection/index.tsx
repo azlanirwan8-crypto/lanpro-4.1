@@ -48,7 +48,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
   // kotak pencarian atau satu kartu diseret.
   // UPDATE: Sekarang mengumpulkan SEMUA descendant secara rekursif (bukan hanya direct children)
   // untuk menampilkan hierarki sub-task bertingkat lengkap.
-  const { filteredBacklogTasks, epics, kelompok } = React.useMemo(() => {
+  const { filteredBacklogTasks, epics, kelompok, anakPeta, backlogIds } = React.useMemo(() => {
     const backlog = tasks.filter((t) => !t.sprintId && (t.type || "").toLowerCase() !== "epic");
     const kata = search.toLowerCase();
 
@@ -89,10 +89,25 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
     );
     standaloneTasks.forEach((t) => dorong("standalone", t, 0));
 
+    // Peta anak langsung (induk → anak, urutan tasks) untuk pohon rekursif:
+    // tiap task yang punya anak mendapat chevron dropdown sendiri.
+    const anakPeta = new Map<string, Task[]>();
+    const backlogIds = new Set<string>();
+    for (const t of tasks) {
+      if (t.sprintId || (t.type || "").toLowerCase() === "epic") continue;
+      backlogIds.add(t.id);
+      if (!t.parentId) continue;
+      const wadah = anakPeta.get(t.parentId);
+      if (wadah) wadah.push(t);
+      else anakPeta.set(t.parentId, [t]);
+    }
+
     return {
       filteredBacklogTasks: tersaring,
       epics: epicsList,
       kelompok: peta,
+      anakPeta,
+      backlogIds,
     };
   }, [tasks, search, priorityFilter]);
 
@@ -105,6 +120,57 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
   const adaSaringan = Boolean(search.trim()) || priorityFilter !== "All Priorities";
 
   let _draggablesRenderedCount = 0;
+
+  const garisTepi = (depth: number) =>
+    depth === 1
+      ? "rgb(var(--color-primary) / 0.4)"
+      : depth === 2
+        ? "rgb(var(--color-primary) / 0.25)"
+        : "rgb(var(--color-primary) / 0.15)";
+
+  // Pohon rekursif: setiap task yang punya anak mendapat chevron sendiri di
+  // kiri kartunya, sehingga sub-sub (dan seterusnya) bisa dibuka/tutup per
+  // induk. Chevron berada DI LUAR Draggable agar klik toggle tidak mulai drag.
+  const renderPohon = (task: Task, depth: number): React.ReactNode => {
+    const anak = anakPeta.get(task.id) ?? [];
+    const kunci = `node-${task.id}`;
+    const terbuka = !collapsedParents.has(kunci);
+    const dndIndex = _draggablesRenderedCount++;
+
+    return (
+      <div key={task.id}>
+        <div
+          className="mb-2 relative flex items-center gap-1"
+          style={{
+            paddingLeft: `${depth * 8 + 8}px`,
+            borderLeft: depth > 0 ? `2px solid ${garisTepi(depth)}` : undefined,
+          }}
+        >
+          {anak.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => toggleExpand(kunci)}
+              className="w-4 h-4 shrink-0 flex items-center justify-center text-content-muted hover:text-content-strong cursor-pointer rounded-sm"
+            >
+              {terbuka ? (
+                <ChevronDown className="w-3.5 h-3.5" aria-hidden />
+              ) : (
+                <ChevronRight className="w-3.5 h-3.5" aria-hidden />
+              )}
+            </button>
+          ) : depth >= 2 ? (
+            <span className="w-4 shrink-0 flex items-center justify-center" aria-hidden>
+              <span className="w-1 h-1 rounded-full bg-primary/40" />
+            </span>
+          ) : (
+            <span className="w-4 shrink-0" aria-hidden />
+          )}
+          <div className="flex-1 min-w-0">{renderDraggableTask(task, dndIndex, "card")}</div>
+        </div>
+        {terbuka && anak.map((a) => renderPohon(a, depth + 1))}
+      </div>
+    );
+  };
 
   return (
     <>
@@ -210,33 +276,15 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
                 {items.length}
               </div>
             </div>,
-            ...(isExpanded ? items.map(({ task, depth }) => {
-              const dndIndex = _draggablesRenderedCount++;
-              const indentPx = depth * 8;
-              const borderColor =
-                depth === 1
-                  ? "rgb(var(--color-primary) / 0.4)"
-                  : depth === 2
-                    ? "rgb(var(--color-primary) / 0.25)"
-                    : "rgb(var(--color-primary) / 0.15)";
-
-              return (
-                <div
-                  key={task.id}
-                  className="mb-2 relative"
-                  style={{
-                    paddingLeft: `${indentPx + 8}px`,
-                    borderLeft: depth > 0 ? `2px solid ${borderColor}` : undefined,
-                  }}
-                >
-                  {renderDraggableTask(task, dndIndex, "card")}
-                  {/* Dot indicator untuk sub-task level 2+ */}
-                  {depth >= 2 && (
-                    <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-primary/40" />
-                  )}
-                </div>
-              );
-            }) : []),
+            ...(isExpanded
+              ? items
+                  .filter(
+                    (i) =>
+                      i.task.parentId === epic.id ||
+                      !backlogIds.has(i.task.parentId as string)
+                  )
+                  .map((i) => renderPohon(i.task, i.depth))
+              : []),
           ];
         })}
 
@@ -266,24 +314,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
                 {items.length}
               </div>
             </div>,
-            ...(isExpanded ? items.map(({ task, depth }) => {
-              const dndIndex = _draggablesRenderedCount++;
-              const indentPx = depth * 8;
-
-              return (
-                <div
-                  key={task.id}
-                  className="mb-2 relative"
-                  style={{
-                    paddingLeft: `${indentPx + 8}px`,
-                    borderLeft:
-                      depth > 0 ? "2px solid rgb(var(--color-primary) / 0.4)" : undefined,
-                  }}
-                >
-                  {renderDraggableTask(task, dndIndex, "card")}
-                </div>
-              );
-            }) : []),
+            ...(isExpanded ? items.map((i) => renderPohon(i.task, i.depth)) : []),
           ];
         })()}
 
