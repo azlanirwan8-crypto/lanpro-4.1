@@ -11,14 +11,20 @@
  * `tingkatIsu.ts` berdiri di `src/lib` karena dipakai lebih dari satu fitur.
  *
  * KENAPA BERDIRI SENDIRI. Kolom `type` pada tugas TIDAK ditulis dari satu sumber,
- * dan keempat penulisnya tidak sepakat soal huruf besar-kecil. `hooks.ts:381` dan
- * `hooks.ts:403` menyimpan `tipeDipakai.toLowerCase()` — padahal yang dikirim
- * bilah cepat dan baris anak adalah label apa adanya (`IssueBaris-604.test.tsx:190`
- * mengirim `"Sub-task"`); `components/modals/NewTaskModal.tsx:123` memakai `id`
- * yang sudah di-lowercase; dan `AppContainer.tsx:2574` menyimpan `type` TANPA
- * dinormalkan sama sekali. Nilai lama ada yang berupa `code` master data. Satu
- * kolom karenanya memuat tiga bentuk untuk satu jenis: `"Epic"`, `"epic"`, dan
- * `code` barisnya.
+ * dan keempat penulisnya dulu tidak sepakat soal bentuk: `hooks.ts` menyimpan
+ * `tipeDipakai.toLowerCase()` padahal yang dikirim bilah cepat dan baris anak
+ * adalah label apa adanya (`"Sub-task"`); `components/modals/NewTaskModal.tsx`
+ * memakai `id` berupa label yang dilowerkan; dan `AppContainer.handleQuickCreate`
+ * menyimpan `type` TANPA dinormalkan sama sekali. Nilai lama ada yang berupa
+ * `code` master data. Satu kolom karenanya memuat tiga bentuk untuk satu jenis:
+ * `"Epic"`, `"epic"`, dan `code` barisnya.
+ *
+ * #609 menutup jalur tulis itu: keempat penulis sekarang memanggil
+ * `kunciJenisIsu()` sebelum menyimpan, jadi yang masuk database adalah `code`
+ * MasterData dalam bentuk kunci kanonik — SATU definisi untuk tulis dan baca.
+ * Baris lama dibersihkan migrasi satu arah di `src/lib/pg-migrate.ts`. Fungsi ini
+ * karenanya bukan lagi sekadar pencocok tampilan: ia adalah penerjemah tunggal
+ * label ↔ `code` (§3 AGENTS.md melarang menyimpan label).
  *
  * Filter yang membandingkan string mentah akan tampak benar pada proyek yang
  * kodenya kebetulan sama dengan labelnya, dan memulangkan KOSONG pada proyek yang
@@ -37,7 +43,13 @@ import { cariMaster } from "./warnaLabel";
 /** Nilai togel "semua jenis" — sebutan yang sama dengan sepuluh dropdown saudaranya. */
 export const SEMUA_JENIS = "All";
 
-/** Kunci kanonik sebuah nilai jenis: `code` master data bila dikenal. */
+/**
+ * Kunci kanonik sebuah nilai jenis: `code` master data bila dikenal.
+ *
+ * #609 — inilah nilai yang DISIMPAN ke `Tasks.type`, bukan hanya kunci
+ * pembanding di layar. Bentuknya `LOWER(TRIM(code))` supaya tulis, baca, dan
+ * migrasi memakai satu definisi yang sama.
+ */
 export const kunciJenisIsu = (
   masterData: MasterData[] | undefined | null,
   nilai?: string | null

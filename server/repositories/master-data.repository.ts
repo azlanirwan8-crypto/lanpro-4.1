@@ -138,12 +138,30 @@ export class MasterDataRepository {
     }
   }
 
-  async countTaskUsage(label: string): Promise<number> {
+  /**
+   * #609 — berapa task yang masih memakai baris master ini (gerbang hapus).
+   *
+   * Kolom `Tasks.type` dulu memuat LABEL yang dilowerkan dan sekarang memuat
+   * `code`; baris lama belum tentu sudah termigrasi, jadi keduanya harus
+   * terhitung. Bila tidak, gerbang "sedang digunakan" meloloskan penghapusan
+   * baris `issue_type` yang justru paling terpakai — sunyi, tanpa galat.
+   * Huruf besar-kecil dan pemisah (spasi/`-`/`_`) diabaikan, meniru `normal()`
+   * di `src/lib/warnaLabel.ts` yang dipakai pencocok di klien.
+   */
+  async countTaskUsage(label: string, kode?: string | null): Promise<number> {
+    const normal = (nilai?: string | null) =>
+      String(nilai ?? "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "");
+    const labelN = normal(label);
+    const kodeN = normal(kode) || labelN;
     const connection = await db.getConnection();
     try {
       const [taskRows]: any = await connection.query(
-        "SELECT COUNT(*) as count FROM Tasks WHERE status = ? OR priority = ? OR type = ? OR environment = ?",
-        [label, label, label, label]
+        `SELECT COUNT(*) as count FROM Tasks
+          WHERE status = ? OR priority = ? OR environment = ?
+             OR REGEXP_REPLACE(LOWER(COALESCE(type, '')), '[^a-z0-9]', '', 'g') IN (?, ?)`,
+        [label, label, label, labelN, kodeN]
       );
       return Number(taskRows?.[0]?.count || 0);
     } finally {

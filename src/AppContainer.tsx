@@ -30,6 +30,7 @@ import {
 import { hasPermission, resolveProjectRole } from "./lib/permissions";
 import { canDeleteIssue } from "./features/issues/issuePermissions";
 import { adalahWaterfall } from "./lib/methodology";
+import { kunciJenisIsu } from "./lib/jenisIsu";
 import { validateFileClient } from "./lib/fileSecurity";
 import {
   confirmDeleteAlert,
@@ -2462,6 +2463,12 @@ function AppContainer() {
     const tempId = `temp-${crypto.randomUUID()}`;
     suppressTaskDataRefresh(8000);
 
+    // #609 — yang disimpan ke database adalah `code` MasterData, bukan label
+    // yang dilowerkan. Penerjemahnya `kunciJenisIsu`, fungsi yang SAMA dengan
+    // yang dipakai jalur baca (#705/#730), supaya tulis dan baca tidak lagi
+    // punya definisi sendiri-sendiri.
+    const jenisKanonik = (kunciJenisIsu(masterData, newTaskType) || "task") as Task["type"];
+
     const payload = {
       title: newTaskTitle,
       description: newTaskDescription,
@@ -2469,7 +2476,7 @@ function AppContainer() {
       storyPoints: newTaskStoryPoints,
       projectRisk: newTaskProjectRisk,
       status: newTaskStatus || "todo",
-      type: newTaskType,
+      type: jenisKanonik,
       parentId: newTaskParentId || null,
       sprintId: newTaskSprintId || null,
       assigneeId: newTaskAssigneeId,
@@ -2572,7 +2579,10 @@ function AppContainer() {
     const activeUid = currentUser?.uid || user?.uid;
     if (!selectedProject || !title.trim() || !activeUid) return;
     const tempId = `temp-${crypto.randomUUID()}`;
-    const taskType = ((type as Task["type"]) || "task") as Task["type"];
+    // #609 — dulu `type` diteruskan apa adanya dari pemanggil; kini lewat
+    // penerjemah yang sama dengan jalur tulis lain. (Prop `handleQuickCreate`
+    // saat ini tidak punya situs pemanggil, jadi jalur ini belum terjangkau UI.)
+    const taskType = (kunciJenisIsu(masterData, type) || "task") as Task["type"];
     const placeholder: Task = {
       id: tempId,
       projectId: selectedProject.id,

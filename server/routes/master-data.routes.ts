@@ -268,7 +268,12 @@ router.delete("/api/master-data/:id", verifyGlobalAdmin, async (req, res) => {
       });
     }
 
-    const usageCount = await masterDataRepository.countTaskUsage(item.label);
+    // #609 — untuk `issue_type`, `Tasks.type` memuat `code` (baris baru) atau
+    // label yang dilowerkan (baris lama); keduanya harus ikut terhitung.
+    const usageCount = await masterDataRepository.countTaskUsage(
+      item.label,
+      item.type === "issue_type" ? item.code : null
+    );
     if (usageCount > 0) {
       return res.status(400).json({
         status: "error",

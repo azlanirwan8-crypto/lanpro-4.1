@@ -30,6 +30,7 @@ import { TaskSubtasksSection } from "./components/modal/TaskSubtasksSection";
 import { TaskCommentsSection } from "./components/modal/TaskCommentsSection";
 import { TaskDetailSidebar } from "./components/modal/TaskDetailSidebar";
 import { JUDUL_SECTION, KARTU_SECTION } from "../../components/ui/gayaForm";
+import { kunciJenisIsu } from "../../lib/jenisIsu";
 import {
   isUserReporter as isUserReporterFn,
   canDeleteIssue as canDeleteIssueFn,
@@ -233,7 +234,12 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     variant="secondary"
                     size="sm"
                     onClick={wrapSubmit("addSubtask", () =>
-                      handleQuickAddSubtask(task.id, task.type === "epic" ? "task" : "subtask")
+                      // #609 — bandingkan kunci kanonik, bukan string mentah:
+                      // baris lama ada yang menyimpan "Epic" atau "sub-task".
+                      handleQuickAddSubtask(
+                        task.id,
+                        kunciJenisIsu(masterData, task.type) === "epic" ? "task" : "subtask"
+                      )
                     )}
                     disabled={isSubmitting["addSubtask"]}
                   >

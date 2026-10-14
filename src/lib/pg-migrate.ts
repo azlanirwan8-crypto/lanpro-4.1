@@ -248,6 +248,61 @@ export async function runMigrations(pool: Pool): Promise<void> {
       ALTER TABLE "Tasks" ADD COLUMN IF NOT EXISTS "endDate" VARCHAR(50);
     `);
 
+    // #609 — SATU ARAH: label yang dilowerkan → `code` MasterData.
+    // Kolom `type` ditulis dari empat tempat yang tidak sepakat bentuk, dan yang
+    // mendarat di production adalah LABEL yang dilowerkan (`"sub-task"` dari label
+    // "Sub-task") padahal §3 AGENTS.md mewajibkan `code` (`"subtask"`). Jalur tulis
+    // sudah diperbaiki; baris lama dibersihkan di sini.
+    //
+    // Bentuk kanoniknya `LOWER(TRIM(code))` — persis `kunciJenisIsu()` yang dipakai
+    // seluruh jalur baca (#705/#730) dan seluruh jalur tulis (#609), supaya tidak
+    // ada definisi keempat. Pencocokan baris lama meniru `normal()` di
+    // `src/lib/warnaLabel.ts` (huruf kecil, semua pemisah dibuang), jadi `"Sub-task"`,
+    // `"sub-task"`, `"SUB TASK"`, dan `"subtask"` semuanya bertemu baris yang sama.
+    //
+    // Idempoten dan konvergen: `t.type <> p.kanonik` membuat baris yang sudah
+    // kanonik tidak cocok lagi, sehingga boot berikutnya tidak menulis apa pun.
+    // Baris yang cocok dengan LEBIH dari satu `code` berbeda DILEWATI (HAVING
+    // COUNT(DISTINCT) = 1) — menebak di data produksi lebih mahal daripada
+    // meninggalkan satu nilai lama. Nilai yang tidak dikenal MasterData ikut
+    // dilewati dan tetap terlihat lewat `SELECT DISTINCT type FROM "Tasks"`.
+    try {
+      const hasil609 = await client.query(`
+        WITH peta AS (
+          SELECT LOWER(TRIM(code)) AS kanonik,
+                 REGEXP_REPLACE(LOWER(TRIM(code)),  '[^a-z0-9]', '', 'g') AS kode_n,
+                 REGEXP_REPLACE(LOWER(TRIM(label)), '[^a-z0-9]', '', 'g') AS label_n
+            FROM "MasterData"
+           WHERE type = 'issue_type'
+             AND COALESCE(TRIM(code), '') <> ''
+        ),
+        cocok AS (
+          SELECT t.id AS task_id, p.kanonik
+            FROM "Tasks" t
+            JOIN peta p
+              ON REGEXP_REPLACE(LOWER(TRIM(COALESCE(t.type, ''))), '[^a-z0-9]', '', 'g')
+                 IN (p.kode_n, p.label_n)
+           WHERE COALESCE(TRIM(t.type), '') <> ''
+             AND t.type <> p.kanonik
+        ),
+        unik AS (
+          SELECT task_id, MIN(kanonik) AS kanonik
+            FROM cocok
+           GROUP BY task_id
+          HAVING COUNT(DISTINCT kanonik) = 1
+        )
+        UPDATE "Tasks" t
+           SET type = u.kanonik
+          FROM unik u
+         WHERE t.id = u.task_id
+      `);
+      if ((hasil609 as any)?.rowCount) {
+        console.log(`[PG-MIGRATE] #609 tasks.type label → code: ${hasil609.rowCount} baris`);
+      }
+    } catch (e: any) {
+      console.warn("[PG-MIGRATE] #609 tasks.type label→code warning:", e.message);
+    }
+
     // ── TaskExternalLinks ───────────────────────────────────────────────────
     await client.query(`
       CREATE TABLE IF NOT EXISTS "TaskExternalLinks" (

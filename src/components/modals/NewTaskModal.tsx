@@ -7,6 +7,7 @@ import { StyledDropdown } from "../ui/CommonComponents";
 import { LanproDatePicker } from "../ui/LanproDatePicker";
 import { validateFileClient } from "../../lib/fileSecurity";
 import { BAKU } from "../../lib/warnaLabel";
+import { kunciJenisIsu } from "../../lib/jenisIsu";
 import { enterUntukSimpan } from "../../lib/enterSimpan";
 import { MasterData, Sprint, Task, UserProfile, Project } from "../../types";
 
@@ -119,8 +120,11 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
   const issueTypeOptions = React.useMemo(() => {
     const masterTypes = masterData.filter((m) => m.type === "issue_type");
     if (masterTypes.length > 0) {
+      // #609 — `id` inilah yang berakhir di kolom `type`, jadi isinya `code`
+      // MasterData (lewat kunci kanonik yang sama dengan jalur baca), bukan
+      // label yang dilowerkan. Label tetap dipakai untuk tampilan.
       return masterTypes.map((t) => ({
-        id: t.label.toLowerCase(),
+        id: kunciJenisIsu(masterData, t.label),
         label: t.label,
         icon: t.icon,
         color: t.color,

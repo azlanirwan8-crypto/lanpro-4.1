@@ -13,7 +13,7 @@ import {
   saveSessionFilters,
   type IssueFilterSnapshot,
 } from "./lib/issueFilterSnapshot";
-import { cocokJenisIsu } from "../../lib/jenisIsu";
+import { cocokJenisIsu, kunciJenisIsu } from "../../lib/jenisIsu";
 
 export const useIssueList = (props: IssueListViewProps) => {
   const { tasks, roots, selectedProject, user, masterData, userRole } = props;
@@ -373,12 +373,17 @@ export const useIssueList = (props: IssueListViewProps) => {
     setIsCreating(true);
     const effectiveUserId = user?.uid || "guest";
     const tempId = `temp-${crypto.randomUUID()}`;
+    // #609 — pemilih mengirim LABEL MasterData apa adanya ("Sub-task"), dan dulu
+    // nilai itu hanya dilowerkan sebelum disimpan, jadi kolom `type` memuat label
+    // padahal §3 AGENTS.md mewajibkan `code`. Yang dipakai sekarang adalah kunci
+    // kanonik yang SAMA dengan jalur baca (#705/#730).
+    const taskType = kunciJenisIsu(mArr, tipeDipakai) as Task["type"];
     const placeholder: Task = {
       id: tempId,
       projectId: selectedProject.id,
       title: titleToUse,
       status: inlineAddStatus || "To Do",
-      type: tipeDipakai.toLowerCase() as Task["type"],
+      type: taskType,
       parentId: parentId || undefined,
       priority: inlineAddPriority || "Medium",
       assigneeId: inlineAddAssigneeId || undefined,
@@ -399,8 +404,6 @@ export const useIssueList = (props: IssueListViewProps) => {
     setTasks((prev) => [placeholder, ...prev.filter((t) => t.id !== tempId)]);
 
     suppressTaskDataRefresh(8000);
-
-    const taskType = tipeDipakai.toLowerCase();
 
     try {
       const response = await createTask(selectedProject.id, effectiveUserId, {
