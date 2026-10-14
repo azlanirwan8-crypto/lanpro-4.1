@@ -103,7 +103,7 @@ const nilaiKartu = (label: string) => {
 };
 
 const barisAnggota = (nama: string) => {
-  const el = screen.getByText(nama).closest(".group");
+  const el = screen.getByText(nama).closest('[data-testid="kartu-beban"]');
   if (!el) throw new Error(`baris ${nama} tidak ditemukan`);
   return el as HTMLElement;
 };
@@ -164,16 +164,17 @@ describe("panel beban per anggota", () => {
     expect(lebarBar("Budi")).toBe("0%");
   });
 
-  it("nama satu baris: dipotong elipsis, nama utuh lewat tooltip", () => {
+  it("nama anggota tidak dipotong elipsis dan tidak memakai tooltip", () => {
     pasang();
     const nama = screen.getByText("Siti Aminah");
-    expect(nama.className).toContain("truncate");
-    expect(nama.getAttribute("title")).toBe("Siti Aminah");
+    expect(nama.className).not.toContain("truncate");
+    expect(nama.getAttribute("title")).toBeNull();
   });
 
   it("track bar tetap terlihat walau isinya nol persen", () => {
     pasang();
-    const track = barisAnggota("Budi").querySelector(".group\\/bar > div");
+    const isi = barisAnggota("Budi").querySelector<HTMLElement>("[style*='width']");
+    const track = isi?.parentElement;
     expect(track?.className).toContain("bg-surface-sunken");
     expect(track?.className).toContain("border-border-subtle");
     expect(lebarBar("Budi")).toBe("0%");
@@ -184,24 +185,24 @@ describe("panel beban per anggota", () => {
     expect(screen.queryByText("Beban per anggota")).toBeNull();
   });
 
-  it("kartu anggota satu baris berukuran sama dan menggulir ke samping", () => {
+  it("kartu anggota tersusun dalam grid dua kolom yang lebarnya sama", () => {
     pasang();
     const kartu = barisAnggota("Siti Aminah");
     const deret = kartu.parentElement;
-    expect(deret?.className).toContain("overflow-x-auto");
-    expect(kartu.className).toContain("flex-1");
-    expect(kartu.className).toContain("min-w-[8.5rem]");
+    expect(deret?.className).toContain("md:grid-cols-2");
     // Semua kartu berbagi induk yang sama, jadi lebarnya sama rata.
     expect(deret?.children).toHaveLength(3);
     expect(barisAnggota("Budi").parentElement).toBe(deret);
   });
 
-  it("persentase tidak dicetak permanen — hanya gelembung hover di atas bar", () => {
+  it("persentase tercetak permanen: pil di kanan atas dan angka di bawah bar", () => {
     pasang();
-    const gelembung = barisAnggota("Siti Aminah").querySelector(".group\\/bar > span");
-    expect(gelembung?.textContent).toBe("50%");
-    expect(gelembung?.className).toContain("opacity-0");
-    expect(gelembung?.className).toContain("group-hover/bar:opacity-100");
+    const kartu = barisAnggota("Siti Aminah");
+    const persen = Array.from(kartu.querySelectorAll("span")).filter(
+      (s) => s.textContent === "50%"
+    );
+    expect(persen).toHaveLength(2);
+    expect(persen.every((p) => !p.className.includes("opacity-0"))).toBe(true);
   });
 
   it("tugas tanpa penanggung jawab tetap terlihat, tidak hilang dari hitungan", () => {

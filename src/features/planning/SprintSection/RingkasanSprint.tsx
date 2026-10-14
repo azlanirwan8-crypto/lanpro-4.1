@@ -165,41 +165,42 @@ export const RingkasanSprint: React.FC<RingkasanSprintProps> = ({
             {t("planning.perMemberEmpty", "Belum ada tugas yang ditugaskan")}
           </div>
         ) : (
-          /* Satu baris kartu berukuran sama: `flex-1` membagi rata saat anggota
-           * sedikit, `min-w` memaksa lebar yang sama dan menggulir ke samping
-           * saat mereka tidak muat — bukan mengecil tak terbaca. */
-          <div className="flex-1 min-h-0 flex items-stretch gap-2 overflow-x-auto custom-scrollbar pb-0.5">
+          /* Kartu lebar berjala dua kolom, mengikuti rujukan pemilik: nama utuh
+             terbaca satu baris, persentase tercetak permanen sebagai pil di
+             kanan atas dan angka kecil di bawah bar — bukan gelembung hover.
+             Kartu sempit satu baris tidak mungkin memuat ketiganya sekaligus. */
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {beban.map((b) => (
               <div
                 key={b.uid || "tanpa-penanggung"}
-                className="group flex-1 min-w-[8.5rem] bg-surface-sunken/60 border border-border-subtle/70 rounded-lg px-2.5 py-2 flex flex-col gap-2 transition-all duration-200 hover:-translate-y-px hover:shadow-xs hover:border-border-default hover:bg-surface-sunken"
+                data-testid="kartu-beban"
+                className="bg-surface-sunken/60 border border-border-subtle/70 rounded-lg px-3 py-2.5 flex flex-col gap-2 transition-all duration-200 hover:-translate-y-px hover:shadow-xs hover:border-border-default hover:bg-surface-sunken"
               >
-                <div className="flex items-center gap-2 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0">
                   {b.uid ? (
-                    <UserAvatar uid={b.uid} members={projectMembers} size="sm" />
+                    <UserAvatar uid={b.uid} members={projectMembers} size="md" />
                   ) : (
-                    <span className="w-6 h-6 rounded-full bg-surface border border-border-subtle flex items-center justify-center shrink-0">
-                      <Users className="w-3.5 h-3.5 text-content-muted" />
+                    <span className="w-8 h-8 rounded-full bg-surface border border-border-subtle flex items-center justify-center shrink-0">
+                      <Users className="w-4 h-4 text-content-muted" />
                     </span>
                   )}
-                  {/* Satu baris penuh: nama panjang dipotong elipsis dan nama
-                      utuhnya tetap terbaca lewat tooltip. */}
-                  <span
-                    className="flex-1 min-w-0 truncate text-[11px] font-medium text-content-strong"
-                    title={b.nama}
-                  >
+                  <span className="flex-1 min-w-0 text-xs font-medium text-content-strong">
                     {b.nama}
                   </span>
-                  <span className="text-[11px] font-semibold text-content-subtle tabular-nums shrink-0">
-                    {b.selesai}/{b.jumlah}
+                  <span className="flex flex-col items-end gap-0.5 shrink-0">
+                    <span className="rounded-full bg-surface-strong px-2 py-0.5 text-[10px] font-semibold text-content-subtle tabular-nums">
+                      {b.persen}%
+                    </span>
+                    <span className="text-[11px] font-semibold text-content-subtle tabular-nums">
+                      {b.selesai}/{b.jumlah}
+                    </span>
                   </span>
                 </div>
-                <div className="group/bar relative mt-auto">
+                <div className="flex flex-col gap-1">
                   {/* Track wajib terlihat walau isinya 0%: `bg-surface` di atas
                       kartu `bg-surface-sunken/60` nyaris sewarna, dan bar 0%
-                      karenanya terbaca sebagai "bar hilang". Pola track ini
-                      sama dengan bar di AiMeetingCompanion. */}
-                  <div className="h-2 rounded-full bg-surface-sunken border border-border-subtle overflow-hidden">
+                      karenanya terbaca sebagai "bar hilang". */}
+                  <div className="h-1.5 rounded-full bg-surface-sunken border border-border-subtle overflow-hidden">
                     <div
                       className={cn(
                         "h-full rounded-full transition-[width] duration-700 ease-out",
@@ -208,10 +209,7 @@ export const RingkasanSprint: React.FC<RingkasanSprintProps> = ({
                       style={{ width: `${barSiap ? b.persen : 0}%` }}
                     />
                   </div>
-                  {/* Persentase sengaja tidak dicetak permanen: kartu ini sempit
-                      dan angkanya sudah terbaca dari rasio di kanan atas. Ia
-                      muncul sebagai gelembung hanya saat bar disentuh kursor. */}
-                  <span className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-content-inverse tabular-nums shadow-2xs opacity-0 transition-opacity duration-200 group-hover/bar:opacity-100">
+                  <span className="self-end text-[10px] font-normal text-content-muted tabular-nums">
                     {b.persen}%
                   </span>
                 </div>
