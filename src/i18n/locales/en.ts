@@ -2131,7 +2131,6 @@ export const en = {
     progress: "Progress",
     completed: "Completed",
     hold: "Hold",
-    perMember: "Per-member load",
     perMemberEmpty: "No tasks assigned yet",
     unassigned: "Unassigned",
     active: "Active",

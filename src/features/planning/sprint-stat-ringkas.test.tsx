@@ -9,7 +9,7 @@
  *
  * Yang diuji di sini adalah perilakunya, bukan kelas CSS-nya: Hold dihitung dari
  * baris MasterData (bukan string keras), Poin benar-benar hilang dari kartu, dan
- * lebar bar tiap anggota proporsional terhadap beban terbesar.
+ * tiap anggota menampilkan rasio tugas selesai terhadap tugas miliknya sendiri.
  */
 import React from "react";
 import { render, screen } from "@testing-library/react";
@@ -150,17 +150,30 @@ describe("ringkasan sprint dua baris", () => {
 });
 
 describe("panel beban per anggota", () => {
-  it("nama anggota diambil dari projectMembers, jumlahnya dari tugas sprint", () => {
+  it("nama anggota diambil dari projectMembers, rasionya selesai/ditugaskan", () => {
     pasang();
     expect(screen.getByText("Siti Aminah")).toBeInTheDocument();
-    expect(barisAnggota("Siti Aminah").textContent).toContain("2");
-    expect(barisAnggota("Budi").textContent).toContain("1");
+    // Siti punya 2 tugas, satu di antaranya berstatus terminal.
+    expect(barisAnggota("Siti Aminah").textContent).toContain("1/2");
+    expect(barisAnggota("Budi").textContent).toContain("0/1");
   });
 
-  it("lebar bar proporsional terhadap beban terbesar", () => {
+  it("lebar bar = porsi tugas selesai milik anggota itu sendiri", () => {
     pasang();
-    expect(lebarBar("Siti Aminah")).toBe("100%");
-    expect(lebarBar("Budi")).toBe("50%");
+    expect(lebarBar("Siti Aminah")).toBe("50%");
+    expect(lebarBar("Budi")).toBe("0%");
+  });
+
+  it("nama panjang tidak dipotong — tidak ada truncate di elemen nama", () => {
+    pasang();
+    const nama = screen.getByText("Siti Aminah");
+    expect(nama.className).not.toContain("truncate");
+    expect(nama.className).toContain("break-words");
+  });
+
+  it("judul panel dan hitungan anggota di pojok sudah dihapus", () => {
+    pasang();
+    expect(screen.queryByText("Beban per anggota")).toBeNull();
   });
 
   it("kartu anggota satu baris berukuran sama dan menggulir ke samping", () => {
@@ -169,7 +182,7 @@ describe("panel beban per anggota", () => {
     const deret = kartu.parentElement;
     expect(deret?.className).toContain("overflow-x-auto");
     expect(kartu.className).toContain("flex-1");
-    expect(kartu.className).toContain("min-w-[8.5rem]");
+    expect(kartu.className).toContain("min-w-[10rem]");
     // Semua kartu berbagi induk yang sama, jadi lebarnya sama rata.
     expect(deret?.children).toHaveLength(3);
     expect(barisAnggota("Budi").parentElement).toBe(deret);
@@ -178,7 +191,7 @@ describe("panel beban per anggota", () => {
   it("persentase tidak dicetak permanen — hanya gelembung hover di atas bar", () => {
     pasang();
     const gelembung = barisAnggota("Siti Aminah").querySelector(".group\\/bar > span");
-    expect(gelembung?.textContent).toBe("100%");
+    expect(gelembung?.textContent).toBe("50%");
     expect(gelembung?.className).toContain("opacity-0");
     expect(gelembung?.className).toContain("group-hover/bar:opacity-100");
   });
@@ -186,7 +199,7 @@ describe("panel beban per anggota", () => {
   it("tugas tanpa penanggung jawab tetap terlihat, tidak hilang dari hitungan", () => {
     pasang();
     expect(screen.getByText("Belum Ditugaskan")).toBeInTheDocument();
-    expect(barisAnggota("Belum Ditugaskan").textContent).toContain("1");
+    expect(barisAnggota("Belum Ditugaskan").textContent).toContain("0/1");
   });
 
   it("sprint tanpa tugas menampilkan keadaan kosong, bukan bar kosong", () => {

@@ -2151,7 +2151,6 @@ export const id = {
     progress: "Kemajuan",
     completed: "Selesai",
     hold: "Hold",
-    perMember: "Beban per anggota",
     perMemberEmpty: "Belum ada tugas yang ditugaskan",
     unassigned: "Belum Ditugaskan",
     active: "Aktif",

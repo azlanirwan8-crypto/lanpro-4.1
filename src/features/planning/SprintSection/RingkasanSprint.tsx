@@ -4,6 +4,7 @@ import { Calendar, CheckCircle2, CirclePause, PieChart, Users } from "lucide-rea
 import { cn } from "../../../lib/utils";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
 import { cariMaster } from "../../../lib/warnaLabel";
+import { statusSelesai } from "../../../lib/statusSelesai";
 import { MasterData, Task, UserProfile } from "../../../types";
 
 /**
@@ -70,19 +71,22 @@ export const RingkasanSprint: React.FC<RingkasanSprintProps> = ({
     );
   };
 
-  /** Beban per penanggung jawab; lebar bar = porsi terhadap beban terbesar. */
+  /** Beban per penanggung jawab: porsi tugas selesai masing-masing anggota. */
   const beban = (() => {
-    const hitung = new Map<string, number>();
+    const hitung = new Map<string, { jumlah: number; selesai: number }>();
     for (const x of sprintTasks) {
       const kunci = x.assigneeId ? String(x.assigneeId) : "";
-      hitung.set(kunci, (hitung.get(kunci) || 0) + 1);
+      const isi = hitung.get(kunci) || { jumlah: 0, selesai: 0 };
+      isi.jumlah += 1;
+      if (statusSelesai(x.status, masterData)) isi.selesai += 1;
+      hitung.set(kunci, isi);
     }
-    const tertinggi = Math.max(1, ...Array.from(hitung.values()));
     return Array.from(hitung.entries())
-      .map(([uid, jumlah]) => ({
+      .map(([uid, { jumlah, selesai }]) => ({
         uid,
         jumlah,
-        persen: Math.round((jumlah / tertinggi) * 100),
+        selesai,
+        persen: jumlah > 0 ? Math.round((selesai / jumlah) * 100) : 0,
         nama: uid ? namaAnggota(uid) : t("planning.unassigned", "Belum Ditugaskan"),
       }))
       .sort(
@@ -155,16 +159,7 @@ export const RingkasanSprint: React.FC<RingkasanSprintProps> = ({
         ))}
       </div>
 
-      <div className="bg-surface border border-border-subtle/80 rounded-lg px-2.5 py-2 flex flex-col gap-1.5 min-w-0">
-        <div className="flex items-center gap-1.5 shrink-0">
-          <Users className="w-3.5 h-3.5 text-primary shrink-0" />
-          <span className="text-[11px] font-medium text-content-subtle truncate">
-            {t("planning.perMember", "Beban per anggota")}
-          </span>
-          <span className="ml-auto text-[10px] font-normal text-content-muted tabular-nums shrink-0">
-            {beban.length}
-          </span>
-        </div>
+      <div className="bg-surface border border-border-subtle/80 rounded-lg px-2.5 py-2 flex flex-col min-w-0">
         {beban.length === 0 ? (
           <div className="flex-1 flex items-center justify-center text-[11px] font-normal text-content-muted text-center px-2">
             {t("planning.perMemberEmpty", "Belum ada tugas yang ditugaskan")}
@@ -177,29 +172,23 @@ export const RingkasanSprint: React.FC<RingkasanSprintProps> = ({
             {beban.map((b) => (
               <div
                 key={b.uid || "tanpa-penanggung"}
-                className="group flex-1 min-w-[8.5rem] bg-surface-sunken/60 border border-border-subtle/70 rounded-lg px-2.5 py-2 flex flex-col gap-2 transition-all duration-200 hover:-translate-y-px hover:shadow-xs hover:border-border-default hover:bg-surface-sunken"
+                className="group flex-1 min-w-[10rem] bg-surface-sunken/60 border border-border-subtle/70 rounded-lg px-2.5 py-2 flex flex-col gap-2 transition-all duration-200 hover:-translate-y-px hover:shadow-xs hover:border-border-default hover:bg-surface-sunken"
               >
-                <div className="flex items-center gap-2 min-w-0">
+                {/* `items-start` bukan `items-center`: nama panjang boleh turun
+                    ke beberapa baris dan avatar tetap rapi di baris pertama. */}
+                <div className="flex items-start gap-2 min-w-0">
                   {b.uid ? (
-                    <UserAvatar
-                      uid={b.uid}
-                      members={projectMembers}
-                      size="xs"
-                      className="transition-transform duration-200 group-hover:scale-110"
-                    />
+                    <UserAvatar uid={b.uid} members={projectMembers} size="sm" className="mt-px" />
                   ) : (
-                    <span className="w-5 h-5 rounded-full bg-surface border border-border-subtle flex items-center justify-center shrink-0">
-                      <Users className="w-3 h-3 text-content-muted" />
+                    <span className="w-6 h-6 mt-px rounded-full bg-surface border border-border-subtle flex items-center justify-center shrink-0">
+                      <Users className="w-3.5 h-3.5 text-content-muted" />
                     </span>
                   )}
-                  <span
-                    className="flex-1 min-w-0 truncate text-[11px] font-medium text-content-strong"
-                    title={b.nama}
-                  >
+                  <span className="flex-1 min-w-0 text-[11px] font-medium leading-snug break-words text-content-strong">
                     {b.nama}
                   </span>
                   <span className="text-[11px] font-semibold text-content-subtle tabular-nums shrink-0">
-                    {b.jumlah}/{totalTasks}
+                    {b.selesai}/{b.jumlah}
                   </span>
                 </div>
                 <div className="group/bar relative mt-auto">
