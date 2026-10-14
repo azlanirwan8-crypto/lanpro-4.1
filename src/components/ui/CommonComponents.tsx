@@ -26,6 +26,7 @@ import {
   gayaLabel,
   warnaDariMaster,
   warnaLabel,
+  warnaSah,
   WARNA_NETRAL,
 } from "../../lib/warnaLabel";
 import { useAppStore } from "../../store/useAppStore";
@@ -104,20 +105,25 @@ export const TypeIcon = ({
   type,
   className,
   masterData,
+  warna,
 }: {
   type: string;
   className?: string;
   masterData?: MasterData[];
+  /** Hex penimpa untuk baris yang warnanya milik medan lain (mis. kepala epik ikut priority). */
+  warna?: string;
 }) => {
   const t = cariMaster(masterData, "issue_type", type);
   const iconProps = { className: cn("w-4 h-4", className) };
   /** #564 — satu hex untuk ikon DAN chip jenis; tidak ada lagi ungu lokal. */
-  const hex = warnaLabel({
-    kelompok: "issue_type",
-    label: t?.label ?? type,
-    kode: t?.code,
-    warnaMaster: t?.color,
-  });
+  const hex = warnaSah(warna)
+    ? warna.trim()
+    : warnaLabel({
+        kelompok: "issue_type",
+        label: t?.label ?? type,
+        kode: t?.code,
+        warnaMaster: t?.color,
+      });
 
   if (t?.icon) {
     return <RenderIcon iconName={t.icon} className={iconProps.className} style={{ color: hex }} />;

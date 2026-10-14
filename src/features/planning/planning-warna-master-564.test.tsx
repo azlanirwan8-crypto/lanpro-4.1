@@ -129,8 +129,23 @@ describe("#564 warna Planning mengikuti Master Data", () => {
     expect(chip!.style.getPropertyValue("--lbr")).toBe(HEX_STATUS);
   });
 
-  it("kepala epik memakai hex jenis isu milik Master Data, bukan ungu baku", () => {
+  it("kepala epik memakai hex priority epiknya, bukan warna jenis isu", () => {
     render(<PlanningView {...(props as any)} />);
-    expect(screen.getByText("Epik Uji").style.color).toBe(rgb(HEX_EPIK));
+    expect(screen.getByText("Epik Uji").style.color).toBe(rgb(HEX_PRIORITAS));
+  });
+
+  it("epik tanpa priority jatuh ke hex jenis isu, bukan warna kosong", () => {
+    render(
+      <PlanningView
+        {...({
+          ...props,
+          tasks: [
+            tugas("epik-2", { type: "epic", title: "Epik Polos", priority: "" }),
+            tugas("anak-2", { parentId: "epik-2", assigneeId: UID }),
+          ],
+        } as any)}
+      />
+    );
+    expect(screen.getByText("Epik Polos").style.color).toBe(rgb(HEX_EPIK));
   });
 });

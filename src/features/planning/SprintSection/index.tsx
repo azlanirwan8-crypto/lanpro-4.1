@@ -497,13 +497,13 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                     if (items.length === 0) return [];
 
                                     const epicExpanded = indukTerbuka(sprint.id, `epic-${epic.id}`);
-                                    // #564 — ikon & warna epik milik MasterData.
+                                    // #564 — warna baris epik mengikuti PRIORITY
+                                    // epiknya sendiri; hex issue_type hanya jatuh
+                                    // balik untuk epik tanpa priority.
                                     const jenisEpic = epic.type || "epic";
-                                    const hexEpic = warnaDariMaster(
-                                      masterData,
-                                      "issue_type",
-                                      jenisEpic
-                                    );
+                                    const hexEpic = epic.priority
+                                      ? warnaDariMaster(masterData, "priority", epic.priority)
+                                      : warnaDariMaster(masterData, "issue_type", jenisEpic);
 
                                     return [
                                       <div
@@ -531,6 +531,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                             type={jenisEpic}
                                             className="w-3.5 h-3.5 shrink-0"
                                             masterData={masterData}
+                                            warna={hexEpic}
                                           />
                                           <span
                                             className="text-xs font-normal leading-none"

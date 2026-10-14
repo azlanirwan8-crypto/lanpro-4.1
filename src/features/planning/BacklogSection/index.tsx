@@ -241,10 +241,14 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
           if (items.length === 0) return [];
 
           const isExpanded = !collapsedParents.has(`epic-${epic.id}`);
-          // #564 — ikon & warna epik datang dari MasterData: TypeIcon memilih
-          // ikonnya sendiri, hex di sini hanya untuk chevron, judul, dan badge.
+          // #564 — warna baris epik mengikuti PRIORITY epiknya sendiri, supaya
+          // sembilan epik tidak lagi tampil satu warna; hex issue_type hanya
+          // jatuh balik untuk epik tanpa priority. Ikon tetap pilihan Master
+          // Data, hanya warnanya yang ditimpa lewat `warna`.
           const jenisEpic = epic.type || "epic";
-          const hexEpic = warnaDariMaster(masterData, "issue_type", jenisEpic);
+          const hexEpic = epic.priority
+            ? warnaDariMaster(masterData, "priority", epic.priority)
+            : warnaDariMaster(masterData, "issue_type", jenisEpic);
 
           return [
             <div
@@ -257,7 +261,12 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
               ) : (
                 <ChevronRight className="w-3.5 h-3.5 shrink-0" style={{ color: hexEpic }} />
               )}
-              <TypeIcon type={jenisEpic} className="w-3.5 h-3.5 shrink-0" masterData={masterData} />
+              <TypeIcon
+                type={jenisEpic}
+                className="w-3.5 h-3.5 shrink-0"
+                masterData={masterData}
+                warna={hexEpic}
+              />
               <span className="text-xs font-normal leading-none" style={{ color: hexEpic }}>
                 {epic.title}
               </span>
