@@ -205,6 +205,10 @@ export function useAuth(
       title: i18n.t("logoutConfirm.title"),
       message: i18n.t("logoutConfirm.message"),
       variant: "warning",
+      // #738 — niatnya dinyatakan, bukan ditebak dari judul: judul Inggris
+      // ("Log Out Account") dulu luput dari penciuman judul ConfirmationModal
+      // dan dialog logout membuka dengan ikon tong sampah.
+      kind: "logout",
       confirmText: i18n.t("logoutConfirm.confirm"),
       cancelText: i18n.t("logoutConfirm.cancel"),
       onConfirm: async () => {

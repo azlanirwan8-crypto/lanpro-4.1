@@ -43,6 +43,8 @@ describe("useAuth handleLogoutRequest i18n (item #176)", () => {
         title: "Logout Akun",
         message: "Apakah Anda yakin ingin keluar? Sesi Anda akan diakhiri.",
         variant: "warning",
+        // #738 — niatnya ikut dikirim, supaya ikon tidak ditebak dari judul.
+        kind: "logout",
         confirmText: "Ya, Keluar",
         cancelText: "Batal",
       })
@@ -80,6 +82,7 @@ describe("useAuth handleLogoutRequest i18n (item #176)", () => {
         title: "Log Out Account",
         message: "Are you sure you want to log out? Your session will be ended.",
         variant: "warning",
+        kind: "logout",
         confirmText: "Yes, Log Out",
         cancelText: "Cancel",
       })

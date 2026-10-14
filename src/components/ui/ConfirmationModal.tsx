@@ -54,6 +54,11 @@ interface ConfirmationModalProps {
   iconSrc?: string;
   iconColors?: string;
   customIcon?: React.ReactNode;
+  /**
+   * #738 — niat pengirim, dinyatakan eksplisit. Menang atas penciuman judul di
+   * bawah: judul bisa berganti ejaan di i18n kapan saja, niat tidak.
+   */
+  kind?: "logout";
 }
 
 export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -71,6 +76,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   iconSrc,
   iconColors,
   customIcon,
+  kind,
 }) => {
   const { t } = useTranslation();
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
@@ -85,7 +91,12 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   }, [isOpen]);
 
   const isLogoutAction =
+    kind === "logout" ||
     title.toLowerCase().includes("logout") ||
+    // #738 — jaring pengaman untuk pemanggil yang belum menyatakan `kind`:
+    // judul Inggris "Log Out Account" terpisah dua kata dan dulu luput dari
+    // daftar ini, sehingga dialog logout membuka dengan ikon tong sampah.
+    title.toLowerCase().includes("log out") ||
     title.toLowerCase().includes("keluar") ||
     title.toLowerCase().includes("sign out") ||
     title.toLowerCase().includes("signout");

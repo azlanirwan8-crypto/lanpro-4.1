@@ -274,6 +274,12 @@ function AppContainer() {
     closeOnBackdropClick?: boolean;
     iconSrc?: string;
     iconColors?: string;
+    // #738 — pengirim menyatakan niatnya sendiri. ConfirmationModal dulu
+    // memilih ikon dengan mencium teks judul, dan judul Inggris "Log Out
+    // Account" (dua kata) luput dari daftarnya sehingga jatuh ke ikon tong
+    // sampah — menyiratkan ada data terhapus padahal logout tidak menghapus
+    // apa pun. Field ini menang atas penciuman judul.
+    kind?: "logout";
   } | null>(null);
 
   // useMasterData butuh isLoggedIn yang justru dihasilkan useAuthHook, sehingga
@@ -4737,6 +4743,7 @@ function AppContainer() {
               }
               cancelText={confirmAction?.cancelText || "Batal"}
               isAlert={confirmAction?.isAlert || false}
+              kind={confirmAction?.kind}
               variant={
                 confirmAction?.variant ||
                 (confirmAction?.isAlert
