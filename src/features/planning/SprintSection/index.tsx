@@ -237,7 +237,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                             }}
                             className="btn-animation waves-effect waves-light btn-primary h-8 px-3 text-xs font-normal rounded-lg flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
                           >
-                            <Zap className="w-3.5 h-3.5 fill-current" />{" "}
+                            <LucideIcons.Zap className="w-3.5 h-3.5 fill-current" />{" "}
                             <span>{t("planning.start")}</span>
                           </button>
                         )}
