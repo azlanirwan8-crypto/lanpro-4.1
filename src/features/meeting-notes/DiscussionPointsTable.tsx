@@ -24,7 +24,7 @@ import {
   type TautanDiskusi,
 } from "../../types";
 import { AiMeetingCompanion } from "./AiMeetingCompanion";
-import { MessageSquare } from "lucide-react";
+import { KeadaanKosongDiskusi } from "./KeadaanKosongDiskusi";
 import { toast } from "sonner";
 import { hasPermission } from "../../lib/permissions";
 import {
@@ -106,6 +106,10 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
   const paginatedPoints = points;
   const totalPages = Math.max(1, Math.ceil(totalPoints / itemsPerPage) || 1);
+
+  /* #706 — keadaan kosong dibaca dari `kueriTertunda`, bukan `searchQuery`,
+   * karena itulah yang sungguh dikirim ke server (#711). */
+  const kosongKarenaCari = kueriTertunda.length > 0;
 
   const handleToggleStatus = async (point: DiscussionPoint) => {
     if (!point.id) return;
@@ -609,13 +613,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             )}
             {paginatedPoints.length === 0 ? (
               <div className="text-center py-12 text-content-subtle">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-2 text-primary shadow-2xs">
-                  <MessageSquare className="w-5 h-5" />
-                </div>
-                <p className="font-normal text-content-strong text-xs">
-                  {t("meetings.emptyTitle")}
-                </p>
-                <p className="text-[11px] text-content-subtle mt-0.5">{t("meetings.emptyHint")}</p>
+                <KeadaanKosongDiskusi cari={kosongKarenaCari} />
               </div>
             ) : (
               <DiscussionPointMobileCardView
@@ -674,15 +672,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                 {paginatedPoints.length === 0 ? (
                   <tr>
                     <td colSpan={9} className="text-center py-12 text-content-subtle">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-2 text-primary shadow-2xs">
-                        <MessageSquare className="w-5 h-5" />
-                      </div>
-                      <p className="font-normal text-content-strong text-xs">
-                        {t("meetings.emptyTitle")}
-                      </p>
-                      <p className="text-[11px] text-content-subtle mt-0.5">
-                        {t("meetings.emptyHint")}
-                      </p>
+                      <KeadaanKosongDiskusi cari={kosongKarenaCari} />
                     </td>
                   </tr>
                 ) : (

@@ -10,6 +10,7 @@ import {
   User,
   Tag,
   Link2,
+  Image as IkonGambar,
 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { DiscussionPoint, UserProfile, MasterData } from "../../../types";
@@ -76,6 +77,13 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
         const tautan = Array.isArray(p.links) ? p.links : [];
         const berkas = Array.isArray(p.files) ? p.files : [];
         const gambar = berkas.filter((b) => (b.mimetype || "").startsWith("image/"));
+        /* #716 — berkas bukan-gambar dulu berhenti di filter `gambar` di atas dan
+         * tidak pernah dirender, jadi satu PDF atau XLSX yang menempel pada titik
+         * diskusi terbaca di layar kerja tetapi HILANG total di layar HP — padahal
+         * justru di situ titik diskusi biasanya dibaca ulang setelah rapat. Ini
+         * melanggar aturan #645: satu field, satu perilaku, dua tampilan. Bentuk
+         * chip-nya mengekor `BarisDiskusi.tsx`, bukan karangan baru. */
+        const bukanGambar = berkas.filter((b) => !(b.mimetype || "").startsWith("image/"));
 
         const contextMeta = masterData.find(
           (m) =>
@@ -253,8 +261,10 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
             </div>
 
             {/* Tautan dan gambar — #704 butir 5 dan 6, supaya HP tidak tertinggal
-                dari desktop (#645: satu field, satu perilaku, dua tampilan). */}
-            {(tautan.length > 0 || gambar.length > 0) && (
+                dari desktop (#645: satu field, satu perilaku, dua tampilan).
+                #716 — berkas bukan-gambar ikut, dengan syarat tampil yang kini
+                membaca `berkas` (semua lampiran), bukan `gambar` saja. */}
+            {(tautan.length > 0 || berkas.length > 0) && (
               <div className="flex flex-wrap items-center gap-1.5 pt-1">
                 {tautan.map((l) => (
                   <a
@@ -268,6 +278,19 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                   >
                     <Link2 className="w-3 h-3 shrink-0" />
                     {l.label || l.url}
+                  </a>
+                ))}
+                {bukanGambar.map((b) => (
+                  <a
+                    key={b.id}
+                    href={b.url || undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={b.name || b.originalName || ""}
+                    className="inline-flex items-center gap-1 max-w-full text-[10px] font-medium px-2 py-0.5 rounded-md bg-surface-sunken text-content-body border border-border-subtle break-all"
+                  >
+                    <IkonGambar className="w-3 h-3 shrink-0 text-content-subtle" />
+                    <span className="break-words">{b.name || b.originalName || b.fileRef}</span>
                   </a>
                 ))}
                 {gambar.map((b) => (

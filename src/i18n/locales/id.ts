@@ -1859,6 +1859,14 @@ export const id = {
     heading2: "Poin Diskusi & Keputusan",
     subheading: "Poin Diskusi & Tindak Lanjut",
     searchPlaceholder: "Cari poin diskusi...",
+    /* #706 — keadaan kosong milik papan ini sendiri. Sebelumnya ia meminjam
+       `meetings.emptyTitle`/`emptyHint` ("Rapat tidak ditemukan — Buat rapat
+       baru…") padahal tabel ini ada DI DALAM satu rapat yang sedang dibuka dan
+       tombol menambahnya bukan "buat rapat baru". */
+    emptyTitle: "Belum ada poin diskusi",
+    emptyHint: "Tambahkan poin diskusi pertama lewat baris tambah di atas papan.",
+    emptySearchTitle: "Tidak ada poin diskusi yang cocok",
+    emptySearchHint: "Ubah kata kunci pencarian Anda.",
     closeAiAssistant: "Tutup Asisten AI",
     editPoint: "Ubah Poin Diskusi",
     concernTopic: "Topik / Persoalan",

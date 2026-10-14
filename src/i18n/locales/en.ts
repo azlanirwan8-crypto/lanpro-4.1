@@ -1846,6 +1846,14 @@ export const en = {
     heading2: "Discussion Points & Decisions",
     subheading: "Discussion Points & Action Items",
     searchPlaceholder: "Search discussion points...",
+    /* #706 — this board's own empty state. It used to borrow
+       `meetings.emptyTitle`/`emptyHint` ("No meetings found — Create a new
+       meeting…") even though this table lives INSIDE an open meeting and its
+       add button is not "create a new meeting". */
+    emptyTitle: "No discussion points yet",
+    emptyHint: "Add the first discussion point with the add row above the board.",
+    emptySearchTitle: "No matching discussion points",
+    emptySearchHint: "Adjust your search keyword.",
     closeAiAssistant: "Close AI Assistant",
     editPoint: "Edit Discussion Point",
     concernTopic: "Concern / Topic",
