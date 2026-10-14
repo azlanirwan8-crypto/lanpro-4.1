@@ -79,6 +79,8 @@ import type { BatasKonversi } from "./lib/sumberDrawio";
 // #659 - papan bisa ditulis MENJADI berkas draw.io, bukan dibaca saja.
 import { eksporDrawIo } from "./lib/eksporDrawio";
 import { apakahPembuat, tampilanNamaPembuat } from "./lib/authorIdentity";
+// #537 - chrome bertanda `data-abai-ekspor` tidak boleh ikut terpotret ekspor JPG.
+import { abaikanChromeEkspor } from "./lib/abaikanEkspor";
 import {
   colorPaletteHex,
   UKURAN_BENTUK,
@@ -209,7 +211,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     stopCanvasPanning,
     toggleGridSnap,
     aturZoom,
-    geserZoom,
+    /* #662 — tombol, pintasan papan ketik, dan "zoom to fit" memakai jalur
+     * ber-tween. Roda tetikus dan cubit tetap instan di dalam hook. */
+    geserZoomHalus,
     resetZoom,
     resetPan,
     pasKeLayar,
@@ -1088,6 +1092,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       const dataUrl = await toJpeg(canvasContainerRef.current, {
         backgroundColor: "#f4f7f9",
         quality: 0.95,
+        /* #537 — chrome yang duduk DI DALAM subtree kanvas harus dibuang, dan
+         * yang menandainya adalah komponennya sendiri lewat `data-abai-ekspor`
+         * (lihat `EdgeStyleBar.tsx`). Penyaringnya hidup di
+         * `lib/abaikanEkspor.ts` supaya bisa diuji terhadap DOM tiruan: filter
+         * yang keliru menolak akar yang dipotret dan menghasilkan JPG KOSONG
+         * yang tidak terlihat di `npm test` maupun di gerbang audit — hanya
+         * terlihat dengan membuka berkasnya. */
+        filter: abaikanChromeEkspor,
       });
       const link = document.createElement("a");
       link.download = `${currentFlowMetadata?.name || "flow_workspace"}.jpg`;
@@ -1548,7 +1560,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       // Add: Ctrl +/- for zooming canvas precisely instead of zooming native browser window
       if ((e.ctrlKey || e.metaKey) && (e.key === "=" || e.key === "+" || e.key === "-")) {
         e.preventDefault();
-        geserZoom(e.key === "-" ? 1 / 1.1 : 1.1);
+        geserZoomHalus(e.key === "-" ? 1 / 1.1 : 1.1);
       }
     };
 
@@ -3678,8 +3690,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   /**
    * #618 — padanan "zoom to fit" (Miro Cmd+Shift+1). Yang dihitung adalah kotak
    * seluruh bentuk; papan kosong tetap ke keadaan awal, bukan ke (0,0).
+   * #662 — `true`: lompatan ke kotak itu di-tween. Pemanggilan saat papan
+   * pertama dimuat (lihat `handleImport`) tetap tanpa animasi.
    */
-  const fitPapanKeLayar = () => pasKeLayar(batasSeluruhBentuk(nodes));
+  const fitPapanKeLayar = () => pasKeLayar(batasSeluruhBentuk(nodes), true);
 
   const getLinkedTaskDetails = (taskId?: string) => {
     if (!taskId) return undefined;
@@ -4698,7 +4712,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           {/* Zoom Controls */}
                           <div className="flex items-center gap-0.5 bg-surface-sunken/50 rounded-xl p-0.5 border border-border-subtle/60">
                             <button
-                              onClick={() => geserZoom(1 / 1.1)}
+                              onClick={() => geserZoomHalus(1 / 1.1)}
                               className="p-1.5 text-content-muted hover:bg-surface-strong hover:text-content-strong rounded-lg transition-all active:scale-95"
                               title={t("flowchart.zoomOut")}
                             >
@@ -4712,7 +4726,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               {Math.round(zoomLevel * 100)}%
                             </button>
                             <button
-                              onClick={() => geserZoom(1.1)}
+                              onClick={() => geserZoomHalus(1.1)}
                               className="p-1.5 text-content-muted hover:bg-surface-strong hover:text-content-strong rounded-lg transition-all active:scale-95"
                               title={t("flowchart.zoomIn")}
                             >
@@ -5213,8 +5227,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 canvasContextMenu.y
               )
             }
-            onZoomIn={() => geserZoom(1.1)}
-            onZoomOut={() => geserZoom(1 / 1.1)}
+            onZoomIn={() => geserZoomHalus(1.1)}
+            onZoomOut={() => geserZoomHalus(1 / 1.1)}
             onResetZoom={fitPapanKeLayar}
             onUndo={handleUndoClick}
             onRedo={handleRedoClick}

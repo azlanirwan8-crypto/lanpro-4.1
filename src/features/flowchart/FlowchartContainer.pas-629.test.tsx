@@ -4,7 +4,7 @@
 /* #534 #618 — "pas ke layar" harus benar-benar mengubah viewport papan, bukan
    cuma ada di rumus. #629 — bentuk tidak boleh lagi membesar saat disentuh. */
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import type { Project, Task } from "../../types";
 
 jest.mock("./services/flowchart.service", () => ({
@@ -91,6 +91,21 @@ const bacaTransform = (el: HTMLElement) => {
   return m ? { x: +m[1], y: +m[2], skala: +m[3] } : null;
 };
 
+/**
+ * #662 — Shift+1, tombol dock, dan tombol persentase adalah aksi DISKRET, jadi
+ * sekarang di-tween 150 ms sebelum viewport-nya sampai di tujuan. Yang dijamin
+ * #534/#618 tidak berubah (keadaan akhirnya tetap sama), tetapi keadaan itu
+ * tidak lagi terbaca pada baris yang sama dengan pemicunya.
+ */
+async function tungguSkala(container: HTMLElement, skala: number) {
+  let akhir = bacaTransform(wrapperPapan(container));
+  await waitFor(() => {
+    akhir = bacaTransform(wrapperPapan(container));
+    expect(akhir?.skala).toBeCloseTo(skala, 6);
+  });
+  return akhir!;
+}
+
 async function bukaPapan(container: HTMLElement) {
   fireEvent.click((await screen.findAllByText("Alur Jauh"))[0]);
   fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
@@ -120,12 +135,9 @@ describe("pas ke layar (#534 #618)", () => {
 
     fireEvent.keyDown(window, { key: "1", shiftKey: true });
 
-    const sesudah = bacaTransform(wrapperPapan(container));
-    expect(sesudah).not.toBeNull();
-    const t = sesudah!;
     // Bbox = x 2.600..2.940 (340), y 1.800..2.160 (360) pada layar 800x600.
     // Terbatas tinggi: (600-80)/360 = 1,4444.
-    expect(t.skala).toBeCloseTo(520 / 360, 6);
+    const t = await tungguSkala(container, 520 / 360);
     const kiri = t.x + 2600 * t.skala;
     const kanan = t.x + 2940 * t.skala;
     const atas = t.y + 1800 * t.skala;
@@ -145,8 +157,9 @@ describe("pas ke layar (#534 #618)", () => {
     const tombol = await screen.findByTitle(/Fit to screen|Pas ke layar/i);
     fireEvent.click(tombol);
 
-    const t = bacaTransform(wrapperPapan(container))!;
-    expect(t.skala).toBeCloseTo(520 / 360, 6);
+    const t = await tungguSkala(container, 520 / 360);
+    // Jaminan #618 yang sama lewat jalur tombol: bentuk paling kanan ikut masuk.
+    expect(t.x + 2940 * t.skala).toBeLessThanOrEqual(800 - 40 + 1e-6);
   });
 
   it("tombol persentase meminta 100%, bukan skala awal — dua hal yang dulu bertukar (#534)", async () => {
@@ -154,11 +167,11 @@ describe("pas ke layar (#534 #618)", () => {
     await bukaPapan(container);
 
     fireEvent.keyDown(window, { key: "1", shiftKey: true });
-    const sesudahPas = bacaTransform(wrapperPapan(container))!;
+    const sesudahPas = await tungguSkala(container, 520 / 360);
     expect(sesudahPas.skala).not.toBe(1);
 
     fireEvent.click(screen.getByTitle(/zoom \(100%\)/i));
-    const persen = bacaTransform(wrapperPapan(container))!;
+    const persen = await tungguSkala(container, 1);
     expect(persen.skala).toBe(1);
   });
 

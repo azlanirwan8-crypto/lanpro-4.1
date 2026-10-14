@@ -18,6 +18,38 @@ const MARGIN_PAS = 40;
 
 const batasZoom = (nilai: number) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, nilai));
 
+/**
+ * #662 — lama tween untuk zoom yang dipicu tombol dan pintasan.
+ *
+ * 150 ms ada di tengah rentang yang diminta tiket (120-180 ms): cukup pendek
+ * supaya papan tidak terasa berlumpur saat pengguna menekan tombol berulang,
+ * cukup panjang supaya lompatannya terbaca sebagai gerakan. Roda tetikus dan
+ * cubit SENGAJA tidak memakai ini — lihat `geserZoom` versus `geserZoomHalus`.
+ */
+export const ANIMASI_ZOOM_MS = 150;
+
+const MEDIA_GERAK_KURANG = "(prefers-reduced-motion: reduce)";
+
+const mediaGerakKurang = (): MediaQueryList | null =>
+  typeof window !== "undefined" && typeof window.matchMedia === "function"
+    ? window.matchMedia(MEDIA_GERAK_KURANG)
+    : null;
+
+/**
+ * #662(c) — `MotionConfig reducedMotion="user"` (#641) hanya memerintah
+ * komponen `motion/react`; tween di berkas ini jalan lewat
+ * `requestAnimationFrame` sendiri, jadi ia harus membaca preferensinya sendiri.
+ */
+const bacaGerakKurang = () => mediaGerakKurang()?.matches ?? false;
+
+/** easeOutCubic: cepat di awal, tenang di akhir — terasa seperti tuas, bukan robot. */
+const haluskan = (t: number) => 1 - Math.pow(1 - t, 3);
+
+export interface Viewport {
+  zoom: number;
+  pan: { x: number; y: number };
+}
+
 export interface Batas {
   x: number;
   y: number;
@@ -142,35 +174,139 @@ export function useFlowchartCanvas() {
   viewport.current = { zoom: zoomLevel, pan: panOffset };
 
   /**
-   * Pasang zoom sambil menahan satu titik layar tetap di tempatnya. `titik`
+   * Hitung tujuan zoom+pan TANPA menerapkannya: zoom dipotong ke batasnya, lalu
+   * geseran dikoreksi supaya satu titik layar tetap di tempatnya. `titik`
    * relatif ke pojok kiri-atas kanvas; bila kosong, tengah kanvas. Tanpa koreksi
    * geser ini, skala selalu tumbuh dari kiri-atas sehingga isi papan melompat
    * menjauh dari kursor setiap kali pengguna memperbesar.
+   *
+   * Dipisahkan dari penerapnya untuk #662: satu tujuan yang sama bisa diterapkan
+   * seketika (roda tetikus, cubit) atau digerakkan (tombol, pintasan).
+   * Menghitungnya dua kali akan membuat titik jangkar tween berbeda dari titik
+   * jangkar hasil akhirnya, dan papan terlihat bergeser dua kali.
    */
-  const aturZoom = useCallback((target: number, titik?: { x: number; y: number }) => {
+  const tujuanZoom = useCallback((target: number, titik?: { x: number; y: number }) => {
     const { zoom: lama, pan } = viewport.current;
     const baru = batasZoom(target);
-    if (baru === lama) return;
+    if (baru === lama) return null;
     const el = canvasContainerRef.current;
     const acuan = titik ?? (el ? { x: el.clientWidth / 2, y: el.clientHeight / 2 } : null);
     const r = baru / lama;
     const panBaru = acuan
       ? { x: acuan.x - (acuan.x - pan.x) * r, y: acuan.y - (acuan.y - pan.y) * r }
       : pan;
-    setZoomLevel(baru);
-    setPanOffset(panBaru);
+    return { zoom: baru, pan: panBaru };
+  }, []);
+
+  const terapkanViewport = useCallback((v: Viewport) => {
+    setZoomLevel(v.zoom);
+    setPanOffset(v.pan);
     // Dua peristiwa gulir bisa tiba sebelum React sempat render. Tanpa nilai
     // sasaran ditulis ulang ke ref ini, peristiwa kedua masih membaca zoom lama
     // sehingga langkah pertama hilang — gulir cepat terasa "nyangkut".
-    viewport.current = { zoom: baru, pan: panBaru };
+    viewport.current = v;
   }, []);
 
-  /** Kalikan zoom saat ini dengan `faktor`, terpotong 0.2x–3x. */
+  const rafZoom = useRef<number | null>(null);
+
+  const hentikanAnimasiZoom = useCallback(() => {
+    if (rafZoom.current !== null) {
+      cancelAnimationFrame(rafZoom.current);
+      rafZoom.current = null;
+    }
+  }, []);
+
+  // Loop yang tidak berhenti adalah kegagalan yang tidak terlihat di test: papan
+  // terus berkedip sesudah tab ditutup. Tween-nya dihentikan saat unmount.
+  useEffect(() => hentikanAnimasiZoom, [hentikanAnimasiZoom]);
+
+  const gerakKurangRef = useRef<boolean>(bacaGerakKurang());
+
+  useEffect(() => {
+    const mq = mediaGerakKurang();
+    if (!mq) return;
+    const ubah = () => {
+      gerakKurangRef.current = mq.matches;
+      hentikanAnimasiZoom();
+    };
+    ubah();
+    mq.addEventListener("change", ubah);
+    return () => mq.removeEventListener("change", ubah);
+  }, [hentikanAnimasiZoom]);
+
+  /**
+   * #662 — terapkan tujuan lewat tween `ANIMASI_ZOOM_MS`.
+   *
+   * Mode gerak-kurang melompat langsung ke nilai akhir: satu nilai, bukan
+   * rangkaian. `tujuan` dihitung SEBELUM tween dimulai dan `dari` dibaca sekali
+   * di awal, jadi menekan tombol dua kali di tengah gerakan menghitung ulang
+   * dari posisi saat itu — tidak ada antrean tween yang saling menimpa.
+   */
+  const animasikanZoom = useCallback(
+    (tujuan: Viewport | null) => {
+      if (!tujuan) return;
+      const dari = viewport.current;
+      if (gerakKurangRef.current || tujuan.zoom === dari.zoom) {
+        hentikanAnimasiZoom();
+        terapkanViewport(tujuan);
+        return;
+      }
+      hentikanAnimasiZoom();
+      if (typeof requestAnimationFrame !== "function") {
+        terapkanViewport(tujuan);
+        return;
+      }
+      let mulai: number | null = null;
+      const langkah = (kini: number) => {
+        if (mulai === null) mulai = kini;
+        const t = Math.min(1, (kini - mulai) / ANIMASI_ZOOM_MS);
+        const e = haluskan(t);
+        terapkanViewport({
+          zoom: dari.zoom + (tujuan.zoom - dari.zoom) * e,
+          pan: {
+            x: dari.pan.x + (tujuan.pan.x - dari.pan.x) * e,
+            y: dari.pan.y + (tujuan.pan.y - dari.pan.y) * e,
+          },
+        });
+        rafZoom.current = t < 1 ? requestAnimationFrame(langkah) : null;
+      };
+      rafZoom.current = requestAnimationFrame(langkah);
+    },
+    [hentikanAnimasiZoom, terapkanViewport]
+  );
+
+  /**
+   * Pasang zoom SEKETIKA. Ini jalur roda tetikus, cubit trackpad, dan seretan:
+   * peristiwa itu datang bertubi-tubi puluhan kali per detik, dan tween di
+   * atasnya akan terasa terlambat serta membuat papan berenang di bawah kursor.
+   */
+  const aturZoom = useCallback(
+    (target: number, titik?: { x: number; y: number }) => {
+      hentikanAnimasiZoom();
+      terapkanViewport(tujuanZoom(target, titik) ?? viewport.current);
+    },
+    [hentikanAnimasiZoom, terapkanViewport, tujuanZoom]
+  );
+
+  /** Kalikan zoom saat ini dengan `faktor`, terpotong 0.2x–3x. Seketika. */
   const geserZoom = useCallback(
     (faktor: number, titik?: { x: number; y: number }) => {
       aturZoom(viewport.current.zoom * faktor, titik);
     },
     [aturZoom]
+  );
+
+  /**
+   * #662 — `geserZoom` untuk aksi DISKRET: tombol plus/minus di dock dan di
+   * bilah kanvas, serta pintasan `+`/`-`. Satu penekanan adalah satu langkah
+   * yang punya awal dan akhir, jadi ia digerakkan. Jangkarnya tengah kanvas,
+   * bukan kursor, karena aksi ini memang tidak punya kursor.
+   */
+  const geserZoomHalus = useCallback(
+    (faktor: number) => {
+      animasikanZoom(tujuanZoom(viewport.current.zoom * faktor));
+    },
+    [animasikanZoom, tujuanZoom]
   );
 
   // Wheel event handler for zoom and pan
@@ -241,9 +377,9 @@ export function useFlowchartCanvas() {
     setIsSnapToGrid((prev) => !prev);
   };
 
-  // Reset zoom to default
+  // #662 — aksi tombol, jadi digerakkan.
   const resetZoom = () => {
-    aturZoom(ZOOM_AWAL);
+    animasikanZoom(tujuanZoom(ZOOM_AWAL));
   };
 
   // Reset pan to origin
@@ -261,20 +397,27 @@ export function useFlowchartCanvas() {
    * #618 — padanan "zoom to fit" Miro/draw.io. `batas` dihitung pemanggil dari
    * seluruh bentuk di papan; kanvas dibaca dari ref supaya angka viewport yang
    * dipakai adalah yang sedang tampil, bukan asumsi.
+   *
+   * #662 — `animasi` dinyalakan HANYA oleh tombol/pintasan. Pemanggilan saat
+   * diagram pertama kali dimuat membiarkannya mati: menganimasikan papan yang
+   * baru terbuka berarti pengguna menonton papan menyesuaikan diri alih-alih
+   * langsung melihat isinya.
    */
-  const pasKeLayar = (batas: Batas | null) => {
+  const pasKeLayar = (batas: Batas | null, animasi = false) => {
     const el = canvasContainerRef.current;
     const hasil = hitungPasKeLayar(batas, {
       lebar: el?.clientWidth ?? 0,
       tinggi: el?.clientHeight ?? 0,
     });
-    setZoomLevel(hasil.zoom);
-    setPanOffset(hasil.pan);
-    viewport.current = { zoom: hasil.zoom, pan: hasil.pan };
+    if (animasi) animasikanZoom(hasil);
+    else {
+      hentikanAnimasiZoom();
+      terapkanViewport(hasil);
+    }
   };
 
-  /** #534 — tombol persentase meminta 100%, bukan skala awal. */
-  const skalaSeratus = () => aturZoom(ZOOM_SERATUS);
+  /** #534 — tombol persentase meminta 100%, bukan skala awal. #662 — digerakkan. */
+  const skalaSeratus = () => animasikanZoom(tujuanZoom(ZOOM_SERATUS));
 
   /**
    * #635 — menjamin `batas` terlihat setelah menempel. viewport dibaca dari REF
@@ -336,6 +479,7 @@ export function useFlowchartCanvas() {
     // Handlers
     aturZoom,
     geserZoom,
+    geserZoomHalus,
     startCanvasPanning,
     updatePanOffset,
     stopCanvasPanning,
