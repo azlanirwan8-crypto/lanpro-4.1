@@ -13,6 +13,23 @@ import {
 import type { GayaGaris } from "./gayaImpor";
 
 /**
+ * #611(a) — angka dari teks impor, dengan cadangan yang BENAR-BENAR dipakai.
+ *
+ * Pola `parseFloat(a || b || "150") || idx * 60` tampak seperti punya dua
+ * jaring pengaman tetapi hanya punya satu: teks cadangan membuat `parseFloat`
+ * selalu berhasil, sehingga cabang `||` di belakangnya tidak pernah jalan dan
+ * setiap baris tanpa koordinat menumpuk di titik yang sama. Di sini cadangannya
+ * satu dan diserahkan pemanggil, jadi bisa berupa turunan indeks baris.
+ *
+ * `NaN`, `Infinity`, `""`, `null`, dan `undefined` semuanya jatuh ke cadangan;
+ * `0` TIDAK, karena koordinat nol di papan adalah nilai yang sah.
+ */
+const nomorAtau = (mentah: unknown, cadangan: number): number => {
+  const nilai = typeof mentah === "number" ? mentah : parseFloat(String(mentah ?? ""));
+  return Number.isFinite(nilai) ? nilai : cadangan;
+};
+
+/**
  * #665 - kolom gaya garis hasil pembacaan `style=` tepi. Kedua jalur pembuatan
  * garis (yang bersambung `source` dan `target`, dan yang hanya koordinat ujung
  * seperti #636) memakai fungsi yang sama, supaya tidak ada satu jalur yang
@@ -853,8 +870,13 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
           label: row.label || row.text || row.value || undefined,
         });
       } else {
-        const x = parseFloat(row.x || row.left || "150") || idx * 60 + 100;
-        const y = parseFloat(row.y || row.top || "150") || idx * 40 + 120;
+        /* #611(a) — `parseFloat(row.x || row.left || "150") || idx * 60 + 100`
+         * tidak pernah mencapai cabang berjenjangnya: teks cadangan "150"
+         * membuat `parseFloat` selalu menghasilkan angka, jadi dua baris CSV
+         * tanpa kolom posisi mendarat di titik yang sama persis dan tampil
+         * sebagai satu kotak. Cadangannya harus INDEKS barisnya. */
+        const x = nomorAtau(row.x ?? row.left, idx * 60 + 100);
+        const y = nomorAtau(row.y ?? row.top, idx * 40 + 120);
         const width = parseFloat(row.width || "130") || 130;
         const height = parseFloat(row.height || "80") || 80;
 
@@ -956,20 +978,17 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
         item.from;
 
       if (!isConnector) {
-        let x = 150;
-        let y = 150;
+        /* #611(a) — cabang JSON menumpuk persis seperti CSV: setiap item tanpa
+         * `position` jatuh ke 150/150, jadi tiga item Miro tampil sebagai satu
+         * kotak. Cadangannya turunan indeks, sama dengan cabang CSV di atas. */
+        let x = idx * 60 + 100;
+        let y = idx * 40 + 120;
         if (item.position) {
-          x =
-            typeof item.position.x === "number"
-              ? item.position.x
-              : parseFloat(item.position.x || "150");
-          y =
-            typeof item.position.y === "number"
-              ? item.position.y
-              : parseFloat(item.position.y || "150");
-        } else if (typeof item.x === "number") {
-          x = item.x;
-          y = item.y ?? 150;
+          x = nomorAtau(item.position.x, x);
+          y = nomorAtau(item.position.y, y);
+        } else if (item.x !== undefined || item.y !== undefined) {
+          x = nomorAtau(item.x, x);
+          y = nomorAtau(item.y, y);
         }
 
         let width = 130;
