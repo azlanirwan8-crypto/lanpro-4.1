@@ -9,8 +9,6 @@ import {
   Trash2,
   CheckCircle2,
   Rocket,
-  Star,
-  PieChart,
   MoreVertical,
   Zap,
 } from "lucide-react";
@@ -19,8 +17,9 @@ import { cn, ensureDate } from "../../../lib/utils";
 import { getAllDescendants, getTaskDepth } from "../../../lib/taskTree";
 import { TypeIcon } from "../../../components/ui/CommonComponents";
 import { warnaDariMaster } from "../../../lib/warnaLabel";
-import { Task, Sprint, MasterData } from "../../../types";
+import { Task, Sprint, MasterData, UserProfile } from "../../../types";
 import { statusSelesai } from "../../../lib/statusSelesai";
+import { RingkasanSprint } from "./RingkasanSprint";
 import { Droppable as _Droppable } from "@hello-pangea/dnd";
 
 const Droppable = _Droppable as any;
@@ -29,6 +28,8 @@ interface SprintSectionProps {
   sprints: Sprint[];
   tasks: Task[];
   masterData?: MasterData[];
+  /** Dipakai panel "beban per anggota" untuk menampilkan nama + avatar. */
+  projectMembers?: UserProfile[];
   expandedSprintId: string | null;
   setExpandedSprintId: (id: string) => void;
   renderDraggableTask: (task: Task, index: number, variant: "card" | "row") => React.ReactNode;
@@ -44,6 +45,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
   sprints,
   tasks,
   masterData = [],
+  projectMembers = [],
   expandedSprintId,
   setExpandedSprintId,
   renderDraggableTask,
@@ -285,71 +287,17 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                   </div>
                 </div>
 
-                {/* Baris Bawah: Grid 4-Kartu Ringkasan (Presisi Gambar 1) */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-2.5 bg-surface-sunken/50 rounded-xl border border-border-subtle/70 mt-1">
-                  {/* 1. Issues Card */}
-                  <div className="bg-surface border border-border-subtle/80 rounded-lg p-2.5 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                      <Calendar className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-content-strong leading-none">
-                        {totalTasks}
-                      </div>
-                      <div className="text-[11px] font-normal text-content-subtle mt-0.5">
-                        {t("planning.issues", "Issues")}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 2. Points Card */}
-                  <div className="bg-surface border border-border-subtle/80 rounded-lg p-2.5 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
-                      <Star className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-content-strong leading-none">
-                        {sprintTasks.reduce((acc, t) => acc + (t.storyPoints || 0), 0)}
-                      </div>
-                      <div className="text-[11px] font-normal text-content-subtle mt-0.5">
-                        {t("planning.points", "Points")}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 3. Progress Card */}
-                  <div className="bg-surface border border-border-subtle/80 rounded-lg p-2.5 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-purple-500/10 text-purple-600 flex items-center justify-center shrink-0">
-                      <PieChart className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-content-strong leading-none">
-                        {completionPercentage}%
-                      </div>
-                      <div className="text-[11px] font-normal text-content-subtle mt-0.5">
-                        {t("planning.progress", "Progress")}
-                        {totalPoints > 0
-                          ? ` · ${donePoints}/${totalPoints} pts`
-                          : ` · ${doneTasks}/${totalTasks}`}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 4. Completed Card */}
-                  <div className="bg-surface border border-border-subtle/80 rounded-lg p-2.5 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-                      <CheckCircle2 className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-content-strong leading-none">
-                        {doneTasks}/{totalTasks}
-                      </div>
-                      <div className="text-[11px] font-normal text-content-subtle mt-0.5">
-                        {t("planning.completed", "Completed")}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {/* Ringkasan sprint: 2 baris metrik + beban per anggota. */}
+                <RingkasanSprint
+                  sprintTasks={sprintTasks}
+                  masterData={masterData}
+                  projectMembers={projectMembers}
+                  totalTasks={totalTasks}
+                  doneTasks={doneTasks}
+                  totalPoints={totalPoints}
+                  donePoints={donePoints}
+                  completionPercentage={completionPercentage}
+                />
               </div>
 
               <AnimatePresence>

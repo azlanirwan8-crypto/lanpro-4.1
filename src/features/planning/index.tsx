@@ -284,6 +284,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
               sprints={sprints}
               tasks={tasks}
               masterData={masterData}
+              projectMembers={projectMembers}
               expandedSprintId={expandedSprintId}
               setExpandedSprintId={setExpandedSprintId}
               renderDraggableTask={renderDraggableTask}
