@@ -28,7 +28,27 @@ import { ImportDiagramModal } from "./ImportDiagramModal";
  */
 const PENGECUALIAN = [{ berkas: "FlowchartContainer.tsx", baris: /label: "Ide Baru Miro/ }];
 
-const PITA_EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}]/u;
+/**
+ * #739 — pita ini diperlebar dua blok dari versi #532:
+ *
+ *   `2300-23FF` (Miscellaneous Technical) memuat `⏰` U+23F0, dan `25A0-25FF`
+ *   (Geometric Shapes) memuat `◀`/`▶`. Keduanya glyph berwarna di font platform
+ *   mana pun, jadi persis masalah yang sama dengan emoji: tidak bisa diwarnai
+ *   token, tidak ikut ukuran teks, dan berbeda antar platform.
+ *
+ *   `2190-21FF` (panah `← ↑ ↓ →`) SENGAJA tidak ikut. Di kamus dan di komponen
+ *   panah itu dipakai sebagai TIPOGRAFI, bukan hiasan: `arrowKeys` ("Tombol
+ *   Panah (↑↓←→)") memang sedang membicarakan tombol panahnya, dan hint
+ *   "File → Export As → XML" adalah notasi jalur menu baku. Memasukkannya akan
+ *   memaksa dua pengecualian bernama untuk teks yang benar, dan pengecualian
+ *   yang banyak adalah cara sebuah gerbang kehilangan artinya. Yang dipakai
+ *   sebagai hiasan (`backToList` "← Kembali…", `undoDone` "… ◀") tetap
+ *   dibersihkan di #739 — hanya saja tidak dipagari gerbang ini.
+ */
+/* FE0F berdiri di luar kelas: ia tanda gabungan (Mn), dan di dalam kelas ia
+ * tidak bisa menggabungkan diri dengan apa pun — `no-misleading-character-class`. */
+const PITA_EMOJI =
+  /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{2300}-\u{23FF}\u{25A0}-\u{25FF}]|\u{FE0F}/u;
 
 const sapu = (dir: string, hasil: string[] = []): string[] => {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -38,6 +58,16 @@ const sapu = (dir: string, hasil: string[] = []): string[] => {
   }
   return hasil;
 };
+
+/**
+ * #739 — kamus i18n ikut disapu. Sebelum ini ratchet-nya berhenti di
+ * `src/features/flowchart` dan 25 kunci per locale membawa emoji di dalam
+ * stringnya, jadi membersihkan komponen saja tidak pernah cukup: teks yang
+ * tampil tetap datang dari kamus.
+ */
+const KAMUS = ["id.ts", "en.ts"].map((n) =>
+  path.join(__dirname, "..", "..", "..", "i18n", "locales", n)
+);
 
 const pasang = () =>
   render(
@@ -78,8 +108,8 @@ describe("#532 — ikon lucide menggantikan glyph emoji di dialog impor", () => 
 
   it("petunjuk, ringkasan hasil, dan lencana punya ikon SVG", () => {
     const { baseElement } = pasang();
-    const kelas = Array.from(baseElement.querySelectorAll("svg.lucide")).map((s) =>
-      Array.from(s.classList).find((c) => c.startsWith("lucide-") && c !== "lucide") || ""
+    const kelas = Array.from(baseElement.querySelectorAll("svg.lucide")).map(
+      (s) => Array.from(s.classList).find((c) => c.startsWith("lucide-") && c !== "lucide") || ""
     );
     for (const nama of [
       "lucide-lightbulb",
@@ -90,8 +120,8 @@ describe("#532 — ikon lucide menggantikan glyph emoji di dialog impor", () => 
       expect(kelas).toContain(nama);
   });
 
-  it("tidak ada emoji baru di chrome papan gambar", () => {
-    const berkas = sapu(path.join(__dirname, ".."));
+  it("tidak ada emoji baru di chrome papan gambar maupun di kamus i18n", () => {
+    const berkas = [...sapu(path.join(__dirname, "..")), ...KAMUS];
     const situs: string[] = [];
     for (const b of berkas) {
       const nama = path.basename(b);
@@ -103,5 +133,19 @@ describe("#532 — ikon lucide menggantikan glyph emoji di dialog impor", () => 
       });
     }
     expect(situs).toEqual([]);
+  });
+
+  it("kedua tombol terapan punya ikon SVG sendiri, bukan glyph di dalam label (#739)", () => {
+    const { baseElement } = pasang();
+    const tombol = Array.from(baseElement.querySelectorAll("button")).filter((b) =>
+      /Gabungkan ke Kanvas|Merge into Canvas|Ganti Kanvas Aktif|Replace Active Canvas/.test(
+        b.textContent || ""
+      )
+    );
+    // Kedua label itu muncul hanya bila `parsedImportData` terisi, yaitu keadaan
+    // yang dipasang `pasang()`. Bila jumlahnya bukan dua, yang berubah adalah
+    // syarat rendernya dan assertion di bawah tidak lagi membuktikan apa-apa.
+    expect(tombol).toHaveLength(2);
+    for (const b of tombol) expect(b.querySelector("svg")).not.toBeNull();
   });
 });

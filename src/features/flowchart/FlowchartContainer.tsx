@@ -39,6 +39,7 @@ import {
   Link as LinkIcon,
   Copy,
   ChevronLeft,
+  ChevronRight,
   FileDown,
 } from "lucide-react";
 import { Task, Project } from "../../types";
@@ -4502,9 +4503,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           <span className="hidden sm:inline text-[11px]">
                             {t("flowchart.propertiesEditor")}
                           </span>
-                          <span className="hidden md:inline text-content-subtle">
-                            {isRightSidebarOpen ? "▶" : "◀"}
-                          </span>
+                          {/* #739 — penanda arah panel ini dulu dua glyph emoji
+                              di dalam JSX. Diganti ikon lucide supaya ikut token
+                              tema, rata baseline dengan teks di sebelahnya, dan
+                              tidak berubah bentuk antar platform. */}
+                          {isRightSidebarOpen ? (
+                            <ChevronRight className="hidden md:inline w-3.5 h-3.5 text-content-subtle" />
+                          ) : (
+                            <ChevronLeft className="hidden md:inline w-3.5 h-3.5 text-content-subtle" />
+                          )}
                         </button>
 
                         {/* FLOATING CANVAS ACTION RIBBON (CENTER DOCK) — #321: naik/sembunyi saat sheet HP */}

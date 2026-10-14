@@ -25,6 +25,8 @@ import {
   CheckCircle,
   Shapes,
   MoveUpRight,
+  Plus,
+  Replace,
 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { Modal } from "../../../components/ui/Modal";
@@ -184,9 +186,13 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
           {parsedImportData ? (
             <>
               <Button type="button" variant="soft" onClick={handleApplyImportMerge}>
+                {/* #739 — ikon dipilih komponen, bukan diselundupkan ke dalam
+                    string kamus sebagai emoji. */}
+                <Plus className="w-4 h-4" />
                 {t("importDiagram.mergeCanvas")}
               </Button>
               <Button type="button" onClick={handleApplyImportReplace}>
+                <Replace className="w-4 h-4" />
                 {t("importDiagram.replaceCanvas")}
               </Button>
             </>
