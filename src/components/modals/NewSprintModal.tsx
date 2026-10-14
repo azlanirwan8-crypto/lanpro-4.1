@@ -41,7 +41,11 @@ export const NewSprintModal: React.FC<NewSprintModalProps> = ({
       onClose={onClose}
       title={t("newSprint.title")}
       footer={
-        <Button onClick={onSubmit} disabled={isSubmitting} className="justify-center min-w-[8rem]">
+        <Button
+          onClick={onSubmit}
+          disabled={isSubmitting}
+          className="justify-center min-w-[8rem] font-medium!"
+        >
           {t("newSprint.createAssign")}
         </Button>
       }

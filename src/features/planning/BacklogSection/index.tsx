@@ -24,11 +24,12 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("All Priorities");
-  // State untuk track parent task mana yang di-expand
-  const [expandedParents, setExpandedParents] = useState<Set<string>>(new Set());
+  // Default TERBUKA: yang disimpan adalah kelompok yang DITUTUP pengguna.
+  // Bila default tertutup, kartu Draggable tidak dirender dan drag-drop mati.
+  const [collapsedParents, setCollapsedParents] = useState<Set<string>>(new Set());
 
   const toggleExpand = (parentId: string) => {
-    setExpandedParents((prev) => {
+    setCollapsedParents((prev) => {
       const next = new Set(prev);
       if (next.has(parentId)) {
         next.delete(parentId);
@@ -173,7 +174,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
           const items = getTasksForParent(epic.id);
           if (items.length === 0) return [];
 
-          const isExpanded = expandedParents.has(`epic-${epic.id}`);
+          const isExpanded = !collapsedParents.has(`epic-${epic.id}`);
           const EpicIcon = getIconForTaskType("epic", masterData);
           const epicColor = getColorForTaskType("epic", masterData);
           const epicColorClass = epicColor.colorClass || "text-purple-600";
@@ -243,7 +244,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
           const items = getTasksForParent("standalone");
           if (items.length === 0) return [];
           
-          const isExpanded = expandedParents.has("standalone");
+          const isExpanded = !collapsedParents.has("standalone");
           const StandaloneIcon = getIconForTaskType("task", masterData);
           const standaloneColor = "text-content-muted";
 
