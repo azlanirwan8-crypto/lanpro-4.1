@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Search, LayoutGrid, Filter, Plus, ChevronRight, ChevronDown } from "lucide-react";
-import * as LucideIcons from "lucide-react";
 import { Task, MasterData } from "../../../types";
 import { StyledDropdown } from "../../../components/ui/CommonComponents";
-import { getAllDescendants, getTaskDepth } from "../../../lib/utils";
+import { getAllDescendants, getTaskDepth } from "../../../lib/taskTree";
+import { getIconForTaskType, getColorForTaskType } from "../iconMasterData";
 
 interface BacklogSectionProps {
   tasks: Task[];
@@ -37,40 +37,6 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
       }
       return next;
     });
-  };
-
-  // Helper untuk mendapatkan icon dari MasterData berdasarkan type task
-  const getIconForTaskType = (taskType: string | undefined, masterData: MasterData[]) => {
-    if (!taskType) return null;
-    
-    // Cari di master data yang tipenya "issue_type" atau sejenisnya
-    const typeData = masterData.find(
-      (m) => m.type.toLowerCase() === "issue_type" && m.label.toLowerCase() === taskType.toLowerCase()
-    );
-    
-    if (typeData?.icon && typeof typeData.icon === 'string') {
-      // Convert icon name string ke component Lucide
-      const iconName = typeData.icon.charAt(0).toUpperCase() + typeData.icon.slice(1);
-      const IconComponent = (LucideIcons as any)[iconName];
-      if (IconComponent && typeof IconComponent === 'function') {
-        return IconComponent;
-      }
-    }
-    
-    // Fallback: gunakan icon default berdasarkan type
-    if (taskType.toLowerCase() === "epic") return LucideIcons.Zap;
-    return LucideIcons.Target;
-  };
-
-  // Helper untuk mendapatkan warna dari MasterData
-  const getColorForTaskType = (taskType: string | undefined, masterData: MasterData[]) => {
-    if (!taskType) return "text-content-muted";
-    
-    const typeData = masterData.find(
-      (m) => m.type.toLowerCase() === "issue_type" && m.label.toLowerCase() === taskType.toLowerCase()
-    );
-    
-    return typeData?.color || "text-content-muted";
   };
 
   // #689 butir (g) — satu kali jalan, bukan saringan berulang per baris.
@@ -206,35 +172,40 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
         {epics.flatMap((epic) => {
           const items = getTasksForParent(epic.id);
           if (items.length === 0) return [];
-          
+
           const isExpanded = expandedParents.has(`epic-${epic.id}`);
           const EpicIcon = getIconForTaskType("epic", masterData);
           const epicColor = getColorForTaskType("epic", masterData);
-          
-          // Kelompokkan task berdasarkan direct parent untuk collapsible
-          const directChildrenMap = new Map<string, { task: Task; depth: number }[]>();
-          items.forEach((item) => {
-            const parentKey = item.task.parentId || "root";
-            if (!directChildrenMap.has(parentKey)) {
-              directChildrenMap.set(parentKey, []);
-            }
-            directChildrenMap.get(parentKey)!.push(item);
-          });
+          const epicColorClass = epicColor.colorClass || "text-purple-600";
 
           return [
-            <div 
-              key={`header-${epic.id}`} 
+            <div
+              key={`header-${epic.id}`}
               className="flex items-center gap-2 px-1 mt-3 mb-2 cursor-pointer hover:bg-purple-500/5 rounded-md py-1 transition-colors"
               onClick={() => toggleExpand(`epic-${epic.id}`)}
             >
               {isExpanded ? (
-                <ChevronDown className={`w-3.5 h-3.5 shrink-0 ${epicColor}`} />
+                <ChevronDown
+                  className={`w-3.5 h-3.5 shrink-0 ${epicColorClass}`}
+                  style={epicColor.colorStyle}
+                />
               ) : (
-                <ChevronRight className={`w-3.5 h-3.5 shrink-0 ${epicColor}`} />
+                <ChevronRight
+                  className={`w-3.5 h-3.5 shrink-0 ${epicColorClass}`}
+                  style={epicColor.colorStyle}
+                />
               )}
-              {EpicIcon && <EpicIcon className={`w-3.5 h-3.5 ${epicColor}`} />}
-              <span className={`text-xs font-normal leading-none ${epicColor}`}>{epic.title}</span>
-              <div className={`ml-auto text-[10px] leading-none font-normal ${epicColor} bg-purple-500/10 px-2 py-0.2 rounded-md border border-purple-500/30`}>
+              <EpicIcon className={`w-3.5 h-3.5 ${epicColorClass}`} style={epicColor.colorStyle} />
+              <span
+                className={`text-xs font-normal leading-none ${epicColorClass}`}
+                style={epicColor.colorStyle}
+              >
+                {epic.title}
+              </span>
+              <div
+                className={`ml-auto text-[10px] leading-none font-normal ${epicColorClass} bg-purple-500/10 px-2 py-0.2 rounded-md border border-purple-500/30`}
+                style={epicColor.colorStyle}
+              >
                 {items.length}
               </div>
             </div>,
@@ -287,8 +258,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
               ) : (
                 <ChevronRight className={`w-3.5 h-3.5 shrink-0 ${standaloneColor}`} />
               )}
-              {StandaloneIcon && <StandaloneIcon className={`w-3.5 h-3.5 ${standaloneColor}`} />}
-              <span className="text-xs font-normal text-content-secondary leading-none">
+              {StandaloneIcon && <StandaloneIcon className={`w-3.5 h-3.5 ${standaloneColor}`} />}              <span className="text-xs font-normal text-content-secondary leading-none">
                 {t("planning.standaloneBacklog")}
               </span>
               <div className="ml-auto text-xs sm:text-[10px] font-normal text-content-secondary bg-surface-muted px-2 py-0.2 rounded-md border border-border-subtle/60">

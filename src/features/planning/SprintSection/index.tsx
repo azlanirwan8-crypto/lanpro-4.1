@@ -12,10 +12,12 @@ import {
   Star,
   PieChart,
   MoreVertical,
+  Zap,
 } from "lucide-react";
-import * as LucideIcons from "lucide-react";
 import { format } from "date-fns";
-import { cn, ensureDate, getAllDescendants, getTaskDepth } from "../../../lib/utils";
+import { cn, ensureDate } from "../../../lib/utils";
+import { getAllDescendants, getTaskDepth } from "../../../lib/taskTree";
+import { getIconForTaskType, getColorForTaskType } from "../iconMasterData";
 import { Task, Sprint, MasterData } from "../../../types";
 import { statusSelesai } from "../../../lib/statusSelesai";
 import { Droppable as _Droppable } from "@hello-pangea/dnd";
@@ -71,36 +73,6 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
 
   const isExpanded = (sprintId: string, parentId: string) => {
     return expandedParents[sprintId]?.has(parentId) || false;
-  };
-
-  // Helper untuk mendapatkan icon dari MasterData berdasarkan type task
-  const getIconForTaskType = (taskType: string | undefined, masterData: MasterData[]) => {
-    if (!taskType) return null;
-    
-    const typeData = masterData.find(
-      (m) => m.type.toLowerCase() === "issue_type" && m.label.toLowerCase() === taskType.toLowerCase()
-    );
-    
-    if (typeData?.icon && typeof typeData.icon === 'string') {
-      const iconName = typeData.icon.charAt(0).toUpperCase() + typeData.icon.slice(1);
-      const IconComponent = (LucideIcons as any)[iconName];
-      if (IconComponent && typeof IconComponent === 'function') {
-        return IconComponent;
-      }
-    }
-    
-    if (taskType.toLowerCase() === "epic") return LucideIcons.Zap;
-    return LucideIcons.Target;
-  };
-
-  const getColorForTaskType = (taskType: string | undefined, masterData: MasterData[]) => {
-    if (!taskType) return "text-content-muted";
-    
-    const typeData = masterData.find(
-      (m) => m.type.toLowerCase() === "issue_type" && m.label.toLowerCase() === taskType.toLowerCase()
-    );
-    
-    return typeData?.color || "text-content-muted";
   };
 
   return (
@@ -238,7 +210,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                             }}
                             className="btn-animation waves-effect waves-light btn-primary h-8 px-3 text-xs font-normal rounded-lg flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
                           >
-                            <LucideIcons.Zap className="w-3.5 h-3.5 fill-current" />{" "}
+                            <Zap className="w-3.5 h-3.5 fill-current" />{" "}
                             <span>{t("planning.start")}</span>
                           </button>
                         )}
@@ -455,7 +427,8 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                     const epicExpanded = isExpanded(sprint.id, `epic-${epic.id}`);
                                     const EpicIcon = getIconForTaskType("epic", masterData);
                                     const epicColor = getColorForTaskType("epic", masterData);
-                                    
+                                    const epicColorClass = epicColor.colorClass || "text-purple-600";
+
                                     return [
                                       <div
                                         key={`sprint-header-${epic.id}`}
@@ -464,16 +437,31 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                       >
                                         <div className="flex items-center gap-2">
                                           {epicExpanded ? (
-                                            <ChevronDown className={`w-3.5 h-3.5 shrink-0 ${epicColor}`} />
+                                            <ChevronDown
+                                              className={`w-3.5 h-3.5 shrink-0 ${epicColorClass}`}
+                                              style={epicColor.colorStyle}
+                                            />
                                           ) : (
-                                            <ChevronRight className={`w-3.5 h-3.5 shrink-0 ${epicColor}`} />
+                                            <ChevronRight
+                                              className={`w-3.5 h-3.5 shrink-0 ${epicColorClass}`}
+                                              style={epicColor.colorStyle}
+                                            />
                                           )}
-                                          {EpicIcon && <EpicIcon className={`w-3.5 h-3.5 ${epicColor}`} />}
-                                          <span className={`text-xs font-normal leading-none ${epicColor}`}>
+                                          <EpicIcon
+                                            className={`w-3.5 h-3.5 ${epicColorClass}`}
+                                            style={epicColor.colorStyle}
+                                          />
+                                          <span
+                                            className={`text-xs font-normal leading-none ${epicColorClass}`}
+                                            style={epicColor.colorStyle}
+                                          >
                                             {epic.title}
                                           </span>
                                         </div>
-                                        <div className={`text-[10px] font-normal ${epicColor} bg-surface border border-purple-500/30 px-2 py-0.2 rounded-md`}>
+                                        <div
+                                          className={`text-[10px] font-normal ${epicColorClass} bg-surface border border-purple-500/30 px-2 py-0.2 rounded-md`}
+                                          style={epicColor.colorStyle}
+                                        >
                                           {items.length}
                                         </div>
                                       </div>,
