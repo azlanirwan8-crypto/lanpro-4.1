@@ -172,19 +172,22 @@ export const RingkasanSprint: React.FC<RingkasanSprintProps> = ({
             {beban.map((b) => (
               <div
                 key={b.uid || "tanpa-penanggung"}
-                className="group flex-1 min-w-[10rem] bg-surface-sunken/60 border border-border-subtle/70 rounded-lg px-2.5 py-2 flex flex-col gap-2 transition-all duration-200 hover:-translate-y-px hover:shadow-xs hover:border-border-default hover:bg-surface-sunken"
+                className="group flex-1 min-w-[8.5rem] bg-surface-sunken/60 border border-border-subtle/70 rounded-lg px-2.5 py-2 flex flex-col gap-2 transition-all duration-200 hover:-translate-y-px hover:shadow-xs hover:border-border-default hover:bg-surface-sunken"
               >
-                {/* `items-start` bukan `items-center`: nama panjang boleh turun
-                    ke beberapa baris dan avatar tetap rapi di baris pertama. */}
-                <div className="flex items-start gap-2 min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
                   {b.uid ? (
-                    <UserAvatar uid={b.uid} members={projectMembers} size="sm" className="mt-px" />
+                    <UserAvatar uid={b.uid} members={projectMembers} size="sm" />
                   ) : (
-                    <span className="w-6 h-6 mt-px rounded-full bg-surface border border-border-subtle flex items-center justify-center shrink-0">
+                    <span className="w-6 h-6 rounded-full bg-surface border border-border-subtle flex items-center justify-center shrink-0">
                       <Users className="w-3.5 h-3.5 text-content-muted" />
                     </span>
                   )}
-                  <span className="flex-1 min-w-0 text-[11px] font-medium leading-snug break-words text-content-strong">
+                  {/* Satu baris penuh: nama panjang dipotong elipsis dan nama
+                      utuhnya tetap terbaca lewat tooltip. */}
+                  <span
+                    className="flex-1 min-w-0 truncate text-[11px] font-medium text-content-strong"
+                    title={b.nama}
+                  >
                     {b.nama}
                   </span>
                   <span className="text-[11px] font-semibold text-content-subtle tabular-nums shrink-0">
@@ -192,7 +195,11 @@ export const RingkasanSprint: React.FC<RingkasanSprintProps> = ({
                   </span>
                 </div>
                 <div className="group/bar relative mt-auto">
-                  <div className="h-1.5 rounded-full bg-surface overflow-hidden">
+                  {/* Track wajib terlihat walau isinya 0%: `bg-surface` di atas
+                      kartu `bg-surface-sunken/60` nyaris sewarna, dan bar 0%
+                      karenanya terbaca sebagai "bar hilang". Pola track ini
+                      sama dengan bar di AiMeetingCompanion. */}
+                  <div className="h-2 rounded-full bg-surface-sunken border border-border-subtle overflow-hidden">
                     <div
                       className={cn(
                         "h-full rounded-full transition-[width] duration-700 ease-out",

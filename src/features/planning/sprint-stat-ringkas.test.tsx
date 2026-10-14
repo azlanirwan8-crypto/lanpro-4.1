@@ -164,11 +164,19 @@ describe("panel beban per anggota", () => {
     expect(lebarBar("Budi")).toBe("0%");
   });
 
-  it("nama panjang tidak dipotong — tidak ada truncate di elemen nama", () => {
+  it("nama satu baris: dipotong elipsis, nama utuh lewat tooltip", () => {
     pasang();
     const nama = screen.getByText("Siti Aminah");
-    expect(nama.className).not.toContain("truncate");
-    expect(nama.className).toContain("break-words");
+    expect(nama.className).toContain("truncate");
+    expect(nama.getAttribute("title")).toBe("Siti Aminah");
+  });
+
+  it("track bar tetap terlihat walau isinya nol persen", () => {
+    pasang();
+    const track = barisAnggota("Budi").querySelector(".group\\/bar > div");
+    expect(track?.className).toContain("bg-surface-sunken");
+    expect(track?.className).toContain("border-border-subtle");
+    expect(lebarBar("Budi")).toBe("0%");
   });
 
   it("judul panel dan hitungan anggota di pojok sudah dihapus", () => {
@@ -182,7 +190,7 @@ describe("panel beban per anggota", () => {
     const deret = kartu.parentElement;
     expect(deret?.className).toContain("overflow-x-auto");
     expect(kartu.className).toContain("flex-1");
-    expect(kartu.className).toContain("min-w-[10rem]");
+    expect(kartu.className).toContain("min-w-[8.5rem]");
     // Semua kartu berbagi induk yang sama, jadi lebarnya sama rata.
     expect(deret?.children).toHaveLength(3);
     expect(barisAnggota("Budi").parentElement).toBe(deret);
