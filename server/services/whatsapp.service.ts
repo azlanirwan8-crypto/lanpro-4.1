@@ -8,6 +8,7 @@ import {
 import { ambilAppUrl } from "./email.service";
 import { ambilWhatsappToken } from "./integrationSettings.service";
 import { recordBroadcastLog } from "./broadcastLog.service";
+import { muatKunciTerminal, sqlStatusBukanTerminal } from "../lib/statusSelesai";
 
 const WA_API_URL = "https://api.fonnte.com/send";
 
@@ -123,6 +124,9 @@ export interface WhatsAppDigestResult {
 export interface TopikRapat {
   judulRapat: string;
   topik: string;
+  /** Putaran 3 (#744): diminta pemilik proyek supaya blok catatan menyebut keadaan butirnya. */
+  status: string;
+  targetDate: string;
 }
 
 /**
@@ -173,6 +177,9 @@ export async function ambilTopikRapat(
            COALESCE(NULLIF(TRIM(dp.concern), ''),
                     NULLIF(TRIM(dp.content), ''),
                     'Tanpa Topik')                   AS "topik",
+           COALESCE(NULLIF(TRIM(dp.status), ''),
+                    'pending')                       AS "status",
+           COALESCE(TRIM(dp."targetDate"), '')       AS "targetDate",
            COUNT(*) OVER()                           AS "total"
     FROM DiscussionPoints dp
     JOIN Meetings m ON m.id = dp."meetingId"
@@ -193,6 +200,8 @@ export async function ambilTopikRapat(
   const baris = (rows || []).map((r: any) => ({
     judulRapat: String(r.judulRapat || "Tanpa Judul Rapat").trim(),
     topik: String(r.topik || "Tanpa Topik").trim(),
+    status: String(r.status || "pending").trim(),
+    targetDate: String(r.targetDate || "").trim(),
     total: Number(r.total || 0),
   }));
 
@@ -223,6 +232,19 @@ export async function sendDailyTaskDigest(
     // Item #278: dibaca sekali per digest, bukan per pesan — sumbernya
     // basis data (UI Settings), dengan env APP_URL sebagai cadangan.
     const appUrlAktif = await ambilAppUrl();
+
+    /* #745 — arahan pemilik proyek 15 Okt: broadcast hanya memuat pekerjaan yang
+     * masih OPEN; yang sudah close/done tidak dikirim lagi. Tiga string hardcode
+     * lama diganti predikat terminal dari MasterData, pola yang sama dengan
+     * digest email (`taskDigest.service.ts:64-68`), supaya WhatsApp dan email
+     * akhirnya sepakat soal arti "aktif". Dibaca SEKALI per digest, bukan per
+     * pengguna. CATATAN JUJUR: lebar himpunan hasilnya terhadap tiga string lama
+     * belum bisa diukur dari mesin kerja karena database tidak terjangkau —
+     * pengukuran itu tetap tercatat sebagai syarat di baris #745.
+     */
+    const kunciTerminal = await muatKunciTerminal(connection);
+    const predikatBuka = sqlStatusBukanTerminal("t.status", kunciTerminal);
+
     let totalDikirim = 0;
     let totalGagal = 0;
     let totalTanpaTugas = 0;
@@ -263,7 +285,7 @@ export async function sendDailyTaskDigest(
         FROM Tasks t
         LEFT JOIN Projects p ON t."projectId" = p.id
         WHERE (t.assigneeId = ? OR t.assigneeId = ? OR t.assigneeId = ?)
-        AND t.status IN ('To Do', 'In Progress', 'Testing')
+        AND ${predikatBuka}
         ORDER BY p.name, COALESCE(t."endDate", t."dueDate")
       `,
         [uId, uUid, uUsername]
@@ -534,11 +556,18 @@ export function formatTaskList(tasks: any[]): string {
       const status = formatStatus(t.status);
       const priority = formatPriority(t.priority);
       const tanggal = formatTanggal(t.endDate || t.dueDate);
+      /* Putaran 3 (#744): judul tiket bisa jauh lebih panjang dari lebar layar
+       * ponsel, dan WhatsApp melipatnya di KOLOM NOL sehingga baris lanjutan
+       * menabrak nomor butir — persis tangkapan layar pemilik proyek pada
+       * butir 14–18. Judul karena itu dilipat sendiri, dengan indentasi gantung
+       * sejajar di bawah teks judul, bukan jatuh di bawah `[n]`.
+       */
+      const kepala = bungkusKepala(idx + 1, title);
       return (
-        `[${idx + 1}] ${title}\n` +
-        `    Status           : ${status}\n` +
-        `    Prioritas        : ${priority}\n` +
-        `    Tanggal Terakhir : ${tanggal}`
+        `${kepala}\n` +
+        `${barisLabel("Status", status, LEBAR_LABEL_TIKET)}\n` +
+        `${barisLabel("Prioritas", priority, LEBAR_LABEL_TIKET)}\n` +
+        `${barisLabel("Tanggal Terakhir", tanggal, LEBAR_LABEL_TIKET)}`
       );
     })
     .join("\n\n");
@@ -547,37 +576,20 @@ export function formatTaskList(tasks: any[]): string {
 }
 
 /**
- * Format daftar topik rapat untuk WhatsApp (#744), dikelompokkan per judul rapat.
- *
- * Topik rapat adalah kalimat utuh, bukan nilai pendek seperti status tiket,
- * jadi meniru label `Topik :` milik `formatTaskList()` justru merusak: label
- * memakan 12 karakter dan sisanya dilipat WhatsApp di kolom nol. Bentuknya
- * karena itu butir ber-indentasi gantung, dilipat sendiri di LEBAR_BLOK_RAPAT.
- *
- * Contoh:
- * ```
- * [1] KICKOFF Q4 PLANNING
- *     • Evaluasi kapasitas tim backend
- *     • Pembagian PIC rilis November
- *
- * [2] REVIEW SPRINT 12
- *     • Migrasi database ke Neon
- * ```
- */
-/**
- * Lebar maksimum satu baris di dalam blok monospace rapat (#744 putaran 2,
- * atas keluhan pemilik proyek saat uji kirim sungguhan).
+ * Lebar maksimum satu baris di dalam blok monospace (#744 putaran 2, atas
+ * keluhan pemilik proyek saat uji kirim sungguhan; putaran 3 melebarkan
+ * cakupannya ke blok tiket sesudah tangkapan layar kedua menunjukkan judul
+ * tiket panjang dilipat WhatsApp di kolom nol dan menabrak nomor butir).
  *
  * WhatsApp MELIPAT SENDIRI baris yang melebihi lebar layar, dan lipatannya
  * jatuh di kolom nol — di luar indentasi blok — sehingga pesan tampak
- * berantakan persis seperti tangkapan layar 15 Okt. Karena itu pelipatan
- * WAJIB dilakukan di sini, sebelum pesan dikirim, dengan indentasi gantung
- * supaya baris lanjutan tetap sejajar di bawah teksnya.
+ * berantakan. Pelipatan karena itu WAJIB dilakukan di sini, sebelum pesan
+ * dikirim, dengan indentasi gantung supaya baris lanjutan tetap sejajar.
  */
-const LEBAR_BLOK_RAPAT = 46;
-const AWAL_TOPIK = "    • ";
-const LANJUT_TOPIK = "      ";
-const LANJUT_JUDUL = "    ";
+const LEBAR_BLOK = 46;
+const INDENT = "    ";
+const LEBAR_LABEL_TIKET = 16; // "Tanggal Terakhir"; penjaga penyelarasan titik dua #505
+const LEBAR_LABEL_CATATAN = 14; // "Tanggal Target" — label terpanjang blok catatan
 
 function bungkus(teks: string, lebarIsi: number, indentLanjut: string): string {
   const baris: string[] = [];
@@ -596,24 +608,62 @@ function bungkus(teks: string, lebarIsi: number, indentLanjut: string): string {
   return baris.map((b, i) => (i === 0 ? b : `${indentLanjut}${b}`)).join("\n");
 }
 
+/**
+ * Baris kepala `[n] JUDUL`. Lipatannya menjorok tepat di bawah judulnya, bukan
+ * empat spasi tetap: awalan `[14] ` lebih lebar satu karakter daripada `[1] `,
+ * dan nomor dua digit justru yang tampak bertabrakan di tangkapan layar pemilik
+ * proyek (butir 14–18).
+ */
+function bungkusKepala(nomor: number, teks: string): string {
+  const awalan = `[${nomor}] `;
+  return bungkus(`${awalan}${teks}`, LEBAR_BLOK, " ".repeat(awalan.length));
+}
+
+/** Satu baris berlabel `Label : nilai`; nilai panjang dilipat sejajar di kolom nilainya. */
+function barisLabel(label: string, nilai: string, lebarLabel: number): string {
+  const kepala = `${INDENT}${label.padEnd(lebarLabel)} : `;
+  return `${kepala}${bungkus(nilai, LEBAR_BLOK - kepala.length, " ".repeat(kepala.length))}`;
+}
+
+/**
+ * Format daftar topik rapat untuk WhatsApp (#744), dikelompokkan per judul rapat.
+ * Putaran 3 atas permintaan pemilik proyek: tiap butir memuat TIGA label sejajar
+ * — Topik, Status, Tanggal Target — meniru penyelarasan titik dua blok tiket.
+ *
+ * Contoh:
+ * ```
+ * [1] KICKOFF Q4 PLANNING
+ *     Topik          : Evaluasi kapasitas tim
+ *                      backend
+ *     Status         : Pending
+ *     Tanggal Target : 18/10/2026
+ * ```
+ */
 export function formatMeetingList(rapat: TopikRapat[], totalSebelumBatas?: number): string {
-  const perRapat = new Map<string, string[]>();
+  const perRapat = new Map<string, TopikRapat[]>();
   for (const r of rapat) {
     const judul = (r.judulRapat || "Tanpa Judul Rapat").trim() || "Tanpa Judul Rapat";
     if (!perRapat.has(judul)) perRapat.set(judul, []);
     const daftar = perRapat.get(judul)!;
     const topik = (r.topik || "Tanpa Topik").trim() || "Tanpa Topik";
-    if (!daftar.includes(topik)) daftar.push(topik);
+    if (!daftar.some((d) => d.topik === topik)) daftar.push({ ...r, topik });
   }
 
   const inner = [...perRapat.entries()]
-    .map(([judul, topik], idx) => {
-      const kepala = bungkus(`[${idx + 1}] ${judul.toUpperCase()}`, LEBAR_BLOK_RAPAT, LANJUT_JUDUL);
-      const badan = topik
+    .map(([judul, daftar], idx) => {
+      const kepala = bungkusKepala(idx + 1, judul.toUpperCase());
+      const badan = daftar
         .map(
-          (t) => `${AWAL_TOPIK}${bungkus(t, LEBAR_BLOK_RAPAT - AWAL_TOPIK.length, LANJUT_TOPIK)}`
+          (r) =>
+            `${barisLabel("Topik", r.topik, LEBAR_LABEL_CATATAN)}\n` +
+            `${barisLabel("Status", formatStatus(r.status), LEBAR_LABEL_CATATAN)}\n` +
+            `${barisLabel(
+              "Tanggal Target",
+              r.targetDate ? formatTanggal(r.targetDate) : "-",
+              LEBAR_LABEL_CATATAN
+            )}`
         )
-        .join("\n");
+        .join("\n\n");
       return `${kepala}\n${badan}`;
     })
     .join("\n\n");

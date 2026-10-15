@@ -45,6 +45,51 @@ describe("WhatsApp Template Monospace Ticket (Item #505)", () => {
     expect(list).toContain("    Tanggal Terakhir : -");
   });
 
+  it("judul tiket panjang dilipat dengan indentasi gantung, tidak menabrak nomor butir", () => {
+    /* Putaran 3 #744: tangkapan layar pemilik proyek menunjukkan judul tiket
+     * panjang dilipat WhatsApp di kolom nol sehingga baris lanjutannya
+     * bertabrakan dengan nomor butir 14–18. Pelipatan kini dilakukan sendiri. */
+    const list = formatTaskList([
+      {
+        id: 1,
+        title: 'Status tidak konsisten: "sedang diproses" di app vs "inactive" di portal',
+        status: "To Do",
+        priority: "Medium",
+        dueDate: null,
+      },
+    ]);
+    const baris = list
+      .split("\n")
+      .slice(1, -1)
+      .filter((b) => b.trim().length > 0);
+    // Baris kepala `[n] …` memang mulai di kolom nol; yang dilarang jatuh di
+    // kolom nol adalah baris LANJUTAN dan baris berlabel.
+    baris.filter((b) => !b.startsWith("[")).forEach((b) => expect(b.startsWith(" ")).toBe(true));
+    expect(Math.max(...baris.map((b) => b.length))).toBeLessThanOrEqual(46);
+
+    const iKepala = baris.findIndex((b) => b.startsWith("[1]"));
+    expect(iKepala).toBeGreaterThan(-1);
+    expect(baris[iKepala + 1].startsWith("    ")).toBe(true);
+    expect(baris[iKepala + 1].startsWith("    Status")).toBe(false);
+  });
+
+  it("nomor dua digit: lipatan judul sejajar di bawah judulnya, bukan di bawah nomor", () => {
+    /* Tangkapan layar pemilik proyek menunjuk butir 14–18 khusus. Awalan
+     * `[14] ` lima karakter, jadi indentasi tetap empat spasi pasti miring. */
+    const banyak = Array.from({ length: 14 }, (_, i) => ({
+      id: i + 1,
+      title: "Judul tiket cukup panjang supaya pasti terlipat di layar ponsel",
+      status: "To Do",
+      priority: "Medium",
+      dueDate: null,
+    }));
+    const baris = formatTaskList(banyak).split("\n");
+    const i14 = baris.findIndex((b) => b.startsWith("[14] "));
+    expect(i14).toBeGreaterThan(-1);
+    expect(baris[i14 + 1].startsWith("     ")).toBe(true);
+    expect(baris[i14 + 1].startsWith("      ")).toBe(false);
+  });
+
   it("formatMessage menyusun pesan lengkap dengan header, list monospace, app url, dan footer resmi", () => {
     const msg = formatMessage("Azlan Irwan", sampleTasks, null, "https://lanpro.my.id");
 

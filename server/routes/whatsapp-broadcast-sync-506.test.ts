@@ -61,7 +61,12 @@ describe("Item #506: Sinkronisasi Multi-Recipient, Pelaporan Status, & Zona Wakt
       ],
     ]);
 
-    // 2. Query Tasks untuk user u-1 (memiliki 1 tugas)
+    // 2. Query MasterData type=status (#745) — kunci status terminal dibaca
+    //    sekali per digest, SEBELUM kueri tiket per pengguna. Baris kosong
+    //    berarti fallback terminal bawaan yang dipakai.
+    mockQuery.mockResolvedValueOnce([[]]);
+
+    // 3. Query Tasks untuk user u-1 (memiliki 1 tugas)
     mockQuery.mockResolvedValueOnce([
       [
         {
@@ -75,10 +80,13 @@ describe("Item #506: Sinkronisasi Multi-Recipient, Pelaporan Status, & Zona Wakt
       ],
     ]);
 
-    // 3. Insert BroadcastLogs untuk u-1 (success)
+    // 4. Query topik rapat untuk u-1 (#744) — tidak ada
     mockQuery.mockResolvedValueOnce([[]]);
 
-    // 4. Insert BroadcastLogs untuk u-2 (failed - tanpa HP)
+    // 5. Insert BroadcastLogs untuk u-1 (success)
+    mockQuery.mockResolvedValueOnce([[]]);
+
+    // 6. Insert BroadcastLogs untuk u-2 (failed - tanpa HP)
     mockQuery.mockResolvedValueOnce([[]]);
 
     const hasil = await sendDailyTaskDigest(undefined, ["u-1", "u-2"]);

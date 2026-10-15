@@ -33,10 +33,28 @@ import { DEFAULT_WHATSAPP_TEMPLATE } from "../services/broadcastConfig.service";
 
 const GARIS_KAKI = "─────────────────";
 
+/* Topik di fixture ini sengaja muat dalam satu baris (kolom nilai = 25 karakter)
+ * supaya assert baris-utuh tetap terbaca. Pelipatan topik panjang diuji terpisah
+ * lewat `topikPanjang` di bawah. */
 const topik: TopikRapat[] = [
-  { judulRapat: "Kickoff Q4 Planning", topik: "Evaluasi kapasitas tim backend" },
-  { judulRapat: "Kickoff Q4 Planning", topik: "Pembagian PIC rilis November" },
-  { judulRapat: "Review Sprint 12", topik: "Migrasi database ke Neon" },
+  {
+    judulRapat: "Kickoff Q4 Planning",
+    topik: "Evaluasi kapasitas tim",
+    status: "pending",
+    targetDate: "2026-11-02",
+  },
+  {
+    judulRapat: "Kickoff Q4 Planning",
+    topik: "Pembagian PIC rilis",
+    status: "pending",
+    targetDate: "",
+  },
+  {
+    judulRapat: "Review Sprint 12",
+    topik: "Migrasi database ke Neon",
+    status: "pending",
+    targetDate: "2026-10-20",
+  },
 ];
 
 const tiket = [
@@ -62,19 +80,48 @@ describe("#744 · formatMeetingList — blok topik rapat", () => {
     expect(list).toContain("[1] KICKOFF Q4 PLANNING");
     expect(list).toContain("[2] REVIEW SPRINT 12");
     expect(list.match(/KICKOFF Q4 PLANNING/g)).toHaveLength(1);
-    expect(list).toContain("    • Evaluasi kapasitas tim backend");
-    expect(list).toContain("    • Pembagian PIC rilis November");
-    expect(list).toContain("    • Migrasi database ke Neon");
+    expect(list).toContain("    Topik          : Evaluasi kapasitas tim");
+    expect(list).toContain("    Topik          : Pembagian PIC rilis");
+    expect(list).toContain("    Topik          : Migrasi database ke Neon");
   });
 
-  /* Putaran 2 #744 — tiga penjaga ini lahir dari tangkapan layar uji kirim
+  it("tiap butir memuat Status dan Tanggal Target sejajar, permintaan putaran 3", () => {
+    const list = formatMeetingList(topik);
+    expect(list).toContain("    Status         : Pending");
+    expect(list).toContain("    Tanggal Target : 02/11/2026");
+    expect(list).toContain("    Tanggal Target : 20/10/2026");
+    // targetDate kosong tidak boleh mencetak baris kosong atau tanggal palsu
+    expect(list).toContain("    Tanggal Target : -");
+  });
+
+  it("status rapat yang tersimpan sebagai kode tetap terbaca, bukan 'in_progress'", () => {
+    const list = formatMeetingList([
+      { judulRapat: "Rapat A", topik: "Topik", status: "in_progress", targetDate: "" },
+    ]);
+    expect(list).toContain("    Status         : In Progress");
+    expect(list).not.toContain("in_progress");
+  });
+
+  it("titik dua ketiga label berbaris di kolom yang sama", () => {
+    const kolom = new Set(
+      formatMeetingList(topik)
+        .split("\n")
+        .filter((b) => /^ {4}[A-Za-z][A-Za-z ]* : /.test(b))
+        .map((b) => b.indexOf(" : "))
+    );
+    expect(kolom.size).toBe(1);
+  });
+
+  /* Putaran 2 #744 — penjaga-penjaga ini lahir dari tangkapan layar uji kirim
    * sungguhan: WhatsApp melipat baris panjang di KOLOM NOL, di luar indentasi
    * blok, dan pesan tampak berantakan. Pelipatan kini dilakukan sendiri. */
-  const topikPanjang = [
+  const topikPanjang: TopikRapat[] = [
     {
       judulRapat: "Allignment Squad 1 - Wondr Merchant",
       topik:
         "Terakhir dari Andreas APS info ada 30 merchant yang belum berhasil dilakukan migrasi ulang karena informasi data yang kurang sesuai.",
+      status: "pending",
+      targetDate: "",
     },
   ];
 
@@ -93,36 +140,37 @@ describe("#744 · formatMeetingList — blok topik rapat", () => {
     isi.forEach((b) => expect(b.startsWith(" ")).toBe(true));
   });
 
-  it("baris lanjutan topik menjorok sejajar di bawah teks butirnya", () => {
-    const lanjutan = formatMeetingList(topikPanjang)
-      .split("\n")
-      .slice(1, -1)
-      .filter((b) => b.trim().length > 0 && !b.startsWith("    •") && !b.startsWith("["));
-    expect(lanjutan.length).toBeGreaterThan(0);
-    lanjutan.forEach((b) => expect(b.startsWith("      ")).toBe(true));
+  it("baris lanjutan nilai menjorok sejajar di kolom nilainya, bukan di kolom nol", () => {
+    const baris = formatMeetingList(topikPanjang).split("\n");
+    const iTopik = baris.findIndex((b) => b.startsWith("    Topik"));
+    expect(iTopik).toBeGreaterThan(-1);
+    expect(baris[iTopik + 1].startsWith(" ".repeat(21))).toBe(true);
+    expect(baris[iTopik + 1].trim().length).toBeGreaterThan(0);
   });
 
   it("tidak mencetak topik yang kembar dua kali di rapat yang sama", () => {
     const list = formatMeetingList([
-      { judulRapat: "Rapat A", topik: "Topik sama" },
-      { judulRapat: "Rapat A", topik: "Topik sama" },
+      { judulRapat: "Rapat A", topik: "Topik sama", status: "pending", targetDate: "" },
+      { judulRapat: "Rapat A", topik: "Topik sama", status: "pending", targetDate: "" },
     ]);
     expect(list.match(/Topik sama/g)).toHaveLength(1);
   });
 
   it("menyebut jumlah sisa yang terpotong batas, bukan membuangnya diam-diam", () => {
-    const sepuluh = Array.from({ length: BATAS_TOPIK_RAPAT }, (_, i) => ({
+    const sepuluh: TopikRapat[] = Array.from({ length: BATAS_TOPIK_RAPAT }, (_, i) => ({
       judulRapat: `Rapat ${i + 1}`,
       topik: `Topik ${i + 1}`,
+      status: "pending",
+      targetDate: "",
     }));
     expect(formatMeetingList(sepuluh, 14)).toContain("+ 4 topik lainnya tidak ditampilkan");
     expect(formatMeetingList(sepuluh, 10)).not.toContain("topik lainnya");
   });
 
   it("judul rapat dan topik kosong tetap tercetak, tidak menghasilkan baris '[1] '", () => {
-    const list = formatMeetingList([{ judulRapat: "  ", topik: "" }]);
+    const list = formatMeetingList([{ judulRapat: "  ", topik: "", status: "", targetDate: "" }]);
     expect(list).toContain("[1] TANPA JUDUL RAPAT");
-    expect(list).toContain("    • Tanpa Topik");
+    expect(list).toContain("    Topik          : Tanpa Topik");
   });
 });
 
@@ -276,14 +324,34 @@ describe("#744 · ambilTopikRapat — kueri dan batasnya", () => {
     expect(sql).not.toMatch(/[^"]\bmeetingId\b[^"]/);
   });
 
-  it("memetakan judul rapat dan topik, dan membawa total sebelum LIMIT", async () => {
+  it("memetakan judul rapat, topik, status, dan tanggal target, serta membawa total sebelum LIMIT", async () => {
     const koneksi = koneksiPalsu([
-      { judulRapat: "Rapat A", topik: "Topik satu", total: 12 },
-      { judulRapat: "Rapat B", topik: "Topik dua", total: 12 },
+      {
+        judulRapat: "Rapat A",
+        topik: "Topik satu",
+        status: "pending",
+        targetDate: "2026-10-20",
+        total: 12,
+      },
+      { judulRapat: "Rapat B", topik: "Topik dua", status: "pending", targetDate: "", total: 12 },
     ]);
     const hasil = await ambilTopikRapat(koneksi as any, ["7"]);
     expect(hasil.total).toBe(12);
-    expect(hasil.baris[0]).toEqual({ judulRapat: "Rapat A", topik: "Topik satu", total: 12 });
+    expect(hasil.baris[0]).toEqual({
+      judulRapat: "Rapat A",
+      topik: "Topik satu",
+      status: "pending",
+      targetDate: "2026-10-20",
+      total: 12,
+    });
+  });
+
+  it("kueri menarik status dan tanggal target untuk label blok catatan putaran 3", async () => {
+    const koneksi = koneksiPalsu([]);
+    await ambilTopikRapat(koneksi as any, ["7"]);
+    const sql = koneksi.tercatat[0].sql;
+    expect(sql).toContain(`AS "status"`);
+    expect(sql).toContain(`AS "targetDate"`);
   });
 });
 
@@ -335,5 +403,16 @@ describe("#744 · penjaga teks sumber whatsapp.service.ts", () => {
   it("totalTanpaTugas tetap ada (#504 menguncinya) dan totalTopikRapat dilaporkan", () => {
     expect(sumber).toContain("totalTanpaTugas++;");
     expect(sumber).toContain("totalTopikRapat: number;");
+  });
+
+  it("#745 — tiga status hardcode diganti predikat terminal MasterData", () => {
+    expect(sumber).not.toContain("t.status IN ('To Do', 'In Progress', 'Testing')");
+    expect(sumber).toContain("muatKunciTerminal(connection)");
+    expect(sumber).toContain('sqlStatusBukanTerminal("t.status", kunciTerminal)');
+  });
+
+  it("kunci terminal dibaca sekali per digest, bukan sekali per penerima", () => {
+    const jumlah = sumber.split("await muatKunciTerminal(connection)").length - 1;
+    expect(jumlah).toBe(1);
   });
 });
