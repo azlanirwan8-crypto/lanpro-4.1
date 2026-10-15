@@ -137,7 +137,7 @@ export const RingkasanSprint: React.FC<RingkasanSprintProps> = ({
         {kartu.map((k) => (
           <div
             key={k.kunci}
-            className="group bg-surface border border-border-subtle/80 rounded-lg px-2.5 py-2 flex items-center gap-2.5 min-w-0 transition-all duration-200 hover:-translate-y-px hover:shadow-xs hover:border-border-default"
+            className="group bg-surface border border-border-subtle/80 rounded-lg px-2.5 py-2 flex items-center gap-2.5 min-w-0 transition-all duration-200 hover:-translate-y-px hover:shadow-xs hover:border-border-subtle"
           >
             <div
               className={cn(
@@ -174,7 +174,7 @@ export const RingkasanSprint: React.FC<RingkasanSprintProps> = ({
               <div
                 key={b.uid || "tanpa-penanggung"}
                 data-testid="kartu-beban"
-                className="bg-surface-sunken/60 border border-border-subtle/70 rounded-lg px-3 py-2.5 flex flex-col gap-2 transition-all duration-200 hover:-translate-y-px hover:shadow-xs hover:border-border-default hover:bg-surface-sunken"
+                className="bg-surface-sunken/60 border border-border-subtle/70 rounded-lg px-3 py-2.5 flex flex-col gap-2 transition-all duration-200 hover:-translate-y-px hover:shadow-xs hover:border-border-subtle hover:bg-surface-sunken"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   {b.uid ? (
