@@ -278,30 +278,74 @@ export async function sendDailyTaskDigest(
 
       /* Sebelum #744 cabang ini hanya `tasks.length > 0`, sehingga pengguna
        * tanpa tiket tapi punya topik rapat TIDAK PERNAH menerima pesan —
-       * persis sasaran fitur ini. `taskCount` di log tetap jumlah TIKET saja:
-       * kolom itu yang dicetak `BroadcastMonitor.tsx:146`, dan mencampur topik
-       * rapat ke dalamnya membuat angka di layar tidak lagi berarti apa pun.
-       * Jumlah topik masuk ke `details`, jadi nol perubahan skema.
+       * persis sasaran fitur ini.
+       *
+       * Putaran 2 (uji kirim sungguhan 15 Okt): tiket dan rapat berangkat
+       * sebagai DUA pesan terpisah. Satu pesan gabungan terbukti terlalu
+       * panjang di layar ponsel. Pengecualiannya hanya satu: admin yang
+       * menaruh {{meeting_list}} di templat kustomnya memang meminta rapat
+       * inline, dan kehendak itu dihormati.
+       *
+       * `taskCount` di log tetap jumlah TIKET saja: kolom itu yang dicetak
+       * `BroadcastMonitor.tsx:146`, dan mencampur topik rapat ke dalamnya
+       * membuat angka di layar tidak lagi berarti apa pun. Jumlah topik masuk
+       * ke `details`, jadi nol perubahan skema. Log tetap SATU baris per
+       * pengguna supaya monitor tidak membaca pesan rapat sebagai baris
+       * terbaru ber-`taskCount` 0 untuk orang yang sebenarnya punya tiket.
        */
       if (tasks.length > 0 || jumlahTopik > 0) {
-        const message = formatMessage(
-          recipientName,
-          tasks,
-          messageTemplate,
-          appUrlAktif,
-          rapat.baris,
-          rapat.total
-        );
+        const adaTugas = tasks.length > 0;
+        const adaRapat = jumlahTopik > 0;
+        const gabung = adaTugas && adaRapat && rapatDigabungKeTemplat(messageTemplate);
+
+        const daftarPesan: string[] = gabung
+          ? [
+              formatMessage(
+                recipientName,
+                tasks,
+                messageTemplate,
+                appUrlAktif,
+                rapat.baris,
+                rapat.total
+              ),
+            ]
+          : adaTugas && adaRapat
+            ? [
+                formatMessage(recipientName, tasks, messageTemplate, appUrlAktif, [], undefined),
+                formatMessage(recipientName, [], null, appUrlAktif, rapat.baris, rapat.total),
+              ]
+            : adaTugas
+              ? [formatMessage(recipientName, tasks, messageTemplate, appUrlAktif, [], undefined)]
+              : [formatMessage(recipientName, [], null, appUrlAktif, rapat.baris, rapat.total)];
+        const namaPesan =
+          gabung || daftarPesan.length === 1 ? ["pesan"] : ["pesan tugas", "catatan rapat"];
+
+        const terkirim: string[] = [];
+        let errPertama: any = null;
+        for (let i = 0; i < daftarPesan.length; i++) {
+          try {
+            await sendToWhatsApp(user.phone, daftarPesan[i]);
+            terkirim.push(namaPesan[i]);
+          } catch (kirimErr: any) {
+            errPertama = errPertama || kirimErr;
+            console.error(`[WHATSAPP] Gagal mengirim ${namaPesan[i]} ke ${user.phone}:`, kirimErr);
+          }
+        }
+
         const isi = [
-          tasks.length > 0 ? `${tasks.length} tugas aktif` : null,
-          jumlahTopik > 0 ? `${jumlahTopik} topik rapat` : null,
+          adaTugas ? `${tasks.length} tugas aktif` : null,
+          adaRapat ? `${jumlahTopik} topik rapat` : null,
         ]
           .filter(Boolean)
           .join(", ");
-        try {
-          await sendToWhatsApp(user.phone, message);
+        const topikTerkirim =
+          adaRapat && (gabung ? terkirim.length === 1 : terkirim.includes("catatan rapat"))
+            ? jumlahTopik
+            : 0;
+        totalTopikRapat += topikTerkirim;
+
+        if (terkirim.length === daftarPesan.length) {
           totalDikirim++;
-          totalTopikRapat += jumlahTopik;
           await recordBroadcastLog({
             channel: "whatsapp",
             userId: uId,
@@ -309,18 +353,21 @@ export async function sendDailyTaskDigest(
             recipientTarget: user.phone,
             status: "success",
             taskCount: tasks.length,
-            details: `Berhasil dikirim (${isi})`,
+            details: `Berhasil dikirim (${isi}) dalam ${daftarPesan.length} pesan`,
           });
-        } catch (kirimErr: any) {
+        } else {
           totalGagal++;
-          const reason = kirimErr?.message || "Gagal mengirim ke gateway WhatsApp";
+          const reason = errPertama?.message || "Gagal mengirim ke gateway WhatsApp";
+          const keterangan =
+            terkirim.length > 0
+              ? `Sebagian terkirim (${terkirim.join(", ")}); gagal: ${reason}`
+              : reason;
           kegagalan.push({
             userId: uId,
             name: recipientName,
             phone: user.phone,
-            reason,
+            reason: keterangan,
           });
-          console.error(`[WHATSAPP] Gagal mengirim pesan ke ${user.phone}:`, kirimErr);
           await recordBroadcastLog({
             channel: "whatsapp",
             userId: uId,
@@ -328,7 +375,7 @@ export async function sendDailyTaskDigest(
             recipientTarget: user.phone,
             status: "failed",
             taskCount: tasks.length,
-            details: reason,
+            details: keterangan,
           });
         }
       } else {
@@ -414,6 +461,19 @@ function isTemplateBawaan(template: string): boolean {
   return template.trim() === DEFAULT_WHATSAPP_TEMPLATE.trim();
 }
 
+/**
+ * Benar bila admin MENGAJAK rapat masuk ke dalam templat tiketnya lewat
+ * `{{meeting_list}}` (#744 putaran 2). Hanya dalam kasus itu rapat dikirim
+ * SATU pesan bersama tiket; selain itu rapat selalu berangkat sebagai pesan
+ * kedua tersendiri, sesuai permintaan pemilik proyek sesudah uji kirim:
+ * satu pesan gabungan terlalu panjang di layar ponsel.
+ */
+function rapatDigabungKeTemplat(template?: string | null): boolean {
+  if (!template || !template.trim()) return false;
+  if (isTemplateLegacy(template) || isTemplateBawaan(template)) return false;
+  return template.includes("{{meeting_list}}");
+}
+
 function formatStatus(status?: string | null): string {
   if (!status || status === "-") return "-";
   const s = String(status).trim();
@@ -489,22 +549,53 @@ export function formatTaskList(tasks: any[]): string {
 /**
  * Format daftar topik rapat untuk WhatsApp (#744), dikelompokkan per judul rapat.
  *
- * Bentuknya sengaja meniru `formatTaskList()`: blok monospace terpisah, judul
- * rapat sebagai `[n]` huruf kapital, topik di bawahnya dengan label `Topik :`
- * yang lebarnya tetap. Karena bloknya TERPISAH dari blok tiket, lebar label
- * keduanya tidak saling menyeret — penyelarasan `:` yang diperjuangkan #505
- * tetap utuh.
+ * Topik rapat adalah kalimat utuh, bukan nilai pendek seperti status tiket,
+ * jadi meniru label `Topik :` milik `formatTaskList()` justru merusak: label
+ * memakan 12 karakter dan sisanya dilipat WhatsApp di kolom nol. Bentuknya
+ * karena itu butir ber-indentasi gantung, dilipat sendiri di LEBAR_BLOK_RAPAT.
  *
  * Contoh:
  * ```
  * [1] KICKOFF Q4 PLANNING
- *     Topik : Evaluasi kapasitas tim backend
- *     Topik : Pembagian PIC rilis November
+ *     • Evaluasi kapasitas tim backend
+ *     • Pembagian PIC rilis November
  *
  * [2] REVIEW SPRINT 12
- *     Topik : Migrasi database ke Neon
+ *     • Migrasi database ke Neon
  * ```
  */
+/**
+ * Lebar maksimum satu baris di dalam blok monospace rapat (#744 putaran 2,
+ * atas keluhan pemilik proyek saat uji kirim sungguhan).
+ *
+ * WhatsApp MELIPAT SENDIRI baris yang melebihi lebar layar, dan lipatannya
+ * jatuh di kolom nol — di luar indentasi blok — sehingga pesan tampak
+ * berantakan persis seperti tangkapan layar 15 Okt. Karena itu pelipatan
+ * WAJIB dilakukan di sini, sebelum pesan dikirim, dengan indentasi gantung
+ * supaya baris lanjutan tetap sejajar di bawah teksnya.
+ */
+const LEBAR_BLOK_RAPAT = 46;
+const AWAL_TOPIK = "    • ";
+const LANJUT_TOPIK = "      ";
+const LANJUT_JUDUL = "    ";
+
+function bungkus(teks: string, lebarIsi: number, indentLanjut: string): string {
+  const baris: string[] = [];
+  let kini = "";
+  for (const kata of teks.split(/\s+/).filter(Boolean)) {
+    const calon = kini ? `${kini} ${kata}` : kata;
+    if (kini && calon.length > lebarIsi) {
+      baris.push(kini);
+      kini = kata;
+    } else {
+      kini = calon;
+    }
+  }
+  if (kini) baris.push(kini);
+  if (baris.length === 0) baris.push("-");
+  return baris.map((b, i) => (i === 0 ? b : `${indentLanjut}${b}`)).join("\n");
+}
+
 export function formatMeetingList(rapat: TopikRapat[], totalSebelumBatas?: number): string {
   const perRapat = new Map<string, string[]>();
   for (const r of rapat) {
@@ -516,10 +607,15 @@ export function formatMeetingList(rapat: TopikRapat[], totalSebelumBatas?: numbe
   }
 
   const inner = [...perRapat.entries()]
-    .map(
-      ([judul, topik], idx) =>
-        `[${idx + 1}] ${judul.toUpperCase()}\n` + topik.map((t) => `    Topik : ${t}`).join("\n")
-    )
+    .map(([judul, topik], idx) => {
+      const kepala = bungkus(`[${idx + 1}] ${judul.toUpperCase()}`, LEBAR_BLOK_RAPAT, LANJUT_JUDUL);
+      const badan = topik
+        .map(
+          (t) => `${AWAL_TOPIK}${bungkus(t, LEBAR_BLOK_RAPAT - AWAL_TOPIK.length, LANJUT_TOPIK)}`
+        )
+        .join("\n");
+      return `${kepala}\n${badan}`;
+    })
     .join("\n\n");
 
   // Sisa yang terpotong BATAS_TOPIK_RAPAT disebut jumlahnya, bukan dibuang

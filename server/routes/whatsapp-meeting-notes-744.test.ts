@@ -62,17 +62,44 @@ describe("#744 · formatMeetingList — blok topik rapat", () => {
     expect(list).toContain("[1] KICKOFF Q4 PLANNING");
     expect(list).toContain("[2] REVIEW SPRINT 12");
     expect(list.match(/KICKOFF Q4 PLANNING/g)).toHaveLength(1);
-    expect(list).toContain("    Topik : Evaluasi kapasitas tim backend");
-    expect(list).toContain("    Topik : Pembagian PIC rilis November");
-    expect(list).toContain("    Topik : Migrasi database ke Neon");
+    expect(list).toContain("    • Evaluasi kapasitas tim backend");
+    expect(list).toContain("    • Pembagian PIC rilis November");
+    expect(list).toContain("    • Migrasi database ke Neon");
   });
 
-  it("menyelaraskan titik dua pada label Topik yang lebarnya tetap", () => {
-    const baris = formatMeetingList(topik)
+  /* Putaran 2 #744 — tiga penjaga ini lahir dari tangkapan layar uji kirim
+   * sungguhan: WhatsApp melipat baris panjang di KOLOM NOL, di luar indentasi
+   * blok, dan pesan tampak berantakan. Pelipatan kini dilakukan sendiri. */
+  const topikPanjang = [
+    {
+      judulRapat: "Allignment Squad 1 - Wondr Merchant",
+      topik:
+        "Terakhir dari Andreas APS info ada 30 merchant yang belum berhasil dilakukan migrasi ulang karena informasi data yang kurang sesuai.",
+    },
+  ];
+
+  it("setiap baris di dalam blok tidak melebihi lebar layar ponsel", () => {
+    const panjang = formatMeetingList(topikPanjang)
       .split("\n")
-      .filter((b) => b.includes(":"));
-    const kolom = new Set(baris.map((b) => b.indexOf(":")));
-    expect(kolom.size).toBe(1);
+      .map((b) => b.length);
+    expect(Math.max(...panjang)).toBeLessThanOrEqual(46);
+  });
+
+  it("tidak ada baris isi yang jatuh di kolom nol — penyebab berantakan di layar", () => {
+    const isi = formatMeetingList(topikPanjang)
+      .split("\n")
+      .slice(1, -1)
+      .filter((b) => b.trim().length > 0 && !b.startsWith("["));
+    isi.forEach((b) => expect(b.startsWith(" ")).toBe(true));
+  });
+
+  it("baris lanjutan topik menjorok sejajar di bawah teks butirnya", () => {
+    const lanjutan = formatMeetingList(topikPanjang)
+      .split("\n")
+      .slice(1, -1)
+      .filter((b) => b.trim().length > 0 && !b.startsWith("    •") && !b.startsWith("["));
+    expect(lanjutan.length).toBeGreaterThan(0);
+    lanjutan.forEach((b) => expect(b.startsWith("      ")).toBe(true));
   });
 
   it("tidak mencetak topik yang kembar dua kali di rapat yang sama", () => {
@@ -95,7 +122,7 @@ describe("#744 · formatMeetingList — blok topik rapat", () => {
   it("judul rapat dan topik kosong tetap tercetak, tidak menghasilkan baris '[1] '", () => {
     const list = formatMeetingList([{ judulRapat: "  ", topik: "" }]);
     expect(list).toContain("[1] TANPA JUDUL RAPAT");
-    expect(list).toContain("    Topik : Tanpa Topik");
+    expect(list).toContain("    • Tanpa Topik");
   });
 });
 
@@ -268,9 +295,12 @@ describe("#744 · penjaga teks sumber whatsapp.service.ts", () => {
   });
 
   it("kueri topik rapat tidak menarik kolom sensitif catatan rapat", () => {
+    // Irisannya HANYA badan ambilTopikRapat. Berhenti di sendDailyTaskDigest,
+    // bukan di formatTaskList: putaran 2 menambah variabel `keterangan` di
+    // digest yang tidak ada hubungannya dengan kolom yang dibaca kueri.
     const badan = sumber.slice(
       sumber.indexOf("export async function ambilTopikRapat"),
-      sumber.indexOf("export function formatTaskList")
+      sumber.indexOf("export async function sendDailyTaskDigest")
     );
     expect(badan.length).toBeGreaterThan(0);
     for (const terlarang of [
@@ -284,9 +314,21 @@ describe("#744 · penjaga teks sumber whatsapp.service.ts", () => {
     }
   });
 
+  it("tiket dan rapat berangkat sebagai pesan terpisah, kecuali admin meminta inline", () => {
+    expect(sumber).toContain("const daftarPesan: string[] = gabung");
+    expect(sumber).toContain("rapatDigabungKeTemplat(messageTemplate)");
+    expect(sumber).toContain('["pesan tugas", "catatan rapat"]');
+  });
+
+  it("pengiriman sebagian dicatat gagal dengan keterangan pesan mana yang lolos", () => {
+    expect(sumber).toContain('Sebagian terkirim (${terkirim.join(", ")}); gagal: ${reason}');
+  });
+
   it("taskCount di log broadcast tetap jumlah TIKET, jumlah topik masuk details", () => {
     expect(sumber).toContain("taskCount: tasks.length,");
-    expect(sumber).toContain("details: `Berhasil dikirim (${isi})`,");
+    expect(sumber).toContain(
+      "details: `Berhasil dikirim (${isi}) dalam ${daftarPesan.length} pesan`,"
+    );
     expect(sumber).not.toContain("taskCount: tasks.length + jumlahTopik");
   });
 

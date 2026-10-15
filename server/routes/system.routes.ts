@@ -400,15 +400,13 @@ router.post("/api/settings/whatsapp/broadcast-now", verifyGlobalAdmin, async (re
       // Sebagian terkirim, sebagian gagal
       message = `Broadcast WhatsApp sebagian berhasil: ${hasil.totalDikirim} terkirim, ${hasil.totalGagal} gagal (${hasil.kegagalan?.[0]?.reason || ""}).`;
     } else if (hasil.totalDikirim > 0) {
-      // #744 — "tugas aktif" saja tidak lagi lengkap: pesan sekarang bisa
-      // memuat topik rapat, dan bisa juga dikirim ke penerima yang tidak
-      // punya tiket sama sekali.
+      // Putaran 2 #744: tiket dan rapat berangkat sebagai pesan terpisah, jadi
+      // totalDikirim menghitung PENERIMA yang terlayani penuh, bukan jumlah
+      // pesan. Kalimatnya menyebut penerima supaya angkanya tetap jujur.
       const topik = hasil.totalTopikRapat || 0;
       message =
-        `Broadcast WhatsApp berhasil diproses. ${hasil.totalDikirim} pesan dikirim` +
-        (topik > 0
-          ? `, memuat ${topik} topik rapat di luar tiket tugas.`
-          : ` ke penerima dengan tugas aktif.`);
+        `Broadcast WhatsApp berhasil diproses. ${hasil.totalDikirim} penerima terlayani` +
+        (topik > 0 ? `, termasuk ${topik} topik rapat pada pesan catatan rapat.` : `.`);
     } else if (hasil.totalTanpaTugas > 0) {
       message = `Broadcast selesai: 0 pesan dikirim karena ${hasil.totalTanpaTugas} penerima yang diperiksa tidak memiliki tiket tugas aktif maupun topik rapat yang ditugaskan. Silakan tugaskan tiket atau topik rapat ke pengguna terlebih dahulu.`;
     } else {
