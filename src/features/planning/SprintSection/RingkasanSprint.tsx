@@ -169,7 +169,7 @@ export const RingkasanSprint: React.FC<RingkasanSprintProps> = ({
              terbaca satu baris, persentase tercetak permanen sebagai pil di
              kanan atas dan angka kecil di bawah bar — bukan gelembung hover.
              Kartu sempit satu baris tidak mungkin memuat ketiganya sekaligus. */
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 max-h-[21rem] overflow-y-auto custom-scrollbar pr-1">
             {beban.map((b) => (
               <div
                 key={b.uid || "tanpa-penanggung"}
