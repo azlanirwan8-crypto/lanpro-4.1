@@ -20,7 +20,13 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { praMuatKamus, simpanBahasa, tukarBahasa, type Bahasa } from "./index";
+import {
+  mintaMuatUlangBahasa,
+  praMuatKamus,
+  simpanBahasa,
+  tukarBahasa,
+  type Bahasa,
+} from "./index";
 
 const BenderaIndonesia = () => (
   <svg viewBox="0 0 20 14" className="w-5 h-[14px] rounded-[2px] shadow-2xs" aria-hidden="true">
@@ -52,6 +58,14 @@ export const LanguageSwitcher = () => {
    * (build lama di peramban, jaringan hotspot putus), bahasa berpindah di atas
    * kertas sementara layar tetap Inggris — dan tombolnya terlihat mati untuk
    * kedua kalinya, persis keluhan yang dilaporkan lagi hari ini.
+   *
+   * #746 — dua lubang ditutup di sini. (1) `catch`: `tukarBahasa` bisa MENOLAK
+   * (`i18n.changeLanguage` di dalamnya tidak dibungkus try), dan tanpa catch
+   * penolakan itu keluar sebagai unhandled rejection sementara `finally` sudah
+   * membuat tombolnya siap ditekan lagi — mati tanpa jejak. (2) kegagalan yang
+   * terdeteksi dijawab dengan muat ulang sekali, karena satu-satunya penyebab
+   * yang paling umum adalah HTML basi dan hanya HTML baru yang menyembuhkannya;
+   * toast di sini sekarang jalan kedua, sesudah muat ulang sudah pernah dicoba.
    */
   const ganti = async () => {
     if (sedangBertukar) return;
@@ -61,7 +75,10 @@ export const LanguageSwitcher = () => {
       // Pilihan hanya disimpan kalau benar-benar terpakai; menyimpan bahasa yang
       // kamusnya tidak ada berarti muat berikutnya ikut rusak.
       if (berhasil) simpanBahasa(tujuan);
-      else toast.error(t("language.gagalMuat"));
+      else if (!mintaMuatUlangBahasa(tujuan)) toast.error(t("language.gagalMuat"));
+    } catch (error) {
+      console.error("[I18N] penukaran bahasa menolak:", error);
+      if (!mintaMuatUlangBahasa(tujuan)) toast.error(t("language.gagalMuat"));
     } finally {
       setSedangBertukar(false);
     }

@@ -13,6 +13,10 @@
  * `console.warn`. Sekarang tombolnya wajib berkata ke layar — dan TIDAK boleh
  * menyimpan pilihan yang gagal, karena menyimpannya berarti muat berikutnya ikut
  * rusak.
+ *
+ * #746 mempersempit berkas ini: kegagalan PERTAMA kini dijawab dengan muat ulang
+ * (`muat-ulang-bahasa-746.test.tsx`), jadi yang diuji di sini kegagalan SESUDAH
+ * muat ulang pernah dicoba — satu-satunya keadaan di mana toast masih benar.
  */
 jest.mock("../locales/id", () => {
   throw new Error("Failed to fetch chunk id-legacy.js (404)");
@@ -28,6 +32,9 @@ import { LanguageSwitcher } from "../LanguageSwitcher";
 describe("LanguageSwitcher saat kamus tujuannya tidak datang (#603)", () => {
   beforeEach(async () => {
     window.localStorage.clear();
+    window.sessionStorage.clear();
+    // Muat ulang sudah pernah dicoba dan tidak menolong: hanya toast yang tersisa.
+    window.sessionStorage.setItem("bahasa-muat-ulang", "1");
     jest.mocked(toast.error).mockClear();
     await i18n.changeLanguage("en");
   });
@@ -42,8 +49,10 @@ describe("LanguageSwitcher saat kamus tujuannya tidak datang (#603)", () => {
     await waitFor(() => expect(toast.error).toHaveBeenCalledTimes(1));
     const pesan = String(jest.mocked(toast.error).mock.calls[0][0]);
     expect(pesan.toLowerCase()).toContain("language");
-    // Yang diminta pengguna ada di pesan itu: apa yang harus dilakukan.
-    expect(pesan).toContain("Ctrl+Shift+R");
+    // #746 — yang diminta pengguna ada di pesan itu: apa yang harus dilakukan,
+    // dan kalimatnya harus bisa dijalankan di ponsel. Ctrl+Shift+R bukan.
+    expect(pesan).not.toContain("Ctrl+Shift+R");
+    expect(pesan.toLowerCase()).toContain("tab");
     catat.mockRestore();
   });
 

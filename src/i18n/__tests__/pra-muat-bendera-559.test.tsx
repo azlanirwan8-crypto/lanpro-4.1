@@ -16,11 +16,14 @@ const praMuatKamus = jest.fn();
 const simpanBahasa = jest.fn();
 /** #603 — komponen kini memverifikasi hasil tukar lewat fungsi ini. */
 const tukarBahasa = jest.fn().mockResolvedValue(true);
+/** #746 — jalur gagal kini menawarkan muat ulang; di suite ini tidak dipakai. */
+const mintaMuatUlangBahasa = jest.fn().mockReturnValue(false);
 
 jest.mock("../index", () => ({
   praMuatKamus: (b: string) => praMuatKamus(b),
   simpanBahasa: (b: string) => simpanBahasa(b),
   tukarBahasa: (b: string) => tukarBahasa(b),
+  mintaMuatUlangBahasa: (b: string) => mintaMuatUlangBahasa(b),
 }));
 
 import { LanguageSwitcher } from "../LanguageSwitcher";

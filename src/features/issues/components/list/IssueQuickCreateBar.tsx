@@ -119,7 +119,12 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
               <ChevronDown className="w-3 h-3 text-content-subtle ml-0.5" />
             </button>
             {isInlineTypeOpen === "global" && (
-              <div className="absolute left-0 bottom-full mb-2 w-48 bg-surface border border-border-subtle rounded-lg shadow-xl z-[100] overflow-hidden animate-dropdown">
+              /* #747 — z-40, bukan z-[100]. Diukur: dropdown ini berada di dalam
+                 konteks stacking z-20 milik wadah barisnya, jadi ia tidak pernah
+                 benar-benar bisa menutupi lembar bawah notifikasi (z-[44]);
+                 angkanya diturunkan supaya tidak menjanjikan jangkauan yang
+                 tidak ia punya. */
+              <div className="absolute left-0 bottom-full mb-2 w-48 bg-surface border border-border-subtle rounded-lg shadow-xl z-40 overflow-hidden animate-dropdown">
                 {mArr
                   .filter((m) => m.type === "issue_type")
                   .filter((m) => legal.split("|").includes(m.label))

@@ -125,6 +125,10 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
       </div>
 
       {/* Floating Bulk Action Bar */}
+      {/* #747 — z-40: bilah ini mengambang di bawah layar dan di HP jejaknya
+          menutupi tengah lembar bawah notifikasi (`TopbarMenuPortal` z-[44]).
+          Ia bukan modal, jadi di tangga #729 tempatnya setara krom aplikasi,
+          di bawah menu portaled, scrim laci, dan modal. */}
       <AnimatePresence>
         {selectedTaskIds.size > 0 && (
           <motion.div
@@ -132,7 +136,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
             animate={{ y: 0, opacity: 1, x: "-50%" }}
             exit={{ y: 80, opacity: 0, x: "-50%" }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] md:bottom-6 left-1/2 z-50 bg-overlay/95 backdrop-blur-md border border-border-inverse/40 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] px-6 py-3.5 flex flex-wrap items-center gap-6 text-content-inverse text-xs font-medium select-none max-w-[calc(100vw-1.5rem)]"
+            className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] md:bottom-6 left-1/2 z-40 bg-overlay/95 backdrop-blur-md border border-border-inverse/40 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] px-6 py-3.5 flex flex-wrap items-center gap-6 text-content-inverse text-xs font-medium select-none max-w-[calc(100vw-1.5rem)]"
           >
             <div className="flex items-center gap-2 border-r border-border-inverse pr-4">
               <span className="bg-primary-surface text-content-inverse text-xs sm:text-[10px] font-medium rounded-full px-2 py-0.5 min-w-[20px] text-center">
@@ -158,9 +162,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
                   // jalan, dan yang ditolak server di-rollback diam-diam oleh
                   // `updateTaskField` sendiri. Sukses sekarang menyusul jawaban
                   // server, pola yang sama dengan E7.
-                  await Promise.allSettled(
-                    ids.map((id) => updateTaskField(id, "status", val))
-                  );
+                  await Promise.allSettled(ids.map((id) => updateTaskField(id, "status", val)));
                   toast.success(t("toast.bulkStatusChanged", { count: ids.length, status: val }));
                   setSelectedTaskIds(new Set());
                 }}

@@ -660,9 +660,16 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
   });
 
   return (
+    // #747 — z-40, bukan z-50. Wadah ini membentuk konteks stacking, jadi angka
+    // di sini adalah langit-langit bagi tombol DAN kotak obrolan di dalamnya.
+    // Di HP lembar bawah notifikasi (`TopbarMenuPortal` z-[44]) menempati jejak
+    // yang hampir sama dengan kotak obrolan, dan pada z-50 widget ini mencetak
+    // dirinya di atas daftar notifikasi. Di tangga #729 widget mengambang bukan
+    // modal: ia duduk setara krom aplikasi (40), di bawah menu portaled (44),
+    // scrim laci (45), dan modal (50).
     <div
       id="lanpro-live-chat-widget"
-      className="fixed bottom-20 md:bottom-6 right-6 z-50 select-none"
+      className="fixed bottom-20 md:bottom-6 right-6 z-40 select-none"
     >
       {/* 1. FLOATING TOGGLE BUTTON */}
       <motion.button
@@ -700,7 +707,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             ref={chatBoxRef}
-            className="absolute bottom-16 right-0 max-md:fixed max-md:inset-x-0 max-md:bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] max-md:right-0 max-md:left-0 w-full md:w-80 h-[min(72vh,520px)] md:h-[480px] bg-surface rounded-t-2xl md:rounded-xl border border-border-subtle/80 shadow-2xl flex flex-col overflow-hidden z-50 bg-opacity-95 backdrop-blur-md"
+            className="absolute bottom-16 right-0 max-md:fixed max-md:inset-x-0 max-md:bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] max-md:right-0 max-md:left-0 w-full md:w-80 h-[min(72vh,520px)] md:h-[480px] bg-surface rounded-t-2xl md:rounded-xl border border-border-subtle/80 shadow-2xl flex flex-col overflow-hidden z-40 bg-opacity-95 backdrop-blur-md"
           >
             {/* VIEW A: CONTACT LIST VIEW */}
             {!activeChatUser ? (

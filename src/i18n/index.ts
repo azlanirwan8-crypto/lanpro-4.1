@@ -15,13 +15,16 @@
  */
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { safeLocalStorage } from "../lib/safeStorage";
+import { safeLocalStorage, safeSessionStorage } from "../lib/safeStorage";
 import { en } from "./locales/en";
 
 export const BAHASA_TERSEDIA = ["id", "en"] as const;
 export type Bahasa = (typeof BAHASA_TERSEDIA)[number];
 
 const KUNCI_SIMPAN = "bahasa";
+/** #746 — niat yang dibawa melewati muat ulang, dan bendera anti-lingkaran. */
+const KUNCI_TUNDA = "bahasa-tunda";
+const KUNCI_MUAT_ULANG = "bahasa-muat-ulang";
 
 export const bacaBahasaTersimpan = (): Bahasa => {
   try {
@@ -106,8 +109,69 @@ export const tukarBahasa = async (bahasa: Bahasa, anggaranMs = 4000): Promise<bo
   if (batas) clearTimeout(batas);
   if (!kamusTiba) return false;
 
-  await i18n.changeLanguage(bahasa);
+  // #746 — `changeLanguage` bisa MENOLAK, dan kontrak fungsi ini adalah boolean:
+  // pemanggilnya (tombol bendera, pemulihan saat boot) memutuskan apa yang harus
+  // dikatakan ke layar berdasarkan `false`, bukan berdasarkan try/catch sendiri.
+  // Tanpa ini penolakannya lolos sebagai unhandled rejection dan tombolnya mati
+  // tanpa jejak — persis gejala yang dilaporkan pemilik proyek.
+  try {
+    await i18n.changeLanguage(bahasa);
+  } catch (error) {
+    console.warn(`[I18N] changeLanguage(${bahasa}) menolak:`, error);
+    return false;
+  }
   return i18n.resolvedLanguage === bahasa && i18n.hasResourceBundle(bahasa, "translation");
+};
+
+/**
+ * #746 — satu-satunya jalan keluar yang benar saat potongan kamus tidak tiba.
+ *
+ * Penyebab kegagalan yang paling umum adalah peramban memegang HTML build lama
+ * yang menunjuk hash berkas lama yang sudah tidak ada di server. Tidak ada
+ * jumlah klik yang menyembuhkan itu; hanya HTML baru yang bisa. Karena itu
+ * kegagalannya dijawab dengan MUAT ULANG, bukan dengan kalimat suruhan yang di
+ * ponsel tidak bisa dijalankan (sebelum ini toast-nya menyuruh Ctrl+Shift+R).
+ *
+ * Sekali, bukan berulang: bendera di sessionStorage membuat percobaan kedua
+ * jatuh ke toast. Benderanya sengaja di sessionStorage, bukan localStorage —
+ * tab baru boleh mencoba lagi, dan tab yang sama tidak akan pernah terperangkap
+ * lingkaran muat ulang.
+ *
+ * Niatnya juga disimpan di sessionStorage, BUKAN di kunci `bahasa`: preferensi
+ * yang kamusnya tidak pernah tiba tidak boleh dipersistenkan (penjaga #603),
+ * tapi sesudah muat ulang niat itu harus masih ada supaya penukarannya
+ * diselesaikan sendiri tanpa pengguna menekan apa pun lagi.
+ *
+ * @returns `false` bila muat ulang sudah pernah dicoba di tab ini — pemanggil
+ *   wajib mengucapkan sesuatu ke layar, bukan diam.
+ */
+export const mintaMuatUlangBahasa = (bahasa: Bahasa): boolean => {
+  if (safeSessionStorage.getItem(KUNCI_MUAT_ULANG)) return false;
+  safeSessionStorage.setItem(KUNCI_MUAT_ULANG, "1");
+  safeSessionStorage.setItem(KUNCI_TUNDA, bahasa);
+  window.location.reload();
+  return true;
+};
+
+/**
+ * #746 — menyelesaikan penukaran yang tertunda sesudah muat ulang.
+ *
+ * @returns `null` bila tidak ada yang tertunda (jalur biasa), `true` bila
+ *   bahasa berhasil dipakai, `false` bila gagal lagi — pemanggil boleh memakai
+ *   `false` sebagai tanda bahwa pengguna perlu diberi tahu.
+ */
+export const selesaikanBahasaTertunda = async (): Promise<boolean | null> => {
+  const tertunda = safeSessionStorage.getItem(KUNCI_TUNDA);
+  if (tertunda !== "en" && tertunda !== "id") return null;
+  safeSessionStorage.removeItem(KUNCI_TUNDA);
+
+  const berhasil = await tukarBahasa(tertunda);
+  if (!berhasil) return false;
+
+  // Baru sekarang preferensinya layak dipersistenkan: kamusnya terbukti ada.
+  simpanBahasa(tertunda);
+  safeSessionStorage.removeItem(KUNCI_MUAT_ULANG);
+  return true;
 };
 
 const bahasaDikenal = new Set<string>(BAHASA_TERSEDIA);

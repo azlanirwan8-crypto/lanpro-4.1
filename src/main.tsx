@@ -1,6 +1,7 @@
-import i18n, { siapBahasa } from "./i18n";
+import i18n, { selesaikanBahasaTertunda, siapBahasa } from "./i18n";
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { createRoot } from "react-dom/client";
+import { toast } from "sonner";
 import App from "./App";
 import "./index.css";
 
@@ -155,4 +156,18 @@ const pasang = () =>
 
 // #515 — hanya kamus Indonesia yang ikut potongan awal, jadi piksel pertama
 // menunggu kamus bahasa pilihan tiba. Untuk Indonesia tungguannya nol.
-siapBahasa.then(pasang);
+siapBahasa.then(() => {
+  pasang();
+  // #746 — bila muat ulang ini dipicu tombol bahasa yang kamusnya tidak tiba,
+  // penukarannya diselesaikan di sini tanpa pengguna menekan apa pun lagi.
+  // Sengaja SESUDAH `pasang()`: menunggu kamusnya bisa makan empat detik dan
+  // piksel pertama tidak boleh disandera oleh jalur pemulihan yang jarang ini.
+  void selesaikanBahasaTertunda()
+    .then((berhasil) => {
+      if (berhasil === false) toast.error(i18n.t("language.gagalMuat"));
+    })
+    .catch((error) => {
+      console.error("[I18N] pemulihan bahasa tertunda gagal:", error);
+      toast.error(i18n.t("language.gagalMuat"));
+    });
+});
