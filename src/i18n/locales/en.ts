@@ -1582,6 +1582,7 @@ export const en = {
     duplicateShape: "Duplicate Shape",
     copyNothingSelected: "No shape is selected to copy.",
     copiedShapes: "Copied {{bentuk}} shapes and {{panah}} arrows to the canvas clipboard.",
+    cutShapes: "Cut {{bentuk}} shapes and {{panah}} arrows - paste them with Ctrl+V.",
     pasteNothing: "The canvas clipboard is empty - copy a shape first (Ctrl+C).",
     pastedShapes: "Pasted {{bentuk}} shapes and {{panah}} arrows.",
     tempelTidakTerbaca:

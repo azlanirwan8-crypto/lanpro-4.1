@@ -33,6 +33,8 @@
  *    hilang kapan saja tanpa siapa pun memutuskan itu.
  */
 
+import { bentukDariGayaDrawio } from "./petaBentukDrawio";
+
 export const FORMAT_SUMBER = "drawio-xml-v1" as const;
 
 /**
@@ -315,8 +317,7 @@ export interface BatasKonversi {
  */
 export const batasKonversi = (
   sumber: Pick<HasilSumber, "halaman">,
-  xmlDoc: Document,
-  bentukDidukung: ReadonlySet<string>
+  xmlDoc: Document
 ): BatasKonversi => {
   const bentuk = new Set<string>();
   const kunci = new Set<string>();
@@ -327,13 +328,21 @@ export const batasKonversi = (
   for (const cell of Array.from(xmlDoc.getElementsByTagName("mxCell"))) {
     const gaya = cell.getAttribute("style") || "";
     if (!gaya) continue;
+    const gayaKecil = gaya.toLowerCase();
+
+    // #752 — "tidak dikenali" diputuskan oleh resolver yang SAMA dengan yang
+    // dipakai penjeraf, bukan oleh daftar kata kunci yang disalin tangan dan
+    // bisa basi. Dulu laporan ini memegang `Set` berisi 19 kata sementara
+    // pemetaannya punya 13 cabang; dua sumber kebenaran untuk satu pertanyaan.
+    const nilaiShape = /(?:^|;)shape=([^;]+)/.exec(gayaKecil)?.[1]?.trim();
+    if (nilaiShape && bentukDariGayaDrawio(gayaKecil) === null) {
+      bentuk.add(nilaiShape);
+    }
+
     for (const bagian of gaya.split(";")) {
-      const [nama, nilai] = bagian.split("=");
+      const [nama] = bagian.split("=");
       if (!nama) continue;
       const k = nama.trim().toLowerCase();
-      if (k === "shape" && nilai && !bentukDidukung.has(nilai.trim().toLowerCase())) {
-        bentuk.add(nilai.trim());
-      }
       if ((KUNCI_GAYA_TAK_DIPERTAHANKAN as readonly string[]).includes(k)) kunci.add(k);
     }
     const value = cell.getAttribute("value") || "";

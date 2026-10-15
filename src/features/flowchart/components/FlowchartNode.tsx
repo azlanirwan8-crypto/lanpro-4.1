@@ -65,6 +65,16 @@ interface FlowchartNodeProps {
   handleUpdateActiveNode: (props: Partial<FlowNode>) => void;
   /** #644 — label ditulis ke bentuknya SENDIRI, bukan ke "yang terpilih". */
   handleUpdateNode: (id: string, props: Partial<FlowNode>) => void;
+  /**
+   * #754 — bentuk ini SEDANG menyunting labelnya. Selama nilainya `false`,
+   * textarea-nya tidak menerima pointer sama sekali sehingga klik dan seret
+   * jatuh ke badan bentuk dan memindahkannya — perilaku draw.io. Klik ganda
+   * memanggil `mulaiSuntingLabel`, kehilangan fokus memanggil
+   * `akhiriSuntingLabel` yang sekaligus menulis riwayat.
+   */
+  isEditingLabel: boolean;
+  mulaiSuntingLabel: (id: string) => void;
+  akhiriSuntingLabel: () => void;
   handleDuplicateNode: (node: FlowNode) => void;
   handleDeleteSelected: () => void;
   /** Task yang tertaut pada node, bila ada. */
@@ -139,6 +149,9 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
   handleConnectPortClick,
   handleUpdateActiveNode,
   handleUpdateNode,
+  isEditingLabel,
+  mulaiSuntingLabel,
+  akhiriSuntingLabel,
   handleDuplicateNode,
   handleDeleteSelected,
   getLinkedTaskDetails,
@@ -148,6 +161,21 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
 }) => {
   const { t } = useTranslation();
   const linkedTask = getLinkedTaskDetails(node.taskId);
+
+  /**
+   * #754 — kotak label difokuskan dan diseleksi seluruh isinya begitu
+   * penyuntingan dibuka, jadi mengetik langsung MENIMPA label lama seperti di
+   * draw.io. Efeknya hanya jalan pada satu bentuk (yang `isEditingLabel`-nya
+   * benar), sehingga tidak membebani papan yang berisi ratusan bentuk.
+   */
+  const kotakLabelRef = React.useRef<HTMLTextAreaElement | null>(null);
+  React.useEffect(() => {
+    if (!isEditingLabel) return;
+    const kotak = kotakLabelRef.current;
+    if (!kotak) return;
+    kotak.focus();
+    kotak.select();
+  }, [isEditingLabel]);
 
   const nodeWidth = ukuranBentukEfektif(node).width;
   const nodeHeight = ukuranBentukEfektif(node).height;
@@ -237,6 +265,13 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
         willChange: "transform",
       }}
       onMouseDown={(e) => handleNodeMouseDown(e, node)}
+      // #754 — klik ganda membuka penyunting label, persis draw.io. Klik tunggal
+      // tetap memilih dan menyeret memindahkan; tanpa pemisahan ini textarea
+      // yang selalu aktif membuat badan bentuk tidak bisa diseret sama sekali.
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        mulaiSuntingLabel(node.id);
+      }}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -473,15 +508,44 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
           style={{ padding: isDiamond ? "15%" : undefined }}
         >
           <textarea
+            ref={kotakLabelRef}
             disabled={!isWorkspaceEditable}
             value={node.label}
+            // #754 — di luar penyuntingan kotak ini TIDAK menerima pointer dan
+            // tidak bisa difokus lewat Tab, sehingga klik dan seret jatuh ke
+            // badan bentuk. Inilah yang membuat bentuk bisa dipindahkan dari
+            // tengahnya, seperti di draw.io.
+            tabIndex={isEditingLabel ? 0 : -1}
+            readOnly={!isEditingLabel}
+            onFocus={() => setSelectedNodeId(node.id)}
+            onBlur={() => {
+              if (isEditingLabel) akhiriSuntingLabel();
+            }}
+            onKeyDown={(e) => {
+              // Escape menutup penyuntingan tanpa membuang hasil ketikan, dan
+              // tidak boleh diteruskan ke pintasan kanvas (yang akan ikut
+              // membatalkan seleksi).
+              if (e.key === "Escape") {
+                e.stopPropagation();
+                e.preventDefault();
+                kotakLabelRef.current?.blur();
+                return;
+              }
+              // Enter tanpa Shift mengakhiri penyuntingan; Shift+Enter tetap
+              // baris baru. draw.io berperilaku sama.
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                kotakLabelRef.current?.blur();
+              }
+              // Pintasan papan tidak boleh bocor ke kanvas saat mengetik.
+              e.stopPropagation();
+            }}
             // #644 — dulu memanggil `handleUpdateActiveNode`, yang menulis ke
             // bentuk TERPILIH dan mengembalikan tanpa arti kalau tidak ada yang
             // terpilih (keadaan biasa setelah menempel kelompok). Mengetik di
             // sini sekarang mengubah bentuk ini, dan fokusnya sekaligus memilih
             // bentuk itu supaya panel sifat tidak menunjuk bentuk lain.
             onChange={(e) => handleUpdateNode(node.id, { label: e.target.value })}
-            onFocus={() => setSelectedNodeId(node.id)}
             className={cn(
               // #654 — berat dan keluarga huruf mengikuti bawaan draw.io: normal
               // (400) dan Helvetica. `tracking-tight` dilepas karena draw.io tidak
@@ -490,6 +554,9 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
               // yang mengunci `font-family` semua `textarea`, sehingga tombol
               // serif/mono di panel sifat mengubah DATA tanpa mengubah TAMPILAN.
               "w-full bg-transparent border-0 resize-none text-current focus:outline-none focus:ring-1 focus:ring-violet-300 rounded leading-tight text-center custom-scrollbar",
+              // #754 — selama tidak menyunting, kursor harus terlihat seperti di
+              // atas bentuk (bisa diseret), bukan seperti di dalam kotak teks.
+              isEditingLabel ? "pointer-events-auto cursor-text" : "pointer-events-none",
               node.fontWeight === "bold" ? "font-bold" : "font-normal",
               canvasTheme === "blueprint" &&
                 !mengguratLatarTerang &&

@@ -12,12 +12,7 @@
  * papan kosong atau toast hijau palsu.
  */
 
-import {
-  KATA_BENTUK_DIKENALI,
-  parseDrawIoXML,
-  parseUniversalDiagram,
-  type ParsedDiagram,
-} from "./importers";
+import { parseDrawIoXML, parseUniversalDiagram, type ParsedDiagram } from "./importers";
 import {
   TolakSumber,
   bacaSumberDrawio,
@@ -46,7 +41,7 @@ const hitungBatas = (sumber: HasilSumber): BatasKonversi | null => {
   try {
     const doc = new DOMParser().parseFromString(sumber.teksSiapJeraf, "text/xml");
     if (doc.getElementsByTagName("parsererror").length > 0) return null;
-    return batasKonversi({ halaman: sumber.halaman }, doc, KATA_BENTUK_DIKENALI);
+    return batasKonversi({ halaman: sumber.halaman }, doc);
   } catch {
     // Laporan batas tidak boleh menjatuhkan impor yang sudah berhasil; kalau
     // gagal dihitung, UI akan menampilkan "batas belum bisa diperiksa".

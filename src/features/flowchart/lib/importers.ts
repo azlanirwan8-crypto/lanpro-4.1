@@ -11,6 +11,7 @@ import {
   warnaTeksAman,
 } from "./gayaImpor";
 import type { GayaGaris } from "./gayaImpor";
+import { bentukDariGayaDrawio } from "./petaBentukDrawio";
 
 /**
  * #611(a) — angka dari teks impor, dengan cadangan yang BENAR-BENAR dipakai.
@@ -315,35 +316,6 @@ const titikTekukanGaris = (cell: Element): { x: number; y: number }[] => {
 };
 
 /** Membaca berkas .drawio/.xml dan memetakan tiap <mxCell> ke node atau edge. */
-/**
- * #685 — kata kunci gaya yang BENAR-BENAR dikenali pemetaan bentuk di bawah.
- *
- * Daftarnya hidup di sini, bukan disalin ke laporan batas, karena satu-satunya
- * yang tahu bentuk apa yang dikenali adalah kode pemetaan itu sendiri. Kalau
- * nanti ada bentuk baru, laporan "apa yang hilang" ikut berubah tanpa ada yang
- * perlu mengingat untuk menyinkronkan dua tempat.
- */
-export const KATA_BENTUK_DIKENALI: ReadonlySet<string> = new Set([
-  "cloud",
-  "process",
-  "preprocess",
-  "text",
-  "ellipse",
-  "oval",
-  "circle",
-  "rhombus",
-  "diamond",
-  "cylinder",
-  "db",
-  "database",
-  "parallelogram",
-  "document",
-  "actor",
-  "lambda",
-  "class",
-  "sticky",
-  "note",
-]);
 
 export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
   const parser = new DOMParser();
@@ -514,6 +486,16 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
         type = "sticky";
         color = "yellow";
       }
+
+      // #752 — rantai `includes` di atas hanya mengenali 13 kata, sehingga dari
+      // 206 bentuk yang bisa DIGAMBAR papan ini hanya 12 yang pernah bisa
+      // HASIL dari berkas draw.io; diukur 15 Okt, 66% node impor jatuh ke `rect`
+      // polos. Tabel di `petaBentukDrawio.ts` membaca nilai `shape=` persis dan
+      // per pustaka, jadi ia menimpa TIPE tanpa menyentuh WARNA bawaan rantai
+      // lama. Yang tidak dikenali tetap `rect` dan tetap dilaporkan
+      // `batasKonversi` — dilaporkan, bukan ditebak (aturan #685).
+      const dariTabel = bentukDariGayaDrawio(style);
+      if (dariTabel) type = dariTabel;
 
       const dariGambar =
         warnaPaletTerdekat(/fillcolor=([^;]+)/i.exec(style)?.[1]) ||

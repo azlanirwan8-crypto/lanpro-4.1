@@ -462,10 +462,14 @@ describe("FlowchartView", () => {
     expect(await screen.findAllByText("Alur Ikon Saja")).toHaveLength(1);
   });
 
-  // Item #540 — klik-tahan pada kanvas kosong harus MENGGESER papan. Dulu drag
-  // biasa menggambar kerangka seleksi, sehingga papan terasa mati bagi orang yang
-  // belum tahu ada tool tangan / spasi. Seleksi kotak tetap ada di Shift+drag.
-  it("drag biasa menggeser papan, Shift+drag menggambar seleksi kotak", async () => {
+  // Item #754 MEMBALIKKAN #540, dan itu disengaja. Perintah pemilik 15 Okt:
+  // "feel saat buat flowchart berasa sama dengan draw.io". Di draw.io seret biasa
+  // pada kanvas kosong MENGGAMBAR KOTAK SELEKSI; papan digeser dengan spasi-tahan,
+  // tombol tengah, atau tool tangan. #540 menukar keduanya demi rasa Miro, dan
+  // akibatnya memilih beberapa bentuk selalu harus diawali Shift — kebiasaan yang
+  // tidak ada di draw.io. Kedua jalur tetap diuji di sini supaya tukar-menukar
+  // ini tidak bisa terjadi lagi tanpa test yang merah.
+  it("drag biasa menggambar seleksi kotak, spasi-tahan dan tombol tengah menggeser papan", async () => {
     (fetchFlowcharts as jest.Mock).mockResolvedValue([
       {
         id: "fw6",
@@ -501,19 +505,30 @@ describe("FlowchartView", () => {
     const awal = kanvas.style.backgroundPosition;
     expect(awal).toBe("50px 50px");
 
+    // Drag biasa: kotak seleksi muncul, papan TIDAK bergeser.
     fireEvent.mouseDown(kanvas, { clientX: 300, clientY: 200, button: 0 });
+    fireEvent.mouseMove(window, { clientX: 240, clientY: 150 });
+    expect(kotakSeleksi()).toBeTruthy();
+    expect(kanvas.style.backgroundPosition).toBe(awal);
+    fireEvent.mouseUp(window);
+    expect(kotakSeleksi()).toBeNull();
+
+    // Tombol tengah: menggeser papan, tidak menggambar kotak.
+    fireEvent.mouseDown(kanvas, { clientX: 300, clientY: 200, button: 1 });
     fireEvent.mouseMove(window, { clientX: 240, clientY: 150 });
     expect(kanvas.style.backgroundPosition).toBe("-10px 0px");
     expect(kotakSeleksi()).toBeNull();
     fireEvent.mouseUp(window);
 
-    // Shift+drag: yang bergerak kotak seleksi, papan dibiarkan diam.
+    // Spasi-tahan: juga menggeser papan, walau tombolnya kiri.
     const sesudahGeser = kanvas.style.backgroundPosition;
-    fireEvent.mouseDown(kanvas, { clientX: 300, clientY: 200, button: 0, shiftKey: true });
-    fireEvent.mouseMove(window, { clientX: 240, clientY: 150, shiftKey: true });
-    expect(kotakSeleksi()).toBeTruthy();
-    expect(kanvas.style.backgroundPosition).toBe(sesudahGeser);
+    fireEvent.keyDown(window, { code: "Space", key: " " });
+    fireEvent.mouseDown(kanvas, { clientX: 300, clientY: 200, button: 0 });
+    fireEvent.mouseMove(window, { clientX: 340, clientY: 240 });
+    expect(kanvas.style.backgroundPosition).not.toBe(sesudahGeser);
+    expect(kotakSeleksi()).toBeNull();
     fireEvent.mouseUp(window);
+    fireEvent.keyUp(window, { code: "Space", key: " " });
   });
 
   // Item #546 — titik ungu di ujung garis bantu pernah menempel sendirian di

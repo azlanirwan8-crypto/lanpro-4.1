@@ -17,6 +17,7 @@ import { motion } from "motion/react";
 import { findSmartRoute, memotongInteriorKotak } from "../lib/routing";
 import { colorPaletteHex, ukuranBentukEfektif } from "../constants";
 import { EdgeStyleBar } from "./EdgeStyleBar";
+import { BENTUK_KEPALA, gambarKepala, kepalaKosongBawaan, skalaKepala } from "./kepalaPanah";
 import { warnaTeksAman } from "../lib/gayaImpor";
 import type { FlowNode, FlowEdge, Point } from "../types";
 
@@ -136,41 +137,6 @@ export const titikPort = (
 const warnaGarisPapan = (tema: "miro" | "blueprint"): string =>
   tema === "miro" ? "#000000" : "#60a5fa";
 
-/**
- * #665 - mata panah yang papan ini bisa gambar. draw.io mengenal lebih banyak
- * lagi (stepped, skip, circle, dan seterusnya); nilai yang tidak ada di daftar
- * ini jatuh ke `classic`, dan itu dituliskan sebagai BATAS, bukan ditebak.
- */
-const BENTUK_KEPALA = ["classic", "open", "oval", "block", "diamond", "none"];
-
-const gambarKepala = (bentuk: string, isi: boolean, warna: string) => {
-  if (bentuk === "oval")
-    return (
-      <ellipse
-        cx="5.5"
-        cy="4"
-        rx="4.5"
-        ry="3"
-        fill={isi ? warna : "none"}
-        stroke={warna}
-        strokeWidth="1"
-      />
-    );
-  if (bentuk === "diamond")
-    return (
-      <path
-        d="M0.8,4 L5,0.8 L9.2,4 L5,7.2 Z"
-        fill={isi ? warna : "none"}
-        stroke={warna}
-        strokeWidth="1"
-      />
-    );
-  if (bentuk === "open")
-    return <path d="M0.8,0.8 L9.5,4 L0.8,7.2" fill="none" stroke={warna} strokeWidth="1" />;
-  // `classic` dan `block`: segitiga, terisi atau berbingkai.
-  return <path d="M0.8,0.8 L9.5,4 L0.8,7.2 Z" fill={warna} stroke={warna} strokeWidth="1" />;
-};
-
 type SpesifikasiKepala = { id: string; bentuk: string; isi: boolean; warna: string };
 
 /**
@@ -185,13 +151,16 @@ const idKepala = (arah: string, bentuk: string, isi: boolean, hex: string): stri
 };
 
 /**
- * #665 - mata panah di kedua ujung, dibaca dari `endArrow` dan `startArrow`.
+ * #665 / #753 - mata panah di kedua ujung, dibaca dari `endArrow` dan `startArrow`.
  *
  * TIGA keadaan yang harus dibeda-kan, dan inilah bagian yang paling gampang
  * salah: `undefined` berarti sumber TIDAK menulis apa pun, jadi papan memakai
  * matanya sendiri; `"none"` berarti sumber menulis tanpa mata, dan garisnya
  * harus benar-benar tanpa mata (sebelum ini papan selalu menggambar satu);
  * selebihnya digambar sesuai bentuk dan isian sumber.
+ *
+ * Nilai yang tidak ada di `BENTUK_KEPALA` jatuh ke `classic` — dinyatakan
+ * sebagai batas, bukan ditebak.
  */
 const kepalaUntuk = (
   edge: FlowEdge,
@@ -203,9 +172,9 @@ const kepalaUntuk = (
     const nilai = (arah === "end" ? edge.endArrow : edge.startArrow)?.toLowerCase();
     if (!nilai) return undefined;
     if (nilai === "none") return null;
-    const bentuk = BENTUK_KEPALA.includes(nilai) ? nilai : "classic";
+    const bentuk = (BENTUK_KEPALA as readonly string[]).includes(nilai) ? nilai : "classic";
     const flag = arah === "end" ? edge.endFill : edge.startFill;
-    const isi = flag ?? !(bentuk === "open" || bentuk === "oval" || bentuk === "diamond");
+    const isi = flag ?? !kepalaKosongBawaan(bentuk);
     return {
       id: idKepala(arah, bentuk, isi, hex),
       bentuk,
@@ -721,8 +690,8 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                       key={k.id}
                       id={k.id}
                       viewBox="0 0 10 8"
-                      markerWidth="10"
-                      markerHeight="8"
+                      markerWidth={10 * skalaKepala(k.bentuk)}
+                      markerHeight={8 * skalaKepala(k.bentuk)}
                       refX="9.5"
                       refY="4"
                       orient="auto-start-reverse"

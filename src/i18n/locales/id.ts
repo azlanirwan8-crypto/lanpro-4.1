@@ -1593,6 +1593,7 @@ export const id = {
     duplicateShape: "Duplikasi Bentuk",
     copyNothingSelected: "Tidak ada bentuk yang diseleksi untuk disalin.",
     copiedShapes: "{{bentuk}} bentuk dan {{panah}} panah disalin ke clipboard papan.",
+    cutShapes: "{{bentuk}} bentuk dan {{panah}} panah dipotong - tempel dengan Ctrl+V.",
     pasteNothing: "Clipboard papan kosong - salin dulu bentuknya (Ctrl+C).",
     pastedShapes: "{{bentuk}} bentuk dan {{panah}} panah ditempel.",
     tempelTidakTerbaca:

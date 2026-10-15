@@ -22,6 +22,8 @@
  */
 import type { FlowEdge, FlowNode } from "../types";
 import { colorPaletteHex, ukuranBentukEfektif } from "../constants";
+import { EJAAN_KEPALA_DRAWIO } from "../components/kepalaPanah";
+import { ejaanUntuk } from "./petaEksporDrawio";
 
 /** Nilai atribut XML: lima karakter yang wajib, dan tidak ada yang lain. */
 const kutip = (nilai: string): string =>
@@ -40,37 +42,27 @@ const kutip = (nilai: string): string =>
  */
 const nilaiLabel = (teks: string): string => kutip((teks || "").replace(/\n/g, "<br>"));
 
-/** Bentuk papan -> awalan `style=` draw.io, sesuai urutan pengenal impor. */
-const gayaBentukDrawIo = (node: FlowNode): string => {
-  switch (node.type) {
-    case "oval":
-    case "circle":
-      return "ellipse;";
-    case "diamond":
-    case "decision":
-      return "rhombus;";
-    case "cloud":
-      return "ellipse;shape=cloud;";
-    case "subprocess":
-    case "predefined":
-      return "shape=process;";
-    case "parallelogram":
-      return "shape=parallelogram;";
-    case "document":
-    case "multiDocument":
-      return "shape=document;";
-    case "cylinder":
-    case "database":
-      return "shape=cylinder3;";
-    case "sticky":
-      return "shape=note;";
-    case "hexagon":
-      return "shape=hexagon;";
-    default:
-      // Persegi panjang: memang bawaan draw.io, jadi tidak perlu awalan.
-      return "";
-  }
-};
+/**
+ * Bentuk papan → awalan `style=` draw.io.
+ *
+ * Sejak #753 seluruh ejaannya datang dari `petaEksporDrawio.ts`, yang
+ * dibangkitkan dengan menjalankan resolver IMPOR atas korpus gaya sidebar
+ * draw.io sungguhan. Sebelumnya di sini ada switch 12 cabang tulisan tangan yang
+ * hanya mencakup sebagian kecil dari 208 tipe native, dan sisanya keluar sebagai
+ * persegi panjang tanpa pernah dicatat sebagai kehilangan.
+ *
+ * `default` tetap `""`: persegi panjang memang bawaan draw.io, jadi tidak perlu
+ * awalan — dan bentuk yang tercatat di `TANPA_PADANAN_DRAWIO` jujur keluar
+ * sebagai persegi panjang daripada memakai ejaan karangan yang membuat draw.io
+ * menampilkan sel KOSONG.
+ */
+const gayaBentukDrawIo = (node: FlowNode): string => ejaanUntuk(node.type)?.gaya ?? "";
+
+/**
+ * Ejaan kanonik mata panah. mxGraph mencari penanda lewat tabel yang peka huruf
+ * besar/kecil, sedangkan model internal menyimpan semuanya huruf kecil.
+ */
+const ejaanKepala = (nilai: string): string => EJAAN_KEPALA_DRAWIO[nilai.toLowerCase()] ?? nilai;
 
 /** Isian dan tepi. Palet papan INI ADALAH heks draw.io, jadi ia bisa ditulis balik. */
 const gayaWarna = (node: FlowNode): string[] => {
@@ -146,8 +138,12 @@ const gayaGaris = (edge: FlowEdge): string[] => {
   if (edge.dashPattern) out.push(`dashPattern=${edge.dashPattern.replace(/,/g, " ")}`);
   if (edge.strokeColor) out.push(`strokeColor=${edge.strokeColor}`);
   out.push(`strokeWidth=${edge.strokeWidth ?? 1}`);
-  if (edge.endArrow) out.push(`endArrow=${edge.endArrow}`);
-  if (edge.startArrow) out.push(`startArrow=${edge.startArrow}`);
+  // mxGraph mencari penanda lewat `mxMarker.markers[nama]` yang PEKA huruf
+  // besar/kecil, sementara model internal menyimpan semuanya huruf kecil
+  // (`gayaImpor.ts:291`). Menulis `endArrow=ermany` menghasilkan garis TANPA
+  // mata panah di draw.io, jadi ejaannya dinormalkan dulu (#753).
+  if (edge.endArrow) out.push(`endArrow=${ejaanKepala(edge.endArrow)}`);
+  if (edge.startArrow) out.push(`startArrow=${ejaanKepala(edge.startArrow)}`);
   if (edge.endFill !== undefined) out.push(`endFill=${edge.endFill ? 1 : 0}`);
   if (edge.startFill !== undefined) out.push(`startFill=${edge.startFill ? 1 : 0}`);
   if (edge.labelFontSize) out.push(`fontSize=${edge.labelFontSize}`);

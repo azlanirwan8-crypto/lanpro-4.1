@@ -528,6 +528,23 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   /**
+   * #754 — bentuk yang kotak labelnya SEDANG disunting. Null = tidak ada.
+   *
+   * KENAPA STATE INI ADA. Kotak label adalah `<textarea>` yang menutupi seluruh
+   * badan bentuk, dan `handleNodeMouseDown` menolak memulai seretan begitu
+   * targetnya textarea — jadi satu-satunya cara memindahkan bentuk adalah
+   * menyeret bingkainya yang beberapa piksel lebar. draw.io tidak begitu: klik
+   * tunggal memilih, seret memindahkan, dan KLIK GANDA yang membuka penyunting
+   * teks. Selama textarea selalu aktif, keduanya tidak bisa dibedakan.
+   *
+   * Konsekuensinya dijaga di dua tempat: textarea hanya menerima pointer saat
+   * bentuk ini sedang disunting (`FlowchartNode`), dan label di-commit ke
+   * riwayat SEKALI saat penyuntingan berakhir — bukan tiap ketikan, karena 40
+   * huruf berarti 40 langkah Ctrl+Z.
+   */
+  const [suntingLabelId, setSuntingLabelId] = useState<string | null>(null);
+
+  /**
    * #614 — kelompok yang terseleksi sekarang punya SATU kotak pemilih bersama.
    * State ini menyimpan kotak pada saat tarikan dimulai plus letur tiap
    * anggotanya, sehingga satu pegangan mengubah ukuran semua anggota dengan
@@ -1254,6 +1271,49 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   /**
+   * #754 — Ctrl+X. draw.io memotong seleksi: isinya masuk clipboard DAN hilang
+   * dari papan, dalam SATU langkah yang bisa dibatalkan Ctrl+Z. Sebelumnya
+   * pintasan ini tidak terdaftar sama sekali, jadi Ctrl+X diam sementara Ctrl+C
+   * dan Ctrl+V jalan — persis kelas keluhan yang #582 perbaiki ("kenapa tidak
+   * bisa" tanpa pesan apa pun).
+   */
+  const potongSeleksi = () => {
+    const terpilih =
+      copiedNodes.length > 0 ? copiedNodes : nodes.filter((n) => n.id === selectedNodeId);
+
+    if (terpilih.length === 0) {
+      if (!selectedEdgeId) {
+        toast.info(t("flowchart.copyNothingSelected"));
+        return;
+      }
+      // Hanya garis yang terpilih: potong garisnya saja.
+      const sisaGaris = edges.filter((e) => e.id !== selectedEdgeId);
+      setEdges(sisaGaris);
+      recordHistory(nodes, sisaGaris);
+      setSelectedEdgeId(null);
+      toast.success(t("flowchart.cutShapes", { bentuk: 0, panah: 1 }));
+      return;
+    }
+
+    const salinan = kumpulkanSalinan(terpilih, edges);
+    copyNodesToClipboard(salinan.nodes, salinan.edges);
+
+    const id = new Set(terpilih.map((n) => n.id));
+    const sisaBentuk = nodes.filter((n) => !id.has(n.id));
+    // Panah yang salah satu ujungnya terpotong ikut hilang — itulah yang
+    // dilakukan draw.io, dan panah menggantung tanpa ujung tidak bisa digambar.
+    const sisaGaris = edges.filter((e) => !id.has(e.fromNodeId) && !id.has(e.toNodeId));
+    setNodes(sisaBentuk);
+    setEdges(sisaGaris);
+    recordHistory(sisaBentuk, sisaGaris);
+    setCopiedNodes([]);
+    setSelectedNodeId(null);
+    toast.success(
+      t("flowchart.cutShapes", { bentuk: salinan.nodes.length, panah: salinan.edges.length })
+    );
+  };
+
+  /**
    * Cadangan untuk jalur yang TIDAK memicu peristiwa `paste` (klik-kanan
    * "Tempel di sini"). Hanya `text/plain` yang bisa didapat dari sini — rasa
    * HTML milik draw.io tidak terjangkau, dan itu justru sebabnya peristiwa
@@ -1397,6 +1457,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   // `copiedNodes` tidak berubah saat salinan ditulis.
   const aksiKlipboardRef = useRef({
     salin: salinSeleksi,
+    potong: potongSeleksi,
     tempel: tempelSalinan,
     adaSalinanPapan: () => getClipboard().nodes.length > 0,
     tempelPeristiwa: tempelDariPeristiwa,
@@ -1404,6 +1465,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   useEffect(() => {
     aksiKlipboardRef.current = {
       salin: salinSeleksi,
+      potong: potongSeleksi,
       tempel: tempelSalinan,
       adaSalinanPapan: () => getClipboard().nodes.length > 0,
       tempelPeristiwa: tempelDariPeristiwa,
@@ -1469,6 +1531,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
       // 2. Escape to deselect everything
       if (e.key === "Escape") {
+        // #754 — Escape pertama menutup penyuntingan label dan MENYIMPAN
+        // hasilnya; Escape kedua baru melepas seleksi. draw.io berperilaku sama,
+        // dan tanpa urutan ini mengetik lalu menekan Escape membuang teks yang
+        // sedang ditulis tanpa jejak di riwayat.
+        if (suntingLabelId) {
+          akhiriSuntingLabel();
+          return;
+        }
         setSelectedNodeId(null);
         setSelectedEdgeId(null);
         setConnectSourceId(null);
@@ -1476,13 +1546,42 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         setActiveTool("select");
       }
 
+      // #754 — F2 dan Enter membuka kotak label bentuk terpilih, dan mengetik
+      // satu huruf langsung menyunting dengan huruf itu menimpa label lama.
+      // Ketiganya cara draw.io masuk ke mode teks; sebelumnya satu-satunya jalan
+      // adalah mengklik kotak label yang menutupi seluruh badan bentuk, yang
+      // justru membuat bentuknya tidak bisa diseret.
+      if (selectedNodeId && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        if (e.key === "F2" || e.key === "Enter") {
+          e.preventDefault();
+          mulaiSuntingLabel(selectedNodeId);
+          return;
+        }
+        // Spasi DIKECUALIKAN dengan sengaja: ia sudah dipakai di atas sebagai
+        // tahan-untuk-geser, dan `e.key`-nya juga satu karakter.
+        if (e.key.length === 1 && e.code !== "Space") {
+          e.preventDefault();
+          const id = selectedNodeId;
+          mulaiSuntingLabel(id);
+          // Huruf pertamanya tidak boleh hilang: ditulis sebagai label baru,
+          // bukan ditambahkan ke label lama.
+          setNodes((prev) => prev.map((n) => (n.id === id ? { ...n, label: e.key } : n)));
+          return;
+        }
+      }
+
       // 3. Arrow Keys to nudge selected node (with snap support)
-      if (selectedNodeId && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+      // #754 — seluruh KELOMPOK ikut bergeser, bukan hanya bentuk tunggal.
+      // Sebelumnya `copiedNodes` diabaikan di sini, jadi memilih lima bentuk
+      // lalu menekan panah hanya menggerakkan yang terakhir diklik.
+      const idNudge = new Set<string>(copiedNodes.map((n) => n.id));
+      if (selectedNodeId) idNudge.add(selectedNodeId);
+      if (idNudge.size > 0 && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
         e.preventDefault();
         const step = e.shiftKey ? 20 : 5;
         setNodes((prev) =>
           prev.map((n) => {
-            if (n.id === selectedNodeId) {
+            if (idNudge.has(n.id)) {
               let nextX = n.x;
               let nextY = n.y;
               if (e.key === "ArrowUp") nextY -= step;
@@ -1526,6 +1625,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         // yang tersalin baru muncul saat korban menekan Ctrl+V.
         e.preventDefault();
         aksiKlipboardRef.current.salin();
+      }
+
+      // #754 — Ctrl+X / Cmd+X: potong seleksi. Sebelumnya pintasan ini tidak
+      // terdaftar sama sekali padahal Ctrl+C dan Ctrl+V ada, jadi memindahkan
+      // sekelompok bentuk berarti menyalin lalu menghapus satu per satu.
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "x") {
+        e.preventDefault();
+        aksiKlipboardRef.current.potong();
       }
 
       // Add: Ctrl+V / Cmd+V - Paste di bawah kursor
@@ -2411,6 +2518,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     if (!selectedNodeId) return;
     const updated = nodes.map((n) => (n.id === selectedNodeId ? { ...n, ...props } : n));
     setNodes(updated);
+    // #754 — perubahan gaya dari panel sifat dulu TIDAK masuk riwayat, jadi
+    // mengganti warna lalu menekan Ctrl+Z melompat ke perubahan sebelumnya dan
+    // warna yang baru saja dipilih hilang tanpa bisa diambil kembali. Satu
+    // perubahan panel = satu langkah undo, persis draw.io.
+    recordHistory(updated, edges);
   };
 
   /**
@@ -2426,6 +2538,29 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
    */
   const handleUpdateNode = (id: string, props: Partial<FlowNode>) => {
     setNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...props } : n)));
+  };
+
+  /**
+   * #754 — menutup penyuntingan label dan memasukkan hasilnya ke riwayat.
+   *
+   * Dipanggil saat textarea kehilangan fokus, saat Escape ditekan, dan saat
+   * bentuk yang disunting berpindah. Tanpa commit di satu tempat, mengetik 40
+   * huruf menghasilkan 40 langkah Ctrl+Z — dan `recordHistory` yang dipasang di
+   * `handleUpdateNode` akan membuat setiap ketikan menumpuk riwayat, jadi
+   * riwayatnya justru ditulis DI SINI, sekali.
+   */
+  const akhiriSuntingLabel = () => {
+    if (!suntingLabelId) return;
+    setSuntingLabelId(null);
+    recordHistory(nodes, edges);
+  };
+
+  /** #754 — klik ganda / F2 / Enter membuka kotak label bentuk ini. */
+  const mulaiSuntingLabel = (id: string) => {
+    if (!isWorkspaceEditable) return;
+    setSelectedNodeId(id);
+    setSelectedEdgeId(null);
+    setSuntingLabelId(id);
   };
 
   // Add flow symbol/shape to workspace
@@ -3024,12 +3159,19 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const handleNodeMouseDown = (e: React.MouseEvent, node: FlowNode) => {
     e.stopPropagation();
 
-    // Do not initiate node dragging if clicking on an input/textarea
-    // to allow standard text selection blocking with the cursor
+    // #754 — kotak label hanya menerima pointer saat bentuknya SEDANG disunting
+    // (`FlowchartNode` memasang `pointer-events-none` di luar itu), jadi cabang
+    // ini sekarang hanya kena pada penyuntingan yang benar-benar aktif: menyeret
+    // pilihan teks di dalam kotak tidak boleh memindahkan bentuknya.
     const target = e.target as HTMLElement;
-    if (target.tagName.toLowerCase() === "textarea" || target.tagName.toLowerCase() === "input") {
+    const tag = target.tagName.toLowerCase();
+    if ((tag === "textarea" || tag === "input") && suntingLabelId === node.id) {
       return;
     }
+
+    // Pindah ke bentuk lain menutup penyuntingan yang masih terbuka, dan
+    // hasilnya masuk riwayat — kalau tidak, Ctrl+Z melewatinya diam-diam.
+    if (suntingLabelId && suntingLabelId !== node.id) akhiriSuntingLabel();
 
     if (!isWorkspaceEditable) {
       setSelectedNodeId(node.id);
@@ -3048,10 +3190,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     }
 
     // #614 — Shift+klik menambah atau mengeluarkan SATU bentuk dari kelompok.
-    // Sebelum item ini kelompok hanya bisa lahir dari Shift+seret, jadi ingin
-    // menambah satu bentuk ke seleksi yang sudah ada berarti harus menggambar
-    // kotak baru yang menelan semuanya.
-    if (e.shiftKey) {
+    // #754 — Ctrl/Cmd+klik melakukan hal yang sama, karena itulah tombol yang
+    // dipakai draw.io, Figma, dan hampir setiap editor diagram; sebelumnya hanya
+    // `e.shiftKey` yang diuji sehingga Ctrl+klik justru MEMBUANG seleksi yang
+    // ada dan memilih satu bentuk saja.
+    if (e.shiftKey || e.ctrlKey || e.metaKey) {
       const sudahAnggota = copiedNodes.some((n) => n.id === node.id);
       const dasar = copiedNodes.length ? copiedNodes : nodes.filter((n) => n.id === selectedNodeId);
       const kelompok = sudahAnggota ? dasar.filter((n) => n.id !== node.id) : [...dasar, node];
@@ -3087,6 +3230,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setSelectedNodeId(null);
     setSelectedEdgeId(null);
     setCopiedNodes([]);
+    // #754 — klik di kanvas kosong menutup penyuntingan label dan menulis
+    // hasilnya ke riwayat.
+    if (suntingLabelId) akhiriSuntingLabel();
 
     // #546 — klik di luar bentuk membatalkan mode sambung. Sebelumnya mode ini
     // hanya selesai lewat Escape atau klik port tujuan, sehingga siapa pun yang
@@ -3094,26 +3240,28 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     // selamanya: garis bantu + titik ungu terus menempel di kursor.
     if (connectSourceId) setConnectSourceId(null);
 
-    // #540 — papan mengikuti tangan: klik-tahan di kanvas kosong MENGGESER papan
-    // (dulu: hanya tool tangan / spasi / tombol tengah, sementara drag biasa
-    // menggambar kerangka seleksi sehingga papan terasa mati). Seleksi kotak
-    // pindah ke Shift+drag dan tetap menyeleksi bentuk yang tersentuh.
-    const seleksiKotak = e.shiftKey;
-    if (
-      !seleksiKotak &&
-      (activeTool === "hand" || isSpacePressed || e.button === 1 || activeTool === "select")
-    ) {
+    // #754 MEMBALIKKAN #540, dan itu disengaja: perintah pemilik 15 Okt adalah
+    // "feel saat buat flowchart berasa sama dengan draw.io". Di draw.io seret
+    // biasa di kanvas kosong MENGGAMBAR KOTAK SELEKSI; papan digeser dengan
+    // tombol tangan, spasi-tahan, atau tombol tengah. #540 menukar keduanya
+    // demi rasa Miro, dan akibatnya memilih beberapa bentuk harus selalu diawali
+    // Shift — satu kebiasaan yang tidak ada di draw.io. Kedua jalur tetap bisa
+    // dipakai: Shift+seret masih menggambar kotak, spasi/tengah/tangan masih
+    // menggeser.
+    const geserPapan = activeTool === "hand" || isSpacePressed || e.button === 1;
+    if (geserPapan) {
       startCanvasPanning(e.clientX, e.clientY);
-    } else if (seleksiKotak && activeTool === "select") {
-      const rect = canvasContainerRef.current?.getBoundingClientRect();
-      if (rect) {
-        setMarqueeBox({
-          startX: e.clientX,
-          startY: e.clientY,
-          currentX: e.clientX,
-          currentY: e.clientY,
-        });
-      }
+      return;
+    }
+    if (e.button !== 0 || activeTool !== "select") return;
+    const rect = canvasContainerRef.current?.getBoundingClientRect();
+    if (rect) {
+      setMarqueeBox({
+        startX: e.clientX,
+        startY: e.clientY,
+        currentX: e.clientX,
+        currentY: e.clientY,
+      });
     }
   };
 
@@ -3744,6 +3892,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     handleConnectPortClick,
     handleUpdateActiveNode,
     handleUpdateNode,
+    mulaiSuntingLabel,
+    akhiriSuntingLabel,
     handleDuplicateNode,
     handleDeleteSelected,
     getLinkedTaskDetails,
@@ -3754,6 +3904,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     handleConnectPortClick,
     handleUpdateActiveNode,
     handleUpdateNode,
+    mulaiSuntingLabel,
+    akhiriSuntingLabel,
     handleDuplicateNode,
     handleDeleteSelected,
     getLinkedTaskDetails,
@@ -3773,6 +3925,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         aksiBentukRef.current.handleUpdateActiveNode(props),
       handleUpdateNode: (id: string, props: Partial<FlowNode>) =>
         aksiBentukRef.current.handleUpdateNode(id, props),
+      mulaiSuntingLabel: (id: string) => aksiBentukRef.current.mulaiSuntingLabel(id),
+      akhiriSuntingLabel: () => aksiBentukRef.current.akhiriSuntingLabel(),
       handleDuplicateNode: (node: FlowNode) => aksiBentukRef.current.handleDuplicateNode(node),
       handleDeleteSelected: () => aksiBentukRef.current.handleDeleteSelected(),
       getLinkedTaskDetails: (taskId?: string) => aksiBentukRef.current.getLinkedTaskDetails(taskId),
@@ -4415,6 +4569,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               handleConnectPortClick={aksiBentuk.handleConnectPortClick}
                               handleUpdateActiveNode={aksiBentuk.handleUpdateActiveNode}
                               handleUpdateNode={aksiBentuk.handleUpdateNode}
+                              isEditingLabel={suntingLabelId === node.id}
+                              mulaiSuntingLabel={aksiBentuk.mulaiSuntingLabel}
+                              akhiriSuntingLabel={aksiBentuk.akhiriSuntingLabel}
                               handleDuplicateNode={aksiBentuk.handleDuplicateNode}
                               handleDeleteSelected={aksiBentuk.handleDeleteSelected}
                               getLinkedTaskDetails={aksiBentuk.getLinkedTaskDetails}
