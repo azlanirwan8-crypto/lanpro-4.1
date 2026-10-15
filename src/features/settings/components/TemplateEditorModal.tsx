@@ -20,7 +20,13 @@ const EMAIL_VARIABLES = [
   "{{project_name}}",
 ];
 
-const WA_VARIABLES = ["{{user_name}}", "{{task_list}}", "{{app_url}}", "{{project_name}}"];
+const WA_VARIABLES = [
+  "{{user_name}}",
+  "{{task_list}}",
+  "{{meeting_list}}",
+  "{{app_url}}",
+  "{{project_name}}",
+];
 
 export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
   isOpen,

@@ -400,9 +400,17 @@ router.post("/api/settings/whatsapp/broadcast-now", verifyGlobalAdmin, async (re
       // Sebagian terkirim, sebagian gagal
       message = `Broadcast WhatsApp sebagian berhasil: ${hasil.totalDikirim} terkirim, ${hasil.totalGagal} gagal (${hasil.kegagalan?.[0]?.reason || ""}).`;
     } else if (hasil.totalDikirim > 0) {
-      message = `Broadcast WhatsApp berhasil diproses. ${hasil.totalDikirim} pesan dikirim ke penerima dengan tugas aktif.`;
+      // #744 — "tugas aktif" saja tidak lagi lengkap: pesan sekarang bisa
+      // memuat topik rapat, dan bisa juga dikirim ke penerima yang tidak
+      // punya tiket sama sekali.
+      const topik = hasil.totalTopikRapat || 0;
+      message =
+        `Broadcast WhatsApp berhasil diproses. ${hasil.totalDikirim} pesan dikirim` +
+        (topik > 0
+          ? `, memuat ${topik} topik rapat di luar tiket tugas.`
+          : ` ke penerima dengan tugas aktif.`);
     } else if (hasil.totalTanpaTugas > 0) {
-      message = `Broadcast selesai: 0 pesan dikirim karena ${hasil.totalTanpaTugas} penerima yang diperiksa tidak memiliki tugas aktif (To Do, In Progress, Testing). Silakan tugaskan tiket ke pengguna terlebih dahulu.`;
+      message = `Broadcast selesai: 0 pesan dikirim karena ${hasil.totalTanpaTugas} penerima yang diperiksa tidak memiliki tiket tugas aktif maupun topik rapat yang ditugaskan. Silakan tugaskan tiket atau topik rapat ke pengguna terlebih dahulu.`;
     } else {
       message = "Broadcast selesai: Tidak ada penerima yang memiliki nomor WhatsApp terdaftar.";
     }
@@ -415,6 +423,7 @@ router.post("/api/settings/whatsapp/broadcast-now", verifyGlobalAdmin, async (re
         pesanDikirim: hasil.totalDikirim,
         pesanGagal: hasil.totalGagal || 0,
         tanpaTugas: hasil.totalTanpaTugas || 0,
+        topikRapat: hasil.totalTopikRapat || 0,
         kegagalan: hasil.kegagalan || [],
       },
     });

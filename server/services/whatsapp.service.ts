@@ -1,6 +1,10 @@
 import cron from "node-cron";
 import dbPool from "../../src/lib/db";
-import { getBroadcastConfig, claimBroadcastFire } from "./broadcastConfig.service";
+import {
+  getBroadcastConfig,
+  claimBroadcastFire,
+  DEFAULT_WHATSAPP_TEMPLATE,
+} from "./broadcastConfig.service";
 import { ambilAppUrl } from "./email.service";
 import { ambilWhatsappToken } from "./integrationSettings.service";
 import { recordBroadcastLog } from "./broadcastLog.service";
@@ -104,7 +108,95 @@ export interface WhatsAppDigestResult {
   totalPenerima: number;
   totalGagal: number;
   totalTanpaTugas: number;
+  totalTopikRapat: number;
   kegagalan: WhatsAppDigestFailure[];
+}
+
+/**
+ * Satu topik rapat yang ditugaskan ke pengguna (#744).
+ *
+ * Sengaja HANYA dua medan ini. Pemilik proyek meminta "informasinya saja
+ * (topiknya saja)": catatan rapat bisa berisi pembahasan sensitif, dan pesan
+ * ini keluar ke nomor WhatsApp pribadi. `keterangan`, `tindakanLanjut`,
+ * `transcript`, dan `aiSummary` TIDAK boleh ikut ke sini.
+ */
+export interface TopikRapat {
+  judulRapat: string;
+  topik: string;
+}
+
+/**
+ * Batas topik rapat per pesan (#744). Tanpa batas, satu pengguna yang memegang
+ * belasan titik diskusi menghasilkan pesan 1.500+ karakter yang tidak terbaca
+ * di ponsel dan mendekati batas praktis gateway. Sisanya dilaporkan sebagai
+ * satu baris hitungan, bukan dibuang diam-diam.
+ */
+export const BATAS_TOPIK_RAPAT = 10;
+
+/**
+ * Topik titik diskusi Meeting Notes yang ditugaskan ke pengguna (#744).
+ *
+ * TIGA hal yang mudah salah di sini, semuanya sudah diukur sebelumnya:
+ *
+ * 1. **Identitas.** `discussion_point_assignees.user_id` menyimpan `Users.uid`,
+ *    BUKAN `Users.id` — `DiscussionPointsTable.tsx:541` membangun opsinya dari
+ *    `String(m?.uid || m?.id)`. Karena itu pemanggil mengirim ketiga kunci
+ *    (id, uid, username) persis seperti kueri tiket di bawah, bukan satu.
+ *
+ * 2. **Dua sumber.** Kolom tunggal lama `"assignTo"` MASIH ditulis sampai hari
+ *    ini (`discussion-points.routes.ts:101` dan `:160`), berdampingan dengan
+ *    tabel jamak #703. Membaca salah satunya saja membuat sebagian data
+ *    pengguna tidak muncul. `EXISTS` dipakai alih-alih `JOIN` supaya titik yang
+ *    cocok di KEDUA sumber tetap satu baris, bukan dua.
+ *
+ * 3. **Kutip manual.** `"assignTo"`, `"meetingId"`, dan `"targetDate"` tidak
+ *    ada di `camelCaseCols` `src/lib/db.ts:122`, jadi Postgres akan melipatnya
+ *    jadi huruf kecil — pelajaran #476. `Meetings`/`DiscussionPoints` sebaliknya
+ *    SUDAH ada di `pgTables:88` dan dikutip otomatis, jadi ditulis tanpa kutip.
+ *
+ * `"targetDate"` bertipe VARCHAR(50), bukan tanggal: pengurutannya perbandingan
+ * string dan hanya benar selama formatnya seragam. Itu keterbatasan yang
+ * diterima, bukan yang tersembunyi.
+ *
+ * `COUNT(*) OVER()` memberi jumlah total SEBELUM dibatasi LIMIT, supaya baris
+ * penutup bisa menyebut angka sisa yang jujur tanpa kueri kedua.
+ */
+export async function ambilTopikRapat(
+  connection: { query: (sql: string, params?: unknown[]) => Promise<unknown> },
+  kunciPengguna: string[]
+): Promise<{ baris: (TopikRapat & { total: number })[]; total: number }> {
+  if (kunciPengguna.length === 0) return { baris: [], total: 0 };
+
+  const [rows]: any = await connection.query(
+    `
+    SELECT m.title                                   AS "judulRapat",
+           COALESCE(NULLIF(TRIM(dp.concern), ''),
+                    NULLIF(TRIM(dp.content), ''),
+                    'Tanpa Topik')                   AS "topik",
+           COUNT(*) OVER()                           AS "total"
+    FROM DiscussionPoints dp
+    JOIN Meetings m ON m.id = dp."meetingId"
+    WHERE (
+            EXISTS (
+              SELECT 1 FROM discussion_point_assignees dpa
+              WHERE dpa.point_id = dp.id AND dpa.user_id IN (?)
+            )
+         OR dp."assignTo" IN (?)
+          )
+      AND COALESCE(dp.status, 'pending') <> 'completed'
+    ORDER BY NULLIF(TRIM(dp."targetDate"), '') ASC NULLS LAST, dp."createdAt" ASC
+    LIMIT ?
+  `,
+    [kunciPengguna, kunciPengguna, BATAS_TOPIK_RAPAT]
+  );
+
+  const baris = (rows || []).map((r: any) => ({
+    judulRapat: String(r.judulRapat || "Tanpa Judul Rapat").trim(),
+    topik: String(r.topik || "Tanpa Topik").trim(),
+    total: Number(r.total || 0),
+  }));
+
+  return { baris, total: baris[0]?.total ?? 0 };
 }
 
 export async function sendDailyTaskDigest(
@@ -134,6 +226,7 @@ export async function sendDailyTaskDigest(
     let totalDikirim = 0;
     let totalGagal = 0;
     let totalTanpaTugas = 0;
+    let totalTopikRapat = 0;
     const kegagalan: WhatsAppDigestFailure[] = [];
 
     for (const user of users) {
@@ -176,11 +269,39 @@ export async function sendDailyTaskDigest(
         [uId, uUid, uUsername]
       );
 
-      if (tasks.length > 0) {
-        const message = formatMessage(recipientName, tasks, messageTemplate, appUrlAktif);
+      /* #744 — topik rapat dibaca DENGAN kunci identitas yang sama seperti
+       * tiket di atas: id, uid, DAN username. `discussion_point_assignees`
+       * menyimpan uid, `Tasks.assigneeId` menyimpan campuran keduanya.
+       */
+      const rapat = await ambilTopikRapat(connection, [uId, uUid, uUsername]);
+      const jumlahTopik = rapat.baris.length;
+
+      /* Sebelum #744 cabang ini hanya `tasks.length > 0`, sehingga pengguna
+       * tanpa tiket tapi punya topik rapat TIDAK PERNAH menerima pesan —
+       * persis sasaran fitur ini. `taskCount` di log tetap jumlah TIKET saja:
+       * kolom itu yang dicetak `BroadcastMonitor.tsx:146`, dan mencampur topik
+       * rapat ke dalamnya membuat angka di layar tidak lagi berarti apa pun.
+       * Jumlah topik masuk ke `details`, jadi nol perubahan skema.
+       */
+      if (tasks.length > 0 || jumlahTopik > 0) {
+        const message = formatMessage(
+          recipientName,
+          tasks,
+          messageTemplate,
+          appUrlAktif,
+          rapat.baris,
+          rapat.total
+        );
+        const isi = [
+          tasks.length > 0 ? `${tasks.length} tugas aktif` : null,
+          jumlahTopik > 0 ? `${jumlahTopik} topik rapat` : null,
+        ]
+          .filter(Boolean)
+          .join(", ");
         try {
           await sendToWhatsApp(user.phone, message);
           totalDikirim++;
+          totalTopikRapat += jumlahTopik;
           await recordBroadcastLog({
             channel: "whatsapp",
             userId: uId,
@@ -188,7 +309,7 @@ export async function sendDailyTaskDigest(
             recipientTarget: user.phone,
             status: "success",
             taskCount: tasks.length,
-            details: `Berhasil dikirim (${tasks.length} tugas aktif)`,
+            details: `Berhasil dikirim (${isi})`,
           });
         } catch (kirimErr: any) {
           totalGagal++;
@@ -219,12 +340,19 @@ export async function sendDailyTaskDigest(
           recipientTarget: user.phone,
           status: "skipped_no_tasks",
           taskCount: 0,
-          details: "Dilewati: 0 tiket tugas aktif (To Do / In Progress / Testing)",
+          details: "Dilewati: 0 tiket tugas aktif dan 0 topik rapat yang ditugaskan",
         });
       }
     }
 
-    return { totalDikirim, totalPenerima: users.length, totalGagal, totalTanpaTugas, kegagalan };
+    return {
+      totalDikirim,
+      totalPenerima: users.length,
+      totalGagal,
+      totalTanpaTugas,
+      totalTopikRapat,
+      kegagalan,
+    };
   } catch (error) {
     console.error("[DEBUG] Error in daily task digest:", error);
     throw error;
@@ -259,6 +387,31 @@ const TEMPLATE_LAMA_DIKENALI = [
 function isTemplateLegacy(template: string): boolean {
   const lower = template.toLowerCase();
   return TEMPLATE_LAMA_DIKENALI.some((penanda) => lower.includes(penanda));
+}
+
+/** Garis pemisah penutup pesan — dipakai juga sebagai jangkar penyisipan #744. */
+const GARIS_KAKI = "─────────────────";
+
+/** Judul blok topik rapat (#744) — satu sumber supaya labelnya tidak pernah beda antar jalur. */
+const LABEL_RAPAT = "📋 *Catatan Rapat*";
+
+/**
+ * Template yang PERSIS sama dengan `DEFAULT_WHATSAPP_TEMPLATE` diperlakukan
+ * seolah admin belum mengkustomisasi apa pun (#744).
+ *
+ * Tanpa ini, pesan adaptif di `formatMessage()` tidak pernah tercapai di
+ * production: `toRow()` di `broadcastConfig.service.ts:36-43` menormalkan
+ * setiap template yang tidak memuat `{{task_list}}` menjadi DEFAULT, sehingga
+ * `config.messageTemplate` yang sampai ke sini SELALU string default itu dan
+ * selalu masuk cabang template-kustom. Akibatnya pengguna yang hanya punya
+ * topik rapat akan menerima pesan berjudul "Task Assignment" dan berkalimat
+ * "Berikut tiket tugas aktif..." yang tidak memuat satu pun tugas.
+ *
+ * Presedennya `isTemplateLegacy()` tepat di atas: sama-sama mendeteksi
+ * "admin belum benar-benar mengubah apa pun", hanya penandanya berbeda.
+ */
+function isTemplateBawaan(template: string): boolean {
+  return template.trim() === DEFAULT_WHATSAPP_TEMPLATE.trim();
 }
 
 function formatStatus(status?: string | null): string {
@@ -334,39 +487,125 @@ export function formatTaskList(tasks: any[]): string {
 }
 
 /**
+ * Format daftar topik rapat untuk WhatsApp (#744), dikelompokkan per judul rapat.
+ *
+ * Bentuknya sengaja meniru `formatTaskList()`: blok monospace terpisah, judul
+ * rapat sebagai `[n]` huruf kapital, topik di bawahnya dengan label `Topik :`
+ * yang lebarnya tetap. Karena bloknya TERPISAH dari blok tiket, lebar label
+ * keduanya tidak saling menyeret — penyelarasan `:` yang diperjuangkan #505
+ * tetap utuh.
+ *
+ * Contoh:
+ * ```
+ * [1] KICKOFF Q4 PLANNING
+ *     Topik : Evaluasi kapasitas tim backend
+ *     Topik : Pembagian PIC rilis November
+ *
+ * [2] REVIEW SPRINT 12
+ *     Topik : Migrasi database ke Neon
+ * ```
+ */
+export function formatMeetingList(rapat: TopikRapat[], totalSebelumBatas?: number): string {
+  const perRapat = new Map<string, string[]>();
+  for (const r of rapat) {
+    const judul = (r.judulRapat || "Tanpa Judul Rapat").trim() || "Tanpa Judul Rapat";
+    if (!perRapat.has(judul)) perRapat.set(judul, []);
+    const daftar = perRapat.get(judul)!;
+    const topik = (r.topik || "Tanpa Topik").trim() || "Tanpa Topik";
+    if (!daftar.includes(topik)) daftar.push(topik);
+  }
+
+  const inner = [...perRapat.entries()]
+    .map(
+      ([judul, topik], idx) =>
+        `[${idx + 1}] ${judul.toUpperCase()}\n` + topik.map((t) => `    Topik : ${t}`).join("\n")
+    )
+    .join("\n\n");
+
+  // Sisa yang terpotong BATAS_TOPIK_RAPAT disebut jumlahnya, bukan dibuang
+  // diam-diam — admin yang membaca pesan harus tahu daftarnya tidak lengkap.
+  const sisa = (totalSebelumBatas ?? rapat.length) - rapat.length;
+  const barisSisa = sisa > 0 ? `\n\n+ ${sisa} topik lainnya tidak ditampilkan` : "";
+
+  return `\`\`\`\n${inner}${barisSisa}\n\`\`\``;
+}
+
+/**
  * Menyusun isi pesan WhatsApp Task Assignment (Item #505 - Monospace Ticket).
  * Mendukung kustomisasi template melalui BroadcastConfig.
- * Placeholder yang didukung: {{user_name}}, {{task_list}}, {{app_url}}, {{project_name}}.
+ * Placeholder yang didukung: {{user_name}}, {{task_list}}, {{meeting_list}},
+ * {{app_url}}, {{project_name}}.
+ *
+ * #744 menambah blok Catatan Rapat. Tiga penyesuaian yang menyertainya,
+ * semuanya karena pesan ini sekarang punya TIGA bentuk, bukan satu:
+ * judul kepala, label tautan, dan ada-tidaknya sub-judul 📋 menyesuaikan
+ * isi — pengguna yang hanya punya topik rapat tidak boleh menerima pesan
+ * berjudul "Task Assignment" yang tidak memuat satu pun tugas.
  */
 export function formatMessage(
   name: string,
   tasks: any[],
   messageTemplate?: string | null,
-  appUrlOverride?: string
+  appUrlOverride?: string,
+  rapat: TopikRapat[] = [],
+  totalTopikRapat?: number
 ) {
-  const projectNames = Array.from(new Set(tasks.map((t) => t.projectName || "Tanpa Project")));
-  const projectNameUntukTemplate = projectNames.length === 1 ? projectNames[0] : "beberapa project";
+  const daftarTugas = tasks || [];
+  const adaTugas = daftarTugas.length > 0;
+  const daftarRapat = rapat || [];
+  const adaRapat = daftarRapat.length > 0;
+
+  const projectNames = Array.from(
+    new Set(daftarTugas.map((t) => t.projectName || "Tanpa Project"))
+  );
+  const projectNameUntukTemplate =
+    projectNames.length === 1 ? projectNames[0] : adaTugas ? "beberapa project" : "";
   const appUrl = (appUrlOverride || process.env.APP_URL || "http://localhost:3000").replace(
     /\/+$/,
     ""
   );
 
-  const taskListText = formatTaskList(tasks);
+  const taskListText = adaTugas ? formatTaskList(daftarTugas) : "";
+  const meetingListText = adaRapat ? formatMeetingList(daftarRapat, totalTopikRapat) : "";
 
   const templateBersih =
-    messageTemplate && messageTemplate.trim() && !isTemplateLegacy(messageTemplate)
+    messageTemplate &&
+    messageTemplate.trim() &&
+    !isTemplateLegacy(messageTemplate) &&
+    !isTemplateBawaan(messageTemplate)
       ? messageTemplate
       : null;
 
   // Jika template kustom mengandung {{task_list}}
   if (templateBersih && templateBersih.includes("{{task_list}}")) {
-    return templateBersih
+    const tersusun = templateBersih
       .replace(/\{\{user_name\}\}/g, name)
       .replace(/\{\{task_list\}\}/g, taskListText)
+      .replace(/\{\{meeting_list\}\}/g, meetingListText)
       .replace(/\{\{app_url\}\}/g, appUrl)
       .replace(/\{\{project_name\}\}/g, projectNameUntukTemplate)
-      .replace(/\{\{[a-zA-Z0-9_]+\}\}/g, "")
-      .trim();
+      .replace(/\{\{[a-zA-Z0-9_]+\}\}/g, "");
+
+    if (!adaRapat || templateBersih.includes("{{meeting_list}}")) return tersusun.trim();
+
+    /* Template admin yang tersimpan SEBELUM #744 tidak punya {{meeting_list}},
+     * dan sapuan placeholder di atas tidak akan memunculkannya. Tanpa blok ini
+     * topik rapat hilang tanpa jejak dari pesan mereka — kelas bug yang sama
+     * persis dengan yang melahirkan isTemplateLegacy(). Disisipkan SEBELUM
+     * garis kaki, bukan ditambahkan di ujung, supaya pemisah `─` dan baris
+     * "_Pesan otomatis_" tetap menjadi penutup pesan.
+     *
+     * LABEL_RAPAT wajib ikut disisipkan: template admin sudah memuat blok tiket
+     * mereka sendiri, jadi tanpa judul dua blok ```monospace``` akan tampak
+     * bersambung dan penerima tidak bisa membedakan mana tugas mana topik rapat.
+     */
+    const blokRapat = `${LABEL_RAPAT}\n\n${meetingListText}`;
+    const idxKaki = tersusun.lastIndexOf(GARIS_KAKI);
+    const disisipkan =
+      idxKaki === -1
+        ? `${tersusun.trimEnd()}\n\n${blokRapat}`
+        : `${tersusun.slice(0, idxKaki).trimEnd()}\n\n${blokRapat}\n\n${tersusun.slice(idxKaki)}`;
+    return disisipkan.trim();
   }
 
   const greeting = templateBersih
@@ -377,15 +616,33 @@ export function formatMessage(
         .trim()
     : `Halo *${name}*,`;
 
-  // Format default Monospace Ticket resmi (#505)
+  const judul = adaTugas ? (adaRapat ? "Ringkasan Pekerjaan" : "Task Assignment") : "Catatan Rapat";
+  const labelTautan = adaTugas
+    ? adaRapat
+      ? "Akses Detail"
+      : "Akses Detail Tugas"
+    : "Akses Catatan Rapat";
+
+  let isi = "";
+  if (adaTugas) {
+    isi += `Berikut tiket tugas aktif yang ditugaskan kepada Anda:\n\n${taskListText}\n\n`;
+  }
+  if (adaRapat) {
+    // Sub-judul 📋 hanya diperlukan bila ada blok tiket di atasnya. Bila pesan
+    // ini HANYA berisi rapat, kepala sudah menyebut "Catatan Rapat" dan
+    // mengulanginya mencetak dua baris berjudul sama.
+    const subJudul = adaTugas ? `${LABEL_RAPAT}\n` : "";
+    isi += `${subJudul}Berikut topik rapat yang ditugaskan kepada Anda:\n\n${meetingListText}\n\n`;
+  }
+
+  // Format default Monospace Ticket resmi (#505) + blok Catatan Rapat (#744)
   return (
-    `*[LanPro] Task Assignment*\n\n` +
+    `*[LanPro] ${judul}*\n\n` +
     `${greeting}\n` +
-    `Berikut tiket tugas aktif yang ditugaskan kepada Anda:\n\n` +
-    `${taskListText}\n\n` +
-    `🔗 *Akses Detail Tugas:*\n` +
+    `${isi}` +
+    `🔗 *${labelTautan}:*\n` +
     `${appUrl}\n\n` +
-    `─────────────────\n` +
+    `${GARIS_KAKI}\n` +
     `_Pesan otomatis • LanPro Project Management_`
   );
 }
