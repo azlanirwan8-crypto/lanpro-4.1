@@ -195,14 +195,14 @@ describe("panel beban per anggota", () => {
     expect(barisAnggota("Budi").parentElement).toBe(deret);
   });
 
-  it("persentase tercetak permanen: pil di kanan atas dan angka di bawah bar", () => {
+  it("persentase tercetak tepat sekali di ujung bar, tanpa pil duplikat di atas", () => {
     pasang();
     const kartu = barisAnggota("Siti Aminah");
     const persen = Array.from(kartu.querySelectorAll("span")).filter(
       (s) => s.textContent === "50%"
     );
-    expect(persen).toHaveLength(2);
-    expect(persen.every((p) => !p.className.includes("opacity-0"))).toBe(true);
+    expect(persen).toHaveLength(1);
+    expect(persen[0].className).not.toContain("opacity-0");
   });
 
   it("tugas tanpa penanggung jawab tetap terlihat, tidak hilang dari hitungan", () => {

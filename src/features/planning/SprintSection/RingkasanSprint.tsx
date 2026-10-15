@@ -187,13 +187,8 @@ export const RingkasanSprint: React.FC<RingkasanSprintProps> = ({
                   <span className="flex-1 min-w-0 text-xs font-medium text-content-strong">
                     {b.nama}
                   </span>
-                  <span className="flex flex-col items-end gap-0.5 shrink-0">
-                    <span className="rounded-full bg-surface-strong px-2 py-0.5 text-[10px] font-semibold text-content-subtle tabular-nums">
-                      {b.persen}%
-                    </span>
-                    <span className="text-[11px] font-semibold text-content-subtle tabular-nums">
-                      {b.selesai}/{b.jumlah}
-                    </span>
+                  <span className="text-[11px] font-semibold text-content-subtle tabular-nums shrink-0">
+                    {b.selesai}/{b.jumlah}
                   </span>
                 </div>
                 <div className="flex flex-col gap-1">
