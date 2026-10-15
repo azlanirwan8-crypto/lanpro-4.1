@@ -130,14 +130,6 @@ export interface TopikRapat {
 }
 
 /**
- * Batas topik rapat per pesan (#744). Tanpa batas, satu pengguna yang memegang
- * belasan titik diskusi menghasilkan pesan 1.500+ karakter yang tidak terbaca
- * di ponsel dan mendekati batas praktis gateway. Sisanya dilaporkan sebagai
- * satu baris hitungan, bukan dibuang diam-diam.
- */
-export const BATAS_TOPIK_RAPAT = 10;
-
-/**
  * Topik titik diskusi Meeting Notes yang ditugaskan ke pengguna (#744).
  *
  * TIGA hal yang mudah salah di sini, semuanya sudah diukur sebelumnya:
@@ -162,14 +154,17 @@ export const BATAS_TOPIK_RAPAT = 10;
  * string dan hanya benar selama formatnya seragam. Itu keterbatasan yang
  * diterima, bukan yang tersembunyi.
  *
- * `COUNT(*) OVER()` memberi jumlah total SEBELUM dibatasi LIMIT, supaya baris
- * penutup bisa menyebut angka sisa yang jujur tanpa kueri kedua.
+ * TANPA `LIMIT`. Putaran pertama fitur ini membatasi 10 topik dan menyebut
+ * sisanya sebagai satu baris hitungan; pemilik proyek menolaknya 15 Okt 2026
+ * ("harus nya semua nya di tampilkan"). Konsekuensinya pesan bisa melewati
+ * batas panjang WhatsApp, dan itu ditangani `pecahCatatanRapat()` di bawah —
+ * topik dibelah ke beberapa pesan, tidak pernah dibuang.
  */
 export async function ambilTopikRapat(
   connection: { query: (sql: string, params?: unknown[]) => Promise<unknown> },
   kunciPengguna: string[]
-): Promise<{ baris: (TopikRapat & { total: number })[]; total: number }> {
-  if (kunciPengguna.length === 0) return { baris: [], total: 0 };
+): Promise<TopikRapat[]> {
+  if (kunciPengguna.length === 0) return [];
 
   const [rows]: any = await connection.query(
     `
@@ -179,8 +174,7 @@ export async function ambilTopikRapat(
                     'Tanpa Topik')                   AS "topik",
            COALESCE(NULLIF(TRIM(dp.status), ''),
                     'pending')                       AS "status",
-           COALESCE(TRIM(dp."targetDate"), '')       AS "targetDate",
-           COUNT(*) OVER()                           AS "total"
+           COALESCE(TRIM(dp."targetDate"), '')       AS "targetDate"
     FROM DiscussionPoints dp
     JOIN Meetings m ON m.id = dp."meetingId"
     WHERE (
@@ -192,20 +186,49 @@ export async function ambilTopikRapat(
           )
       AND COALESCE(dp.status, 'pending') <> 'completed'
     ORDER BY NULLIF(TRIM(dp."targetDate"), '') ASC NULLS LAST, dp."createdAt" ASC
-    LIMIT ?
   `,
-    [kunciPengguna, kunciPengguna, BATAS_TOPIK_RAPAT]
+    [kunciPengguna, kunciPengguna]
   );
 
-  const baris = (rows || []).map((r: any) => ({
+  return (rows || []).map((r: any) => ({
     judulRapat: String(r.judulRapat || "Tanpa Judul Rapat").trim(),
     topik: String(r.topik || "Tanpa Topik").trim(),
     status: String(r.status || "pending").trim(),
     targetDate: String(r.targetDate || "").trim(),
-    total: Number(r.total || 0),
   }));
+}
 
-  return { baris, total: baris[0]?.total ?? 0 };
+/**
+ * Batas aman panjang satu pesan WhatsApp. Klien memotong di 4.096 karakter;
+ * margin dibiarkan untuk overhead gateway dan encoding emoji.
+ */
+export const BATAS_PESAN_WA = 3900;
+
+/**
+ * Belah daftar topik rapat menjadi beberapa pesan bila satu pesan melewati
+ * `batas`. Dicabutnya batas 10 topik memindahkan masalah panjang pesan dari
+ * "ada topik yang tersembunyi" menjadi "pesan bisa ditolak gateway",
+ * jadi pembelahan ini yang menjaga janji SEMUA topik terkirim.
+ *
+ * Dibelah dua berulang, bukan dipotong per N topik, karena panjang tiap butir
+ * tidak seragam — topik rapat adalah kalimat utuh yang bisa enam baris.
+ * Satu judul rapat bisa terbelah ke dua pesan; tiap pesan tetap utuh dan
+ * terbaca sendiri, dan tidak ada topik yang hilang.
+ */
+export function pecahCatatanRapat(
+  rapat: TopikRapat[],
+  buatPesan: (bagian: TopikRapat[]) => string,
+  batas: number = BATAS_PESAN_WA
+): { pesan: string; jumlahTopik: number }[] {
+  const pesan = buatPesan(rapat);
+  if (pesan.length <= batas || rapat.length <= 1) {
+    return [{ pesan, jumlahTopik: rapat.length }];
+  }
+  const tengah = Math.ceil(rapat.length / 2);
+  return [
+    ...pecahCatatanRapat(rapat.slice(0, tengah), buatPesan, batas),
+    ...pecahCatatanRapat(rapat.slice(tengah), buatPesan, batas),
+  ];
 }
 
 export async function sendDailyTaskDigest(
@@ -296,7 +319,7 @@ export async function sendDailyTaskDigest(
        * menyimpan uid, `Tasks.assigneeId` menyimpan campuran keduanya.
        */
       const rapat = await ambilTopikRapat(connection, [uId, uUid, uUsername]);
-      const jumlahTopik = rapat.baris.length;
+      const jumlahTopik = rapat.length;
 
       /* Sebelum #744 cabang ini hanya `tasks.length > 0`, sehingga pengguna
        * tanpa tiket tapi punya topik rapat TIDAK PERNAH menerima pesan —
@@ -320,34 +343,49 @@ export async function sendDailyTaskDigest(
         const adaRapat = jumlahTopik > 0;
         const gabung = adaTugas && adaRapat && rapatDigabungKeTemplat(messageTemplate);
 
-        const daftarPesan: string[] = gabung
-          ? [
-              formatMessage(
-                recipientName,
-                tasks,
-                messageTemplate,
-                appUrlAktif,
-                rapat.baris,
-                rapat.total
-              ),
-            ]
-          : adaTugas && adaRapat
-            ? [
-                formatMessage(recipientName, tasks, messageTemplate, appUrlAktif, [], undefined),
-                formatMessage(recipientName, [], null, appUrlAktif, rapat.baris, rapat.total),
-              ]
-            : adaTugas
-              ? [formatMessage(recipientName, tasks, messageTemplate, appUrlAktif, [], undefined)]
-              : [formatMessage(recipientName, [], null, appUrlAktif, rapat.baris, rapat.total)];
-        const namaPesan =
-          gabung || daftarPesan.length === 1 ? ["pesan"] : ["pesan tugas", "catatan rapat"];
+        /* Putaran 4: batas 10 topik DICABUT atas permintaan pemilik proyek
+         * ("harus nya semua nya di tampilkan"), jadi daftar yang panjang
+         * dibelah `pecahCatatanRapat()` menjadi beberapa pesan, tidak dipotong.
+         * Ketiga larik di bawah tumbuh bersama dan WAJIB tetap sejajar — satu
+         * indeks menunjuk satu pesan, namanya, dan jumlah topik di dalamnya. */
+        const daftarPesan: string[] = [];
+        const namaPesan: string[] = [];
+        const topikPerPesan: number[] = [];
+
+        if (gabung) {
+          daftarPesan.push(
+            formatMessage(recipientName, tasks, messageTemplate, appUrlAktif, rapat)
+          );
+          namaPesan.push("pesan");
+          topikPerPesan.push(jumlahTopik);
+        } else {
+          if (adaTugas) {
+            daftarPesan.push(formatMessage(recipientName, tasks, messageTemplate, appUrlAktif, []));
+            namaPesan.push(adaRapat ? "pesan tugas" : "pesan");
+            topikPerPesan.push(0);
+          }
+          if (adaRapat) {
+            const catatan = pecahCatatanRapat(rapat, (bagian) =>
+              formatMessage(recipientName, [], null, appUrlAktif, bagian)
+            );
+            for (let i = 0; i < catatan.length; i++) {
+              daftarPesan.push(catatan[i].pesan);
+              namaPesan.push(
+                catatan.length > 1 ? `catatan rapat ${i + 1}/${catatan.length}` : "catatan rapat"
+              );
+              topikPerPesan.push(catatan[i].jumlahTopik);
+            }
+          }
+        }
 
         const terkirim: string[] = [];
+        let topikTerkirim = 0;
         let errPertama: any = null;
         for (let i = 0; i < daftarPesan.length; i++) {
           try {
             await sendToWhatsApp(user.phone, daftarPesan[i]);
             terkirim.push(namaPesan[i]);
+            topikTerkirim += topikPerPesan[i];
           } catch (kirimErr: any) {
             errPertama = errPertama || kirimErr;
             console.error(`[WHATSAPP] Gagal mengirim ${namaPesan[i]} ke ${user.phone}:`, kirimErr);
@@ -360,10 +398,6 @@ export async function sendDailyTaskDigest(
         ]
           .filter(Boolean)
           .join(", ");
-        const topikTerkirim =
-          adaRapat && (gabung ? terkirim.length === 1 : terkirim.includes("catatan rapat"))
-            ? jumlahTopik
-            : 0;
         totalTopikRapat += topikTerkirim;
 
         if (terkirim.length === daftarPesan.length) {
@@ -629,6 +663,8 @@ function barisLabel(label: string, nilai: string, lebarLabel: number): string {
  * Format daftar topik rapat untuk WhatsApp (#744), dikelompokkan per judul rapat.
  * Putaran 3 atas permintaan pemilik proyek: tiap butir memuat TIGA label sejajar
  * — Topik, Status, Tanggal Target — meniru penyelarasan titik dua blok tiket.
+ * Putaran 4: SELURUH topik yang diterima dicetak, tanpa batas dan tanpa baris
+ * hitungan sisa — daftar panjang dibelah di `pecahCatatanRapat()`.
  *
  * Contoh:
  * ```
@@ -639,7 +675,7 @@ function barisLabel(label: string, nilai: string, lebarLabel: number): string {
  *     Tanggal Target : 18/10/2026
  * ```
  */
-export function formatMeetingList(rapat: TopikRapat[], totalSebelumBatas?: number): string {
+export function formatMeetingList(rapat: TopikRapat[]): string {
   const perRapat = new Map<string, TopikRapat[]>();
   for (const r of rapat) {
     const judul = (r.judulRapat || "Tanpa Judul Rapat").trim() || "Tanpa Judul Rapat";
@@ -668,12 +704,7 @@ export function formatMeetingList(rapat: TopikRapat[], totalSebelumBatas?: numbe
     })
     .join("\n\n");
 
-  // Sisa yang terpotong BATAS_TOPIK_RAPAT disebut jumlahnya, bukan dibuang
-  // diam-diam — admin yang membaca pesan harus tahu daftarnya tidak lengkap.
-  const sisa = (totalSebelumBatas ?? rapat.length) - rapat.length;
-  const barisSisa = sisa > 0 ? `\n\n+ ${sisa} topik lainnya tidak ditampilkan` : "";
-
-  return `\`\`\`\n${inner}${barisSisa}\n\`\`\``;
+  return `\`\`\`\n${inner}\n\`\`\``;
 }
 
 /**
@@ -693,8 +724,7 @@ export function formatMessage(
   tasks: any[],
   messageTemplate?: string | null,
   appUrlOverride?: string,
-  rapat: TopikRapat[] = [],
-  totalTopikRapat?: number
+  rapat: TopikRapat[] = []
 ) {
   const daftarTugas = tasks || [];
   const adaTugas = daftarTugas.length > 0;
@@ -712,7 +742,7 @@ export function formatMessage(
   );
 
   const taskListText = adaTugas ? formatTaskList(daftarTugas) : "";
-  const meetingListText = adaRapat ? formatMeetingList(daftarRapat, totalTopikRapat) : "";
+  const meetingListText = adaRapat ? formatMeetingList(daftarRapat) : "";
 
   const templateBersih =
     messageTemplate &&

@@ -26,7 +26,8 @@ import {
   formatMeetingList,
   formatMessage,
   ambilTopikRapat,
-  BATAS_TOPIK_RAPAT,
+  pecahCatatanRapat,
+  BATAS_PESAN_WA,
   type TopikRapat,
 } from "../services/whatsapp.service";
 import { DEFAULT_WHATSAPP_TEMPLATE } from "../services/broadcastConfig.service";
@@ -156,15 +157,20 @@ describe("#744 · formatMeetingList — blok topik rapat", () => {
     expect(list.match(/Topik sama/g)).toHaveLength(1);
   });
 
-  it("menyebut jumlah sisa yang terpotong batas, bukan membuangnya diam-diam", () => {
-    const sepuluh: TopikRapat[] = Array.from({ length: BATAS_TOPIK_RAPAT }, (_, i) => ({
+  it("SEMUA topik dicetak, tidak ada baris 'topik lainnya tidak ditampilkan'", () => {
+    /* Putaran 4: pemilik proyek melihat "+ 3 topik lainnya tidak ditampilkan"
+     * di ponselnya dan menolaknya. Batas 10 topik adalah keputusan agen, bukan
+     * permintaan, jadi ia dicabut — bukan dinaikkan. */
+    const banyak: TopikRapat[] = Array.from({ length: 25 }, (_, i) => ({
       judulRapat: `Rapat ${i + 1}`,
       topik: `Topik ${i + 1}`,
       status: "pending",
       targetDate: "",
     }));
-    expect(formatMeetingList(sepuluh, 14)).toContain("+ 4 topik lainnya tidak ditampilkan");
-    expect(formatMeetingList(sepuluh, 10)).not.toContain("topik lainnya");
+    const list = formatMeetingList(banyak);
+    expect(list).not.toContain("tidak ditampilkan");
+    for (let i = 1; i <= 25; i++) expect(list).toContain(`Topik ${i}`);
+    expect(list.match(/\[\d+\]/g)).toHaveLength(25);
   });
 
   it("judul rapat dan topik kosong tetap tercetak, tidak menghasilkan baris '[1] '", () => {
@@ -174,9 +180,51 @@ describe("#744 · formatMeetingList — blok topik rapat", () => {
   });
 });
 
+describe("#744 · pecahCatatanRapat — semua topik terkirim walau daftarnya panjang", () => {
+  const buat = (bagian: TopikRapat[]) => formatMessage("Budi", [], null, "https://x.id", bagian);
+  const banyak = (n: number): TopikRapat[] =>
+    Array.from({ length: n }, (_, i) => ({
+      judulRapat: `Rapat ${i + 1}`,
+      topik: `Topik nomor ${i + 1} yang cukup panjang supaya makan tempat di layar`,
+      status: "pending",
+      targetDate: "2026-10-20",
+    }));
+  const hitungButir = (pesan: string) => pesan.match(/ {4}Topik {10}:/g)?.length ?? 0;
+
+  it("daftar pendek tetap SATU pesan — 'jadikan 2 pesan saja' dari putaran 2 tidak berubah", () => {
+    const hasil = pecahCatatanRapat(banyak(5), buat);
+    expect(hasil).toHaveLength(1);
+    expect(hasil[0].jumlahTopik).toBe(5);
+    expect(hasil[0].pesan.length).toBeLessThanOrEqual(BATAS_PESAN_WA);
+  });
+
+  it("daftar panjang dibelah, tiap pesan di bawah batas WhatsApp, dan nol topik yang hilang", () => {
+    const daftar = banyak(120);
+    const hasil = pecahCatatanRapat(daftar, buat);
+
+    expect(hasil.length).toBeGreaterThan(1);
+    hasil.forEach((h) => expect(h.pesan.length).toBeLessThanOrEqual(BATAS_PESAN_WA));
+    expect(hasil.reduce((n, h) => n + h.jumlahTopik, 0)).toBe(daftar.length);
+    expect(hasil.reduce((n, h) => n + hitungButir(h.pesan), 0)).toBe(daftar.length);
+  });
+
+  it("satu topik raksasa yang tidak bisa dibelah lagi tetap dikirim, tidak dibuang diam-diam", () => {
+    /* Batas yang diterima, bukan disembunyikan: pembelahan berhenti di satu
+     * butir. Topik sepanjang ini praktis tidak ada, dan gateway yang memotong
+     * lebih jujur daripada agen yang membuang. */
+    const raksasa: TopikRapat[] = [
+      { judulRapat: "Rapat", topik: "kata ".repeat(1200), status: "pending", targetDate: "" },
+    ];
+    const hasil = pecahCatatanRapat(raksasa, buat);
+    expect(hasil).toHaveLength(1);
+    expect(hasil[0].jumlahTopik).toBe(1);
+    expect(hasil[0].pesan.length).toBeGreaterThan(BATAS_PESAN_WA);
+  });
+});
+
 describe("#744 · formatMessage — tiga bentuk pesan", () => {
   it("tiket + rapat: kepala 'Ringkasan Pekerjaan', dua blok terpisah, sub-judul 📋", () => {
-    const pesan = formatMessage("Azlan Irwan", tiket, null, "https://lanpro.my.id", topik, 3);
+    const pesan = formatMessage("Azlan Irwan", tiket, null, "https://lanpro.my.id", topik);
 
     expect(pesan).toContain("*[LanPro] Ringkasan Pekerjaan*");
     expect(pesan).toContain("Berikut tiket tugas aktif yang ditugaskan kepada Anda:");
@@ -190,7 +238,7 @@ describe("#744 · formatMessage — tiga bentuk pesan", () => {
   });
 
   it("HANYA rapat: kepala 'Catatan Rapat', tanpa judul ganda dan tanpa kalimat tiket", () => {
-    const pesan = formatMessage("Budi", [], null, "https://lanpro.my.id", topik, 3);
+    const pesan = formatMessage("Budi", [], null, "https://lanpro.my.id", topik);
 
     expect(pesan).toContain("*[LanPro] Catatan Rapat*");
     expect(pesan).toContain("Berikut topik rapat yang ditugaskan kepada Anda:");
@@ -213,7 +261,7 @@ describe("#744 · formatMessage — tiga bentuk pesan", () => {
   it("template bawaan diperlakukan sebagai BELUM dikustomisasi, sehingga kepala adaptif tercapai", () => {
     // Inilah jalur yang benar-benar berjalan di production: `toRow()` di
     // broadcastConfig.service.ts:36-43 selalu menormalkan template ke default.
-    const pesan = formatMessage("Budi", [], DEFAULT_WHATSAPP_TEMPLATE, "https://x.id", topik, 3);
+    const pesan = formatMessage("Budi", [], DEFAULT_WHATSAPP_TEMPLATE, "https://x.id", topik);
 
     expect(pesan).toContain("*[LanPro] Catatan Rapat*");
     expect(pesan).not.toContain("Berikut tiket tugas aktif");
@@ -222,7 +270,7 @@ describe("#744 · formatMessage — tiga bentuk pesan", () => {
 
   it("template kustom dengan {{meeting_list}} menggantinya di tempat", () => {
     const kustom = `Halo {{user_name}},\n{{task_list}}\nRapatmu:\n{{meeting_list}}\n{{app_url}}`;
-    const pesan = formatMessage("Budi", tiket, kustom, "https://x.id", topik, 3);
+    const pesan = formatMessage("Budi", tiket, kustom, "https://x.id", topik);
 
     expect(pesan).toContain("Rapatmu:");
     expect(pesan).toContain("[1] KICKOFF Q4 PLANNING");
@@ -232,7 +280,7 @@ describe("#744 · formatMessage — tiga bentuk pesan", () => {
 
   it("template kustom LAMA tanpa {{meeting_list}} tetap menampilkan topik, disisipkan SEBELUM garis kaki", () => {
     const kustomLama = `Halo {{user_name}},\n\n{{task_list}}\n\n${GARIS_KAKI}\n_Pesan otomatis_`;
-    const pesan = formatMessage("Budi", tiket, kustomLama, "https://x.id", topik, 3);
+    const pesan = formatMessage("Budi", tiket, kustomLama, "https://x.id", topik);
 
     expect(pesan).toContain("[1] KICKOFF Q4 PLANNING");
     expect(pesan.indexOf("[1] KICKOFF Q4 PLANNING")).toBeLessThan(pesan.indexOf(GARIS_KAKI));
@@ -251,8 +299,7 @@ describe("#744 · formatMessage — tiga bentuk pesan", () => {
       tiket,
       "Tugas {{user_name}}:\n{{task_list}}",
       "https://x.id",
-      topik,
-      3
+      topik
     );
     expect(pesan.trim().endsWith("```")).toBe(true);
     expect(pesan).toContain("[2] REVIEW SPRINT 12");
@@ -264,8 +311,7 @@ describe("#744 · formatMessage — tiga bentuk pesan", () => {
       tiket,
       "Tugas:\n{{task_list}}\nRapat:\n{{meeting_list}}",
       "https://x.id",
-      [],
-      0
+      []
     );
     expect(pesan).not.toMatch(/\{\{[a-zA-Z0-9_]+\}\}/);
     // Blok tiket tetap ada (ia juga monospace), yang harus hilang adalah blok rapat.
@@ -274,7 +320,7 @@ describe("#744 · formatMessage — tiga bentuk pesan", () => {
   });
 });
 
-describe("#744 · ambilTopikRapat — kueri dan batasnya", () => {
+describe("#744 · ambilTopikRapat — kueri", () => {
   const koneksiPalsu = (baris: any[]) => {
     const tercatat: { sql: string; params: unknown[] }[] = [];
     return {
@@ -289,8 +335,7 @@ describe("#744 · ambilTopikRapat — kueri dan batasnya", () => {
   it("mengembalikan baris kosong tanpa menyentuh database bila tidak ada kunci pengguna", async () => {
     const koneksi = koneksiPalsu([]);
     const hasil = await ambilTopikRapat(koneksi as any, []);
-    expect(hasil.baris).toEqual([]);
-    expect(hasil.total).toBe(0);
+    expect(hasil).toEqual([]);
     expect(koneksi.tercatat).toHaveLength(0);
   });
 
@@ -305,7 +350,17 @@ describe("#744 · ambilTopikRapat — kueri dan batasnya", () => {
     // Keduanya menerima array, bukan nilai tunggal — IN (?) jadi = ANY($n).
     expect(params[0]).toEqual(["7", "uid-7", "budi"]);
     expect(params[1]).toEqual(["7", "uid-7", "budi"]);
-    expect(params[2]).toBe(BATAS_TOPIK_RAPAT);
+  });
+
+  it("TIDAK membatasi jumlah topik: semua yang ditugaskan ikut terbaca", async () => {
+    /* Putaran 4 atas perintah pemilik proyek — "harus nya semua nya di
+     * tampilkan". LIMIT 10 dan COUNT(*) OVER() dicabut; panjang pesan kini
+     * ditangani pecahCatatanRapat(), bukan dengan membuang topik. */
+    const koneksi = koneksiPalsu([]);
+    await ambilTopikRapat(koneksi as any, ["7"]);
+    const sql = koneksi.tercatat[0].sql;
+    expect(sql).not.toMatch(/LIMIT/i);
+    expect(sql).not.toContain("COUNT(*) OVER()");
   });
 
   it("mengecualikan titik diskusi yang sudah selesai", async () => {
@@ -324,25 +379,18 @@ describe("#744 · ambilTopikRapat — kueri dan batasnya", () => {
     expect(sql).not.toMatch(/[^"]\bmeetingId\b[^"]/);
   });
 
-  it("memetakan judul rapat, topik, status, dan tanggal target, serta membawa total sebelum LIMIT", async () => {
+  it("memetakan judul rapat, topik, status, dan tanggal target", async () => {
     const koneksi = koneksiPalsu([
-      {
-        judulRapat: "Rapat A",
-        topik: "Topik satu",
-        status: "pending",
-        targetDate: "2026-10-20",
-        total: 12,
-      },
-      { judulRapat: "Rapat B", topik: "Topik dua", status: "pending", targetDate: "", total: 12 },
+      { judulRapat: "Rapat A", topik: "Topik satu", status: "pending", targetDate: "2026-10-20" },
+      { judulRapat: "Rapat B", topik: "Topik dua", status: "pending", targetDate: "" },
     ]);
     const hasil = await ambilTopikRapat(koneksi as any, ["7"]);
-    expect(hasil.total).toBe(12);
-    expect(hasil.baris[0]).toEqual({
+    expect(hasil).toHaveLength(2);
+    expect(hasil[0]).toEqual({
       judulRapat: "Rapat A",
       topik: "Topik satu",
       status: "pending",
       targetDate: "2026-10-20",
-      total: 12,
     });
   });
 
@@ -383,9 +431,19 @@ describe("#744 · penjaga teks sumber whatsapp.service.ts", () => {
   });
 
   it("tiket dan rapat berangkat sebagai pesan terpisah, kecuali admin meminta inline", () => {
-    expect(sumber).toContain("const daftarPesan: string[] = gabung");
+    expect(sumber).toContain("const daftarPesan: string[] = [];");
     expect(sumber).toContain("rapatDigabungKeTemplat(messageTemplate)");
-    expect(sumber).toContain('["pesan tugas", "catatan rapat"]');
+    expect(sumber).toContain('namaPesan.push(adaRapat ? "pesan tugas" : "pesan");');
+    expect(sumber).toContain('"catatan rapat"');
+  });
+
+  it("tidak ada lagi batas jumlah topik di mana pun di berkas ini", () => {
+    /* Putaran 4: pemilik proyek menolak "+ N topik lainnya tidak ditampilkan".
+     * Penjaga ini ada supaya batas itu tidak diam-diam dipasang kembali. */
+    expect(sumber).not.toContain("BATAS_TOPIK_RAPAT");
+    expect(sumber).not.toContain("topik lainnya");
+    expect(sumber).not.toMatch(/LIMIT \?/);
+    expect(sumber).toContain("pecahCatatanRapat(rapat,");
   });
 
   it("pengiriman sebagian dicatat gagal dengan keterangan pesan mana yang lolos", () => {
