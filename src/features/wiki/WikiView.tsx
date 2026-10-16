@@ -1078,11 +1078,17 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           {doc.fileName ? (
                             <button
                               onClick={() => handleDownload(doc.id, doc.fileName || undefined)}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-success/10 hover:bg-success/15 text-success-text border border-success/30 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs whitespace-nowrap text-left"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-success/10 hover:bg-success/15 text-success-text border border-success/30 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs text-left"
                               title={t("meetings.clickToDownload")}
                             >
                               <Download className="w-3.5 h-3.5 shrink-0 text-success group-hover/file:scale-110 transition-transform" />
-                              {doc.fileName || t("wiki.attachment")}
+                              {/* #767 — nama berkas melipat multi-baris. #726 sempat
+                                  memaksanya satu baris, tetapi nama berkas panjang nyaris
+                                  tanpa spasi: satu baris hanya melebarkan kolom dan
+                                  mendorong tabel ke gulir samping. `break-all` = pola
+                                  daftar rapat (MeetingNotes). Chip kategori tetap satu
+                                  baris — itu inti perbaikan #726 dan tidak disentuh. */}
+                              <span className="whitespace-normal break-all">{doc.fileName}</span>
                             </button>
                           ) : (
                             <span className="text-content-subtle italic text-xs">—</span>

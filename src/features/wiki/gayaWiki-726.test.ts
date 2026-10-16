@@ -31,6 +31,14 @@
  * site tabel ini saja (`LabelChip` dipakai 10+ layar lain; mengubah komponennya
  * global = churn di luar otoritas item), wadah `overflow-x-auto` menyerap
  * kelebaran kolom. Dua test di bawah mengunci bentuk baru ini.
+ *
+ * PEMBALIKAN SEBAGIAN (#767, laporan pemilik proyek 16 Okt): "berkas document
+ * ini jadi 1 baris ya data nya". Satu baris hanya benar untuk chip kategori
+ * (kosakata terkendali). Nama berkas panjang nyaris tanpa spasi, jadi satu
+ * baris hanya melebarkan kolom dan mendorong tabel ke gulir samping. Nama
+ * berkas kembali melipat dengan `break-all` persis seperti daftar rapat
+ * (`MeetingNotes.tsx`); chip kategori tetap satu baris. Penjaga di bawah
+ * mengunci bentuk campuran ini.
  */
 import { readdirSync, readFileSync } from "fs";
 import { join } from "path";
@@ -97,14 +105,24 @@ describe("data tampil penuh di tabel DOCUMENTATION (#645 -> #726)", () => {
     expect(s).toMatch(/max-w-\[320px\] whitespace-normal break-words/);
   });
 
-  it("chip kategori dan nama berkas SATU baris (verifikasi visual 14 Okt)", () => {
+  it("chip kategori SATU baris; nama berkas melipat (#726 -> #767)", () => {
     const s = isi(DAFTAR);
     // Chip kategori: kosakata terkendali — nowrap di call site tabel, kolom
     // melebar, wadah overflow-x-auto menyerap. Bukan di komponen LabelChip.
     const chipTabel = s.slice(s.indexOf("<LabelChip"), s.indexOf("/>", s.indexOf("<LabelChip")));
     expect(chipTabel).toContain('className="whitespace-nowrap"');
-    // Tombol unduh berkas: satu baris penuh, span pembatas/pemotongnya cabut.
-    expect(s).toMatch(/shadow-2xs whitespace-nowrap text-left/);
+    // #767 — tombol unduh berkas TIDAK boleh membawa nowrap lagi; nama berkas di
+    // dalam span yang melipat dengan break-all (pola daftar rapat MeetingNotes).
+    // Penjaganya dipotong per tombol, bukan per berkas: dua tombol lain di layar
+    // ini (1401, 1493) memang boleh satu baris dan tidak boleh ikut kena.
+    const berkasTabel = s.slice(
+      s.indexOf("onClick={() => handleDownload(doc.id"),
+      s.indexOf("clickToDownload")
+    );
+    expect(berkasTabel.length).toBeGreaterThan(0);
+    expect(berkasTabel).not.toContain("whitespace-nowrap");
+    expect(berkasTabel).toMatch(/shadow-2xs text-left/);
+    expect(s).toMatch(/<span className="whitespace-normal break-all">\{doc\.fileName\}<\/span>/);
     expect(s).not.toContain("max-w-[220px]");
   });
 
