@@ -179,9 +179,13 @@ export const SEL =
  * py-3` — huruf lebih besar dan baris lebih gemuk daripada tabel mana pun lain
  * di aplikasi yang sama, dan itu bagian dari "tidak Velzon".
  *
- * Jumlahnya jadi sembilan kolom: 48, 220, 190, 200, 220, 200, 170, 130, 230 =
- * 1.608 px. `min-w` wadah gulir WAJIB sama dengan jumlah ini; test menguncinya.
- * (170 bukan 150 sejak #765 — lihat catatan di kolom TANGGAL TARGET.)
+ * Jumlahnya jadi sembilan kolom: 66, 220, 190, 200, 220, 200, 170, 130, 230 =
+ * 1.626 px. `min-w` wadah gulir WAJIB sama dengan jumlah ini; test menguncinya.
+ * (170 bukan 150 sejak #765 — lihat catatan di kolom TANGGAL TARGET. 66 bukan
+ * 48 sejak putaran 3 #765: "No" digambar uppercase 10 px = 16,2 px, ditambah
+ * gap 4 dan panah 12 = 32,2 px, sementara `px-4` kepala memakan 32 px dari 48 —
+ * kolomnya hanya menyisakan 16 px, jadi peramban melebarkannya sendiri dan
+ * angka yang dijumlahkan test itu tidak lagi menggambarkan layar.)
  *
  * #765 — enam dari sembilan kepala bisa ditekan untuk URUT (No./`createdAt`,
  * Concern, Notes, Follow-up, Target Date, Status). Yang tidak: Context/Tags, PIC,
@@ -253,13 +257,13 @@ export const KepalaTabel: React.FC<KepalaTabelProps> = ({ sortir, onSortir }) =>
     );
   };
   const tombol =
-    "group flex w-full items-center gap-1 cursor-pointer text-left text-content-subtle hover:text-content-body transition-colors";
+    "group flex w-full items-center gap-1 uppercase cursor-pointer text-left text-content-subtle hover:text-content-body transition-colors";
   const th =
     "sticky top-0 z-30 bg-surface-sunken px-4 py-2.5 text-[10px] font-normal text-content-subtle whitespace-nowrap border-b border-b-border-subtle border-r border-r-border-faint last:border-r-0";
   return (
     <thead>
       <tr className="text-content-subtle">
-        <th scope="col" aria-sort={aria("createdAt")} className={`${th} w-[48px]`}>
+        <th scope="col" aria-sort={aria("createdAt")} className={`${th} w-[66px]`}>
           <button
             type="button"
             onClick={() => onSortir("createdAt")}
@@ -271,7 +275,12 @@ export const KepalaTabel: React.FC<KepalaTabelProps> = ({ sortir, onSortir }) =>
           </button>
         </th>
         <th scope="col" aria-sort={aria("concern")} className={`${th} w-[220px]`}>
-          <button type="button" onClick={() => onSortir("concern")} title={t("discussion.urutkan")}>
+          <button
+            type="button"
+            onClick={() => onSortir("concern")}
+            title={t("discussion.urutkan")}
+            className={tombol}
+          >
             {t("discussion.thConcern")}
             {ikon("concern")}
           </button>
@@ -281,6 +290,7 @@ export const KepalaTabel: React.FC<KepalaTabelProps> = ({ sortir, onSortir }) =>
             type="button"
             onClick={() => onSortir("keterangan")}
             title={t("discussion.urutkan")}
+            className={tombol}
           >
             {t("discussion.thNotes")}
             {ikon("keterangan")}
@@ -298,6 +308,7 @@ export const KepalaTabel: React.FC<KepalaTabelProps> = ({ sortir, onSortir }) =>
             type="button"
             onClick={() => onSortir("tindakanLanjut")}
             title={t("discussion.urutkan")}
+            className={tombol}
           >
             {t("discussion.followUp")}
             {ikon("tindakanLanjut")}
@@ -320,6 +331,7 @@ export const KepalaTabel: React.FC<KepalaTabelProps> = ({ sortir, onSortir }) =>
             type="button"
             onClick={() => onSortir("targetDate")}
             title={t("discussion.urutkan")}
+            className={tombol}
           >
             {t("discussion.thTargetDate")}
             {ikon("targetDate")}

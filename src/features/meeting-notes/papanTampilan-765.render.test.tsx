@@ -92,6 +92,32 @@ describe("#765 — panah urutan selalu terlihat di kepala tabel", () => {
     }
   });
 
+  it("SETIAP kepala sortir adalah baris flex berkapital besar — bukan button polos (#765 putaran 3)", () => {
+    /* Putaran 2 hanya memasang kelas baris-flex pada kolom "No". Lima kepala
+     * lainnya dirender `<button>` polos, dan karena `display` default button
+     * adalah inline-block dengan lebar shrink-to-fit, panahnya jatuh ke BARIS
+     * KEDUA begitu label memenuhi kolom — terukur di peramban: ikon duduk di
+     * y=23,1 px dari puncak sel, bukan 15,6 px seperti yang flex. Cacat kedua
+     * ikut ketahuan dari screenshot yang sama: preflight Tailwind memberi
+     * `button { text-transform: none }`, jadi kepala sortir tercetak
+     * "Catatan / Keterangan" sementara kepala biasa "KONTEKS / TAG" — satu
+     * baris kepala dengan dua kapital. jsdom tidak menghitung layout, jadi yang
+     * dikunci di sini adalah KELAS yang menghasilkan satu baris itu, untuk
+     * KEENAM tombol sekaligus: tidak boleh ada yang tertinggal lagi. */
+    const { container } = render(<KepalaTabel sortir={TUNGGAL} onSortir={() => {}} />);
+    const tombol = Array.from(container.querySelectorAll("thead th button"));
+    expect(tombol).toHaveLength(6);
+    for (const b of tombol) {
+      const kelas = b.getAttribute("class") || "";
+      expect(kelas).toContain("flex");
+      expect(kelas).toContain("items-center");
+      expect(kelas).toContain("gap-1");
+      expect(kelas).toContain("uppercase");
+      // Panahnya anak tombol yang sama — kalau ia keluar, ia turun baris lagi.
+      expect(b.querySelector("svg")).not.toBeNull();
+    }
+  });
+
   it("kolom yang sedang aktif menunjuk arahnya, bukan hanya warnanya", () => {
     const { container, rerender } = render(<KepalaTabel sortir={TUNGGAL} onSortir={() => {}} />);
     const sebelum = Array.from(container.querySelectorAll("thead svg")).map((s) =>

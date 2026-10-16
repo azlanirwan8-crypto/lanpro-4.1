@@ -650,7 +650,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               sendiri atau tabel terpotong lagi — dan `kepalaSelSejajar-715.test.ts`
               menghitungnya, bukan mempercayainya. */}
           <div className="hidden sm:block flex-1 min-h-0 overflow-auto">
-            <table className="w-full min-w-[1608px] table-fixed border-separate border-spacing-0 text-left text-xs">
+            <table className="w-full min-w-[1626px] table-fixed border-separate border-spacing-0 text-left text-xs">
               <KepalaTabel sortir={sortir} onSortir={sortirKepala} />
               <tbody className="text-content-body">
                 {paginatedPoints.length === 0 ? (
