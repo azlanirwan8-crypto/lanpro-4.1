@@ -125,7 +125,7 @@ export const MeetingMobileCardView: React.FC<MeetingMobileCardViewProps> = ({
                     type="button"
                     onClick={(e) => onEditMeeting(meeting, e)}
                     aria-label={t("meetings.editMeeting") || "Edit Meeting"}
-                    className="p-1.5 rounded-md hover:bg-surface-sunken text-content-subtle hover:text-amber-600 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-md hover:bg-surface-sunken text-content-subtle hover:text-primary transition-colors cursor-pointer"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
@@ -136,7 +136,7 @@ export const MeetingMobileCardView: React.FC<MeetingMobileCardViewProps> = ({
                     type="button"
                     onClick={(e) => onDeleteMeeting(meeting, e)}
                     aria-label={t("meetings.deleteMeeting") || "Delete Meeting"}
-                    className="p-1.5 rounded-md hover:bg-surface-sunken text-content-subtle hover:text-rose-600 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-md hover:bg-surface-sunken text-content-subtle hover:text-danger-text transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -177,7 +177,7 @@ export const MeetingMobileCardView: React.FC<MeetingMobileCardViewProps> = ({
                       onDownloadAttachment(meeting.id, meeting.fileName || "attachment");
                     }
                   }}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 font-medium hover:underline cursor-pointer"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success/10 border border-success/30 text-success-text font-medium hover:underline cursor-pointer"
                 >
                   <Download className="w-3 h-3" />
                   {meeting.fileName || t("meetings.attachment")}

@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { gayaLabel } from "../../../lib/warnaLabel";
-import { getUserAvatarColors } from "../../../components/ui/UserAvatar";
+import { getUserAvatarHex } from "../../../components/ui/UserAvatar";
 import { DiscussionPoint, UserProfile, MasterData } from "../../../types";
 import { Paragraf } from "./Paragraf";
 
@@ -261,22 +261,20 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                 <div className="flex flex-wrap items-center gap-1 text-[11px] text-content-body min-w-0">
                   <User className="w-3 h-3 text-content-subtle shrink-0" />
                   {namaPenerima.length > 0 ? (
-                    namaPenerima.map(({ id, nama }) => {
-                      const warna = getUserAvatarColors(id);
-                      return (
-                        <span
-                          key={id}
-                          className={cn(
-                            "px-1.5 py-0.5 rounded-md text-[10px] font-normal border break-words",
-                            warna.bg,
-                            warna.text,
-                            warna.border
-                          )}
-                        >
-                          {nama}
-                        </span>
-                      );
-                    })
+                    namaPenerima.map(({ id, nama }) => (
+                      /* #769 — sama seperti papan: `.label-chip` atas heksa rona
+                         orang yang sama dengan avatarnya, bukan blok pekat
+                         `bg-*-700` (pemilik proyek 17 Okt: "warna pic nya kasar").
+                         #645 satu perilaku: papan dan kartu HP menampilkan chip
+                         yang sama untuk data yang sama. */
+                      <span
+                        key={id}
+                        className="label-chip px-1.5 py-0.5 rounded-md text-[10px] font-normal border break-words"
+                        style={gayaLabel(getUserAvatarHex(id))}
+                      >
+                        {nama}
+                      </span>
+                    ))
                   ) : (
                     /* #645 — tanpa PIC, teksnya tetap utuh dan tidak berwarna:
                          "Belum ditugaskan" bukan milik siapa pun. */

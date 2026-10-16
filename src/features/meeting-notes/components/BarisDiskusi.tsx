@@ -13,7 +13,7 @@ import {
 import type { DiscussionPoint, MasterData } from "../../../types";
 import { cn } from "../../../lib/utils";
 import { gayaLabel } from "../../../lib/warnaLabel";
-import { getUserAvatarColors } from "../../../components/ui/UserAvatar";
+import { getUserAvatarHex } from "../../../components/ui/UserAvatar";
 import { SEL } from "./BagianPapan";
 import { Paragraf } from "./Paragraf";
 
@@ -198,20 +198,20 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
         <div className="flex flex-wrap items-center gap-1">
           {namaPenerima.length > 0 ? (
             namaPenerima.map(({ id, nama }) => {
-              /* #765 — chip PIC memakai warna yang sama dengan avatarnya:
-                 `getUserAvatarColors` meng-hash ID orang, bukan namanya
-                 (#122/#125), jadi satu orang punya satu warna di seluruh
-                 aplikasi. */
-              const warna = getUserAvatarColors(id);
+              /* #769 — chip PIC memakai pola chip yang SAMA dengan chip isu di
+                 sebelahnya: `.label-chip` menurunkan latar 13 % dan garis 34 %
+                 dari satu heksa, sementara TEKS-nya netral (diambil dari
+                 `--color-content`, bukan dari heksa) sehingga tidak bisa gagal
+                 kontras di kartu gelap. Heksanya tetap rona orang yang sama
+                 dengan avatarnya (`getUserAvatarHex` sejajar indeks dengan
+                 `getUserAvatarColors`), hanya nadanya yang turun dari blok pekat
+                 ke warna susu. Versi pertama item ini menyalin `bg-*-700` + teks
+                 putih dan ditolak pemilik proyek: "warna pic nya kasar". */
               return (
                 <span
                   key={id}
-                  className={cn(
-                    "px-2 py-0.5 rounded-md text-[10px] leading-snug font-normal border break-words",
-                    warna.bg,
-                    warna.text,
-                    warna.border
-                  )}
+                  className="label-chip px-2 py-0.5 rounded-md text-[10px] leading-snug font-normal border break-words"
+                  style={gayaLabel(getUserAvatarHex(id))}
                 >
                   {nama}
                 </span>

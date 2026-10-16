@@ -8,9 +8,13 @@
  *     itu tidak ada, jadi affordancenya terbaca nol. Yang diuji: panahnya ADA di
  *     DOM dan tidak sedang disembunyikan.
  * (2) "konteks / tag yang dipilih harus mengikuti warna priority nya".
- * (3) "pic nama nya kalau bisa ikut warna jika ada" — warna yang sama dengan
- *     avatarnya, yaitu hash dari ID orang (`getUserAvatarColors`), bukan dari
- *     namanya, supaya orang yang sama tidak berubah warna di layar yang berbeda.
+ * (3) "pic nama nya kalau bisa ikut warna jika ada" — rona yang sama dengan
+ *     avatarnya, yaitu hash dari ID orang (`getUserAvatarHex` sejajar indeks
+ *     dengan `getUserAvatarColors`), bukan dari namanya, supaya orang yang sama
+ *     tidak berubah warna di layar yang berbeda. #769 menurunkan NADANYA: chip
+ *     memakai `.label-chip` (latar 13 %, garis 34 %, teks netral) atas heksa itu,
+ *     bukan blok pekat `bg-*-700` + teks putih yang ditolak pemilik proyek
+ *     ("warna pic nya kasar ... harus clean dan smooth", 17 Okt).
  * (4) "paragraf nya harus rata kiri kanan".
  *
  * RENDER, bukan baca sumber, karena (1)-(3) adalah hal yang dilihat pengguna:
@@ -24,7 +28,7 @@ import { render } from "@testing-library/react";
 import { KepalaTabel } from "./components/BagianPapan";
 import { BarisDiskusi } from "./components/BarisDiskusi";
 import { DiscussionPointMobileCardView } from "./components/DiscussionPointMobileCardView";
-import { getUserAvatarColors } from "../../components/ui/UserAvatar";
+import { getUserAvatarHex } from "../../components/ui/UserAvatar";
 import type { DiscussionPoint } from "../../types";
 
 jest.mock("react-i18next", () => ({
@@ -132,10 +136,11 @@ describe("#765 — chip tag dan PIC berwarna", () => {
     const chip = Array.from(container.querySelectorAll("tbody td:nth-child(6) span")).find((s) =>
       (s.textContent || "").includes("Nabila Triana")
     ) as HTMLElement;
-    const warna = getUserAvatarColors("u2");
-    for (const kelas of [warna.bg, warna.text, warna.border]) {
-      expect(chip.className).toContain(kelas);
-    }
+    const heksa = getUserAvatarHex("u2");
+    expect(chip.className).toContain("label-chip");
+    expect(chip.style.getPropertyValue("--lbr")).toBe(heksa);
+    // Nadanya lembut: tidak ada lagi blok pekat palet di chip PIC (#769).
+    expect(chip.className).not.toMatch(/bg-[a-z]+-\d{2,3}/);
   });
 
   it("kartu HP berperilaku sama dengan papan (#645: satu field, satu perilaku)", () => {
@@ -162,7 +167,11 @@ describe("#765 — chip tag dan PIC berwarna", () => {
     const pic = Array.from(container.querySelectorAll("span")).find(
       (s) => (s.textContent || "").trim() === "Azlan Irawan"
     ) as HTMLElement;
-    expect(pic.className).toContain(getUserAvatarColors("u1").bg);
+    // #769 — kartu HP memakai chip yang LEMBUT sama seperti papan (#645: satu
+    // perilaku untuk data yang sama), atas rona orang yang sama dengan avatarnya.
+    expect(pic.className).toContain("label-chip");
+    expect(pic.style.getPropertyValue("--lbr")).toBe(getUserAvatarHex("u1"));
+    expect(pic.className).not.toMatch(/bg-[a-z]+-\d{2,3}/);
   });
 });
 

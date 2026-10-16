@@ -666,7 +666,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                               }
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-500/10 text-primary hover:bg-indigo-500/15 rounded-md font-medium truncate max-w-[150px] transition-all text-[10px] leading-none border border-indigo-500/30"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 text-primary hover:bg-primary/15 rounded-md font-medium truncate max-w-[150px] transition-all text-[10px] leading-none border border-primary/20"
                               title={meeting.meetingLink}
                             >
                               <Video className="w-3.5 h-3.5 shrink-0" />
@@ -682,10 +682,10 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                           {meeting.fileName ? (
                             <button
                               onClick={() => handleDownloadMeeting(meeting.id!, meeting.fileName!)}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-success/10 hover:bg-success/15 text-success-text border border-success/30 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs"
                               title={t("meetings.clickToDownload")}
                             >
-                              <Download className="w-3.5 h-3.5 shrink-0 text-emerald-600 group-hover/file:scale-110 transition-transform" />
+                              <Download className="w-3.5 h-3.5 shrink-0 text-success-text group-hover/file:scale-110 transition-transform" />
                               <span className="whitespace-normal break-all">
                                 {meeting.fileName}
                               </span>
@@ -724,7 +724,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                                 setActiveMeetingId(meeting.id!);
                                 setMobileViewMode("detail");
                               }}
-                              className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
+                              className="p-1.5 text-content-muted hover:text-primary hover:bg-primary/10 rounded-md transition-all cursor-pointer"
                               title={t("meetings.viewDetails")}
                             >
                               <Eye className="w-4 h-4" />
@@ -732,7 +732,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                             {(isUserAdmin || isMeetingAuthor(meeting)) && (
                               <button
                                 onClick={() => startEdit(meeting)}
-                                className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
+                                className="p-1.5 text-content-muted hover:text-primary hover:bg-primary/10 rounded-md transition-all cursor-pointer"
                                 title={t("meetings.editMeeting")}
                               >
                                 <Edit2 className="w-4 h-4" />
@@ -741,7 +741,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                             {canDeleteMeeting(meeting) && (
                               <button
                                 onClick={() => handleDeleteMeeting(meeting.id!)}
-                                className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
+                                className="p-1.5 text-content-muted hover:text-danger-text hover:bg-danger/10 rounded-md transition-all cursor-pointer"
                                 title={t("meetings.deleteMeeting")}
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -861,14 +861,14 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                               onClick={() =>
                                 handleDownloadMeeting(activeMeeting.id!, activeMeeting.fileName!)
                               }
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 rounded-md text-xs font-medium transition-all border border-emerald-500/30 cursor-pointer shadow-2xs shrink-0 self-start sm:self-center"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-success/10 hover:bg-success/15 text-success-text rounded-md text-xs font-medium transition-all border border-success/30 cursor-pointer shadow-2xs shrink-0 self-start sm:self-center"
                               title={t("meetingExtra.downloadAttachment")}
                             >
-                              <FileText className="w-3.5 h-3.5 text-emerald-600" />
+                              <FileText className="w-3.5 h-3.5 text-success-text" />
                               <span className="whitespace-normal break-words">
                                 {activeMeeting.fileName}
                               </span>
-                              <span className="text-[10px] bg-emerald-200/60 px-1.5 py-0.5 rounded font-medium">
+                              <span className="text-[10px] bg-success/15 text-success-text px-1.5 py-0.5 rounded font-medium">
                                 {t("meetingExtra.download")}
                               </span>
                             </button>
@@ -973,7 +973,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
             </button>
 
             <div className="flex items-center gap-3 mb-5 pr-10">
-              <div className="w-9 h-9 rounded-md bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-primary shrink-0">
+              <div className="w-9 h-9 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
                 <Calendar className="w-5 h-5" />
               </div>
               <div>
@@ -986,7 +986,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
             <div className="space-y-4 mb-5">
               <div>
                 <label className="block text-content-body font-normal text-xs tracking-normal uppercase mb-1.5">
-                  {t("meetings.meetingTitle")} <span className="text-rose-500">*</span>
+                  {t("meetings.meetingTitle")} <span className="text-danger-text">*</span>
                 </label>
                 <input
                   disabled={!canModify}
@@ -1063,7 +1063,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                     <button
                       type="button"
                       onClick={() => setNewMeetingFile(null)}
-                      className="text-xs sm:text-[10px] text-rose-600 hover:underline font-medium"
+                      className="text-xs sm:text-[10px] text-danger-text hover:underline font-medium"
                     >
                       {t("meetingExtra.remove")}
                     </button>
@@ -1090,7 +1090,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   />
                   {newMeetingFile ? (
                     <div className="flex items-center justify-center gap-2">
-                      <FileText className="w-4 h-4 text-emerald-600" />
+                      <FileText className="w-4 h-4 text-success-text" />
                       <span className="text-xs font-medium text-content-strong whitespace-normal break-words">
                         {newMeetingFile.name}
                       </span>
@@ -1116,7 +1116,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                             e.stopPropagation();
                             setShouldRemoveMeetingFile(true);
                           }}
-                          className="text-[10px] leading-none bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 px-2 py-1 rounded font-medium transition-all"
+                          className="text-[10px] leading-none bg-danger/10 hover:bg-danger/15 text-danger-text px-2 py-1 rounded font-medium transition-all"
                         >
                           {t("meetingExtra.deleteFile")}
                         </button>
@@ -1154,8 +1154,8 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 {t("common.close")}
               </button>
               {!canModify ? (
-                <div className="text-xs font-medium text-rose-600 flex items-center gap-1.5 bg-rose-500/10 px-3.5 py-2 rounded-md border border-rose-500/30 shadow-2xs">
-                  <Eye className="w-4 h-4 text-rose-500" />
+                <div className="text-xs font-medium text-danger-text flex items-center gap-1.5 bg-danger/10 px-3.5 py-2 rounded-md border border-danger/30 shadow-2xs">
+                  <Eye className="w-4 h-4 text-danger-text" />
                   <span>{t("meetingExtra.readOnlyMode")}</span>
                 </div>
               ) : (

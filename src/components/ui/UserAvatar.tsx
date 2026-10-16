@@ -19,26 +19,55 @@ const avatarGagal = new Set<string>();
 // 3,48 dan gagal AA. Seluruh delapan warna di `-700` lolos:
 //   blue 6,70 · emerald 6,45 · violet 7,10 · amber 5,02
 //   rose 6,29 · indigo 7,90 · cyan 5,36 · fuchsia 6,32
-export const getUserAvatarColors = (idOrName: string = "") => {
-  const colors = [
-    { bg: "bg-blue-700", text: "text-content-inverse", border: "border-blue-700" },
-    { bg: "bg-emerald-700", text: "text-content-inverse", border: "border-emerald-700" },
-    { bg: "bg-violet-700", text: "text-content-inverse", border: "border-violet-700" },
-    { bg: "bg-amber-700", text: "text-content-inverse", border: "border-amber-700" },
-    { bg: "bg-rose-700", text: "text-content-inverse", border: "border-rose-700" },
-    { bg: "bg-indigo-700", text: "text-content-inverse", border: "border-indigo-700" },
-    { bg: "bg-cyan-700", text: "text-content-inverse", border: "border-cyan-700" },
-    { bg: "bg-fuchsia-700", text: "text-content-inverse", border: "border-fuchsia-700" },
-  ];
+/**
+ * #769 — HEKSA yang SEJAJAR indeksnya dengan palet kelas di atas.
+ *
+ * KENAPA SATU FUNGSI HASH. Chip PIC di papan Poin Diskusi tadinya menyalin kelas
+ * pekat `bg-*-700` dari `getUserAvatarColors` dan pemilik proyek menolaknya pada
+ * 17 Okt ("warna pic nya kasar ... harus clean dan smooth"). Bentuk chip yang
+ * benar sudah ada di rumah ini: `.label-chip` + `gayaLabel(hex)` — latar 13 %,
+ * garis 34 %, TEKS netral yang tidak bergantung pada hex, jadi ia tidak bisa
+ * gagal kontras di mode gelap (§22). Yang harus tetap identik adalah RONANYA:
+ * satu orang = satu rona di seluruh aplikasi (#122/#125). Karena itu kedua
+ * keluaran diambil dari `indeksWarna` yang sama; daftar kelas dan daftar heksa
+ * tidak boleh bertambah atau bertukar urutan sendiri-sendiri —
+ * `warnaSmooth-769.test.ts` yang menjaga kesejajaran itu.
+ */
+export const HEKSA_AVATAR = [
+  "#1D4ED8", // blue
+  "#047857", // emerald
+  "#6D28D9", // violet
+  "#B45309", // amber
+  "#BE123C", // rose
+  "#4338CA", // indigo
+  "#0E7490", // cyan
+  "#A21CAF", // fuchsia
+];
 
+const palet = [
+  { bg: "bg-blue-700", text: "text-content-inverse", border: "border-blue-700" },
+  { bg: "bg-emerald-700", text: "text-content-inverse", border: "border-emerald-700" },
+  { bg: "bg-violet-700", text: "text-content-inverse", border: "border-violet-700" },
+  { bg: "bg-amber-700", text: "text-content-inverse", border: "border-amber-700" },
+  { bg: "bg-rose-700", text: "text-content-inverse", border: "border-rose-700" },
+  { bg: "bg-indigo-700", text: "text-content-inverse", border: "border-indigo-700" },
+  { bg: "bg-cyan-700", text: "text-content-inverse", border: "border-cyan-700" },
+  { bg: "bg-fuchsia-700", text: "text-content-inverse", border: "border-fuchsia-700" },
+];
+
+const indeksWarna = (idOrName: string = ""): number => {
   let hash = 0;
   const target = idOrName || "";
   for (let i = 0; i < target.length; i++) {
     hash = target.charCodeAt(i) + ((hash << 5) - hash);
   }
-  const index = Math.abs(hash) % colors.length;
-  return colors[index];
+  return Math.abs(hash) % palet.length;
 };
+
+export const getUserAvatarColors = (idOrName: string = "") => palet[indeksWarna(idOrName)];
+
+/** Rona orang yang sama, versi heksa — untuk chip yang harus lembut. */
+export const getUserAvatarHex = (idOrName: string = "") => HEKSA_AVATAR[indeksWarna(idOrName)];
 
 export const getInitials = (fullName?: string): string => {
   if (!fullName) return "?";
