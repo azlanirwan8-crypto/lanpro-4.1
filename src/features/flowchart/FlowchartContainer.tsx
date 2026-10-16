@@ -55,7 +55,7 @@ import { FlowchartDocumentModal } from "./components/FlowchartDocumentModal";
 import { ImportDiagramModal } from "./components/ImportDiagramModal";
 import { CanvasToolbar } from "./components/CanvasToolbar";
 import { FlowchartNode } from "./components/FlowchartNode";
-import { FlowchartEdges } from "./components/FlowchartEdges";
+import { FlowchartEdges, pecahanPort } from "./components/FlowchartEdges";
 import { FlowchartMinimap } from "./components/FlowchartMinimap";
 import { NodeContextMenu } from "./components/NodeContextMenu";
 import { CanvasContextMenu } from "./components/CanvasContextMenu";
@@ -67,7 +67,14 @@ import { AnimatePresence } from "motion/react";
 import { FlowchartDetail } from "./components/FlowchartDetail";
 import { hasilTempel, kumpulkanSalinan } from "./lib/salinTempel";
 import type { SalinanPapan } from "./lib/salinTempel";
-import type { FlowNode, FlowEdge, FlowchartDocument, FlowchartData, SudutGrup } from "./types";
+import type {
+  FlowNode,
+  FlowEdge,
+  FlowchartDocument,
+  FlowchartData,
+  Point,
+  SudutGrup,
+} from "./types";
 import { adaKonteks, KONTEKS_KOSONG } from "./types";
 import { dataUnduhAman, tautanAman } from "../../lib/tautanAman";
 import { labelTautan } from "./lib/labelTautan";
@@ -3764,7 +3771,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   /** Satu jalur menambah garis: dipakai mode klik dan mode tarik. */
-  const tambahSambungan = (dari: string, ke: string) => {
+  const tambahSambungan = (dari: string, ke: string, titikLepas?: Point) => {
     if (dari === ke) {
       toast.error(t("toast.connectSelf"));
       return false;
@@ -3775,7 +3782,21 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       return false;
     }
     const id = "edge_" + Date.now();
-    const nextEdges = [...edges, { id, fromNodeId: dari, toNodeId: ke }];
+    // #762 — garis BARU pun mengunci titik yang disentuh, sama seperti ujung
+    // yang dipindah. draw.io menyimpan ini sebagai exitX/entryX; papan ini sudah
+    // MEMBACA pecahan itu saat impor dan sudah MENGHORMATINYA saat menggambar —
+    // yang belum adalah penulisannya dari layar, jadi garis buatan pengguna
+    // selalu melompat ke port yang dipapankan.
+    const sasaran = nodes.find((n) => n.id === ke);
+    const nextEdges = [
+      ...edges,
+      {
+        id,
+        fromNodeId: dari,
+        toNodeId: ke,
+        ...(titikLepas && sasaran ? { portTujuan: pecahanPort(sasaran, titikLepas) } : null),
+      },
+    ];
     setEdges(nextEdges);
     recordHistory(nodes, nextEdges);
     toast.success(t("toast.arrowAdded"));
@@ -3897,9 +3918,16 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         const garis = edges.find((x) => x.id === ujingSeret.edgeId);
         const tetap = ujingSeret.ujung === "akhir" ? garis?.fromNodeId : garis?.toNodeId;
         if (garis && target && target !== tetap) {
+          // #762 — ujung yang dipindah juga DIKUNCI ke titik yang Bapak sentuh,
+          // bukan sekadar dipindah ke bentuknya. Tanpa ini papan memilihkan port
+          // sendiri dan garis pindah ke sisi yang tidak diminta.
+          const sasaran = nodes.find((n) => n.id === target);
+          const port = sasaran && titik ? pecahanPort(sasaran, titik) : undefined;
           const nextEdges = edges.map((x) =>
             x.id === garis.id
-              ? { ...x, [ujingSeret.ujung === "akhir" ? "toNodeId" : "fromNodeId"]: target }
+              ? ujingSeret.ujung === "akhir"
+                ? { ...x, toNodeId: target, portTujuan: port }
+                : { ...x, fromNodeId: target, portSumber: port }
               : x
           );
           setEdges(nextEdges);
@@ -3921,7 +3949,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       }
 
       if (target && seretSambung && target !== seretSambung) {
-        tambahSambungan(seretSambung, target);
+        tambahSambungan(seretSambung, target, titik ?? undefined);
         setConnectSourceId(null);
         setActiveTool("select");
       } else {

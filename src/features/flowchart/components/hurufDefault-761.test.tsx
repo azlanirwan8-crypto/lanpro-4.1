@@ -90,7 +90,7 @@ describe("#761 bawaan huruf Helvetica berlaku sampai label garis", () => {
     );
     const label = labelGaris(container);
     expect(label).toBeTruthy();
-    expect(label.className).toContain(KELAS_HURUF.sans);
+    expect(label!.className).toContain(KELAS_HURUF.sans);
   });
 
   it("kelas sans itu memang Helvetica, bukan nama kelas kosong", () => {

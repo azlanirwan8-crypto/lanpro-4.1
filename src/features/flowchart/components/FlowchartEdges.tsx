@@ -130,6 +130,30 @@ export const titikPort = (
 };
 
 /**
+ * #762 — kebalikan dari `titikPort`: titik papan → pecahan 0..1 pada bentuknya.
+ *
+ * Inilah yang membuat sebuah ujung panah bisa DIPIN. draw.io menyimpan
+ * `exitX/exitY` dan `entryX/entryY` sebagai pecahan, bukan sebagai koordinat
+ * absolut, jadi pin tetap di tempatnya ketika bentuknya dipindahkan atau
+ * diubah ukurannya. Papan ini sudah MEMBACA pecahan itu saat mengimpor
+ * (`gayaImpor.ts:318-320`) dan sudah menghormatinya saat menggambar
+ * (`FlowchartEdges.tsx:566-568`) — yang tidak pernah ada adalah cara
+ * menuliskannya dari layar, jadi garis yang dibuat pengguna selalu menempel di
+ * port yang dipapankan, bukan di titik yang Bapak sentuh.
+ *
+ * Dibatasi 0..1: di luar itu artinya "di luar bentuk", dan menyimpan angka di
+ * luar rentang akan membuat garis menempel di tempat yang tidak terlihat.
+ */
+export const pecahanPort = (node: FlowNode, titik: Point): Point => {
+  const u = ukuranBentukEfektif(node);
+  const jepit = (v: number) => Math.min(1, Math.max(0, v));
+  return {
+    x: jepit((titik.x - node.x) / u.width),
+    y: jepit((titik.y - node.y) / u.height),
+  };
+};
+
+/**
  * #656 — SATU sumber warna garis. Dulu jalur dan kepala panah masing-masing
  * menulis hex abu-abu slate, dua tempat yang bisa lupa disamakan. draw.io
  * memakai hitam untuk garis pada papan terang; papan gelap `blueprint` tetap
