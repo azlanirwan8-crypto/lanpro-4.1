@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { cn } from "../../../lib/utils";
 import { DIAGRAM_SHAPE_GROUPS, MIME_BENTUK_PALET } from "../constants";
 import { renderMiniPreviewIcon } from "../lib/shapes";
+import { KUNCI_PRESET, URUT_PRESET, grupBoleh, type PresetPalet } from "../lib/presetPalet";
 import type { FlowNode } from "../types";
 
 /** Grup yang boleh memakai tanda "FREE" — judul aslinya panjang, jadi
@@ -49,21 +50,30 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
 
   const closePalette = () => setIsShapeDropdownOpen(false);
 
+  /**
+   * #760 — preset maksud. State-nya LOKAL dan sengaja tidak disimpan ke
+   * basis data: ini cara melihat palet, bukan isi papan, jadi ia tidak boleh
+   * ikut recordHistory atau membuat dua papan punya "tab aktif" berbeda.
+   */
+  const [preset, setPreset] = React.useState<PresetPalet>("semua");
+
   // #541 — satu predikat untuk grup, daftar, dan pesan "tidak ada hasil".
   // Sebelumnya predikat yang sama ditulis dua kali (dan bisa berbeda), serta
   // hanya membaca name/desc sehingga mencari "bpmn" atau "cloud" tidak
   // menemukan apa pun walaupun judul grupnya persis begitu.
   const kueri = shapeSearchQuery.trim().toLowerCase();
-  const grupTersaring = DIAGRAM_SHAPE_GROUPS.map((group) => ({
-    group,
-    items: group.items.filter(
-      (item) =>
-        kueri === "" ||
-        group.title.toLowerCase().includes(kueri) ||
-        item.name.toLowerCase().includes(kueri) ||
-        !!item.desc?.toLowerCase().includes(kueri)
-    ),
-  }));
+  const grupTersaring = DIAGRAM_SHAPE_GROUPS.filter((group) => grupBoleh(preset, group.title)).map(
+    (group) => ({
+      group,
+      items: group.items.filter(
+        (item) =>
+          kueri === "" ||
+          group.title.toLowerCase().includes(kueri) ||
+          item.name.toLowerCase().includes(kueri) ||
+          !!item.desc?.toLowerCase().includes(kueri)
+      ),
+    })
+  );
   const adaHasil = grupTersaring.some((g) => g.items.length > 0);
 
   const panelBody = (
@@ -126,6 +136,30 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
         </div>
       </div>
 
+      {/* #760 — preset maksud di atas grup lama. Grup TIDAK dihapus atau
+          disusun ulang: yang berubah hanya saringannya, jadi palet 16 grup
+          tetap utuh untuk yang memang mencari `Electrical & P&ID`. */}
+      <div className="px-2.5 pt-2.5 shrink-0 flex flex-wrap gap-1" data-testid="deret-preset">
+        {URUT_PRESET.map((p) => (
+          <button
+            key={p}
+            type="button"
+            data-preset-palet={p}
+            data-testid={`tombol-preset-${p}`}
+            aria-pressed={preset === p}
+            onClick={() => setPreset(p)}
+            className={cn(
+              "px-2 py-1 text-[10px] font-medium rounded-md border transition-all cursor-pointer",
+              preset === p
+                ? "bg-primary/15 text-primary border-primary/40"
+                : "bg-surface text-content-secondary border-border-faint hover:border-primary/30"
+            )}
+          >
+            {t(KUNCI_PRESET[p])}
+          </button>
+        ))}
+      </div>
+
       {/* Search Bar */}
       <div className="p-2.5 border-b border-border-faint shrink-0">
         <div className="relative font-sans">
@@ -168,7 +202,10 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                 className="w-full flex items-center justify-between text-left py-1 hover:bg-surface-sunken/70 p-1 rounded-lg transition-colors group"
               >
                 <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="text-[11px] font-medium text-content-strong tracking-tight truncate">
+                  <span
+                    data-testid="judul-grup-palet"
+                    className="text-[11px] font-medium text-content-strong tracking-tight truncate"
+                  >
                     {group.title}
                   </span>
                   {GRUP_BERBADGE.includes(group.title) && (
