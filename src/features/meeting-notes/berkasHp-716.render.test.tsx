@@ -46,13 +46,16 @@ const pasang = (p: Partial<DiscussionPoint>) =>
       points={[titik(p)]}
       projectMembers={[]}
       masterData={[]}
+      /* #765 — peta warna chip tag; test ini tidak menguji warna. */
+      warnaTag={{}}
       onOpenThread={() => {}}
       onEditPoint={() => {}}
       onDeletePoint={() => {}}
       onToggleStatus={() => {}}
       canEdit={() => true}
       canDelete={() => true}
-      canToggleStatus={false}
+      /* #765 — prop ini kini predikat per baris, sama seperti canEdit/canDelete. */
+      canToggleStatus={() => false}
       currentUserId="u1"
     />
   );

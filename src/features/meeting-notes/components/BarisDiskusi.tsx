@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import type { DiscussionPoint, MasterData } from "../../../types";
 import { cn } from "../../../lib/utils";
+import { gayaLabel } from "../../../lib/warnaLabel";
+import { getUserAvatarColors } from "../../../components/ui/UserAvatar";
 import { SEL } from "./BagianPapan";
 import { Paragraf } from "./Paragraf";
 
@@ -41,12 +43,24 @@ interface BarisDiskusiProps {
   nomor: string;
   /** Nama satu penerima, sudah di-resolve dari anggota proyek. */
   assigneeName: string;
-  /** Daftar penerima jamak (#703, B2 = b) sebagai label siap tampil. */
-  namaPenerima: string[];
+  /** Daftar penerima jamak (#703, B2 = b). #765: id-nya ikut dipakai untuk warna. */
+  namaPenerima: { id: string; nama: string }[];
   masterData: MasterData[];
+  /** #765 — id isu → hex prioritasnya (`lib/warnaTag.ts`). */
+  warnaTag: Record<string, string>;
   jumlahKomentar: number;
   bolehSunting: boolean;
   bolehHapus: boolean;
+  /**
+   * #765 — boleh mengubah status. Dulu TIDAK ADA gerbangnya di baris desktop:
+   * pil status dirender untuk setiap pemanggil sementara `handleToggleStatus`
+   * tidak memeriksa izin, jadi pembaca-saja bisa mengkliknya, melihat statusnya
+   * berubah, lalu melihatnya berubah kembali ketika papan dimuat ulang setelah
+   * server menjawab 403. Kartu mobile justru sudah digerbangi (oleh `canAdd`,
+   * izin yang salah untuk alasan yang benar). Sekarang satu aturan untuk kedua
+   * jalur: status boleh diubah oleh orang yang boleh menyunting barisnya.
+   */
+  bolehUbahStatus: boolean;
   onOpenThread: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -58,15 +72,22 @@ const kosong = (teks: string) => (
 );
 
 /**
- * #708 — tiga sel teks di bawah diberi plafon TINGGI (`max-h-32` + gulir),
- * bukan plafon isi. Keputusan #645 melarang `line-clamp`/`truncate` pada catatan
- * rapat dan larangan itu tetap berlaku: seluruh teks masih ada dan masih bisa
- * dibaca, hanya barisnya yang tidak lagi memanjang tanpa batas. Bentuknya persis
- * yang ditunjuk gerbang `audit:label` sebagai pengganti potongan teks — "satu
- * baris + wadahnya yang menggulir" (#565/#566). Kelasnya ditulis HARFIAH di
- * setiap sel, bukan lewat konstanta: `catatanLengkap-645.test.ts` membaca 400
- * karakter sebelum ekspresi datanya, dan sebuah nama konstanta membuat jaminan
- * itu terbaca hilang padahal tidak.
+ * #708 — tiga sel teks di bawah diberi PLAFON TINGGI (`max-h` + gulir), bukan
+ * plafon isi. Keputusan #645 melarang `line-clamp`/`truncate` pada catatan rapat
+ * dan larangan itu tetap berlaku: seluruh teks masih ada dan masih bisa dibaca,
+ * hanya barisnya yang tidak lagi memanjang tanpa batas. Bentuknya persis yang
+ * ditunjuk gerbang `audit:label` sebagai pengganti potongan teks — "satu baris +
+ * wadahnya yang menggulir" (#565/#566). Kelasnya ditulis HARFIAH di setiap sel,
+ * bukan lewat konstanta: `catatanLengkap-645.test.ts` membaca 400 karakter sebelum
+ * ekspresi datanya, dan sebuah nama konstanta membuat jaminan itu terbaca hilang
+ * padahal tidak.
+ *
+ * #765 — angkanya turun dari 32 (128 px) ke 16 (64 px) atas laporan pemilik
+ * proyek: dengan plafon 128 px satu baris tabel tingginya ±118 px, jadi hanya TIGA
+ * baris yang muat di layar sebelum pengguna perlu menggulir. Di 64 px barisnya
+ * ±86 px dan EMPAT baris terlihat, yang diminta. Teks tidak dipotong — hanya
+ * jendela gulirnya yang lebih pendek, dan `tataletakPapan-707.test.ts` ikut
+ * dipindah ke angka baru supaya penjaga ini tidak menyimpan angka lama.
  */
 
 export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
@@ -75,9 +96,11 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
   assigneeName,
   namaPenerima,
   masterData,
+  warnaTag,
   jumlahKomentar,
   bolehSunting,
   bolehHapus,
+  bolehUbahStatus,
   onOpenThread,
   onEdit,
   onDelete,
@@ -107,14 +130,14 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
 
       {/* Concern — follow-up tidak lagi menumpang di sel ini; ia kolom sendiri (#703 butir 3). */}
       <td className={cn(SEL, "py-2.5 align-top")}>
-        <div className="font-normal text-content-strong leading-snug whitespace-pre-wrap break-words max-h-32 overflow-y-auto">
+        <div className="font-normal text-content-strong leading-snug whitespace-pre-wrap break-words text-justify max-h-16 overflow-y-auto">
           <Paragraf teks={p.concern} />
         </div>
       </td>
 
       {/* Notes / Keterangan — #645: TIDAK boleh dipotong. */}
       <td className={cn(SEL, "py-2.5 align-top text-content-body font-normal")}>
-        <div className="whitespace-pre-wrap break-words max-h-32 overflow-y-auto">
+        <div className="whitespace-pre-wrap break-words text-justify max-h-16 overflow-y-auto">
           <Paragraf teks={p.keterangan || p.comment || "-"} />
         </div>
       </td>
@@ -126,7 +149,14 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
           {tag.map((s) => (
             <span
               key={s.id}
-              className="px-2 py-0.5 rounded-md text-[10px] leading-snug font-normal bg-primary/10 text-primary border border-primary/20 break-words"
+              /* #765 — chip isu ikut warna PRIORITAS isu tertaut: `label-chip`
+                 menurunkan latar, garis, dan teks dari satu hex (`--lbr`), sama
+                 seperti chip di Daftar Isu. Tanpa prioritas, warna merek. */
+              className={cn(
+                "px-2 py-0.5 rounded-md text-[10px] leading-snug font-normal border break-words",
+                warnaTag[s.id] ? "label-chip" : "bg-primary/10 text-primary border-primary/20"
+              )}
+              style={warnaTag[s.id] ? gayaLabel(warnaTag[s.id]) : undefined}
             >
               {s.label}
             </span>
@@ -151,7 +181,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
           (`"tindakanLanjut" TEXT`), hanya kolomnya yang belum pernah tampil. */}
       <td className={cn(SEL, "py-2.5 align-top text-content-body font-normal")}>
         {p.tindakanLanjut || p.next_action ? (
-          <div className="whitespace-pre-wrap break-words max-h-32 overflow-y-auto">
+          <div className="whitespace-pre-wrap break-words text-justify max-h-16 overflow-y-auto">
             <Paragraf teks={p.tindakanLanjut || p.next_action} />
           </div>
         ) : (
@@ -167,14 +197,26 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
       <td className={cn(SEL, "py-2.5 align-top text-content-body font-normal")}>
         <div className="flex flex-wrap items-center gap-1">
           {namaPenerima.length > 0 ? (
-            namaPenerima.map((nama) => (
-              <span
-                key={nama}
-                className="px-2 py-0.5 rounded-md text-[10px] leading-snug font-normal bg-surface-sunken text-content-body border border-border-subtle break-words"
-              >
-                {nama}
-              </span>
-            ))
+            namaPenerima.map(({ id, nama }) => {
+              /* #765 — chip PIC memakai warna yang sama dengan avatarnya:
+                 `getUserAvatarColors` meng-hash ID orang, bukan namanya
+                 (#122/#125), jadi satu orang punya satu warna di seluruh
+                 aplikasi. */
+              const warna = getUserAvatarColors(id);
+              return (
+                <span
+                  key={id}
+                  className={cn(
+                    "px-2 py-0.5 rounded-md text-[10px] leading-snug font-normal border break-words",
+                    warna.bg,
+                    warna.text,
+                    warna.border
+                  )}
+                >
+                  {nama}
+                </span>
+              );
+            })
           ) : (
             /* #645 — nama PIC dulu dipotong pada 120 px, jadi "Gloria Handoyo"
                tampil sebagai "Gloria Hand…". Ekspresi `{assigneeName}` ini juga
@@ -205,7 +247,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
         {tautan.length === 0 && berkas.length === 0 ? (
           kosong("-")
         ) : (
-          <div className="flex flex-wrap items-start gap-1.5 max-h-32 overflow-y-auto">
+          <div className="flex flex-wrap items-start gap-1.5 max-h-16 overflow-y-auto">
             {tautan.map((l) => (
               <a
                 key={l.id}
@@ -270,7 +312,8 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
           <button
             type="button"
             onClick={onToggleStatus}
-            className="cursor-pointer transition-all active:scale-95 inline-block"
+            disabled={!bolehUbahStatus}
+            className="cursor-pointer disabled:cursor-default transition-all active:scale-95 disabled:active:scale-100 inline-block"
             title={t("discussion.toggleStatus")}
           >
             {isCompleted ? (

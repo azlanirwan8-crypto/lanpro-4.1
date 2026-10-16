@@ -1,6 +1,7 @@
 import db from "../../src/lib/db";
 import crypto from "crypto";
 import { BATAS_DAFTAR_TANPA_PAGINATION, type PaginationParams } from "../lib/pagination";
+import { susunUrutanDiskusi, type UrutanDiskusi } from "../lib/sortirDiskusi";
 
 export interface DiscussionPointEntity {
   id: string;
@@ -66,12 +67,16 @@ export interface DiscussionPointCommentEntity {
 }
 
 export class DiscussionPointsRepository {
-  async findByMeetingId(meetingId: string, search?: string): Promise<DiscussionPointEntity[]> {
+  async findByMeetingId(
+    meetingId: string,
+    search?: string,
+    urutan?: UrutanDiskusi
+  ): Promise<DiscussionPointEntity[]> {
     const connection = await db.getConnection();
     try {
       const { where, params } = this.buildPointWhere(meetingId, search);
       const [rows]: any = await connection.query(
-        `SELECT * FROM DiscussionPoints WHERE ${where} ORDER BY createdAt ASC LIMIT ${BATAS_DAFTAR_TANPA_PAGINATION}`,
+        `SELECT * FROM DiscussionPoints WHERE ${where} ${susunUrutanDiskusi(urutan)} LIMIT ${BATAS_DAFTAR_TANPA_PAGINATION}`,
         params
       );
       return await this.tempelAnak(connection, rows || []);
@@ -83,7 +88,8 @@ export class DiscussionPointsRepository {
   async findByMeetingIdPaged(
     meetingId: string,
     pagination: PaginationParams,
-    search?: string
+    search?: string,
+    urutan?: UrutanDiskusi
   ): Promise<{ items: DiscussionPointEntity[]; total: number }> {
     const connection = await db.getConnection();
     try {
@@ -94,7 +100,7 @@ export class DiscussionPointsRepository {
       );
       const total = countRows?.[0]?.total ?? 0;
       const [rows]: any = await connection.query(
-        `SELECT * FROM DiscussionPoints WHERE ${where} ORDER BY createdAt ASC LIMIT ? OFFSET ?`,
+        `SELECT * FROM DiscussionPoints WHERE ${where} ${susunUrutanDiskusi(urutan)} LIMIT ? OFFSET ?`,
         [...params, pagination.limit, pagination.offset]
       );
       return { items: await this.tempelAnak(connection, rows || []), total };

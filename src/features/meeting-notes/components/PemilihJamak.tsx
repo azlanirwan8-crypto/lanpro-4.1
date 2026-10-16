@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { Check, ChevronDown, Search, X } from "lucide-react";
 import { cn } from "../../../lib/utils";
+import { gayaLabel } from "../../../lib/warnaLabel";
 
 /**
  * #703 — pemilih JAMAK.
@@ -50,6 +51,13 @@ export interface OpsiJamak {
   label: string;
   /** Warna snapshot dari master data/daftar isu; boleh kosong. */
   warna?: string | null;
+  /**
+   * #765 — `type` prioritas MasterData milik isu tertaut (KODE, bukan hex).
+   * Yang disimpan dan yang dikirim ke pemanggil adalah kode: hex-nya selalu
+   * dihitung ulang lewat `warnaDariMaster` supaya mengubah warna di Master Data
+   * langsung terlihat di mana-mana, bukan membeku di catatan rapat (#564/#590).
+   */
+  prioritas?: string | null;
 }
 
 interface PemilihJamakProps {
@@ -194,7 +202,14 @@ export const PemilihJamak: React.FC<PemilihJamakProps> = ({
               {terpilih.slice(0, CHIP_TERPAKAI).map((o) => (
                 <span
                   key={o.id}
-                  className="inline-flex items-center gap-1 max-w-full px-1.5 py-0.5 rounded-md text-[10px] leading-tight font-normal bg-primary/10 text-primary border border-primary/20"
+                  // #765 — chip yang punya warna dari master data memakainya
+                  // (`label-chip` menurunkan latar, garis, dan teks dari satu
+                  // hex — #564/#590); yang tidak punya tetap warna merek.
+                  className={cn(
+                    "inline-flex items-center gap-1 max-w-full px-1.5 py-0.5 rounded-md text-[10px] leading-tight font-normal break-words",
+                    o.warna ? "label-chip" : "bg-primary/10 text-primary border border-primary/20"
+                  )}
+                  style={o.warna ? gayaLabel(o.warna) : undefined}
                 >
                   <span className="break-words">{o.label}</span>
                   <X

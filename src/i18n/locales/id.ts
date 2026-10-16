@@ -1934,6 +1934,14 @@ export const id = {
     showingPoints: "Menampilkan {{shown}} dari {{filtered}} poin (Total: {{total}})",
     openThread: "Buka Utas Komentar & Balasan",
     toggleStatus: "Klik untuk ubah status Tertunda / Selesai",
+    /* #765 — kepala kolom yang bisa diurut (pesan alat bantu) dan popup satu
+       isian yang muncul ketika sebuah poin ditandai selesai. Placeholder kotak
+       catatannya memakai `notesPlaceholder` yang sudah ada — isian yang sama,
+       hanya entry point-nya yang baru. */
+    urutkan: "Urutkan kolom ini",
+    catatanSelesaiJudul: "Catatan saat menandai selesai",
+    catatanSelesaiJejak: "Tersimpan di kolom Catatan / Keterangan poin ini.",
+    simpanSelesai: "Simpan & tandai selesai",
     editRow: "Ubah",
     deleteRow: "Hapus",
     newConcernPlaceholder: "Ketik topik baru...",

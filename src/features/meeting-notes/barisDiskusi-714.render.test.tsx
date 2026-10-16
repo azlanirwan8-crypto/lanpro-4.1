@@ -23,6 +23,9 @@ jest.mock("react-i18next", () => ({
 }));
 
 const TIGA_PIC = ["Nabila Triana", "AZLAN IRWAN", "Mohamad Rifky Pramadanianto"];
+/* #765 — chip PIC kini butuh id orangnya (warna avatar diambil dari id), jadi
+   pasangan nama di atas dikirim berpasangan dengan id stabil u1..u3. */
+const TIGA_PIC_OBYEK = TIGA_PIC.map((nama, i) => ({ id: `u${i + 1}`, nama }));
 
 const titik = (lebih: Partial<DiscussionPoint> = {}): DiscussionPoint =>
   ({
@@ -51,11 +54,13 @@ const pasang = (p: Partial<DiscussionPoint> = {}) =>
           p={titik(p)}
           nomor="01"
           assigneeName="Belum ditugaskan"
-          namaPenerima={TIGA_PIC}
+          namaPenerima={TIGA_PIC_OBYEK}
           masterData={[]}
+          warnaTag={{}}
           jumlahKomentar={2}
           bolehSunting
           bolehHapus
+          bolehUbahStatus
           onOpenThread={() => {}}
           onEdit={() => {}}
           onDelete={() => {}}
@@ -127,11 +132,13 @@ describe("#714/#715 — baris data sembilan sel", () => {
             p={titik({ status: "completed" })}
             nomor="02"
             assigneeName="AZLAN IRWAN"
-            namaPenerima={["AZLAN IRWAN"]}
+            namaPenerima={[{ id: "u1", nama: "AZLAN IRWAN" }]}
             masterData={[]}
+            warnaTag={{}}
             jumlahKomentar={0}
             bolehSunting={false}
             bolehHapus={false}
+            bolehUbahStatus
             onOpenThread={() => {}}
             onEdit={() => {}}
             onDelete={() => {}}

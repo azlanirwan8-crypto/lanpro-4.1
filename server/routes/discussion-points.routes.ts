@@ -10,7 +10,6 @@ import { identitasPemanggil, identitasWajib } from "../middleware/identitas";
 import { discussionPointsRepository } from "../repositories/discussion-points.repository";
 import { matchesCaller } from "../services/task.service";
 import { validasiBody, validasiQuery } from "../middleware/validate";
-import { listSearchQuerySchema } from "../schemas/pagination.schema";
 import { respondWithProjectList } from "../lib/listResponse";
 import {
   createDiscussionPointSchema,
@@ -18,6 +17,7 @@ import {
   createCommentSchema,
   updateCommentSchema,
   buatBerkasDiskusiSchema,
+  daftarDiskusiQuerySchema,
 } from "../schemas/discussion-points.schema";
 
 const router = Router();
@@ -38,16 +38,26 @@ const penulisDari = (req: any) => ({
 router.get(
   "/api/projects/:projectId/meetings/:id/discussionPoints",
   jagaProyek("meetingNotes", "R"),
-  validasiQuery(listSearchQuerySchema),
+  validasiQuery(daftarDiskusiQuerySchema),
   async (req, res) => {
     try {
       const { id } = req.params;
       const search = req.query.search as string | undefined;
+      /* #765 — `sort`/`dir` diteruskan sebagai SATU objek urutan, bukan ditambahkan
+       * ke `PaginationParams`. Alasannya: `PaginationParams` dipakai bersama semua
+       * daftar di aplikasi ini (`server/lib/pagination.ts:14`), sementara kolom yang
+       * boleh diurut justru per-modul. Menyalakan sort server-side untuk papan lain
+       * nanti berarti menulis ulang daftar kolom papan itu di tempat yang salah. */
+      const urutan = {
+        sortir: req.query.sort as string | undefined,
+        arah: req.query.dir as string | undefined,
+      };
       await respondWithProjectList(
         res,
         req.query as Record<string, unknown>,
-        () => discussionPointsRepository.findByMeetingId(id, search),
-        (pagination) => discussionPointsRepository.findByMeetingIdPaged(id, pagination, search)
+        () => discussionPointsRepository.findByMeetingId(id, search, urutan),
+        (pagination) =>
+          discussionPointsRepository.findByMeetingIdPaged(id, pagination, search, urutan)
       );
     } catch (error: any) {
       console.error(error);

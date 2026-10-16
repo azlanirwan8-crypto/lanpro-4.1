@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { listSearchQuerySchema } from "./pagination.schema";
+import { DAFTAR_KOLOM_SORTIR } from "../lib/sortirDiskusi";
 
 /**
  * #703 (B1 = a) — satu tag = SATU isu nyata dari Daftar Isu.
@@ -125,4 +127,19 @@ export const buatBerkasDiskusiSchema = z.object({
   mimetype: z.string().max(100).optional().nullable(),
   size: z.number().int().min(0).max(20000000).optional().nullable(),
   url: z.string().max(2000).optional().nullable(),
+});
+
+/**
+ * #765 — query daftar titik diskusi: pagination + pencarian + pengurutan.
+ *
+ * `sort` adalah `z.enum` atas daftar yang sama dengan peta kolom repository
+ * (`server/lib/sortirDiskusi.ts`), bukan `z.string()`. Alasannya bukan kerapian:
+ * nilai ini nanti DITEMPEL ke `ORDER BY`, dan `ORDER BY` tidak bisa diparameter.
+ * Dengan enum, nilai asing ditolak 400 di gerbang validasi; repository tetap
+ * menjaga peta sebagai lapis kedua supaya jalur lain (impor, panggilan internal)
+ * tidak bisa melewati skema ini lalu menyuntik SQL.
+ */
+export const daftarDiskusiQuerySchema = listSearchQuerySchema.extend({
+  sort: z.enum(DAFTAR_KOLOM_SORTIR).optional(),
+  dir: z.enum(["asc", "desc"]).optional(),
 });

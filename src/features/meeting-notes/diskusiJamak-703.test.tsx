@@ -127,8 +127,10 @@ describe("#703 butir 3 — kolom Follow-up akhirnya tampil di tabel", () => {
     expect(sel).toContain('rel="noopener noreferrer"');
     expect(sel).toContain('loading="lazy"'); // miniatur gambar (#711)
     // Satu sel, satu wadah — bukan dua kolom yang pada papan ini keduanya
-    // hanya berisi "-".
-    expect(sel.match(/max-h-32 overflow-y-auto/g)).toHaveLength(1);
+    // hanya berisi "-". Yang dijaga di sini JUMLAH wadahnya; plafonnya ikut
+    // turun ke `max-h-16` pada #765 (lihat alasannya di `BarisDiskusi.tsx` dan
+    // penjaga ritmenya di `tataletakPapan-707.test.ts`).
+    expect(sel.match(/max-h-16 overflow-y-auto/g)).toHaveLength(1);
   });
 
   it("selnya memisahkan Follow-up dari Concern (#703: field ada, kolomnya tidak)", () => {

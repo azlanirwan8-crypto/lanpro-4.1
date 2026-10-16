@@ -38,7 +38,7 @@ const KECUALI = [/i18n[\\/]locales/, /\.test\./, /\.d\.ts$/, /__mocks__/, /[\\/]
 const KALIMAT = /[A-Za-zÀ-ÿ]{3,}[ .,!'’()-]+[A-Za-zÀ-ÿ]{2,}/;
 /** Bukan kalimat layar: kelas Tailwind, URL, id SVG, nama produk, kode warna. */
 const BUKAN_TEKS =
-  /^(w-|h-|p-|m-|px-|py-|text-|bg-|border|rounded|flex|grid|absolute|relative|hidden|opacity|shadow|z-|min-|max-|hover:|focus:|md:|sm:|lg:|xl:|url\(|#|rgba?\(|hsla?\(|var\(--|https?:|\/\/|\d|filter |transition |transform |scale-|ring-|line-clamp|duration-|ease-|top-|left-|right-|bottom-|inset|pointer-|select-|cursor-|overflow|whitespace|tracking-|leading-|font-|gap-|space-|items-|justify-|place-|animate-|group|list-|table-|inline|block |uppercase|capitalize|italic|underline|order-|col-|row-|self-|basis-|grow|shrink)/;
+  /^(w-|h-|p-|m-|px-|py-|text-|bg-|border|rounded|flex|grid|absolute|relative|hidden|opacity|shadow|z-|min-|max-|hover:|focus:|md:|sm:|lg:|xl:|url\(|#|rgba?\(|hsla?\(|var\(--|https?:|\/\/|\d|filter |transition |transform |scale-|ring-|line-clamp|duration-|ease-|top-|left-|right-|bottom-|inset|pointer-|select-|cursor-|overflow|whitespace|tracking-|leading-|font-|gap-|space-|items-|justify-|place-|animate-|group|list-|label-|table-|inline|block |uppercase|capitalize|italic|underline|order-|col-|row-|self-|basis-|grow|shrink)/;
 
 /** Kunci kamus yang ditulis sebagai string (`permModul.dashboardLabel`) bukan teks keras. */
 const KUNCI = /^[a-z][\w]*(\.[\w]+)+$/;

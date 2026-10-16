@@ -1920,6 +1920,13 @@ export const en = {
     showingPoints: "Showing {{shown}} of {{filtered}} points (Total: {{total}})",
     openThread: "Open Comment & Reply Thread",
     toggleStatus: "Click to toggle status Pending / Done",
+    /* #765 — tooltip kepala kolom yang bisa diurut, dan popup satu isian yang
+       muncul ketika sebuah poin ditandai selesai. Kotak catatannya memakai
+       `notesPlaceholder` yang sudah ada: isian yang sama, entry point berbeda. */
+    urutkan: "Sort by this column",
+    catatanSelesaiJudul: "Note when marking done",
+    catatanSelesaiJejak: "Saved into this point's Notes / Remarks column.",
+    simpanSelesai: "Save & mark done",
     editRow: "Edit",
     deleteRow: "Delete",
     newConcernPlaceholder: "Type a new concern...",

@@ -28,9 +28,15 @@ import { cn } from "../../../lib/utils";
  * dan tidak ada warna keras (§22).
  */
 
-const labelKelas =
-  "text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-normal";
 /**
+ * #765 — `labelKelas` dan `textareaKelas` DIEKSPOR, bukan disalin, karena popup
+ * catatan selesai memakai kontrol yang SAMA dengan laci ini atas permintaan
+ * pemilik proyek ("sama dengan yang ada di edit dan tambah data, bedanya hanya
+ * entry point"). Menyalin kelasnya berarti dua tempat yang boleh berbeda bentuk
+ * tanpa ada yang menyadarinya.
+ */
+export const labelKelas =
+  "text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-normal"; /**
  * #712 — SATU pita tinggi untuk seluruh laci ini, dan pita itu adalah pita yang
  * sama dengan baris tambah (`BarisCepat.tsx`): `h-11` (44 px), ambang sentuh yang
  * sudah dipakai `Input` (`CoreUI.tsx:142`) dan tombol tutup `Modal` (`:93`).
@@ -46,8 +52,18 @@ const labelKelas =
 const dasarIsian =
   "w-full min-w-0 px-3.5 bg-surface border border-border-subtle rounded-md text-xs font-normal text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 shadow-2xs";
 const isianKelas = `${dasarIsian} h-11`;
-const textareaKelas = `${dasarIsian} min-h-[80px] py-2 leading-relaxed`;
+export const textareaKelas = `${dasarIsian} min-h-[80px] py-2 leading-relaxed`;
 const tombolKelas = `${dasarIsian} min-h-11 text-left font-medium`;
+
+/**
+ * #765 — dua tombol kaki laci ikut diekspor karena popup catatan selesai memakai
+ * kaki yang SAMA. Yang dikunci di sini adalah ritmenya (`px-4 py-2`, `text-xs
+ * font-medium`, primer di kanan), bukan teksnya — teksnya beda karena aksinya beda.
+ */
+export const kakiBatalKelas =
+  "px-4 py-2 text-xs font-medium text-content-secondary hover:bg-surface-muted rounded-md border border-border-subtle bg-surface transition-all cursor-pointer shadow-2xs";
+export const kakiSimpanKelas =
+  "px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs disabled:opacity-50 cursor-pointer";
 
 interface FormDiskusiProps {
   form: Partial<DiscussionPoint>;
@@ -114,19 +130,10 @@ export const FormDiskusi: React.FC<FormDiskusiProps> = ({
       bodyClassName="space-y-4"
       footer={
         <>
-          <button
-            type="button"
-            onClick={onBatal}
-            className="px-4 py-2 text-xs font-medium text-content-secondary hover:bg-surface-muted rounded-md border border-border-subtle bg-surface transition-all cursor-pointer shadow-2xs"
-          >
+          <button type="button" onClick={onBatal} className={kakiBatalKelas}>
             {t("discussion.cancel")}
           </button>
-          <button
-            type="button"
-            onClick={onSave}
-            disabled={isSaving}
-            className="px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs disabled:opacity-50 cursor-pointer"
-          >
+          <button type="button" onClick={onSave} disabled={isSaving} className={kakiSimpanKelas}>
             {isSaving ? t("common.saving") : t("common.saveChanges2")}
           </button>
         </>

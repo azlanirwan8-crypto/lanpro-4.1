@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import React, { useState, useEffect } from "react";
-import io from "socket.io-client";
 import {
   getDiscussionPoints,
   createDiscussionPoint,
@@ -27,17 +26,19 @@ import { AiMeetingCompanion } from "./AiMeetingCompanion";
 import { KeadaanKosongDiskusi } from "./KeadaanKosongDiskusi";
 import { toast } from "sonner";
 import { hasPermission } from "../../lib/permissions";
-import {
-  suppressDiscussionPointsRefresh,
-  shouldSuppressDiscussionPointsRefresh,
-} from "../../lib/taskRefreshControl";
+import { suppressDiscussionPointsRefresh } from "../../lib/taskRefreshControl";
 import { KepalaPapan, KakiPapan, KepalaTabel } from "./components/BagianPapan";
 import { DiscussionPointMobileCardView } from "./components/DiscussionPointMobileCardView";
 import { FormDiskusi } from "./components/FormDiskusi";
 import { BarisDiskusi } from "./components/BarisDiskusi";
 import { BarisCepat, BlokCepatMobile, type NilaiCepat } from "./components/BarisCepat";
 import { LaciUtas } from "./components/LaciUtas";
+import { ModalCatatanSelesai } from "./components/ModalCatatanSelesai";
 import { useLampiranDiskusi } from "./lib/lampiran";
+import { useRealtimePapan } from "./lib/realtime";
+import { useWarnaTagIsu } from "./lib/warnaTag";
+import { paramSortir, useSortirPapan, type KolomSortir } from "./lib/sortir";
+import { useSelesaiCatatan } from "./lib/selesaiCatatan";
 import type { OpsiJamak } from "./components/PemilihJamak";
 import { useMobileAction } from "../../contexts/MobileActionContext";
 
@@ -111,30 +112,29 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
    * karena itulah yang sungguh dikirim ke server (#711). */
   const kosongKarenaCari = kueriTertunda.length > 0;
 
-  const handleToggleStatus = async (point: DiscussionPoint) => {
-    if (!point.id) return;
-    const nextStatus = point.status === "completed" ? "pending" : "completed";
-    try {
-      setPoints((prev) => prev.map((p) => (p.id === point.id ? { ...p, status: nextStatus } : p)));
-      await updateDiscussionPoint(
-        projectId,
-        meetingId,
-        point.id,
-        { status: nextStatus },
-        currentUser?.uid
-      );
-      showSuccessAlert(
-        t("alerts.successTitle"),
-        t("alerts.statusChanged", {
-          status:
-            nextStatus === "completed" ? t("discussion.statusDone") : t("discussion.statusPending"),
-        })
-      );
-    } catch (e: any) {
-      toast.error(t("toast.statusChangeFailed") + e.message);
-      fetchPoints();
-    }
+  /* #765 — dua keadaan baru papan ini tinggal di `lib/` karena berkasnya ada di
+   * batas 800 baris §4. `tekanStatus` satu pintu untuk pil desktop dan kartu HP:
+   * "selesai" membuka popup catatan, kembali ke "pending" tetap satu klik. */
+  const { setelan: sortir, ganti: gantiSortir } = useSortirPapan();
+  const sortirKepala = (kolom: KolomSortir) => {
+    setCurrentPage(1); // halaman yang terbuka tidak berisi hasil urutan baru (#711)
+    gantiSortir(kolom);
   };
+  const {
+    titik: titikSelesai,
+    catatan,
+    ubahCatatan,
+    mengirim: sedangMenyelesaikan,
+    tekanStatus,
+    simpan: simpanSelesai,
+    batal: batalSelesai,
+  } = useSelesaiCatatan({
+    projectId,
+    meetingId,
+    pengguna: currentUser,
+    setPoints,
+    muatUlang: () => void fetchPoints(),
+  });
 
   useEffect(() => {
     setCurrentPage(1);
@@ -152,7 +152,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
   useEffect(() => {
     fetchPoints();
-  }, [meetingId, projectId, currentPage, kueriTertunda, itemsPerPage]);
+  }, [meetingId, projectId, currentPage, kueriTertunda, itemsPerPage, sortir]);
 
   /* #711 — `projectMembers` tidak lagi ikut menentukan kapan papan dimuat. Ia
    * array dari induk, dan setiap render induk yang menyodorkan array baru
@@ -165,34 +165,10 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     }
   }, [projectId, projectMembers]);
 
-  useEffect(() => {
-    let socket: any;
-    try {
-      socket = io();
-      socket.on("error", (err: any) => {
-        console.warn("[SOCKET ERROR]", err);
-      });
-    } catch (err) {
-      console.error("[SOCKET FATAL]", err);
-    }
-
-    if (socket) {
-      socket.on("data_changed", (event: any) => {
-        if (shouldSuppressDiscussionPointsRefresh()) return;
-        // #322 — abaikan event proyek lain
-        if (event?.projectId && projectId && event.projectId !== projectId) return;
-        if (event.path?.includes("/discussionPoints") || event.path?.includes("/meetings")) {
-          fetchPoints();
-        }
-      });
-    }
-
-    return () => {
-      if (socket) {
-        socket.disconnect();
-      }
-    };
-  }, [meetingId, projectId]);
+  /* #765 — papan harus tahu sendiri kalau isinya berubah. Alasannya panjang dan
+   * ada di `lib/realtime.ts`: socket papan tidak pernah masuk ruangan proyek,
+   * jadi `data_changed` dari orang lain tidak pernah sampai. */
+  useRealtimePapan({ projectId, muatUlang: () => void fetchPoints() });
 
   const fetchUsers = async () => {
     try {
@@ -223,6 +199,8 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             .map((t: any) => ({
               id: String(t.id),
               label: String(t.title || t.summary || t.name || t.id),
+              // #765 — kodenya yang disimpan; hex dihitung di `lib/warnaTag.ts`.
+              prioritas: t.priority ? String(t.priority) : null,
             }))
         );
       } catch (error) {
@@ -445,6 +423,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
         page: currentPage,
         limit: itemsPerPage,
         search: kueriTertunda,
+        ...paramSortir(sortir),
       });
       const fetchedPoints = result.data as DiscussionPoint[];
       setPoints(fetchedPoints);
@@ -545,6 +524,26 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     }))
     .filter((o) => !!o.id && !!o.label);
 
+  /**
+   * #765 — izin per baris, satu aturan untuk pil desktop, kartu HP, dan popup
+   * catatan: status boleh diubah oleh yang boleh menyunting barisnya. Sebelumnya
+   * pil desktop tidak digerbangi sama sekali, sementara kartu HP memakai `canAdd`
+   * — izin membuat titik diskusi, bukan izin yang dibutuhkan.
+   */
+  const izinBaris = (point: DiscussionPoint, aksi: "update" | "delete") =>
+    hasPermission(
+      userRole,
+      "meetingNotes",
+      aksi,
+      point.authorId === (currentUser?.uid || ""),
+      permissions
+    );
+  const bolehSuntingBaris = (point: DiscussionPoint) => izinBaris(point, "update");
+  const bolehHapusBaris = (point: DiscussionPoint) => izinBaris(point, "delete");
+
+  /* #765 — chip Konteks/Tag ikut warna prioritas isu tertaut (lib/warnaTag.ts). */
+  const { warnaIsu, opsiTag } = useWarnaTagIsu(opsiIsu, masterData);
+
   return (
     <div className="bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden flex-1 flex flex-col min-h-0 font-sans text-left">
       {/* #703 — kepala dan kaki papan ikut keluar ke components/BagianPapan.tsx:
@@ -574,7 +573,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
           }}
           isSaving={isSaving}
           opsiPenerima={opsiPenerima}
-          opsiIsu={opsiIsu}
+          opsiIsu={opsiTag}
           masterData={masterData}
           onUnggah={unggahBerkas}
           onHapusBerkas={hapusBerkas}
@@ -608,7 +607,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                 onTambah={() => handleLiveQuickAdd()}
                 sedangMenyimpan={isSaving}
                 opsiPenerima={opsiPenerima}
-                opsiIsu={opsiIsu}
+                opsiIsu={opsiTag}
               />
             )}
             {paginatedPoints.length === 0 ? (
@@ -620,29 +619,14 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                 points={paginatedPoints}
                 projectMembers={projectMembers}
                 masterData={masterData}
+                warnaTag={warnaIsu}
                 onOpenThread={(point) => handleOpenThreadDrawer(point)}
                 onEditPoint={(point) => startEdit(point)}
                 onDeletePoint={(id) => handleDelete(id)}
-                onToggleStatus={(point) => handleToggleStatus(point)}
-                canEdit={(point) =>
-                  hasPermission(
-                    userRole,
-                    "meetingNotes",
-                    "update",
-                    point.authorId === (currentUser?.uid || ""),
-                    permissions
-                  )
-                }
-                canDelete={(point) =>
-                  hasPermission(
-                    userRole,
-                    "meetingNotes",
-                    "delete",
-                    point.authorId === (currentUser?.uid || ""),
-                    permissions
-                  )
-                }
-                canToggleStatus={canAdd}
+                onToggleStatus={(point) => tekanStatus(point)}
+                canEdit={bolehSuntingBaris}
+                canDelete={bolehHapusBaris}
+                canToggleStatus={bolehSuntingBaris}
                 currentUserId={currentUser?.uid}
               />
             )}
@@ -659,15 +643,15 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               #708 — `table-fixed`: lebar kolom dibaca dari kepala saja
               (`KepalaTabel`), bukan dari isi terpanjang, supaya satu catatan
               sepanjang paragraf tidak lagi menggeser seluruh papan. */}
-          {/* #714 — `min-w` harus PERSIS sama dengan jumlah lebar di
-              `KepalaTabel`; #715 menaikkan itu dari 1.468 ke 1.588 px ketika PIC
-              dan Target Date dipisah kembali ke kolomnya sendiri. Dengan
-              `table-fixed` dua angka yang berbeda berarti kolom melebar sendiri
-              atau tabel mulai terpotong lagi — dan `kepalaSelSejajar-715.test.ts`
-              kini menghitungnya, bukan mempercayainya. */}
+          {/* #714 — `min-w` harus PERSIS sama dengan jumlah lebar di `KepalaTabel`:
+              #715 menaikkan itu dari 1.468 ke 1.588 px, #765 ke 1.608 px karena
+              kolom TANGGAL TARGET kini memegang panah urutan di samping labelnya.
+              Dengan `table-fixed` dua angka yang berbeda berarti kolom melebar
+              sendiri atau tabel terpotong lagi — dan `kepalaSelSejajar-715.test.ts`
+              menghitungnya, bukan mempercayainya. */}
           <div className="hidden sm:block flex-1 min-h-0 overflow-auto">
-            <table className="w-full min-w-[1588px] table-fixed border-separate border-spacing-0 text-left text-xs">
-              <KepalaTabel />
+            <table className="w-full min-w-[1608px] table-fixed border-separate border-spacing-0 text-left text-xs">
+              <KepalaTabel sortir={sortir} onSortir={sortirKepala} />
               <tbody className="text-content-body">
                 {paginatedPoints.length === 0 ? (
                   <tr>
@@ -687,20 +671,16 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                         : p.assignTo || p.assignee_id
                           ? [String(p.assignTo || p.assignee_id)]
                           : [];
-                    const namaPenerima = idPenerima
-                      .map((id) => {
-                        const orang = projectMembers.find((m) => (m.uid || m.id) === id);
-                        return orang ? orang.displayName || orang.username || orang.name || id : id;
-                      })
-                      .filter(Boolean);
-                    const assigneeUser = projectMembers.find(
-                      (m) => (m.uid || m.id) === (p.assignTo || p.assignee_id)
-                    );
-                    const assigneeName = assigneeUser
-                      ? assigneeUser.displayName || assigneeUser.username
-                      : p.assignTo || t("newTask.unassigned");
-                    const isOwner = p.authorId === (currentUser?.uid || "");
-
+                    /* #765 — chip PIC butuh id orangnya: warna avatar diambil dari
+                       id (`getUserAvatarColors`), bukan dari namanya. */
+                    const namaPenerima = idPenerima.map((id) => {
+                      const orang = projectMembers.find((m) => (m.uid || m.id) === id);
+                      return {
+                        id,
+                        nama: orang?.displayName || orang?.username || orang?.name || id,
+                      };
+                    });
+                    const assigneeName = namaPenerima[0]?.nama || t("newTask.unassigned");
                     return (
                       <BarisDiskusi
                         key={p.id || index}
@@ -709,25 +689,15 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                         assigneeName={assigneeName}
                         namaPenerima={namaPenerima}
                         masterData={masterData}
+                        warnaTag={warnaIsu}
                         jumlahKomentar={p.commentsCount ?? 0}
-                        bolehSunting={hasPermission(
-                          userRole,
-                          "meetingNotes",
-                          "update",
-                          isOwner,
-                          permissions
-                        )}
-                        bolehHapus={hasPermission(
-                          userRole,
-                          "meetingNotes",
-                          "delete",
-                          isOwner,
-                          permissions
-                        )}
+                        bolehSunting={bolehSuntingBaris(p)}
+                        bolehUbahStatus={bolehSuntingBaris(p)}
+                        bolehHapus={bolehHapusBaris(p)}
                         onOpenThread={() => handleOpenThreadDrawer(p)}
                         onEdit={() => startEdit(p)}
                         onDelete={() => handleDelete(p.id!)}
-                        onToggleStatus={() => handleToggleStatus(p)}
+                        onToggleStatus={() => tekanStatus(p)}
                       />
                     );
                   })
@@ -748,7 +718,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               onTambah={() => handleLiveQuickAdd()}
               sedangMenyimpan={isSaving}
               opsiPenerima={opsiPenerima}
-              opsiIsu={opsiIsu}
+              opsiIsu={opsiTag}
             />
           )}
 
@@ -765,6 +735,19 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             onHalaman={setCurrentPage}
           />
         </div>
+      )}
+
+      {/* #765 — popup catatan selesai; hanya `status` dan `keterangan` yang
+          dituliskannya, keduanya lewat `useSelesaiCatatan`. */}
+      {titikSelesai && (
+        <ModalCatatanSelesai
+          concern={titikSelesai.concern}
+          catatan={catatan}
+          onCatatan={ubahCatatan}
+          onSimpan={() => void simpanSelesai()}
+          onBatal={batalSelesai}
+          mengirim={sedangMenyelesaikan}
+        />
       )}
 
       {/* #703 — laci utas pindah ke components/LaciUtas.tsx: induknya masih

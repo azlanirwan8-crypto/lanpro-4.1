@@ -13,6 +13,8 @@ import {
   Image as IkonGambar,
 } from "lucide-react";
 import { cn } from "../../../lib/utils";
+import { gayaLabel } from "../../../lib/warnaLabel";
+import { getUserAvatarColors } from "../../../components/ui/UserAvatar";
 import { DiscussionPoint, UserProfile, MasterData } from "../../../types";
 import { Paragraf } from "./Paragraf";
 
@@ -20,13 +22,20 @@ interface DiscussionPointMobileCardViewProps {
   points: DiscussionPoint[];
   projectMembers: UserProfile[];
   masterData: MasterData[];
+  /** #765 — id isu → hex prioritasnya (`lib/warnaTag.ts`). */
+  warnaTag: Record<string, string>;
   onOpenThread: (point: DiscussionPoint) => void;
   onEditPoint: (point: DiscussionPoint) => void;
   onDeletePoint: (id: string) => void;
   onToggleStatus: (point: DiscussionPoint) => void;
   canEdit: (point: DiscussionPoint) => boolean;
   canDelete: (point: DiscussionPoint) => boolean;
-  canToggleStatus: boolean;
+  /**
+   * #765 — dulu `boolean` untuk seluruh kartu, dan induk menyodorkan `canAdd`
+   * (izin MEMBUAT titik diskusi). Sekarang predikat per baris dengan izin yang
+   * sama dengan pil desktop: orang yang boleh menyunting barisnya.
+   */
+  canToggleStatus: (point: DiscussionPoint) => boolean;
   currentUserId?: string;
 }
 
@@ -34,6 +43,7 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
   points,
   projectMembers,
   masterData,
+  warnaTag,
   onOpenThread,
   onEditPoint,
   onDeletePoint,
@@ -52,6 +62,7 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
     <div className="sm:hidden flex flex-col divide-y divide-border-subtle/60 pb-16">
       {points.map((p, index) => {
         const isCompleted = p.status === "completed";
+        const bolehStatus = canToggleStatus(p);
         const assigneeUser = projectMembers.find(
           (m) => (m.uid || m.id) === (p.assignTo || p.assignee_id)
         );
@@ -67,12 +78,12 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
             : p.assignTo || p.assignee_id
               ? [String(p.assignTo || p.assignee_id)]
               : [];
-        const namaPenerima = idPenerima
-          .map((id) => {
-            const orang = projectMembers.find((m) => (m.uid || m.id) === id);
-            return orang ? orang.displayName || orang.name || orang.username || id : id;
-          })
-          .filter(Boolean);
+        /* #765 — id ikut di bawaan chip: warna seorang orang diambil dari id-nya
+           (`getUserAvatarColors`), sama seperti avatarnya di seluruh aplikasi. */
+        const namaPenerima = idPenerima.map((id) => {
+          const orang = projectMembers.find((m) => (m.uid || m.id) === id);
+          return { id, nama: orang?.displayName || orang?.name || orang?.username || id };
+        });
         const tag = Array.isArray(p.tags) ? p.tags : [];
         const tautan = Array.isArray(p.links) ? p.links : [];
         const berkas = Array.isArray(p.files) ? p.files : [];
@@ -113,16 +124,16 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                 {/* Status Badge */}
                 <button
                   type="button"
-                  onClick={() => canToggleStatus && onToggleStatus(p)}
-                  disabled={!canToggleStatus}
+                  onClick={() => bolehStatus && onToggleStatus(p)}
+                  disabled={!bolehStatus}
                   className={cn(
                     "text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center gap-1 transition-all",
                     isCompleted
                       ? "bg-success/10 text-success-text border border-success/30 hover:bg-success/15"
                       : "bg-warning/10 text-warning-text border border-warning/30 hover:bg-warning/15",
-                    !canToggleStatus && "cursor-default"
+                    !bolehStatus && "cursor-default"
                   )}
-                  title={canToggleStatus ? t("discussion.toggleStatus") : undefined}
+                  title={bolehStatus ? t("discussion.toggleStatus") : undefined}
                 >
                   {isCompleted ? (
                     <CheckCircle2 className="w-3 h-3 text-success-text shrink-0" />
@@ -182,7 +193,7 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                   sama tidak boleh memberi meaning berbeda (#645). Pil status di
                   kepala kartu sudah menyatakan selesai, dan coretan pada teks
                   concern justru dibaca "dibatalkan", bukan "sudah beres". */}
-              <p className="text-xs font-semibold text-content-strong leading-relaxed">
+              <p className="text-xs font-semibold text-content-strong leading-relaxed text-justify">
                 {p.concern}
               </p>
             </div>
@@ -193,7 +204,7 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                 <span className="text-[10px] font-normal uppercase tracking-normal text-content-subtle block mb-0.5">
                   {t("discussion.thNotes")}
                 </span>
-                <div className="whitespace-pre-wrap">
+                <div className="whitespace-pre-wrap text-justify">
                   <Paragraf teks={p.keterangan} />
                 </div>
               </div>
@@ -206,7 +217,7 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                 <span className="text-[10px] font-normal uppercase tracking-normal text-content-subtle block mb-0.5">
                   {t("discussion.followUp")}
                 </span>
-                <div className="whitespace-pre-wrap break-words">
+                <div className="whitespace-pre-wrap break-words text-justify">
                   <Paragraf teks={p.tindakanLanjut} />
                 </div>
               </div>
@@ -219,7 +230,13 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                 {tag.map((s) => (
                   <span
                     key={s.id}
-                    className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 whitespace-normal break-words"
+                    // #765 — sama seperti papan: chip isu ikut warna prioritas
+                    // isu tertaut (#564/#590), bukan warna merek.
+                    className={cn(
+                      "inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md border whitespace-normal break-words",
+                      warnaTag[s.id] ? "label-chip" : "bg-primary/10 text-primary border-primary/20"
+                    )}
+                    style={warnaTag[s.id] ? gayaLabel(warnaTag[s.id]) : undefined}
                   >
                     <Tag className="w-3 h-3 shrink-0" />
                     {s.label}
@@ -243,11 +260,28 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                 {/* PIC — #703: boleh lebih dari satu orang. */}
                 <div className="flex flex-wrap items-center gap-1 text-[11px] text-content-body min-w-0">
                   <User className="w-3 h-3 text-content-subtle shrink-0" />
-                  {(namaPenerima.length > 0 ? namaPenerima : [assigneeName]).map((nama) => (
-                    <span key={nama} className="break-words">
-                      {nama}
-                    </span>
-                  ))}
+                  {namaPenerima.length > 0 ? (
+                    namaPenerima.map(({ id, nama }) => {
+                      const warna = getUserAvatarColors(id);
+                      return (
+                        <span
+                          key={id}
+                          className={cn(
+                            "px-1.5 py-0.5 rounded-md text-[10px] font-normal border break-words",
+                            warna.bg,
+                            warna.text,
+                            warna.border
+                          )}
+                        >
+                          {nama}
+                        </span>
+                      );
+                    })
+                  ) : (
+                    /* #645 — tanpa PIC, teksnya tetap utuh dan tidak berwarna:
+                         "Belum ditugaskan" bukan milik siapa pun. */
+                    <span className="break-words">{assigneeName}</span>
+                  )}
                 </div>
 
                 {/* Target Date */}

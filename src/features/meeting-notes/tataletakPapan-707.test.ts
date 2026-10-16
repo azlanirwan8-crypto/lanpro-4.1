@@ -117,7 +117,13 @@ describe("#708 — sel teks tidak lagi memanjang tanpa batas", () => {
   ])("sel %s dibatasi TINGGINYA, bukan isinya", (ekspresi, _nama) => {
     const pembungkusSel = pembungkus(baca(BARIS), ekspresi);
     expect(pembungkusSel).toContain("whitespace-pre-wrap");
-    expect(pembungkusSel).toContain("max-h-32");
+    /* #765 — plafonnya turun dari `max-h-32` (128 px) ke `max-h-16` (64 px):
+     * yang dijaga test ini adalah PRINSIPNYA (tinggi dibatasi, isi digulir, tidak
+     * ada yang dipotong), bukan angkanya. Angka lama membuat satu baris tabel
+     * ±118 px sehingga hanya tiga baris yang muat di layar — pemilik proyek
+     * meminta empat. Kalau angka ini berubah lagi, ubah keduanya bersama-sama:
+     * penjaga ini dan selnya, jangan salah satu saja. */
+    expect(pembungkusSel).toContain("max-h-16");
     expect(pembungkusSel).toContain("overflow-y-auto");
     // Janji #645 tidak dicabut di sini: tidak ada satu pun bentuk pemotongan.
     expect(pembungkusSel).not.toContain("line-clamp");

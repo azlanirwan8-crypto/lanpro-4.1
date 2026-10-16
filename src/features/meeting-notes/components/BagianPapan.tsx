@@ -1,15 +1,18 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import {
+  ArrowDown,
   ArrowLeft,
+  ArrowUpDown,
+  ArrowUp,
   ChevronLeft,
   ChevronRight,
-  MessageSquare,
   Search,
   Sparkles,
 } from "lucide-react";
 import { ListPerPageSelect } from "../../../components/ui/ListPerPageSelect";
 import { cn } from "../../../lib/utils";
+import type { ArahSortir, KolomSortir, SetelanSortir } from "../lib/sortir";
 
 /**
  * #703 — kepala (cari + tombol asisten AI) dan kaki (paginasi) papan diskusi,
@@ -176,24 +179,112 @@ export const SEL =
  * py-3` — huruf lebih besar dan baris lebih gemuk daripada tabel mana pun lain
  * di aplikasi yang sama, dan itu bagian dari "tidak Velzon".
  *
- * Jumlahnya jadi sembilan kolom: 48, 220, 190, 200, 220, 200, 150, 130, 230 =
- * 1.588 px. `min-w` wadah gulir WAJIB sama dengan jumlah ini; test menguncinya.
+ * Jumlahnya jadi sembilan kolom: 48, 220, 190, 200, 220, 200, 170, 130, 230 =
+ * 1.608 px. `min-w` wadah gulir WAJIB sama dengan jumlah ini; test menguncinya.
+ * (170 bukan 150 sejak #765 — lihat catatan di kolom TANGGAL TARGET.)
+ *
+ * #765 — enam dari sembilan kepala bisa ditekan untuk URUT (No./`createdAt`,
+ * Concern, Notes, Follow-up, Target Date, Status). Yang tidak: Context/Tags, PIC,
+ * dan Lampiran — ketiganya datang dari tabel relasi atau kolom `JSONB` (`tags`,
+ * `links`, `discussion_point_assignees`), jadi tidak ada satu nilai pun di
+ * Database yang bisa dipakai `ORDER BY`; menaruh panah di sana akan menjanjikan
+ * urutan yang tidak bisa ditunaikan server.
+ *
+ * YANG SENGAJA TIDAK DIUBAH: lebar kolom dan kelas kepala. Test
+ * `kepalaSelSejajar-715.test.ts` menjumlahkan lebar itu dan membandingkannya
+ * dengan `min-w` wadah, dan `tataletakPapan-707.test.ts` membaca blok kelas
+ * kepala lewat penanda deklarasinya sendiri — karena itu komentar di berkas ini
+ * TIDAK BOLEH mengulang penanda itu apa adanya, persis pelajaran yang sudah
+ * ditulis di kepala `BarisDiskusi.tsx`: komentar yang menyebut marker membuat
+ * `indexOf` test menemukannya lebih dulu daripada kodenya, dan penjaganya jatuh
+ * untuk alasan yang bukan cacat. Yang dijaga di sini: kepala tetap seukuran
+ * kit rumah (10 px, jarak vertikal 2.5) tanpa latar tembus. Karena itu ruang
+ * panah dicari dari dalam, bukan dari lebar: tombolnya `flex` penuh di dalam
+ * `px-4` kepala, label "Topik" (±60 px) dan "Catatan / Keterangan" masih punya
+ * sisa panjang di kolomnya masing-masing, dan panah kecil tidak menyentuh
+ * pemisah kolom.
  */
-export const KepalaTabel: React.FC = () => {
+interface KepalaTabelProps {
+  sortir: SetelanSortir;
+  onSortir: (kolom: KolomSortir) => void;
+}
+
+/**
+ * `aria-sort` wajib di sel kepala, bukan di tombolnya: yang membaca layar
+ * perlu tahu kolom mana sedang jadi acuan dan ke mana arahnya, dan itu sifat
+ * KOLOM. Nilai `none` tetap ditulis untuk kolom yang tidak diurut supaya
+ * pembaca tahu kolom itu bisa ditekan tetapi sedang diam.
+ */
+const ariaSortir = (kolom: KolomSortir, setelan: SetelanSortir) =>
+  setelan.kolom !== kolom ? "none" : setelan.arah === "asc" ? "ascending" : "descending";
+
+export const KepalaTabel: React.FC<KepalaTabelProps> = ({ sortir, onSortir }) => {
   const { t } = useTranslation();
+  /* `aria` pendek bukan kosmetik: ada test yang MENGHITUNG tag pembuka sel
+     kepala tabel — `kepalaSelSejajar-715.test.ts` memotongnya lewat pola
+     berpemisah spasi, `diskusiJamak-703.test.tsx` memindai seluruh berkas, dan
+     `tataletakPapan-707.test.ts` membaca angkanya lewat kelas lebar. Kalau satu
+     tag kepala terpecah ke baris berikutnya karena panjang, jumlah yang terbaca
+     test jadi kurang dan papannya dianggap kehilangan kolom. Karena itu pula
+     komentar ini tidak boleh menulis tag itu secara harfiah. */
+  const aria = (kolom: KolomSortir) => ariaSortir(kolom, sortir);
+  /**
+   * Ikon penanda urutan — SELALU terlihat (pemilik proyek 16 Okt: "header table
+   * harus ada desc, asc"). Versi pertama menyembunyikannya sampai hover, dan di
+   * layar itu sama dengan tidak ada sama sekali.
+   *
+   * Yang aktif memakai dua sinyal sekaligus supaya tidak bergantung pada warna:
+   * panah menunjuk arah (naik atau turun) dan bewarna primer. Yang diam memakai
+   * panah dua arah `ArrowUpDown` dengan opasitas 45 % — terbaca sebagai "kolom ini
+   * bisa ditekan" tanpa bersaing dengan enam kepala yang sedang tidak dipakai.
+   */
+  const ikon = (kolom: KolomSortir) => {
+    if (sortir.kolom !== kolom)
+      return (
+        <ArrowUpDown
+          className="w-3 h-3 shrink-0 opacity-45 text-content-subtle"
+          aria-hidden="true"
+        />
+      );
+    return sortir.arah === "asc" ? (
+      <ArrowUp className="w-3 h-3 shrink-0 text-primary" aria-hidden="true" />
+    ) : (
+      <ArrowDown className="w-3 h-3 shrink-0 text-primary" aria-hidden="true" />
+    );
+  };
+  const tombol =
+    "group flex w-full items-center gap-1 cursor-pointer text-left text-content-subtle hover:text-content-body transition-colors";
   const th =
     "sticky top-0 z-30 bg-surface-sunken px-4 py-2.5 text-[10px] font-normal text-content-subtle whitespace-nowrap border-b border-b-border-subtle border-r border-r-border-faint last:border-r-0";
   return (
     <thead>
       <tr className="text-content-subtle">
-        <th scope="col" className={`${th} w-[48px] text-center`}>
-          {t("discussion.thNo")}
+        <th scope="col" aria-sort={aria("createdAt")} className={`${th} w-[48px]`}>
+          <button
+            type="button"
+            onClick={() => onSortir("createdAt")}
+            title={t("discussion.urutkan")}
+            className={`${tombol} justify-center`}
+          >
+            {t("discussion.thNo")}
+            {ikon("createdAt")}
+          </button>
         </th>
-        <th scope="col" className={`${th} w-[220px]`}>
-          {t("discussion.thConcern")}
+        <th scope="col" aria-sort={aria("concern")} className={`${th} w-[220px]`}>
+          <button type="button" onClick={() => onSortir("concern")} title={t("discussion.urutkan")}>
+            {t("discussion.thConcern")}
+            {ikon("concern")}
+          </button>
         </th>
-        <th scope="col" className={`${th} w-[190px]`}>
-          {t("discussion.thNotes")}
+        <th scope="col" aria-sort={aria("keterangan")} className={`${th} w-[190px]`}>
+          <button
+            type="button"
+            onClick={() => onSortir("keterangan")}
+            title={t("discussion.urutkan")}
+          >
+            {t("discussion.thNotes")}
+            {ikon("keterangan")}
+          </button>
         </th>
         {/* URUTAN INI yang salah di #714: tag dulu, baru follow-up — persis
             seperti urutan sel di `BarisDiskusi`. */}
@@ -202,8 +293,15 @@ export const KepalaTabel: React.FC = () => {
         </th>
         {/* #703 butir 3 — Follow-up selama ini ADA di form dan ADA di basis
             data, tetapi tidak pernah punya kolom. */}
-        <th scope="col" className={`${th} w-[220px]`}>
-          {t("discussion.followUp")}
+        <th scope="col" aria-sort={aria("tindakanLanjut")} className={`${th} w-[220px]`}>
+          <button
+            type="button"
+            onClick={() => onSortir("tindakanLanjut")}
+            title={t("discussion.urutkan")}
+          >
+            {t("discussion.followUp")}
+            {ikon("tindakanLanjut")}
+          </button>
         </th>
         <th scope="col" className={`${th} w-[200px]`}>
           {t("discussion.thPic")}
@@ -213,9 +311,19 @@ export const KepalaTabel: React.FC = () => {
             (`index.css:595`), dan "TANGGAL TARGET" — label terpanjang yang bisa
             duduk di kolom ini — adalah 14 karakter × ±7 px + `px-4` = ±130 px.
             Kepalanya persis menyentuh tepi, `whitespace-nowrap`, dan satu
-            pixel bahasa lain langsung luber ke pemisah kolom. */}
-        <th scope="col" className={`${th} w-[150px]`}>
-          {t("discussion.thTargetDate")}
+            pixel bahasa lain langsung luber ke pemisah kolom. #765 menambahkan
+            panah ±16 px di kolom ini, jadi lebarnya 150 → 170 dan `min-w`
+            wadah ikut naik; itu BUKAN pilihan gaya, melainkan angka yang sama
+            yang dihitung `kepalaSelSejajar-715.test.ts`. */}
+        <th scope="col" aria-sort={aria("targetDate")} className={`${th} w-[170px]`}>
+          <button
+            type="button"
+            onClick={() => onSortir("targetDate")}
+            title={t("discussion.urutkan")}
+          >
+            {t("discussion.thTargetDate")}
+            {ikon("targetDate")}
+          </button>
         </th>
         {/* #704 butir 5 dan 6: tautan dan gambar satu sel "Lampiran". Isinya
             tetap tampil penuh, bukan angka. */}
@@ -229,8 +337,16 @@ export const KepalaTabel: React.FC = () => {
             persis tinggi baris yang membuat papan dibaca berantakan. Ruang diambil
             dari Concern dan Follow-up, dua-duanya kolom teks yang sudah punya
             gulir sendiri dan tidak kehilangan satu karakter pun. */}
-        <th scope="col" className={`${th} w-[230px] text-right`}>
-          {t("discussion.thStatusAksi")}
+        <th scope="col" aria-sort={aria("status")} className={`${th} w-[230px] text-right`}>
+          <button
+            type="button"
+            onClick={() => onSortir("status")}
+            title={t("discussion.urutkan")}
+            className={`${tombol} justify-end`}
+          >
+            {t("discussion.thStatusAksi")}
+            {ikon("status")}
+          </button>
         </th>
       </tr>
     </thead>

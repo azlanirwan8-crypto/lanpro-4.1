@@ -59,13 +59,20 @@ export const getDiscussionPoints = async (
   projectId: string,
   meetingId: string,
   userId?: string,
-  options?: { page?: number; limit?: number; search?: string }
+  /**
+   * #765 — `sort`/`dir` adalah nama kolom dan arah yang SUDAH dibatasi di server
+   * (`server/lib/sortirDiskusi.ts`); di sini keduanya string biasa karena papan
+   * hanya mengirim nilai yang datang dari kepala kolomnya sendiri.
+   */
+  options?: { page?: number; limit?: number; search?: string; sort?: string; dir?: string }
 ) => {
   try {
     const params = new URLSearchParams();
     if (options?.page !== undefined) params.set("page", String(options.page));
     if (options?.limit !== undefined) params.set("limit", String(options.limit));
     if (options?.search?.trim()) params.set("search", options.search.trim());
+    if (options?.sort) params.set("sort", options.sort);
+    if (options?.dir) params.set("dir", options.dir);
     const qs = params.toString();
     const data = await apiRequest(
       `/api/projects/${projectId}/meetings/${meetingId}/discussionPoints${qs ? `?${qs}` : ""}`,
