@@ -85,6 +85,17 @@ const PAPAN = [
         width: 200,
         height: 100,
       },
+      // Sasaran retarget yang jelas berbeda: jauh di bawah, pusatnya (400,450).
+      {
+        id: "a2",
+        type: "rect",
+        x: 300,
+        y: 400,
+        label: "Tiga",
+        color: "green",
+        width: 200,
+        height: 100,
+      },
     ],
     edges: [{ id: "e0", fromNodeId: "a0", toNodeId: "a1" }],
     theme: "miro",
@@ -423,6 +434,62 @@ describe("#759 gagang putar draw.io", () => {
     // karena 0 juga kelipatan 15.
     expect(hasil).not.toBe(0);
     expect(hasil % 15).toBe(0);
+  });
+});
+
+describe("#759 ujung panah bisa digenggam dan dipindahkan", () => {
+  const gagangUjung = (container: HTMLElement, ujung: string) =>
+    container.querySelector(`[data-ujung-garis="${ujung}"]`) as SVGGElement;
+
+  it("garis terpilih memasang dua gagang ujung", async () => {
+    const { container } = renderView();
+    await masukKanvas(container);
+    fireEvent.click(
+      container.querySelector('[data-edge-id="e0"] path[stroke="transparent"]') as SVGElement
+    );
+    expect(gagangUjung(container, "awal")).toBeTruthy();
+    expect(gagangUjung(container, "akhir")).toBeTruthy();
+  });
+
+  it("melepas gagang akhir di bentuk lain memindah sasarannya", async () => {
+    const { container } = renderView();
+    await masukKanvas(container);
+    const jalur = () =>
+      (
+        container.querySelector('[data-edge-id="e0"] path[stroke="transparent"]') as SVGPathElement
+      ).getAttribute("d") || "";
+    fireEvent.click(
+      container.querySelector('[data-edge-id="e0"] path[stroke="transparent"]') as SVGElement
+    );
+    const sebelum = jalur();
+    expect(sebelum).toContain("150");
+
+    // a2 duduk jauh di bawah (pusat 400,450). Kalau gagang akhir benar-benar
+    // dipindah ke sana, ujung garis tidak lagi berada di tinggi a0/a1 (y=150).
+    fireEvent.mouseDown(gagangUjung(container, "akhir"), { clientX: 500, clientY: 150 });
+    fireEvent.mouseMove(window, { clientX: 400, clientY: 450 });
+    fireEvent.mouseUp(window, { clientX: 400, clientY: 450 });
+
+    const sesudah = jalur();
+    expect(sesudah).not.toBe(sebelum);
+    expect(parseFloat(sesudah.split(" ").pop() || "0")).toBeGreaterThan(300);
+  });
+
+  it("melepas di tempat kosong TIDAK membuang garisnya", async () => {
+    const { container } = renderView();
+    await masukKanvas(container);
+    const sebelum = container.querySelectorAll("[data-edge-id]").length;
+    fireEvent.click(
+      container.querySelector('[data-edge-id="e0"] path[stroke="transparent"]') as SVGElement
+    );
+
+    fireEvent.mouseDown(gagangUjung(container, "akhir"), { clientX: 500, clientY: 150 });
+    fireEvent.mouseMove(window, { clientX: 1200, clientY: 900 });
+    fireEvent.mouseUp(window, { clientX: 1200, clientY: 900 });
+
+    // Membuang garis karena jari meleset adalah kerusakan yang lebih besar
+    // daripada tidak memindahkan apa pun.
+    expect(container.querySelectorAll("[data-edge-id]").length).toBe(sebelum);
   });
 });
 

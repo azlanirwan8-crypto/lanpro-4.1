@@ -101,7 +101,7 @@ describe("#759 angka flow vs draw.io", () => {
     // drawio 90%". Dikunci sebagai syarat lulus, jadi kemunduran interaksi apa
     // pun — hilang satu gagang, hilang satu pintasan — membuat papan merah
     // alih-alih diam-diam turun ke 88%.
-    expect(terpenuhi).toBe(45);
+    expect(terpenuhi).toBe(46);
     expect(skor).toBeGreaterThanOrEqual(90);
   });
 

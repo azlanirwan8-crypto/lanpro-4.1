@@ -271,6 +271,16 @@ interface FlowchartEdgesProps {
   koordinatPapan: (clientX: number, clientY: number) => { x: number; y: number } | null;
   /** Putuskan sambungan garis terpilih. Kosong = tombol putuskan tak dipakai. */
   onDeleteEdge?: () => void;
+  /**
+   * #759 — memulai genggaman pada salah satu ujung garis supaya bisa dipindah
+   * ke bentuk lain, seperti draw.io. Dipanggil dengan koordinat klien supaya
+   * garis bantu langsung lahir di bawah jari, bukan di pusat bentuk sasaran.
+   */
+  mulaiUbahUjung?: (
+    edgeId: string,
+    ujung: "awal" | "akhir",
+    e?: { clientX: number; clientY: number }
+  ) => void;
   /** Papan boleh diubah; bilah gaya tidak muncul untuk pembaca saja. */
   isEditable: boolean;
   /** Titik tengah sebuah node; tinggal di container karena membaca state nodes. */
@@ -300,6 +310,7 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
   onEdgePatch,
   koordinatPapan,
   onDeleteEdge,
+  mulaiUbahUjung,
   isEditable,
   getNodeCenter,
   draggingNodeId,
@@ -721,6 +732,45 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                   setConnectSourceId(null);
                 }}
               />
+
+              {/* #759 — gagang ujung garis. draw.io memperlakukan ujung panah
+                  sebagai benda yang bisa digenggam dan dipindahkan ke bentuk
+                  lain; sebelum ini satu-satunya jalan adalah menghapus garis lalu
+                  menyambung ulang, yang membuang tekukan dan gaya yang sudah
+                  diatur. Dua persegi kecil ini hanya muncul untuk garis terpilih,
+                  supaya kanvas tidak berubah jadi hutan gagang. */}
+              {isSelected && mulaiUbahUjung && (
+                <>
+                  {(
+                    [
+                      ["awal", start],
+                      ["akhir", end],
+                    ] as const
+                  ).map(([ujung, titik]) => (
+                    <g
+                      key={ujung}
+                      data-ujung-garis={ujung}
+                      className="cursor-move"
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        mulaiUbahUjung(edge.id, ujung, { clientX: e.clientX, clientY: e.clientY });
+                      }}
+                    >
+                      <rect
+                        x={titik.x - 7}
+                        y={titik.y - 7}
+                        width="14"
+                        height="14"
+                        fill="var(--color-surface, #fff)"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        className="text-violet-600"
+                      />
+                    </g>
+                  ))}
+                </>
+              )}
 
               {/* #630 — seleksi/hover ditandai satu halo tipis STATIS, bukan pendar 8 px yang berdenyut selamanya. */}
               {(isHovered || isSelected) && (

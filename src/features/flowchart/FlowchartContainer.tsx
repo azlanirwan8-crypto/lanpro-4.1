@@ -584,6 +584,24 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const awalSeretSambung = useRef<{ x: number; y: number } | null>(null);
 
   /**
+   * #759 — ujung garis yang SEDANG diseret untuk dipindahkan ke bentuk lain.
+   *
+   * draw.io memperlakukan ujung panah sebagai gagang: ambil, lepas di bentuk
+   * lain, garisnya ikut. Papan ini belum pernah punya jalur itu sama sekali,
+   * jadi satu-satunya cara mengganti sasaran adalah menghapus garis lalu
+   * menyambung ulang — dan itu membuang tekukan serta gaya yang sudah diatur.
+   *
+   * Genggamannya sengaja MEMAKAI ULANG efek `seretSambung` di bawah, bukan
+   * efek kembar: garis bantu yang mengikuti kursor, throttle satu frame, dan
+   * pembatalan saat dilepas di tempat kosong sudah dibuktikan di sana. Yang
+   * berbeda hanya apa yang dilakukan saat lepas — menambal satu ujung, bukan
+   * membuat garis baru.
+   */
+  const [ujingSeret, setUjingSeret] = useState<null | { edgeId: string; ujung: "awal" | "akhir" }>(
+    null
+  );
+
+  /**
    * #599 — satu sumber kebenaran untuk "jari/papan ketik sedang menggerakkan
    * sesuatu di kanvas". Tiga pemakai: pendengar mousemove global (ia pemilik
    * pergerakan selama interaksi, jadi div kanvas tidak boleh menjalankan handler
@@ -600,6 +618,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     // apa-apa" di browser dan test DOM menangkapnya karena ia mengirim
     // mousemove ke jendela, seperti yang dilakukan orang.
     putarAktif !== null ||
+    // #759 — sama seperti state putar: kalau ini tidak ikut dihitung, listener
+    // gerak jendela tidak pernah terpasang dan menyeret ujung garis tidak
+    // melakukan apa-apa. Kelas bug yang sama, dua kali.
+    ujingSeret !== null ||
     isPanning ||
     marqueeBox !== null;
 
@@ -3770,6 +3792,42 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     return null;
   };
 
+  /**
+   * #759 — memulai genggaman pada salah satu ujung garis.
+   *
+   * Sisi yang TIDAK digenggam dipasang sebagai `connectSourceId`, supaya garis
+   * bantu yang sudah ada (yang tarik-sambung biasa pakai) ikut bergerak dari
+   * sisi tetap ke kursor. Efek `seretSambung` di bawah yang menyelesaikan
+   * lepasnya; di sini hanya keadaan genggaman yang disiapkan.
+   */
+  const mulaiUbahUjung = (
+    edgeId: string,
+    ujung: "awal" | "akhir",
+    e?: { clientX: number; clientY: number }
+  ) => {
+    if (!isWorkspaceEditable) return;
+    const garis = edges.find((x) => x.id === edgeId);
+    if (!garis) return;
+    const tetap = ujung === "akhir" ? garis.fromNodeId : garis.toNodeId;
+    const bergerak = ujung === "akhir" ? garis.toNodeId : garis.fromNodeId;
+    if (!tetap || !bergerak) return;
+
+    setSelectedEdgeId(edgeId);
+    setSelectedNodeId(null);
+    setConnectSourceId(tetap);
+    setUjingSeret({ edgeId, ujung });
+    const rect = canvasContainerRef.current?.getBoundingClientRect();
+    if (e && rect) {
+      setHoverCoords({
+        x: Math.round((e.clientX - rect.left - panOffset.x) / zoomLevel),
+        y: Math.round((e.clientY - rect.top - panOffset.y) / zoomLevel),
+      });
+    } else {
+      setHoverCoords(getNodeCenter(bergerak));
+    }
+    awalSeretSambung.current = getNodeCenter(bergerak);
+  };
+
   const handleConnectClick = (nodeId: string) => {
     if (!connectSourceId) {
       setConnectSourceId(nodeId);
@@ -3806,7 +3864,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
    * memicu render seluruh papan — persis keluhan "tidak responsif" yang dilaporkan.
    */
   useEffect(() => {
-    if (!seretSambung) return;
+    if (!seretSambung && !ujingSeret) return;
 
     let raf = 0;
     let berikut: { x: number; y: number } | null = null;
@@ -3832,7 +3890,37 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     const onUp = (e: MouseEvent) => {
       const titik = papanDari(e.clientX, e.clientY);
       const target = titik ? bentukDiTitik(titik.x, titik.y) : null;
-      if (target && target !== seretSambung) {
+
+      // #759 — genggaman ujung: satu sisi garis yang dipindahkan, sisi lainnya
+      // tetap menjadi sumber garis bantu.
+      if (ujingSeret) {
+        const garis = edges.find((x) => x.id === ujingSeret.edgeId);
+        const tetap = ujingSeret.ujung === "akhir" ? garis?.fromNodeId : garis?.toNodeId;
+        if (garis && target && target !== tetap) {
+          const nextEdges = edges.map((x) =>
+            x.id === garis.id
+              ? { ...x, [ujingSeret.ujung === "akhir" ? "toNodeId" : "fromNodeId"]: target }
+              : x
+          );
+          setEdges(nextEdges);
+          recordHistory(nodes, nextEdges);
+          setConnectSourceId(null);
+          setUjingSeret(null);
+          awalSeretSambung.current = null;
+          setSeretSambung(null);
+          return;
+        }
+        // Dilepas di kosong atau di bentuk yang sama: garisnya TIDAK berubah.
+        // Membuang garis karena jari pengguna meleset adalah kerusakan yang
+        // lebih besar daripada tidak memindahkan apa pun.
+        setConnectSourceId(null);
+        setUjingSeret(null);
+        awalSeretSambung.current = null;
+        setSeretSambung(null);
+        return;
+      }
+
+      if (target && seretSambung && target !== seretSambung) {
         tambahSambungan(seretSambung, target);
         setConnectSourceId(null);
         setActiveTool("select");
@@ -3855,7 +3943,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       if (raf) cancelAnimationFrame(raf);
     };
     // nodes/edges ikut karena penambah garis dan uji sasaran membacanya.
-  }, [seretSambung, panOffset.x, panOffset.y, zoomLevel, nodes, edges]);
+  }, [seretSambung, ujingSeret, panOffset.x, panOffset.y, zoomLevel, nodes, edges]);
 
   // Node / Arrow delete handler
   /**
@@ -4063,6 +4151,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     handleResizeMouseDown,
     handleRotateMouseDown,
     handleConnectPortClick,
+    mulaiUbahUjung,
     handleUpdateActiveNode,
     handleUpdateNode,
     mulaiSuntingLabel,
@@ -4076,6 +4165,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     handleResizeMouseDown,
     handleRotateMouseDown,
     handleConnectPortClick,
+    mulaiUbahUjung,
     handleUpdateActiveNode,
     handleUpdateNode,
     mulaiSuntingLabel,
@@ -4092,6 +4182,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         aksiBentukRef.current.handleResizeMouseDown(e, nodeId, direction),
       handleRotateMouseDown: (e: React.MouseEvent, nodeId: string) =>
         aksiBentukRef.current.handleRotateMouseDown(e, nodeId),
+      mulaiUbahUjung: (
+        edgeId: string,
+        ujung: "awal" | "akhir",
+        e?: { clientX: number; clientY: number }
+      ) => aksiBentukRef.current.mulaiUbahUjung(edgeId, ujung, e),
       handleConnectPortClick: (
         nodeId: string,
         portName: string,
@@ -4719,6 +4814,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             connectorType={connectorType}
                             zoomLevel={zoomLevel}
                             onEdgePatch={handleEdgePatch}
+                            mulaiUbahUjung={aksiBentuk.mulaiUbahUjung}
                             koordinatPapan={koordinatPapan}
                             onDeleteEdge={handlePutuskanGaris}
                             isEditable={isWorkspaceEditable}

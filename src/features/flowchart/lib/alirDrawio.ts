@@ -304,11 +304,12 @@ export const ALIR_DRAWIO: readonly BarisAlir[] = [
   },
   {
     id: "garis-retarget",
-    label: "Ujung garis bisa diseret lepas dan dipasang ke bentuk lain",
-    ada: false,
-    sebab:
-      "Ujung garis menempel pada bentuknya dan tidak ada gagang untuk memindahkannya; satu-satunya jalan adalah menghapus garis lalu menyambung ulang.",
-    tiket: "#12",
+    label: "Ujung garis bisa digenggam dan dipindah ke bentuk lain",
+    ada: true,
+    bukti: {
+      berkas: "src/features/flowchart/FlowchartContainer.tsx",
+      penanda: "const mulaiUbahUjung",
+    },
   },
   {
     id: "garis-menu",
