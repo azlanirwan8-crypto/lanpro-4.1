@@ -24,7 +24,7 @@ import { cn } from "../../../lib/utils";
 import { gayaLabel, warnaLabel } from "../../../lib/warnaLabel";
 import { customSvgTypes, renderCustomSvgShape } from "../lib/shapes";
 import { getShapeThemeClasses, bentukLatarTerang } from "../lib/nodeTheme";
-import { colorPaletteHex, ukuranBentukEfektif } from "../constants";
+import { colorPaletteHex, ukuranBentukEfektif, KELAS_HURUF } from "../constants";
 import { cincinBentuk, gayaBentuk, idGradienSumber, warnaSumberBentuk } from "../lib/gayaBentuk";
 import { warnaTeksAman } from "../lib/gayaImpor";
 import { NodePropertiesOverlay } from "./NodePropertiesOverlay";
@@ -147,19 +147,6 @@ interface FlowchartNodeProps {
   /** #321 — sembunyikan overlay node bila panel properti terbuka. */
   suppressNodeOverlay?: boolean;
 }
-
-/**
- * #654 — keluarga huruf label, dituliskan lewat tabel kecil supaya tepat satu
- * kemungkinan yang terpasang pada sebuah bentuk. Ketiganya diberi `!important`
- * di blok gaya papan (`FlowchartContainer.tsx`), tempatnya aturan
- * `font-family: Inter !important` untuk `textarea` di `src/index.css` bisa
- * dikalahkan tanpa menyentuh berkas itu.
- */
-const KELAS_HURUF: Record<NonNullable<FlowNode["fontStyle"]>, string> = {
-  sans: "huruf-sans",
-  serif: "huruf-serif",
-  mono: "huruf-mono",
-};
 
 /**
  * #670 - keluarga huruf dari berkas sumber dipetakan ke SALAH SATU kelas papan,

@@ -15,7 +15,8 @@
 import React, { useRef } from "react";
 import { motion } from "motion/react";
 import { findSmartRoute, memotongInteriorKotak } from "../lib/routing";
-import { colorPaletteHex, ukuranBentukEfektif } from "../constants";
+import { cn } from "../../../lib/utils";
+import { colorPaletteHex, ukuranBentukEfektif, KELAS_HURUF } from "../constants";
 import { EdgeStyleBar } from "./EdgeStyleBar";
 import { BENTUK_KEPALA, gambarKepala, kepalaKosongBawaan, skalaKepala } from "./kepalaPanah";
 import { warnaTeksAman } from "../lib/gayaImpor";
@@ -854,7 +855,14 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                       fontSize: edge.labelFontSize,
                       color: warnaTeksAman(edge.labelColor) ?? undefined,
                     }}
-                    className="bg-surface/85 text-xs text-content-strong font-normal px-1 py-0.5 text-center whitespace-pre-wrap break-words"
+                    className={cn(
+                      "bg-surface/85 text-xs text-content-strong font-normal px-1 py-0.5 text-center whitespace-pre-wrap break-words",
+                      // #761 — draw.io memakai Helvetica untuk label GARIS juga,
+                      // bukan hanya label bentuk. Kelas yang sama dipakai kedua
+                      // jalur lewat constants.ts, jadi ia tidak bisa lagi
+                      // tertinggal di satu sisi saja.
+                      KELAS_HURUF.sans
+                    )}
                   >
                     {edge.label}
                   </div>

@@ -3,7 +3,27 @@
  *
  * Diekstrak apa adanya dari FlowchartContainer.tsx (Fase 3 — Anti-God-Object).
  */
-import type { FlowNodeType } from "./types";
+import type { FlowNode, FlowNodeType } from "./types";
+
+/**
+ * Tiga keluarga huruf yang bisa ditampilkan papan, sebagai kelas CSS.
+ *
+ * Dipindah ke sini dari `FlowchartNode.tsx` karena label GARIS ternyata tidak
+ * pernah memakai salah satunya (#761): pemetaannya hidup di komponen bentuk,
+ * jadi label garis kebagian font global aplikasi (Inter) sementara label bentuk
+ * Helvetica. draw.io memakai Helvetica untuk KEDUANYA. Satu sumber di sini
+ * membuat kelas itu tidak bisa lagi dipakai separuh jalur.
+ *
+ * `!important` pada `.huruf-*` diperlukan dan bukan kebetulan: `index.css`
+ * mengunci `font-family` untuk `textarea`/`input` dengan font global, dan
+ * tanpa penanda itu tombol serif/mono mengubah DATA tanpa mengubah TAMPILAN
+ * (#654, terukur di Chrome 09 Okt).
+ */
+export const KELAS_HURUF: Record<NonNullable<FlowNode["fontStyle"]>, string> = {
+  sans: "huruf-sans",
+  serif: "huruf-serif",
+  mono: "huruf-mono",
+};
 
 /**
  * #620 — bentuk yang ditawarkan palet DAN bentuk yang bisa disimpan ke payload
