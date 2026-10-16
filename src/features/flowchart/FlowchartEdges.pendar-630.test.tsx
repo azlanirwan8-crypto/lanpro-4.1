@@ -128,15 +128,19 @@ describe("pendar garis terpilih (#630)", () => {
     expect(jalur[0].warna).toBe("#000000");
   });
 
-  it("wilayah sentuh 16 px tetap ada tapi TRANSPARAN, jadi tidak menebalkan apa pun", async () => {
+  it("wilayah sentuh lebar tetap ada tapi TRANSPARAN, jadi tidak menebalkan apa pun", async () => {
     const { container } = renderView();
     await bukaPapan(container);
 
+    // #766 — lebarnya kini `16 / zoomLevel` (di papan 1,2 zoom jadi 13,3), jadi
+    // test ini tidak lagi mencocokkan angka 16 sebagai penanda. Yang dijaga di
+    // sini adalah isi #630: wilayah sentuh yang lebar itu ADA, dan ia bening —
+    // bukan pita ungu 16 px yang membuat garis 2 px terlihat tebal.
     const hit = Array.from(container.querySelectorAll("svg path")).filter(
-      (p) => p.getAttribute("stroke-width") === "16"
+      (p) => p.getAttribute("stroke") === "transparent"
     );
     expect(hit).toHaveLength(1);
-    expect(hit[0].getAttribute("stroke")).toBe("transparent");
+    expect(parseFloat(hit[0].getAttribute("stroke-width") || "0")).toBeGreaterThanOrEqual(12);
   });
 
   it("garis terpilih = inti 1 px + halo 5 px tipis statis; tidak ada lagi pita 16 px berwarna", async () => {

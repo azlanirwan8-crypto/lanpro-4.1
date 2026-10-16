@@ -40,6 +40,37 @@ const kotakBentuk = (n: FlowNode): Kotak => ({
 });
 
 /**
+ * Titik-titik yang SUNGGUH tergambar pada sebuah `pathD`.
+ *
+ * #766 — dan ini sebabnya gagang tekukan dulu terasa tidak bisa dipakai.
+ * `pathPoints` adalah titik MODEL (ujung + tekukan + simpul rute). Bentuk siku
+ * yang dipakai draw.io di sini justru disintesis belakangan, langsung ke
+ * `pathD`: connector orthogonal mengubah dua titik menjadi siku dengan
+ * menyisipkan sudutnya sendiri. Jadi gagang yang dihitung dari `pathPoints`
+ * duduk di TENGAH TALI LURUS antara dua ujung — di atas ruang kosong, beberapa
+ * puluh px dari garis yang terlihat. Itulah "garis tidak bisa di atur":
+ * pegangannya ada, garisnya tidak di sana.
+ *
+ * Yang dibaca: `M`/`L` (absolut, satu pasangan per perintah) dan `C`
+ * (kontrolnya dibuang, titik akhirnya diambil). Cukup untuk ketiga mode papan
+ * ini dan tidak mengarang titik yang tidak digambar.
+ */
+const POLA_PERINTAH = /([MLC])([^MLC]+)/gi;
+const simpulTergambar = (pathD: string, cadangan: Point[]): Point[] => {
+  const keluar: Point[] = [];
+  for (const cocok of pathD.matchAll(POLA_PERINTAH)) {
+    const angka = (cocok[2].match(/-?\d*\.?\d+/g) || []).map(Number);
+    const pasangan: Point[] = [];
+    for (let i = 0; i + 1 < angka.length; i += 2) pasangan.push({ x: angka[i], y: angka[i + 1] });
+    if (pasangan.length === 0) continue;
+    // `C` menyisipkan dua titik kontrol sebelum titik akhirnya; `M` dan `L`
+    // hanya punya satu pasangan.
+    keluar.push(cocok[1] === "C" ? pasangan[pasangan.length - 1] : pasangan[0]);
+  }
+  return keluar.length >= 2 ? keluar : cadangan;
+};
+
+/**
  * Titik di TENGAH SEPANJANG jalur (#653) — bukan rata-rata koordinat ujung.
  *
  * Rata-rata ujung jatuh di ruang kosong begitu garis mengitari bentuk, jadi
@@ -411,6 +442,13 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
    * ada: pemegang "tambah tekukan" duduk di tengah segmen, jadi tekukan baru
    * lahir di sana lalu langsung mengikuti jarinya.
    *
+   * #766 — `basis` membawa bentuk jalur SEBELUM tekukan manual ada. Selama
+   * garis masih dirutekan otomatis, `edge.waypoints` kosong dan titik-titik
+   * beloknya hidup di hasil rute, bukan di model. Menambahkan satu tekukan di
+   * tengah segmen tanpa menyimpan sisa rute akan MELOMPATKAN garis ke bentuk
+   * baru — persis keluhan "garis tidak bisa dibentuk". Dengan basis = simpul
+   * rute yang ada, tekukan baru menyisip tanpa mengubah apa pun yang lain.
+   *
    * Pendengarnya dipasang di `window`, bukan di lingkaran: jarinya bisa
    * meninggalkan elemen sekecil 5 px di tengah seretan, dan kehilangan peristiwa
    * di tengah jalan berarti garis berhenti di tengah udara.
@@ -419,13 +457,17 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
     e: React.PointerEvent,
     edge: FlowEdge,
     indeks: number,
-    titikAwal?: Point
+    titikAwal?: Point,
+    basis?: Point[]
   ) => {
     if (!isEditable) return;
     e.stopPropagation();
     e.preventDefault();
     const asal = (edge.waypoints || []).slice();
-    const daftar = titikAwal ? asal.concat([titikAwal]) : asal;
+    const sumber = basis ?? asal;
+    const daftar = titikAwal
+      ? sumber.slice(0, indeks).concat([titikAwal], sumber.slice(indeks))
+      : asal;
     const tulis = (isi: Point[]) => onEdgePatch(edge.id, { waypoints: isi.slice() });
     if (titikAwal) tulis(daftar);
     const pindah = (ev: PointerEvent) => {
@@ -744,12 +786,17 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                 dipilih, di atas 16 px, sehingga garis 2 px terlihat sebagai pita
                 ungu (#630). Kini transparan selamanya — lebarnya hanya menentukan
                 seberapa mudah garis ditangkap kursor.
+                #766 — lebarnya dibagi `zoomLevel` seperti gagang tekukan: 16 piksel
+                papan di zoom 0,4 hanya tinggal 6 piksel di layar, dan di HP enam
+                piksel tidak bisa disentuh. Ini jalur masuk ke SEMUA keluwesan garis
+                (pilih dulu, baru bentuk), jadi kalau ia terlewat, tidak ada yang
+                bisa diatur.
               */}
               <path
                 d={pathD}
                 fill="none"
                 stroke="transparent"
-                strokeWidth="16"
+                strokeWidth={16 / zoomLevel}
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedEdgeId(edge.id);
@@ -894,47 +941,100 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
               )}
 
               {/*
-                #653 — pemegang tekukan, hanya pada garis terpilih di papan yang
-                boleh disunting. Lingkaran isi = tekukan yang sudah ada (seret
-                untuk memindah, klik-ganda untuk membuang); lingkaran kosong di
-                TENGAH JALUR menambah tekukan baru. Ukuran dan tebal garisnya
-                dibagi `zoomLevel` supaya tetap teraih di papan 0,3 maupun 3,0 —
-                sama seperti bilah gaya garis.
+                #653 — pemegang tekukan, pada papan yang boleh disunting.
+                #766 — satu hal diganti dan satu hal ditambah, dan keduanya
+                karena keluhan pemilik proyek yang digambar dengan tangannya
+                sendiri: "garis tidak bisa digeser, di atur, di bentuk".
+
+                DULU: hanya muncul pada garis TERPILIH, dan hanya ada SATU
+                lingkaran kosong di tengah seluruh jalur. Pada garis diagonal
+                sepanjang dua layar itu berarti satu sasaran 5 px di titik yang
+                tidak bisa dipilih — dan di HP, memilih garis saja sudah sulit,
+                jadi jalur membentuk garis praktis tidak ada.
+
+                SEKARANG, meniru draw.io:
+                - SATU gagang di TENGAH SETIAP SEGMEN, bukan satu per garis;
+                - gagang ikut muncul saat garis hanya DIARAHKAN kursor, supaya
+                  ada untuk ditemukan sebelum dipilih;
+                - sasaran sentuhnya 13 px ruang papan (lingkaran transparan),
+                  lingkaran ungunya hanya hiasan 4,5 px — jari tidak menarget
+                  hiasan;
+                - menarik gagang menyisipkan tekukan PADA INDEKS segmen itu dan
+                - langsung mengikutinya, sementara sisa jalur tetap di tempat
+                  (simpul rute lama disimpan sebagai basis, lihat #766 di
+                  `mulaiSeretTekukan`), jadi garis TIDAK melompat saat dibentuk.
+
+                Lingkaran UNGU penuh = tekukan yang sudah ada: seret untuk
+                memindah, klik-ganda untuk membuang.
               */}
-              {isSelected &&
+              {(isSelected || hoveredEdgeId === edge.id) &&
                 isEditable &&
                 (() => {
-                  const tengah = titikTengahJalur(pathPoints);
                   const daftar = edge.waypoints || [];
+                  // SEGMEN dibaca dari yang TERGAMBAR, bukan dari titik model:
+                  // lihat `simpulTergambar` (#766). Basis tekukan baru ikut yang
+                  // tergambar, supaya menyisip satu tekukan tidak mengubah sisa
+                  // bentuk garisnya.
+                  const tergambar = simpulTergambar(pathD, pathPoints);
+                  const basis = tergambar.slice(1, -1);
+                  // Tengah SETIAP segmen, dihitung dengan helper #653 supaya
+                  // satu definisi "titik tengah" tidak bercabang dua.
+                  const segmen = tergambar.slice(0, -1).map((p, i) => ({
+                    ...titikTengahJalur([p, tergambar[i + 1]]),
+                    i,
+                  }));
                   return (
                     <g>
                       {daftar.map((w, i) => (
-                        <circle
-                          key={`tekuk-${i}`}
-                          cx={w.x}
-                          cy={w.y}
-                          r={6 / zoomLevel}
-                          fill="#8b5cf6"
-                          stroke="#ffffff"
-                          strokeWidth={2 / zoomLevel}
-                          className="cursor-grab"
-                          onPointerDown={(e) => mulaiSeretTekukan(e, edge, i)}
-                          onDoubleClick={(e) => {
-                            e.stopPropagation();
-                            hapusTekukan(edge, i);
-                          }}
-                        />
+                        <g key={`tekuk-${i}`}>
+                          <circle
+                            data-testid={`tekukan-${i}`}
+                            cx={w.x}
+                            cy={w.y}
+                            r={13 / zoomLevel}
+                            fill="transparent"
+                            className="cursor-grab"
+                            onPointerDown={(e) => mulaiSeretTekukan(e, edge, i)}
+                            onDoubleClick={(e) => {
+                              e.stopPropagation();
+                              hapusTekukan(edge, i);
+                            }}
+                          />
+                          <circle
+                            cx={w.x}
+                            cy={w.y}
+                            r={6 / zoomLevel}
+                            fill="#8b5cf6"
+                            stroke="#ffffff"
+                            strokeWidth={2 / zoomLevel}
+                            pointerEvents="none"
+                          />
+                        </g>
                       ))}
-                      <circle
-                        cx={tengah.x}
-                        cy={tengah.y}
-                        r={5 / zoomLevel}
-                        fill="#ffffff"
-                        stroke="#8b5cf6"
-                        strokeWidth={2 / zoomLevel}
-                        className="cursor-crosshair"
-                        onPointerDown={(e) => mulaiSeretTekukan(e, edge, daftar.length, tengah)}
-                      />
+                      {segmen.map((sg) => (
+                        <g key={`seg-${sg.i}`}>
+                          <circle
+                            data-testid={`gagang-tekuk-${sg.i}`}
+                            cx={sg.x}
+                            cy={sg.y}
+                            r={13 / zoomLevel}
+                            fill="transparent"
+                            className="cursor-crosshair"
+                            onPointerDown={(e) =>
+                              mulaiSeretTekukan(e, edge, sg.i, { x: sg.x, y: sg.y }, basis)
+                            }
+                          />
+                          <circle
+                            cx={sg.x}
+                            cy={sg.y}
+                            r={4.5 / zoomLevel}
+                            fill="#ffffff"
+                            stroke="#8b5cf6"
+                            strokeWidth={1.5 / zoomLevel}
+                            pointerEvents="none"
+                          />
+                        </g>
+                      ))}
                     </g>
                   );
                 })()}

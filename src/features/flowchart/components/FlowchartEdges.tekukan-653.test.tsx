@@ -164,19 +164,29 @@ describe("menyeret dan membuang tekukan (#653)", () => {
         })}
       />
     );
-    const pemegang = container.querySelectorAll("circle");
-    const tambah = pemegang[pemegang.length - 1];
+    // #766: gagang penambah tekukan sekarang SATU PER SEGMEN dan tiap gagang
+    // adalah sepasang lingkaran (satu bening selebar 13 px sebagai sasaran
+    // sentuh, satu ungu sebagai hiasan). Yang dipegang adalah sasaran sentuhnya,
+    // jadi test ini tidak lagi menebak "lingkaran terakhir di DOM" dan titik
+    // kelahirannya dibaca dari gagang itu sendiri — bukan angka koordinat yang
+    // menempel pada satu bentuk rute tertentu.
+    const gagang = container.querySelectorAll('[data-testid^="gagang-tekuk-"]');
+    const tambah = gagang[gagang.length - 1] as SVGCircleElement;
+    const lahir = {
+      x: parseFloat(tambah.getAttribute("cx") || "0"),
+      y: parseFloat(tambah.getAttribute("cy") || "0"),
+    };
     fireEvent.pointerDown(tambah, { clientX: 250, clientY: 75, button: 0 });
     peristiwaJari("pointermove", 250, 300);
     peristiwaJari("pointerup");
 
     const semua = onEdgePatch.mock.calls.map((c) => c[1].waypoints);
-    // Lahir di tengah jalur (335,75), lalu pindah ke jarinya (150,300).
-    expect(semua[0]).toEqual([{ x: 335, y: 75 }]);
+    // Lahir di tengah segmennya sendiri, lalu pindah ke jarinya (150,300).
+    expect(semua[0]).toEqual([lahir]);
     expect(semua[semua.length - 1]).toEqual([{ x: 150, y: 300 }]);
     // Patch pertama tidak boleh ikut berubah oleh seretan berikutnya: array yang
     // sudah diserahkan harus tidak pernah dimutasi lagi.
-    expect(semua[0]).toEqual([{ x: 335, y: 75 }]);
+    expect(semua[0]).toEqual([lahir]);
   });
 
   it("peristiwa tanpa koordinat DIBUANG, bukan ditulis sebagai NaN", () => {
@@ -190,7 +200,7 @@ describe("menyeret dan membuang tekukan (#653)", () => {
         })}
       />
     );
-    fireEvent.pointerDown(container.querySelectorAll("circle")[0], {
+    fireEvent.pointerDown(container.querySelector('[data-testid="tekukan-0"]') as Element, {
       clientX: 100,
       clientY: 100,
       button: 0,
@@ -223,7 +233,7 @@ describe("menyeret dan membuang tekukan (#653)", () => {
         })}
       />
     );
-    const tekukan = container.querySelectorAll("circle")[0];
+    const tekukan = container.querySelector('[data-testid="tekukan-0"]') as Element;
     fireEvent.doubleClick(tekukan);
     expect(onEdgePatch).toHaveBeenCalledWith("e1", {
       waypoints: [{ x: 400, y: 500 }],
