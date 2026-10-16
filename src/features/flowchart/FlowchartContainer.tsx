@@ -4187,6 +4187,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     handleDuplicateNode,
     handleDeleteSelected,
     getLinkedTaskDetails,
+    handleAddNewNode,
+    toggleGroupExpanded,
   });
   aksiBentukRef.current = {
     handleNodeMouseDown,
@@ -4201,6 +4203,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     handleDuplicateNode,
     handleDeleteSelected,
     getLinkedTaskDetails,
+    handleAddNewNode,
+    toggleGroupExpanded,
   };
   const aksiBentuk = useMemo(
     () => ({
@@ -4229,6 +4233,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       handleDuplicateNode: (node: FlowNode) => aksiBentukRef.current.handleDuplicateNode(node),
       handleDeleteSelected: () => aksiBentukRef.current.handleDeleteSelected(),
       getLinkedTaskDetails: (taskId?: string) => aksiBentukRef.current.getLinkedTaskDetails(taskId),
+      // #763 — dua penangan palet ikut tas ref yang sama. Tanpa ini keduanya
+      // tetap closure baru setiap render, `React.memo` di rel alat dan palet
+      // tidak pernah lolos, dan seratus lebih pratinjau SVG bangun pada setiap
+      // peristiwa mouse selama satu bentuk digeser.
+      handleAddNewNode: (type: FlowNode["type"], warna?: string, labelAwal?: string) =>
+        aksiBentukRef.current.handleAddNewNode(type, warna, labelAwal),
+      toggleGroupExpanded: (judul: string) => aksiBentukRef.current.toggleGroupExpanded(judul),
     }),
     []
   );
@@ -4618,7 +4629,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         activeTool={activeTool}
                         setActiveTool={setActiveTool}
                         setConnectSourceId={setConnectSourceId}
-                        handleAddNewNode={handleAddNewNode}
+                        handleAddNewNode={aksiBentuk.handleAddNewNode}
                         isShapeDropdownOpen={isShapeDropdownOpen}
                         setIsShapeDropdownOpen={setIsShapeDropdownOpen}
                         selectedAddColor={selectedAddColor}
@@ -4626,7 +4637,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         shapeSearchQuery={shapeSearchQuery}
                         setShapeSearchQuery={setShapeSearchQuery}
                         expandedGroups={expandedGroups}
-                        toggleGroupExpanded={toggleGroupExpanded}
+                        toggleGroupExpanded={aksiBentuk.toggleGroupExpanded}
                         setIsRightSidebarOpen={setIsRightSidebarOpen}
                       />
 

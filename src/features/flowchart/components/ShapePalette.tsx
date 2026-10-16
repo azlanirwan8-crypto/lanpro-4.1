@@ -34,7 +34,7 @@ interface ShapePaletteProps {
   onOpenPalette?: () => void;
 }
 
-export const ShapePalette: React.FC<ShapePaletteProps> = ({
+const ShapePaletteBati: React.FC<ShapePaletteProps> = ({
   isShapeDropdownOpen,
   setIsShapeDropdownOpen,
   selectedAddColor,
@@ -302,6 +302,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
     <div className="relative font-sans">
       <button
         type="button"
+        data-testid="tombol-palet-bentuk"
         onClick={() => {
           const next = !isShapeDropdownOpen;
           setIsShapeDropdownOpen(next);
@@ -345,3 +346,18 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
     </div>
   );
 };
+
+/**
+ * #763 — palet dibungkus `React.memo`.
+ *
+ * Diukur lebih dulu, bukan diduga: papan 40 bentuk / 56 garis, satu seretan =
+ * dua belas peristiwa mouse, dan `ShapePalette` bangun pada SETIAP peristiwa
+ * karena induknya (rel alat) ikut dirender ulang. Dengan seratus lebih pratinjau
+ * SVG hidup, biaya per peristiwa di jsdom naik dari ~70 ms ke ~150-590 ms — dan
+ * itu kode yang sama yang dijalankan prosesor HP yang jauh lebih lambat.
+ *
+ * Prop palet semuanya stabil selama menyeret (state + setter + penangan lewat
+ * tas ref #621), jadi memo ini bukan hiasan: ia yang membuat pratinjau bentuk
+ * tidak ikut teriak setiap kali bentuk digeser.
+ */
+export const ShapePalette = React.memo(ShapePaletteBati);

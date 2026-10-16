@@ -223,7 +223,16 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
                   <div
                     key={node.id}
                     className={cn(
-                      "absolute rounded-[2px] transition-all duration-300",
+                      // #763 — `transition-all duration-300` DICABUT dari titik
+                      // ini. Pengukurannya: satu seretan bentuk menulis ulang
+                      // `style` titik peta kecil ini dua kali per peristiwa, dan
+                      // dengan transisi 300 ms browser harus menganimasikan
+                      // left/top/width/height KE TARGET YANG BERGERAK SETIAP
+                      // FRAME — pekerjaan kompositor terbesar kedua di papan
+                      // setelah garisnya sendiri, dan justru sumber rasa "patah"
+                      // pada titiknya. Peta kecil draw.io/Miro mengikuti jari
+                      // tanpa animasi, dan itu yang benar.
+                      "absolute rounded-[2px]",
                       bgClass,
                       node.type === "decision" ? "rotate-45" : ""
                     )}

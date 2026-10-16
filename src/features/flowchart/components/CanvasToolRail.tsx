@@ -3,7 +3,7 @@
  * Dipindah verbatim dari FlowchartContainer — handler tetap props.
  */
 import { useTranslation } from "react-i18next";
-import React from "react";
+import React, { useCallback } from "react";
 import { ArrowRight, Hand, HelpCircle, MousePointer, StickyNote, Type } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "../../../lib/utils";
@@ -26,7 +26,7 @@ interface CanvasToolRailProps {
   setIsRightSidebarOpen: (v: boolean) => void;
 }
 
-export const CanvasToolRail: React.FC<CanvasToolRailProps> = ({
+const CanvasToolRailBati: React.FC<CanvasToolRailProps> = ({
   activeTool,
   setActiveTool,
   setConnectSourceId,
@@ -42,6 +42,10 @@ export const CanvasToolRail: React.FC<CanvasToolRailProps> = ({
   setIsRightSidebarOpen,
 }) => {
   const { t } = useTranslation();
+  // #763 — identitas stabil, supaya `React.memo` di ShapePalette benar-benar
+  // berlaku. Panah inline (`() => ...`) dibuang setiap render dan membuat memo
+  // tidak pernah lolos — persis pelajaran #621.
+  const bukaPalet = useCallback(() => setIsRightSidebarOpen(false), [setIsRightSidebarOpen]);
 
   return (
     <div className="absolute top-24 md:top-20 z-20 flex flex-col gap-1.5 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1.5 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] shrink-0 select-none items-center transition-all duration-300 left-3">
@@ -100,7 +104,7 @@ export const CanvasToolRail: React.FC<CanvasToolRailProps> = ({
         expandedGroups={expandedGroups}
         toggleGroupExpanded={toggleGroupExpanded}
         handleAddNewNode={handleAddNewNode}
-        onOpenPalette={() => setIsRightSidebarOpen(false)}
+        onOpenPalette={bukaPalet}
       />
 
       <button
@@ -149,3 +153,16 @@ export const CanvasToolRail: React.FC<CanvasToolRailProps> = ({
     </div>
   );
 };
+
+/**
+ * #763 — rel alat (dan palet di dalamnya) dibungkus `React.memo`.
+ *
+ * Pengukurannya ada di `FlowchartContainer.ceria-763.test.tsx`: sebelum, satu
+ * seretan bentuk pada papan 40/56 membuat `CanvasToolRail` + `ShapePalette`
+ * bangun pada SETIAP peristiwa mouse, bukan hanya ketika isinya benar-benar
+ * berubah. Tidak ada satu pun nilai yang dipegang rel ini berubah saat bentuk
+ * digeser — yang berubah adalah `nodes`, dan `nodes` tidak pernah menjadi
+ * prop-nya. Jadi seluruh kerja itu murni biaya rekonsiliasi React, dan itu
+ * persis yang membuat papan terasa "patah-patah" di HP.
+ */
+export const CanvasToolRail = React.memo(CanvasToolRailBati);
