@@ -9,7 +9,7 @@ import React from "react";
 import { Layers, ChevronDown, X, Search } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "../../../lib/utils";
-import { DIAGRAM_SHAPE_GROUPS } from "../constants";
+import { DIAGRAM_SHAPE_GROUPS, MIME_BENTUK_PALET } from "../constants";
 import { renderMiniPreviewIcon } from "../lib/shapes";
 import type { FlowNode } from "../types";
 
@@ -203,6 +203,23 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                     <button
                       key={item.type}
                       type="button"
+                      data-item-palet={item.type}
+                      draggable
+                      // #759 — palet draw.io diseret ke papan dan bentuknya
+                      // mendarat tepat di titik lepas. Klik tetap berfungsi
+                      // seperti dulu (menaruh di tengah), jadi jalur lama yang
+                      // sudah terbiasa dipakai tidak berubah.
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData(
+                          MIME_BENTUK_PALET,
+                          JSON.stringify({
+                            type: item.type,
+                            nama: item.name,
+                            warna: selectedAddColor,
+                          })
+                        );
+                        e.dataTransfer.effectAllowed = "copy";
+                      }}
                       onClick={() => {
                         handleAddNewNode(item.type, selectedAddColor, item.name);
                         // Di HP tutup setelah pilih agar kanvas kembali fokus

@@ -672,6 +672,7 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
           return (
             <g
               key={edge.id}
+              data-edge-id={edge.id}
               className="pointer-events-auto cursor-pointer"
               onMouseEnter={() => setHoveredEdgeId(edge.id)}
               onMouseLeave={() => setHoveredEdgeId(null)}

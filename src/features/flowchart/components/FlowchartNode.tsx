@@ -28,8 +28,69 @@ import { colorPaletteHex, ukuranBentukEfektif } from "../constants";
 import { cincinBentuk, gayaBentuk, idGradienSumber, warnaSumberBentuk } from "../lib/gayaBentuk";
 import { warnaTeksAman } from "../lib/gayaImpor";
 import { NodePropertiesOverlay } from "./NodePropertiesOverlay";
-import type { FlowNode, FlowEdge } from "../types";
+import type { FlowNode, FlowEdge, SudutGrup } from "../types";
 import type { Task } from "../../../types";
+
+/**
+ * #759 — delapan gagang ukuran pada satu bentuk terpilih, meniru draw.io.
+ * Sudut digambar kotak (dua sumbu bebas), tepi digambar lingkaran (satu sumbu).
+ * Kelas Tailwind ditulis penuh di sini, bukan dirakit dari potongan, karena
+ * kompilator hanya melihat string utuh.
+ */
+/**
+ * #759 — kelas bersama gagang ukuran DAN gagang putar.
+ *
+ * `z-30` ditulis di satu tempat, bukan sembilan kali: gerbang `audit:z`
+ * menghitung kemunculan tangga z per berkas, dan menuliskan angka yang sama
+ * berulang bukan hanya berulang — ia membuat tempat gagang di tangga itu bisa
+ * melenceng senyap satu per satu. Yang tersisa di tiap entri hanya posisi,
+ * ukuran, dan kursor, yaitu bagian yang memang beda per gagang.
+ */
+const KELAS_GAGANG =
+  "absolute bg-violet-600 border border-surface z-30 hover:scale-125 transition-transform shadow-md";
+
+const GAGANG_UKURAN: { arah: SudutGrup; gaya: string; kunciJudul: string }[] = [
+  {
+    arah: "nw",
+    gaya: "left-0 top-0 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded cursor-nwse-resize",
+    kunciJudul: "flowNode.freeSizing",
+  },
+  {
+    arah: "n",
+    gaya: "left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full cursor-ns-resize",
+    kunciJudul: "flowNode.resizeHeight",
+  },
+  {
+    arah: "ne",
+    gaya: "right-0 top-0 translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded cursor-nesw-resize",
+    kunciJudul: "flowNode.freeSizing",
+  },
+  {
+    arah: "e",
+    gaya: "right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full cursor-ew-resize",
+    kunciJudul: "flowNode.resizeWidth",
+  },
+  {
+    arah: "se",
+    gaya: "bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded cursor-nwse-resize",
+    kunciJudul: "flowNode.freeSizing",
+  },
+  {
+    arah: "s",
+    gaya: "bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2.5 h-2.5 rounded-full cursor-ns-resize",
+    kunciJudul: "flowNode.resizeHeight",
+  },
+  {
+    arah: "sw",
+    gaya: "bottom-0 left-0 -translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded cursor-nesw-resize",
+    kunciJudul: "flowNode.freeSizing",
+  },
+  {
+    arah: "w",
+    gaya: "left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full cursor-ew-resize",
+    kunciJudul: "flowNode.resizeWidth",
+  },
+];
 
 interface FlowchartNodeProps {
   /** Node yang dirender oleh instance ini. */
@@ -55,7 +116,9 @@ interface FlowchartNodeProps {
   setEdges: React.Dispatch<React.SetStateAction<FlowEdge[]>>;
   setNodeContextMenu: (menu: { x: number; y: number; nodeId: string } | null) => void;
   handleNodeMouseDown: (e: React.MouseEvent, node: FlowNode) => void;
-  handleResizeMouseDown: (e: React.MouseEvent, nodeId: string, direction: "se" | "e" | "s") => void;
+  handleResizeMouseDown: (e: React.MouseEvent, nodeId: string, direction: SudutGrup) => void;
+  /** #759 — gagang putar draw.io: satu lingkaran di atas bentuk terpilih. */
+  handleRotateMouseDown: (e: React.MouseEvent, nodeId: string) => void;
   /** `e` dipakai untuk memulai seretan sambungan (#548); tanpa event, jalur klik lama tetap jalan. */
   handleConnectPortClick: (
     nodeId: string,
@@ -146,6 +209,7 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
   setNodeContextMenu,
   handleNodeMouseDown,
   handleResizeMouseDown,
+  handleRotateMouseDown,
   handleConnectPortClick,
   handleUpdateActiveNode,
   handleUpdateNode,
@@ -607,23 +671,37 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
       {/* Interactive Sizing Handles & Quick Auto-Connect Widget */}
       {isSelected && isWorkspaceEditable && (
         <>
-          {/* Right East sizing circle handle */}
+          {/* #759 — delapan gagang, sama seperti draw.io. Dulu hanya tiga
+              (`e`, `s`, `se`), jadi sisi kiri dan atas bentuk tidak bisa
+              ditarik. Sudut digambar kotak, tepi digambar lingkaran: bentuk
+              glyph-nya memuat arah, jadi gagang kiri/atas tidak dibaca
+              sebagai hiasan. */}
+          {GAGANG_UKURAN.map((g) => (
+            <div
+              key={g.arah}
+              data-testid={`gagang-ukur-${g.arah}`}
+              onMouseDown={(e) => handleResizeMouseDown(e, node.id, g.arah)}
+              className={cn(KELAS_GAGANG, g.gaya)}
+              title={t(g.kunciJudul)}
+            />
+          ))}
+
+          {/* #759 — gagang putar, persis di atas tepi utara seperti draw.io.
+              Batang tipisnya hanya penunjuk visual; yang menangkap genggaman
+              adalah lingkarnya. */}
           <div
-            onMouseDown={(e) => handleResizeMouseDown(e, node.id, "e")}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2.5 h-2.5 bg-violet-600 rounded-full border border-surface cursor-ew-resize z-30 hover:scale-125 transition-transform shadow-md"
-            title={t("flowNode.resizeWidth")}
+            data-testid="gagang-putar-batang"
+            className="absolute left-1/2 -translate-x-1/2 top-[-26px] h-[26px] w-px bg-violet-500 pointer-events-none"
+            aria-hidden="true"
           />
-          {/* Bottom South sizing circle handle */}
           <div
-            onMouseDown={(e) => handleResizeMouseDown(e, node.id, "s")}
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2.5 h-2.5 bg-violet-600 rounded-full border border-surface cursor-ns-resize z-30 hover:scale-125 transition-transform shadow-md"
-            title={t("flowNode.resizeHeight")}
-          />
-          {/* Corners SE sizing square handle */}
-          <div
-            onMouseDown={(e) => handleResizeMouseDown(e, node.id, "se")}
-            className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 bg-violet-600 rounded border border-surface cursor-nwse-resize z-30 hover:scale-125 transition-transform shadow-md"
-            title={t("flowNode.freeSizing")}
+            data-testid="gagang-putar"
+            onMouseDown={(e) => handleRotateMouseDown(e, node.id)}
+            title={t("flowNode.rotate")}
+            className={cn(
+              KELAS_GAGANG,
+              "left-1/2 -translate-x-1/2 top-[-34px] w-3.5 h-3.5 bg-surface border-2 border-violet-600 rounded-full cursor-grab"
+            )}
           />
 
           {/* Auto-Connector plus direction link helper */}

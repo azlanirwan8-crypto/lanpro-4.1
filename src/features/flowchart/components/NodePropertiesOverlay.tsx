@@ -57,7 +57,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
 
   return (
     <div
-      className="absolute -top-16 left-1/2 -translate-x-1/2 bg-surface/95 backdrop-blur-md p-2 px-3 rounded-xl border border-border-subtle/90 shadow-[0_10px_35px_rgba(0,0,0,0.12)] items-center gap-2 z-40 select-none pointer-events-auto transition-all hidden md:flex"
+      className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 bg-surface/95 backdrop-blur-md p-2 px-3 rounded-xl border border-border-subtle/90 shadow-[0_10px_35px_rgba(0,0,0,0.12)] flex-wrap items-center justify-center gap-2 z-40 select-none pointer-events-auto transition-all flex w-max max-w-[min(420px,94vw)]"
       onMouseDown={(e) => e.stopPropagation()}
     >
       {/* Shape Converter Selector */}

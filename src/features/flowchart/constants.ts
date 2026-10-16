@@ -44,6 +44,16 @@ export interface GrupBentukPalet {
  * derajat. Kolomnya dipertahankan karena `warnaPaletTerdekat` (penjeraf
  * draw.io/Miro) memetakan hex asal ke NAMA warna lewat bacaan `bgGrad`+`stroke`.
  */
+/**
+ * #759 — jenis `dataTransfer` untuk bentuk yang diseret dari palet ke papan.
+ * Namanya sendiri dipakai supaya tidak bertabrakan dengan seret berkas (.drawio)
+ * yang sudah ada di papan yang sama, dan supaya `onDragOver` bisa memutuskan
+ * mana yang boleh diterima sebelum `onDrop` jalan. Diletakkan di sini karena
+ * dua pihak butuh: `ShapePalette` yang menulis dan `FlowchartContainer` yang
+ * membaca — menaruhnya di kontainer akan membuat siklus impor.
+ */
+export const MIME_BENTUK_PALET = "application/x-lanpro-bentuk";
+
 export const colorPaletteHex: Record<string, { bg: string; bgGrad: string; stroke: string }> = {
   yellow: { bg: "#fff2cc", bgGrad: "#fff2cc", stroke: "#d6b656" }, // draw.io yellow
   orange: { bg: "#ffe6cc", bgGrad: "#ffe6cc", stroke: "#d79b00" }, // draw.io orange

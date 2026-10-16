@@ -89,6 +89,14 @@ export type FlowNodeType =
 export type CanvasTheme = "miro" | "blueprint";
 
 /**
+ * Delapan arah gagang ukuran, sama untuk satu bentuk maupun kotak seleksi
+ * banyak bentuk. draw.io memasang delapan gagang pada bentuk terpilih; papan
+ * ini dulu hanya memasang tiga (`e`, `s`, `se`) pada satu bentuk, jadi sisi
+ * kiri dan atas tidak bisa ditarik — lihat #759.
+ */
+export type SudutGrup = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
+
+/**
  * Pola latar papan — pilihan pengguna, TERPISAH dari warna. Warna papan ikut
  * tema aplikasi (#547); pola ini yang decides whether the board is blank,
  * bertitik (bawaan ala Miro), atau berkisi.

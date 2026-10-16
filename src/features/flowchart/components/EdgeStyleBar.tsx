@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import { Trash2 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import type { FlowEdge } from "../types";
+import { BENTUK_KEPALA, gambarKepala } from "./kepalaPanah";
 
 type Bentuk = NonNullable<FlowEdge["connector"]>;
 type Goresan = NonNullable<FlowEdge["strokeStyle"]>;
@@ -48,11 +49,14 @@ const Tombol: React.FC<{
   aktif: boolean;
   judul: string;
   onClick: () => void;
+  /** Test-id lokal-netral: judulnya ikut bahasa, penanda test tidak boleh. */
+  penanda?: string;
   children: React.ReactNode;
-}> = ({ aktif, judul, onClick, children }) => (
+}> = ({ aktif, judul, onClick, penanda, children }) => (
   <button
     type="button"
     title={judul}
+    data-testid={penanda}
     aria-label={judul}
     aria-pressed={aktif}
     onMouseDown={(e) => e.stopPropagation()}
@@ -71,6 +75,47 @@ const Tombol: React.FC<{
   </button>
 );
 
+const TombolKepala: React.FC<{
+  aktif: boolean;
+  judul: string;
+  onClick: () => void;
+  /** Ujung panah di kanan (akhir) atau di kiri (awal). */
+  balik: boolean;
+  bentuk: string;
+}> = ({ aktif, judul, onClick, balik, bentuk }) => (
+  <button
+    type="button"
+    title={judul}
+    aria-label={judul}
+    aria-pressed={aktif}
+    data-testid={`mata-panah-${balik ? "awal" : "akhir"}-${bentuk}`}
+    onMouseDown={(e) => e.stopPropagation()}
+    onClick={(e) => {
+      e.stopPropagation();
+      onClick();
+    }}
+    className={cn(
+      "h-6 w-8 flex items-center justify-center rounded transition-all cursor-pointer",
+      aktif
+        ? "bg-primary/15 border border-primary/40"
+        : "border border-transparent hover:bg-surface-muted"
+    )}
+  >
+    <svg
+      width="18"
+      height="12"
+      viewBox="0 0 10 8"
+      aria-hidden="true"
+      className="text-content-secondary"
+    >
+      <line x1="0" y1="4" x2="10" y2="4" stroke="currentColor" strokeWidth="0.7" />
+      <g transform={balik ? "translate(10,0) scale(-1,1)" : undefined}>
+        {gambarKepala(bentuk, true, "currentColor")}
+      </g>
+    </svg>
+  </button>
+);
+
 export const EdgeStyleBar: React.FC<EdgeStyleBarProps> = ({
   edge,
   bentukBawaan,
@@ -82,6 +127,14 @@ export const EdgeStyleBar: React.FC<EdgeStyleBarProps> = ({
   const { t } = useTranslation();
   const bentuk = edge.connector ?? bentukBawaan;
   const goresan = edge.strokeStyle ?? "solid";
+  /**
+   * #759 — pemilih mata panah. Sejak #753 semua 21 kepala panah draw.io bisa
+   * DIGAMBAR, tapi tidak ada satu pun antarmuka yang bisa MEMILIHNYA, jadi
+   * kekayaan itu tidak bisa dipakai: diagram ER/UML tetap harus diedit di
+   * draw.io lalu diimpor kembali. Bilah gaya garis adalah tempatnya — di
+   * draw.io kepala panah memang bagian dari gaya garis, bukan properti bentuk.
+   */
+  const [bukaKepala, setBukaKepala] = React.useState(false);
 
   return (
     <div
@@ -143,6 +196,20 @@ export const EdgeStyleBar: React.FC<EdgeStyleBarProps> = ({
           </Tombol>
         ))}
 
+        <div className="w-px h-4 bg-surface-strong mx-0.5" />
+
+        <Tombol
+          aktif={bukaKepala}
+          penanda="tombol-mata-panah"
+          judul={t("flowchart.arrowHead")}
+          onClick={() => setBukaKepala((v) => !v)}
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M1 8 L11 8" fill="none" stroke="currentColor" strokeWidth="1.6" />
+            <path d="M11 4 L15 8 L11 12 Z" fill="currentColor" />
+          </svg>
+        </Tombol>
+
         {onDelete && (
           <>
             <div className="w-px h-4 bg-surface-strong mx-0.5" />
@@ -153,6 +220,38 @@ export const EdgeStyleBar: React.FC<EdgeStyleBarProps> = ({
           </>
         )}
       </div>
+
+      {bukaKepala && (
+        <div
+          data-testid="pemilih-mata-panah"
+          className="pointer-events-auto absolute left-1/2 top-5 -translate-x-1/2 w-[340px] max-w-[86vw] bg-surface/95 backdrop-blur-md border border-border-subtle/60 rounded-lg p-2 shadow-soft-lg select-none"
+        >
+          {(
+            [
+              ["akhir", "endArrow"],
+              ["awal", "startArrow"],
+            ] as const
+          ).map(([label, medan]) => (
+            <div key={medan} className="mb-1.5 last:mb-0">
+              <div className="text-[10px] text-content-muted mb-1">
+                {t(`flowchart.arrow${label === "akhir" ? "End" : "Start"}`)}
+              </div>
+              <div className="flex flex-wrap gap-0.5">
+                {BENTUK_KEPALA.map((kepala) => (
+                  <TombolKepala
+                    key={kepala}
+                    bentuk={kepala}
+                    balik={label === "awal"}
+                    aktif={(edge[medan] ?? "classic") === kepala}
+                    judul={kepala}
+                    onClick={() => onPatch({ [medan]: kepala })}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

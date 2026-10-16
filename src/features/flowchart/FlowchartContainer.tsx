@@ -36,6 +36,7 @@ import {
   RefreshCw,
   Upload,
   Image as ImageIcon,
+  FileCode,
   Link as LinkIcon,
   Copy,
   ChevronLeft,
@@ -66,7 +67,7 @@ import { AnimatePresence } from "motion/react";
 import { FlowchartDetail } from "./components/FlowchartDetail";
 import { hasilTempel, kumpulkanSalinan } from "./lib/salinTempel";
 import type { SalinanPapan } from "./lib/salinTempel";
-import type { FlowNode, FlowEdge, FlowchartDocument, FlowchartData } from "./types";
+import type { FlowNode, FlowEdge, FlowchartDocument, FlowchartData, SudutGrup } from "./types";
 import { adaKonteks, KONTEKS_KOSONG } from "./types";
 import { dataUnduhAman, tautanAman } from "../../lib/tautanAman";
 import { labelTautan } from "./lib/labelTautan";
@@ -87,6 +88,7 @@ import {
   UKURAN_BENTUK,
   ukuranBentukEfektif,
   batasSeluruhBentuk,
+  MIME_BENTUK_PALET,
 } from "./constants";
 // Diberi akhiran Api karena useFlowchartList() juga mengekspos updateFlowchart
 // dan deleteFlowchart untuk state daftar lokal. Nama berbeda mencegah salah
@@ -115,8 +117,6 @@ interface FlowchartViewProps {
  * terlanjur menyimpan salah satunya tetap punya pilihan yang cocok.
  */
 /** #614 — delapan pegangan kotak seleksi bersama, sama seperti editor diagram lain. */
-type SudutGrup = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
-
 const PEGANGAN_GRUP: { arah: SudutGrup; gaya: React.CSSProperties; kursor: string }[] = [
   { arah: "nw", gaya: { left: -5, top: -5 }, kursor: "nwse-resize" },
   { arah: "n", gaya: { left: "50%", top: -5, marginLeft: -5 }, kursor: "ns-resize" },
@@ -520,8 +520,23 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     initialHeight: number;
     initialX: number;
     initialY: number;
-    direction: "se" | "e" | "s";
+    direction: SudutGrup;
+    rasio: number;
   } | null>(null);
+
+  /**
+   * #759 — bentuk yang gagang putarnya SEDANG digenggam, bersama titik pusatnya
+   * di ruang papan dan sudut awal genggaman. Pusat dihitung sekali di awal:
+   * sudut harus diukur dari pusat ke kursor, bukan dari selisih gerak, supaya
+   * memutar lalu kembali ke titik awal mengembalikan sudut awalnya.
+   */
+  const [putarAktif, setPutarAktif] = useState<null | {
+    id: string;
+    cx: number;
+    cy: number;
+    sudutMulai: number;
+    rotasiMulai: number;
+  }>(null);
 
   // Drag and Drop (Node moving)
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
@@ -575,7 +590,18 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
    * yang kedua kalinya), efek snapshot asisten, dan bilah kecil di bawah.
    */
   const berinteraksi =
-    draggingNodeId !== null || resizingNodeId !== null || isPanning || marqueeBox !== null;
+    draggingNodeId !== null ||
+    resizingNodeId !== null ||
+    // #759 — state putar WAJIB ikut di sini. Efek yang memasang listener
+    // `mousemove` level jendela keluar lebih dulu bila `berinteraksi` false,
+    // jadi tanpa baris ini memutar bentuk hanya jalan selama kursor kebetulan
+    // masih di atas div papan — dan gagang putar duduk DI LUAR kotak bentuk,
+    // jadi gerakan pertama sudah melepaskannya. Rotasi terasa "tidak terjadi
+    // apa-apa" di browser dan test DOM menangkapnya karena ia mengirim
+    // mousemove ke jendela, seperti yang dilakukan orang.
+    putarAktif !== null ||
+    isPanning ||
+    marqueeBox !== null;
 
   // Canvas-level drag-drop overlay state (file drop directly onto canvas)
   const [canvasDragOver, setCanvasDragOver] = useState(false);
@@ -673,6 +699,30 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     e.preventDefault();
     e.stopPropagation();
     setCanvasDragOver(false);
+
+    // #759 — palet bentuk bisa DIARSERET ke papan, mendarat tepat di titik
+    // lepasnya, sama seperti draw.io. Sebelum ini palet hanya punya tombol
+    // klik-yang-menaruh-di-tengah, jadi menyusun diagram berarti
+    // menaruh-then-geser untuk setiap bentuk.
+    const muatanBentuk = e.dataTransfer.getData(MIME_BENTUK_PALET);
+    if (muatanBentuk) {
+      let muatan: { type?: string; nama?: string; warna?: string };
+      try {
+        muatan = JSON.parse(muatanBentuk);
+      } catch {
+        return;
+      }
+      if (!muatan.type) return;
+      handleAddNewNodeAtPosition(
+        muatan.type as FlowNode["type"],
+        muatan.nama || muatan.type,
+        muatan.warna || selectedAddColor,
+        e.clientX,
+        e.clientY
+      );
+      return;
+    }
+
     const file = e.dataTransfer.files?.[0];
     if (!file) return;
 
@@ -1099,36 +1149,51 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   // Download JPG Snapshot
-  const handleExportJPG = async () => {
+  /**
+   * #618 — satu jalur potret untuk JPG, PNG, dan SVG.
+   *
+   * Selama ini hanya JPG yang ada, padahal `html-to-image` sudah menjadi
+   * dependensi dan menyediakan ketiganya. SVG adalah yang paling berarti untuk
+   * diagram: ia bisa dibuka ulang di peramban dan diperbesar tanpa pecah, dan
+   * draw.io sendiri mengekspor ke sana. Akar yang dipotret, filter `data-abai-
+   * ekspor` (#537), dan nama berkasnya sengaja dipakai bersama supaya ketiga
+   * tombol tidak bisa melenceng satu sama lain.
+   */
+  const eksporGambar = async (format: "jpg" | "png" | "svg") => {
     if (!canvasContainerRef.current) return;
     try {
       toast.info(t("toast.preparingImage"));
       // Dimuat saat tombol ditekan, bukan saat papan dibuka: `html-to-image`
-      // adalah 26% dari chunk papan (#621) padahal hanya satu tombol yang
+      // adalah 26% dari chunk papan (#621) padahal hanya tombol ekspor yang
       // memakainya.
-      const { toJpeg } = await import("html-to-image");
-      const dataUrl = await toJpeg(canvasContainerRef.current, {
-        backgroundColor: "#f4f7f9",
-        quality: 0.95,
+      const mod = await import("html-to-image");
+      const potret = format === "png" ? mod.toPng : format === "svg" ? mod.toSvg : mod.toJpeg;
+      const dataUrl = (await potret(canvasContainerRef.current, {
+        ...(format === "jpg" ? { quality: 0.95 } : {}),
+        ...(format === "svg" ? {} : { backgroundColor: "#f4f7f9" }),
         /* #537 — chrome yang duduk DI DALAM subtree kanvas harus dibuang, dan
          * yang menandainya adalah komponennya sendiri lewat `data-abai-ekspor`
          * (lihat `EdgeStyleBar.tsx`). Penyaringnya hidup di
          * `lib/abaikanEkspor.ts` supaya bisa diuji terhadap DOM tiruan: filter
-         * yang keliru menolak akar yang dipotret dan menghasilkan JPG KOSONG
+         * yang keliru menolak akar yang dipotret dan menghasilkan berkas KOSONG
          * yang tidak terlihat di `npm test` maupun di gerbang audit — hanya
          * terlihat dengan membuka berkasnya. */
         filter: abaikanChromeEkspor,
-      });
+      })) as string;
       const link = document.createElement("a");
-      link.download = `${currentFlowMetadata?.name || "flow_workspace"}.jpg`;
+      link.download = `${currentFlowMetadata?.name || "flow_workspace"}.${format}`;
       link.href = dataUrl;
       link.click();
-      toast.success(t("toast.jpgDownloaded"));
+      toast.success(t("toast.imageDownloaded", { format: format.toUpperCase() }));
     } catch (err) {
       console.error(err);
       toast.error(t("toast.imageDownloadFailed"));
     }
   };
+
+  const handleExportJPG = () => eksporGambar("jpg");
+  const handleExportPNG = () => eksporGambar("png");
+  const handleExportSVG = () => eksporGambar("svg");
 
   // Import JSON backup
   const handleImportJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -3027,12 +3092,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     let spawnY = 150;
     if (container) {
       const rect = container.getBoundingClientRect();
-      spawnX =
-        Math.round((rect.width / 2 - panOffset.x) / zoomLevel - width / 2) +
-        (Math.random() * 40 - 20);
-      spawnY =
-        Math.round((rect.height / 2 - panOffset.y) / zoomLevel - height / 2) +
-        (Math.random() * 40 - 20);
+      // #759 — getaran ±20 px yang dulu ditambah di sini dibuang. draw.io
+      // menaruh bentuk di tengah tampilan dengan posisi yang selalu sama; papan
+      // ini membuat dua bentuk yang identik tidak pernah mendarat di tempat yang
+      // sama, jadi pengguna tidak bisa menyusun baris rapi dari palet. Yang
+      // tersisa hanya titik tengah viewport, dan itu bisa ditebak.
+      spawnX = Math.round((rect.width / 2 - panOffset.x) / zoomLevel - width / 2);
+      spawnY = Math.round((rect.height / 2 - panOffset.y) / zoomLevel - height / 2);
     }
 
     const newNode: FlowNode = {
@@ -3311,26 +3377,66 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     toast.success(t("toast.miroNoteAdded"));
   };
 
-  const handleResizeMouseDown = (
-    e: React.MouseEvent,
-    nodeId: string,
-    direction: "se" | "e" | "s"
-  ) => {
+  const handleResizeMouseDown = (e: React.MouseEvent, nodeId: string, direction: SudutGrup) => {
     e.stopPropagation();
     e.preventDefault();
     const node = nodes.find((n) => n.id === nodeId);
     if (!node) return;
 
+    const lebar = node.width || 130;
+    const tinggi = node.height || 70;
+
     setResizingNodeId(nodeId);
     setResizeStart({
       clientX: e.clientX,
       clientY: e.clientY,
-      initialWidth: node.width || 130,
-      initialHeight: node.height || 70,
+      initialWidth: lebar,
+      initialHeight: tinggi,
       initialX: node.x,
       initialY: node.y,
       direction,
+      rasio: lebar / tinggi,
     });
+  };
+
+  /**
+   * #759 — gagang putar draw.io. draw.io memasang satu lingkaran di atas
+   * bentuk terpilih; menyeretnya memutar bentuk sekitar pusatnya, dan Shift
+   * mengunci ke kelipatan 15°. Sudut disimpan sebagai `rotation` (derajat,
+   * sudah ada di model sejak #669 dan sudah dihormati perender serta ekspor),
+   * jadi yang ditambahkan di sini hanya jalurnya dari tetikus ke angka itu.
+   */
+  const handleRotateMouseDown = (e: React.MouseEvent, nodeId: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!isWorkspaceEditable) return;
+    const node = nodes.find((n) => n.id === nodeId);
+    const papan = canvasContainerRef.current;
+    if (!node || !papan) return;
+
+    const cx = node.x + (node.width || 130) / 2;
+    const cy = node.y + (node.height || 70) / 2;
+    const titik = klienKePapan(e.clientX, e.clientY);
+    setPutarAktif({
+      id: nodeId,
+      cx,
+      cy,
+      sudutMulai: (Math.atan2(titik.y - cy, titik.x - cx) * 180) / Math.PI,
+      rotasiMulai: node.rotation ?? 0,
+    });
+    setSelectedNodeId(nodeId);
+    setSelectedEdgeId(null);
+  };
+
+  /** Titik tetikus diubah ke ruang papan, memakai genggaman papan yang sedang aktif. */
+  const klienKePapan = (clientX: number, clientY: number) => {
+    const papan = canvasContainerRef.current;
+    if (!papan) return { x: 0, y: 0 };
+    const rect = papan.getBoundingClientRect();
+    return {
+      x: (clientX - rect.left - panOffset.x) / zoomLevel,
+      y: (clientY - rect.top - panOffset.y) / zoomLevel,
+    };
   };
 
   const handleCanvasMouseMove = (e: React.MouseEvent) => {
@@ -3441,43 +3547,102 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       return;
     }
 
-    // 2. Handle Shape Resizing
+    // 2. Handle Shape Resizing — #759: delapan arah, sama seperti draw.io.
+    // draw.io memasang gagang pada keempat sudut DAN keempat tepi bentuk
+    // terpilih; papan ini dulu hanya punya tiga (`e`, `s`, `se`), jadi sisi
+    // kiri dan atas tidak bisa ditarik sama sekali. Tepi utara/barat menggeser
+    // titik asal bentuk, bukan hanya mengubah ukurannya. Shift mengunci rasio —
+    // di draw.io itu satu-satunya cara menjaga bentuk tetap proporsional.
     if (resizingNodeId && resizeStart) {
       const deltaX = (e.clientX - resizeStart.clientX) / zoomLevel;
       const deltaY = (e.clientY - resizeStart.clientY) / zoomLevel;
+      const arah = resizeStart.direction;
+      const MIN_LEBAR = 50;
+      const MIN_TINGGI = 40;
 
       setNodes((prev) =>
         prev.map((n) => {
-          if (n.id === resizingNodeId) {
-            let newWidth = resizeStart.initialWidth;
-            let newHeight = resizeStart.initialHeight;
+          if (n.id !== resizingNodeId) return n;
 
-            if (resizeStart.direction.includes("e")) {
-              newWidth = Math.max(50, resizeStart.initialWidth + deltaX);
-            }
-            if (resizeStart.direction.includes("s")) {
-              newHeight = Math.max(40, resizeStart.initialHeight + deltaY);
-            }
+          let lebar = resizeStart.initialWidth;
+          let tinggi = resizeStart.initialHeight;
 
-            if (isSnapToGrid) {
-              const snapStep = canvasTheme === "miro" ? 20 : 15;
-              newWidth = Math.round(newWidth / snapStep) * snapStep;
-              newHeight = Math.round(newHeight / snapStep) * snapStep;
-            }
+          if (arah.includes("e")) lebar = resizeStart.initialWidth + deltaX;
+          if (arah.includes("w")) lebar = resizeStart.initialWidth - deltaX;
+          if (arah.includes("s")) tinggi = resizeStart.initialHeight + deltaY;
+          if (arah.includes("n")) tinggi = resizeStart.initialHeight - deltaY;
 
-            return {
-              ...n,
-              width: newWidth,
-              height: newHeight,
-            };
+          const kunci = e.shiftKey && arah.length === 2;
+          if (kunci) {
+            const skalaLebar = lebar / resizeStart.initialWidth;
+            const skalaTinggi = tinggi / resizeStart.initialHeight;
+            if (Math.abs(skalaLebar - 1) >= Math.abs(skalaTinggi - 1)) {
+              tinggi = lebar / resizeStart.rasio;
+            } else {
+              lebar = tinggi * resizeStart.rasio;
+            }
           }
-          return n;
+
+          lebar = Math.max(MIN_LEBAR, lebar);
+          tinggi = Math.max(MIN_TINGGI, tinggi);
+
+          if (isSnapToGrid) {
+            const langkah = canvasTheme === "miro" ? 20 : 15;
+            const pasang = (v: number) => Math.round(v / langkah) * langkah;
+            // Lebar dibulatkan lebih dulu, lalu dinaikkan satu langkah bila
+            // pembulatan menjatuhkannya di bawah minimum — kalau tidak, bentuk
+            // kecil justru tertolak ke 0 px oleh kisi.
+            const terpasang = (v: number, min: number) => {
+              const dibulatkan = pasang(v);
+              return dibulatkan < min ? dibulatkan + langkah : dibulatkan;
+            };
+            lebar = terpasang(lebar, MIN_LEBAR);
+            tinggi = terpasang(tinggi, MIN_TINGGI);
+          }
+
+          // #759 — sisi yang TIDAK digenggam tetap diam, persis seperti draw.io.
+          // Gagang barat menggerakkan tepi kiri, jadi titik asal x bergeser
+          // sebanyak selisih lebarnya; dulu x tidak pernah disentuh, sehingga
+          // bentuk yang diperlebar lewat kirinya malah bergeser ke kanan.
+          const tepiKanan = resizeStart.initialX + resizeStart.initialWidth;
+          const tepiBawah = resizeStart.initialY + resizeStart.initialHeight;
+          const asalX = arah.includes("w") ? tepiKanan - lebar : resizeStart.initialX;
+          const asalY = arah.includes("n") ? tepiBawah - tinggi : resizeStart.initialY;
+
+          return {
+            ...n,
+            x: Math.round(asalX),
+            y: Math.round(asalY),
+            width: Math.round(lebar),
+            height: Math.round(tinggi),
+          };
         })
       );
       return;
     }
 
-    // 3. Handle Shape Dragging
+    // 3. Handle Shape Rotating — #759, sudut diukur dari PUSAT bentuk ke
+    // kursor, bukan dari selisih gerak. Itu yang membuat memutar bolak-balik
+    // kembali ke angka yang sama, dan yang membuat cengkeraman di tengah
+    // lingkaran tidak melompat ke sudut kursor saat gagang baru digenggam.
+    if (putarAktif) {
+      const titik = klienKePapan(e.clientX, e.clientY);
+      const sudutKini =
+        (Math.atan2(titik.y - putarAktif.cy, titik.x - putarAktif.cx) * 180) / Math.PI;
+      let rotasi = putarAktif.rotasiMulai + (sudutKini - putarAktif.sudutMulai);
+      // draw.io mengunci ke kelipatan 15° saat Shift ditahan — sudut yang sama,
+      // karena papan ini sudah menyimpan `rotation` dalam derajat.
+      if (e.shiftKey) rotasi = Math.round(rotasi / 15) * 15;
+      const bulat = Math.round(rotasi);
+      setNodes((prev) => {
+        const target = prev.find((n) => n.id === putarAktif.id);
+        if (!target || (target.rotation ?? 0) === bulat) return prev;
+        return prev.map((n) => (n.id === putarAktif.id ? { ...n, rotation: bulat } : n));
+      });
+      return;
+    }
+
+    // 4. Handle Shape Dragging
     if (!draggingNodeId) return;
 
     const newX = Math.round(e.clientX / zoomLevel - dragOffset.x);
@@ -3542,6 +3707,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     if (resizingNodeId) {
       setResizingNodeId(null);
       setResizeStart(null);
+      recordHistory(nodes, edges);
+    }
+    if (putarAktif) {
+      // Satu langkah riwayat per tarikan putar, sama seperti seret dan ubah
+      // ukuran: Ctrl+Z setelah memutar harus mengembalikan bentuknya, bukan
+      // menghapus separuh sudutnya.
+      setPutarAktif(null);
       recordHistory(nodes, edges);
     }
   };
@@ -3889,6 +4061,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const aksiBentukRef = useRef({
     handleNodeMouseDown,
     handleResizeMouseDown,
+    handleRotateMouseDown,
     handleConnectPortClick,
     handleUpdateActiveNode,
     handleUpdateNode,
@@ -3901,6 +4074,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   aksiBentukRef.current = {
     handleNodeMouseDown,
     handleResizeMouseDown,
+    handleRotateMouseDown,
     handleConnectPortClick,
     handleUpdateActiveNode,
     handleUpdateNode,
@@ -3914,8 +4088,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     () => ({
       handleNodeMouseDown: (e: React.MouseEvent, node: FlowNode) =>
         aksiBentukRef.current.handleNodeMouseDown(e, node),
-      handleResizeMouseDown: (e: React.MouseEvent, nodeId: string, direction: "se" | "e" | "s") =>
+      handleResizeMouseDown: (e: React.MouseEvent, nodeId: string, direction: SudutGrup) =>
         aksiBentukRef.current.handleResizeMouseDown(e, nodeId, direction),
+      handleRotateMouseDown: (e: React.MouseEvent, nodeId: string) =>
+        aksiBentukRef.current.handleRotateMouseDown(e, nodeId),
       handleConnectPortClick: (
         nodeId: string,
         portName: string,
@@ -4373,6 +4549,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           }
                         }}
                         onDragOver={(e) => {
+                          // #759 — bentuk dari palet HARUS bisa mendarat di papan,
+                          // dan itu butuh preventDefault di sini; tanpa itu
+                          // peramban menolak drop sebelum onDrop sempat jalan.
+                          if (e.dataTransfer.types.includes(MIME_BENTUK_PALET)) {
+                            e.preventDefault();
+                            e.dataTransfer.dropEffect = "copy";
+                            return;
+                          }
                           // Only activate canvas file-drop overlay when a file is being dragged (not node drag)
                           if (e.dataTransfer.types.includes("Files")) {
                             e.preventDefault();
@@ -4566,6 +4750,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               setNodeContextMenu={setNodeContextMenu}
                               handleNodeMouseDown={aksiBentuk.handleNodeMouseDown}
                               handleResizeMouseDown={aksiBentuk.handleResizeMouseDown}
+                              handleRotateMouseDown={aksiBentuk.handleRotateMouseDown}
                               handleConnectPortClick={aksiBentuk.handleConnectPortClick}
                               handleUpdateActiveNode={aksiBentuk.handleUpdateActiveNode}
                               handleUpdateNode={aksiBentuk.handleUpdateNode}
@@ -4731,11 +4916,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 ? "bg-danger/10 text-danger-text hover:bg-danger/15 border  shadow-soft"
                                 : "text-content-body hover:bg-surface-muted hover:text-success-text"
                             )}
-                            title={
-                              isSimulating
-                                ? t("flowchart.stopSim")
-                                : "Jalankan Simulasi Alur Kerja Visual"
-                            }
+                            title={isSimulating ? t("flowchart.stopSim") : t("flowchart.startSim")}
                           >
                             <Play
                               className={cn(
@@ -4759,6 +4940,24 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             title={t("flowchart.downloadJpg")}
                           >
                             <ImageIcon className="w-3.5 h-3.5 text-success" />
+                          </button>
+
+                          {/* #618 — PNG dan SVG memakai jalur potret yang sama */}
+                          <button
+                            data-testid="ekspor-png"
+                            onClick={handleExportPNG}
+                            className="p-2 text-content-muted hover:bg-surface-muted hover:text-success-text rounded-xl transition-all flex items-center justify-center active:scale-95"
+                            title={t("flowchart.downloadPng")}
+                          >
+                            <ImageIcon className="w-3.5 h-3.5 text-success opacity-70" />
+                          </button>
+                          <button
+                            data-testid="ekspor-svg"
+                            onClick={handleExportSVG}
+                            className="p-2 text-content-muted hover:bg-surface-muted hover:text-success-text rounded-xl transition-all flex items-center justify-center active:scale-95"
+                            title={t("flowchart.downloadSvg")}
+                          >
+                            <FileCode className="w-3.5 h-3.5 text-success opacity-70" />
                           </button>
 
                           {/* Download JSON backup */}
