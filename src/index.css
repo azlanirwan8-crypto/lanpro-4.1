@@ -52,6 +52,15 @@
   --color-info: #3577f1;
   --color-secondary: #299cdb;
 
+  /* Aksen lembut (#777) — latar alert/toast gaya Velzon "left border".
+   * Padatan tombol memakai `-surface`, sedangkan latar alert harus lembut
+   * supaya teks `--color-*-text` yang gelap terbaca di atasnya. Versi gelap
+   * di blok `html.dark` di bawah. */
+  --color-success-soft: #d8f3ee;
+  --color-info-soft: #dce9fd;
+  --color-warning-soft: #fcf0db;
+  --color-danger-soft: #fde2dd;
+
   /* ── Permukaan & teks yang SENGAJA tetap di kedua mode ──────────────────
    * Sebagian elemen dirancang gelap terlepas dari tema: kartu aksen, tombol
    * berwarna, lencana. Warnanya dulu ditulis keras (`bg-slate-800`,
@@ -231,6 +240,13 @@ html.dark {
   --color-danger-hover: #ff9585;
   --color-info: #5b93f7;
   --color-secondary: #4fb8ef;
+
+  /* Padanan gelap dari `-soft` di atas (#777) — dicampur ke permukaan gelap
+   * supaya hasilnya tetap padat, bukan transparan di atas konten aplikasi. */
+  --color-success-soft: color-mix(in srgb, var(--color-success) 14%, var(--color-surface));
+  --color-info-soft: color-mix(in srgb, var(--color-info) 14%, var(--color-surface));
+  --color-warning-soft: color-mix(in srgb, var(--color-warning) 14%, var(--color-surface));
+  --color-danger-soft: color-mix(in srgb, var(--color-danger) 14%, var(--color-surface));
 
   /* Peran TEKS aksen (§19.50). Nilai ini SEMULA ditulis di dalam `@theme`,
    * di atas nilai mode terang — satu blok yang sama, sehingga deklarasi
@@ -1000,4 +1016,91 @@ html.dark .shadow-xs {
 }
 .gantt-bar-ujung {
   background-color: var(--lbr, var(--color-surface-marker));
+}
+
+/*
+ * #777 — toast sonner bergaya Velzon "left border" (Alert Border Left).
+ *
+ * Sebelum: sonner `richColors` mengisi toast dengan `--{tipe}-bg/-border/-text`
+ * bawaan (hsl generik) sehingga toast tampil sebagai pill warna penuh. Pemilik
+ * proyek, 17 Okt 2026, menuntut gaya templat Velzon: latar lembut, garis kiri
+ * 3 px berwarna aksen, teks gelap terbaca, outline halus.
+ *
+ * Caranya BUKAN menyentuh 495 call site: sonner membaca 12 variabel di bawah
+ * ini dari elemen `[data-sonner-toaster]`, jadi cukup mengisi ulang variabel
+ * itu dari token repo. Ikon sonner ber-fill `currentColor`, sehingga ikon dan
+ * teks ikut berwarna `--color-*-text` (gelap di mode terang, terang di gelap).
+ * Toaster tanpa prop `theme` selalu membawa `data-sonner-theme="light"`, jadi
+ * satu blok di bawah mengatur KEDUA mode aplikasi: `var()` menyelesaikan token
+ * saat runtime terhadap `html.dark`. Nol varian gelap (§22.4), nol heksa di
+ * luar blok token.
+ *
+ * Prefiks `html` di tiap selektor sengaja: spesifisitasnya satu langkah di
+ * atas aturan sonner sejenis, sehingga hasilnya benar berapapun urutan
+ * styles sonner masuk bundel Vite. Jangan menghapus prefiks itu.
+ */
+html [data-sonner-toaster][data-sonner-theme="light"] {
+  --success-bg: var(--color-success-soft);
+  --success-border: color-mix(in srgb, var(--color-success) 30%, transparent);
+  --success-text: var(--color-success-text);
+  --info-bg: var(--color-info-soft);
+  --info-border: color-mix(in srgb, var(--color-info) 30%, transparent);
+  --info-text: var(--color-info-text);
+  --warning-bg: var(--color-warning-soft);
+  --warning-border: color-mix(in srgb, var(--color-warning) 30%, transparent);
+  --warning-text: var(--color-warning-text);
+  --error-bg: var(--color-danger-soft);
+  --error-border: color-mix(in srgb, var(--color-danger) 30%, transparent);
+  --error-text: var(--color-danger-text);
+}
+
+html [data-rich-colors="true"][data-sonner-toast] {
+  border-left-width: 3px;
+}
+html [data-rich-colors="true"][data-sonner-toast][data-type="success"] {
+  border-left-color: var(--color-success);
+}
+html [data-rich-colors="true"][data-sonner-toast][data-type="info"] {
+  border-left-color: var(--color-info);
+}
+html [data-rich-colors="true"][data-sonner-toast][data-type="warning"] {
+  border-left-color: var(--color-warning);
+}
+html [data-rich-colors="true"][data-sonner-toast][data-type="error"] {
+  border-left-color: var(--color-danger);
+}
+
+/*
+ * Padanan JSX dari gaya toast di atas — alert Velzon "left border" untuk
+ * markup inline (fase 2, #778). Pemakaian:
+ *   <div className="alert-border-left alert-success">…</div>
+ * Varian hanya mengganti tiga variabel; seluruh warna dari token, jadi mode
+ * gelap ikut benar tanpa varian gelap (§22.4). Toast sonner TIDAK memakai
+ * kelas ini — ia ditata lewat blok variabel di atas.
+ */
+.alert-border-left {
+  border: 1px solid color-mix(in srgb, var(--alert-accent, var(--color-info)) 30%, transparent);
+  border-left: 3px solid var(--alert-accent, var(--color-info));
+  background: var(--alert-soft, var(--color-info-soft));
+  color: var(--alert-text, var(--color-info-text));
+}
+.alert-border-left.alert-success {
+  --alert-accent: var(--color-success);
+  --alert-soft: var(--color-success-soft);
+  --alert-text: var(--color-success-text);
+}
+.alert-border-left.alert-info {
+  --alert-accent: var(--color-info);
+  --alert-soft: var(--color-info-soft);
+  --alert-text: var(--color-info-text);
+}
+.alert-border-left.alert-warning {
+  --alert-accent: var(--color-warning);
+  --alert-soft: var(--color-warning-soft);
+  --alert-text: var(--color-warning-text);
+}
+.alert-border-left.alert-danger {
+  --alert-accent: var(--color-danger);
+  --alert-soft: var(--color-danger-soft);
+  --alert-text: var(--color-danger-text);
 }
