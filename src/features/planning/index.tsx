@@ -154,7 +154,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                   <h4 className="text-xs font-normal text-content-body leading-snug line-clamp-2">
                     {task.title}
                   </h4>
-                  <div className="flex items-center justify-between mt-1 pt-1 border-t border-border-faint">
+                  <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 mt-1 pt-1 border-t border-border-faint">
                     <div className="flex items-center gap-2">
                       {task.assigneeId ? (
                         <UserAvatar

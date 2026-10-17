@@ -153,8 +153,15 @@ export const TypeIcon = ({
  * #564 — geometri chip label. Warnanya milik `.label-chip` (src/index.css),
  * yang menurunkannya dari `--lbr`; di sini hanya bentuknya. Terpisah supaya
  * ritme radius/padding tetap jadi keputusan pemanggilnya.
+ *
+ * #779 memecnya jadi dua: `CHIP_TINGGI` adalah ritme VERTIKAL yang harus sama
+ * supaya chip yang berdiri sebaris tidak bertautan, sedangkan padding
+ * horizontal boleh beda — `px-1.5` pada chip tanggal terukur 4,8 px lebih hemat
+ * dan kartu pohon yang sempit (anak pohon kehilangan 8 px per kedalaman) tidak
+ * lagi meluber melewati garis kanannya sendiri.
  */
-const CHIP_DASAR = "px-2 py-0.5 border rounded-md font-normal text-[10px]";
+const CHIP_TINGGI = "py-0.5 border rounded-md font-normal text-[10px]";
+const CHIP_DASAR = `px-2 ${CHIP_TINGGI}`;
 const CHIP_KECIL = `${CHIP_DASAR} tracking-tight uppercase`;
 const CHIP_BIASA = "px-1.5 py-0.5 border rounded font-normal text-xs tracking-tight";
 
@@ -206,8 +213,11 @@ export const LabelChip = ({
  * di pohon perencanaan ia `rounded-md px-1.5` dengan `text-xs sm:text-[10px]`, jadi
  * berdiri di baris yang sama sebelah chip `px-2 text-[10px]` dan tingginya beda
  * beberapa pixel. Pemilik proyek menunjuknya pada 17 Okt: "button nya masih belum
- * standar". Geometrinya sekarang diambil dari `CHIP_KECIL` yang sama; yang tetap
- * milik chip ini hanya warnanya — tenggat lewat memakai keluarga `danger`.
+ * standar". Ritme VERTIKAL-nya sekarang diambil dari `CHIP_TINGGI` yang sama — itu
+ * yang membuat dua chip sebaris tidak bertautan — sementara padding horizontalnya
+ * tetap `px-1.5`: melebarkannya ke `px-2` membuat baris chip meluber keluar kartu
+ * sempit, dan pemilik proyek menunjuknya sehari kemudian ("kok tabrakan nih").
+ * Yang tetap milik chip ini hanya warnanya — tenggat lewat memakai `danger`.
  */
 export const ChipTanggal = ({
   tanggal,
@@ -221,7 +231,8 @@ export const ChipTanggal = ({
   return (
     <span
       className={cn(
-        CHIP_DASAR,
+        "px-1.5",
+        CHIP_TINGGI,
         "inline-flex items-center gap-1",
         lewat
           ? "bg-danger/10 text-danger-text border-danger/30"

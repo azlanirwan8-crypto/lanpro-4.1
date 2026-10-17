@@ -73,16 +73,20 @@ describe("avatar dan chip standar (#779)", () => {
     expect(baca(join(AKAR, "components", "ui", "CommonComponents.tsx"))).toContain("<AvatarKosong");
   });
 
-  it("chip tanggal dan chip label berbagi SATU geometri dasar", () => {
+  it("ritme vertikal chip tanggal dan chip label berasal dari SATU konstanta", () => {
     const isi = baca(join(AKAR, "components", "ui", "CommonComponents.tsx"));
-    const dasar = /const CHIP_DASAR = "([^"]+)";/.exec(isi);
-    expect(dasar).not.toBeNull();
-    expect(dasar![1]).toContain("px-2 py-0.5");
-    expect(dasar![1]).toContain("text-[10px]");
-    expect(isi).toContain("const CHIP_KECIL = `${CHIP_DASAR}");
+    const tinggi = /const CHIP_TINGGI = "([^"]+)";/.exec(isi);
+    expect(tinggi).not.toBeNull();
+    for (const kelas of ["py-0.5", "rounded-md", "text-[10px]", "border"]) {
+      expect(tinggi![1]).toContain(kelas);
+    }
+    expect(isi).toContain("const CHIP_DASAR = `px-2 ${CHIP_TINGGI}`");
     const blokChip = isi.slice(isi.indexOf("export const ChipTanggal"));
-    expect(blokChip.slice(0, 900)).toContain("CHIP_DASAR,");
-    expect(blokChip.slice(0, 900)).not.toContain("CHIP_KECIL");
+    expect(blokChip.slice(0, 900)).toContain("CHIP_TINGGI,");
+    // #779 putaran 2: px-2 pada chip tanggal membuat baris meluber keluar kartu
+    // sempit — tingginya yang harus sama, lebarnya tidak.
+    expect(blokChip.slice(0, 900)).toContain('"px-1.5",');
+    expect(blokChip.slice(0, 900)).not.toContain("CHIP_DASAR,");
   });
 
   it("pohon perencanaan tidak menulis chip tanggalnya sendiri lagi", () => {
@@ -90,13 +94,17 @@ describe("avatar dan chip standar (#779)", () => {
     expect(isi.match(/<ChipTanggal /g)).toHaveLength(2);
     expect(isi).not.toMatch(/format\(ensureDate\(task\.dueDate\)/);
     expect(isi).not.toMatch(/border border-danger\/30/);
+    // Baris chip kartu boleh melipat — pada kartu sempit ia tidak lagi bertautan.
+    expect(isi).toMatch(/flex flex-wrap items-center justify-between/);
   });
 
   it("ChipTanggal: null tanpa tanggal, danger saat lewat, netral saat belum", () => {
     expect(render(<ChipTanggal tanggal={null} />).container.firstChild).toBeNull();
     const lewat = render(<ChipTanggal tanggal="2000-01-01" />);
     expect(lewat.container.textContent).toBe("Jan 1");
-    expect(lewat.container.firstElementChild!.className).toContain("px-2");
+    expect(lewat.container.firstElementChild!.className).toContain("px-1.5");
+    expect(lewat.container.firstElementChild!.className).toContain("text-[10px]");
+    expect(lewat.container.firstElementChild!.className).toContain("py-0.5");
     expect(lewat.container.firstElementChild!.className).toContain("text-danger-text");
     const akan = render(<ChipTanggal tanggal="2999-12-31" />);
     expect(akan.container.firstElementChild!.className).toContain("text-content-muted");
