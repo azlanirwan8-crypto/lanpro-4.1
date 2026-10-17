@@ -91,7 +91,7 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
                   {flow.name || "Untitled Diagram"}
                 </h4>
                 {flow.description && (
-                  <p className="text-xs text-content-muted whitespace-pre-wrap break-words mt-1 leading-relaxed">
+                  <p className="text-xs text-content-muted whitespace-pre-wrap break-words mt-1 leading-relaxed text-justify">
                     {flow.description}
                   </p>
                 )}

@@ -906,6 +906,37 @@ html.dark .shadow-xs {
   background-color: color-mix(in srgb, var(--lbr, var(--color-surface-marker)) 20%, transparent);
 }
 
+/*
+ * #770 — avatar berona lembut.
+ *
+ * SEJAK #125 lingkaran avatar memakai latar PEKAT palet Tailwind (`bg-*-700`)
+ * dengan teks putih. Alasannya waktu itu sah dan terukur: lapisan 15 % di atas
+ * kartu gelap nyaris lenyap sehingga inisial terbaca kontras 1,85. Tapi palet
+ * `-700` itu kelas warna MENTAH — `audit:warna` tidak melihatnya karena gerbang
+ * hanya menghitung keluarga abu-abu — dan di layar ia berdiri sebagai blok
+ * jenuh berdampingan. Pemilik proyek menolaknya pada 17 Okt: "icon user ini
+ * agak kasar ... clean dan enak dilihat tidak keras".
+ *
+ * Yang dibutuhkan #125 sebenarnya bukan latar pekat, melainkan teks yang tidak
+ * bisa kalah kontras. Kelas itu memberi keduanya dari SATU heksa identitas
+ * (`getUserAvatarHex`, rona orang yang sama dengan chip PIC dan avatarnya):
+ * latar 16 % di atas `--color-surface`, garis 32 %, dan teks heksa itu sendiri
+ * di-mix ke `--color-content` — gelap di mode terang, terang di mode gelap, jadi
+ * tidak ada satu pun override `dark:` (§22.4) dan tidak ada kelas palet mentah.
+ *
+ * Seperti `.label-chip`: hanya mengurus WARNA. Ukuran, radius, tipografi dan
+ * transisi tetap milik `UserAvatar`.
+ */
+.avatar-tint {
+  background-color: color-mix(
+    in srgb,
+    var(--lbr, var(--color-surface-marker)) 16%,
+    var(--color-surface)
+  );
+  border-color: color-mix(in srgb, var(--lbr, var(--color-surface-marker)) 32%, transparent);
+  color: color-mix(in srgb, var(--lbr, var(--color-content-subtle)) 62%, var(--color-content));
+}
+
 /**
  * #698 — batang Gantt ikut warna labelnya sendiri.
  *

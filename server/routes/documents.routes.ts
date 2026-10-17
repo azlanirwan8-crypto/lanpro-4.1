@@ -29,11 +29,18 @@ router.get(
       const { projectId } = req.params;
       const search = req.query.search as string | undefined;
       const type = req.query.type as string | undefined;
+      /* #772 — sama seperti daftar rapat: kunci klien hanya memilih ekspresi dari
+       * peta allow-list, tidak pernah ditempel ke SQL. */
+      const urutan = {
+        sortir: req.query.sort as string | undefined,
+        arah: req.query.dir as string | undefined,
+      };
       await respondWithProjectList(
         res,
         req.query as Record<string, unknown>,
-        () => documentRepository.findByProjectId(projectId, search, type),
-        (pagination) => documentRepository.findByProjectIdPaged(projectId, pagination, search, type)
+        () => documentRepository.findByProjectId(projectId, search, type, urutan),
+        (pagination) =>
+          documentRepository.findByProjectIdPaged(projectId, pagination, search, type, urutan)
       );
     } catch (error: any) {
       console.error(error);

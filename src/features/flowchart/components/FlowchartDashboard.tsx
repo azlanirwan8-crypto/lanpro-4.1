@@ -12,9 +12,18 @@
  */
 import { useTranslation } from "react-i18next";
 import React from "react";
-import { Workflow, Search, Plus, Eye, Edit3, Trash2 } from "lucide-react";
+import {
+  Workflow,
+  Search,
+  Plus,
+  Eye,
+  Edit3,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { ResponsiveTable } from "../../../components/ResponsiveTable";
-import { getInitials } from "../lib/nodeTheme";
+import { UserAvatar } from "../../../components/ui/UserAvatar";
 import { tampilanNamaPembuat } from "../lib/authorIdentity";
 import { labelTautanIsu } from "../lib/tautanIsu";
 import { FlowchartMobileCardView } from "./FlowchartMobileCardView";
@@ -28,6 +37,8 @@ import {
   LIST_THEAD_ROW_CLASS,
 } from "../../../components/ui/ListPageShell";
 import { ListPerPageSelect } from "../../../components/ui/ListPerPageSelect";
+import { ThSortir } from "../../../components/ui/KepalaSortir";
+import type { SetelanSortir } from "../../../hooks/useSetelanSortir";
 import type { FlowchartData } from "../types";
 import type { Task } from "../../../types";
 
@@ -59,6 +70,12 @@ interface FlowchartDashboardProps {
    */
   openEditModal: (flow: FlowchartData, e: React.MouseEvent) => void;
   handleDeleteFlowchart: (id: string, e: React.MouseEvent) => void;
+  /**
+   * #772 — kolom acuan dan arahnya. Milik container, karena komponen ini tanpa
+   * state; yang dikirim hanya cara membacanya dan cara menekannya.
+   */
+  sortir: SetelanSortir;
+  onSortir: (kolom: string) => void;
 }
 
 export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
@@ -79,6 +96,8 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
   canModifyFlowchart,
   openEditModal,
   handleDeleteFlowchart,
+  sortir,
+  onSortir,
 }) => {
   const { t } = useTranslation();
   const { registerAction, unregisterAction } = useMobileAction();
@@ -129,14 +148,54 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
           <thead>
             <tr className={LIST_THEAD_ROW_CLASS}>
               <th className="py-3 px-4 w-14 text-center">No</th>
-              <th className="py-3 px-4 min-w-[180px] max-w-[280px]">{t("flowchart.thTitle")}</th>
-              <th className="py-3 px-4 w-36">{t("flowchart.thCategory")}</th>
-              <th className="py-3 px-4 min-w-[180px] max-w-[280px]">
-                {t("flowchart.thDescription")}
-              </th>
-              <th className="py-3 px-4 w-44">{t("flowchart.thLinkedIssue")}</th>
-              <th className="py-3 px-4 w-40">{t("flowchart.thAuthor")}</th>
-              <th className="py-3 px-4 w-36">{t("wiki.thLastUpdated")}</th>
+              <ThSortir
+                kolom="name"
+                label={t("flowchart.thTitle")}
+                sortir={sortir}
+                onSortir={onSortir}
+                className="py-3 px-4 min-w-[180px] max-w-[280px]"
+              />
+              <ThSortir
+                kolom="category"
+                label={t("flowchart.thCategory")}
+                sortir={sortir}
+                onSortir={onSortir}
+                className="py-3 px-4 w-36"
+              />
+              <ThSortir
+                kolom="description"
+                label={t("flowchart.thDescription")}
+                sortir={sortir}
+                onSortir={onSortir}
+                className="py-3 px-4 min-w-[180px] max-w-[280px]"
+              />
+              {/* #773 — w-44 terlalu sempit untuk judul isu yang masih tergolong
+                  pendek: "[PRJ-2] Setting & Services" (±150 px + ikon + padding
+                  ±186 px) tidak muat di 176 − 32 = 144 px, jadi ia melipat dua
+                  baris padahal pemilik proyek minta satu baris selama memang
+                  tidak panjang. Kolom naik ke w-56 (muat ±192 px); yang benar-
+                  benar panjang tetap boleh melipat di dalam chip. */}
+              <ThSortir
+                kolom="linkedIssue"
+                label={t("flowchart.thLinkedIssue")}
+                sortir={sortir}
+                onSortir={onSortir}
+                className="py-3 px-4 w-56"
+              />
+              <ThSortir
+                kolom="author"
+                label={t("flowchart.thAuthor")}
+                sortir={sortir}
+                onSortir={onSortir}
+                className="py-3 px-4 w-40"
+              />
+              <ThSortir
+                kolom="lastEditedAt"
+                label={t("wiki.thLastUpdated")}
+                sortir={sortir}
+                onSortir={onSortir}
+                className="py-3 px-4 w-36"
+              />
               <th className="py-3 px-4 w-28 text-center">{t("flowchart.thAction")}</th>
             </tr>
           </thead>
@@ -178,7 +237,6 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                   });
                 };
                 const lastEditedAt = formatDateSafe(fw.lastEditedAt || fw.createdAt);
-                const initials = getInitials(createdBy);
                 const linkedIsu = tasks.find((t) => t.id === fw.epicTaskId);
 
                 return (
@@ -221,7 +279,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                         kosong={t("flowchart.uncategorized")}
                       />
                     </td>
-                    <td className="py-3 px-4 text-content-muted font-medium max-w-[280px] whitespace-normal break-words">
+                    <td className="py-3 px-4 text-content-muted font-medium max-w-[280px] whitespace-normal break-words text-justify">
                       {fw.description ? (
                         fw.description
                       ) : (
@@ -245,9 +303,11 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                     </td>
                     <td className="py-3 px-4 text-content-body font-medium whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-primary-surface/10 text-primary flex items-center justify-center text-[10px] leading-none font-medium shrink-0">
-                          {initials}
-                        </div>
+                        {/* #770 — lingkaran ini dulu punya kelas warnanya sendiri
+                            (`bg-primary-surface/10 text-primary`), jadi rona
+                            pembuat di daftar ini bukan rona orang yang sama di
+                            layar lain. `UserAvatar` satu-satunya sumber rona. */}
+                        <UserAvatar name={createdBy} size="sm" />
                         <span className="whitespace-nowrap">{createdBy}</span>
                       </div>
                     </td>
@@ -316,10 +376,14 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
         />
       </div>
 
-      {/* Pagination Footer */}
-      <div className="px-6 py-4 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+      {/* Pagination Footer — #774: satu bentuk untuk kaki tabel tiga daftar
+          (rapat, dokumentasi, diagram alur) dan mengikuti pola tenang papan
+          Poin Diskusi. Yang dulu beda: chip halaman di sini blok merek PEKAT
+          (`bg-primary-surface` + teks putih) sementara papan memakai chip
+          bergaris dengan angka primer; dan tanpa chevron. */}
+      <div className="px-6 py-3.5 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-3">
-          <span className="text-xs sm:text-[10px] text-content-muted font-normal">
+          <span className="text-[11px] text-content-subtle font-normal">
             {t("common.showing")} {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
             {t("common.to")} {Math.min(currentPage * itemsPerPage, totalItems)} {t("common.of")}{" "}
             {totalItems} {t("common.entries")}
@@ -338,19 +402,19 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
+              className="px-3 py-1.5 bg-surface border border-border-subtle text-content-body hover:bg-surface-muted rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
             >
-              {t("flowchart.previous")}
+              <ChevronLeft className="w-3.5 h-3.5" /> {t("flowchart.previous")}
             </button>
-            <span className="px-3.5 py-1.5 bg-primary-surface text-content-inverse rounded-md text-xs sm:text-[10px] font-normal shadow-xs">
-              {currentPage}
+            <span className="px-3 py-1 bg-surface border border-border-subtle rounded-md text-primary shadow-2xs text-xs sm:text-[10px] font-normal">
+              {t("rakit.pageOf", { kini: currentPage, total: totalPages })}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
+              className="px-3 py-1.5 bg-surface border border-border-subtle text-content-body hover:bg-surface-muted rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
             >
-              {t("flowchart.next")}
+              {t("flowchart.next")} <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
         )}

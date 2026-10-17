@@ -88,6 +88,9 @@ import type { BatasKonversi } from "./lib/sumberDrawio";
 // #659 - papan bisa ditulis MENJADI berkas draw.io, bukan dibaca saja.
 import { eksporDrawIo } from "./lib/eksporDrawio";
 import { apakahPembuat, tampilanNamaPembuat } from "./lib/authorIdentity";
+// #772 - kepala tabel daftar bisa ditekan untuk asc/desc; datanya sudah utuh di klien.
+import { buatPembandingSortirAlur } from "./lib/sortirAlur";
+import { useSetelanSortir } from "../../hooks/useSetelanSortir";
 // #537 - chrome bertanda `data-abai-ekspor` tidak boleh ikut terpotret ekspor JPG.
 import { abaikanChromeEkspor } from "./lib/abaikanEkspor";
 import {
@@ -420,8 +423,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setCurrentPage,
     itemsPerPage,
     setItemsPerPage,
-    sortBy,
-    setSortBy,
     confirmModal,
     setConfirmModal,
     addFlowchart,
@@ -439,6 +440,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     exitEditor,
     toggleEditor,
   } = listHook;
+
+  /**
+   * #772 — kolom mana yang jadi acuan dan arahnya. Negara bagian ini tinggal di
+   * container (bukan `FlowchartDashboard`) karena papan tanpa state sendiri itu
+   * sengaja dipertahankan; yang membacanya juga harus yang menyimpannya.
+   */
+  const { sortir, tukar: pilihSortir } = useSetelanSortir();
 
   // Node & Edge Management
   const nodesHook = useFlowchartNodes();
@@ -4148,18 +4156,18 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     return nameMatch || descMatch;
   });
 
-  const sortedFlowcharts = [...filteredFlowcharts].sort((a, b) => {
-    if (sortBy === "name") {
-      return a.name.localeCompare(b.name);
-    } else if (sortBy === "createdAt") {
-      return (b.createdAt || "").localeCompare(a.createdAt || "");
-    } else {
-      // Default: lastEditedAt
-      const valA = a.lastEditedAt || a.createdAt || "";
-      const valB = b.lastEditedAt || b.createdAt || "";
-      return valB.localeCompare(valA);
-    }
-  });
+  const sortedFlowcharts = [...filteredFlowcharts].sort(
+    buatPembandingSortirAlur(sortir.kolom, sortir.arah, {
+      penulisAktif: getResolvedAuthor(),
+      tasks,
+    })
+  );
+
+  /** Kepala tabel yang ditekan: ganti urutan, lalu kembali ke halaman 1. */
+  const urutkanDaftarAlur = (kolom: string) => {
+    setCurrentPage(1);
+    pilihSortir(kolom);
+  };
 
   const totalItems = sortedFlowcharts.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
@@ -4298,6 +4306,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           totalPages={totalPages}
           currentItems={currentItems}
           tasks={tasks}
+          sortir={sortir}
+          onSortir={urutkanDaftarAlur}
           openCreateModal={openCreateModal}
           getResolvedAuthor={getResolvedAuthor}
           handleSelectFlowchart={handleSelectFlowchart}

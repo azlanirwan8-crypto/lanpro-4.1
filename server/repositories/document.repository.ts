@@ -1,5 +1,6 @@
 import db from "../../src/lib/db";
 import { BATAS_DAFTAR_TANPA_PAGINATION, type PaginationParams } from "../lib/pagination";
+import { sortirDocument, type UrutanDaftar } from "../lib/sortirDaftar";
 
 /** Penanda baris papan flowchart di tabel Documents. Bukan jenis dokumen manusia. */
 export const JENIS_PAPAN = "flowchart";
@@ -70,13 +71,14 @@ export class DocumentRepository {
   async findByProjectId(
     projectId: string,
     search?: string,
-    type?: string
+    type?: string,
+    urutan?: UrutanDaftar
   ): Promise<DocumentEntity[]> {
     const connection = await db.getConnection();
     try {
       const { where, params } = this.buildDocumentWhere(projectId, search, type);
       const [rows]: any = await connection.query(
-        `SELECT ${this.documentListSelect} FROM Documents WHERE ${where} ORDER BY createdAt DESC LIMIT ${BATAS_DAFTAR_TANPA_PAGINATION}`,
+        `SELECT ${this.documentListSelect} FROM Documents WHERE ${where} ${sortirDocument(urutan)} LIMIT ${BATAS_DAFTAR_TANPA_PAGINATION}`,
         params
       );
       return rows || [];
@@ -89,7 +91,8 @@ export class DocumentRepository {
     projectId: string,
     pagination: PaginationParams,
     search?: string,
-    type?: string
+    type?: string,
+    urutan?: UrutanDaftar
   ): Promise<{ items: DocumentEntity[]; total: number }> {
     const connection = await db.getConnection();
     try {
@@ -100,7 +103,7 @@ export class DocumentRepository {
       );
       const total = countRows?.[0]?.total ?? 0;
       const [rows]: any = await connection.query(
-        `SELECT ${this.documentListSelect} FROM Documents WHERE ${where} ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
+        `SELECT ${this.documentListSelect} FROM Documents WHERE ${where} ${sortirDocument(urutan)} LIMIT ? OFFSET ?`,
         [...params, pagination.limit, pagination.offset]
       );
       return { items: rows || [], total };

@@ -10,6 +10,17 @@ export const paginationQuerySchema = z.object({
 /** Pagination + pencarian teks untuk daftar modul. */
 export const listSearchQuerySchema = paginationQuerySchema.extend({
   search: z.string().max(200).optional(),
+  /**
+   * #772 — pengurutan daftar yang di-page server (rapat dan dokumentasi).
+   *
+   * Sengaja string bebas, BUKAN enum: nilai yang tidak dikenal harus jatuh ke
+   * urutan bawaan, bukan membalas 400 pada URL lama atau tautan yang dibagikan.
+   * Yang membatasi nilainya bukan schema ini, melainkan peta allow-list di
+   * `server/lib/sortirDaftar.ts` — string klien tidak pernah masuk ke SQL sebagai
+   * teks, ia hanya dipakai sebagai kunci untuk memilih ekspresi yang sudah tetap.
+   */
+  sort: z.string().max(40).optional(),
+  dir: z.enum(["asc", "desc"]).optional(),
 });
 
 /** Daftar dokumen: pagination + search + filter tipe. */

@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Calendar, Video, Download, Eye, Edit2, Trash2 } from "lucide-react";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
+import { NamaBerkas } from "../../../components/ui/NamaBerkas";
 import type { Meeting, UserProfile } from "../../../types";
 
 interface MeetingMobileCardViewProps {
@@ -100,7 +101,7 @@ export const MeetingMobileCardView: React.FC<MeetingMobileCardViewProps> = ({
                   {meeting.title}
                 </h4>
                 {meeting.description && (
-                  <p className="text-xs text-content-muted whitespace-pre-wrap break-words mt-1 leading-relaxed">
+                  <p className="text-xs text-content-muted whitespace-pre-wrap break-words mt-1 leading-relaxed text-justify">
                     {meeting.description}
                   </p>
                 )}
@@ -180,7 +181,7 @@ export const MeetingMobileCardView: React.FC<MeetingMobileCardViewProps> = ({
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success/10 border border-success/30 text-success-text font-medium hover:underline cursor-pointer"
                 >
                   <Download className="w-3 h-3" />
-                  {meeting.fileName || t("meetings.attachment")}
+                  <NamaBerkas nama={meeting.fileName || t("meetings.attachment")} />
                 </button>
               )}
             </div>

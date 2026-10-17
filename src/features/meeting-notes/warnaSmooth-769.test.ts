@@ -25,11 +25,7 @@
  */
 import { readFileSync } from "fs";
 import { join } from "path";
-import {
-  getUserAvatarColors,
-  getUserAvatarHex,
-  HEKSA_AVATAR,
-} from "../../components/ui/UserAvatar";
+import { getUserAvatarHex, HEKSA_AVATAR } from "../../components/ui/UserAvatar";
 
 const AKAR = join(__dirname, "..", "..");
 const baca = (relatif: string) => readFileSync(join(AKAR, relatif), "utf8").replace(/\r\n/g, "\n");
@@ -63,21 +59,23 @@ describe("chip PIC memakai pola chip lembut rumah (#769)", () => {
     }
   });
 
-  it("rona orang tetap sama dengan avatarnya — indeks kedua palet sejajar", () => {
+  it("satu orang satu rona: SATU daftar heksa, deterministik, tanpa palet pekat", () => {
     const isi = baca(AVATAR);
-    const ronaKelas = [...isi.matchAll(/bg-([a-z]+)-700/g)].map((m) => m[1]);
-    const ronaHeks = [...isi.matchAll(/"#[0-9A-Fa-f]{6}", \/\/ ([a-z]+)/g)].map((m) => m[1]);
-    expect(ronaKelas.length).toBeGreaterThan(1);
-    expect(ronaHeks).toEqual(ronaKelas);
-    expect(HEKSA_AVATAR.length).toBe(ronaKelas.length);
+    /* #769 menjaga kesejajaran DUA daftar (kelas pekat ↔ heksa). #770 menghapus
+     * daftar kelas itu, jadi risiko yang dikunci berubah: bukan lagi "keduanya
+     * bertukar urutan", melainkan "ada daftar KEDUA yang muncul lagi" — baik
+     * sebagai kelas palet maupun sebagai heksa tambahan. Keduanya ditutup di sini. */
+    const rona = [...isi.matchAll(/"#[0-9A-Fa-f]{6}", \/\/ ([a-z]+)/g)].map((m) => m[1]);
+    expect(rona).toHaveLength(HEKSA_AVATAR.length);
+    expect(new Set(HEKSA_AVATAR).size).toBe(HEKSA_AVATAR.length);
+    expect(isi).not.toMatch(/\bbg-[a-z]+-\d{2,3}\b/);
+    expect(isi).not.toMatch(/\bborder-[a-z]+-\d{2,3}\b/);
 
-    // Konsekuensi yang harus benar-benar berlaku: ID yang sama memberi indeks
-    // yang sama di kedua keluaran, jadi satu orang satu rona di seluruh aplikasi.
+    // Determinisme: ID yang sama memberi heksa yang sama di setiap panggilan,
+    // dan hasil selalu anggota daftar (tidak pernah undefined).
     for (const id of ["u1", "u2", "gloria-handoyo", "7", ""]) {
-      const kelas = getUserAvatarColors(id).bg;
-      const urutan = ronaKelas.findIndex((r) => kelas === `bg-${r}-700`);
-      expect(urutan).toBeGreaterThanOrEqual(0);
-      expect(getUserAvatarHex(id)).toBe(HEKSA_AVATAR[urutan]);
+      expect(getUserAvatarHex(id)).toBe(getUserAvatarHex(id));
+      expect(HEKSA_AVATAR).toContain(getUserAvatarHex(id));
     }
   });
 

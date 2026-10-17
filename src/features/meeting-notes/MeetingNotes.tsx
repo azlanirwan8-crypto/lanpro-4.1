@@ -16,6 +16,8 @@ import {
   Eye,
   Download,
   ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -32,6 +34,9 @@ import {
   type UserPermissions,
 } from "../../types";
 import { UserAvatar } from "../../components/ui/UserAvatar";
+import { NamaBerkas } from "../../components/ui/NamaBerkas";
+import { ThSortir } from "../../components/ui/KepalaSortir";
+import { useSetelanSortir, paramSortir } from "../../hooks/useSetelanSortir";
 import { downloadMeetingFile, resolveUserId } from "./services/meeting.service";
 import { hasPermission } from "../../lib/permissions";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
@@ -182,6 +187,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
   };
 
   const [currentPage, setCurrentPage] = useState(1);
+  const { sortir, tukar: pilihSortir } = useSetelanSortir();
   const [searchQuery, setSearchQuery] = useState("");
   const [totalMeetings, setTotalMeetings] = useState(0);
   /** #639 — dulu 8 dan tidak bisa diubah; kini 10 + pemilih seperti daftar lain. */
@@ -220,7 +226,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, projectId]);
+  }, [searchQuery, projectId, sortir]);
 
   useEffect(() => {
     setActiveMeetingId(null);
@@ -233,7 +239,9 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
     } else {
       fetchUsers();
     }
-  }, [projectId, projectMembers, currentPage, searchQuery, itemsPerPage]);
+    // `sortir` ikut sebagai sumber muat ulang: daftar ini di-page server, jadi
+    // menukar urutan berarti meminta halaman yang sama dengan urutan baru.
+  }, [projectId, projectMembers, currentPage, searchQuery, itemsPerPage, sortir]);
 
   useEffect(() => {
     setWorkspaceTab("manual");
@@ -260,9 +268,26 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
   const fetchMeetings = async (opts?: { force?: boolean; silent?: boolean }) => {
     const userId = currentUser?.uid || "guest";
-    const listOpts = { page: currentPage, limit: itemsPerPage, search: searchQuery };
+    const listOpts = {
+      page: currentPage,
+      limit: itemsPerPage,
+      search: searchQuery,
+      /* #772 — urutan adalah bagian dari IDENTITAS halaman ini, bukan hiasan:
+       * `cacheKey` moduleDataCache ikut memakainya, jadi menekan kepala tabel
+       * tidak akan membaca kembali entri berurutan lama dari memori. */
+      ...paramSortir(sortir),
+    };
     const cached = peekProjectMeetings<Meeting>(projectId, userId);
-    if (cached && !opts?.force && currentPage === 1 && !searchQuery) {
+    if (
+      cached &&
+      !opts?.force &&
+      currentPage === 1 &&
+      !searchQuery &&
+      /* peek = cache "tampilan bawaan" (tanpa page/search/SORTIR); memakainya
+       * saat pengguna sudah memilih urutan akan menyajikan daftar yang salah
+       * urut sambil tetap terlihat sukses. */
+      !sortir.kolom
+    ) {
       setMeetings(cached);
       if (!opts?.silent) setLoading(false);
     } else if (!opts?.silent && !cached) {
@@ -589,14 +614,42 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
               <thead>
                 <tr className={LIST_THEAD_ROW_CLASS}>
                   <th className="py-3 px-4 w-14 text-center">{t("meetings.thNo")}</th>
-                  <th className="py-3 px-4 min-w-[180px] max-w-[260px]">{t("meetings.thTitle")}</th>
-                  <th className="py-3 px-4 w-44">{t("meetings.thDatetime")}</th>
+                  <ThSortir
+                    kolom="title"
+                    label={t("meetings.thTitle")}
+                    sortir={sortir}
+                    onSortir={pilihSortir}
+                    className="py-3 px-4 min-w-[180px] max-w-[260px]"
+                  />
+                  <ThSortir
+                    kolom="createdAt"
+                    label={t("meetings.thDatetime")}
+                    sortir={sortir}
+                    onSortir={pilihSortir}
+                    className="py-3 px-4 w-44"
+                  />
                   <th className="py-3 px-4 w-40">{t("meetings.thLink")}</th>
-                  <th className="py-3 px-4 w-40">{t("meetings.thDocument")}</th>
-                  <th className="py-3 px-4 w-36">{t("meetings.thAuthor")}</th>
-                  <th className="py-3 px-4 min-w-[180px] max-w-[260px]">
-                    {t("meetings.thDescription")}
-                  </th>
+                  <ThSortir
+                    kolom="fileName"
+                    label={t("meetings.thDocument")}
+                    sortir={sortir}
+                    onSortir={pilihSortir}
+                    className="py-3 px-4 w-40"
+                  />
+                  <ThSortir
+                    kolom="authorId"
+                    label={t("meetings.thAuthor")}
+                    sortir={sortir}
+                    onSortir={pilihSortir}
+                    className="py-3 px-4 w-36"
+                  />
+                  <ThSortir
+                    kolom="description"
+                    label={t("meetings.thDescription")}
+                    sortir={sortir}
+                    onSortir={pilihSortir}
+                    className="py-3 px-4 min-w-[180px] max-w-[260px]"
+                  />
                   <th className="py-3 px-4 w-28 text-center">{t("meetings.thAction")}</th>
                 </tr>
               </thead>
@@ -686,9 +739,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                               title={t("meetings.clickToDownload")}
                             >
                               <Download className="w-3.5 h-3.5 shrink-0 text-success-text group-hover/file:scale-110 transition-transform" />
-                              <span className="whitespace-normal break-all">
-                                {meeting.fileName}
-                              </span>
+                              <NamaBerkas nama={meeting.fileName} />
                             </button>
                           ) : (
                             <span className="text-content-subtle italic text-xs">—</span>
@@ -709,7 +760,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                           {/* #647 — keterangan rapat adalah paragraf; satu baris
                               dengan elipsis menyembunyikan sisanya tanpa cara
                               membukanya. Sama seperti #645. */}
-                          <div className="whitespace-pre-wrap break-words">
+                          <div className="whitespace-pre-wrap break-words text-justify">
                             {meeting.description || (
                               <span className="text-content-subtle text-xs sm:text-[11px] italic">
                                 {t("meetings.noDescription")}
@@ -802,19 +853,19 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
+                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-body hover:bg-surface-muted rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
                 >
-                  {t("meetingExtra.previous")}
+                  <ChevronLeft className="w-3.5 h-3.5" /> {t("meetingExtra.previous")}
                 </button>
-                <span className="px-3 py-1.5 bg-primary-surface text-content-inverse rounded-md text-xs sm:text-[10px] font-normal shadow-xs">
-                  {currentPage}
+                <span className="px-3 py-1 bg-surface border border-border-subtle rounded-md text-primary shadow-2xs text-xs sm:text-[10px] font-normal">
+                  {t("rakit.pageOf", { kini: currentPage, total: totalPages })}
                 </span>
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
+                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-body hover:bg-surface-muted rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
                 >
-                  {t("meetingExtra.next")}
+                  {t("meetingExtra.next")} <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}
@@ -851,7 +902,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                                 {formatDate(activeMeeting.createdAt)}
                               </span>
                             </div>
-                            <p className="text-xs text-content-body leading-relaxed whitespace-pre-wrap">
+                            <p className="text-xs text-content-body leading-relaxed whitespace-pre-wrap text-justify">
                               {activeMeeting.description}
                             </p>
                           </div>
@@ -865,9 +916,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                               title={t("meetingExtra.downloadAttachment")}
                             >
                               <FileText className="w-3.5 h-3.5 text-success-text" />
-                              <span className="whitespace-normal break-words">
-                                {activeMeeting.fileName}
-                              </span>
+                              <NamaBerkas nama={activeMeeting.fileName} />
                               <span className="text-[10px] bg-success/15 text-success-text px-1.5 py-0.5 rounded font-medium">
                                 {t("meetingExtra.download")}
                               </span>

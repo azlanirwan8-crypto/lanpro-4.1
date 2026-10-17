@@ -22,6 +22,13 @@ export interface ListQueryOptions {
   type?: string;
   suiteId?: string;
   rootsOnly?: boolean;
+  /**
+   * #772 — pengurutan daftar yang di-page server. Nama kolom dibatasi di sisi
+   * SERVER (`server/lib/sortirDaftar.ts`, allow-list), jadi tipe longgar di sini
+   * bukan lubang: nilai asing hanya membuat server jatuh ke urutan bawaan.
+   */
+  sort?: string;
+  dir?: "asc" | "desc";
 }
 
 export function buildListQuery(options?: ListQueryOptions): string {
@@ -33,6 +40,8 @@ export function buildListQuery(options?: ListQueryOptions): string {
   if (options.type?.trim()) params.set("type", options.type.trim());
   if (options.suiteId?.trim()) params.set("suiteId", options.suiteId.trim());
   if (options.rootsOnly) params.set("rootsOnly", "1");
+  if (options.sort?.trim()) params.set("sort", options.sort.trim());
+  if (options.dir) params.set("dir", options.dir);
   const qs = params.toString();
   return qs ? `?${qs}` : "";
 }

@@ -1975,6 +1975,8 @@ export const id = {
     of: "dari",
     entries: "entri",
     rowsPerPage: "Baris per halaman:",
+    // #772 — tooltip kepala tabel yang bisa diurut (rapat, dokumentasi, diagram alur)
+    urutkan: "Urutkan kolom ini",
     close: "Tutup",
     collapseSidebar: "Ciutkan Bilah Sisi",
     expandSidebar: "Bentangkan Bilah Sisi",

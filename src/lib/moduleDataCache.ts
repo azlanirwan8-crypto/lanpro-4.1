@@ -30,7 +30,14 @@ function cacheKey(
   const page = options?.page ?? "all";
   const limit = options?.limit ?? "all";
   const search = options?.search?.trim() || "";
-  return `${resource}:${projectId}:${userId}:${page}:${limit}:${search}`;
+  /* #772 — setelan sortir WAJIB ikut kunci. Tanpa ini, menekan kepala tabel
+   * akan mengirim permintaan baru tetapi membaca kembali entri lama dari
+   * memori: urutannya tidak berubah dan tidak ada satu pun galat yang
+   * menegurnya — persis kelas bug "cache terasa cepat padahal salah" yang
+   * sudah dicatat #317. */
+  const sort = options?.sort?.trim() || "";
+  const dir = options?.dir || "";
+  return `${resource}:${projectId}:${userId}:${page}:${limit}:${search}:${sort}:${dir}`;
 }
 
 function storageKey(resource: Resource, projectId: string, userId: string) {

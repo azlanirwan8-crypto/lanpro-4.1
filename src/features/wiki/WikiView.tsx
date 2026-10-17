@@ -2,12 +2,16 @@ import { useTranslation } from "react-i18next";
 import { safeLocalStorage, safeSessionStorage } from "../../lib/safeStorage";
 import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { UserAvatar } from "../../components/ui/UserAvatar";
+import { NamaBerkas } from "../../components/ui/NamaBerkas";
+import { ThSortir } from "../../components/ui/KepalaSortir";
+import { useSetelanSortir, paramSortir } from "../../hooks/useSetelanSortir";
 import {
   Plus,
   Edit2,
   Trash2,
   FileText,
   ChevronRight,
+  ChevronLeft,
   Save,
   Upload,
   Link as LinkIcon,
@@ -85,6 +89,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [dragActive, setDragActive] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const { sortir, tukar: pilihSortir } = useSetelanSortir();
   /** #639 — 8 tidak bisa diubah dan bikin baris berikutnya tersembunyi; kini 10 + pemilih. */
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -427,9 +432,18 @@ export const WikiView: React.FC<WikiViewProps> = ({
       limit: itemsPerPage,
       search,
       type: selectedCategory !== "Semua" ? selectedCategory : undefined,
+      // #772 — daftar dokumentasi juga di-page server: urutnya ikut dikirim.
+      ...paramSortir(sortir),
     };
     const cached = peekProjectDocuments<DocumentModel>(projectId, effectiveUserId);
-    if (cached && !opts?.force && currentPage === 1 && !search && selectedCategory === "Semua") {
+    if (
+      cached &&
+      !opts?.force &&
+      currentPage === 1 &&
+      !search &&
+      selectedCategory === "Semua" &&
+      !sortir.kolom // peek hanya mewakili tampilan bawaan
+    ) {
       setDocuments(cached);
     }
     // #689 — `loading` DIDEKLARASIKAN di :83 tapi tidak pernah disentuh fungsi
@@ -458,12 +472,12 @@ export const WikiView: React.FC<WikiViewProps> = ({
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, selectedCategory, projectId]);
+  }, [search, selectedCategory, projectId, sortir]);
 
   useEffect(() => {
     const effectiveUserId = resolveUserId(currentUser);
     const cached = peekProjectDocuments<DocumentModel>(projectId, effectiveUserId);
-    if (cached && currentPage === 1 && !search && selectedCategory === "Semua") {
+    if (cached && currentPage === 1 && !search && selectedCategory === "Semua" && !sortir.kolom) {
       setDocuments(cached);
     }
     fetchDocuments({ silent: true });
@@ -472,7 +486,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
       setShowFormModal(false);
       setMobileActiveView("list");
     }
-  }, [projectId, currentPage, itemsPerPage, search, selectedCategory]);
+  }, [projectId, currentPage, itemsPerPage, search, selectedCategory, sortir]);
 
   // Grid layout catalog defaults to showing all documents at once
 
@@ -971,11 +985,41 @@ export const WikiView: React.FC<WikiViewProps> = ({
               <thead>
                 <tr className={LIST_THEAD_ROW_CLASS}>
                   <th className="px-4 py-2.5 w-14 text-center">No</th>
-                  <th className="px-4 py-2.5 min-w-[200px] max-w-[320px]">{t("wiki.thTitle")}</th>
-                  <th className="px-4 py-2.5 w-44">{t("wiki.thCategory")}</th>
-                  <th className="px-4 py-2.5 w-44">{t("wiki.thFile")}</th>
-                  <th className="px-4 py-2.5 w-40">{t("meetings.thAuthor")}</th>
-                  <th className="px-4 py-2.5 w-36">{t("wiki.thLastUpdated")}</th>
+                  <ThSortir
+                    kolom="title"
+                    label={t("wiki.thTitle")}
+                    sortir={sortir}
+                    onSortir={pilihSortir}
+                    className="px-4 py-2.5 min-w-[200px] max-w-[320px]"
+                  />
+                  <ThSortir
+                    kolom="type"
+                    label={t("wiki.thCategory")}
+                    sortir={sortir}
+                    onSortir={pilihSortir}
+                    className="px-4 py-2.5 w-44"
+                  />
+                  <ThSortir
+                    kolom="fileName"
+                    label={t("wiki.thFile")}
+                    sortir={sortir}
+                    onSortir={pilihSortir}
+                    className="px-4 py-2.5 w-44"
+                  />
+                  <ThSortir
+                    kolom="createdBy"
+                    label={t("meetings.thAuthor")}
+                    sortir={sortir}
+                    onSortir={pilihSortir}
+                    className="px-4 py-2.5 w-40"
+                  />
+                  <ThSortir
+                    kolom="createdAt"
+                    label={t("wiki.thLastUpdated")}
+                    sortir={sortir}
+                    onSortir={pilihSortir}
+                    className="px-4 py-2.5 w-36"
+                  />
                   <th className="px-4 py-2.5 w-28 text-center">{t("discussion.action")}</th>
                 </tr>
               </thead>
@@ -1082,13 +1126,12 @@ export const WikiView: React.FC<WikiViewProps> = ({
                               title={t("meetings.clickToDownload")}
                             >
                               <Download className="w-3.5 h-3.5 shrink-0 text-success group-hover/file:scale-110 transition-transform" />
-                              {/* #767 — nama berkas melipat multi-baris. #726 sempat
-                                  memaksanya satu baris, tetapi nama berkas panjang nyaris
-                                  tanpa spasi: satu baris hanya melebarkan kolom dan
-                                  mendorong tabel ke gulir samping. `break-all` = pola
-                                  daftar rapat (MeetingNotes). Chip kategori tetap satu
-                                  baris — itu inti perbaikan #726 dan tidak disentuh. */}
-                              <span className="whitespace-normal break-all">{doc.fileName}</span>
+                              {/* #771 — nama berkas SATU baris dengan elipsis di
+                                  tengah, bukan lipatan tiga baris (#767 salah baca
+                                  permintaan pemilik proyek dan sudah dibalik):
+                                  "..._12_Oktober_2026.xlsx" harus tetap terbaca
+                                  ekstensinya, dan nama penuh selalu ada di title. */}
+                              <NamaBerkas nama={doc.fileName} />
                             </button>
                           ) : (
                             <span className="text-content-subtle italic text-xs">—</span>
@@ -1170,9 +1213,9 @@ export const WikiView: React.FC<WikiViewProps> = ({
           </div>
 
           {/* Table Footer / Pagination */}
-          <div className="px-6 py-4 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+          <div className="px-6 py-3.5 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
             <div className="flex items-center gap-3">
-              <span className="text-xs sm:text-[10px] text-content-muted font-normal">
+              <span className="text-[11px] text-content-subtle font-normal">
                 {t("common.showing")} {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
                 {t("common.to")} {Math.min(currentPage * itemsPerPage, totalItems)} {t("common.of")}{" "}
                 {totalItems} {t("common.entries")}
@@ -1191,19 +1234,19 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
+                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-body hover:bg-surface-muted rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
                 >
-                  {t("wiki.previous")}
+                  <ChevronLeft className="w-3.5 h-3.5" /> {t("wiki.previous")}
                 </button>
-                <span className="text-xs sm:text-[10px] font-normal px-2 text-content-secondary">
+                <span className="text-xs sm:text-[10px] font-normal px-3 py-1 bg-surface border border-border-subtle rounded-md text-primary shadow-2xs">
                   {t("rakit.pageOf", { kini: currentPage, total: totalPages })}
                 </span>
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
+                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-body hover:bg-surface-muted rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
                 >
-                  {t("wiki.next")}
+                  {t("wiki.next")} <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}

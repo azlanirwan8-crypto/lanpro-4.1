@@ -1,5 +1,6 @@
 import db from "../../src/lib/db";
 import { BATAS_DAFTAR_TANPA_PAGINATION, type PaginationParams } from "../lib/pagination";
+import { sortirMeeting, type UrutanDaftar } from "../lib/sortirDaftar";
 
 export interface MeetingEntity {
   id: string;
@@ -35,12 +36,16 @@ export class MeetingRepository {
     return { where, params };
   }
 
-  async findByProjectId(projectId: string, search?: string): Promise<MeetingEntity[]> {
+  async findByProjectId(
+    projectId: string,
+    search?: string,
+    urutan?: UrutanDaftar
+  ): Promise<MeetingEntity[]> {
     const connection = await db.getConnection();
     try {
       const { where, params } = this.buildMeetingWhere(projectId, search);
       const [rows]: any = await connection.query(
-        `SELECT ${this.meetingListSelect} FROM Meetings WHERE ${where} ORDER BY createdAt DESC LIMIT ${BATAS_DAFTAR_TANPA_PAGINATION}`,
+        `SELECT ${this.meetingListSelect} FROM Meetings WHERE ${where} ${sortirMeeting(urutan)} LIMIT ${BATAS_DAFTAR_TANPA_PAGINATION}`,
         params
       );
       return rows || [];
@@ -52,7 +57,8 @@ export class MeetingRepository {
   async findByProjectIdPaged(
     projectId: string,
     pagination: PaginationParams,
-    search?: string
+    search?: string,
+    urutan?: UrutanDaftar
   ): Promise<{ items: MeetingEntity[]; total: number }> {
     const connection = await db.getConnection();
     try {
@@ -63,7 +69,7 @@ export class MeetingRepository {
       );
       const total = countRows?.[0]?.total ?? 0;
       const [rows]: any = await connection.query(
-        `SELECT ${this.meetingListSelect} FROM Meetings WHERE ${where} ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
+        `SELECT ${this.meetingListSelect} FROM Meetings WHERE ${where} ${sortirMeeting(urutan)} LIMIT ? OFFSET ?`,
         [...params, pagination.limit, pagination.offset]
       );
       return { items: rows || [], total };

@@ -1135,11 +1135,19 @@ router.get(
     try {
       const { projectId } = req.params;
       const search = req.query.search as string | undefined;
+      /* #772 — `sort`/`dir` tidak pernah masuk SQL sebagai teks: repository
+       * memakainya hanya sebagai kunci ke peta allow-list (`sortirDaftar.ts`),
+       * dan kunci asing jatuh ke urutan bawaan. */
+      const urutan = {
+        sortir: req.query.sort as string | undefined,
+        arah: req.query.dir as string | undefined,
+      };
       await respondWithProjectList(
         res,
         req.query as Record<string, unknown>,
-        () => meetingRepository.findByProjectId(projectId, search),
-        (pagination) => meetingRepository.findByProjectIdPaged(projectId, pagination, search)
+        () => meetingRepository.findByProjectId(projectId, search, urutan),
+        (pagination) =>
+          meetingRepository.findByProjectIdPaged(projectId, pagination, search, urutan)
       );
     } catch (error: any) {
       console.error(error);

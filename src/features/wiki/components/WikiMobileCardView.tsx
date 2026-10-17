@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Card } from "../../../components/ui/CoreUI";
 import { LabelChip } from "../../../components/ui/CommonComponents";
+import { NamaBerkas } from "../../../components/ui/NamaBerkas";
 import type { DocumentModel } from "../types";
 
 interface WikiMobileCardViewProps {
@@ -98,7 +99,7 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
                   {doc.title}
                 </h4>
                 {doc.description && (
-                  <p className="text-xs text-content-muted mt-1 leading-relaxed whitespace-normal break-words">
+                  <p className="text-xs text-content-muted mt-1 leading-relaxed whitespace-normal break-words text-justify">
                     {doc.description}
                   </p>
                 )}
@@ -161,9 +162,7 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success/10 border border-success/30 text-success-text font-medium hover:underline cursor-pointer"
                 >
                   <Download className="w-3 h-3" />
-                  <span className="whitespace-normal break-words" title={doc.fileName}>
-                    {doc.fileName}
-                  </span>
+                  <NamaBerkas nama={doc.fileName} />
                 </button>
               )}
 

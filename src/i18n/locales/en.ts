@@ -1959,6 +1959,8 @@ export const en = {
     of: "of",
     entries: "entries",
     rowsPerPage: "Rows per page:",
+    // #772 — tooltip on sortable table headers (meetings, documentation, flowcharts)
+    urutkan: "Sort by this column",
     close: "Close",
     collapseSidebar: "Collapse Sidebar",
     expandSidebar: "Expand Sidebar",

@@ -105,16 +105,17 @@ describe("data tampil penuh di tabel DOCUMENTATION (#645 -> #726)", () => {
     expect(s).toMatch(/max-w-\[320px\] whitespace-normal break-words/);
   });
 
-  it("chip kategori SATU baris; nama berkas melipat (#726 -> #767)", () => {
+  it("chip kategori SATU baris; nama berkas satu baris lewat NamaBerkas (#726 -> #767 -> #771)", () => {
     const s = isi(DAFTAR);
     // Chip kategori: kosakata terkendali — nowrap di call site tabel, kolom
     // melebar, wadah overflow-x-auto menyerap. Bukan di komponen LabelChip.
     const chipTabel = s.slice(s.indexOf("<LabelChip"), s.indexOf("/>", s.indexOf("<LabelChip")));
     expect(chipTabel).toContain('className="whitespace-nowrap"');
-    // #767 — tombol unduh berkas TIDAK boleh membawa nowrap lagi; nama berkas di
-    // dalam span yang melipat dengan break-all (pola daftar rapat MeetingNotes).
-    // Penjaganya dipotong per tombol, bukan per berkas: dua tombol lain di layar
-    // ini (1401, 1493) memang boleh satu baris dan tidak boleh ikut kena.
+    // #767 sempat membalik nama berkas jadi melipat multi-baris — itu salah baca
+    // permintaan pemilik proyek, dan #771 mengembalikannya ke satu baris dengan
+    // elipsis TENGAH lewat primitif `NamaBerkas` (ekstensi tetap terbaca, nama
+    // penuh di `title`). Yang dijaga di sini: tombolnya tidak membawa nowrap
+    // sendiri, dan nama berkas TIDAK dirender telanjang di dalam span.
     const berkasTabel = s.slice(
       s.indexOf("onClick={() => handleDownload(doc.id"),
       s.indexOf("clickToDownload")
@@ -122,7 +123,8 @@ describe("data tampil penuh di tabel DOCUMENTATION (#645 -> #726)", () => {
     expect(berkasTabel.length).toBeGreaterThan(0);
     expect(berkasTabel).not.toContain("whitespace-nowrap");
     expect(berkasTabel).toMatch(/shadow-2xs text-left/);
-    expect(s).toMatch(/<span className="whitespace-normal break-all">\{doc\.fileName\}<\/span>/);
+    expect(s).toContain("<NamaBerkas nama={doc.fileName} />");
+    expect(s).not.toMatch(/<span[^>]*\{doc\.fileName\}<\/span>/);
     expect(s).not.toContain("max-w-[220px]");
   });
 
@@ -136,9 +138,16 @@ describe("data tampil penuh di tabel DOCUMENTATION (#645 -> #726)", () => {
 describe("ritme dan chrome (#726)", () => {
   it("kepala tabel memakai ritme Velzon yang sama dengan sel datanya", () => {
     const s = isi(DAFTAR);
+    // #772: sebagian kepala kini dirender lewat ThSortir, jadi ritme harus
+    // dibaca dari keduanya — menghitung `<th>` saja membuat penjaga ini tetap
+    // hijau sementara kelas sel sebenarnya sudah berpindah tempat.
     const th = [...s.matchAll(/<th className="([^"]*)"/g)].map((m) => m[1]);
-    expect(th.length).toBeGreaterThanOrEqual(7);
-    for (const k of th) {
+    const thSortir = [...s.matchAll(/<ThSortir[\s\S]{0,220}?className="([^"]*)"/g)].map(
+      (m) => m[1]
+    );
+    const semua = [...th, ...thSortir];
+    expect(semua.length).toBeGreaterThanOrEqual(7);
+    for (const k of semua) {
       expect(k).toContain("py-2.5");
       expect(k).not.toContain("py-3 ");
     }

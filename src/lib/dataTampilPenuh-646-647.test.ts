@@ -183,18 +183,27 @@ describe("kartu Document List flowchart (#646 -> #648)", () => {
 describe("daftar Meeting Notes tampil penuh (#647)", () => {
   const isi = baca(DAFTAR_MEETING);
 
-  it("judul, nama berkas rekaman, dan keterangan tidak dipotong", () => {
+  it("judul dan keterangan tidak dipotong; nama berkas lewat NamaBerkas (#647 -> #771)", () => {
     tanpaPotong(isi, "{meeting.title}", DAFTAR_MEETING);
-    tanpaPotong(isi, "{meeting.fileName}", DAFTAR_MEETING);
     tanpaPotong(isi, "{meeting.description || (", DAFTAR_MEETING);
+    /* #771 memindahkan nama berkas ke primitif yang SATU baris dengan elipsis di
+     * tengah. Ini pengecualian yang disengaja dan dibatasi: yang boleh dipotong
+     * hanyalah NAMA BERKAS — paragraf catatan/deskripsi/judul tetap wajib tampil
+     * penuh seperti di atas — dan nilainya tidak pernah hilang tanpa jalan
+     * membacanya karena `NamaBerkas` selalu memasang `title` berisi nama penuh
+     * (`NamaBerkas.test.tsx` yang menjaga itu). Kalau seseorang mengembalikan
+     * ekspresi ini ke `<span>` telanjang, ia bebas memilih potongan atau
+     * peluberan; keduanya pernah dilaporkan pemilik proyek. */
+    expect(isi).toContain("<NamaBerkas nama={meeting.fileName} />");
+    expect(isi).not.toMatch(/<span[^>]*\{meeting\.fileName\}<\/span>/);
   });
 
   it("nama penulis tidak dipotong, tapi boleh satu baris", () => {
     tanpaPotong(isi, "{author.name}", DAFTAR_MEETING, true);
   });
 
-  it("nama berkas rekaman tampil penuh di detail dan di form", () => {
-    tanpaPotong(isi, "{activeMeeting.fileName}", DAFTAR_MEETING);
+  it("nama berkas rekaman: detail lewat NamaBerkas, form tetap penuh", () => {
+    expect(isi).toContain("<NamaBerkas nama={activeMeeting.fileName} />");
     tanpaPotong(isi, "{newMeetingFile.name}", DAFTAR_MEETING);
     tanpaPotong(isi, "{editingMeeting.fileName}", DAFTAR_MEETING);
   });
