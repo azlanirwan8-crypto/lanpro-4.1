@@ -64,6 +64,66 @@ export const getInitials = (fullName?: string): string => {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
+/**
+ * #776 — TANGGA UKURAN. ANGKA, BUKAN SELERA.
+ *
+ * Diukur 17 Okt 2026 di peramban memakai CSS hasil build proyek ini
+ * (`scratch/harness-avatar.html`): akar 13 px (src/index.css:546) membuat
+ * `w-6` = 19,5 px dan `text-xs` = 9,75 px, sementara dua huruf kapital Inter
+ * 600 selebar 1,51×fontSize ("MP") sampai 1,94×fontSize ("WW"). Akibatnya
+ * inisial memakan 86–95 % diameter dan `overflow-hidden` memotong sisi
+ * hurufnya — itulah yang dilaporkan pemilik proyek sebagai "bentrok,
+ * kebesaran".
+ *
+ * Aturan yang membuat dua huruf dijamin tidak menyentuh tepi (diameter efektif
+ * dikurangi garis tepi):
+ *   D ≥ 18 px → 2 huruf, fontSize terbesar dengan 1,94×fs ≤ 0,80×D
+ *   D < 18 px → 1 huruf; dua huruf tidak pernah muat terbaca di situ.
+ *
+ * KENAPA UserAvatar YANG MENENTUKAN UKURAN, BUKAN CALLER. `cn()`
+ * (src/lib/utils.ts:4) hanya JOIN STRING — bukan `tailwind-merge` — jadi kelas
+ * komponen dan kelas caller sama-sama masuk DOM dan pemenangnya urutan
+ * stylesheet, bukan niat penulis. Terukur dari `dist`: `.w-4`@59913 <
+ * `.w-6`@60067 sehingga `className="w-4 h-4"` selama ini DIABAIKAN (avatar
+ * tetap 19,5 px), dan `.text-xs`@150800 datang BELAKANGAN dari
+ * `.text-sm`/`.text-xl` sehingga `text-xl` di lingkaran 65 px pun diabaikan.
+ * Karena itu diameter caller dihormati, kelas ukuran TEKS caller dibuang, dan
+ * fontSize dipasang dari tangga di bawah. Kelas ditulis literal di sini agar
+ * Tailwind v4 benar-benar melihatnya.
+ */
+const TANGGA: Record<string, { lingkaran: string; fs: string; huruf: 1 | 2 }> = {
+  "3.5": { lingkaran: "w-3.5 h-3.5", fs: "text-[8px]", huruf: 1 },
+  "4": { lingkaran: "w-4 h-4", fs: "text-[9px]", huruf: 1 },
+  "5": { lingkaran: "w-5 h-5", fs: "text-[11px]", huruf: 1 },
+  "6": { lingkaran: "w-6 h-6", fs: "text-[8px]", huruf: 2 },
+  "7": { lingkaran: "w-7 h-7", fs: "text-[9px]", huruf: 2 },
+  "8": { lingkaran: "w-8 h-8", fs: "text-[10px]", huruf: 2 },
+  "9": { lingkaran: "w-9 h-9", fs: "text-[11px]", huruf: 2 },
+  "10": { lingkaran: "w-10 h-10", fs: "text-[12px]", huruf: 2 },
+  "12": { lingkaran: "w-12 h-12", fs: "text-[14px]", huruf: 2 },
+  "16": { lingkaran: "w-16 h-16", fs: "text-[18px]", huruf: 2 },
+  "20": { lingkaran: "w-20 h-20", fs: "text-[20px]", huruf: 2 },
+};
+
+const UKURAN_PROP: Record<string, string> = {
+  xs: "5",
+  sm: "6",
+  md: "8",
+  lg: "10",
+  xl: "16",
+};
+
+/** Kelas ukuran teks mana pun yang dikirim caller — semuanya dibuang. */
+const POLA_TEKS =
+  /(?:^|\s)[\w:/.-]*text-(?:2xs|3xs|4xs|xsm|xs|sm|md|base|lg|xl|[2-9]xl|\[[^\]]*\])(?=\s|$)/g;
+
+const kunciTangga = (kelasCaller: string, size?: string) => {
+  const m = /(?:^|\s)w-(\d+(?:\.\d+)?)(?=\s|$)/.exec(kelasCaller);
+  if (m && TANGGA[m[1]]) return m[1];
+  if (size && UKURAN_PROP[size] && TANGGA[UKURAN_PROP[size]]) return UKURAN_PROP[size];
+  return "6";
+};
+
 export interface UserAvatarProps {
   user?: UserProfile | any;
   uid?: string;
@@ -136,16 +196,10 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
   const targetId = member?.id || member?.uid || uid || displayName;
   const heksa = getUserAvatarHex(String(targetId));
 
-  const sizeClasses: Record<string, string> = {
-    xs: "w-5 h-5 text-xs sm:text-[11px] sm:text-[9px]",
-    sm: "w-6 h-6 text-xs sm:text-[10px]",
-    md: "w-8 h-8 text-xs",
-    lg: "w-10 h-10 text-sm",
-    xl: "w-16 h-16 text-xl",
-  };
-
-  const defaultSizeClass =
-    size && sizeClasses[size] ? sizeClasses[size] : "w-6 h-6 text-xs sm:text-[10px]";
+  const tangga = TANGGA[kunciTangga(className || "", size)];
+  const kelasCaller = (className || "").replace(POLA_TEKS, " ").trim();
+  const callerPunyaLebar = /(^|\s)w-/.test(kelasCaller);
+  const inisial = getInitials(displayName);
 
   return (
     <div
@@ -154,8 +208,9 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
          identitas orang itu; tidak ada lagi kelas palet mentah di sini. */
       className={cn(
         "avatar-tint rounded-full flex items-center justify-center font-semibold overflow-hidden shrink-0 select-none transition-all border shadow-2xs",
-        defaultSizeClass,
-        className
+        callerPunyaLebar ? "" : tangga.lingkaran,
+        tangga.fs,
+        kelasCaller
       )}
       style={gayaLabel(heksa)}
       title={displayName}
@@ -172,7 +227,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
           }}
         />
       ) : (
-        <span className="leading-none">{getInitials(displayName)}</span>
+        <span className="leading-none">{tangga.huruf === 1 ? inisial.slice(0, 1) : inisial}</span>
       )}
     </div>
   );

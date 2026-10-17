@@ -120,7 +120,7 @@ export const LaciUtas: React.FC<LaciUtasProps> = ({
                           uid={commentUserId}
                           members={anggota}
                           name={authorName}
-                          className="w-4 h-4 text-xs sm:text-[11px] sm:text-[9px]"
+                          className="w-4 h-4"
                         />
                         <span className="text-xs sm:text-[10px] text-content-muted font-medium">
                           {authorName}

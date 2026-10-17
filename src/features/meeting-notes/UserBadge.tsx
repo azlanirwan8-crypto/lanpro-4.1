@@ -51,7 +51,7 @@ export const UserBadge = ({
         uid={authorId}
         members={users}
         name={name}
-        className="w-6 h-6 text-xs sm:text-[11px] sm:text-[9px] shrink-0 group-hover/avatar:scale-110 transition-transform"
+        className="w-6 h-6 shrink-0 group-hover/avatar:scale-110 transition-transform"
       />
       {showName && (
         <div className="flex flex-col min-w-0">

@@ -665,7 +665,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                 <UserAvatar
                                   uid={tc.assignedTo}
                                   members={projectMembers}
-                                  className="w-5.5 h-5.5 rounded-full"
+                                  className="w-6 h-6 rounded-full"
                                 />
                               ) : (
                                 <User className="w-3 h-3 text-content-subtle" />

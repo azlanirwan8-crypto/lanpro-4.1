@@ -54,6 +54,7 @@ import { StyledDropdown } from "../../components/ui/CommonComponents";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { Card } from "../../components/ui/CoreUI";
 import { TugasScopeToggle } from "../../components/ui/TugasScopeToggle";
+import UserAvatar from "../../components/ui/UserAvatar";
 import { useLingkupTugas } from "../../hooks/useLingkupTugas";
 import { adalahTugasMilikSaya } from "../../lib/tugasSaya";
 import { useProjectStore } from "../../store/stores";
@@ -1321,9 +1322,10 @@ export function DashboardView(props: DashboardViewProps) {
                           <tr key={idx} className="hover:bg-surface-sunken transition">
                             <td className="py-3 px-2">
                               <div className="flex items-center gap-2.5">
-                                <div className="w-7 h-7 rounded-full bg-primary-surface text-content-inverse flex items-center justify-center font-medium text-xs">
-                                  {user.name.slice(0, 2).toUpperCase()}
-                                </div>
+                                {/* #776 — lingkaran ini dibuat sendiri (`slice(0,2)`
+                                    + palet keras), jadi inisialnya "MO" untuk
+                                    "Mohamad Rifky" dan ronanya tidak ikut #770. */}
+                                <UserAvatar name={user.name} className="w-7 h-7" />
                                 <span className="font-medium text-content-strong ">
                                   {user.name}
                                 </span>

@@ -257,7 +257,8 @@ export const ActivityLogPanel = ({
                                 <UserAvatar
                                   uid={log.userId}
                                   members={projectMembers}
-                                  className="w-full h-full text-xs font-medium"
+                                  size="md"
+                                  className="w-full h-full font-medium"
                                 />
                                 <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-surface rounded-full"></div>
                               </div>
@@ -322,7 +323,8 @@ export const ActivityLogPanel = ({
                           <UserAvatar
                             uid={log.userId}
                             members={projectMembers}
-                            className="w-full h-full text-[10px] font-medium"
+                            size="sm"
+                            className="w-full h-full font-medium"
                           />
                         </div>
                         <span className="text-xs font-medium text-content-strong truncate">
@@ -351,7 +353,8 @@ export const ActivityLogPanel = ({
                 <UserAvatar
                   uid={inspectedLog.userId}
                   members={projectMembers}
-                  className="w-full h-full text-xs font-medium"
+                  size="md"
+                  className="w-full h-full font-medium"
                 />
               </div>
               <div className="flex flex-col min-w-0">
