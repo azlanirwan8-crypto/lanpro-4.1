@@ -110,7 +110,7 @@ export const LaciUtas: React.FC<LaciUtasProps> = ({
                 >
                   <div
                     className={cn(
-                      "flex flex-col max-w-[85%] md:max-w-xl",
+                      "flex flex-col max-w-[72%]",
                       isMine ? "items-end" : "items-start"
                     )}
                   >
@@ -120,7 +120,7 @@ export const LaciUtas: React.FC<LaciUtasProps> = ({
                           uid={commentUserId}
                           members={anggota}
                           name={authorName}
-                          className="w-4 h-4"
+                          className="w-6 h-6"
                         />
                         <span className="text-xs sm:text-[10px] text-content-muted font-medium">
                           {authorName}
@@ -129,27 +129,22 @@ export const LaciUtas: React.FC<LaciUtasProps> = ({
                     )}
                     <div
                       className={cn(
-                        "px-3.5 py-2 rounded-2xl relative shadow-soft group",
+                        "px-3 py-1.5 rounded-2xl",
                         isMine
                           ? "bg-primary-surface text-content-inverse rounded-br-sm"
                           : "bg-surface text-content-strong border border-border-subtle rounded-bl-sm"
                       )}
                     >
-                      <p className="text-[13px] leading-relaxed whitespace-pre-wrap break-words min-w-[50px] pb-3.5">
+                      <p className="text-[13px] leading-relaxed whitespace-pre-wrap break-words min-w-[50px]">
                         {commentBody}
                       </p>
-                      <span
-                        className={cn(
-                          "absolute bottom-1 right-3 text-xs sm:text-[11px] sm:text-[9px] tracking-tight",
-                          isMine ? "text-content-inverse/80" : "text-content-subtle"
-                        )}
-                      >
-                        {new Date(commentDate).toLocaleTimeString("id-ID", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
                     </div>
+                    <span className="text-3xs text-content-subtle mt-0.5 px-1">
+                      {new Date(commentDate).toLocaleTimeString("id-ID", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
                   </div>
                 </div>
               );
