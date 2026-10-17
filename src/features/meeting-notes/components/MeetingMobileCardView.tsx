@@ -193,7 +193,7 @@ export const MeetingMobileCardView: React.FC<MeetingMobileCardViewProps> = ({
                   uid={meeting.authorId}
                   members={[...users, ...projectMembers]}
                   name={authorName}
-                  className="w-5 h-5 text-[10px]"
+                  className="w-5 h-5"
                 />
                 <span className="font-medium text-content whitespace-nowrap">{authorName}</span>
               </div>

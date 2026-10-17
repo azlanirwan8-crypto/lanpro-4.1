@@ -840,7 +840,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                             <div className="relative shrink-0">
                               <UserAvatar
                                 user={targetUser}
-                                className="w-9 h-9 border border-border-faint text-xs"
+                                className="w-9 h-9 border border-border-faint"
                               />
                               {/* Penanda: hanya yang online yang memakai titik */}
                               {isOnline && (
@@ -906,7 +906,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       ) : (
                         <UserAvatar
                           user={activeChatUser}
-                          className="w-8 h-8 border border-border-inverse text-xs"
+                          className="w-8 h-8 border border-border-inverse"
                         />
                       )}
 

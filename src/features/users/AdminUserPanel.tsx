@@ -884,7 +884,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           }}
                         >
                           <div className="flex items-center gap-3.5">
-                            <UserAvatar user={user} className="w-9 h-9 text-sm shrink-0" />
+                            <UserAvatar user={user} className="w-9 h-9 shrink-0" />
                             <div>
                               <div className="font-medium text-content-strong text-xs group-hover:text-primary transition-colors">
                                 {user?.displayName || user?.username}
@@ -1142,7 +1142,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           className="flex items-center gap-2.5 min-w-0 flex-1 text-left cursor-pointer"
                           onClick={() => props.onSelectUserForDetail?.(user)}
                         >
-                          <UserAvatar user={user} className="w-9 h-9 text-sm shrink-0" />
+                          <UserAvatar user={user} className="w-9 h-9 shrink-0" />
                           <div className="min-w-0">
                             <div className="font-medium text-content-strong text-sm truncate">
                               {user?.displayName || user?.username}

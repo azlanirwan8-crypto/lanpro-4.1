@@ -234,3 +234,32 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
 };
 
 export default UserAvatar;
+
+/**
+ * #779 — lingkaran "belum ada PIC".
+ *
+ * Tanda ini dulu ditulis ulang per layar (abu keras + `uppercase` di papan
+ * kanban, piringan abu SEUKURAN avatar di pohon perencanaan), sehingga ia
+ * terlihat sebagai avatar sendiri yang beda gaya. Sekarang satu sumber, dan
+ * ukurannya ikut tangga `UserAvatar`: kelas ukuran TEKS dari caller dibuang,
+ * diameter caller dihormati.
+ */
+export const AvatarKosong = ({ className, title }: { className?: string; title?: string }) => {
+  const tangga = TANGGA[kunciTangga(className || "")];
+  const kelasCaller = (className || "").replace(POLA_TEKS, " ").trim();
+  const callerPunyaLebar = /(^|\s)w-/.test(kelasCaller);
+  return (
+    <span
+      aria-hidden
+      title={title}
+      className={cn(
+        "rounded-full border border-border-subtle bg-surface-muted text-content-subtle flex items-center justify-center font-semibold shrink-0 select-none",
+        callerPunyaLebar ? "" : tangga.lingkaran,
+        tangga.fs,
+        kelasCaller
+      )}
+    >
+      ?
+    </span>
+  );
+};

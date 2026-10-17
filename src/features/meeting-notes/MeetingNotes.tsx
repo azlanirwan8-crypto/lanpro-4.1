@@ -751,7 +751,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                               uid={meeting.authorId}
                               members={users && users.length > 0 ? users : projectMembers}
                               name={author.name}
-                              className="w-6 h-6 text-xs sm:text-[10px]"
+                              className="w-6 h-6"
                             />
                             <span className="whitespace-nowrap">{author.name}</span>
                           </div>

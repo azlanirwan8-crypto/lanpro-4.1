@@ -1494,7 +1494,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 <div className="relative group shrink-0">
                   <UserAvatar
                     user={{ ...user, photoURL: previewUrl || photoURL } as any}
-                    className="w-16 h-16 sm:w-20 sm:h-20 text-xl ring-4 ring-border-subtle/40 shadow-md shrink-0"
+                    className="w-16 h-16 sm:w-20 sm:h-20 ring-4 ring-border-subtle/40 shadow-md shrink-0"
                   />
                   {previewUrl && (
                     <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-amber-500 text-content-inverse text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
@@ -1726,7 +1726,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                             key={tm.id || tm.uid}
                             className="flex items-center gap-3 py-2.5 first:pt-1 last:pb-0"
                           >
-                            <UserAvatar user={tm} className="w-9 h-9 text-xs shrink-0" />
+                            <UserAvatar user={tm} className="w-9 h-9 shrink-0" />
                             <div className="min-w-0">
                               <div className="text-xs font-medium text-content-strong truncate">
                                 {tm.displayName || tm.username || tm.email}
@@ -1948,7 +1948,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 <div className="flex items-start gap-3">
                                   <UserAvatar
                                     user={user}
-                                    className="w-7 h-7 text-xs shrink-0 ring-2 ring-surface shadow-xs mt-0.5"
+                                    className="w-7 h-7 shrink-0 ring-2 ring-surface shadow-xs mt-0.5"
                                   />
                                   <div className="space-y-1.5 flex-1 min-w-0">
                                     <div className="flex flex-wrap items-center gap-1.5 text-xs">
@@ -3366,7 +3366,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                           <UserAvatar
                                             key={m.id || m.uid}
                                             user={m}
-                                            className="w-5 h-5 text-[10px] ring-2 ring-surface shadow-2xs"
+                                            className="w-5 h-5 ring-2 ring-surface shadow-2xs"
                                           />
                                         ))}
                                         {members.length > 4 && (

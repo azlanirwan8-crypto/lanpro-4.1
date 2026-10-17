@@ -5,17 +5,14 @@ import {
   Droppable as _Droppable,
   Draggable as _Draggable,
 } from "@hello-pangea/dnd";
-import { Clock } from "lucide-react";
-import { format } from "date-fns";
-
 const Droppable = _Droppable as any;
 const Draggable = _Draggable as any;
 
-import { cn, ensureDate } from "../../lib/utils";
+import { cn } from "../../lib/utils";
 import { warnaDariMaster } from "../../lib/warnaLabel";
 import { Task } from "../../types";
-import { UserAvatar } from "../../components/ui/UserAvatar";
-import { LabelChip } from "../../components/ui/CommonComponents";
+import { UserAvatar, AvatarKosong } from "../../components/ui/UserAvatar";
+import { LabelChip, ChipTanggal } from "../../components/ui/CommonComponents";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { PlanningViewProps } from "./types";
 import { usePlanning } from "./hooks";
@@ -146,7 +143,8 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                 variant === "card"
                   ? "group p-3 rounded-lg shadow-2xs cursor-pointer hover:shadow-xs hover:brightness-[0.985]"
                   : "group flex items-center justify-between p-2.5 px-3 rounded-lg shadow-2xs cursor-pointer hover:brightness-[0.985]",
-                task.isBlocked && "border-l-danger bg-danger/5 border-danger/30 ring-1 ring-danger/50",
+                task.isBlocked &&
+                  "border-l-danger bg-danger/5 border-danger/30 ring-1 ring-danger/50",
                 snapshot.isDragging &&
                   "shadow-xl ring-2 ring-primary/20 scale-[1.02] z-50 bg-surface border-primary"
               )}
@@ -158,32 +156,16 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                   </h4>
                   <div className="flex items-center justify-between mt-1 pt-1 border-t border-border-faint">
                     <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded-full bg-surface-muted flex items-center justify-center shrink-0">
-                        {task.assigneeId ? (
-                          <UserAvatar
-                            uid={task.assigneeId}
-                            members={projectMembers}
-                            className="w-5 h-5"
-                          />
-                        ) : (
-                          <span className="text-xs sm:text-[10px] font-medium text-content-subtle">
-                            ?
-                          </span>
-                        )}
-                      </div>
-                      {task.dueDate && (
-                        <div
-                          className={cn(
-                            "flex items-center gap-1 text-xs sm:text-[10px] font-medium px-1.5 py-0.5 rounded-md",
-                            ensureDate(task.dueDate) < new Date(new Date().setHours(0, 0, 0, 0))
-                              ? "bg-danger/10 text-danger-text border border-danger/30"
-                              : "bg-surface-sunken text-content-muted border border-border-subtle/60"
-                          )}
-                        >
-                          <Clock className="w-3 h-3" />
-                          {format(ensureDate(task.dueDate), "MMM d")}
-                        </div>
+                      {task.assigneeId ? (
+                        <UserAvatar
+                          uid={task.assigneeId}
+                          members={projectMembers}
+                          className="w-5 h-5"
+                        />
+                      ) : (
+                        <AvatarKosong className="w-5 h-5" />
                       )}
+                      <ChipTanggal tanggal={task.dueDate} />
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
                       {task.priority && (
@@ -206,19 +188,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                     </h4>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    {task.dueDate && (
-                      <div
-                        className={cn(
-                          "flex items-center gap-1 text-xs sm:text-[10px] font-medium px-1.5 py-0.5 rounded-md border",
-                          ensureDate(task.dueDate) < new Date(new Date().setHours(0, 0, 0, 0))
-                            ? "bg-danger/10 text-danger-text border-danger/30"
-                            : "bg-surface-sunken text-content-muted border-border-subtle/60"
-                        )}
-                      >
-                        <Clock className="w-3 h-3" />
-                        {format(ensureDate(task.dueDate), "MMM d")}
-                      </div>
-                    )}
+                    <ChipTanggal tanggal={task.dueDate} />
                     {task.priority && (
                       <LabelChip
                         kelompok="priority"
@@ -228,19 +198,15 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                       />
                     )}
                     <LabelChip kelompok="status" nilai={task.status} masterData={masterData} />
-                    <div className="w-5 h-5 rounded-full bg-surface-muted flex items-center justify-center">
-                      {task.assigneeId ? (
-                        <UserAvatar
-                          uid={task.assigneeId}
-                          members={projectMembers}
-                          className="w-5 h-5"
-                        />
-                      ) : (
-                        <span className="text-xs sm:text-[10px] font-medium text-content-subtle">
-                          ?
-                        </span>
-                      )}
-                    </div>
+                    {task.assigneeId ? (
+                      <UserAvatar
+                        uid={task.assigneeId}
+                        members={projectMembers}
+                        className="w-5 h-5"
+                      />
+                    ) : (
+                      <AvatarKosong className="w-5 h-5" />
+                    )}
                   </div>
                 </div>
               )}

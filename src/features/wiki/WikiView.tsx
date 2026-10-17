@@ -1143,7 +1143,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                               uid={doc.createdBy}
                               members={users}
                               name={creatorName}
-                              className="w-6 h-6 text-xs sm:text-[10px]"
+                              className="w-6 h-6"
                             />
                             <span className="whitespace-nowrap" title={creatorName}>
                               {creatorName}

@@ -335,7 +335,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                                   src={replyAvatar}
                                   uid={reply.authorId}
                                   members={projectMembers}
-                                  className="w-6 h-6 border border-surface shadow-2xs shrink-0 mt-0.5 text-[10px]"
+                                  className="w-6 h-6 border border-surface shadow-2xs shrink-0 mt-0.5"
                                 />
                                 <div className="flex-1 min-w-0">
                                   {/* Reply Bubble */}
@@ -386,7 +386,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                               <UserAvatar
                                 user={user}
                                 uid={user?.uid || user?.id}
-                                className="w-6 h-6 border border-surface shadow-2xs shrink-0 mt-1 text-[10px]"
+                                className="w-6 h-6 border border-surface shadow-2xs shrink-0 mt-1"
                               />
                               <div className="flex-1 min-w-0 space-y-2">
                                 <div className="border border-border-subtle rounded-xl bg-surface focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-2xs overflow-hidden">

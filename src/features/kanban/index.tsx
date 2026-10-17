@@ -10,7 +10,7 @@ import { cn } from "../../lib/utils";
 import { statusColumnKey, tasksForStatusLane, taskMatchesStatus } from "../../lib/statusKolom";
 import { warnaLabel } from "../../lib/warnaLabel";
 import { Layers } from "lucide-react";
-import { UserAvatar } from "../../components/ui/UserAvatar";
+import { UserAvatar, AvatarKosong } from "../../components/ui/UserAvatar";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { Card } from "../../components/ui/CoreUI";
@@ -382,11 +382,9 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                       >
                         <div className="flex items-center gap-2 mb-1.5">
                           {isUnassigned ? (
-                            <div className="w-5 h-5 rounded-full flex items-center justify-center font-normal text-xs sm:text-[10px] uppercase bg-surface-muted text-content-secondary shrink-0">
-                              ?
-                            </div>
+                            <AvatarKosong className="w-5 h-5" />
                           ) : (
-                            <UserAvatar user={member} className="w-5 h-5 text-xs sm:text-[10px]" />
+                            <UserAvatar user={member} className="w-5 h-5" />
                           )}
                           <span className="text-xs sm:text-[10px] font-normal text-content-muted truncate">
                             {isUnassigned ? t("newTask.unassigned") : t("issueColumns.assignee")}

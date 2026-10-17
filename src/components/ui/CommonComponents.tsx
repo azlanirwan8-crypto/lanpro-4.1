@@ -17,9 +17,11 @@ import {
   Users,
   Search,
   FileText,
+  Clock,
   User as UserIcon,
 } from "lucide-react";
-import { cn } from "../../lib/utils";
+import { format } from "date-fns";
+import { cn, ensureDate } from "../../lib/utils";
 import { MasterData, UserProfile } from "../../types";
 import {
   cariMaster,
@@ -32,7 +34,7 @@ import {
 import { useAppStore } from "../../store/useAppStore";
 import { RenderIcon } from "../RenderIcon";
 
-import { UserAvatar } from "./UserAvatar";
+import { UserAvatar, AvatarKosong } from "./UserAvatar";
 export { UserAvatar };
 
 export const UserBadge = ({
@@ -152,7 +154,8 @@ export const TypeIcon = ({
  * yang menurunkannya dari `--lbr`; di sini hanya bentuknya. Terpisah supaya
  * ritme radius/padding tetap jadi keputusan pemanggilnya.
  */
-const CHIP_KECIL = "px-2 py-0.5 border rounded-md font-normal text-[10px] tracking-tight uppercase";
+const CHIP_DASAR = "px-2 py-0.5 border rounded-md font-normal text-[10px]";
+const CHIP_KECIL = `${CHIP_DASAR} tracking-tight uppercase`;
 const CHIP_BIASA = "px-1.5 py-0.5 border rounded font-normal text-xs tracking-tight";
 
 /** Warna chip selalu milik baris MasterData - satu komponen supaya panel tidak bisa menulis chip-nya sendiri lagi (#590). */
@@ -192,6 +195,42 @@ export const LabelChip = ({
         <RenderIcon iconName={baris.icon} className="w-3 h-3 shrink-0" style={{ color: hex }} />
       ) : null}
       {teks}
+    </span>
+  );
+};
+
+/**
+ * #779 — chip TENGGAT satu ritme dengan chip label.
+ *
+ * `LabelChip` sudah dijaga #564/#590, tetapi chip tanggal ditulis ulang per layar:
+ * di pohon perencanaan ia `rounded-md px-1.5` dengan `text-xs sm:text-[10px]`, jadi
+ * berdiri di baris yang sama sebelah chip `px-2 text-[10px]` dan tingginya beda
+ * beberapa pixel. Pemilik proyek menunjuknya pada 17 Okt: "button nya masih belum
+ * standar". Geometrinya sekarang diambil dari `CHIP_KECIL` yang sama; yang tetap
+ * milik chip ini hanya warnanya — tenggat lewat memakai keluarga `danger`.
+ */
+export const ChipTanggal = ({
+  tanggal,
+  className,
+}: {
+  tanggal?: string | Date | null;
+  className?: string;
+}) => {
+  if (!tanggal) return null;
+  const lewat = ensureDate(tanggal) < new Date(new Date().setHours(0, 0, 0, 0));
+  return (
+    <span
+      className={cn(
+        CHIP_DASAR,
+        "inline-flex items-center gap-1",
+        lewat
+          ? "bg-danger/10 text-danger-text border-danger/30"
+          : "bg-surface-sunken text-content-muted border-border-subtle/60",
+        className
+      )}
+    >
+      <Clock className="w-3 h-3 shrink-0" aria-hidden />
+      {format(ensureDate(tanggal), "MMM d")}
     </span>
   );
 };
@@ -470,9 +509,7 @@ export const StyledDropdown = ({
             selected.id !== "System" ? (
               <UserAvatar uid={selected.id} members={members} className="w-4 h-4 flex-shrink-0" />
             ) : type === "member" && (!selected?.id || selected.id === "Unassigned") ? (
-              <div className="w-4 h-4 rounded-full bg-surface-muted border border-border-subtle border-dashed flex items-center justify-center flex-shrink-0">
-                <span className="text-[9px] text-content-subtle font-normal">?</span>
-              </div>
+              <AvatarKosong className="w-4 h-4" />
             ) : isStatus ? (
               selected?.icon ? (
                 <RenderIcon
