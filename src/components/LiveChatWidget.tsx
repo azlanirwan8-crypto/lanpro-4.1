@@ -24,6 +24,7 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { validateFileClient } from "../lib/fileSecurity";
+import { waktuPesan } from "../lib/waktuPesan";
 import { dataUnduhAman, gambarAman, tautanAman } from "../lib/tautanAman";
 // UTANG LAPISAN: komponen ini memanggil backend langsung (9 panggilan chat).
 // Dijadwalkan pindah ke services/ pada fase L4. Ditandai eksplisit agar
@@ -524,15 +525,14 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
   // Calculate total unread messages
   const totalUnread = Object.values(unreadCounts).reduce((acc, curr) => acc + curr, 0);
 
-  // Format timestamp
-  const formatTime = (isoString: string) => {
-    try {
-      const d = new Date(isoString);
-      return d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
-    } catch (e) {
-      return "";
-    }
-  };
+  /**
+   * #791 — delegasi ke `waktuPesan()`. Namanya tetap `formatTime` karena tiga
+   * pemanggilnya (dua pratinjau percakapan + satu gelembung) memang butuh
+   * stempel yang sama; isinya bukan jam lagi — pesan kemarin berbunyi
+   * "Kemarin", bukan "14.45" tanpa penanda hari.
+   */
+  const formatTime = (isoString: string) =>
+    isoString ? waktuPesan(isoString, { t, bahasa: i18n.language }) : "";
 
   /**
    * Peninjauan gambar ukuran penuh (#640).

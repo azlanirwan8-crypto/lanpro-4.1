@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { MessageSquare, Send, X } from "lucide-react";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
 import { cn } from "../../../lib/utils";
+import { waktuPesan } from "../../../lib/waktuPesan";
 import type { DiscussionPoint, DiscussionPointComment, UserProfile } from "../../../types";
 
 /**
@@ -36,7 +37,7 @@ export const LaciUtas: React.FC<LaciUtasProps> = ({
   onKirim,
   onTutup,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [teks, setTeks] = useState("");
 
   const kirim = () => {
@@ -140,10 +141,7 @@ export const LaciUtas: React.FC<LaciUtasProps> = ({
                       </p>
                     </div>
                     <span className="text-3xs text-content-subtle mt-0.5 px-1">
-                      {new Date(commentDate).toLocaleTimeString("id-ID", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {waktuPesan(commentDate, { t, bahasa: i18n.language })}
                     </span>
                   </div>
                 </div>
