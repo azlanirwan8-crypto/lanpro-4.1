@@ -4,7 +4,7 @@ import { Search, LayoutGrid, Filter, Plus, ChevronRight, ChevronDown } from "luc
 import { Task, MasterData } from "../../../types";
 import { StyledDropdown, TypeIcon } from "../../../components/ui/CommonComponents";
 import { getAllDescendants, getTaskDepth } from "../../../lib/taskTree";
-import { warnaDariMaster } from "../../../lib/warnaLabel";
+import { gayaLabel, warnaDariMaster } from "../../../lib/warnaLabel";
 
 interface BacklogSectionProps {
   tasks: Task[];
@@ -116,8 +116,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
     };
   }, [tasks, search, priorityFilter]);
 
-  const getTasksForParent = (parentId: string | null) =>
-    kelompok.get(parentId ?? "") ?? [];
+  const getTasksForParent = (parentId: string | null) => kelompok.get(parentId ?? "") ?? [];
 
   // #689 butir (g) — "backlog kosong" dan "tidak ada yang cocok" adalah dua
   // kabar yang berbeda; yang pertama berarti tidak ada kerja, yang kedua berarti
@@ -216,10 +215,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
             />
           </div>
           <div className="w-[42%] max-w-[9.5rem] shrink-0 flex items-center gap-1.5 min-w-0">
-            <Filter
-              className="w-3 h-3 text-content-subtle shrink-0 hidden xs:block"
-              aria-hidden
-            />
+            <Filter className="w-3 h-3 text-content-subtle shrink-0 hidden xs:block" aria-hidden />
             <div className="min-w-0 flex-1">
               <StyledDropdown
                 value={priorityFilter}
@@ -276,12 +272,8 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
                 {epic.title}
               </span>
               <div
-                className="ml-auto text-[10px] leading-none font-normal px-1.5 py-1 rounded-md border"
-                style={{
-                  color: hexEpic,
-                  backgroundColor: `${hexEpic}1A`,
-                  borderColor: `${hexEpic}4D`,
-                }}
+                className="label-chip ml-auto text-[10px] leading-none font-normal px-1.5 py-1 rounded-md border"
+                style={gayaLabel(hexEpic)}
               >
                 {items.length}
               </div>
@@ -289,9 +281,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
             ...(isExpanded
               ? items
                   .filter(
-                    (i) =>
-                      i.task.parentId === epic.id ||
-                      !backlogIds.has(i.task.parentId as string)
+                    (i) => i.task.parentId === epic.id || !backlogIds.has(i.task.parentId as string)
                   )
                   .map((i) => renderPohon(i.task, i.depth))
               : []),
@@ -301,12 +291,12 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
         {(() => {
           const items = getTasksForParent("standalone");
           if (items.length === 0) return [];
-          
+
           const isExpanded = terbuka("standalone");
 
           return [
-            <div 
-              key="header-standalone" 
+            <div
+              key="header-standalone"
               className="flex items-center gap-2 px-1 mt-3 mb-2 cursor-pointer hover:bg-surface-muted/50 rounded-md py-1 transition-colors"
               onClick={() => toggleExpand("standalone")}
             >

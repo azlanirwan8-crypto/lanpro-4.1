@@ -923,6 +923,25 @@ html.dark .shadow-xs {
 }
 
 /*
+ * #785 — rona untuk PERMUKAAN BESAR (baris epik dan kartu tugas di pohon
+ * perencanaan).
+ *
+ * Pemanggil sebelumnya menulis alpha sendiri di dalam JavaScript
+ * (`backgroundColor: ${hexPrioritas}0F`), sehingga satu heksa master data
+ * menghasilkan tiga heksa baru dan tidak ada satu pun tempat yang bisa
+ * menyetel kuat-ronanya. Kelas ini memindahkan angka itu ke CSS dengan sumber
+ * yang sama seperti `.label-chip` (`--lbr` dari `gayaLabel()`): `.label-wash`
+ * hanya latar, `.label-edge` hanya garis kiri. Garis dan teks permukaan besar
+ * tetap milik pemanggil, jadi kartu tidak berubah menjadi badge.
+ */
+.label-wash {
+  background-color: color-mix(in srgb, var(--lbr, var(--color-surface-marker)) 6%, transparent);
+}
+.label-edge {
+  border-left-color: var(--lbr, var(--color-border-subtle));
+}
+
+/*
  * #770 — avatar berona lembut.
  *
  * SEJAK #125 lingkaran avatar memakai latar PEKAT palet Tailwind (`bg-*-700`)

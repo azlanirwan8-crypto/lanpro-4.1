@@ -106,10 +106,16 @@ describe("#564 warna Planning mengikuti Master Data", () => {
   beforeEach(() => useProjectStore.getState().setLingkupTugas("all"));
   afterEach(() => useProjectStore.getState().setLingkupTugas("all"));
 
-  it("garis kiri kartu memakai hex priority milik Master Data", () => {
+  it("garis kiri kartu membawa hex priority milik Master Data", () => {
     render(<PlanningView {...(props as any)} />);
     fireEvent.click(screen.getByText("Epik Uji"));
-    expect(kartu("Judul anak-1").style.borderLeftColor).toBe(rgb(HEX_PRIORITAS));
+    const el = kartu("Judul anak-1");
+    // #785 — hex tidak lagi ditulis sebagai `borderLeftColor` inline plus alpha
+    // rakitan; ia masuk lewat SATU properti `--lbr` yang dipetakan CSS
+    // `.label-edge` ke `border-left-color` (pemetaan itu dikunci hexString-785).
+    expect(el.className).toContain("label-edge");
+    expect(el.style.getPropertyValue("--lbr")).toBe(HEX_PRIORITAS);
+    expect(el.style.borderLeftColor).toBe("");
   });
 
   it("chip priority memakai hex & label milik Master Data", () => {

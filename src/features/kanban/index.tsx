@@ -252,7 +252,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                     {/* Epic Card Content */}
                     <div
                       className={cn(
-                        "bg-surface rounded-lg shadow-2xs border border-border-subtle/80 border-l-4 border-l-purple-600 transition-all duration-200 hover:border-purple-500/30",
+                        "bg-surface rounded-lg shadow-2xs border border-border-subtle/80 border-l-4 border-l-primary transition-all duration-200 hover:border-primary/30",
                         isCompact ? "p-2" : "p-2.5"
                       )}
                     >
@@ -266,7 +266,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                         >
                           {epic.title}
                         </h3>
-                        <span className="shrink-0 bg-primary-surface/10 text-primary px-1.5 py-0.5 rounded text-[10px] leading-none font-medium border border-purple-500/30">
+                        <span className="shrink-0 bg-primary-surface/10 text-primary px-1.5 py-0.5 rounded text-[10px] leading-none font-medium border border-primary/30">
                           {boardStatuses.reduce(
                             (acc, status) =>
                               acc + tasksForStatusLane(groupedTasks, epic.id, status).length,
