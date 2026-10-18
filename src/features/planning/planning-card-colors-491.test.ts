@@ -49,10 +49,13 @@ describe("#564: warna & ikon Planning datang dari MasterData", () => {
 
   it("kartu/baris memakai border-l-4 dengan hex MasterData", () => {
     expect(planning).toContain("border-l-4");
+    expect(planning).toContain("label-edge");
     expect(planning).toMatch(/warnaDariMaster\(\s*masterData,\s*"priority",\s*task\.priority\s*\)/);
     expect(planning).toMatch(/warnaDariMaster\(\s*masterData,\s*"status",\s*task\.status\s*\)/);
-    expect(planning).toMatch(/borderLeftColor:\s*hexPrioritas/);
-    expect(planning).toMatch(/borderLeftColor:\s*hexStatus/);
+    // #785 — hex masuk ke garis kiri lewat SATU properti `--lbr` yang diisi
+    // `gayaLabel()`, bukan `borderLeftColor` inline plus alpha rakitan `${hex}0F`.
+    expect(planning).toMatch(/gayaLabel\(\s*variant === "card" \? hexPrioritas : hexStatus\s*\)/);
+    expect(planning).not.toMatch(/\$\{hex(Prioritas|Status)\}/);
   });
 
   it("blocked tetap memakai token danger, bukan warna master", () => {

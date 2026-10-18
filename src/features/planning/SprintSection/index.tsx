@@ -16,7 +16,7 @@ import { format } from "date-fns";
 import { cn, ensureDate } from "../../../lib/utils";
 import { getAllDescendants, getTaskDepth } from "../../../lib/taskTree";
 import { TypeIcon } from "../../../components/ui/CommonComponents";
-import { warnaDariMaster } from "../../../lib/warnaLabel";
+import { gayaLabel, warnaDariMaster } from "../../../lib/warnaLabel";
 import { Task, Sprint, MasterData, UserProfile } from "../../../types";
 import { statusSelesai } from "../../../lib/statusSelesai";
 import { RingkasanSprint } from "./RingkasanSprint";
@@ -143,7 +143,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                 <div className="flex items-center justify-between gap-2 sm:gap-4">
                   {/* Sisi Kiri: Icon Roket + Name + Status + Date */}
                   <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                    <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 text-content-inverse flex items-center justify-center shadow-xs shrink-0">
+                    <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-primary text-content-inverse flex items-center justify-center shadow-xs shrink-0">
                       <Rocket className="w-4 h-4 sm:w-5 sm:h-5 text-content-inverse" />
                     </div>
                     <div className="flex flex-col min-w-0 flex-1">
@@ -459,11 +459,8 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                     return [
                                       <div
                                         key={`sprint-header-${epic.id}`}
-                                        className="flex items-center justify-between px-3 py-1.5 border rounded-md mb-2 mt-2 first:mt-0 cursor-pointer hover:brightness-[0.985] transition-colors"
-                                        style={{
-                                          backgroundColor: `${hexEpic}1A`,
-                                          borderColor: `${hexEpic}4D`,
-                                        }}
+                                        className="label-edge flex items-center justify-between px-3 py-1.5 border border-l-4 border-border-subtle rounded-md mb-2 mt-2 first:mt-0 cursor-pointer hover:bg-surface-muted/60 transition-colors"
+                                        style={gayaLabel(hexEpic)}
                                         onClick={() => toggleExpand(sprint.id, `epic-${epic.id}`)}
                                       >
                                         <div className="flex items-center gap-2">
@@ -492,11 +489,8 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                           </span>
                                         </div>
                                         <div
-                                          className="text-[10px] font-normal px-1.5 py-1 rounded-md border bg-surface"
-                                          style={{
-                                            color: hexEpic,
-                                            borderColor: `${hexEpic}4D`,
-                                          }}
+                                          className="label-chip text-[10px] font-normal px-1.5 py-1 rounded-md border"
+                                          style={gayaLabel(hexEpic)}
                                         >
                                           {items.length}
                                         </div>

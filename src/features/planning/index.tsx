@@ -9,7 +9,7 @@ const Droppable = _Droppable as any;
 const Draggable = _Draggable as any;
 
 import { cn } from "../../lib/utils";
-import { warnaDariMaster } from "../../lib/warnaLabel";
+import { gayaLabel, warnaDariMaster } from "../../lib/warnaLabel";
 import { Task } from "../../types";
 import { UserAvatar, AvatarKosong } from "../../components/ui/UserAvatar";
 import { LabelChip, ChipTanggal } from "../../components/ui/CommonComponents";
@@ -134,12 +134,11 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
               style={
                 task.isBlocked
                   ? undefined
-                  : variant === "card"
-                    ? { borderLeftColor: hexPrioritas, backgroundColor: `${hexPrioritas}0F` }
-                    : { borderLeftColor: hexStatus, backgroundColor: `${hexStatus}0F` }
+                  : gayaLabel(variant === "card" ? hexPrioritas : hexStatus)
               }
               className={cn(
                 "transition-all duration-200 ease-out select-none border border-border-subtle/80 border-l-4",
+                !task.isBlocked && "label-edge label-wash",
                 variant === "card"
                   ? "group p-3 rounded-lg shadow-2xs cursor-pointer hover:shadow-xs hover:brightness-[0.985]"
                   : "group flex items-center justify-between p-2.5 px-3 rounded-lg shadow-2xs cursor-pointer hover:brightness-[0.985]",
