@@ -124,17 +124,3 @@ export const getShapeThemeClasses = (node: FlowNode, isSelected: boolean): strin
 
   return `${base} ${palette.text} border-0 bg-transparent text-left items-start ${ringClass}`;
 };
-
-/**
- * Inisial dua huruf untuk avatar penulis flowchart.
- *
- * "LP" (LanPro) dipakai bila nama tidak diketahui.
- */
-export const getInitials = (name?: string): string => {
-  if (!name) return "LP";
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  }
-  return name.slice(0, 2).toUpperCase();
-};

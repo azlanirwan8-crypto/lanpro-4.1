@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { UserAvatar } from "../../components/ui/UserAvatar";
 import {
   Search,
   Calendar,
@@ -580,9 +581,10 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                       {t("audit.authorActivity")}
                     </p>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary-surface rounded-full flex items-center justify-center text-content-inverse font-medium">
-                        {(selectedLog.userName || "U")[0]}
-                      </div>
+                      <UserAvatar
+                        name={selectedLog.userName || "Unknown User"}
+                        className="w-10 h-10"
+                      />
                       <div>
                         <p className="text-sm font-medium text-content-strong">
                           {selectedLog.userName || "Unknown User"}

@@ -902,18 +902,6 @@ export const WikiView: React.FC<WikiViewProps> = ({
     return u?.displayName || u?.username || currentUser?.displayName || "Administrator";
   };
 
-  const getUserInitials = (id: string) => {
-    const name = getUserName(id);
-    return (
-      name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .substring(0, 2)
-        .toUpperCase() || "?"
-    );
-  };
-
   // Bentuk URL yang boleh dibingkai Google dipindah ke ./embedUrl.ts (#600):
   // fungsi lama di sini hanya mengenali URL yang mengandung "/edit", jadi
   // bentuk tautan lainnya dipasang apa adanya ke <iframe> dan Google membalas
