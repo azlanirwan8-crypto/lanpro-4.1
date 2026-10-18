@@ -1394,7 +1394,7 @@ export function DashboardView(props: DashboardViewProps) {
                     >
                       <div className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-[10px] leading-none font-mono font-medium text-primary bg-primary/10 px-1.5 py-0.2 rounded border border-primary/30">
+                          <span className="text-[10px] leading-none font-mono font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded border border-primary/30">
                             {epic.key || "EPIC"}
                           </span>
                           <span className="font-medium text-content-strong truncate">
@@ -1648,7 +1648,7 @@ export function DashboardView(props: DashboardViewProps) {
                           {issue.key}
                         </span>
                         {issue.isBlocked && (
-                          <span className="text-[10px] leading-none sm:text-[9px] font-medium text-danger-text bg-danger/10 px-1.5 py-0.2 rounded border border-danger/30">
+                          <span className="text-[10px] leading-none sm:text-[9px] font-medium text-danger-text bg-danger/10 px-1.5 py-0.5 rounded border border-danger/30">
                             BLOCKED
                           </span>
                         )}

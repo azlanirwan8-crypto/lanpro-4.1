@@ -469,7 +469,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                     <span className="text-xs font-medium text-content-strong">
                       {actor?.displayName}
                     </span>
-                    <span className="text-xs sm:text-[10px] font-normal text-content-subtle bg-surface border border-border-subtle/60 px-1.5 py-0.2 rounded uppercase tracking-tight">
+                    <span className="text-xs sm:text-[10px] font-normal text-content-subtle bg-surface border border-border-subtle/60 px-1.5 py-0.5 rounded uppercase tracking-tight">
                       {safeFormat(log.createdAt, "MMM d, HH:mm")}
                     </span>
                   </div>

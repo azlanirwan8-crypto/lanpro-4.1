@@ -1087,11 +1087,11 @@ export const MasterDataPanel = ({
                                                 return (
                                                   <div className="flex items-center gap-1 shrink-0 select-none">
                                                     {rType === "PROJECT" ? (
-                                                      <span className="text-[10px] leading-none sm:text-[9px] font-normal px-2 py-0.2 rounded-md bg-blue-500/10 text-blue-700 border border-blue-500/30 uppercase">
+                                                      <span className="text-[10px] leading-none sm:text-[9px] font-normal px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-700 border border-blue-500/30 uppercase">
                                                         {t("master.projectRole")}
                                                       </span>
                                                     ) : (
-                                                      <span className="text-[10px] leading-none sm:text-[9px] font-normal px-2 py-0.2 rounded-md bg-purple-500/10 text-purple-700 border border-purple-500/30 uppercase">
+                                                      <span className="text-[10px] leading-none sm:text-[9px] font-normal px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-700 border border-purple-500/30 uppercase">
                                                         {t("master.systemRole")}
                                                       </span>
                                                     )}
@@ -1110,7 +1110,7 @@ export const MasterDataPanel = ({
                                               })()}
 
                                             {usageCount > 0 && (
-                                              <span className="text-[10px] leading-none font-medium px-2 py-0.2 rounded-md bg-primary/10 text-primary border border-primary/30 flex items-center gap-1">
+                                              <span className="text-[10px] leading-none font-medium px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/30 flex items-center gap-1">
                                                 <Tag className="w-3 h-3" />{" "}
                                                 {t("rakit.activeTasks", { count: usageCount })}
                                               </span>

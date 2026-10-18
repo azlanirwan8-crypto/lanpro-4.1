@@ -266,7 +266,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                         >
                           {epic.title}
                         </h3>
-                        <span className="shrink-0 bg-primary-surface/10 text-primary px-1.5 py-0.2 rounded text-[10px] leading-none font-medium border border-purple-500/30">
+                        <span className="shrink-0 bg-primary-surface/10 text-primary px-1.5 py-0.5 rounded text-[10px] leading-none font-medium border border-purple-500/30">
                           {boardStatuses.reduce(
                             (acc, status) =>
                               acc + tasksForStatusLane(groupedTasks, epic.id, status).length,
@@ -389,7 +389,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                           <span className="text-xs sm:text-[10px] font-normal text-content-muted truncate">
                             {isUnassigned ? t("newTask.unassigned") : t("issueColumns.assignee")}
                           </span>
-                          <span className="ml-auto bg-surface-muted text-content-secondary px-1.5 py-0.2 rounded text-xs sm:text-[10px] font-normal shrink-0">
+                          <span className="ml-auto bg-surface-muted text-content-secondary px-1.5 py-0.5 rounded text-xs sm:text-[10px] font-normal shrink-0">
                             {totalIssueCount}
                           </span>
                         </div>

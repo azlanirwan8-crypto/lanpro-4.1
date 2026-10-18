@@ -914,7 +914,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                         {activeChatUser.id === "lanpro-ai" && (
                           <span
                             title={t("chat.assistantEngine")}
-                            className="px-1 py-0.2 bg-primary/20 text-primary text-xs sm:text-[10px] font-medium rounded uppercase border border-primary/30"
+                            className="px-1 py-0.5 bg-primary/20 text-primary text-xs sm:text-[10px] font-medium rounded uppercase border border-primary/30"
                           >
                             AI
                           </span>

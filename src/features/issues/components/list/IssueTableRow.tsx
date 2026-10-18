@@ -314,7 +314,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                 const hexJenis = warnaDariMaster(mArr, "issue_type", task.type);
                 content = (
                   <div
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 min-w-0"
                     style={{ paddingLeft: `${depth * 24}px` }}
                   >
                     {/*
@@ -376,7 +376,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                         setIsTaskDetailModalOpen(false);
                         setCurrentView("issueDetail" as any);
                       }}
-                      className="text-xs font-normal text-content-body hover:text-blue-600 transition-colors cursor-pointer whitespace-nowrap block"
+                      className="text-xs font-normal text-content-body hover:text-blue-600 transition-colors cursor-pointer whitespace-nowrap block truncate"
                       title={`${task.title || (task as any).summary || (task as any).name || ""} — ${t(
                         "issueRow.openDetail"
                       )}`}

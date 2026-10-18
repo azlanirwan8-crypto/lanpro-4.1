@@ -142,7 +142,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
             <History className="w-3.5 h-3.5" />
             {t("qa.executionHistory")}
             {executionLogs.length > 0 && (
-              <span className="bg-primary-surface/10 text-primary text-[10px] leading-none sm:text-[9px] px-1.5 py-0.2 rounded-full font-medium">
+              <span className="bg-primary-surface/10 text-primary text-[10px] leading-none sm:text-[9px] px-1.5 py-0.5 rounded-full font-medium">
                 {executionLogs.length}
               </span>
             )}
