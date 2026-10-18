@@ -15,6 +15,7 @@ import { LabelChip, StyledDropdown } from "../../../components/ui/CommonComponen
 import { useMasterOptionItems } from "../../../hooks/useMasterOptions";
 import { useAppStore } from "../../../store/useAppStore";
 import { warnaDariMaster } from "../../../lib/warnaLabel";
+import { waktuPesan } from "../../../lib/waktuPesan";
 import { CADANGAN_STATUS_QA } from "./QATestCaseTable";
 
 interface QADetailDrawerProps {
@@ -54,7 +55,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
   handleOpenCreateBugModal,
   handleStatusChange,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const mArr = useAppStore((s) => s.masterData) || [];
   const opsiStatusQa = useMasterOptionItems("qa_status", CADANGAN_STATUS_QA);
   if (!selectedTestCase) return null;
@@ -306,10 +307,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                           {cm.userName}
                         </span>
                         <span className="text-xs sm:text-[10px] text-content-subtle">
-                          {new Date(cm.timestamp).toLocaleTimeString("id-ID", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          {waktuPesan(cm.timestamp, { t, bahasa: i18n.language })}
                         </span>
                       </div>
                       <p className="text-xs text-content-secondary">{cm.text}</p>

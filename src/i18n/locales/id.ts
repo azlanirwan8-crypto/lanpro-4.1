@@ -332,6 +332,9 @@ export const id = {
     danLainnya: "…dan {{jumlah}} lainnya",
     mengerti: "Mengerti",
   },
+  waktuPesan: {
+    kemarin: "Kemarin",
+  },
   notif: {
     nBugRetest: "BUG RETEST",
     nBugReady: "Bug Ready for Retest",

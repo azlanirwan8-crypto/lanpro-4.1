@@ -66,11 +66,14 @@ describe("gelembung utas diskusi (#780)", () => {
     expect(ganda).toEqual([]);
   });
 
-  it("jam dirender DI LUAR gelembung, sebagai tetangga setelahnya", () => {
+  it("stempel waktu dirender DI LUAR gelembung, sebagai tetangga setelahnya", () => {
     const { container } = renderLaci();
     const gelembung = container.querySelector("p")!.parentElement!;
     const induk = gelembung.parentElement!;
-    const jam = [...induk.children].find((el) => /^\d{2}[.:]\d{2}$/.test(el.textContent!.trim()));
+    // Dicari lewat kelasnya, bukan lewat pola "14.45": sejak #791 stempel ini
+    // juga bisa berbunyi "Kemarin" atau "12 Okt", dan yang diuji di sini
+    // POSISINYA di DOM, bukan bentuk teksnya.
+    const jam = [...induk.children].find((el) => el.className.includes("text-3xs"));
     expect(jam).toBeTruthy();
     expect(jam!.contains(gelembung)).toBe(false);
     expect(gelembung.nextElementSibling).toBe(jam);

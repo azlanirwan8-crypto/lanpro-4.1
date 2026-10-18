@@ -322,6 +322,9 @@ export const en = {
     danLainnya: "…and {{jumlah}} more",
     mengerti: "Got it",
   },
+  waktuPesan: {
+    kemarin: "Yesterday",
+  },
   notif: {
     nBugRetest: "BUG RETEST",
     nBugReady: "Bug ready for retest",
