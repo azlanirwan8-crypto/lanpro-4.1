@@ -104,7 +104,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
                 key={i}
                 onClick={() => setListPage(i + 1)}
                 className={cn(
-                  "w-6 h-6 rounded-lg flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-normal transition-all cursor-pointer active:scale-95 shrink-0",
+                  "w-6 h-6 rounded-lg flex items-center justify-center text-xs sm:text-[11px] font-normal transition-all cursor-pointer active:scale-95 shrink-0",
                   listPage === i + 1
                     ? "bg-primary-surface text-content-inverse shadow-xs"
                     : "text-content-muted hover:bg-surface-strong/80"

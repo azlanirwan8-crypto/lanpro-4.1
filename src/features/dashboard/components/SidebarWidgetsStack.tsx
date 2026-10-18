@@ -69,7 +69,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             {myActiveTasks.length})
           </h3>
           {myActiveTasks.some((task) => isDueSoon24h(task.endDate)) && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase tracking-normal bg-warning text-content-inverse animate-pulse shrink-0">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] font-normal uppercase tracking-normal bg-warning text-content-inverse animate-pulse shrink-0">
               {t("dashboard.urgent24h")}
             </span>
           )}
@@ -97,7 +97,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-1.5">
                     {isDueSoon24h(task.endDate) && (
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase tracking-normal bg-warning text-content-inverse animate-pulse">
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] font-normal uppercase tracking-normal bg-warning text-content-inverse animate-pulse">
                         ⏰ {getRemainingHours(task.endDate)}
                       </span>
                     )}
@@ -123,7 +123,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             {t("widgets.stoppersBlocked")} ({blockedTasks.length})
           </h3>
           {blockedTasks.some((task) => isDueSoon24h(task.endDate)) && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase tracking-normal bg-warning text-content-inverse animate-pulse shrink-0">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] font-normal uppercase tracking-normal bg-warning text-content-inverse animate-pulse shrink-0">
               {t("dashboard.urgent24h")}
             </span>
           )}
@@ -151,7 +151,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-1.5">
                     {isDueSoon24h(task.endDate) && (
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase tracking-normal bg-warning text-content-inverse animate-pulse">
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] font-normal uppercase tracking-normal bg-warning text-content-inverse animate-pulse">
                         ⏰ {getRemainingHours(task.endDate)}
                       </span>
                     )}
@@ -211,7 +211,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             <Zap className="w-4 h-4 text-warning" /> {t("widgets.dueSoon")} ({dueSoonTasks.length})
           </h3>
           {dueSoonTasks.some((task) => isDueSoon24h(task.endDate)) && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase tracking-normal bg-warning text-content-inverse animate-pulse shrink-0">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] font-normal uppercase tracking-normal bg-warning text-content-inverse animate-pulse shrink-0">
               {t("dashboard.urgent24h")}
             </span>
           )}
@@ -239,7 +239,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-1.5">
                     {isDueSoon24h(task.endDate) && (
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase tracking-normal bg-warning text-content-inverse animate-pulse">
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] font-normal uppercase tracking-normal bg-warning text-content-inverse animate-pulse">
                         ⏰ {getRemainingHours(task.endDate)}
                       </span>
                     )}
@@ -366,7 +366,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                     <span className="text-content-inverse font-medium">{author}</span>{" "}
                     {humanizeActivityAction(log.action, log.details)}
                   </div>
-                  <div className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle mt-0.5">
+                  <div className="text-xs sm:text-[11px] text-content-subtle mt-0.5">
                     {formatDistanceToNow(ensureDate(log.createdAt), {
                       addSuffix: true,
                     })}

@@ -960,7 +960,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
             >
               <ListChecks className="w-3.5 h-3.5 text-primary" /> {t("aiMeeting.followUp")}
               {activeMeetingData?.tab_tindak_lanjut?.length > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 bg-primary-surface text-content-inverse text-xs sm:text-[11px] sm:text-[9px] rounded-full font-medium min-w-[16px] text-center inline-block">
+                <span className="ml-1 px-1.5 py-0.5 bg-primary-surface text-content-inverse text-xs sm:text-[11px] rounded-full font-medium min-w-[16px] text-center inline-block">
                   {activeMeetingData.tab_tindak_lanjut.length}
                 </span>
               )}
@@ -1050,7 +1050,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-surface p-4 rounded-xl border border-border-subtle/50 shadow-xs flex flex-col justify-between">
-                      <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle uppercase tracking-normal block">
+                      <span className="text-xs sm:text-[11px] text-content-subtle uppercase tracking-normal block">
                         {t("aiMeeting.discussionSegments")}
                       </span>
                       <p className="text-base font-medium text-primary mt-1">
@@ -1061,7 +1061,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                     </div>
 
                     <div className="bg-surface p-4 rounded-xl border border-border-subtle/50 shadow-xs flex flex-col justify-between">
-                      <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle uppercase tracking-normal block">
+                      <span className="text-xs sm:text-[11px] text-content-subtle uppercase tracking-normal block">
                         {t("aiMeeting.actionItems")}
                       </span>
                       <p className="text-base font-medium text-emerald-700 mt-1">
@@ -1790,7 +1790,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
                         <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft hover:shadow-md transition-all">
                           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                            <span className="px-2 py-0.5 bg-pink-500/10 border border-pink-500/30 text-pink-700 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase rounded">
+                            <span className="px-2 py-0.5 bg-pink-500/10 border border-pink-500/30 text-pink-700 text-xs sm:text-[11px] font-medium uppercase rounded">
                               {t("rakit.actionPlanNo", { no: index + 1 })}
                             </span>
                             {item.due_date && (

@@ -186,7 +186,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                 {!isSidebarCollapsed && (
                   <>
                     <span className="truncate flex-1 text-left text-xs font-medium">{p.name}</span>
-                    <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 py-0.5 rounded bg-sidebar-item-hover text-sidebar-text-active">
+                    <span className="text-xs sm:text-[11px] font-medium px-1.5 py-0.5 rounded bg-sidebar-item-hover text-sidebar-text-active">
                       {p.key}
                     </span>
                   </>

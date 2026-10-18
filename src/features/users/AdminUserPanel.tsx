@@ -946,7 +946,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                         <td className="py-3.5 px-4">
                           <span
                             className={cn(
-                              "inline-flex font-normal text-xs sm:text-[11px] sm:text-[9px] tracking-normal uppercase px-2 py-0.5 rounded-md border",
+                              "inline-flex font-normal text-xs sm:text-[11px] tracking-normal uppercase px-2 py-0.5 rounded-md border",
                               normalkanPeran(user.role) === "admin"
                                 ? "bg-rose-500/10 text-rose-600 border-rose-500/30"
                                 : normalkanPeran(user.role) === "head"

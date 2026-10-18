@@ -79,7 +79,7 @@ export function RateLimitIndicator() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-normal bg-surface/15 px-2 py-1 rounded-lg whitespace-nowrap">
+            <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal bg-surface/15 px-2 py-1 rounded-lg whitespace-nowrap">
               {t("network.remaining")} {maxLimit.retriesLeft}x
             </span>
             <Loader2 className="w-4 h-4 animate-spin text-content-inverse/80 shrink-0" />

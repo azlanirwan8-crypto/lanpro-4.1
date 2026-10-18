@@ -844,7 +844,7 @@ export const MasterDataPanel = ({
                       <span>{t("master.allRoles")}</span>
                       <span
                         className={cn(
-                          "text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 py-0.5 rounded-full",
+                          "text-xs sm:text-[11px] font-medium px-1.5 py-0.5 rounded-full",
                           roleTabFilter === "ALL"
                             ? "bg-surface-muted text-content-body"
                             : "bg-surface-strong/60 text-content-secondary"
@@ -866,7 +866,7 @@ export const MasterDataPanel = ({
                       <span>{t("master.projectRoles")}</span>
                       <span
                         className={cn(
-                          "text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 py-0.5 rounded-full",
+                          "text-xs sm:text-[11px] font-medium px-1.5 py-0.5 rounded-full",
                           roleTabFilter === "PROJECT"
                             ? "bg-blue-500/10 text-blue-700"
                             : "bg-surface-strong/60 text-content-secondary"
@@ -896,7 +896,7 @@ export const MasterDataPanel = ({
                       <span>{t("master.systemRoles")}</span>
                       <span
                         className={cn(
-                          "text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 py-0.5 rounded-full",
+                          "text-xs sm:text-[11px] font-medium px-1.5 py-0.5 rounded-full",
                           roleTabFilter === "SYSTEM"
                             ? "bg-purple-500/10 text-purple-700"
                             : "bg-surface-strong/60 text-content-secondary"
@@ -1203,7 +1203,7 @@ export const MasterDataPanel = ({
                   {newMasterLabel || t("master.labelMasterData")}
                 </span>
                 {selectedType === "project_role" && (
-                  <span className="text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-normal text-primary mt-0.5">
+                  <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal text-primary mt-0.5">
                     {newMasterRoleType === "PROJECT"
                       ? "Project Role (Tim Proyek)"
                       : "System Role (Akses Platform)"}

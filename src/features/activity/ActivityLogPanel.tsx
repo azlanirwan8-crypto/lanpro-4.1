@@ -231,7 +231,7 @@ export const ActivityLogPanel = ({
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-center gap-2 flex-wrap mb-2">
                                         <span
-                                          className={`text-xs sm:text-[11px] sm:text-[9px] font-normal tracking-[0.15em] uppercase px-2 py-0.5 rounded shadow-soft ${badgeClass}`}
+                                          className={`text-xs sm:text-[11px] font-normal tracking-[0.15em] uppercase px-2 py-0.5 rounded shadow-soft ${badgeClass}`}
                                         >
                                           {log.action?.replace(/_/g, " ") || "ACTION_EXECUTED"}
                                         </span>
@@ -275,7 +275,7 @@ export const ActivityLogPanel = ({
                           <td className="px-8 py-5 text-right w-48 align-middle">
                             <div className="flex flex-col items-end gap-1.5">
                               <div
-                                className="font-mono text-xs sm:text-[11px] sm:text-[9px] bg-surface-muted text-content-muted px-2 py-1 rounded border border-border-subtle uppercase font-normal tracking-normal select-all opacity-70 group-hover:opacity-100 transition-opacity"
+                                className="font-mono text-xs sm:text-[11px] bg-surface-muted text-content-muted px-2 py-1 rounded border border-border-subtle uppercase font-normal tracking-normal select-all opacity-70 group-hover:opacity-100 transition-opacity"
                                 title={log.id}
                               >
                                 ...{log.id?.substring((log.id?.length || 0) - 8)}

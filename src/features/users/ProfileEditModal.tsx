@@ -217,7 +217,7 @@ export const ProfileEditModal = ({
               className="w-16 h-16"
             />
             {previewUrl && (
-              <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-amber-500 text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
+              <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-amber-500 text-content-inverse text-xs sm:text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
                 {t("profile.preview")}
               </span>
             )}

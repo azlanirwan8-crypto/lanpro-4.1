@@ -1438,7 +1438,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                                 <span className="font-medium">{format(start, "dd MMM yyyy")}</span>
                                 <span className="text-content-inverse-muted">→</span>
                                 <span className="font-medium">{format(end, "dd MMM yyyy")}</span>
-                                <span className="font-medium px-1.5 py-0.5 rounded text-xs sm:text-[11px] sm:text-[9px] ml-1 bg-surface-inverse/60 text-content-inverse">
+                                <span className="font-medium px-1.5 py-0.5 rounded text-xs sm:text-[11px] ml-1 bg-surface-inverse/60 text-content-inverse">
                                   {t("rakit.daysCount", {
                                     count: differenceInDays(end, start) + 1,
                                   })}
@@ -1591,7 +1591,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                       className="absolute top-0 bottom-0 z-20 border-l-2 border-danger border-dashed pointer-events-none"
                       style={{ left: `${todayLeft}%` }}
                     >
-                      <div className="bg-danger-surface text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-md absolute top-1.5 -translate-x-1/2 shadow-soft flex items-center gap-1 z-30 tracking-wider">
+                      <div className="bg-danger-surface text-content-inverse text-xs sm:text-[11px] font-semibold px-2 py-0.5 rounded-md absolute top-1.5 -translate-x-1/2 shadow-soft flex items-center gap-1 z-30 tracking-wider">
                         <span className="relative flex h-1.5 w-1.5">
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-surface opacity-75"></span>
                           <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-surface"></span>

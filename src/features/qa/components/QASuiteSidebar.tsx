@@ -181,7 +181,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                   {/* Phase Pill Badge */}
                   <div className="flex items-center gap-1.5">
                     <LabelChip kelompok="qa_phase" nilai={suite.phase} />
-                    <span className="text-xs sm:text-[11px] sm:text-[9px] font-normal text-content-subtle">
+                    <span className="text-xs sm:text-[11px] font-normal text-content-subtle">
                       {new Date(suite.uploadedAt).toLocaleDateString("id-ID")}
                     </span>
                   </div>
@@ -193,7 +193,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
 
                   {/* Velzon Front-Card PIC Assignment Badge */}
                   <div className="mt-2.5 flex items-center justify-between text-xs sm:text-[10px] font-normal text-content-muted pt-2 border-t border-border-faint">
-                    <span className="flex items-center gap-1 text-content-subtle text-xs sm:text-[11px] sm:text-[9px]">
+                    <span className="flex items-center gap-1 text-content-subtle text-xs sm:text-[11px]">
                       <FileSpreadsheet className="w-3 h-3 text-content-subtle" />
                       <span className="truncate max-w-[85px]">
                         {suite.fileName || "Custom Script"}
@@ -223,7 +223,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                               members={projectMembers}
                               className="w-3.5 h-3.5 rounded-full"
                             />
-                            <span className="text-xs sm:text-[11px] sm:text-[9px] font-normal text-primary truncate max-w-[80px]">
+                            <span className="text-xs sm:text-[11px] font-normal text-primary truncate max-w-[80px]">
                               {matchedMember?.displayName?.split(" ")[0] ||
                                 matchedMember?.username ||
                                 "PIC"}
@@ -232,7 +232,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                         ) : (
                           <div className="flex items-center gap-1 text-primary">
                             <User className="w-2.5 h-2.5" />
-                            <span className="text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase">
+                            <span className="text-xs sm:text-[10px] font-normal uppercase">
                               {t("qaSuite.allPic")}
                             </span>
                           </div>
@@ -251,7 +251,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                             }}
                           />
                           <div className="absolute right-0 bottom-full mb-1.5 w-56 bg-surface rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-dropdown">
-                            <div className="px-3 py-1 text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-normal text-primary border-b border-border-faint mb-1">
+                            <div className="px-3 py-1 text-xs sm:text-[11px] font-normal uppercase tracking-normal text-primary border-b border-border-faint mb-1">
                               {t("qa.assignModulePicProjectTeam")}
                             </div>
                             <button

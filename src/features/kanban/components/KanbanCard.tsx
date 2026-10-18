@@ -165,7 +165,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
             {isDueSoon && (
               <div
                 className={cn(
-                  "flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs sm:text-[11px] sm:text-[9px] font-medium tracking-tight select-none border animate-pulse shrink-0",
+                  "flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs sm:text-[11px] font-medium tracking-tight select-none border animate-pulse shrink-0",
                   isOverdue
                     ? "bg-danger/10 border-danger/20 text-danger-text"
                     : "bg-warning/10 border-warning/20 text-warning-text"

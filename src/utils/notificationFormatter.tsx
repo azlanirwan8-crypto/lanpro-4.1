@@ -363,14 +363,12 @@ export const formatNotification = (
           if (statusMatch && statusMatch[1] && statusMatch[2]) {
             return (
               <div className="mt-1 flex items-center gap-1 text-content-muted bg-surface-sunken border border-border-faint rounded-md p-1 px-1.5 max-w-fit">
-                <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-subtle">
+                <span className="text-xs sm:text-[11px] font-medium text-content-subtle">
                   {i18n.t("notifications.transition")}
                 </span>
                 <div className="flex items-center gap-0.5">
                   {renderStatusBadge(statusMatch[1])}
-                  <span className="text-content-subtle text-xs sm:text-[11px] sm:text-[9px]">
-                    ➔
-                  </span>
+                  <span className="text-content-subtle text-xs sm:text-[11px]">➔</span>
                   {renderStatusBadge(statusMatch[2])}
                 </div>
               </div>
@@ -378,13 +376,11 @@ export const formatNotification = (
           } else if (toMatch && toMatch[1]) {
             return (
               <div className="mt-1 flex items-center gap-1 text-content-muted bg-surface-sunken border border-border-faint rounded-md p-1 px-1.5 max-w-fit">
-                <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-subtle">
+                <span className="text-xs sm:text-[11px] font-medium text-content-subtle">
                   {i18n.t("notifications.transition")}
                 </span>
                 <div className="flex items-center gap-0.5">
-                  <span className="text-content-subtle text-xs sm:text-[11px] sm:text-[9px] font-medium">
-                    Ke
-                  </span>
+                  <span className="text-content-subtle text-xs sm:text-[11px] font-medium">Ke</span>
                   {renderStatusBadge(toMatch[1])}
                 </div>
               </div>

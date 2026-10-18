@@ -86,7 +86,7 @@ export const HeaderAvatarGroup: React.FC<HeaderAvatarGroupProps> = ({
                 {member.displayName || member.name || member.username || "Anggota Tim"}{" "}
                 {isCurrentUser ? t("dashboard.youSuffix") : ""}
               </span>
-              <span className="text-xs sm:text-[10px] sm:text-[8px] text-content-subtle capitalize mt-0.5">
+              <span className="text-xs sm:text-[10px] text-content-subtle capitalize mt-0.5">
                 {member.role || "User"}
               </span>
             </div>
