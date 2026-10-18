@@ -5,6 +5,7 @@ import { ChevronRight, MoreVertical, CheckCircle2, Clock, Layers } from "lucide-
 import { format } from "date-fns";
 import { cn, ensureDate } from "../../../../lib/utils";
 import { TypeIcon } from "../../../../components/ui/CommonComponents";
+import { UserAvatar } from "../../../../components/ui/UserAvatar";
 import { cariMaster, gayaLabel, warnaDariMaster } from "../../../../lib/warnaLabel";
 import { Task, MasterData, UserProfile, Sprint } from "../../../../types";
 
@@ -154,17 +155,7 @@ export const IssueMobileCardView: React.FC<IssueMobileCardViewProps> = ({
               <div className="flex items-center gap-1.5">
                 {assignee ? (
                   <div className="flex items-center gap-1">
-                    {assignee.avatarUrl || (assignee as any).avatar_url ? (
-                      <img
-                        src={assignee.avatarUrl || (assignee as any).avatar_url}
-                        alt={assignee.name || assignee.displayName || "Assignee"}
-                        className="w-5 h-5 rounded-full object-cover ring-1 ring-border-subtle"
-                      />
-                    ) : (
-                      <div className="w-5 h-5 rounded-full bg-primary/20 text-primary text-[9px] font-bold flex items-center justify-center">
-                        {(assignee.name || assignee.displayName || "U")[0].toUpperCase()}
-                      </div>
-                    )}
+                    <UserAvatar user={assignee} className="w-5 h-5" />
                     <span
                       title={assignee.name || assignee.displayName}
                       className="text-[11px] text-content-body truncate max-w-[80px]"

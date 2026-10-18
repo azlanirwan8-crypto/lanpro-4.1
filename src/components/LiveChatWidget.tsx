@@ -826,9 +826,6 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                         const isOnline = adalahOnline(targetUser);
                         const userUnread = unreadCounts[targetUser.id] || 0;
                         const lastMsg = lastMessages[targetUser.id];
-                        const initials = (targetUser?.displayName || targetUser?.username || "U")
-                          .substring(0, 2)
-                          .toUpperCase();
 
                         return (
                           <div

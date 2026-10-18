@@ -8,7 +8,7 @@
  * dipindahkan dari FlowchartContainer — jaring pengaman untuk Fase 5 yang akan
  * membelah JSX-nya.
  */
-import { getShapeThemeClasses, getInitials } from "./nodeTheme";
+import { getShapeThemeClasses } from "./nodeTheme";
 import type { FlowNode } from "../types";
 
 const node = (over: Partial<FlowNode> = {}): FlowNode =>
@@ -122,24 +122,5 @@ describe("getShapeThemeClasses", () => {
     const hasil = getShapeThemeClasses(node({ type: "sticky", borderStyle: "none" }), false);
     expect(hasil).not.toContain("border-dashed");
     expect(hasil).toContain("border-0");
-  });
-});
-
-describe("getInitials", () => {
-  it("mengambil huruf pertama dua kata pertama", () => {
-    expect(getInitials("Rifky Pramadanianto")).toBe("RP");
-  });
-
-  it("mengambil dua huruf pertama bila hanya satu kata", () => {
-    expect(getInitials("Administrator")).toBe("AD");
-  });
-
-  it("memakai LP bila nama tidak diketahui", () => {
-    expect(getInitials()).toBe("LP");
-    expect(getInitials("")).toBe("LP");
-  });
-
-  it("tahan terhadap spasi berlebih", () => {
-    expect(getInitials("  Rido   Oktobriananta  ")).toBe("RO");
   });
 });

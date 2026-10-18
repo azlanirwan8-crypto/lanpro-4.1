@@ -459,10 +459,6 @@ export const TeamManagementPanel = ({
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
               {filteredPeople.map((person: any, i) => {
                 const name = person?.displayName || person?.email || "Unknown Member";
-                const initialsMatch = name.match(/\b\w/g);
-                const initials = (initialsMatch ? initialsMatch.join("") : name.substring(0, 2))
-                  .substring(0, 2)
-                  .toUpperCase();
                 // #82 — label dari katalog Master Data, bukan nilai mentah.
                 const roleName = labelPeran(
                   peranProyek,
@@ -597,12 +593,6 @@ export const TeamManagementPanel = ({
                   <tbody className="divide-y divide-border-faint">
                     {filteredPeople.map((person: any, i) => {
                       const name = person?.displayName || person?.email || "Unknown Member";
-                      const initialsMatch = name.match(/\b\w/g);
-                      const initials = (
-                        initialsMatch ? initialsMatch.join("") : name.substring(0, 2)
-                      )
-                        .substring(0, 2)
-                        .toUpperCase();
                       // #82 — label dari katalog Master Data.
                       const roleName = labelPeran(
                         peranProyek,
