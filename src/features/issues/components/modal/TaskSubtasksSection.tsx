@@ -71,11 +71,7 @@ export const TaskSubtasksSection: React.FC<TaskSubtasksSectionProps> = ({
               disabled={!isEditable}
             />
             <div className="flex items-center gap-3 shrink-0">
-              <UserAvatar
-                uid={st.assigneeId || ""}
-                members={projectMembers}
-                className="w-6 h-6 border border-surface shadow-soft ring-1 ring-border-faint"
-              />
+              <UserAvatar uid={st.assigneeId || ""} members={projectMembers} className="w-6 h-6" />
               <div className="h-4 w-px bg-surface-strong" />
               <PriorityIcon
                 priority={st.priority || "Medium"}

@@ -163,6 +163,29 @@ export const TypeIcon = ({
 const CHIP_TINGGI = "py-0.5 border rounded-md font-normal text-[10px]";
 const CHIP_DASAR = `px-2 ${CHIP_TINGGI}`;
 const CHIP_KECIL = `${CHIP_DASAR} tracking-tight uppercase`;
+
+/**
+ * #782 — kerangka KONTROL netral untuk `StyledDropdown`.
+ *
+ * Sebelum ini trigger dropdown memakai `CHIP_KECIL` + `.label-chip`, jadi field
+ * yang nilainya punya warna MasterData (status, prioritas) dicat penuh: latar
+ * 13 %, garis 34 %, teks ter-mix. Di panel detail akibatnya `LIFECYCLE STATUS`
+ * dan `PRIORITY` berdiri sebagai blok biru/kuning selebar panel sementara
+ * `ASSIGNEE` dan `POINTS` di sebelahnya tetap putih. Pemilik proyek, 18 Okt:
+ * "kasar dan berat serta seperti memaksakan keadaan". Kontrol form sekarang
+ * selalu netral — yang membawa warna hanyalah titik/ikon di kiri nilainya, yang
+ * memang sudah ada sejak lama.
+ *
+ * Catatan teknis yang membuat ini wajib: `.label-chip` TIDAK berada di `@layer`
+ * (src/index.css), jadi ia mengalahkan `bg-surface` milik caller apa pun urutan
+ * kelasnya — kelas warna memang tidak seharusnya menempel pada kontrol.
+ */
+const KONTROL_NETRAL =
+  "px-2 py-1 bg-surface border border-border-subtle rounded-md text-xs font-normal text-content-body";
+const KONTROL_KECIL =
+  "px-2 py-0.5 bg-surface border border-border-subtle rounded-md text-[10px] font-normal uppercase tracking-tight text-content-body";
+const KONTROL_BENING =
+  "px-1.5 py-0.5 bg-surface border border-transparent hover:border-border-subtle rounded text-xs font-normal";
 const CHIP_BIASA = "px-1.5 py-0.5 border rounded font-normal text-xs tracking-tight";
 
 /** Warna chip selalu milik baris MasterData - satu komponen supaya panel tidak bisa menulis chip-nya sendiri lagi (#590). */
@@ -459,7 +482,6 @@ export const StyledDropdown = ({
   const hex = hexChip(type, baris, selected, value);
   /** Pemilih anggota/kosong tetap abu: labelnya memang tidak punya warna. */
   const berwarna = isStatus || isPriority || hex !== WARNA_NETRAL;
-  const gaya = berwarna ? gayaLabel(hex) : undefined;
 
   return (
     <div className={cn("relative", className)}>
@@ -501,14 +523,9 @@ export const StyledDropdown = ({
              tata letak pemanggil), tapi nilai utuhnya harus tinggal satu
              kibasan kursor — dan muncul penuh begitu daftarnya dibuka. */
           title={selected?.label || value || undefined}
-          style={gaya}
           className={cn(
             "flex items-center gap-1.5 group/dd transition-all cursor-pointer w-full justify-between focus:ring-1 focus:ring-primary/20",
-            isStatus || isPriority
-              ? cn(CHIP_KECIL, "label-chip transition-colors")
-              : berwarna
-                ? cn(CHIP_BIASA, "label-chip transition-colors")
-                : "px-1.5 py-0.5 bg-surface border border-transparent hover:border-border-subtle rounded text-xs font-normal",
+            isStatus || isPriority ? KONTROL_KECIL : berwarna ? KONTROL_NETRAL : KONTROL_BENING,
             disabled && "opacity-50 cursor-not-allowed",
             buttonClassName
           )}
@@ -545,6 +562,15 @@ export const StyledDropdown = ({
                 iconName={selected.icon}
                 className="w-3.5 h-3.5 flex-shrink-0"
                 style={{ color: selected.color || hex }}
+              />
+            ) : berwarna ? (
+              /* #782 — nilai yang warnanya tidak punya ikon tetap membawa titiknya.
+                 Tanpa ini, mencabut cat dari kontrol akan MENGHILANGKAN warna untuk
+                 jenis seperti `issue_type`, padahal #564 menuntut warna itu terlihat. */
+              <span
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{ backgroundColor: hex }}
+                aria-hidden
               />
             ) : null}
             <span

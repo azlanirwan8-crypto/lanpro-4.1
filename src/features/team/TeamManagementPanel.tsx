@@ -495,7 +495,7 @@ export const TeamManagementPanel = ({
                     <div className="relative -mt-5 md:-mt-8 mx-auto z-10">
                       <UserAvatar
                         user={person}
-                        className="w-12 h-12 md:w-16 md:h-16 border-4 border-surface shadow-md"
+                        className="w-12 h-12 md:w-16 md:h-16 ring-2 ring-surface"
                       />
                       <div
                         className={`w-2.5 h-2.5 md:w-3.5 md:h-3.5 rounded-full border-2 border-surface absolute bottom-0 right-0 shadow-2xs ${
@@ -627,10 +627,7 @@ export const TeamManagementPanel = ({
                           <td className="px-5 py-3.5">
                             <div className="flex items-center gap-3">
                               <div className="relative">
-                                <UserAvatar
-                                  user={person}
-                                  className="w-9 h-9 border border-border-subtle"
-                                />
+                                <UserAvatar user={person} className="w-9 h-9" />
                                 <div
                                   className={`w-2.5 h-2.5 rounded-full border border-surface absolute bottom-0 right-0 ${person.isPending ? "bg-amber-500" : "bg-emerald-500"}`}
                                 />
@@ -754,7 +751,7 @@ export const TeamManagementPanel = ({
                     <div className="-mt-12 mb-4 flex items-end justify-between">
                       <UserAvatar
                         user={selectedProfileUser}
-                        className="w-20 h-20 border-4 border-surface shadow-md"
+                        className="w-20 h-20 ring-2 ring-surface"
                       />
                       <span className="px-3 py-1 bg-emerald-500/10 text-emerald-700 text-xs font-medium rounded-full border border-emerald-500/30">
                         {t("teamPanel.joinedProject")}

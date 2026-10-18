@@ -75,8 +75,17 @@ interface TimelineProps {
  *  HP hanya 20 rem (#309) dan memuat empat kolom di sana akan memakan namanya
  *  sendiri. */
 const KOLOM = {
-  status: "w-20 shrink-0 max-md:hidden",
-  prioritas: "w-16 shrink-0 max-md:hidden",
+  /**
+   * #782 — kolom status sempat `w-20` (80 px) sementara chip "IN PROGRESS"
+   * butuh ±92 px termasuk padding. Karena chipnya `shrink-0`, ia meluber keluar
+   * kolomnya dan memakan `gap-2` antar kolom, jadi badge status dan badge
+   * prioritas bersentuhan — pemilik proyek, 18 Okt: "masih tabrakan". Lebar
+   * sekarang menampung label terpanjang di palet baku, dan chip boleh memotong
+   * di dalam kolomnya sendiri untuk label MasterData yang lebih panjang, supaya
+   * yang terpotong adalah satu badge, bukan tabrakan dua badge.
+   */
+  status: "w-28 shrink-0 max-md:hidden",
+  prioritas: "w-20 shrink-0 max-md:hidden",
   tanggal: "w-24 shrink-0 max-md:hidden",
 };
 const LABEL_KEPALA =
@@ -1048,21 +1057,21 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
 
                       {/* KOLOM 2 dan 3: labelnya tetap `label-chip` + `--lbr`,
                           jadi warnanya masih dari MasterData (#564). */}
-                      <span className={cn(KOLOM.status, "flex items-center")}>
+                      <span className={cn(KOLOM.status, "flex items-center min-w-0")}>
                         <span
                           style={gayaLabel(hexStatus)}
-                          className="label-chip shrink-0 inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-tight"
+                          className="label-chip min-w-0 max-w-full inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-tight"
                         >
-                          {task.status}
+                          <span className="truncate">{task.status}</span>
                         </span>
                       </span>
-                      <span className={cn(KOLOM.prioritas, "flex items-center")}>
+                      <span className={cn(KOLOM.prioritas, "flex items-center min-w-0")}>
                         {!!task.priority && (
                           <span
                             style={gayaLabel(hexPrioritas)}
-                            className="label-chip shrink-0 rounded-md border px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-tight"
+                            className="label-chip min-w-0 max-w-full inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-tight"
                           >
-                            {task.priority}
+                            <span className="truncate">{task.priority}</span>
                           </span>
                         )}
                       </span>

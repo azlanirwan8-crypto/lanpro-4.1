@@ -204,10 +204,15 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
   return (
     <div
       onClick={onClick}
-      /* #770 — `avatar-tint` menurunkan latar, garis, dan teks dari SATU heksa
-         identitas orang itu; tidak ada lagi kelas palet mentah di sini. */
+      /* #770 — `avatar-tint` menurunkan latar dan teks dari SATU heksa identitas
+         orang itu; tidak ada lagi kelas palet mentah di sini.
+         #782 — `border` dan `shadow-2xs` DIHAPUS dari komponen: di 24-32 px garis
+         32 % + bayangan membaca sebagai cincin tebal ("avatar tidak clean", pemilik
+         proyek 18 Okt), dan caller yang menambah `border` sendiri justru menimpa
+         garis tint karena `cn()` hanya merangkai string. Avatar sekarang datar;
+         yang butuh pemisah (tumpukan avatar) memakai `ring-*` dari caller. */
       className={cn(
-        "avatar-tint rounded-full flex items-center justify-center font-semibold overflow-hidden shrink-0 select-none transition-all border shadow-2xs",
+        "avatar-tint rounded-full flex items-center justify-center font-semibold overflow-hidden shrink-0 select-none transition-all",
         callerPunyaLebar ? "" : tangga.lingkaran,
         tangga.fs,
         kelasCaller

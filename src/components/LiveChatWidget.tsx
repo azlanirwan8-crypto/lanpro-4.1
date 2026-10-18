@@ -838,10 +838,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                           >
                             {/* Avatar with Dot indicator */}
                             <div className="relative shrink-0">
-                              <UserAvatar
-                                user={targetUser}
-                                className="w-9 h-9 border border-border-faint"
-                              />
+                              <UserAvatar user={targetUser} className="w-9 h-9" />
                               {/* Penanda: hanya yang online yang memakai titik */}
                               {isOnline && (
                                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-surface shadow-soft" />
@@ -904,10 +901,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                           <Bot className="w-3.5 h-3.5 text-yellow-200" />
                         </div>
                       ) : (
-                        <UserAvatar
-                          user={activeChatUser}
-                          className="w-8 h-8 border border-border-inverse"
-                        />
+                        <UserAvatar user={activeChatUser} className="w-8 h-8" />
                       )}
 
                       {activeChatUser.id !== "lanpro-ai" && adalahOnline(activeChatUser) && (

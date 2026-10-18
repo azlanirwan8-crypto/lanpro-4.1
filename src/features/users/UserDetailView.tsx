@@ -1494,7 +1494,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 <div className="relative group shrink-0">
                   <UserAvatar
                     user={{ ...user, photoURL: previewUrl || photoURL } as any}
-                    className="w-16 h-16 sm:w-20 sm:h-20 ring-4 ring-border-subtle/40 shadow-md shrink-0"
+                    className="w-16 h-16 sm:w-20 sm:h-20 shrink-0"
                   />
                   {previewUrl && (
                     <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-amber-500 text-content-inverse text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
@@ -1946,10 +1946,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 <div className="absolute -left-[37px] top-2.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-surface shadow-xs" />
 
                                 <div className="flex items-start gap-3">
-                                  <UserAvatar
-                                    user={user}
-                                    className="w-7 h-7 shrink-0 ring-2 ring-surface shadow-xs mt-0.5"
-                                  />
+                                  <UserAvatar user={user} className="w-7 h-7 shrink-0 mt-0.5" />
                                   <div className="space-y-1.5 flex-1 min-w-0">
                                     <div className="flex flex-wrap items-center gap-1.5 text-xs">
                                       <span className="font-medium text-content-strong">
@@ -3366,7 +3363,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                           <UserAvatar
                                             key={m.id || m.uid}
                                             user={m}
-                                            className="w-5 h-5 ring-2 ring-surface shadow-2xs"
+                                            className="w-5 h-5 ring-2 ring-surface"
                                           />
                                         ))}
                                         {members.length > 4 && (

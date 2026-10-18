@@ -135,11 +135,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
         <div className="space-y-6">
           {/* New Comment Box (Top Level) */}
           <div className="flex gap-3">
-            <UserAvatar
-              user={user}
-              uid={user?.uid || user?.id}
-              className="w-8 h-8 border border-surface shadow-2xs shrink-0"
-            />
+            <UserAvatar user={user} uid={user?.uid || user?.id} className="w-8 h-8 shrink-0" />
             <div className="flex-1 relative">
               <div className="border border-border-subtle rounded-xl bg-surface focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-xs overflow-hidden">
                 <div className="flex items-center gap-1 p-2 border-b border-border-subtle bg-surface-sunken/40 overflow-x-auto">
@@ -262,7 +258,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                       src={rootAvatar}
                       uid={root.authorId}
                       members={projectMembers}
-                      className="w-8 h-8 border border-surface shadow-2xs shrink-0 mt-0.5"
+                      className="w-8 h-8 shrink-0 mt-0.5"
                     />
                     <div className="flex-1 min-w-0">
                       {/* Comment Bubble */}
@@ -335,7 +331,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                                   src={replyAvatar}
                                   uid={reply.authorId}
                                   members={projectMembers}
-                                  className="w-6 h-6 border border-surface shadow-2xs shrink-0 mt-0.5"
+                                  className="w-6 h-6 shrink-0 mt-0.5"
                                 />
                                 <div className="flex-1 min-w-0">
                                   {/* Reply Bubble */}
@@ -386,7 +382,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                               <UserAvatar
                                 user={user}
                                 uid={user?.uid || user?.id}
-                                className="w-6 h-6 border border-surface shadow-2xs shrink-0 mt-1"
+                                className="w-6 h-6 shrink-0 mt-1"
                               />
                               <div className="flex-1 min-w-0 space-y-2">
                                 <div className="border border-border-subtle rounded-xl bg-surface focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-2xs overflow-hidden">
@@ -462,7 +458,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                   <UserAvatar
                     uid={log.userId}
                     members={projectMembers}
-                    className="w-7 h-7 shrink-0 shadow-2xs border border-surface relative z-10"
+                    className="w-7 h-7 shrink-0 relative z-10"
                   />
                   {i < filteredLogs.length - 1 && (
                     <div className="absolute top-7 left-1/2 -translate-x-1/2 w-0.5 h-full bg-surface-strong/60 z-0" />
