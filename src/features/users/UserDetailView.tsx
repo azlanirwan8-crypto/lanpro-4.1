@@ -2278,12 +2278,12 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                               <span className="text-xs font-medium text-content-strong truncate">
                                                 {tItem.title}
                                               </span>
-                                              <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-normal bg-primary/10 text-primary border border-primary/20 uppercase">
+                                              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-normal bg-primary/10 text-primary border border-primary/20 uppercase">
                                                 {tItem.key || tItem.taskKey || "TASK"}
                                               </span>
                                               <span
                                                 className={cn(
-                                                  "px-1.5 py-0.2 rounded text-[10px] font-normal uppercase",
+                                                  "px-1.5 py-0.5 rounded text-[10px] font-normal uppercase",
                                                   (tItem.priority || "")
                                                     .toLowerCase()
                                                     .includes("high")

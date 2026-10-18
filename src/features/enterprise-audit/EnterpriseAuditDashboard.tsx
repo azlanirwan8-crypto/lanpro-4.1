@@ -466,7 +466,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                             <span className="text-xs font-medium text-content-strong truncate">
                               {log.userName}
                             </span>
-                            <span className="text-[10px] leading-none bg-info/10 text-info-text font-normal px-2 py-0.2 rounded border border-info/30 uppercase flex items-center gap-1">
+                            <span className="text-[10px] leading-none bg-info/10 text-info-text font-normal px-2 py-0.5 rounded border border-info/30 uppercase flex items-center gap-1">
                               {getEntityIcon(log.entityName)}
                               {log.entityName}
                             </span>
@@ -482,7 +482,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                             {t("rakit.auditDidAction")}{" "}
                             <span
                               className={cn(
-                                "font-normal uppercase px-1.5 py-0.2 rounded text-xs sm:text-[10px]",
+                                "font-normal uppercase px-1.5 py-0.5 rounded text-xs sm:text-[10px]",
                                 log.actionType === "CREATE"
                                   ? "bg-success/10 text-success-text"
                                   : log.actionType === "UPDATE"
@@ -494,7 +494,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                             </span>{" "}
                             {t("rakit.onEntity", { nama: log.entityName })}
                           </span>
-                          <span className="font-mono text-[10px] leading-none font-medium text-primary bg-primary/10 px-1.5 py-0.2 rounded border border-primary/30">
+                          <span className="font-mono text-[10px] leading-none font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded border border-primary/30">
                             {log.entityId}
                           </span>
                         </div>
@@ -502,12 +502,12 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                         <div className="mt-2.5 flex items-center justify-between pt-2 border-t border-border-faint">
                           <div className="flex items-center gap-2">
                             {log.oldValues && Object.keys(log.oldValues).length > 0 && (
-                              <span className="px-1.5 py-0.2 bg-danger/10 border border-danger/30 rounded text-[10px] leading-none sm:text-[9px] font-normal text-danger-text uppercase">
+                              <span className="px-1.5 py-0.5 bg-danger/10 border border-danger/30 rounded text-[10px] leading-none sm:text-[9px] font-normal text-danger-text uppercase">
                                 {t("audit.before")} {Object.keys(log.oldValues).length} keys
                               </span>
                             )}
                             {log.newValues && Object.keys(log.newValues).length > 0 && (
-                              <span className="px-1.5 py-0.2 bg-success/10 border border-success/30 rounded text-[10px] leading-none sm:text-[9px] font-normal text-success-text uppercase">
+                              <span className="px-1.5 py-0.5 bg-success/10 border border-success/30 rounded text-[10px] leading-none sm:text-[9px] font-normal text-success-text uppercase">
                                 {t("audit.after")} {Object.keys(log.newValues).length} keys
                               </span>
                             )}
