@@ -179,20 +179,44 @@ export const SEL =
  * py-3` — huruf lebih besar dan baris lebih gemuk daripada tabel mana pun lain
  * di aplikasi yang sama, dan itu bagian dari "tidak Velzon".
  *
- * Jumlahnya jadi sembilan kolom: 66, 220, 190, 200, 220, 200, 170, 130, 230 =
- * 1.626 px. `min-w` wadah gulir WAJIB sama dengan jumlah ini; test menguncinya.
+ * Jumlahnya jadi sepuluh kolom: 170, 66, 220, 190, 200, 220, 200, 170, 130, 92 =
+ * 1.658 px. `min-w` wadah gulir WAJIB sama dengan jumlah ini; test menguncinya.
  * (170 bukan 150 sejak #765 — lihat catatan di kolom TANGGAL TARGET. 66 bukan
  * 48 sejak putaran 3 #765: "No" digambar uppercase 10 px = 16,2 px, ditambah
  * gap 4 dan panah 12 = 32,2 px, sementara `px-4` kepala memakan 32 px dari 48 —
  * kolomnya hanya menyisakan 16 px, jadi peramban melebarkannya sendiri dan
  * angka yang dijumlahkan test itu tidak lagi menggambarkan layar.)
  *
- * #765 — enam dari sembilan kepala bisa ditekan untuk URUT (No./`createdAt`,
- * Concern, Notes, Follow-up, Target Date, Status). Yang tidak: Context/Tags, PIC,
- * dan Lampiran — ketiganya datang dari tabel relasi atau kolom `JSONB` (`tags`,
- * `links`, `discussion_point_assignees`), jadi tidak ada satu nilai pun di
- * Database yang bisa dipakai `ORDER BY`; menaruh panah di sana akan menjanjikan
- * urutan yang tidak bisa ditunaikan server.
+ * #792 — sembilan jadi SEPULUH, dan yang berpindah adalah yang paling penting.
+ * Selama "Status & actions" menjadi kolom TERAKHIR, kedelapan kolom sebelumnya
+ * berjumlah 1.396 px: di layar mana pun yang lebih sempit dari itu, pil status
+ * dan badge komentar TIDAK TERLIHAT sebelum pengguna menggulir horizontal —
+ * persis "kejauhan" yang dilaporkan pemilik proyek. Kartu mobile sudah lama
+ * menaruh nomor dan pil status di baris paling atas
+ * (`DiscussionPointMobileCardView.tsx`), jadi yang menyimpang adalah desktopnya.
+ *
+ * Sel 230 px itu kini DIPECAH dua, dan pembagiannya bukan kosmetik: STATUS dan
+ * komentar adalah keadaan yang dibaca, sunting dan hapus adalah perintah yang
+ * ditekan. Yang pertama pindah ke kolom pertama (rata kiri); yang kedua tetap
+ * di kanan sebagai AKSI karena di sanalah tombol baris berada di tabel mana pun
+ * lain di aplikasi ini.
+ *
+ * ANGKA 170 BUKAN ANGKA BULAT YANG DIPILIH — ia sisa dari 230. #715 mengukur isi
+ * sel lama ±214 px dari 230 px dan itu angka yang masih berlaku, karena yang
+ * dibuang hanyalah dua tombol ikon: `p-1.5` atas ikon 16 px = 28 px tiap tombol,
+ * dua tombol, plus dua `gap-1` = 64 px. 230 − 64 = 166 px yang harus ditanggung
+ * pil status dan badge komentar sendirian, dan kolomnya diberi 170 px supaya
+ * longgar seperti dulu. Kolom AKSI 92 px dihitung dari isinya juga: dua tombol
+ * `p-1.5` atas ikon 16 px = 28 px tiap tombol, satu `gap-1` = 4 px, lalu `px-4`
+ * kepala = 32 px. 28 + 28 + 4 + 32 = 92.
+ *
+ * #792 — enam dari sepuluh kepala bisa ditekan untuk URUT (Status, No./
+ * `createdAt`, Concern, Notes, Follow-up, Target Date). Yang tidak: Context/Tags,
+ * PIC, Lampiran, dan Aksi — tiga pertama datang dari tabel relasi atau kolom
+ * `JSONB` (`tags`, `links`, `discussion_point_assignees`) jadi tidak ada satu
+ * nilai pun di Database yang bisa dipakai `ORDER BY`, dan yang terakhir bukan
+ * kolom data sama sekali. Menaruh panah di sana akan menjanjikan urutan yang
+ * tidak bisa ditunaikan server.
  *
  * YANG SENGAJA TIDAK DIUBAH: lebar kolom dan kelas kepala. Test
  * `kepalaSelSejajar-715.test.ts` menjumlahkan lebar itu dan membandingkannya
@@ -263,6 +287,19 @@ export const KepalaTabel: React.FC<KepalaTabelProps> = ({ sortir, onSortir }) =>
   return (
     <thead>
       <tr className="text-content-subtle">
+        {/* #792 — kolom PERTAMA, dan rata kiri. Pil status + badge komentar
+            pindah ke sini dari sel paling kanan; lihat catatan di kepala. */}
+        <th scope="col" aria-sort={aria("status")} className={`${th} w-[170px]`}>
+          <button
+            type="button"
+            onClick={() => onSortir("status")}
+            title={t("discussion.urutkan")}
+            className={tombol}
+          >
+            {t("discussion.thStatus")}
+            {ikon("status")}
+          </button>
+        </th>
         <th scope="col" aria-sort={aria("createdAt")} className={`${th} w-[66px]`}>
           <button
             type="button"
@@ -342,23 +379,15 @@ export const KepalaTabel: React.FC<KepalaTabelProps> = ({ sortir, onSortir }) =>
         <th scope="col" className={`${th} w-[130px]`}>
           {t("discussion.thLampiran")}
         </th>
-        {/* #715 — kolom aksi dinaikkan dari 210 ke 230 karena yang diukur bukan
-            judulnya melainkan ISINYA: pil status (ikon + kata + padding), tombol
-            utas berangka, dan dua tombol ikon. Dengan `gap-1.5` dan padding lama
-            susunan itu ±214 px, jadi selnya turun dua lajur di SETIAP baris —
-            persis tinggi baris yang membuat papan dibaca berantakan. Ruang diambil
-            dari Concern dan Follow-up, dua-duanya kolom teks yang sudah punya
-            gulir sendiri dan tidak kehilangan satu karakter pun. */}
-        <th scope="col" aria-sort={aria("status")} className={`${th} w-[230px] text-right`}>
-          <button
-            type="button"
-            onClick={() => onSortir("status")}
-            title={t("discussion.urutkan")}
-            className={`${tombol} justify-end`}
-          >
-            {t("discussion.thStatusAksi")}
-            {ikon("status")}
-          </button>
+        {/* #792 — tersisa AKSI saja: sunting dan hapus. Yang pindah ke kolom
+            pertama adalah keadaan barisnya (status dan jumlah komentar), dan
+            dua tombol ini bukan keadaan melainkan perintah, jadi ia tinggal di
+            kanan bersama tombol baris di tabel mana pun lain di aplikasi ini.
+            92 px = dua tombol `p-1.5` dengan ikon 16 px (28 px tiap tombol) +
+            satu `gap-1` + `px-4` kepala; tanpa panah urutan karena tidak ada
+            kolom Database yang bisa diurut dari sini. */}
+        <th scope="col" className={`${th} w-[92px]`}>
+          {t("discussion.thAction")}
         </th>
       </tr>
     </thead>

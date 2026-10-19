@@ -1896,7 +1896,6 @@ export const id = {
     thPic: "PIC",
     thTargetDate: "Tanggal Target",
     thLampiran: "Lampiran",
-    thStatusAksi: "Status & aksi",
     thStatus: "Status",
     thAction: "Aksi",
     next: "Berikutnya:",

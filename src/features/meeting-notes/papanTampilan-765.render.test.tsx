@@ -132,14 +132,17 @@ describe("#765 — panah urutan selalu terlihat di kepala tabel", () => {
     expect(sesudah.some((k) => (k || "").includes("text-primary"))).toBe(true);
     expect(sebelum.some((k) => (k || "").includes("text-primary"))).toBe(false);
     const kepala = Array.from(container.querySelectorAll("thead th"));
-    expect(kepala[2].getAttribute("aria-sort")).toBe("descending");
+    expect(kepala[3].getAttribute("aria-sort")).toBe("descending");
   });
 });
 
+/* #792 — angka `nth-child` di bawah adalah POSISI SEL, dan ia bergeser satu
+ * ke kanan karena kolom status menyisip di depan. Yang diuji tetap sama:
+ * chip isu di sel kelimanya, chip PIC di sel ketujuhnya. */
 describe("#765 — chip tag dan PIC berwarna", () => {
   it("chip isu memakai `label-chip` dengan hex prioritas dari pemanggil", () => {
     const { container } = pasangBaris({ i1: "#B3261E" });
-    const chip = Array.from(container.querySelectorAll("tbody td:nth-child(4) span")).find((s) =>
+    const chip = Array.from(container.querySelectorAll("tbody td:nth-child(5) span")).find((s) =>
       (s.textContent || "").includes("Enhancement Onboarding")
     ) as HTMLElement;
     expect(chip.className).toContain("label-chip");
@@ -149,7 +152,7 @@ describe("#765 — chip tag dan PIC berwarna", () => {
 
   it("tanpa prioritas diketahui, chip jatuh ke warna merek — bukan warna acak", () => {
     const { container } = pasangBaris({});
-    const chip = Array.from(container.querySelectorAll("tbody td:nth-child(4) span")).find((s) =>
+    const chip = Array.from(container.querySelectorAll("tbody td:nth-child(5) span")).find((s) =>
       (s.textContent || "").includes("Enhancement Onboarding")
     ) as HTMLElement;
     expect(chip.className).not.toContain("label-chip");
@@ -159,7 +162,7 @@ describe("#765 — chip tag dan PIC berwarna", () => {
 
   it("chip PIC memakai warna avatar milik ID orangnya, bukan namanya", () => {
     const { container } = pasangBaris();
-    const chip = Array.from(container.querySelectorAll("tbody td:nth-child(6) span")).find((s) =>
+    const chip = Array.from(container.querySelectorAll("tbody td:nth-child(7) span")).find((s) =>
       (s.textContent || "").includes("Nabila Triana")
     ) as HTMLElement;
     const heksa = getUserAvatarHex("u2");
@@ -205,7 +208,8 @@ describe("#765 — paragraf rata kiri-kanan", () => {
   it("papan menggulir setiap sel teks, dan tidak satu pun memotong teksnya (#645)", () => {
     const { container } = pasangBaris();
     const sel = container.querySelectorAll("tbody > tr > td");
-    for (const indeks of [1, 2, 4]) {
+    // #792 — Concern, Notes, dan Follow-up kini duduk di sel 2, 3, 5.
+    for (const indeks of [2, 3, 5]) {
       const kotak = sel[indeks].querySelector("div") as HTMLElement;
       expect(kotak.className).toContain("text-justify");
       expect(kotak.className).toContain("whitespace-pre-wrap");
@@ -214,7 +218,7 @@ describe("#765 — paragraf rata kiri-kanan", () => {
       expect(kotak.className).not.toContain("truncate");
     }
     // Teksnya masih utuh — justify tidak membuang satu kata pun.
-    expect(sel[1].textContent).toContain("30 merchant yang belum berhasil");
+    expect(sel[2].textContent).toContain("30 merchant yang belum berhasil");
   });
 
   it("kartu HP ikut rata kanan-kiri", () => {

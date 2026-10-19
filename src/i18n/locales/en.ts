@@ -1883,7 +1883,6 @@ export const en = {
     thPic: "PIC",
     thTargetDate: "Target Date",
     thLampiran: "Attachments",
-    thStatusAksi: "Status & actions",
     thStatus: "Status",
     thAction: "Action",
     next: "Next:",

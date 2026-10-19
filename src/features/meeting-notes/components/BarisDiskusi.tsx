@@ -123,6 +123,60 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
        opasitas 75 % menurunkan kontras catatan panjang yang justru paling banyak
        ditulis baris selesai (#645 melarang memotong teks, dan ini saudaranya). */
     <tr className="group hover:bg-surface-strong/60 transition-all duration-150 cursor-default">
+      {/* #792 — kolom PERTAMA: keadaan baris ini, bukan perintah atasnya.
+          Pil status dan badge komentar selama ini duduk di sel TERAKHIR papan
+          1.626 px, jadi yang paling sering dibaca justru baru terlihat setelah
+          menggulir horizontal. Kartu mobile sudah menaruh keduanya di atas
+          sejak lama; desktop menyusul. */}
+      <td className={cn(SEL, "py-2.5 align-top")}>
+        <div className="flex flex-wrap items-center gap-1">
+          <button
+            type="button"
+            onClick={onToggleStatus}
+            disabled={!bolehUbahStatus}
+            className="cursor-pointer disabled:cursor-default transition-all active:scale-95 disabled:active:scale-100 inline-block"
+            title={t("discussion.toggleStatus")}
+          >
+            {isCompleted ? (
+              /* #715 — pil status pindah dari palet Tailwind ke TOKEN rumah,
+                 sama seperti yang dipakai `CoreUI.tsx:290` untuk varian
+                 `success` dan `styles.ts` Daftar Isu untuk `filterPillAmber`.
+                 Kelas lama datang dari palet mentah dan tidak punya padanan mode
+                 gelap, jadi teksnya ikut gelap di atas kartu gelap;
+                 `--color-*-text` sudah diturunkan untuk kedua mode (§22). */
+              <span className="flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[10px] leading-none font-normal bg-success/10 text-success-text border border-success/30 shadow-2xs hover:bg-success/15">
+                <CheckCircle2 className="w-3 h-3 text-success-text" />
+                {t("discussion.statusDone")}
+              </span>
+            ) : (
+              <span className="flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[10px] leading-none font-normal bg-warning/10 text-warning-text border border-warning/30 shadow-2xs hover:bg-warning/15">
+                <Clock className="w-3 h-3 text-warning-text" />
+                {t("discussion.statusPending")}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={onOpenThread}
+            className={cn(
+              "inline-flex items-center justify-center gap-1 px-2 py-1 rounded-md text-xs font-normal transition-all cursor-pointer border shadow-2xs active:scale-95",
+              jumlahKomentar > 0
+                ? "bg-primary/10 hover:bg-primary/15 text-primary border-primary/20"
+                : "bg-surface-sunken hover:bg-surface-muted text-content-subtle border-border-subtle/60"
+            )}
+            title={t("discussion.openThread")}
+          >
+            <MessageSquare
+              className={cn(
+                "w-3.5 h-3.5",
+                jumlahKomentar > 0 ? "text-primary fill-primary/20" : "text-content-subtle"
+              )}
+            />
+            <span>{jumlahKomentar}</span>
+          </button>
+        </div>
+      </td>
+
       {/* No. */}
       <td className={cn(SEL, "py-2.5 text-center text-content-subtle font-normal align-top")}>
         {nomor}
@@ -304,56 +358,10 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
         )}
       </td>
 
-      {/* #714 — Thread, Status, dan Action satu sel di kanan. Ketiganya adalah
-          "apa berikutnya", dan selama berdiri sendiri mereka menempati tiga
-          kolom paling kanan yang justru tidak terlihat tanpa gulir horizontal. */}
+      {/* #792 — sel kanan hanya menyisakan PERINTAH baris: sunting dan hapus.
+          Keadaan baris (status, komentar) sudah pindah ke kolom pertama. */}
       <td className={cn(SEL, "py-2.5 align-top")}>
-        <div className="flex flex-wrap items-center justify-end gap-1">
-          <button
-            type="button"
-            onClick={onToggleStatus}
-            disabled={!bolehUbahStatus}
-            className="cursor-pointer disabled:cursor-default transition-all active:scale-95 disabled:active:scale-100 inline-block"
-            title={t("discussion.toggleStatus")}
-          >
-            {isCompleted ? (
-              /* #715 — pil status pindah dari palet Tailwind ke TOKEN rumah,
-                 sama seperti yang dipakai `CoreUI.tsx:290` untuk varian
-                 `success` dan `styles.ts` Daftar Isu untuk `filterPillAmber`.
-                 Kelas lama datang dari palet mentah dan tidak punya padanan mode
-                 gelap, jadi teksnya ikut gelap di atas kartu gelap;
-                 `--color-*-text` sudah diturunkan untuk kedua mode (§22). */
-              <span className="flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[10px] leading-none font-normal bg-success/10 text-success-text border border-success/30 shadow-2xs hover:bg-success/15">
-                <CheckCircle2 className="w-3 h-3 text-success-text" />
-                {t("discussion.statusDone")}
-              </span>
-            ) : (
-              <span className="flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[10px] leading-none font-normal bg-warning/10 text-warning-text border border-warning/30 shadow-2xs hover:bg-warning/15">
-                <Clock className="w-3 h-3 text-warning-text" />
-                {t("discussion.statusPending")}
-              </span>
-            )}
-          </button>
-
-          <button
-            onClick={onOpenThread}
-            className={cn(
-              "inline-flex items-center justify-center gap-1 px-2 py-1 rounded-md text-xs font-normal transition-all cursor-pointer border shadow-2xs active:scale-95",
-              jumlahKomentar > 0
-                ? "bg-primary/10 hover:bg-primary/15 text-primary border-primary/20"
-                : "bg-surface-sunken hover:bg-surface-muted text-content-subtle border-border-subtle/60"
-            )}
-            title={t("discussion.openThread")}
-          >
-            <MessageSquare
-              className={cn(
-                "w-3.5 h-3.5",
-                jumlahKomentar > 0 ? "text-primary fill-primary/20" : "text-content-subtle"
-              )}
-            />
-            <span>{jumlahKomentar}</span>
-          </button>
-
+        <div className="flex flex-wrap items-center gap-1">
           {bolehSunting && (
             <button
               onClick={onEdit}
