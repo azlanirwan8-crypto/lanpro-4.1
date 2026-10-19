@@ -289,6 +289,17 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                     <span>{p.targetDate}</span>
                   </div>
                 )}
+
+                {/* #793 — Tanggal Selesai. Ikut tampil di HP karena kolomnya
+                    ditulis dari satu pintu yang sama: kalau hanya desktop yang
+                    membacanya, tanggal itu jadi fakta yang berbeda tergantung
+                    layar (#645: satu field, satu perilaku, dua tampilan). */}
+                {p.tanggalUpdateStatus && (
+                  <div className="flex items-center gap-1 text-[10px] text-content-muted">
+                    <CheckCircle2 className="w-3 h-3 text-content-subtle shrink-0" />
+                    <span>{p.tanggalUpdateStatus}</span>
+                  </div>
+                )}
               </div>
             </div>
 

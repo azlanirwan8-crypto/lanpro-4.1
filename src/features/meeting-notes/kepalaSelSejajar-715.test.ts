@@ -42,7 +42,8 @@ const MOBILE = "src/features/meeting-notes/components/DiscussionPointMobileCardV
  * #792 — sepuluh, dan yang di posisi satu bukan lagi "No": pil status dan badge
  * komentar pindah ke kolom PERTAMA karena keduanya adalah keadaan yang dibaca,
  * sementara sunting dan hapus — perintah, bukan keadaan — tetap di kanan dan
- * menjadi kolomnya sendiri.
+ * menjadi kolomnya sendiri. #793 menambah kesebelas: TANGGAL SELESAI, tepat
+ * setelah TANGGAL TARGET.
  */
 const PASANGAN: [string, string][] = [
   ['t("discussion.thStatus")', "onClick={onToggleStatus}"],
@@ -53,6 +54,7 @@ const PASANGAN: [string, string][] = [
   ['t("discussion.followUp")', "<Paragraf teks={p.tindakanLanjut"],
   ['t("discussion.thPic")', "namaPenerima.map("],
   ['t("discussion.thTargetDate")', "{p.targetDate ?"],
+  ['t("discussion.thDoneDate")', "{p.tanggalUpdateStatus ?"],
   ['t("discussion.thLampiran")', "{tautan.map((l) =>"],
   ['t("discussion.thAction")', "onClick={onEdit}"],
 ];

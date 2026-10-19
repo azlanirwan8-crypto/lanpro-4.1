@@ -1895,6 +1895,9 @@ export const id = {
     // dan tanggal ke kolomnya sendiri: pemilik proyek menolaknya digabung.
     thPic: "PIC",
     thTargetDate: "Tanggal Target",
+    // #793 — kolom tanggal selesai. Namainya ikut `statusDone` ("Selesai"),
+    // bukan "Done", supaya satu bahasa di seluruh papan.
+    thDoneDate: "Tanggal Selesai",
     thLampiran: "Lampiran",
     thStatus: "Status",
     thAction: "Aksi",

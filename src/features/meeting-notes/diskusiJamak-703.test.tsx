@@ -111,9 +111,10 @@ describe("#703 butir 3 — kolom Follow-up akhirnya tampil di tabel", () => {
     expect(kepala).toContain('t("discussion.followUp")');
     expect(kepala).toContain('t("discussion.thLampiran")');
     // #792 — sepuluh kolom: Status, No, Concern, Notes, Tags, Follow-up, PIC,
-    // Target, Lampiran, Aksi. Baris kosong tidak boleh bokek kolom.
-    expect(kepala.match(/<th /g)).toHaveLength(10);
-    expect(baca(TABEL)).toContain("colSpan={10}");
+    // Target, Lampiran, Aksi. #793 menambah Tanggal Selesai jadi sebelas.
+    // Baris kosong tidak boleh bokek kolom.
+    expect(kepala.match(/<th /g)).toHaveLength(11);
+    expect(baca(TABEL)).toContain("colSpan={11}");
   });
 
   it("tautan dan gambar tetap dirender penuh di sel Lampiran (#704 tidak dicabut)", () => {
@@ -207,12 +208,13 @@ describe("#703/#704 lanjutan — isian papan lengkap, panel tidak terpotong", ()
    * bersamaan dengan yang sedang diketik, karena tabelnya 1.818 px lebar. */
   const jumlah = (isi: string, pola: RegExp) => (isi.match(pola) || []).length;
 
-  it("kepala tabel sepuluh kolom, dan baris tambah bukan lagi `<tr>`", () => {
+  it("kepala tabel sebelas kolom, dan baris tambah bukan lagi `<tr>`", () => {
     const kolom = jumlah(baca(KEPALA), /<th[\s>]/g);
     // #714 menurunkan ini dari 12, #715 menaikkan ke 9 setelah PIC dan tanggal
     // dipisah lagi, #792 ke 10 saat sel aksi dipecah menjadi STATUS di depan dan
-    // AKSI di belakang; penjaga di berkas ini membaca NAMA kolom, bukan posisi.
-    expect(kolom).toBe(10);
+    // AKSI di belakang, #793 ke 11 dengan kolom TANGGAL SELESAI; penjaga di
+    // berkas ini membaca NAMA kolom, bukan posisi.
+    expect(kolom).toBe(11);
     const cepat = baca(CEPAT);
     expect(jumlah(cepat, /<td[\s>]/g)).toBe(0);
     expect(jumlah(cepat, /<tr[\s>]/g)).toBe(0);

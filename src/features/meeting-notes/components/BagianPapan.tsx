@@ -179,8 +179,9 @@ export const SEL =
  * py-3` — huruf lebih besar dan baris lebih gemuk daripada tabel mana pun lain
  * di aplikasi yang sama, dan itu bagian dari "tidak Velzon".
  *
- * Jumlahnya jadi sepuluh kolom: 170, 66, 220, 190, 200, 220, 200, 170, 130, 92 =
- * 1.658 px. `min-w` wadah gulir WAJIB sama dengan jumlah ini; test menguncinya.
+ * Jumlahnya jadi sebelas kolom: 170, 66, 220, 190, 200, 220, 200, 170, 150, 130,
+ * 92 = 1.808 px. `min-w` wadah gulir WAJIB sama dengan jumlah ini; test
+ * menguncinya.
  * (170 bukan 150 sejak #765 — lihat catatan di kolom TANGGAL TARGET. 66 bukan
  * 48 sejak putaran 3 #765: "No" digambar uppercase 10 px = 16,2 px, ditambah
  * gap 4 dan panah 12 = 32,2 px, sementara `px-4` kepala memakan 32 px dari 48 —
@@ -210,13 +211,14 @@ export const SEL =
  * `p-1.5` atas ikon 16 px = 28 px tiap tombol, satu `gap-1` = 4 px, lalu `px-4`
  * kepala = 32 px. 28 + 28 + 4 + 32 = 92.
  *
- * #792 — enam dari sepuluh kepala bisa ditekan untuk URUT (Status, No./
+ * #792 — enam dari sebelas kepala bisa ditekan untuk URUT (Status, No./
  * `createdAt`, Concern, Notes, Follow-up, Target Date). Yang tidak: Context/Tags,
- * PIC, Lampiran, dan Aksi — tiga pertama datang dari tabel relasi atau kolom
- * `JSONB` (`tags`, `links`, `discussion_point_assignees`) jadi tidak ada satu
- * nilai pun di Database yang bisa dipakai `ORDER BY`, dan yang terakhir bukan
- * kolom data sama sekali. Menaruh panah di sana akan menjanjikan urutan yang
- * tidak bisa ditunaikan server.
+ * PIC, Tanggal Selesai (#793), Lampiran, dan Aksi — tiga pertama datang dari
+ * tabel relasi atau kolom `JSONB` (`tags`, `links`,
+ * `discussion_point_assignees`) jadi tidak ada satu nilai pun di Database yang
+ * bisa dipakai `ORDER BY` tanpa menambah whitelist server, dan yang terakhir
+ * bukan kolom data sama sekali. Menaruh panah di sana akan menjanjikan urutan
+ * yang tidak bisa ditunaikan server.
  *
  * YANG SENGAJA TIDAK DIUBAH: lebar kolom dan kelas kepala. Test
  * `kepalaSelSejajar-715.test.ts` menjumlahkan lebar itu dan membandingkannya
@@ -373,6 +375,18 @@ export const KepalaTabel: React.FC<KepalaTabelProps> = ({ sortir, onSortir }) =>
             {t("discussion.thTargetDate")}
             {ikon("targetDate")}
           </button>
+        </th>
+        {/* #793 — TANGGAL SELESAI, tepat setelah TANGGAL TARGET, atas permintaan
+            pemilik proyek ("butuh 1 lagi field tanggal done setelah tanggal
+            target"). Tanpa panah urutan: `tanggalUpdateStatus` bukan salah satu
+            kunci di `DAFTAR_KOLOM_SORTIR` server, dan menambahnya berarti
+            mengubah tiga whitelist yang wajib sepakat (`sortirDiskusi.ts`,
+            skema Zod, `KolomSortir` klien) — bukan pekerjaan satu kolom.
+            150 px dihitung dari label terpanjang yang bisa duduk di sini,
+            "TANGGAL SELESAI" (15 karakter × ±7 px + `px-4` = ±137 px), mengikuti
+            pelajaran #715 bahwa yang menentukan lebarnya adalah TEKSNYA. */}
+        <th scope="col" className={`${th} w-[150px]`}>
+          {t("discussion.thDoneDate")}
         </th>
         {/* #704 butir 5 dan 6: tautan dan gambar satu sel "Lampiran". Isinya
             tetap tampil penuh, bukan angka. */}

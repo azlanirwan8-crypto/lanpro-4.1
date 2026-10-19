@@ -647,17 +647,19 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               #715 menaikkan itu dari 1.468 ke 1.588 px, #765 ke 1.608 px karena
               kolom TANGGAL TARGET kini memegang panah urutan di samping labelnya,
               dan #792 ke 1.658 px karena sel aksi 230 px dipecah menjadi kolom
-              STATUS 170 px di depan dan kolom AKSI 92 px di belakang.
+              STATUS 170 px di depan dan kolom AKSI 92 px di belakang. #793
+              menambah TANGGAL SELESAI 150 px di belakang TANGGAL TARGET, jadi
+              1.808 px.
               Dengan `table-fixed` dua angka yang berbeda berarti kolom melebar
               sendiri atau tabel terpotong lagi — dan `kepalaSelSejajar-715.test.ts`
               menghitungnya, bukan mempercayainya. */}
           <div className="hidden sm:block flex-1 min-h-0 overflow-auto">
-            <table className="w-full min-w-[1658px] table-fixed border-separate border-spacing-0 text-left text-xs">
+            <table className="w-full min-w-[1808px] table-fixed border-separate border-spacing-0 text-left text-xs">
               <KepalaTabel sortir={sortir} onSortir={sortirKepala} />
               <tbody className="text-content-body">
                 {paginatedPoints.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="text-center py-12 text-content-subtle">
+                    <td colSpan={11} className="text-center py-12 text-content-subtle">
                       <KeadaanKosongDiskusi cari={kosongKarenaCari} />
                     </td>
                   </tr>

@@ -293,6 +293,22 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
         )}
       </td>
 
+      {/* #793 — TANGGAL SELESAI. Nilainya ditulis `useSelesaiCatatan` setiap
+          kali status naik ke completed, dan dikosongkan lagi ketika turun.
+          Baris yang sudah selesai SEBELUM item ini ada tetap berbintang "-":
+          tidak ada satu pun sumber yang jujur tentang kapan ia diselesaikan,
+          dan menambalnya berarti mengarang data rapat orang lain. */}
+      <td className={cn(SEL, "py-2.5 align-top text-content-muted font-normal")}>
+        {p.tanggalUpdateStatus ? (
+          <div className="flex items-center gap-1 text-[11px]">
+            <CheckCircle2 className="w-3.5 h-3.5 text-content-subtle shrink-0" />
+            <span className="break-words">{p.tanggalUpdateStatus}</span>
+          </div>
+        ) : (
+          kosong("-")
+        )}
+      </td>
+
       {/* #704 butir 5 dan 6, sekarang satu sel "Lampiran" (#714). Isinya tetap
           lengkap: tautan dan berkas bukan-gambar sebagai chip, gambar sebagai
           miniatur. Yang berhenti adalah dua kolom terpisah yang keduanya hampir

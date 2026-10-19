@@ -63,7 +63,16 @@ export interface DiscussionPoint {
   status: "pending" | "completed";
   targetDate?: string;
   target_date?: string;
-  tanggalUpdateStatus?: string;
+  /**
+   * #793 — tanggal statusnya naik ke "completed", `YYYY-MM-DD`. Nullable di dua
+   * tempat: kolomnya `VARCHAR(50)` tanpa NOT NULL (`pg-migrate.ts:546`) dan
+   * skema Zod-nya `.optional().nullable()`. `null` BUKAN sama dengan `undefined`
+   * di jalur ini: `updatePoint` di repository hanya menulis kolom yang
+   * nilainya `!== undefined`, jadi mengosongkan tanggal saat batal-selesai
+   * WAJIB mengirim `null` — mengirim `undefined` berarti kolomnya diam-diam
+   * dibiarkan berisi tanggal lama.
+   */
+  tanggalUpdateStatus?: string | null;
   createdAt?: any;
   /**
    * #711 — balasan satu titik diskusi, ditempel repository untuk SELURUH

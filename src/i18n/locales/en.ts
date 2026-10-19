@@ -1882,6 +1882,8 @@ export const en = {
     // dan tanggal ke kolomnya sendiri: pemilik proyek menolaknya digabung.
     thPic: "PIC",
     thTargetDate: "Target Date",
+    // #793 — tanggal ketika statusnya naik ke Done. Ikut `statusDone`.
+    thDoneDate: "Done Date",
     thLampiran: "Attachments",
     thStatus: "Status",
     thAction: "Action",

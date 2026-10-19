@@ -70,13 +70,14 @@ const pasang = (p: Partial<DiscussionPoint> = {}) =>
     </table>
   );
 
-describe("#714/#715/#792 — baris data sepuluh sel", () => {
-  it("SEPULUH sel, bukan sembilan dan bukan dua belas", () => {
+describe("#714/#715/#792 — baris data sebelas sel", () => {
+  it("SEBELAS sel, bukan sepuluh dan bukan dua belas", () => {
     const { container } = pasang();
     // #714 menurunkan ke delapan dengan menggabung PIC dan tanggal; #715
     // mengembalikan tanggal ke kolomnya sendiri; #792 memecah sel aksi menjadi
-    // kolom STATUS di depan dan kolom AKSI di belakang.
-    expect(container.querySelectorAll("tbody > tr > td")).toHaveLength(10);
+    // kolom STATUS di depan dan kolom AKSI di belakang; #793 menambah kolom
+    // TANGGAL SELESAI di belakang TANGGAL TARGET.
+    expect(container.querySelectorAll("tbody > tr > td")).toHaveLength(11);
   });
 
   it("tiga nama PIC tampil UTUH, tidak satu pun dipotong", () => {
@@ -104,7 +105,7 @@ describe("#714/#715/#792 — baris data sepuluh sel", () => {
     const { container } = pasang();
     const sel = container.querySelectorAll("tbody > tr > td");
     const keadaan = sel[0];
-    const aksi = sel[9];
+    const aksi = sel[10];
     // Yang dibaca lebih dulu adalah keadaan barisnya, dan ia tidak boleh lagi
     // baru terlihat setelah menggulir 1.396 px kolom lain.
     expect(keadaan.querySelector("button[title='discussion.toggleStatus']")).not.toBeNull();
@@ -118,13 +119,13 @@ describe("#714/#715/#792 — baris data sepuluh sel", () => {
 
   it("tanpa lampiran, selnya berbintang '-' — dan tautan tetap aman diklik", () => {
     const { container } = pasang();
-    const lampiran = container.querySelectorAll("tbody > tr > td")[8];
+    const lampiran = container.querySelectorAll("tbody > tr > td")[9];
     expect(lampiran.textContent?.trim()).toBe("-");
 
     const { container: ada } = pasang({
       links: [{ id: "l1", label: "Portal merchant", url: "https://example.com/x" }],
     });
-    const tautan = ada.querySelector("tbody > tr > td:nth-child(9) a") as HTMLAnchorElement;
+    const tautan = ada.querySelector("tbody > tr > td:nth-child(10) a") as HTMLAnchorElement;
     expect(tautan.textContent).toContain("Portal merchant");
     expect(tautan.getAttribute("rel")).toBe("noopener noreferrer");
     expect(tautan.getAttribute("target")).toBe("_blank");
