@@ -158,7 +158,16 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
           menggulir horizontal. Kartu mobile sudah menaruh keduanya di atas
           sejak lama; desktop menyusul. */}
       <td className={cn(SEL, "py-2.5 align-top")}>
-        <div className="flex flex-wrap items-center gap-1">
+        {/* #795 — `justify-between`, bukan `gap-1` saja. Badge komentar dulu
+            menempel tepat di belakang pil, sementara lebar pil mengikuti
+            panjang labelnya, jadi tepi kiri badge berpindah 8,7 px antara baris
+            "Selesai" dan "Tertunda" (12,2 px pada bahasa Inggris). Dengan tepi
+            kanan sel sebagai pangkalannya, badge tidak lagi bergantung pada
+            lebar pil — dan angka yang berbeda jumlah digitnya tetap sebaris.
+            Kedua chip ikut dibawa ke ritme vertikal rumah `CHIP_TINGGI` (#779):
+            sebelumnya pil `text-[10px] py-1` dan badge `text-xs py-1`, jadi
+            tingginya 20,5 px lawan 22,5 px pada baris yang sama. */}
+        <div className="flex w-full flex-wrap items-center justify-between gap-1">
           <button
             type="button"
             onClick={onToggleStatus}
@@ -173,12 +182,12 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
                  Kelas lama datang dari palet mentah dan tidak punya padanan mode
                  gelap, jadi teksnya ikut gelap di atas kartu gelap;
                  `--color-*-text` sudah diturunkan untuk kedua mode (§22). */
-              <span className="flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[10px] leading-none font-normal bg-success/10 text-success-text border border-success/30 shadow-2xs hover:bg-success/15">
+              <span className="flex items-center justify-center gap-1 px-2 py-0.5 rounded-md text-[10px] leading-none font-normal bg-success/10 text-success-text border border-success/30 shadow-2xs hover:bg-success/15">
                 <CheckCircle2 className="w-3 h-3 text-success-text" />
                 {t("discussion.statusDone")}
               </span>
             ) : (
-              <span className="flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[10px] leading-none font-normal bg-warning/10 text-warning-text border border-warning/30 shadow-2xs hover:bg-warning/15">
+              <span className="flex items-center justify-center gap-1 px-2 py-0.5 rounded-md text-[10px] leading-none font-normal bg-warning/10 text-warning-text border border-warning/30 shadow-2xs hover:bg-warning/15">
                 <Clock className="w-3 h-3 text-warning-text" />
                 {t("discussion.statusPending")}
               </span>
@@ -188,7 +197,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
           <button
             onClick={onOpenThread}
             className={cn(
-              "inline-flex items-center justify-center gap-1 px-2 py-1 rounded-md text-xs font-normal transition-all cursor-pointer border shadow-2xs active:scale-95",
+              "inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-md text-[10px] leading-none font-normal transition-all cursor-pointer border shadow-2xs active:scale-95",
               jumlahKomentar > 0
                 ? "bg-primary/10 hover:bg-primary/15 text-primary border-primary/20"
                 : "bg-surface-sunken hover:bg-surface-muted text-content-subtle border-border-subtle/60"
@@ -197,7 +206,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
           >
             <MessageSquare
               className={cn(
-                "w-3.5 h-3.5",
+                "w-3 h-3",
                 jumlahKomentar > 0 ? "text-primary fill-primary/20" : "text-content-subtle"
               )}
             />
