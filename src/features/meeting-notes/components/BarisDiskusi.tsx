@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { format } from "date-fns";
 import {
   Calendar,
   CheckCircle2,
@@ -12,6 +13,8 @@ import {
 } from "lucide-react";
 import type { DiscussionPoint, MasterData } from "../../../types";
 import { cn } from "../../../lib/utils";
+import { ensureDate } from "../../../lib/utils";
+import { localeTanggal } from "../../../lib/localeTanggal";
 import { gayaLabel } from "../../../lib/warnaLabel";
 import { getUserAvatarHex } from "../../../components/ui/UserAvatar";
 import { SEL } from "./BagianPapan";
@@ -106,13 +109,39 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
   onDelete,
   onToggleStatus,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isCompleted = p.status === "completed";
   const tag = Array.isArray(p.tags) ? p.tags : [];
   const tautan = Array.isArray(p.links) ? p.links : [];
   const berkas = Array.isArray(p.files) ? p.files : [];
   const gambar = berkas.filter((b) => (b.mimetype || "").startsWith("image/"));
   const bukanGambar = berkas.filter((b) => !(b.mimetype || "").startsWith("image/"));
+
+  /* #794 — sel No ikut memikul tanggal dibuat barisnya, lewat `title`.
+     `createdAt` sudah ada di basis data (`pg-migrate.ts:547`), sudah ikut
+     kembali ke klien lewat `SELECT *` di repository, dan sudah menjadi kunci
+     urutan di balik kepala "No" — yang belum ada hanyalah tempat membacanya.
+     Kolom kedua atas nilai yang sama sengaja TIDAK dibuat: kepalanya sudah
+     menawarkan urutan itu, jadi kolom baru hanya menduplikasi satu kontrol di
+     layar yang sama.
+
+     Dua nilai dihitung di sini, bukan di dalam JSX, supaya tag `<td>` tetap
+     satu baris: penjaga `kepalaSelSejajar-715.test.ts` menghitung sel lewat
+     pola yang menuntut spasi sesudah `<td`, dan tag yang terpecah ke baris
+     kedua karena panjang tidak lagi terlihat olehnya — persis jebakan yang
+     sudah dicatat di kepala `BagianPapan.tsx`.
+
+     `ensureDate()` jatuh ke `new Date()` untuk nilai kosong, jadi tooltipnya
+     hanya ada kalau tanggalnya memang ada: baris tanpa `createdAt` tidak boleh
+     terlihat dibuat hari ini. */
+  const kelasNo = cn(SEL, "py-2.5 text-center text-content-subtle font-normal align-top");
+  const judulDibuat = p.createdAt
+    ? t("discussion.dibuatPada", {
+        date: format(ensureDate(p.createdAt), "d MMM yyyy HH:mm", {
+          locale: localeTanggal(i18n.language),
+        }),
+      })
+    : undefined;
 
   return (
     /* #715 — baris papan ikut `tableRow` kit rumah (`styles.ts` Daftar Isu):
@@ -178,7 +207,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
       </td>
 
       {/* No. */}
-      <td className={cn(SEL, "py-2.5 text-center text-content-subtle font-normal align-top")}>
+      <td className={kelasNo} title={judulDibuat}>
         {nomor}
       </td>
 

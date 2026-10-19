@@ -1884,6 +1884,8 @@ export const en = {
     thTargetDate: "Target Date",
     // #793 — tanggal ketika statusnya naik ke Done. Ikut `statusDone`.
     thDoneDate: "Done Date",
+    // #794 — the tooltip on the No cell, not a column of its own.
+    dibuatPada: "Created {{date}}",
     thLampiran: "Attachments",
     thStatus: "Status",
     thAction: "Action",
