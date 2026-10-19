@@ -70,12 +70,13 @@ const pasang = (p: Partial<DiscussionPoint> = {}) =>
     </table>
   );
 
-describe("#714/#715 — baris data sembilan sel", () => {
-  it("SEMBILAN sel, bukan dua belas dan bukan delapan", () => {
+describe("#714/#715/#792 — baris data sepuluh sel", () => {
+  it("SEPULUH sel, bukan sembilan dan bukan dua belas", () => {
     const { container } = pasang();
     // #714 menurunkan ke delapan dengan menggabung PIC dan tanggal; #715
-    // mengembalikan tanggal ke kolomnya sendiri.
-    expect(container.querySelectorAll("tbody > tr > td")).toHaveLength(9);
+    // mengembalikan tanggal ke kolomnya sendiri; #792 memecah sel aksi menjadi
+    // kolom STATUS di depan dan kolom AKSI di belakang.
+    expect(container.querySelectorAll("tbody > tr > td")).toHaveLength(10);
   });
 
   it("tiga nama PIC tampil UTUH, tidak satu pun dipotong", () => {
@@ -92,32 +93,38 @@ describe("#714/#715 — baris data sembilan sel", () => {
     const sel = container.querySelectorAll("tbody > tr > td");
     // #714 pernah menggabung keduanya; #715 memisahkannya kembali atas
     // permintaan pemilik proyek. Urutan ini ADALAH urutan kepala — dan
-    // `kepalaSelSejajar-715.test.ts` yang menjaganya.
-    for (const nama of TIGA_PIC) expect(sel[5].textContent).toContain(nama);
-    expect(sel[5].textContent).not.toContain("2026-10-13");
-    expect(sel[6].textContent).toContain("2026-10-13");
+    // `kepalaSelSejajar-715.test.ts` yang menjaganya. #792 menggeser keduanya
+    // satu tempat ke kanan karena kolom status menyisip di depan.
+    for (const nama of TIGA_PIC) expect(sel[6].textContent).toContain(nama);
+    expect(sel[6].textContent).not.toContain("2026-10-13");
+    expect(sel[7].textContent).toContain("2026-10-13");
   });
 
-  it("status, utas, sunting, dan hapus satu sel di kanan", () => {
+  it("#792 — status dan komentar di kolom PERTAMA, sunting dan hapus di kolom TERAKHIR", () => {
     const { container } = pasang();
-    const aksi = container.querySelectorAll("tbody > tr > td")[8];
-    expect(aksi.querySelector("button[title='discussion.toggleStatus']")).not.toBeNull();
-    expect(aksi.querySelector("button[title='discussion.openThread']")).not.toBeNull();
+    const sel = container.querySelectorAll("tbody > tr > td");
+    const keadaan = sel[0];
+    const aksi = sel[9];
+    // Yang dibaca lebih dulu adalah keadaan barisnya, dan ia tidak boleh lagi
+    // baru terlihat setelah menggulir 1.396 px kolom lain.
+    expect(keadaan.querySelector("button[title='discussion.toggleStatus']")).not.toBeNull();
+    expect(keadaan.querySelector("button[title='discussion.openThread']")).not.toBeNull();
+    expect(keadaan.textContent).toContain("2");
+    // Perintah tetap di kanan, dan TIDAK lagi bercampur dengan keadaan.
     expect(aksi.querySelector("button[title='discussion.editRow']")).not.toBeNull();
     expect(aksi.querySelector("button[title='discussion.deleteRow']")).not.toBeNull();
-    // Angka komentar tetap terbaca di dalam sel yang sama.
-    expect(aksi.textContent).toContain("2");
+    expect(aksi.querySelector("button[title='discussion.toggleStatus']")).toBeNull();
   });
 
   it("tanpa lampiran, selnya berbintang '-' — dan tautan tetap aman diklik", () => {
     const { container } = pasang();
-    const lampiran = container.querySelectorAll("tbody > tr > td")[7];
+    const lampiran = container.querySelectorAll("tbody > tr > td")[8];
     expect(lampiran.textContent?.trim()).toBe("-");
 
     const { container: ada } = pasang({
       links: [{ id: "l1", label: "Portal merchant", url: "https://example.com/x" }],
     });
-    const tautan = ada.querySelector("tbody > tr > td:nth-child(8) a") as HTMLAnchorElement;
+    const tautan = ada.querySelector("tbody > tr > td:nth-child(9) a") as HTMLAnchorElement;
     expect(tautan.textContent).toContain("Portal merchant");
     expect(tautan.getAttribute("rel")).toBe("noopener noreferrer");
     expect(tautan.getAttribute("target")).toBe("_blank");
@@ -148,7 +155,8 @@ describe("#714/#715 — baris data sembilan sel", () => {
       </table>
     );
     expect(screen.getByText("discussion.statusDone")).not.toBeNull();
-    // Sunting dan hapus hilang tanpa izin, selnya tetap delapan.
+    // Sunting dan hapus hilang tanpa izin; kolom status di depan tetap ada
+    // karena ia keadaan, bukan perintah.
     fireEvent.click(screen.getByTitle("discussion.toggleStatus"));
     expect(onToggleStatus).toHaveBeenCalled();
   });

@@ -38,8 +38,14 @@ const MOBILE = "src/features/meeting-notes/components/DiscussionPointMobileCardV
  * Pasangan (kunci kepala, penanda sel) dalam URUTAN yang benar. Menambah kolom
  * berarti menambah satu baris di sini — dan kalau lupa menuanya di salah satu
  * berkas, assertion posisi jatuh, bukan lolos diam-diam.
+ *
+ * #792 — sepuluh, dan yang di posisi satu bukan lagi "No": pil status dan badge
+ * komentar pindah ke kolom PERTAMA karena keduanya adalah keadaan yang dibaca,
+ * sementara sunting dan hapus — perintah, bukan keadaan — tetap di kanan dan
+ * menjadi kolomnya sendiri.
  */
 const PASANGAN: [string, string][] = [
+  ['t("discussion.thStatus")', "onClick={onToggleStatus}"],
   ['t("discussion.thNo")', "{nomor}"],
   ['t("discussion.thConcern")', "<Paragraf teks={p.concern}"],
   ['t("discussion.thNotes")', "<Paragraf teks={p.keterangan"],
@@ -48,7 +54,7 @@ const PASANGAN: [string, string][] = [
   ['t("discussion.thPic")', "namaPenerima.map("],
   ['t("discussion.thTargetDate")', "{p.targetDate ?"],
   ['t("discussion.thLampiran")', "{tautan.map((l) =>"],
-  ['t("discussion.thStatusAksi")', "onClick={onToggleStatus}"],
+  ['t("discussion.thAction")', "onClick={onEdit}"],
 ];
 
 const blok = (isi: string, mulai: string, selesai: string) => {
