@@ -1898,6 +1898,8 @@ export const id = {
     // #793 — kolom tanggal selesai. Namainya ikut `statusDone` ("Selesai"),
     // bukan "Done", supaya satu bahasa di seluruh papan.
     thDoneDate: "Tanggal Selesai",
+    // #794 — tooltip pada sel No, bukan kolom baru.
+    dibuatPada: "Dibuat {{date}}",
     thLampiran: "Lampiran",
     thStatus: "Status",
     thAction: "Aksi",
