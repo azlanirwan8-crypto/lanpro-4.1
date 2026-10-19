@@ -115,7 +115,19 @@ describe("#765 — memuat popup, bukan langsung menulis status", () => {
       result.current.tekanStatus(points[0]);
     });
     expect(result.current.titik).toBeNull();
-    expect(mockUpdate).toHaveBeenCalledWith("pr-1", "m1", "p1", { status: "pending" }, "u1");
+    /* #793 — `expect.objectContaining`, bukan objek utuh. Yang dijaga item ini
+     * adalah DUA HAL: status ditulis, dan keterangan TIDAK ikut terkirim ketika
+     * jalurnya memang tidak menyentuh catatan. Kolom mana lagi yang menumpang
+     * pada permintaan itu bukan urusan #765 — dan `tanggalUpdateStatus` sekarang
+     * menumpang, dijaga di `tanggalDone-793.test.tsx`. Mengunci objek utuh di
+     * sini hanya akan membuat setiap kolom baru menyalakan test yang salah. */
+    expect(mockUpdate).toHaveBeenCalledWith(
+      "pr-1",
+      "m1",
+      "p1",
+      expect.objectContaining({ status: "pending" }),
+      "u1"
+    );
     expect(JSON.stringify(mockUpdate.mock.calls[0][3])).not.toContain("keterangan");
   });
 });
@@ -132,7 +144,10 @@ describe("#765 — menyimpan", () => {
       "pr-1",
       "m1",
       "p1",
-      { status: "completed", keterangan: "Onboarding 12 merchant selesai hari ini" },
+      expect.objectContaining({
+        status: "completed",
+        keterangan: "Onboarding 12 merchant selesai hari ini",
+      }),
       "u1"
     );
     expect(result.current.titik).toBeNull();
@@ -152,7 +167,7 @@ describe("#765 — menyimpan", () => {
       "pr-1",
       "m1",
       "p1",
-      { status: "completed", keterangan: "" },
+      expect.objectContaining({ status: "completed", keterangan: "" }),
       "u1"
     );
   });

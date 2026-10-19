@@ -19,12 +19,20 @@ import type { DiscussionPoint, UserProfile } from "../../../types";
  * arah dan perbedaan itu bukan disengaja, hanya belum ada yang memindahkan
  * pintunya.
  *
- * MENGAPA HANYA DUA KOLOM YANG DIKIRIM. `updatePoint` di repository menulis
+ * MENGAPA HANYA TIGA KOLOM YANG DIKIRIM. `updatePoint` di repository menulis
  * SATU PER SATU kolom yang nilainya `!== undefined`
  * (`server/repositories/discussion-points.repository.ts:289-332`), jadi
- * `{ status, keterangan }` tidak bisa menimpa concern, PIC, atau tautan. Itu
- * alasan popup satu kolom ini aman dipakai dari mana pun, dan alasan `keterangan`
- * selalu ikut dikirim walau isinya sama: yang kosong pun harus bisa mengosongkan.
+ * `{ status, keterangan, tanggalUpdateStatus }` tidak bisa menimpa concern, PIC,
+ * atau tautan. Itu alasan popup satu kolom ini aman dipakai dari mana pun, dan
+ * alasan `keterangan` selalu ikut dikirim walau isinya sama: yang kosong pun
+ * harus bisa mengosongkan.
+ *
+ * #793 — `tanggalUpdateStatus` ikut naik ke daftar itu. Kolomnya SUDAH ada di
+ * database sejak lama (`src/lib/pg-migrate.ts:546`), sudah menembus skema Zod,
+ * rute, dan repository INSERT maupun UPDATE — yang belum pernah ada hanyalah
+ * yang MENULISNYA. Jadi item ini tidak menambah migrasi; ia menghidupkan kolom
+ * yang selama ini mati, dan melakukannya di satu pintu karena pil desktop dan
+ * kartu HP sudah berbagi `tekanStatus` yang sama.
  *
  * MENGAPA OPTIMISTIS TETAP ADA (dan `suppressDiscussionPointsRefresh` ikut
  * dipasang). Pola papan ini — `handleLiveQuickAdd` dan `saveEdit` — sudah
@@ -43,6 +51,28 @@ interface KeadaanSelesaiCatatan {
   muatUlang: () => void;
 }
 
+/**
+ * #793 — "hari ini" sebagai `YYYY-MM-DD`, disusun dari komponen LOKAL.
+ *
+ * `toISOString()` sengaja TIDAK dipakai: ia membaca tanggal dalam UTC, jadi di
+ * zona mana pun yang bukan Greenwich nilainya bergeser satu hari — "selesai
+ * pukul 01.00" tercatat kemarin. Mesin kerja pemilik proyek ada di UTC+7, jadi
+ * itu bukan teori.
+ *
+ * Formatnya pun bukan pilihan bebas. `targetDate` sudah disimpan `YYYY-MM-DD`
+ * oleh `LanproDatePicker`, yang menyusun "hari ini" dari komponen lokal juga
+ * (`LanproDatePicker.tsx:218`), dan `server/lib/sortirDiskusi.ts` mencatat bahwa
+ * urutan leksikografis format itu SAMA dengan urutan kronologis. Satu format
+ * untuk dua kolom tanggal di tabel yang sama, supaya membandingkannya tidak
+ * perlu menebak.
+ */
+const hariIniLokal = (): string => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate()
+  ).padStart(2, "0")}`;
+};
+
 export function useSelesaiCatatan({
   projectId,
   meetingId,
@@ -58,9 +88,19 @@ export function useSelesaiCatatan({
   const tulis = useCallback(
     async (point: DiscussionPoint, status: "pending" | "completed", keterangan?: string) => {
       if (!point.id) return;
-      const perubahan: Partial<DiscussionPoint> =
-        keterangan === undefined ? { status } : { status, keterangan };
-      const sebelumnya = { status: point.status, keterangan: point.keterangan };
+      /* #793 — selesai mencatat harinya, batal mengosongkannya lagi. Kolom yang
+       * masih berisi tanggal sementara statusnya "Tertunda" adalah data yang
+       * berbantahan, dan pembaca papan tidak punya cara tahu mana yang benar. */
+      const perubahan: Partial<DiscussionPoint> = {
+        status,
+        tanggalUpdateStatus: status === "completed" ? hariIniLokal() : null,
+        ...(keterangan === undefined ? {} : { keterangan }),
+      };
+      const sebelumnya = {
+        status: point.status,
+        keterangan: point.keterangan,
+        tanggalUpdateStatus: point.tanggalUpdateStatus,
+      };
 
       setPoints((prev) => prev.map((p) => (p.id === point.id ? { ...p, ...perubahan } : p)));
       suppressDiscussionPointsRefresh(8000);
