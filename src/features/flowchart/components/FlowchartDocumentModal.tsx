@@ -13,7 +13,7 @@ import { CircleAlert, Layers, Lightbulb, Target, TrendingUp, Workflow, X } from 
 import { StyledDropdown } from "../../../components/ui/CommonComponents";
 import { warnaLabel } from "../../../lib/warnaLabel";
 import type { KonteksFlowchart } from "../types";
-import { labelTautanIsu } from "../lib/tautanIsu";
+import { carianTautanIsu } from "../lib/tautanIsu";
 
 /**
  * #718 — satu pilihan pada tautan "Isu Terkait". Dulu bernama EpicOption dan
@@ -202,7 +202,8 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
                   { id: "", label: t("flowchart.connectWithIssue") },
                   ...opsiTautanIsu.map((isu) => ({
                     id: isu.id,
-                    label: labelTautanIsu(isu.key, isu.title),
+                    label: isu.title,
+                    teksCari: carianTautanIsu(isu.key, isu.title),
                     icon: "Workflow",
                     color: warnaJenis(isu.type),
                   })),

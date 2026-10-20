@@ -70,9 +70,11 @@ describe("#718 — tautannya ke ISU, bukan hanya ke epic", () => {
     fireEvent.click(pemicu as HTMLElement);
 
     // Yang lama membuang dua baris terakhir tanpa memberi tahu siapa pun.
-    expect(await screen.findByText("[PRJ-3] Pembayaran QRIS")).toBeTruthy();
-    expect(screen.getByText("[WMIR-167] Report EDC")).toBeTruthy();
-    expect(screen.getByText("[PRJ-4] Transaksi NFC")).toBeTruthy();
+    // #796: label opsi tidak lagi membawa `[KUNCI] ` — yang diuji di sini
+    // KEHADIRAN ketiga jenis isu, dan itu tidak berubah oleh hilangnya prefiks.
+    expect(await screen.findByText("Pembayaran QRIS")).toBeTruthy();
+    expect(screen.getByText("Report EDC")).toBeTruthy();
+    expect(screen.getByText("Transaksi NFC")).toBeTruthy();
   });
 
   it("label dan petunjuk tidak lagi mengklaim epik", () => {
@@ -147,9 +149,7 @@ describe("#718 — tautannya ke ISU, bukan hanya ke epic", () => {
     fireEvent.click(
       screen.getAllByText(/Hubungkan dengan isu/i)[0].closest("button") as HTMLElement
     );
-    const baris = (await screen.findByText("[PRJ-3] Pembayaran QRIS")).closest(
-      "button"
-    ) as HTMLElement;
+    const baris = (await screen.findByText("Pembayaran QRIS")).closest("button") as HTMLElement;
     // Ikon jenis di kiri baris — pembedanya, bukan hanya kata "isu".
     expect(baris.querySelector("svg")).toBeTruthy();
   });

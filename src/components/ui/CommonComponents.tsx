@@ -314,7 +314,7 @@ export const StyledDropdown = ({
 }: {
   value: string;
   onChange: (val: string) => void;
-  options: { id: string; label: string; color?: string; icon?: string }[];
+  options: { id: string; label: string; color?: string; icon?: string; teksCari?: string }[];
   type?: string;
   masterData?: MasterData[];
   className?: string;
@@ -360,7 +360,12 @@ export const StyledDropdown = ({
   const daftarTampil = useMemo(() => {
     const kata = kunciCari(kataCari.trim());
     if (!pakaiCari || !kata) return safeOptions;
-    return safeOptions.filter((o) => kunciCari(o.label).includes(kata));
+    // #796 — `teksCari` memisahkan APA YANG DICARI dari APA YANG DIBACA.
+    // Pemilih Linked Issue menampilkan judul saja (permintaan pemilik proyek)
+    // tetapi tetap harus menemukan tugas lewat kuncinya, perilaku yang sengaja
+    // dipertahankan #727. Tanpa field ini, memendekkan label otomatis membunuh
+    // pencarian kunci — dan tidak ada test yang menyadarinya.
+    return safeOptions.filter((o) => kunciCari(o.teksCari ?? o.label).includes(kata));
   }, [pakaiCari, kataCari, safeOptions]);
   const idDaftar = `dd-${uid}`;
   const idOpsi = (i: number) => `${idDaftar}-${i}`;

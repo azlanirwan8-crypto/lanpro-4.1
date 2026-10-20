@@ -25,7 +25,6 @@ import {
 import { ResponsiveTable } from "../../../components/ResponsiveTable";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
 import { tampilanNamaPembuat } from "../lib/authorIdentity";
-import { labelTautanIsu } from "../lib/tautanIsu";
 import { FlowchartMobileCardView } from "./FlowchartMobileCardView";
 import { useMobileAction } from "../../../contexts/MobileActionContext";
 import { PageHeader } from "../../../components/ui/PageHeader";
@@ -170,11 +169,15 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                 className="py-3 px-4 min-w-[180px] max-w-[280px]"
               />
               {/* #773 — w-44 terlalu sempit untuk judul isu yang masih tergolong
-                  pendek: "[PRJ-2] Setting & Services" (±150 px + ikon + padding
-                  ±186 px) tidak muat di 176 − 32 = 144 px, jadi ia melipat dua
-                  baris padahal pemilik proyek minta satu baris selama memang
-                  tidak panjang. Kolom naik ke w-56 (muat ±192 px); yang benar-
-                  benar panjang tetap boleh melipat di dalam chip. */}
+                  pendek: "Setting & Services" dengan prefiks kuncinya (±150 px +
+                  ikon + padding ±186 px) tidak muat di 176 − 32 = 144 px, jadi ia
+                  melipat dua baris padahal pemilik proyek minta satu baris selama
+                  memang tidak panjang. Kolom naik ke w-56 (muat ±192 px); yang
+                  benar-benar panjang tetap boleh melipat di dalam chip.
+                  #796 mencabut prefiks `[PRJ-2] ` dari label, jadi isi kolom ini
+                  kini lebih pendek daripada saat w-56 ditetapkan. Menurunkan
+                  kembali lebarnya BUKAN bagian #796 — itu perubahan ritme tabel
+                  yang tidak diminta, dan w-56 masih dipakai judul panjang. */}
               <ThSortir
                 kolom="linkedIssue"
                 label={t("flowchart.thLinkedIssue")}
@@ -295,7 +298,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                           title={linkedIsu.title}
                         >
                           <Workflow className="w-3 h-3 shrink-0" />
-                          {labelTautanIsu(linkedIsu.key, linkedIsu.title)}
+                          {linkedIsu.title}
                         </span>
                       ) : (
                         <span className="text-content-subtle font-normal text-xs">-</span>

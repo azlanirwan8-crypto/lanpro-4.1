@@ -10,9 +10,13 @@
  * `kolom` di sini adalah satu-satunya kunci yang dikenal kepala tabel
  * `FlowchartDashboard`. Nilai di luar itu jatuh ke `bawaan`, sehingga kepala
  * tabel yang tidak terdaftar tidak bisa menghasilkan urutan acak.
+ *
+ * #796 — kolom `linkedIssue` mengurut JUDUL, bukan `[KUNCI] judul`. Konsekuensi
+ * yang harus dibaca bersama perubahan tampilnya: urutan kolom itu BERUBAH untuk
+ * daftar yang sudah ada, karena selama ini yang menang adalah prefiks kuncinya
+ * (`PRJ-2` sebelum `PRJ-9`), bukan judulnya.
  */
 import { tampilanNamaPembuat } from "./authorIdentity";
-import { labelTautanIsu } from "./tautanIsu";
 import type { FlowchartData } from "../types";
 import type { Task } from "../../../types";
 
@@ -53,7 +57,7 @@ export const nilaiSortirAlur = (
       return teks(fw.description);
     case "linkedIssue": {
       const isu = k.tasks.find((t) => t.id === fw.epicTaskId);
-      return isu ? labelTautanIsu(isu.key, isu.title) : "";
+      return isu ? isu.title : "";
     }
     case "author":
       return teks(tampilanNamaPembuat(fw, k.penulisAktif));
