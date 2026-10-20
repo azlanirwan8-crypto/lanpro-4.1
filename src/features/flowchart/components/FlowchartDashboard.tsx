@@ -70,6 +70,11 @@ interface FlowchartDashboardProps {
   openEditModal: (flow: FlowchartData, e: React.MouseEvent) => void;
   handleDeleteFlowchart: (id: string, e: React.MouseEvent) => void;
   /**
+   * #797 — buka rincian isu tertaut. Tanpa ini chip hanya terlihat seperti
+   * tombol: `onClick` `<tr>` yang menang, jadi yang terbuka adalah kanvas.
+   */
+  bukaRincianIsu: (task: Task) => void;
+  /**
    * #772 — kolom acuan dan arahnya. Milik container, karena komponen ini tanpa
    * state; yang dikirim hanya cara membacanya dan cara menekannya.
    */
@@ -95,6 +100,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
   canModifyFlowchart,
   openEditModal,
   handleDeleteFlowchart,
+  bukaRincianIsu,
   sortir,
   onSortir,
 }) => {
@@ -293,13 +299,25 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                     </td>
                     <td className="py-3 px-4 whitespace-nowrap">
                       {linkedIsu ? (
-                        <span
-                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary border border-primary/30 text-[10px] leading-snug font-medium rounded-md max-w-[200px] whitespace-normal break-words"
-                          title={linkedIsu.title}
+                        /* #797 — `<span>` menjadi `<button>`. Bukan kosmetik:
+                           `onClick` tidak bisa dijangkau papan ketik di atas
+                           span, dan kontrak fokus #594 menuntut tombol nyata.
+                           `stopPropagation` wajib — tanpa itu klik chip ikut
+                           naik ke `<tr>` dan yang terbuka tetap kanvas.
+                           `title` dulu mengulang teks yang sudah terbaca di
+                           sebelahnya; sekarang ia menyebut AKSI-nya. */
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            bukaRincianIsu(linkedIsu);
+                          }}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary border border-primary/30 text-[10px] leading-snug font-medium rounded-md max-w-[200px] whitespace-normal break-words cursor-pointer transition-colors hover:bg-primary/15"
+                          title={t("flowchart.bukaRincianIsu", { judul: linkedIsu.title })}
                         >
                           <Workflow className="w-3 h-3 shrink-0" />
                           {linkedIsu.title}
-                        </span>
+                        </button>
                       ) : (
                         <span className="text-content-subtle font-normal text-xs">-</span>
                       )}
@@ -376,6 +394,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
           canModifyFlowchart={canModifyFlowchart}
           getResolvedAuthor={getResolvedAuthor}
           onOpenCreate={openCreateModal}
+          bukaRincianIsu={bukaRincianIsu}
         />
       </div>
 

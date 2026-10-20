@@ -1528,6 +1528,7 @@ export const id = {
     deleteDiagram: "Hapus Diagram Alur",
     thCategory: "Kategori",
     thLinkedIssue: "Isu Terkait",
+    bukaRincianIsu: "Buka rincian isu: {{judul}}",
     thAuthor: "Pembuat",
     thAction: "Aksi",
     thTitle: "Judul Diagram Alur",

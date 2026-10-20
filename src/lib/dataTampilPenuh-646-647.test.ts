@@ -308,7 +308,11 @@ describe("kartu mobile tampil penuh (#647)", () => {
   });
 
   it("isu tertaut dan penulis kartu tidak dipotong", () => {
-    tanpaPotong(flow, "{namaIsu}", KARTU_FLOW);
+    // #797 menamai ulang `namaIsu` (string) menjadi `isu` (task) supaya kartu
+    // ini bisa membuka rincian isunya. Yang dikunci test ini — datanya TIDAK
+    // dipotong — tidak berubah, jadi ekspresinya ikut ditulis ulang, bukan
+    // guard-nya yang dilonggarkan.
+    tanpaPotong(flow, "{isu.title}", KARTU_FLOW);
     tanpaPotong(flow, "{author}", KARTU_FLOW, true);
     tanpaPotong(meeting, "{authorName}", KARTU_MEETING, true);
   });
