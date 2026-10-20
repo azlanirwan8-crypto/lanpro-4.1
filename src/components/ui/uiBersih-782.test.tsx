@@ -54,7 +54,14 @@ describe("ui bersih (#782)", () => {
       expect(isi.split(k).length).toBeGreaterThanOrEqual(3); // definisi + pemakaian
     }
     // LabelChip (badge) tetap boleh dan memang harus tetap berwarna.
-    expect(isi).toContain('cn(CHIP_KECIL, "label-chip inline-flex');
+    // #798 memecah bentuknya menjadi `isi ? CHIP_DASAR : CHIP_KECIL`, jadi yang
+    // dikunci di sini bukan lagi urutan argumen `cn()` — melainkan dua hal yang
+    // memang dijaga #782: kelas `.label-chip` masih dipakai dan kedua konstanta
+    // geometri chip masih hidup. Trigger dropdown di baris di atas tetap harus
+    // bersih dari keduanya.
+    expect(isi).toContain('"label-chip inline-flex items-center gap-1.5"');
+    expect(isi).toContain("CHIP_KECIL");
+    expect(isi).toContain("CHIP_DASAR");
   });
 
   it("kontrol status/prioritas netral, warnanya dibawa titik/ikon di kiri nilai", () => {
