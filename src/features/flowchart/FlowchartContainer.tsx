@@ -4408,12 +4408,33 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       {linkedIsu && (
                         <>
                           <span className="text-content-subtle">•</span>
-                          <span
-                            className="text-[10px] font-medium bg-primary/10 border border-primary/30 px-2.5 py-[3px] rounded-full truncate max-w-[180px]"
-                            title={linkedIsu.title}
+                          {/* Permukaan KEEMPAT, ketemu lewat penyapuan
+                              `epicTaskId` — bukan dari tangkapan layar pemilik
+                              proyek. Chip kepala editor ini sudah menampilkan
+                              judul tanpa kunci (jadi #796 tidak menyentuhnya),
+                              tetapi warnanya ditulis keras `bg-primary/10`
+                              seperti chip tabel sebelum #798, dan ia `<span>`
+                              tanpa handler seperti keduanya sebelum #797. Tiga
+                              tiket lewat tanpa satu layar ini ikut berubah =
+                              layar itu masih salah. `bukaRincianIsu` sudah
+                              hidup di komponen ini, jadi tidak ada perpipaan
+                              baru. Efek ikut berubah: `truncate` diganti izin
+                              melipat milik chip rumah, jadi judul panjang
+                              memanjang ke bawah alih-alih dipotong dengan
+                              elipsis — searah dengan #647. */}
+                          <button
+                            type="button"
+                            onClick={() => bukaRincianIsu(linkedIsu)}
+                            className="cursor-pointer align-middle"
+                            title={t("flowchart.bukaRincianIsu", { judul: linkedIsu.title })}
                           >
-                            {t("flowchart.issue")} {linkedIsu.title}
-                          </span>
+                            <LabelChip
+                              kelompok="priority"
+                              nilai={linkedIsu.priority}
+                              className="max-w-[180px] whitespace-normal break-words leading-snug text-left"
+                              isi={`${t("flowchart.issue")} ${linkedIsu.title}`}
+                            />
+                          </button>
                         </>
                       )}
                     </>

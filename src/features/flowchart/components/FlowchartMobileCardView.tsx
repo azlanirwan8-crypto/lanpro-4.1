@@ -133,11 +133,11 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
             <div className="flex flex-wrap items-center gap-2 text-xs">
               {flow.category && <LabelChip kelompok="jenis_dokumen" nilai={flow.category} />}
 
-              {/* #797 — `<button>` + `stopPropagation`, sama seperti di tabel:
-                  tanpa yang kedua, klik chip ikut naik ke kartu dan membuka
-                  kanvas. Efek yang harus dibaca: tautan YATIM (epicTaskId masih
-                  diisi tapi isunya sudah dihapus) dulu menampilkan uuid mentah
-                  di sini; sekarang tidak menampilkan apa pun — seisi dengan sel
+              {/* #797 — tombol + stopPropagation, sama seperti di tabel: tanpa
+                  yang kedua, klik chip ikut naik ke kartu dan membuka kanvas.
+                  Efek yang harus dibaca: tautan YATIM (epicTaskId masih diisi
+                  tapi isunya sudah dihapus) dulu menampilkan uuid mentah di
+                  sini; sekarang tidak menampilkan apa pun — seisi dengan sel
                   tabel yang sudah lama membuang "-". Menampilkan uuid bukan
                   informasi, itu kebocoran kunci internal ke layar. */}
               {isu && (
@@ -147,11 +147,23 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
                     e.stopPropagation();
                     bukaRincianIsu(isu);
                   }}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-sunken border border-border-subtle text-content-muted text-[11px] font-medium whitespace-normal break-words max-w-full cursor-pointer transition-colors hover:bg-surface-muted"
+                  className="cursor-pointer"
                   title={t("flowchart.bukaRincianIsu", { judul: isu.title })}
                 >
-                  <Workflow className="w-3 h-3 text-primary shrink-0" />
-                  <span>{isu.title}</span>
+                  {/* #798 — kartu HP dan sel tabel kini memakai SUMUR YANG SAMA.
+                      Sebelumnya keduanya memang sudah berbeda rona (tabel biru,
+                      kartu abu-abu), dan perbedaan itu tidak pernah diminta. */}
+                  <LabelChip
+                    kelompok="priority"
+                    nilai={isu.priority}
+                    className="max-w-full whitespace-normal break-words leading-snug text-left"
+                    isi={
+                      <>
+                        <Workflow className="w-3 h-3 shrink-0" />
+                        {isu.title}
+                      </>
+                    }
+                  />
                 </button>
               )}
             </div>

@@ -196,6 +196,7 @@ export const LabelChip = ({
   kosong,
   ikon,
   className,
+  isi,
 }: {
   /** `type` baris MasterData, mis. "jenis_dokumen" | "category" | "qa_status". */
   kelompok: string;
@@ -205,6 +206,22 @@ export const LabelChip = ({
   /** Ikut tampilkan ikon yang dipilih di Master Data untuk label ini. */
   ikon?: boolean;
   className?: string;
+  /**
+   * #798 — APA YANG DIBACA boleh berbeda dari APA YANG MENENTUKAN WARNA.
+   *
+   * Sampai sini chip selalu menampilkan label dari nilai yang ia warnai, jadi
+   * satu-satunya cara mewarnai judul isu dengan prioritasnya adalah menulis chip
+   * sendiri — persis yang dilarang #590, dan sudah dua kali terjadi
+   * (`KanbanCard.tsx:205-223`, `FlowchartNode.tsx:639`). Dengan prop ini warna
+   * TETAP milik `warnaDariMaster(kelompok, nilai)` dan hanya isinya yang milik
+   * pemanggil.
+   *
+   * Bentuknya ikut berpindah ke `CHIP_DASAR`, bukan `CHIP_KECIL`: `uppercase
+   * tracking-tight` ada supaya kata "BLOCKER" terbaca sebagai lencana, dan
+   * menerapkannya pada kalimat judul isu menghasilkan teks yang berteriak.
+   * Ritme VERTIKAL-nya tetap sama karena keduanya dibangun dari `CHIP_TINGGI`.
+   */
+  isi?: React.ReactNode;
 }) => {
   const dariStore = useAppStore((s) => s.masterData);
   const daftar = masterData ?? dariStore ?? [];
@@ -212,19 +229,27 @@ export const LabelChip = ({
   const teks = baris?.label ?? nilai ?? "";
   const hex = warnaDariMaster(daftar, kelompok, nilai);
 
-  if (!teks) {
+  if (!isi && !teks) {
     return kosong ? <span className="text-content-subtle text-[10px]">{kosong}</span> : null;
   }
 
   return (
     <span
-      className={cn(CHIP_KECIL, "label-chip inline-flex items-center gap-1.5", className)}
+      className={cn(
+        isi ? CHIP_DASAR : CHIP_KECIL,
+        "label-chip inline-flex items-center gap-1.5",
+        className
+      )}
       style={gayaLabel(hex)}
     >
-      {ikon && baris?.icon ? (
-        <RenderIcon iconName={baris.icon} className="w-3 h-3 shrink-0" style={{ color: hex }} />
-      ) : null}
-      {teks}
+      {isi ?? (
+        <>
+          {ikon && baris?.icon ? (
+            <RenderIcon iconName={baris.icon} className="w-3 h-3 shrink-0" style={{ color: hex }} />
+          ) : null}
+          {teks}
+        </>
+      )}
     </span>
   );
 };

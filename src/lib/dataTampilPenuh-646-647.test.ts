@@ -63,7 +63,10 @@ const kelasTag = (isi: string, ekspresi: string, berkas: string): string => {
     if (kandidat < 0) break;
     const tutup = isi.indexOf(">", kandidat);
     const tag = isi.slice(kandidat, tutup + 1);
-    const saudara = tag.startsWith("</") || tag.endsWith("/>");
+    // Fragmen `<>` BUKAN elemen: ia tidak punya kelas, jadi izin wrap yang
+    // dicari guard ini tidak pernah bisa ada di sana (#798 menaruh judul di
+    // dalam fragmen). Yang membungkusnya adalah induk fragmen itu.
+    const saudara = tag.startsWith("</") || tag.endsWith("/>") || tag === "<>";
     if (!saudara) {
       buka = kandidat;
       break;

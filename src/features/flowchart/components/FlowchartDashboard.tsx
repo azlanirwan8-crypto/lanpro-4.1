@@ -299,12 +299,12 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                     </td>
                     <td className="py-3 px-4 whitespace-nowrap">
                       {linkedIsu ? (
-                        /* #797 — `<span>` menjadi `<button>`. Bukan kosmetik:
-                           `onClick` tidak bisa dijangkau papan ketik di atas
-                           span, dan kontrak fokus #594 menuntut tombol nyata.
-                           `stopPropagation` wajib — tanpa itu klik chip ikut
-                           naik ke `<tr>` dan yang terbuka tetap kanvas.
-                           `title` dulu mengulang teks yang sudah terbaca di
+                        /* #797 — span biasa menjadi tombol sungguhan. Bukan
+                           kosmetik: onClick tidak bisa dijangkau papan ketik di
+                           atas span, dan kontrak fokus #594 menuntut tombol
+                           nyata. stopPropagation wajib — tanpa itu klik chip
+                           ikut naik ke baris dan yang terbuka tetap kanvas.
+                           title dulu mengulang teks yang sudah terbaca di
                            sebelahnya; sekarang ia menyebut AKSI-nya. */
                         <button
                           type="button"
@@ -312,11 +312,26 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                             e.stopPropagation();
                             bukaRincianIsu(linkedIsu);
                           }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary border border-primary/30 text-[10px] leading-snug font-medium rounded-md max-w-[200px] whitespace-normal break-words cursor-pointer transition-colors hover:bg-primary/15"
+                          className="cursor-pointer"
                           title={t("flowchart.bukaRincianIsu", { judul: linkedIsu.title })}
                         >
-                          <Workflow className="w-3 h-3 shrink-0" />
-                          {linkedIsu.title}
+                          {/* #798 — rona chip bukan milik layar ini lagi. Ia
+                              diambil dari baris MasterData `priority` milik
+                              isunya sendiri lewat LabelChip, jadi isu kritikal
+                              dan isu rendah tidak lagi berdiri dengan biru yang
+                              sama, dan tidak ada satu pun kelas warna keras di
+                              sini yang bisa menyimpang dari tema. */}
+                          <LabelChip
+                            kelompok="priority"
+                            nilai={linkedIsu.priority}
+                            className="max-w-[200px] whitespace-normal break-words leading-snug text-left"
+                            isi={
+                              <>
+                                <Workflow className="w-3 h-3 shrink-0" />
+                                {linkedIsu.title}
+                              </>
+                            }
+                          />
                         </button>
                       ) : (
                         <span className="text-content-subtle font-normal text-xs">-</span>
