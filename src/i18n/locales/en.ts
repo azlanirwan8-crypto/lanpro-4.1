@@ -1879,6 +1879,7 @@ export const en = {
     thConcern: "Concern",
     thNotes: "Notes / Remarks",
     thContextTags: "Context / Tags",
+    bukaRincianIsu: "Open issue detail: {{judul}}",
     // #714 — papan turun dari dua belas ke delapan kolom. #715 mengembalikan PIC
     // dan tanggal ke kolomnya sendiri: pemilik proyek menolaknya digabung.
     thPic: "PIC",

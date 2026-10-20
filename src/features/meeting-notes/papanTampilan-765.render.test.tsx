@@ -66,6 +66,9 @@ const pasangBaris = (warnaTag: Record<string, string> = {}) =>
           ]}
           masterData={[]}
           warnaTag={warnaTag}
+
+          petaIsu={{}}
+          bukaRincianIsu={() => {}}
           jumlahKomentar={0}
           bolehSunting
           bolehHapus
@@ -179,6 +182,9 @@ describe("#765 — chip tag dan PIC berwarna", () => {
         projectMembers={[{ uid: "u1", displayName: "Azlan Irawan" } as any]}
         masterData={[]}
         warnaTag={{ i1: "#B3261E" }}
+
+        petaIsu={{}}
+        bukaRincianIsu={() => {}}
         onOpenThread={() => {}}
         onEditPoint={() => {}}
         onDeletePoint={() => {}}
@@ -228,6 +234,9 @@ describe("#765 — paragraf rata kiri-kanan", () => {
         projectMembers={[]}
         masterData={[]}
         warnaTag={{}}
+
+        petaIsu={{}}
+        bukaRincianIsu={() => {}}
         onOpenThread={() => {}}
         onEditPoint={() => {}}
         onDeletePoint={() => {}}

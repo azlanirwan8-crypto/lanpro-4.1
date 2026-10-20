@@ -11,7 +11,7 @@ import {
   MessageSquare,
   Trash2,
 } from "lucide-react";
-import type { DiscussionPoint, MasterData } from "../../../types";
+import type { DiscussionPoint, MasterData, Task } from "../../../types";
 import { cn } from "../../../lib/utils";
 import { ensureDate } from "../../../lib/utils";
 import { localeTanggal } from "../../../lib/localeTanggal";
@@ -51,6 +51,14 @@ interface BarisDiskusiProps {
   masterData: MasterData[];
   /** #765 — id isu → hex prioritasnya (`lib/warnaTag.ts`). */
   warnaTag: Record<string, string>;
+  /**
+   * #799 — id isu → isunya, dari daftar yang sudah dimuat modul ini sendiri.
+   * Tidak ada di peta = isunya sudah dihapus, dan chipnya tetap tampil tanpa
+   * jadi pintu.
+   */
+  petaIsu: Record<string, Task>;
+  /** #799 — buka rincian isu. Dirangkai di `lib/petaIsu.ts`. */
+  bukaRincianIsu: (task: Task) => void;
   jumlahKomentar: number;
   bolehSunting: boolean;
   bolehHapus: boolean;
@@ -100,6 +108,8 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
   namaPenerima,
   masterData,
   warnaTag,
+  petaIsu,
+  bukaRincianIsu,
   jumlahKomentar,
   bolehSunting,
   bolehHapus,
@@ -238,21 +248,44 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
           `fitur` lama yang datanya tetap ada di basis data. */}
       <td className={cn(SEL, "py-2.5 align-top")}>
         <div className="flex flex-wrap gap-1 items-center">
-          {tag.map((s) => (
-            <span
-              key={s.id}
-              /* #765 — chip isu ikut warna PRIORITAS isu tertaut: `label-chip`
-                 menurunkan latar, garis, dan teks dari satu hex (`--lbr`), sama
-                 seperti chip di Daftar Isu. Tanpa prioritas, warna merek. */
-              className={cn(
-                "px-2 py-0.5 rounded-md text-[10px] leading-snug font-normal border break-words",
-                warnaTag[s.id] ? "label-chip" : "bg-primary/10 text-primary border-primary/20"
-              )}
-              style={warnaTag[s.id] ? gayaLabel(warnaTag[s.id]) : undefined}
-            >
-              {s.label}
-            </span>
-          ))}
+          {tag.map((s) => {
+            /* #799 — chip yang menunjuk isu HIDUP dibungkus tombol; yang
+                 menunjuk isu yang sudah dihapus dibiarkan span biasa. Pintu
+                 palsu lebih buruk dari tidak ada pintu: klik yang tidak
+                 menghasilkan apa pun terbaca sebagai aplikasi yang rusak.
+                 Bentuk lencananya TETAP span di dalam tombol, bukan tombol itu
+                 sendiri, supaya `label-chip` + `--lbr` tetap di elemen yang
+                 sama seperti yang diukur #765. */
+            const isu = petaIsu[s.id];
+            const lencana = (
+              <span
+                /* #765 — chip isu ikut warna PRIORITAS isu tertaut: `label-chip`
+                   menurunkan latar, garis, dan teks dari satu hex (`--lbr`), sama
+                   seperti chip di Daftar Isu. Tanpa prioritas, warna merek. */
+                className={cn(
+                  "px-2 py-0.5 rounded-md text-[10px] leading-snug font-normal border break-words",
+                  warnaTag[s.id] ? "label-chip" : "bg-primary/10 text-primary border-primary/20"
+                )}
+                style={warnaTag[s.id] ? gayaLabel(warnaTag[s.id]) : undefined}
+              >
+                {s.label}
+              </span>
+            );
+            if (!isu) {
+              return <React.Fragment key={s.id}>{lencana}</React.Fragment>;
+            }
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => bukaRincianIsu(isu)}
+                className="cursor-pointer"
+                title={t("discussion.bukaRincianIsu", { judul: s.label })}
+              >
+                {lencana}
+              </button>
+            );
+          })}
           {p.fitur ? (
             <span className="px-2 py-0.5 rounded-md text-[10px] leading-snug font-normal bg-surface-sunken text-content-body border border-border-subtle break-words">
               {(() => {

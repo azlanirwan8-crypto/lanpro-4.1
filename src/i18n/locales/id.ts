@@ -1892,6 +1892,7 @@ export const id = {
     thConcern: "Topik",
     thNotes: "Catatan / Keterangan",
     thContextTags: "Konteks / Tag",
+    bukaRincianIsu: "Buka rincian isu: {{judul}}",
     // #714 — papan turun dari dua belas ke delapan kolom. #715 mengembalikan PIC
     // dan tanggal ke kolomnya sendiri: pemilik proyek menolaknya digabung.
     thPic: "PIC",

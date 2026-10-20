@@ -48,6 +48,9 @@ const pasang = (p: Partial<DiscussionPoint>) =>
       masterData={[]}
       /* #765 — peta warna chip tag; test ini tidak menguji warna. */
       warnaTag={{}}
+
+      petaIsu={{}}
+      bukaRincianIsu={() => {}}
       onOpenThread={() => {}}
       onEditPoint={() => {}}
       onDeletePoint={() => {}}

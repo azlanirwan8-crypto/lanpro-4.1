@@ -21,6 +21,7 @@ import {
   type UserPermissions,
   type MasterData,
   type TautanDiskusi,
+  type Task,
 } from "../../types";
 import { AiMeetingCompanion } from "./AiMeetingCompanion";
 import { KeadaanKosongDiskusi } from "./KeadaanKosongDiskusi";
@@ -37,6 +38,7 @@ import { ModalCatatanSelesai } from "./components/ModalCatatanSelesai";
 import { useLampiranDiskusi } from "./lib/lampiran";
 import { useRealtimePapan } from "./lib/realtime";
 import { useWarnaTagIsu } from "./lib/warnaTag";
+import { usePetaIsu, useBukaRincianIsu } from "./lib/petaIsu";
 import { paramSortir, useSortirPapan, type KolomSortir } from "./lib/sortir";
 import { useSelesaiCatatan } from "./lib/selesaiCatatan";
 import type { OpsiJamak } from "./components/PemilihJamak";
@@ -50,6 +52,9 @@ interface DiscussionPointsTableProps {
   permissions?: Partial<UserPermissions>;
   projectMembers?: UserProfile[];
   masterData?: MasterData[];
+  /** #799 — pasangan yang dirangkai `useBukaRincianIsu`, lihat `lib/petaIsu.ts`. */
+  setSelectedTaskForDetail: (task: Task) => void;
+  setIsTaskDetailModalOpen: (isOpen: boolean) => void;
 }
 
 export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
@@ -60,6 +65,8 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
   permissions,
   projectMembers = [],
   masterData = [],
+  setSelectedTaskForDetail,
+  setIsTaskDetailModalOpen,
 }) => {
   const { t } = useTranslation();
   const [points, setPoints] = useState<DiscussionPoint[]>([]);
@@ -88,6 +95,8 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
    * proyek, bukan lagi label MasterData. Diambil sekali per proyek: isinya bisa
    * ratusan, jadi ia tidak boleh di-refetch tiap ketikan di kotak cari. */
   const [opsiIsu, setOpsiIsu] = useState<OpsiJamak[]>([]);
+  /* #799 — daftar yang sama, TIDAK dibuang; alasan lengkapnya di lib/petaIsu.ts. */
+  const [daftarIsu, setDaftarIsu] = useState<Task[]>([]);
   /* #704/#709 — unggah satu berkas lalu daftarkan ke titik diskusi. Logikanya
    * pindah ke `lib/lampiran.ts`: induknya 780 baris dari batas 800 §4 sebelum
    * antrean berkas ini ada (§4: berkas di atas 800 harus dipecah). */
@@ -193,6 +202,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
         const data = await fetchTasks(projectId, { rootsOnly: false });
         if (batal || data?.status !== "success") return;
         const daftar = Array.isArray(data.data) ? data.data : [];
+        setDaftarIsu(daftar.filter((t: any) => t && t.id));
         setOpsiIsu(
           daftar
             .filter((t: any) => t && t.id)
@@ -541,8 +551,12 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
   const bolehSuntingBaris = (point: DiscussionPoint) => izinBaris(point, "update");
   const bolehHapusBaris = (point: DiscussionPoint) => izinBaris(point, "delete");
 
-  /* #765 — chip Konteks/Tag ikut warna prioritas isu tertaut (lib/warnaTag.ts). */
+  /* #765 — chip Konteks/Tag ikut warna prioritas isu tertaut (lib/warnaTag.ts).
+   * #799 — warna saja tidak cukup: chip yang menunjuk isu nyata harus bisa
+   * dibuka. `petaIsu` sekaligus menjawab "isunya masih ada atau tidak". */
   const { warnaIsu, opsiTag } = useWarnaTagIsu(opsiIsu, masterData);
+  const petaIsu = usePetaIsu(daftarIsu);
+  const bukaRincianIsu = useBukaRincianIsu(setSelectedTaskForDetail, setIsTaskDetailModalOpen);
 
   return (
     <div className="bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden flex-1 flex flex-col min-h-0 font-sans text-left">
@@ -620,6 +634,8 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                 projectMembers={projectMembers}
                 masterData={masterData}
                 warnaTag={warnaIsu}
+                petaIsu={petaIsu}
+                bukaRincianIsu={bukaRincianIsu}
                 onOpenThread={(point) => handleOpenThreadDrawer(point)}
                 onEditPoint={(point) => startEdit(point)}
                 onDeletePoint={(id) => handleDelete(id)}
@@ -694,6 +710,8 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                         namaPenerima={namaPenerima}
                         masterData={masterData}
                         warnaTag={warnaIsu}
+                        petaIsu={petaIsu}
+                        bukaRincianIsu={bukaRincianIsu}
                         jumlahKomentar={p.commentsCount ?? 0}
                         bolehSunting={bolehSuntingBaris(p)}
                         bolehUbahStatus={bolehSuntingBaris(p)}

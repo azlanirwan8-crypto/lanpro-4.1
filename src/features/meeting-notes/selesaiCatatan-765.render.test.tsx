@@ -264,6 +264,9 @@ describe("#765 — pil status desktop sekarang digerbangi izin", () => {
             namaPenerima={[{ id: "u1", nama: "AZLAN IRWAN" }]}
             masterData={[]}
             warnaTag={{}}
+
+            petaIsu={{}}
+            bukaRincianIsu={() => {}}
             jumlahKomentar={0}
             bolehSunting={bolehUbahStatus}
             bolehHapus={bolehUbahStatus}

@@ -61,6 +61,9 @@ const pasang = (status: "pending" | "completed") =>
           namaPenerima={[{ id: "u1", nama: "AZLAN IRWAN" }]}
           masterData={[]}
           warnaTag={{}}
+
+          petaIsu={{}}
+          bukaRincianIsu={() => {}}
           jumlahKomentar={2}
           bolehSunting
           bolehHapus

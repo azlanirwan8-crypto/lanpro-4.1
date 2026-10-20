@@ -32,6 +32,7 @@ import {
   type AppRole,
   type PeranEfektif,
   type UserPermissions,
+  type Task,
 } from "../../types";
 import { UserAvatar } from "../../components/ui/UserAvatar";
 import { NamaBerkas } from "../../components/ui/NamaBerkas";
@@ -77,6 +78,14 @@ interface MeetingNotesProps {
   permissions?: Partial<UserPermissions>;
   projectMembers?: UserProfile[];
   masterData?: any[];
+  /**
+   * #799 — pintu ke rincian isu. Poin Diskusi menyimpan tag sebagai
+   * `TagIsu = { id, label }` (#703), dan chipnya sudah berona ikut prioritas
+   * (#765) — tetapi tidak ada satu pun jalur untuk MEMBUKA isunya, karena
+   * kedua setter ini belum pernah diteruskan ke modul ini sama sekali.
+   */
+  setSelectedTaskForDetail: (task: Task) => void;
+  setIsTaskDetailModalOpen: (isOpen: boolean) => void;
 }
 
 export const MeetingNotes: React.FC<MeetingNotesProps> = ({
@@ -86,6 +95,8 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
   permissions,
   projectMembers = [],
   masterData = [],
+  setSelectedTaskForDetail,
+  setIsTaskDetailModalOpen,
 }) => {
   const { t } = useTranslation();
   const effectiveUserId = currentUser?.uid || "guest";
@@ -962,6 +973,8 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                         permissions={permissions}
                         projectMembers={projectMembers}
                         masterData={masterData}
+                        setSelectedTaskForDetail={setSelectedTaskForDetail}
+                        setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
                       />
                     </Suspense>
                   </div>
