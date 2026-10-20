@@ -71,7 +71,13 @@ describe("#772 — pembanding daftar diagram alur", () => {
   it("isu tertaut diurut lewat label yang sama dengan yang dibaca di sel", () => {
     // Baris tanpa isu tidak membuang label kosong ke bawah: selnya menampilkan
     // "-" untuk nilai yang sama, jadi ia memang paling depan saat ASC.
-    expect(urutkan(sampel, "linkedIssue", "asc").map((f) => f.id)).toEqual(["c", "b", "a"]);
+    //
+    // #796 mengurutkan pada JUDUL, bukan `[KUNCI] judul` — kontrak test ini
+    // ("label yang sama dengan yang dibaca di sel") tetap utuh, yang berubah
+    // isinya. Dulu "PRJ-2 Setting & Services" (b) mendahului "PRJ-9 Alur ekspor"
+    // (a) karena kuncinya; sekarang "Alur ekspor" mendahului "Setting &
+    // Services". Angka di bawah adalah judul-saja, bukan koreksi agar hijau.
+    expect(urutkan(sampel, "linkedIssue", "asc").map((f) => f.id)).toEqual(["c", "a", "b"]);
   });
 
   it("pembuat diurut lewat nama yang tampil, bukan id auth", () => {

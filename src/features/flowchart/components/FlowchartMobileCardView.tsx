@@ -4,7 +4,6 @@ import { Workflow, Calendar, Edit3, Trash2, ArrowRight } from "lucide-react";
 import type { FlowchartData } from "../types";
 import type { Task } from "../../../types";
 import { tampilanNamaPembuat } from "../lib/authorIdentity";
-import { labelTautanIsu } from "../lib/tautanIsu";
 import { LabelChip } from "../../../components/ui/CommonComponents";
 
 interface FlowchartMobileCardViewProps {
@@ -33,7 +32,7 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
   const namaIsuTertaut = (idIsu?: string) => {
     if (!idIsu) return null;
     const isu = tasks.find((t) => t.id === idIsu);
-    return isu ? labelTautanIsu(isu.key, isu.title) : idIsu;
+    return isu ? isu.title : idIsu;
   };
 
   const formatDate = (date: any) => {

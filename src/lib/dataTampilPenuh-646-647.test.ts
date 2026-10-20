@@ -44,7 +44,7 @@ const baca = (relatif: string) => readFileSync(join(AKAR, relatif), "utf8").repl
 /** Kelas tag yang merender `ekspresi`. Jangkar "didahului bukan `=` dan bukan
  *  huruf" membuat pencarian tidak tertukar dengan prop bernama sama
  *  (`name={author.name}`) tapi tetap menemukan yang didahului teks lain, seperti
- *  chip tertaut `{labelTautanIsu(isu.key, isu.title)}`. `\s*` menampung gaya
+ *  chip tertaut `{linkedIsu.title}`. `\s*` menampung gaya
  *  prettier yang menaruh ekspresi di barisnya sendiri.
  *
  *  `<` TERAKHIR sebelum ekspresi tidak selalu milik tag pembungkus: sejak #718
@@ -221,7 +221,7 @@ describe("daftar flowchart tampil penuh (#647)", () => {
   it("nama, deskripsi, dan isu tertaut tidak dipotong", () => {
     tanpaPotong(isi, "{fw.name}", TABEL_FLOW);
     tanpaPotong(isi, "{fw.description ? (", TABEL_FLOW);
-    tanpaPotong(isi, "{labelTautanIsu(linkedIsu.key, linkedIsu.title)}", TABEL_FLOW);
+    tanpaPotong(isi, "{linkedIsu.title}", TABEL_FLOW);
   });
 
   it("nama pembuat tidak dipotong", () => {
@@ -240,7 +240,7 @@ describe("daftar flowchart tampil penuh (#647)", () => {
     // Updated, dan Action (screenshot 08 Okt).
     bolehMelebar(isi, "{fw.name}", TABEL_FLOW);
     bolehMelebar(isi, "{fw.description ? (", TABEL_FLOW);
-    bolehMelebar(isi, "{labelTautanIsu(linkedIsu.key, linkedIsu.title)}", TABEL_FLOW);
+    bolehMelebar(isi, "{linkedIsu.title}", TABEL_FLOW);
   });
 
   // #718 — pemilik proyek: "pada linked to epic, ini harusnya linked to issue,
