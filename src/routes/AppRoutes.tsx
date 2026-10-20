@@ -288,6 +288,8 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
             projectMembers={projectMembers && projectMembers.length > 0 ? projectMembers : allUsers}
             masterData={masterData || []}
             permissions={currentUserProfile?.permissions}
+            setSelectedTaskForDetail={setSelectedTaskForDetail}
+            setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
           />
         </div>
       );

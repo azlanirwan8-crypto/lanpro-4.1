@@ -206,6 +206,9 @@ describe("#793 — kolom TANGGAL DONE", () => {
             namaPenerima={[{ id: "u1", nama: "AZLAN IRWAN" }]}
             masterData={[]}
             warnaTag={{}}
+
+            petaIsu={{}}
+            bukaRincianIsu={() => {}}
             jumlahKomentar={0}
             bolehSunting
             bolehHapus

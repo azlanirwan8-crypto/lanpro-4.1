@@ -57,6 +57,9 @@ const pasang = (p: Partial<DiscussionPoint> = {}) =>
           namaPenerima={TIGA_PIC_OBYEK}
           masterData={[]}
           warnaTag={{}}
+
+          petaIsu={{}}
+          bukaRincianIsu={() => {}}
           jumlahKomentar={2}
           bolehSunting
           bolehHapus
@@ -143,6 +146,9 @@ describe("#714/#715/#792 — baris data sebelas sel", () => {
             namaPenerima={[{ id: "u1", nama: "AZLAN IRWAN" }]}
             masterData={[]}
             warnaTag={{}}
+
+            petaIsu={{}}
+            bukaRincianIsu={() => {}}
             jumlahKomentar={0}
             bolehSunting={false}
             bolehHapus={false}

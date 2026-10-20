@@ -15,7 +15,7 @@ import {
 import { cn } from "../../../lib/utils";
 import { gayaLabel } from "../../../lib/warnaLabel";
 import { getUserAvatarHex } from "../../../components/ui/UserAvatar";
-import { DiscussionPoint, UserProfile, MasterData } from "../../../types";
+import { DiscussionPoint, UserProfile, MasterData, Task } from "../../../types";
 import { Paragraf } from "./Paragraf";
 
 interface DiscussionPointMobileCardViewProps {
@@ -24,6 +24,10 @@ interface DiscussionPointMobileCardViewProps {
   masterData: MasterData[];
   /** #765 — id isu → hex prioritasnya (`lib/warnaTag.ts`). */
   warnaTag: Record<string, string>;
+  /** #799 — id isu → isunya; tidak ada di peta berarti chipnya tidak jadi pintu. */
+  petaIsu: Record<string, Task>;
+  /** #799 — buka rincian isu. Dirangkai di `lib/petaIsu.ts`. */
+  bukaRincianIsu: (task: Task) => void;
   onOpenThread: (point: DiscussionPoint) => void;
   onEditPoint: (point: DiscussionPoint) => void;
   onDeletePoint: (id: string) => void;
@@ -44,6 +48,8 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
   projectMembers,
   masterData,
   warnaTag,
+  petaIsu,
+  bukaRincianIsu,
   onOpenThread,
   onEditPoint,
   onDeletePoint,
@@ -227,21 +233,42 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
             <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-border-faint text-xs text-content-muted">
               {/* Context / Tags — #703 (B1 = a): isu nyata dari Daftar Isu. */}
               <div className="flex flex-wrap items-center gap-1 min-w-0">
-                {tag.map((s) => (
-                  <span
-                    key={s.id}
-                    // #765 — sama seperti papan: chip isu ikut warna prioritas
-                    // isu tertaut (#564/#590), bukan warna merek.
-                    className={cn(
-                      "inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md border whitespace-normal break-words",
-                      warnaTag[s.id] ? "label-chip" : "bg-primary/10 text-primary border-primary/20"
-                    )}
-                    style={warnaTag[s.id] ? gayaLabel(warnaTag[s.id]) : undefined}
-                  >
-                    <Tag className="w-3 h-3 shrink-0" />
-                    {s.label}
-                  </span>
-                ))}
+                {tag.map((s) => {
+                  // #799 — sama seperti baris desktop: hanya isu yang MASIH ADA
+                  // yang dapat pintu; lencananya tetap span supaya #765 masih
+                  // mengukur elemen yang sama.
+                  const isu = petaIsu[s.id];
+                  const lencana = (
+                    <span
+                      // #765 — sama seperti papan: chip isu ikut warna prioritas
+                      // isu tertaut (#564/#590), bukan warna merek.
+                      className={cn(
+                        "inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md border whitespace-normal break-words",
+                        warnaTag[s.id]
+                          ? "label-chip"
+                          : "bg-primary/10 text-primary border-primary/20"
+                      )}
+                      style={warnaTag[s.id] ? gayaLabel(warnaTag[s.id]) : undefined}
+                    >
+                      <Tag className="w-3 h-3 shrink-0" />
+                      {s.label}
+                    </span>
+                  );
+                  if (!isu) {
+                    return <React.Fragment key={s.id}>{lencana}</React.Fragment>;
+                  }
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => bukaRincianIsu(isu)}
+                      className="cursor-pointer"
+                      title={t("discussion.bukaRincianIsu", { judul: s.label })}
+                    >
+                      {lencana}
+                    </button>
+                  );
+                })}
                 {p.fitur ? (
                   // #645 — label tag dan nama PIC tidak boleh dipotong; catatan
                   // di kartu ini sudah utuh, tinggal dua potongan ini yang tersisa.

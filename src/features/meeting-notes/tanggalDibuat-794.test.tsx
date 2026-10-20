@@ -57,6 +57,9 @@ const pasang = (p: DiscussionPoint) =>
           namaPenerima={[{ id: "u1", nama: "AZLAN IRWAN" }]}
           masterData={[]}
           warnaTag={{}}
+
+          petaIsu={{}}
+          bukaRincianIsu={() => {}}
           jumlahKomentar={0}
           bolehSunting
           bolehHapus
