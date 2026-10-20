@@ -1517,6 +1517,7 @@ export const en = {
     deleteDiagram: "Delete Flowchart",
     thCategory: "Category",
     thLinkedIssue: "Linked Issue",
+    bukaRincianIsu: "Open issue detail: {{judul}}",
     thAuthor: "Author",
     thAction: "Action",
     thTitle: "Flowchart Title",

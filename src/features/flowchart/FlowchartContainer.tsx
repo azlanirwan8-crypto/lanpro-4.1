@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useMasterOptionItems } from "../../hooks/useMasterOptions";
 import { LabelChip, StyledDropdown } from "../../components/ui/CommonComponents";
 import { safeLocalStorage, safeSessionStorage } from "../../lib/safeStorage";
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useFlowchartCanvas } from "../../hooks/useFlowchartCanvas";
 import { useFlowchartAutosave } from "../../hooks/useFlowchartAutosave";
 import { useFlowchartUI } from "../../hooks/useFlowchartUI";
@@ -173,6 +173,28 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     }
     return "Administrator";
   };
+
+  /**
+   * #797 — membuka RINCIAN sebuah isu dari daftar Diagram Alur.
+   *
+   * Pemilik proyek 20 Okt: "ketika linked issue di klik maka dia masuk ke detail
+   * issue nya bukan ke detail ini". Yang dulu terjadi: chip tertaut hanyalah
+   * `<span>` tanpa handler, jadi klik apa pun di baris kena ke `onClick` `<tr>`
+   * dan membuka KANVAS diagramnya.
+   *
+   * Dua setter ini dipanggil BERSEBELAN dan tidak boleh dipisah, karena
+   * `setIsTaskDetailModalOpen(true)` adalah satu-satunya yang menyimpan
+   * `previousView` — tanpanya tombol kembali tidak membawa pengguna ke daftar
+   * alur. Karena itu pasangannya dirangkai di sini sekali, bukan diwariskan
+   * sebagai dua prop mentah ke dua komponen presentasi.
+   */
+  const bukaRincianIsu = useCallback(
+    (task: Task) => {
+      setSelectedTaskForDetail(task);
+      setIsTaskDetailModalOpen(true);
+    },
+    [setSelectedTaskForDetail, setIsTaskDetailModalOpen]
+  );
 
   // BOLA & Authorization Check (LanPro v1.4)
   const effectiveUser =
@@ -4315,6 +4337,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           canModifyFlowchart={canModifyFlowchart}
           openEditModal={openEditModal}
           handleDeleteFlowchart={handleDeleteFlowchart}
+          bukaRincianIsu={bukaRincianIsu}
         />
       ) : (
         <div className="flex-1 flex flex-col min-h-0 overflow-y-auto bg-surface-sunken p-4 md:p-6 space-y-4 font-sans">

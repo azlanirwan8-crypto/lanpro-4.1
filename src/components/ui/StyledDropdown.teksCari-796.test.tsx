@@ -104,7 +104,11 @@ describe("permukaan Flowchart hanya menampilkan judul (#796)", () => {
 
   it("chip tabel dan kartu HP membaca judulnya langsung", () => {
     expect(baca(TABEL)).toContain("{linkedIsu.title}");
-    expect(baca(KARTU)).toMatch(/isu \? isu\.title :/);
+    // #797 membuat kartu HP memegang TASK-nya, bukan string labelnya, supaya
+    // chipnya bisa membuka rincian. Yang tetap harus benar di sini: yang
+    // dibaca mata hanyalah judulnya.
+    expect(baca(KARTU)).toContain("{isu.title}");
+    expect(baca(KARTU)).not.toMatch(/isu\.key/);
   });
 
   it("label opsi dropdown berisi judul DAN teksCarinya berisi kunci", () => {

@@ -15,6 +15,8 @@ interface FlowchartMobileCardViewProps {
   canModifyFlowchart: (flow: FlowchartData) => boolean;
   getResolvedAuthor: () => string;
   onOpenCreate: () => void;
+  /** #797 — sama seperti di tabel: kartu HP adalah permukaan yang sama. */
+  bukaRincianIsu: (task: Task) => void;
 }
 
 export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = ({
@@ -26,14 +28,16 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
   canModifyFlowchart,
   getResolvedAuthor,
   onOpenCreate,
+  bukaRincianIsu,
 }) => {
   const { t } = useTranslation();
 
-  const namaIsuTertaut = (idIsu?: string) => {
-    if (!idIsu) return null;
-    const isu = tasks.find((t) => t.id === idIsu);
-    return isu ? isu.title : idIsu;
-  };
+  /**
+   * Isu yang tertaut, BUKAN string labelnya (#797). Yang dulu dikembalikan
+   * hanyalah teks, jadi kartu ini secara fisik tidak bisa membuka rincian isu
+   * walau pintunya sudah ada di tabel desktop.
+   */
+  const isuTertaut = (idIsu?: string) => (idIsu ? tasks.find((t) => t.id === idIsu) : undefined);
 
   const formatDate = (date: any) => {
     if (!date) return "-";
@@ -71,7 +75,7 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
     <div className="flex flex-col gap-3">
       {flowcharts.map((flow, index) => {
         const canModify = canModifyFlowchart(flow);
-        const namaIsu = namaIsuTertaut(flow.epicTaskId);
+        const isu = isuTertaut(flow.epicTaskId);
         const author = tampilanNamaPembuat(flow, getResolvedAuthor());
 
         return (
@@ -129,11 +133,26 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
             <div className="flex flex-wrap items-center gap-2 text-xs">
               {flow.category && <LabelChip kelompok="jenis_dokumen" nilai={flow.category} />}
 
-              {namaIsu && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-sunken border border-border-subtle text-content-muted text-[11px] font-medium whitespace-normal break-words max-w-full">
+              {/* #797 — `<button>` + `stopPropagation`, sama seperti di tabel:
+                  tanpa yang kedua, klik chip ikut naik ke kartu dan membuka
+                  kanvas. Efek yang harus dibaca: tautan YATIM (epicTaskId masih
+                  diisi tapi isunya sudah dihapus) dulu menampilkan uuid mentah
+                  di sini; sekarang tidak menampilkan apa pun — seisi dengan sel
+                  tabel yang sudah lama membuang "-". Menampilkan uuid bukan
+                  informasi, itu kebocoran kunci internal ke layar. */}
+              {isu && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    bukaRincianIsu(isu);
+                  }}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-sunken border border-border-subtle text-content-muted text-[11px] font-medium whitespace-normal break-words max-w-full cursor-pointer transition-colors hover:bg-surface-muted"
+                  title={t("flowchart.bukaRincianIsu", { judul: isu.title })}
+                >
                   <Workflow className="w-3 h-3 text-primary shrink-0" />
-                  <span>{namaIsu}</span>
-                </span>
+                  <span>{isu.title}</span>
+                </button>
               )}
             </div>
 
