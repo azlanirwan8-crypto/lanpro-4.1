@@ -17,6 +17,29 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 
+/**
+ * #801 — doctor dijalankan di dua tempat yang berbeda sifatnya, dan sebelum
+ * perubahan ini ia hanya tahu yang pertama.
+ *
+ *   mesin operator : sumber kebenaran adalah BERKAS `.env` di disk
+ *   CI (GitHub Actions) : sumber kebenarannya ENVIRONMENT yang disuntik dari
+ *                         `secrets.*` di workflow
+ *
+ * `.env` ada di `.gitignore` dan tidak ter-track git, jadi runner yang
+ * meng-*checkout* repository TIDAK AKAN PERNAH memilikinya. Pemeriksaan
+ * "`.env` tidak ditemukan" karena itu selalu gagal di CI — dan karena langkah
+ * doctor adalah pemblokir `test-and-scan`, sementara `build-and-push` dan
+ * `deploy-production` memakai `needs:` padanya, seluruh jalur deploy ikut mati.
+ * Itulah sebabnya tidak ada satu pun dari 590 run workflow ini yang pernah
+ * hijau, sejak 14 Agu 2026.
+ *
+ * Yang TIDAK dilonggarkan: di CI, nilai yang wajib tetap diuji lewat §2, dan
+ * koneksi database sungguhan tetap diuji lewat §7/§8 begitu `DATABASE_URL`
+ * diisi. Yang berubah hanyalah "berkas tidak ada" tidak lagi dihitung sebagai
+ * kesalahan pada mesin yang memang tidak seharusnya punya berkas itu.
+ */
+const DI_CI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+
 // Password Neon yang pernah bocor di histori git publik. Doctor menolak
 // environment yang masih memakainya.
 const LEAKED_DB_PASSWORDS = ['npg_CVZvaYbF8W2s'];
@@ -53,7 +76,17 @@ function fingerprint(s) {
 section('1. File environment');
 
 if (!fs.existsSync(path.join(ROOT, '.env'))) {
-  fail('.env tidak ditemukan', 'Salin .env.example jadi .env lalu isi nilainya');
+  // #801 — di CI berkas ini mustahil ada; menuntutnya membuat gerbang yang
+  // seharusnya memeriksa konfigurasi menjadi pemeriksaan yang tak pernah bisa
+  // lulus. Di mesin lokal aturannya tidak berubah: `.env` memang wajib ada.
+  if (DI_CI) {
+    ok(
+      '.env tidak ada — di CI sumbernya environment, bukan berkas',
+      'nilai diuji di §2 dari `env:` workflow (`secrets.*`)'
+    );
+  } else {
+    fail('.env tidak ditemukan', 'Salin .env.example jadi .env lalu isi nilainya');
+  }
 } else {
   ok('.env ditemukan');
 }
@@ -393,7 +426,14 @@ section('6. Penyimpanan berkas unggahan');
   section('7. Uji koneksi database');
 
   if (!process.env.DATABASE_URL) {
-    fail('Dilewati — DATABASE_URL kosong');
+    // #801 — sebab yang sama sudah dihitung SEKALI di §2. Melaporkannya ulang
+    // di sini mengubah satu masalah menjadi tiga baris merah, dan orang akan
+    // mencari tiga penyebab yang tidak ada. Keluaran proses tetap 1 karena §2
+    // sudah menaikkan `failed` — tidak ada yang jadi lebih longgar.
+    warn(
+      'Dilewati — DATABASE_URL kosong (sebabnya sudah dilaporkan di §2)',
+      'isi DATABASE_URL; §2 tetap merah sampai itu dilakukan'
+    );
   } else {
     const { Pool } = require('pg');
     const pool = new Pool({
@@ -426,7 +466,14 @@ section('6. Penyimpanan berkas unggahan');
   section('8. Kelengkapan schema database');
 
   if (!process.env.DATABASE_URL) {
-    fail('Dilewati — DATABASE_URL kosong');
+    // #801 — sebab yang sama sudah dihitung SEKALI di §2. Melaporkannya ulang
+    // di sini mengubah satu masalah menjadi tiga baris merah, dan orang akan
+    // mencari tiga penyebab yang tidak ada. Keluaran proses tetap 1 karena §2
+    // sudah menaikkan `failed` — tidak ada yang jadi lebih longgar.
+    warn(
+      'Dilewati — DATABASE_URL kosong (sebabnya sudah dilaporkan di §2)',
+      'isi DATABASE_URL; §2 tetap merah sampai itu dilakukan'
+    );
   } else {
     const { Pool } = require('pg');
     const pool = new Pool({
