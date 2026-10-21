@@ -262,7 +262,14 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                       key={s.id}
                       type="button"
                       onClick={() => bukaRincianIsu(isu)}
-                      className="cursor-pointer"
+                      /* #800 — `text-left` WAJIB di sini juga: preflight Tailwind
+                         tidak mereset `text-align` pada button, jadi center bawaan
+                         peramban memusatkan teks di dalam chip. Susunannya SENGAJA
+                         tetap `flex-wrap` dan tidak dirata-lebar seperti di tabel
+                         desktop — yang 63,6 px ragged itu terukur pada kolom 168 px;
+                         kartu HP selebar layar, dan memaksakan `w-full` di dalam baris
+                         `justify-between` justru menggeser PIC dan tanggal. */
+                      className="cursor-pointer text-left"
                       title={t("discussion.bukaRincianIsu", { judul: s.label })}
                     >
                       {lencana}

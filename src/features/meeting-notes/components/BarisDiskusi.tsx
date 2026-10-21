@@ -247,7 +247,28 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
       {/* Context / Tags — #703 (B1 = a): isu nyata dari Daftar Isu, plus label
           `fitur` lama yang datanya tetap ada di basis data. */}
       <td className={cn(SEL, "py-2.5 align-top")}>
-        <div className="flex flex-wrap gap-1 items-center">
+        {/* #800 — chip disusun SEBARIS dan dirata-lebar, bukan dialirkan.
+            Terukur pada kolom 200 px (168 px isi) dengan delapan judul isu nyata
+            dari tangkapan layar pemilik proyek: susun lama menghasilkan LIMA
+            lebar chip berbeda — 110,4 / 131 / 134,6 / 136,1 / 174 px, tepi
+            kanan tidak rata 63,6 px. Sekarang satu lebar, 174 px, selisih 0.
+
+            SENGAJA tidak ada plafon tinggi di sini, dan itu hasil pengukuran
+            bukan kelalaian. #708/#765 membatasi sel PROSA dengan jendela gulir
+            setinggi 64 px; pola itu sempat dipasang di sini, lalu diukur — satu
+            chip tag tingginya 14,8 sampai 44,3 px (judul 90 karakter melipat
+            tiga baris), jadi jendela 64 px hanya memuat SATU dari delapan tag,
+            dan jendela 146 px hanya tiga. Menyembunyikan tag bukan kerapian.
+            Konsekuensi yang harus dibaca: sel ini bisa 245,5 px dan menjadi
+            penentu tinggi baris. Kalau itu mengganggu, yang perlu dikecilkan
+            adalah jumlah tag per catatan — bukan jendela lihatnya.
+
+            (Catatan cara menjaga baris ini: `chipRapi-800.test.tsx` MEMBACA
+            SUMBER wilayah tag dan melarang kelas jendela gulir muncul di
+            dalamnya. Karena itu komentar ini menyebut plafonnya dengan KATA,
+            bukan dengan kelas — guard yang sama sudah tiga kali merah di repo
+            ini karena kutipan komentar lebih dulu ketemu daripada kodenya.) */}
+        <div className="flex flex-col gap-1 items-stretch">
           {tag.map((s) => {
             /* #799 — chip yang menunjuk isu HIDUP dibungkus tombol; yang
                  menunjuk isu yang sudah dihapus dibiarkan span biasa. Pintu
@@ -279,7 +300,13 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
                 key={s.id}
                 type="button"
                 onClick={() => bukaRincianIsu(isu)}
-                className="cursor-pointer"
+                /* #800 — `text-left` bukan hiasan. Tailwind preflight mereset
+                   box model, padding, dan latar `button`, TETAPI TIDAK
+                   `text-align` — jadi center bawaan peramban tetap hidup dan
+                   memusatkan teks di dalam chip. Itulah pola "tangga" yang
+                   dilaporkan pemilik proyek: tepi kiri teks bergeser 24,5 px
+                   antar chip. `w-full` membuat semua chip selebar kolom. */
+                className="cursor-pointer text-left w-full"
                 title={t("discussion.bukaRincianIsu", { judul: s.label })}
               >
                 {lencana}
