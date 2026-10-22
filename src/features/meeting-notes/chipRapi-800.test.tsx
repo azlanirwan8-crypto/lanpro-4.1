@@ -21,6 +21,16 @@
  *
  * AKAR KEDUA sudah ada sebelum #799: `flex-wrap` pada kolom selebar 168 px.
  *
+ * PUTARAN 2, 22 Okt — pemilik proyek: "duh masih rapat dan tidak rapi nih saya
+ * minta ui styling lagi perbaiki". Putaran pertama MENGUKUR MODEL dari DOM-nya,
+ * bukan DOM-nya: harness waktu itu menaruh kelas pil langsung pada elemen yang
+ * dirata-lebar, sedangkan yang dirender adalah tombol berisi span. Hasilnya di
+ * layar: tepi kiri sudah rapi (itu yang diukur) tetapi tepi kanan tetap bergigi
+ * dan pil-nya saling menempel. Dua assertion baru di bawah mengunci keduanya
+ * pada ELEMEN YANG TERLIHAT. Pelajaran yang lebih umum: pada struktur bersarang,
+ * "kelas sudah ada" harus dites terhadap elemen yang menampilkan warna, bukan
+ * terhadap elemen yang menempati slot layout.
+ *
  * Yang TIDAK jadi solusi, dan dikunci di sini supaya tidak dicoba lagi: plafon
  * `max-h-16 overflow-y-auto` seperti sel prosa #708. Pernah dipasang, lalu
  * diukur — satu chip tag 14,8–44,3 px tingginya, jadi jendela 64 px hanya
@@ -100,6 +110,85 @@ describe("regresi text-align pada button chip (#800)", () => {
     expect(tombol.getAttribute("class")).toContain("w-full");
   });
 
+  /**
+   * #800 PUTARAN 2 — inilah yang lolos dari putaran pertama. Penjaga di atas
+   * membaca kelas TOMBOL, dan tombolnya memang penuh; yang dilihat pengguna
+   * adalah pil, dan pil itu span di DALAM tombol. `w-full` pada induk tidak
+   * menurunkan lebar ke anak inline. Terukur pada kolom 200 px lewat
+   * `scratch/harness-800b-struktur.html` dengan struktur DOM yang sama seperti
+   * yang dirender: sembilan judul nyata = sembilan lebar pil (110,4 – 171,4 px),
+   * tepi kanan tidak rata 60,9 px, dan jarak LIHAT antar pil −0,5 px (overlap)
+   * walaupun wadahnya bilang `gap-1`.
+   */
+  it("pil yang TERLIHAT ikut dirata-lebar, bukan hanya area kliknya", () => {
+    const { container } = render(
+      <table>
+        <tbody>
+          <BarisDiskusi
+            p={titik()}
+            nomor="01"
+            assigneeName="-"
+            namaPenerima={[]}
+            masterData={[]}
+            warnaTag={{ i1: "#F59E0B" }}
+            petaIsu={{ i1: ISU }}
+            bukaRincianIsu={() => {}}
+            jumlahKomentar={0}
+            bolehSunting
+            bolehHapus
+            bolehUbahStatus
+            onOpenThread={() => {}}
+            onEdit={() => {}}
+            onDelete={() => {}}
+            onToggleStatus={() => {}}
+          />
+        </tbody>
+      </table>
+    );
+    const tombol = tombolChip(container) as HTMLButtonElement;
+    const pil = tombol.querySelector("span") as HTMLSpanElement;
+    expect(pil).toBeTruthy();
+    expect(pil.getAttribute("class")).toContain("block");
+    expect(pil.getAttribute("class")).toContain("w-full");
+    // Rona milik pil, bukan tombol: kalau ini pindah, `.label-chip` kehilangan
+    // `--lbr`-nya dan chip jadi warna merek lagi (#765/#798).
+    expect(pil.getAttribute("class")).toContain("label-chip");
+    expect(pil.getAttribute("style")).toContain("--lbr");
+  });
+
+  it("chip TANPA isu tertaut tetap satu bentuk dengan yang bertombol", () => {
+    const { container } = render(
+      <table>
+        <tbody>
+          <BarisDiskusi
+            p={titik()}
+            nomor="01"
+            assigneeName="-"
+            namaPenerima={[]}
+            masterData={[]}
+            warnaTag={{ i1: "#F59E0B" }}
+            petaIsu={{}}
+            bukaRincianIsu={() => {}}
+            jumlahKomentar={0}
+            bolehSunting
+            bolehHapus
+            bolehUbahStatus
+            onOpenThread={() => {}}
+            onEdit={() => {}}
+            onDelete={() => {}}
+            onToggleStatus={() => {}}
+          />
+        </tbody>
+      </table>
+    );
+    const pil = [...container.querySelectorAll("span")].find((s) =>
+      (s.textContent || "").includes("Enhancement Onboarding")
+    ) as HTMLSpanElement;
+    expect(pil).toBeTruthy();
+    expect(pil.getAttribute("class")).toContain("block");
+    expect(pil.getAttribute("class")).toContain("w-full");
+  });
+
   it("kartu HP ikut dibetulkan — bug yang sama, layar yang sama sekali berbeda", () => {
     const { container } = render(
       <DiscussionPointMobileCardView
@@ -135,8 +224,20 @@ describe("susunan chip desktop (#800)", () => {
   })();
 
   it("satu chip per baris dan dirata-lebar, bukan flex-wrap", () => {
-    expect(wilayah).toContain("flex flex-col gap-1 items-stretch");
+    expect(wilayah).toContain("flex flex-col gap-1.5 items-stretch");
     expect(wilayah).not.toContain("flex flex-wrap gap-1 items-center");
+  });
+
+  /**
+   * `gap-1` (4 px) pernah cukup di atas kertas dan tidak cukup di layar: pil
+   * inline meluber keluar garis tombolnya, jadi 4 px itu termakan dan jarak
+   * yang tersisa NEGATIF (−0,5 px terukur). Kelas jarak yang lebih besar harus
+   * ditulis sebagai kelas, bukan sebagai gaya inline, supaya `audit:kelas`
+   * ikut memastikan Tailwind benar-benar menghasilkan CSS-nya.
+   */
+  it("jarak vertikalnya jendela lihat, bukan nol — lihat angka di atas", () => {
+    expect(wilayah).toContain("gap-1.5");
+    expect(wilayah).not.toMatch(/flex flex-col gap-1 items-stretch/);
   });
 
   it("TANPA jendela gulir: plafon pernah dipasang, diukur, dan terbukti menyembunyikan 7 dari 8 tag", () => {
