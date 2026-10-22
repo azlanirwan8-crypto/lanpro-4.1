@@ -1610,7 +1610,21 @@ sembilan judul nyata dari tangkapan layarnya, CSS hasil build):
 | jumlah lebar pil berbeda |                  9 |                           1 |
 | selisih tepi kanan pil   |        **60,9 px** |                       **0** |
 | jarak LIHAT antar pil    |        **−0,5 px** |                  **4,9 px** |
-| tinggi sel               |           254,8 px |                      295 px |
+| tinggi sel               |           254,8 px |                      289 px |
+
+Kolom "putaran 2" diukur pada **DOM komponen yang sebenarnya**, bukan pada
+modelnya — itu pelajaran kegagalan putaran pertama: `BarisDiskusi` dirender
+lewat jest dengan sembilan judul nyata dari tangkapan layar (satu di antaranya
+tanpa isu tertaut, supaya kedua cabang ikut terukur), HTML-nya dibuang ke
+berkas sementara di `scratch/`, lalu dibuka di peramban dengan CSS hasil
+build. Hasilnya: sembilan pil, semuanya 180,5 px, tepi kiri dan kanan rata
+NOL, jarak 4,9 px, dan latar `color-mix` 13 % kini menutupi SELURUH pil —
+sebelumnya ia hanya menutupi selebar teksnya, dan itulah yang membuat blok
+warnanya terlihat bertingkat meski tepi kiri teksnya sudah rapi. Berkas ukur
+sementara itu sudah dihapus; yang tertinggal sebagai penjaga adalah dua test
+baru di `chipRapi-800.test.tsx` yang membaca ELEMEN pil. Kolom "putaran 1"
+adalah struktur DOM lama (`button` berisi `span` inline) yang dibangun ulang
+sebagai varian A dari `scratch/harness-800b-struktur.html`.
 
 Dua sebab, keduanya hasil mengukur elemen yang SALAH pada putaran pertama:
 
