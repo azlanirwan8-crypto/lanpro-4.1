@@ -268,7 +268,14 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
             dalamnya. Karena itu komentar ini menyebut plafonnya dengan KATA,
             bukan dengan kelas — guard yang sama sudah tiga kali merah di repo
             ini karena kutipan komentar lebih dulu ketemu daripada kodenya.) */}
-        <div className="flex flex-col gap-1 items-stretch">
+        {/* #800 putaran 2 — `gap-1.5`, bukan `gap-1`. Diukur pada kolom aslinya
+            lewat `scratch/harness-800b-struktur.html` dengan STRUKTUR DOM yang
+            sama seperti yang dirender (tombol membungkus span): dengan `gap-1`
+            jarak TERLIHAT antar pil justru NEGATIF, −0,5 px, karena span inline
+            meluber keluar garis tombolnya (tinggi baris `leading-snug` 10 px lebih
+            pendek daripada pil + padding + border). Jendela 4 px itu termakan
+            sebelum terlihat, dan itulah "rapat" pada tangkapan layar 22 Okt. */}
+        <div className="flex flex-col gap-1.5 items-stretch">
           {tag.map((s) => {
             /* #799 — chip yang menunjuk isu HIDUP dibungkus tombol; yang
                  menunjuk isu yang sudah dihapus dibiarkan span biasa. Pintu
@@ -282,9 +289,21 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
               <span
                 /* #765 — chip isu ikut warna PRIORITAS isu tertaut: `label-chip`
                    menurunkan latar, garis, dan teks dari satu hex (`--lbr`), sama
-                   seperti chip di Daftar Isu. Tanpa prioritas, warna merek. */
+                   seperti chip di Daftar Isu. Tanpa prioritas, warna merek.
+
+                   #800 putaran 2 — `block w-full` di SINI, bukan di tombolnya,
+                   dan ini sebab kegagalan putaran pertama. `items-stretch` dan
+                   `w-full` hanya melebarkan ELEMEN yang jadi anak flex, yaitu
+                   tombolnya; pil yang MATSA (span di dalamnya) tetap selebar
+                   teksnya. Terukur: sembilan judul nyata menghasilkan sembilan
+                   lebar pil berbeda (110,4 – 171,4 px) dengan tepi kanan tidak
+                   rata 60,9 px — persis yang ada di tangkapan layar. Yang
+                   dibetulkan #800 pertama hanya tepi KIRI, karena itu tepi kiri
+                   sudah rapi dan tetap saja terlihat tidak rapi.
+                   (Span tanpa tombol ikut dirata-lebar oleh `items-stretch`;
+                   `block w-full` membuatnya seragam dengan yang bertombol.) */
                 className={cn(
-                  "px-2 py-0.5 rounded-md text-[10px] leading-snug font-normal border break-words",
+                  "px-2 py-0.5 rounded-md text-[10px] leading-snug font-normal border break-words block w-full",
                   warnaTag[s.id] ? "label-chip" : "bg-primary/10 text-primary border-primary/20"
                 )}
                 style={warnaTag[s.id] ? gayaLabel(warnaTag[s.id]) : undefined}
@@ -305,7 +324,9 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
                    `text-align` — jadi center bawaan peramban tetap hidup dan
                    memusatkan teks di dalam chip. Itulah pola "tangga" yang
                    dilaporkan pemilik proyek: tepi kiri teks bergeser 24,5 px
-                   antar chip. `w-full` membuat semua chip selebar kolom. */
+                   antar chip. Yang melebarkan pil sampai selebar kolom adalah
+                   `block w-full` pada SPAN di dalam tombol ini — `w-full` di
+                   tombol saja hanya melebarkan area kliknya, bukan bentuknya. */
                 className="cursor-pointer text-left w-full"
                 title={t("discussion.bukaRincianIsu", { judul: s.label })}
               >
