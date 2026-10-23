@@ -491,7 +491,6 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               toggleBlockedStatus={toggleBlockedStatus}
               handleSuggestStoryPoints={handleSuggestStoryPoints}
               deleteTask={deleteTask}
-              onClose={onClose}
               safeFormat={safeFormat}
             />
           </div>

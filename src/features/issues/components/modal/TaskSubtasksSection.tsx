@@ -6,7 +6,6 @@ import { UncontrolledInput } from "./TaskDetailPrimitives";
 import { UserAvatar } from "../../../../components/ui/UserAvatar";
 import { ISIAN_KACA, KARTU_SECTION, JUDUL_SECTION } from "../../../../components/ui/gayaForm";
 import { PriorityIcon } from "../../../../components/ui/CommonComponents";
-import { confirmDeleteAlert, showSuccessAlert } from "../../../../lib/sweetalert";
 import { Task, MasterData, UserProfile } from "../../../../types";
 
 interface TaskSubtasksSectionProps {
@@ -81,15 +80,14 @@ export const TaskSubtasksSection: React.FC<TaskSubtasksSectionProps> = ({
               {isEditable && (
                 <button
                   type="button"
-                  onClick={async () => {
-                    const isConfirmed = await confirmDeleteAlert(
-                      "Hapus Subtask?",
-                      `Apakah Anda yakin ingin menghapus subtask "${st.title || "Untitled Subtask"}"? Tindakan ini tidak dapat dibatalkan.`
-                    );
-                    if (isConfirmed) {
-                      deleteTask(st.id);
-                      showSuccessAlert("Berhasil!", "Subtask berhasil dihapus.");
-                    }
+                  onClick={() => {
+                    // #802 — konfirmasi dan umpan balik DIMILIKI `deleteTask` di
+                    // AppContainer, bukan ditulis ulang di sini. SweetAlert2 hanya
+                    // punya satu popup: memanggil `showSuccessAlert` pada tick yang
+                    // sama menutup dialog konfirmasi yang baru dibuka `deleteTask`
+                    // dan resolve-nya menjadi `isDismissed`, jadi DELETE tidak pernah
+                    // dikirim sementara layar sudah bilang "Berhasil!".
+                    deleteTask(st.id);
                   }}
                   className="p-1 text-content-subtle hover:text-danger-text hover:bg-danger/10 rounded-lg transition-colors ml-1"
                   title={t("subtasks.delete")}
