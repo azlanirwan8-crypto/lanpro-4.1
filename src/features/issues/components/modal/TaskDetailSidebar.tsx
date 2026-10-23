@@ -19,7 +19,6 @@ import { cn, ensureDate } from "../../../../lib/utils";
 import { StyledDropdown } from "../../../../components/ui/CommonComponents";
 import { UncontrolledInput } from "./TaskDetailPrimitives";
 import { LanproDatePicker } from "../../../../components/ui/LanproDatePicker";
-import { confirmDeleteAlert, showSuccessAlert } from "../../../../lib/sweetalert";
 import { Task, MasterData, UserProfile, Sprint } from "../../../../types";
 import { fetchMilestones, type Milestone } from "../../../timeline/milestone.service";
 import { fetchTaskWorkLogs, createTaskWorkLog } from "../../../../services/taskService";
@@ -53,7 +52,6 @@ interface TaskDetailSidebarProps {
   toggleBlockedStatus: (id: string) => void;
   handleSuggestStoryPoints: (task: Task) => void;
   deleteTask: (id: string) => Promise<void> | void;
-  onClose: () => void;
   safeFormat: (date: any, formatStr: string, fallback?: string) => string;
 }
 
@@ -74,7 +72,6 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
   toggleBlockedStatus,
   handleSuggestStoryPoints,
   deleteTask,
-  onClose,
   safeFormat,
 }) => {
   const { t } = useTranslation();
@@ -569,16 +566,15 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
           <div className="pt-2">
             <button
               className={TOMBOL_BAHAYA}
-              onClick={async () => {
-                const isConfirmed = await confirmDeleteAlert(
-                  "Hapus Task / Issue Permanen?",
-                  `Apakah Anda yakin ingin menghapus "${task.title}"? Tindakan ini tidak dapat dibatalkan. Semua data terkait akan terhapus permanen.`
-                );
-                if (isConfirmed) {
-                  deleteTask(task.id);
-                  onClose();
-                  showSuccessAlert("Berhasil!", "Task / Issue telah dihapus.");
-                }
+              onClick={() => {
+                // #802 — `deleteTask` (AppContainer) yang membuka dialog konfirmasi,
+                // membunyikan hasil sukses/gagal, dan MENUTUP modal ini bila task-nya
+                // benar-benar terhapus. Dulu sidebar menutup diri sendiri dan
+                // berteriak "Berhasil!" pada tick yang sama: SweetAlert2 cuma punya
+                // satu popup, jadi dialog konfirmasi baru dibuka langsung dibatalkan
+                // oleh dialog sukses — DELETE tidak pernah dikirim, dan modal tertutup
+                // walau pengguna membatalkan.
+                deleteTask(task.id);
               }}
             >
               <Trash2 className="w-3.5 h-3.5" />
