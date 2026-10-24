@@ -6,6 +6,7 @@ import { UncontrolledInput } from "./TaskDetailPrimitives";
 import { UserAvatar } from "../../../../components/ui/UserAvatar";
 import { ISIAN_KACA, KARTU_SECTION, JUDUL_SECTION } from "../../../../components/ui/gayaForm";
 import { PriorityIcon } from "../../../../components/ui/CommonComponents";
+import { pohonKeturunan } from "../../../../lib/taskTree";
 import { Task, MasterData, UserProfile } from "../../../../types";
 
 interface TaskSubtasksSectionProps {
@@ -30,7 +31,12 @@ export const TaskSubtasksSection: React.FC<TaskSubtasksSectionProps> = ({
   masterData,
 }) => {
   const { t } = useTranslation();
-  const childSubtasks = tasks.filter((t) => t.parentId === task.id);
+  // #803 — SELURUH keturunan, bukan hanya anak langsung. `pohonKeturunan`
+  // memulangkan baris dalam urutan baca pohon beserta kedalamannya, jadi
+  // subtugas bertingkat tidak lagi hilang dari layar ini: dulu seksi ini
+  // menyaring `parentId === task.id`, sehingga cucu dan seterusnya punya data
+  // di sisi klien tetapi tidak pernah ditampilkan di mana pun.
+  const baris = pohonKeturunan(task.id, tasks);
 
   return (
     <div className={cn(KARTU_SECTION, "p-4 md:p-5 space-y-4")}>
@@ -41,9 +47,10 @@ export const TaskSubtasksSection: React.FC<TaskSubtasksSectionProps> = ({
         </h3>
       </div>
       <div className="space-y-3 p-4 bg-surface-sunken/40 rounded-lg border border-dashed border-border-subtle">
-        {childSubtasks.map((st, stIdx) => (
+        {baris.map(({ task: st, kedalaman }, stIdx) => (
           <div
             key={st.id ? `${st.id}-${stIdx}` : `sub-${stIdx}`}
+            style={{ marginLeft: `${(kedalaman - 1) * 20}px` }}
             className={cn(
               "flex items-center gap-4 p-3 bg-surface hover:bg-primary/10 rounded-xl group border border-border-subtle transition-all shadow-soft",
               isUpdatingTask?.[st.id] ? "opacity-50 pointer-events-none" : "hover:border-primary/30"
@@ -98,7 +105,7 @@ export const TaskSubtasksSection: React.FC<TaskSubtasksSectionProps> = ({
             </div>
           </div>
         ))}
-        {childSubtasks.length === 0 && (
+        {baris.length === 0 && (
           <div className="py-4 text-center">
             <p className="text-xs font-normal text-content-subtle uppercase tracking-normal italic">
               {t("subtasks.empty")}
