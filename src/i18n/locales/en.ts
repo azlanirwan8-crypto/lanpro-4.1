@@ -3100,6 +3100,8 @@ export const en = {
     toLightMode: "Switch to light mode",
     toDarkMode: "Switch to dark mode",
     webApps: "Web Apps",
+    webAppsMapsDesc: "Branch Map & Location System",
+    webAppsSentilDesc: "Review sentiment analysis",
     aiInvalidResponse: "Invalid response from AI.",
   },
   completeReg: {

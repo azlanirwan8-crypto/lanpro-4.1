@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { MapPin, ExternalLink } from "lucide-react";
+import { MapPin, MessageSquareQuote, ExternalLink } from "lucide-react";
 import { TopbarMenuPortal } from "../ui/TopbarMenuPortal";
 
 export interface WebAppItem {
@@ -8,7 +8,8 @@ export interface WebAppItem {
   name: string;
   url: string;
   icon?: React.ReactNode;
-  description?: string;
+  /** Kunci kamus, bukan teks jadi — lihat #804 dan `AGENTS.md` §12. */
+  descriptionKey?: string;
 }
 
 const DEFAULT_WEB_APPS: WebAppItem[] = [
@@ -16,10 +17,21 @@ const DEFAULT_WEB_APPS: WebAppItem[] = [
     id: "maps-cabang",
     name: "Maps Cabang",
     url: "https://match-sepia.vercel.app/",
-    description: "Sistem Peta & Lokasi Cabang",
+    descriptionKey: "appShell.webAppsMapsDesc",
     icon: (
       <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-content-inverse shadow-sm transition-transform group-hover:scale-105">
         <MapPin className="w-5 h-5" />
+      </div>
+    ),
+  },
+  {
+    id: "sentil",
+    name: "Sentil",
+    url: "https://sentil-eight.vercel.app/",
+    descriptionKey: "appShell.webAppsSentilDesc",
+    icon: (
+      <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-content-inverse shadow-sm transition-transform group-hover:scale-105">
+        <MessageSquareQuote className="w-5 h-5" />
       </div>
     ),
   },
@@ -117,8 +129,8 @@ export const WebAppsDropdown: React.FC<WebAppsDropdownProps> = ({
                   </span>
                   <ExternalLink className="w-3 h-3 text-content-muted opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                 </div>
-                {app.description && (
-                  <p className="text-[11px] text-content-muted truncate">{app.description}</p>
+                {app.descriptionKey && (
+                  <p className="text-[11px] text-content-muted truncate">{t(app.descriptionKey)}</p>
                 )}
               </div>
             </a>
