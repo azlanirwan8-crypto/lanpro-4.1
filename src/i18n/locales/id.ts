@@ -3126,6 +3126,8 @@ export const id = {
     toLightMode: "Beralih ke Mode Terang",
     toDarkMode: "Beralih ke Mode Gelap",
     webApps: "Web Apps",
+    webAppsMapsDesc: "Sistem Peta & Lokasi Cabang",
+    webAppsSentilDesc: "Analisis Sentimen Review",
     aiInvalidResponse: "Jawaban dari AI tidak valid.",
   },
   completeReg: {
