@@ -313,7 +313,7 @@ export const KepalaTabel: React.FC<KepalaTabelProps> = ({ sortir, onSortir }) =>
             {ikon("createdAt")}
           </button>
         </th>
-        <th scope="col" aria-sort={aria("concern")} className={`${th} w-[220px]`}>
+        <th scope="col" aria-sort={aria("concern")} className={`${th} w-[300px]`}>
           <button
             type="button"
             onClick={() => onSortir("concern")}
@@ -324,7 +324,7 @@ export const KepalaTabel: React.FC<KepalaTabelProps> = ({ sortir, onSortir }) =>
             {ikon("concern")}
           </button>
         </th>
-        <th scope="col" aria-sort={aria("keterangan")} className={`${th} w-[190px]`}>
+        <th scope="col" aria-sort={aria("keterangan")} className={`${th} w-[260px]`}>
           <button
             type="button"
             onClick={() => onSortir("keterangan")}
@@ -342,7 +342,7 @@ export const KepalaTabel: React.FC<KepalaTabelProps> = ({ sortir, onSortir }) =>
         </th>
         {/* #703 butir 3 — Follow-up selama ini ADA di form dan ADA di basis
             data, tetapi tidak pernah punya kolom. */}
-        <th scope="col" aria-sort={aria("tindakanLanjut")} className={`${th} w-[220px]`}>
+        <th scope="col" aria-sort={aria("tindakanLanjut")} className={`${th} w-[300px]`}>
           <button
             type="button"
             onClick={() => onSortir("tindakanLanjut")}

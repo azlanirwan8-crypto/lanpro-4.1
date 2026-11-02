@@ -82,8 +82,18 @@ const isianKelas = `w-full min-w-0 ${TINGGI} ${dasarIsian}`;
  * boleh memakan dua baris. Yang dijamin sama adalah TINGGI MINIMUMNYA — saat
  * kosong, yang dilihat pengguna. */
 const tombolKelas = `w-full min-w-0 min-h-11 px-3 bg-surface border border-border-subtle text-xs text-left text-content-body rounded-md font-medium shadow-2xs`;
-/** Lajur yang tumbuh: judul, catatan, follow-up. */
-const lajurTumbuh = `grow min-w-[240px] ${TINGGI} ${dasarIsian}`;
+/** Lajur yang tumbuh: judul, catatan, follow-up.
+ *
+ * #806 — `h-11` di sini diganti `min-h-11` dan `resize-y` ditambahkan. Dengan
+ * `height` mati, gagang taruh di sudut kanan-bawah tidak menghasilkan apa pun
+ * yang bisa dilihat: pengguna menyeret dan kotak tetap 44 px. `min-h` menjaga
+ * pita #712 saat kosong dan membiarkan kotak membesar saat diseret. `resize-none`
+ * yang lama DICABUT dari dua call site textarea di bawah, bukan dibiarkan:
+ * `cn()` di repo ini hanya merangkai string (`src/lib/utils.ts:3`), jadi
+ * `resize-y` plus `resize-none` akan sama-sama terkirim dan pemenangnya
+ * urutan stylesheet, bukan maksud penulisnya — pelajaran yang sama dengan #712
+ * dan #776. */
+const lajurTumbuh = `grow min-w-[240px] min-h-11 ${dasarIsian} resize-y`;
 /** Lajur yang lebarnya tetap: pemilih tag, pemilih PIC, pemilih tanggal. */
 const lajurTetap = "shrink-0 w-[150px] sm:w-[170px] lg:w-[200px]";
 
@@ -263,15 +273,25 @@ export const BarisCepat: React.FC<BarisCepatProps> = (props) => {
     <div className="hidden sm:block p-2 bg-surface border-t border-border-subtle shrink-0">
       <div className="rounded-xl border border-border-subtle bg-surface-sunken p-1.5">
         <div className="flex flex-wrap items-center gap-1.5">
-          <input
+          <textarea
             id="quick-add-concern-desktop"
-            type="text"
             placeholder={t("discussion.newConcernPlaceholder")}
             aria-label={t("discussion.thConcern")}
             value={nilai.concern}
             onChange={(e) => onUbah({ concern: e.target.value })}
+            rows={1}
             onKeyDown={(e) => {
-              if (e.key === "Enter") onTambah();
+              /* #806 — field ini pindah dari `<input>` ke `<textarea>` supaya
+                 bisa diseret seperti dua lajur di bawahnya. Konsekuensi yang
+                 harus dibaca: di dalam textarea, Enter secara bawaan adalah
+                 ganti baris (#703 butir 4 menegakkan itu untuk CATATAN). TOPIK
+                 bukan paragraf, jadi kontrak lama dipertahankan — Enter
+                 menyimpan, Shift+Enter berganti baris. Tombol Add tetap jalan
+                 sendiri. */
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                onTambah();
+              }
             }}
             className={lajurTumbuh}
           />
@@ -362,7 +382,7 @@ export const BarisCepat: React.FC<BarisCepatProps> = (props) => {
             value={nilai.keterangan}
             onChange={(e) => onUbah({ keterangan: e.target.value })}
             rows={2}
-            className={`${lajurTumbuh} resize-none overflow-y-auto py-1 leading-snug`}
+            className={`${lajurTumbuh} overflow-y-auto py-1 leading-snug`}
           />
           <textarea
             placeholder={t("discussion.followUp")}
@@ -370,7 +390,7 @@ export const BarisCepat: React.FC<BarisCepatProps> = (props) => {
             value={nilai.tindakanLanjut}
             onChange={(e) => onUbah({ tindakanLanjut: e.target.value })}
             rows={2}
-            className={`${lajurTumbuh} resize-none overflow-y-auto py-1 leading-snug`}
+            className={`${lajurTumbuh} overflow-y-auto py-1 leading-snug`}
           />
         </div>
 
