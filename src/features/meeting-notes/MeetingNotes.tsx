@@ -712,7 +712,9 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                               bisa menggulir, jadi yang hilang bukan karena
                               ruangnya habis — hanya karena dipotong. Baris yang
                               memanjang ke bawah adalah konsekuensi yang benar. */}
-                          <div className="whitespace-normal break-words">{meeting.title}</div>
+                          <div className="whitespace-normal break-words text-justify">
+                            {meeting.title}
+                          </div>
                         </td>
                         <td className="py-3 px-4 text-content-muted font-medium">
                           <div className="flex items-center gap-1.5">
