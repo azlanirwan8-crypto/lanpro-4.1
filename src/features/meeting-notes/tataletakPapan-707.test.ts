@@ -173,13 +173,56 @@ describe("#708 lanjutan — baris cepat satu pita, bukan empat tinggi", () => {
     const isi = desktop();
     expect(isi).not.toContain("h-8");
     expect(isi).not.toContain("min-h-[42px]");
-    expect(isi).not.toContain("resize-y");
     expect(isi).not.toContain("h-auto");
+    /* #806 — `resize-y` pernah dilarang di sini, dan alasannya bukan karena
+     * menyeret itu buruk: `resize-none` adalah satu-satunya cara menjaga baris
+     * tetap 44 px, dan pemilik proyek ketika itu mengeluh baris yang tumbuh
+     * sendiri. Permintaan 02 Nov membalik prioritasnya — kotaknya boleh diseret.
+     * Yang tetap dilarang adalah tinggi lama yang berseliweran, dan yang
+     * sekarang dilarang adalah `resize-none`. Assertion ini ditulis ulang
+     * mengikuti maksud aslinya, bukan dihapus supaya hijau. */
+    expect(isi).not.toContain("resize-none");
   });
 
   it("textarea menggulir di dalam kotaknya, bukan memanjangkan baris", () => {
     const isi = desktop();
-    expect(isi.match(/resize-none overflow-y-auto/g)).toHaveLength(2);
+    expect(isi.match(/overflow-y-auto/g)).toHaveLength(2);
+  });
+
+  it("satu lajur seret untuk ketiganya: tinggi MINIMUM dan boleh diseret (#806)", () => {
+    const isi = baca(CEPAT);
+    // `min-h`, bukan `h`: di bawah `height` mati gagang taruh tidak
+    // menghasilkan apa pun yang bisa dilihat. `resize-y` ditulis di SATU
+    // konstanta karena `cn()` di repo ini hanya merangkai string
+    // (`src/lib/utils.ts:3`) — `resize-y` dan `resize-none` yang ditulis
+    // bersama sama-sama terkirim dan pemenangnya urutan stylesheet, bukan
+    // maksud penulisnya. Pelajaran yang sama dengan #712 dan #776.
+    expect(isi).toContain(
+      "const lajurTumbuh = `grow min-w-[240px] min-h-11 ${dasarIsian} resize-y`;"
+    );
+    // `isianKelas` (blok HP) sengaja TIDAK ikut: di sana `h-11` tetap benar
+    // karena lajurnya bertumpuk, bukan berdampingan dalam satu pita.
+    // Tiga lajur memakai konstanta yang sama: Concern telanjang, Catatan dan
+    // Tindak Lanjut dengan varian gulir internal.
+    expect(isi.match(/className=\{lajurTumbuh\}/g)).toHaveLength(1);
+    expect(isi.match(/\$\{lajurTumbuh\} overflow-y-auto py-1 leading-snug/g)).toHaveLength(2);
+  });
+
+  it("Concern baris cepat adalah textarea dan Enter tetap menyimpan (#806)", () => {
+    const isi = baca(CEPAT);
+    // Pindah dari `<input>` ke `<textarea>` adalah syarat bisa diseret —
+    // `resize` tidak berlaku pada input. Yang tidak boleh ikut hilang: kontrak
+    // keyboard lama (Enter menyimpan, Shift+Enter baru berganti baris) dan id
+    // yang dipakai `DiscussionPointsTable.tsx` untuk mencari dan memfokus
+    // fieldnya. #703 butir 4 melarang Enter menyimpan di CATATAN karena di
+    // sana Enter memang berarti ganti baris; TOPIK bukan paragraf, jadi
+    // kontraknya dipertahankan dan itu yang dikunci di sini.
+    const i = isi.indexOf('id="quick-add-concern-desktop"');
+    expect(i).toBeGreaterThan(-1);
+    expect(isi.slice(i - 60, i)).toContain("<textarea");
+    expect(isi.slice(i - 60, i)).not.toContain("<input");
+    expect(isi).toContain('if (e.key === "Enter" && !e.shiftKey)');
+    expect(isi).toContain("e.preventDefault();");
   });
 
   it("pembuka tautan dan berkas setinggi kontrol di sebelahnya saat kosong", () => {
