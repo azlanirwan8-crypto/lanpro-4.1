@@ -278,7 +278,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                         `whitespace-normal` kini ditulis EKSPLISIT di setiap sel
                         data yang melebar, jadi izin-wrap tidak lagi bergantung
                         pada apa yang diwarisi dari baris. */}
-                    <td className="py-3 px-4 font-medium text-content group-hover:text-primary transition-colors max-w-[280px] whitespace-normal break-words">
+                    <td className="py-3 px-4 font-medium text-content group-hover:text-primary transition-colors max-w-[280px] whitespace-normal break-words text-justify">
                       {fw.name}
                     </td>
                     <td className="py-3 px-4 whitespace-nowrap">

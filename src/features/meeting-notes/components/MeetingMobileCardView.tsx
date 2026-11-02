@@ -97,7 +97,7 @@ export const MeetingMobileCardView: React.FC<MeetingMobileCardViewProps> = ({
               <div className="flex-1 min-w-0">
                 {/* #647 — sama seperti tabel desktopnya: judul dan keterangan
                     dipecah dua baris dengan elipsis tanpa cara membuka sisanya. */}
-                <h4 className="text-sm font-semibold text-content-strong whitespace-normal break-words leading-snug">
+                <h4 className="text-sm font-semibold text-content-strong whitespace-normal break-words leading-snug text-justify">
                   {meeting.title}
                 </h4>
                 {meeting.description && (

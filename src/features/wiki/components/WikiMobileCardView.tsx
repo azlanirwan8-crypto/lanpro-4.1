@@ -93,7 +93,7 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
                 <h4
-                  className="text-sm font-semibold text-content-strong leading-snug whitespace-normal break-words"
+                  className="text-sm font-semibold text-content-strong leading-snug whitespace-normal break-words text-justify"
                   title={doc.title}
                 >
                   {doc.title}

@@ -90,7 +90,7 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
                 {/* #647 — nama dan deskripsi dipecah dua baris dengan elipsis, jadi
                     sisa judul/keterangan tidak pernah tampil dan tidak ada cara
                     membukanya di kartu ini. Kartu boleh memanjang. */}
-                <h4 className="text-sm font-semibold text-content-strong whitespace-normal break-words leading-snug">
+                <h4 className="text-sm font-semibold text-content-strong whitespace-normal break-words leading-snug text-justify">
                   {flow.name || "Untitled Diagram"}
                 </h4>
                 {flow.description && (
