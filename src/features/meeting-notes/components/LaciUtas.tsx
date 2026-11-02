@@ -4,6 +4,8 @@ import { MessageSquare, Send, X } from "lucide-react";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
 import { cn } from "../../../lib/utils";
 import { waktuPesan } from "../../../lib/waktuPesan";
+import { labelPesan, pecahPesan } from "../../../lib/pesanTautan";
+import { tautanAman } from "../../../lib/tautanAman";
 import type { DiscussionPoint, DiscussionPointComment, UserProfile } from "../../../types";
 
 /**
@@ -27,6 +29,45 @@ interface LaciUtasProps {
   onKirim: (teks: string) => void;
   onTutup: () => void;
 }
+
+/**
+ * #808a — isi komentar dibaca sebagai teks + tautan, bukan satu token mentah.
+ *
+ * Alamat SharePoint ±300 karakter pernah tampil sebagai tiga baris pecah di
+ * tengah token dan tidak bisa diklik. Yang dirender sekarang adalah dua hal
+ * yang dicari orang dari sebuah tautan — MILIK SIAPA dan BERKAS APA — lewat
+ * `labelPesan`, yang adalah label #648 ditambah nama yang duduk di parameter
+ * query (SharePoint menaruhnya di `?file=`, bukan di ujung path), dengan alamat
+ * penuh tetap terpasang di `title` dan tetap utuh di `href`. Penahan
+ * `tautanAman` dievaluasi TEPAT SEBELUM nilai dipakai, bukan di tempat lain,
+ * karena `commentText` ditulis klien (#584).
+ *
+ * Teks yang bukan tautan dirender utuh di dalam `<p>` induk, jadi izin
+ * berganti baris warisan #645 (baris baru dari pengguna dihormati) tidak berubah
+ * perilakunya untuk komentar biasa.
+ */
+const IsiPesan: React.FC<{ isi: string }> = ({ isi }) => (
+  <>
+    {pecahPesan(isi).map((segitiga, i) => {
+      if (segitiga.jenis === "teks") return <React.Fragment key={i}>{segitiga.isi}</React.Fragment>;
+      const tujuan = tautanAman(segitiga.isi);
+      if (!tujuan) return <React.Fragment key={i}>{segitiga.isi}</React.Fragment>;
+      const dibaca = labelPesan(segitiga.isi);
+      return (
+        <a
+          key={i}
+          href={tujuan}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={segitiga.isi}
+          className="inline font-medium underline underline-offset-2 cursor-pointer"
+        >
+          {dibaca}
+        </a>
+      );
+    })}
+  </>
+);
 
 export const LaciUtas: React.FC<LaciUtasProps> = ({
   titik,
@@ -137,7 +178,7 @@ export const LaciUtas: React.FC<LaciUtasProps> = ({
                       )}
                     >
                       <p className="text-[13px] font-normal leading-normal whitespace-pre-wrap break-words min-w-[50px]">
-                        {commentBody}
+                        <IsiPesan isi={commentBody} />
                       </p>
                     </div>
                     <span className="text-3xs text-content-subtle mt-0.5 px-1">

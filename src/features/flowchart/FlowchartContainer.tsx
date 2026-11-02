@@ -77,7 +77,7 @@ import type {
 } from "./types";
 import { adaKonteks, KONTEKS_KOSONG } from "./types";
 import { dataUnduhAman, tautanAman } from "../../lib/tautanAman";
-import { labelTautan } from "./lib/labelTautan";
+import { labelTautan } from "../../lib/labelTautan";
 import { setScreenSnapshot, clearScreenSnapshot } from "../../lib/screenContext";
 import { parseUniversalDiagram } from "./lib/importers";
 import type { ParsedDiagram } from "./lib/importers";

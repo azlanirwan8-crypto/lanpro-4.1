@@ -11,6 +11,12 @@
  * **berkas apa**. Keduanya ada di sini, sudah dibuka dari percent-encoding.
  * Alamat mentahnya tidak hilang — terpasang di `title` baris dan bisa disalin
  * utuh dengan satu klik.
+ *
+ * PINDAH KE `src/lib/` pada #808a. Pemakainya kini dua fitur (kartu flowchart
+ * dan isi komentar utas diskusi), dan §4 melarang dua fitur menggergaji folder
+ * satu sama lain. Menyalin logikanya adalah jalan lain yang tertutup: #645
+ * menuntut SATU perilaku untuk data yang sama, dan dua salinan pemenggalan host
+ * akan berhenti sama pada bug pertama yang hanya diperbaiki di satu tempat.
  */
 export interface LabelTautan {
   /** Host tanpa `www.`, mis. `bankbniitbk-my.sharepoint.com`. Kosong bila bukan URL. */
