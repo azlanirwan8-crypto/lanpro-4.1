@@ -88,11 +88,13 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
       });
     });
 
-    // Standalone tasks (tanpa parent dan bukan epic)
-    const standaloneTasks = tersaring.filter(
-      (t) => !t.parentId && (t.type || "").toLowerCase() !== "epic"
-    );
-    standaloneTasks.forEach((t) => dorong("standalone", t, 0));
+    // #812 — himpunan id yang sudah tercakup bagian epik, supaya yatim yang
+    // jatuh ke "standalone" tidak menggandakan kartu yang sudah tampil di
+    // bagian epik.
+    const keturunanEpik = new Set<string>();
+    for (const daftar of peta.values()) {
+      for (const b of daftar) keturunanEpik.add(b.task.id);
+    }
 
     // Peta anak langsung (induk → anak, urutan tasks) untuk pohon rekursif:
     // tiap task yang punya anak mendapat chevron dropdown sendiri.
@@ -106,6 +108,18 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
       if (wadah) wadah.push(t);
       else anakPeta.set(t.parentId, [t]);
     }
+
+    // #812 — Standalone: tanpa parent, DITAMBAH "yatim": ber-parent tetapi
+    // induknya tidak ada di backlog (di sprint lain / terhapus) dan tidak
+    // tercakup epik mana pun. Temuan lama E11 #689 ("hilang tanpa kabar")
+    // yang baru diberi nomor: badge jumlah menghitung kartu seperti ini,
+    // tapi sebelum #812 tidak satu pun pintu render yang menampilkannya.
+    const standaloneTasks = tersaring.filter(
+      (t) =>
+        (t.type || "").toLowerCase() !== "epic" &&
+        (!t.parentId || (!backlogIds.has(t.parentId) && !keturunanEpik.has(t.id)))
+    );
+    standaloneTasks.forEach((t) => dorong("standalone", t, getTaskDepth(t, tasks)));
 
     return {
       filteredBacklogTasks: tersaring,

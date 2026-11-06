@@ -328,6 +328,23 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                               sprintTasks.some((st) => st.parentId === t.id)
                           );
 
+                          const sprintIds = new Set(sprintTasks.map((t) => t.id));
+                          // #812 — "yatim": tugas sprint yang induknya (non-epik)
+                          // TIDAK ikut sprint dan tidak tercakup epik mana pun.
+                          // Metrik Isu dan panel beban menghitungnya, tapi
+                          // sebelum #812 tidak ada pintu render untuknya — ia
+                          // terlihat sebagai baris beban (mis. "0/1") tanpa
+                          // kartunya di daftar. `terlaporEpik` = id yang sudah
+                          // tercakup bagian epik, supaya yatim yang jatuh ke
+                          // "standalone" tidak ikut menggandakan yang sudah
+                          // tampil di bagian epik.
+                          const terlaporEpik = new Set<string>();
+                          for (const epic of sprintEpics) {
+                            for (const d of getAllDescendants(epic.id, tasks)) {
+                              if (sprintIds.has(d.id)) terlaporEpik.add(d.id);
+                            }
+                          }
+
                           /* `string`, bukan `string | null`: kedua pemanggil
                            * mengirim `epic.id` atau penanda "standalone", dan
                            * `getAllDescendants` di bawah hanya menerima string.
@@ -335,10 +352,18 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                            * membuat `tsc --noEmit` merah di `main`. */
                           const getSprintTasksForParent = (parentId: string) => {
                             if (parentId === "standalone") {
-                              // Standalone: tasks tanpa parent dan bukan epic
+                              // Standalone: tanpa parent, DITAMBAH yatim (#812):
+                              // ber-parent tetapi induknya tidak ikut sprint dan
+                              // tidak tercakup epik — tanpa penampung ini kartu
+                              // terhitung di metrik tapi tak pernah tampil.
                               return sprintTasks
-                                .filter((t) => !t.parentId && t.type?.toLowerCase() !== "epic")
-                                .map((t) => ({ task: t, depth: 0 }));
+                                .filter(
+                                  (t) =>
+                                    !t.parentId ||
+                                    (!sprintIds.has(t.parentId as string) &&
+                                      !terlaporEpik.has(t.id))
+                                )
+                                .map((t) => ({ task: t, depth: getTaskDepth(t, tasks) }));
                             }
 
                             // Untuk epic/parent: kumpulkan SEMUA descendant secara rekursif
@@ -353,7 +378,6 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                             }));
                           };
 
-                          const sprintIds = new Set(sprintTasks.map((t) => t.id));
                           const anakPeta = new Map<string, Task[]>();
                           for (const t of sprintTasks) {
                             if (!t.parentId || (t.type || "").toLowerCase() === "epic") continue;
