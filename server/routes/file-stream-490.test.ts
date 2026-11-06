@@ -40,7 +40,11 @@ describe("#490 stream & unduh lampiran task", () => {
     expect(fileRoutes).toContain('res.setHeader("Content-Type"');
     expect(fileRoutes).toContain("Content-Disposition");
     expect(fileRoutes).toContain("resolveContentType");
-    expect(fileRoutes).toContain("525600");
+    // Masa berlaku lampiran: 1 tahun (#490) diturunkan #810 menjadi 24 jam
+    // (1440 menit) — URL kedaluwarsa diperbarui otomatis lewat redirect,
+    // jadi lampiran tidak kembali mati seperti yang dulu diperbaiki #490.
+    expect(fileRoutes).toContain("1440");
+    expect(fileRoutes).not.toContain("525600");
   });
 
   it("TaskAttachmentsSection mendukung fallback icon dan parameter download=1", () => {
