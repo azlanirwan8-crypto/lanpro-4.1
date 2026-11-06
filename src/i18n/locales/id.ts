@@ -2046,6 +2046,9 @@ export const id = {
     sprintUndoneToNext: 'Pindahkan ke sprint berikutnya: "{{name}}"',
     sprintNoNext: "Tidak ada sprint berikutnya (planned/active)",
     sprintUndoneLeave: "Biarkan tugas di sprint ini",
+    // #813 — konsekuensi opsi "Biarkan": lingkup sprint selesai terkunci.
+    sprintUndoneLeaveWarning:
+      "Tugas yang dibiarkan terkunci di sprint selesai — hanya bisa dipindah lagi setelah sprint dikembalikan ke Direncanakan.",
     yesCompleteSprint: "Ya, selesaikan",
     sprintCompleted: 'Sprint "{{name}}" berhasil diselesaikan.',
     deleteSprintTitle: "Hapus Sprint?",

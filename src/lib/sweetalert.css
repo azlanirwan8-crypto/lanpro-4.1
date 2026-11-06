@@ -89,6 +89,16 @@
   color: #fff;
 }
 
+/* #813 — caveat konsekuensi opsi "Biarkan" di dialog tutup sprint:
+ * baris kecil di bawah label, tetap di dalam label supaya terbaca sebagai
+ * bagian dari opsi itu. Warna dari token, mengikuti tema tanpa `.dark`. */
+.velzon-swal-peringatan {
+  color: var(--color-warning-text);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  margin-top: 0.15rem;
+}
+
 /* #393 — HP: bottom sheet; md+: tetap centered Velzon */
 @media (max-width: 767px) {
   .swal2-container.swal2-center {
