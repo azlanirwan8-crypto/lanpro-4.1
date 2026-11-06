@@ -103,8 +103,12 @@ router.post(
         /* diabaikan */
       }
 
-      // #490 — masa berlaku lampiran dokumen 1 tahun (525600 menit) agar tidak kadaluarsa dalam 1 jam
-      const presignedUrl = generatePresignedUrl(safeFilename, userId, 525600);
+      // #490 tetap berlaku — lampiran tidak boleh mati dalam 1 jam. #810
+      // menurunkannya ke 24 jam: URL kedaluwarsa yang dibuka pengguna login
+      // DIPERBARUI OTOMATIS oleh secure-stream (redirect), jadi berkas tetap
+      // hidup selamanya untuk pemakai sah, sementara URL yang tersalin tanpa
+      // sesi mati paling lama sehari.
+      const presignedUrl = generatePresignedUrl(safeFilename, userId, 1440);
 
       const tokenParts = presignedUrl.split("token=");
       const tokenValue = tokenParts.length > 1 ? tokenParts[1] : "";
@@ -167,6 +171,13 @@ router.get(
         isAuthorized = verifyPresignedToken(safeFilename, uid, expires, token);
       }
 
+      // #810 — Bearer JWT tidak pernah lagi mengalirkan berkas secara
+      // langsung (dulu JWT mana pun yang login bisa membaca berkas SIAPA PUN
+      // yang namanya diketahui). JWT kini hanya satu hal: kunci pembaruan.
+      // Token presigned kedaluwarsa + sesi sah → terbitkan URL segar 24 jam
+      // dan alihkan (302). <img>, fetch, dan unduhan semuanya mengikuti
+      // redirect, jadi lampiran lama di riwayat chat/tetap hidup tanpa ubah
+      // satu pun perender klien.
       if (!isAuthorized && req.headers?.authorization) {
         const authHeader = req.headers.authorization;
         if (authHeader.startsWith("Bearer ")) {
@@ -174,8 +185,17 @@ router.get(
           const jwtToken = parts.length > 1 ? parts[1] : null;
           if (jwtToken) {
             try {
-              jwt.verify(jwtToken, getJwtSecret());
-              isAuthorized = true;
+              const decoded = jwt.verify(jwtToken, getJwtSecret()) as any;
+              const peminta = decoded?.uid || decoded?.id;
+              if (peminta) {
+                const segar = generatePresignedUrl(safeFilename, String(peminta), 1440);
+                const unduh = req.query.download === "1";
+                const nama = typeof req.query.name === "string" ? req.query.name : "";
+                const tambahan =
+                  (unduh ? "&download=1" : "") + (nama ? `&name=${encodeURIComponent(nama)}` : "");
+                res.setHeader("Cache-Control", "no-store");
+                return res.redirect(segar + tambahan);
+              }
             } catch {}
           }
         }

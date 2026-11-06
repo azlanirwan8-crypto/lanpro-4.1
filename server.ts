@@ -404,14 +404,23 @@ async function startServer() {
       isAuthorized = verifyPresignedToken(safeName, uid, expires, token);
     }
 
-    // 2. Check Bearer JWT token if presigned URL is not present
+    // 2. #810 — Bearer JWT tidak mengalirkan berkas secara langsung; ia
+    //    memperbarui presigned URL yang kedaluwarsa lalu mengalihkan,
+    //    persis seperti /api/v1/files/secure-stream. JWT mana pun yang
+    //    login tidak boleh lagi membaca berkas SIAPA PUN yang namanya
+    //    diketahui.
     if (!isAuthorized) {
       const authHeader = req.headers?.authorization;
       if (authHeader && authHeader.startsWith('Bearer ')) {
         const jwtToken = authHeader.split(' ')[1];
         try {
-          jwt.verify(jwtToken, getJwtSecret());
-          isAuthorized = true;
+          const decoded = jwt.verify(jwtToken, getJwtSecret()) as any;
+          const peminta = decoded?.uid || decoded?.id;
+          if (peminta) {
+            const segar = generatePresignedUrl(safeName, String(peminta), 1440);
+            res.setHeader('Cache-Control', 'no-store');
+            return res.redirect(segar);
+          }
         } catch {}
       }
     }
