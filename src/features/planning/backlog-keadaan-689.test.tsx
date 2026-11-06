@@ -72,10 +72,9 @@ describe("#689 keadaan Backlog di Planning", () => {
       tugas("anak-1b", { parentId: "epic-1" }),
       tugas("anak-2a", { parentId: "epic-2" }),
       tugas("mandiri-1"),
-      // Anak yang induknya BUKAN epik tidak dirender di backlog — perilaku lama,
-      // dipertahankan apa adanya di sini supaya penyederhanaan grup tidak
-      // diam-diam mengubah isi layar. (Catatan #689: kartu seperti ini hilang
-      // tanpa kabar; itu temuan terpisah, bukan bagian tambalan ini.)
+      // #812 — anak yang induknya BUKAN epik dan tidak ada di backlog dulu
+      // tidak dirender sama sekali (temuan lama E11 #689); sekarang ia jatuh
+      // ke kelompok "Backlog Mandiri" bersama tugas tanpa induk.
       tugas("yatim", { parentId: "epic-hilang" }),
     ];
 
@@ -88,10 +87,12 @@ describe("#689 keadaan Backlog di Planning", () => {
     expect(terender).toEqual([]);
     fireEvent.click(screen.getByText("Judul epic-1"));
     fireEvent.click(screen.getByText("Judul epic-2"));
+    fireEvent.click(screen.getByText("Backlog Mandiri"));
 
-    expect([...new Set(terender)].sort()).toEqual(["anak-1a", "anak-1b", "anak-2a"].sort());
+    expect([...new Set(terender)].sort()).toEqual(
+      ["anak-1a", "anak-1b", "anak-2a", "mandiri-1", "yatim"].sort()
+    );
     expect(terender).not.toContain("epic-1");
-    expect(terender).not.toContain("yatim");
   });
 
   it("backlog yang memang kosong disebut kosong", () => {
