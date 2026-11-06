@@ -2028,6 +2028,9 @@ export const en = {
     sprintUndoneToNext: 'Move to next sprint: "{{name}}"',
     sprintNoNext: "No next sprint (planned/active)",
     sprintUndoneLeave: "Leave tasks on this sprint",
+    // #813 — consequence of "Leave": a completed sprint's scope is locked.
+    sprintUndoneLeaveWarning:
+      "Tasks left behind are locked in the completed sprint — they can only be moved after the sprint is set back to Planned.",
     yesCompleteSprint: "Yes, complete",
     sprintCompleted: 'Sprint "{{name}}" completed successfully.',
     deleteSprintTitle: "Delete Sprint?",

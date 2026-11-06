@@ -121,7 +121,12 @@ export const confirmCompleteSprintAlert = async (
         </label>
         <label class="flex items-start gap-2 cursor-pointer">
           <input type="radio" name="tutup-sprint" value="leave" />
-          <span>${i18n.t("alerts.sprintUndoneLeave")}</span>
+          <span class="flex flex-col">
+            <span>${i18n.t("alerts.sprintUndoneLeave")}</span>
+            <small class="velzon-swal-peringatan">${i18n.t(
+              "alerts.sprintUndoneLeaveWarning"
+            )}</small>
+          </span>
         </label>
       </div>
     `,
