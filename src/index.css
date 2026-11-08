@@ -607,17 +607,21 @@ html {
     font-weight: 500;
   }
 
-  /* Densitas Sel Tabel Standar Jira */
+  /* Densitas Sel Tabel Standar Jira.
+   * #817 — px absolut, bukan rem. Akar `html` 81,25% = 13 px membuat `0.625rem`
+   * terhitung 8,125 px dan `0.75rem` 9,75 px, padahal niat yang tertulis di sini
+   * adalah 10 px dan 12 px. Mengubah akarnya akan menggeser seluruh tata letak,
+   * jadi hanya kedua ukuran huruf ini yang dipatok. */
   th {
     padding: 0.5rem 0.75rem; /* py-2 px-3 */
-    font-size: 0.625rem; /* 10px */
+    font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
   td {
     padding: 0.5rem 0.75rem; /* py-2 px-3 */
-    font-size: 0.75rem; /* 12px */
+    font-size: 12px;
   }
 
   /* Standarisasi Form Input & Dropdown Velzon Admin (Height 36px) */
