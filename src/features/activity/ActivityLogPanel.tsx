@@ -155,7 +155,10 @@ export const ActivityLogPanel = ({
           ) : (
             <>
               <div className="hidden sm:block overflow-x-auto min-h-[500px]">
-                <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
+                <ResponsiveTable
+                  className="w-full text-left border-collapse min-w-[900px]"
+                  scroll={false}
+                >
                   <thead>
                     <tr className="bg-primary-surface/5 border-b border-border-subtle text-content-subtle whitespace-nowrap">
                       <th className="px-8 py-5">{t("activityLog.timestamp")}</th>

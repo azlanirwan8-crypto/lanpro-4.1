@@ -1121,7 +1121,9 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                             <p className="text-[11px] font-medium text-content-strong truncate">
                               UI Mockup Redesign
                             </p>
-                            <p className="text-[11px] text-content-subtle">PNG Mockup Asset</p>
+                            <p className="text-[11px] text-content-subtle">
+                              {t("chat.presetImageLabel")}
+                            </p>
                           </div>
                         </button>
 
@@ -1144,7 +1146,9 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                             <p className="text-[11px] font-medium text-content-strong truncate">
                               Database Blueprint
                             </p>
-                            <p className="text-[11px] text-content-subtle">PDF Schema Spec</p>
+                            <p className="text-[11px] text-content-subtle">
+                              {t("chat.presetFileLabel")}
+                            </p>
                           </div>
                         </button>
                       </div>

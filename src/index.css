@@ -677,14 +677,14 @@ html {
    * adalah 10 px dan 12 px. Mengubah akarnya akan menggeser seluruh tata letak,
    * jadi hanya kedua ukuran huruf ini yang dipatok. */
   th {
-    padding: 0.5rem 0.75rem; /* py-2 px-3 */
+    padding: 8px 12px; /* px absolut; #825 — 0.5rem/0.75rem menyusut jadi 6,5/9,75px */
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
   td {
-    padding: 0.5rem 0.75rem; /* py-2 px-3 */
+    padding: 8px 12px; /* px absolut; #825 */
     font-size: 12px;
   }
 

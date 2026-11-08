@@ -969,7 +969,10 @@ export const WikiView: React.FC<WikiViewProps> = ({
         >
           {/* Datatable Container (Desktop sm+) */}
           <div className={LIST_TABLE_WRAP_CLASS}>
-            <ResponsiveTable className="w-full text-left border-collapse min-w-[880px]">
+            <ResponsiveTable
+              className="w-full text-left border-collapse min-w-[880px]"
+              scroll={false}
+            >
               <thead>
                 <tr className={LIST_THEAD_ROW_CLASS}>
                   <th className="px-4 py-2.5 w-14 text-center">No</th>

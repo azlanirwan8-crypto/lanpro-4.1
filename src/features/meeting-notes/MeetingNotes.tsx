@@ -621,7 +621,10 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
         >
           {/* DataTable Container (Desktop sm+) */}
           <div className={LIST_TABLE_WRAP_CLASS}>
-            <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
+            <ResponsiveTable
+              className="w-full text-left border-collapse min-w-[900px]"
+              scroll={false}
+            >
               <thead>
                 <tr className={LIST_THEAD_ROW_CLASS}>
                   <th className="py-3 px-4 w-14 text-center">{t("meetings.thNo")}</th>

@@ -2405,6 +2405,8 @@ export const en = {
     chatTitle: "LanPro Chat",
     searchChannel: "Search channels or colleagues...",
     channelsAssistant: "Channels & Assistant",
+    presetImageLabel: "PNG Mockup Asset",
+    presetFileLabel: "PDF Schema Spec",
     noColleague: "Nobody is online right now.",
     back: "Back",
     searchInChat: "Search in this chat",

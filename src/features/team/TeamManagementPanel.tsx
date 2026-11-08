@@ -579,7 +579,7 @@ export const TeamManagementPanel = ({
           {viewMode === "list" && (
             <div className="bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden">
               <div className="overflow-x-auto">
-                <ResponsiveTable className="w-full text-left">
+                <ResponsiveTable className="w-full text-left" scroll={false}>
                   <thead>
                     <tr className={LIST_THEAD_ROW_CLASS}>
                       <th className="px-5 py-3">{t("team.member")}</th>
