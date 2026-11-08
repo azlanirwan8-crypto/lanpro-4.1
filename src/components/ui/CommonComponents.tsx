@@ -180,12 +180,14 @@ const CHIP_KECIL = `${CHIP_DASAR} tracking-tight uppercase`;
  * (src/index.css), jadi ia mengalahkan `bg-surface` milik caller apa pun urutan
  * kelasnya — kelas warna memang tidak seharusnya menempel pada kontrol.
  */
+/* #817 — ukuran teks px absolut: `text-xs` adalah `0.75rem` dan akar `html`
+ * 13 px membuatnya 9,75 px, bukan 12 px seperti niat skala dasar. */
 const KONTROL_NETRAL =
-  "px-2 py-1 bg-surface border border-border-subtle rounded-md text-xs font-normal text-content-body";
+  "px-2 py-1 bg-surface border border-border-subtle rounded-md text-[12px] font-normal text-content-body";
 const KONTROL_KECIL =
   "px-2 py-0.5 bg-surface border border-border-subtle rounded-md text-[10px] font-normal uppercase tracking-tight text-content-body";
 const KONTROL_BENING =
-  "px-1.5 py-0.5 bg-surface border border-transparent hover:border-border-subtle rounded text-xs font-normal";
+  "px-1.5 py-0.5 bg-surface border border-transparent hover:border-border-subtle rounded text-[12px] font-normal";
 /* #814 — versi borderless-until-hover untuk baris tabel isu: bingkai hanya
  * muncul saat hover, ritmenya sama dengan `KONTROL_BENING`; yang berbeda hanya
  * huruf kapital 10 px milik status/prioritas (#782). */
@@ -655,12 +657,12 @@ export const StyledDropdown = ({
               className={cn(
                 "capitalize tracking-tight truncate",
                 !selected?.label && !value
-                  ? "text-content-subtle font-normal opacity-80 text-xs"
+                  ? "text-content-subtle font-normal opacity-80 text-[12px]"
                   : isStatus
                     ? "font-normal text-[10px] text-inherit tracking-tight uppercase"
                     : isPriority
                       ? "font-normal text-[10px] text-inherit tracking-tight uppercase"
-                      : "font-normal text-xs text-content-body"
+                      : "font-normal text-[12px] text-content-body"
               )}
             >
               {selected?.label || value || "Select..."}
@@ -731,7 +733,7 @@ export const StyledDropdown = ({
                       tutupKembaliKePemicu();
                     }
                   }}
-                  className="w-full h-9 pl-8 pr-2.5 bg-surface text-xs font-normal text-content-body placeholder:text-content-subtle focus:outline-none"
+                  className="w-full h-9 pl-8 pr-2.5 bg-surface text-[12px] font-normal text-content-body placeholder:text-content-subtle focus:outline-none"
                 />
               </div>
             )}
@@ -845,7 +847,7 @@ export const StyledDropdown = ({
                           style={{ color: opt.color || hexOpt }}
                         />
                       ) : null}
-                      <span className="text-xs font-normal whitespace-nowrap text-content-body tracking-tight">
+                      <span className="text-[12px] font-normal whitespace-nowrap text-content-body tracking-tight">
                         {opt.label}
                       </span>
                     </div>
@@ -854,12 +856,12 @@ export const StyledDropdown = ({
                 );
               })}
               {safeOptions.length === 0 && (
-                <div className="p-4 text-center text-xs text-content-subtle italic font-normal">
+                <div className="p-4 text-center text-[12px] text-content-subtle italic font-normal">
                   {t("ui.noOptions")}
                 </div>
               )}
               {safeOptions.length > 0 && daftarTampil.length === 0 && (
-                <div className="p-4 text-center text-xs text-content-subtle italic font-normal">
+                <div className="p-4 text-center text-[12px] text-content-subtle italic font-normal">
                   {t("ui.noMatchFound")}
                 </div>
               )}
