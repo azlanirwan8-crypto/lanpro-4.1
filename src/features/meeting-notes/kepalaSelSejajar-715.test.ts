@@ -168,8 +168,10 @@ describe("#715 — papan ikut keputusan garis #699 dan #678b", () => {
 
   it("kepala tabel memakai ritme kit rumah, bukan ukuran sendiri", () => {
     const th = blok(baca(KEPALA), "const th =", "return (");
-    // `tableHeaderCell` di `src/features/issues/styles.ts`: 10px, py-2.5.
-    expect(th).toContain("text-[10px]");
+    // #824 — ritme kepala tabel rumah: 11px, 600. Sebelumnya 10px/400 ditulis
+    // sendiri di sini sementara `th` dasar `src/index.css` 10px/600.
+    expect(th).toContain("text-[11px]");
+    expect(th).toContain("font-semibold");
     expect(th).toContain("py-2.5");
     expect(th).not.toContain("text-xs");
     // Sel data ikut menipis satu tingkat supaya kepala dan badan satu ritme.

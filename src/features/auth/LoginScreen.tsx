@@ -161,7 +161,7 @@ export const LoginScreen = ({
                   />
                 </div>
                 {fieldErrors.username && (
-                  <p className="text-xs sm:text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
+                  <p className="text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                     <span>{fieldErrors.username}</span>
                   </p>
@@ -203,7 +203,7 @@ export const LoginScreen = ({
                   </button>
                 </div>
                 {fieldErrors.password && (
-                  <p className="text-xs sm:text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
+                  <p className="text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                     <span>{fieldErrors.password}</span>
                   </p>

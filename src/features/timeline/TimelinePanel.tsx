@@ -88,8 +88,7 @@ const KOLOM = {
   prioritas: "w-20 shrink-0 max-md:hidden",
   tanggal: "w-24 shrink-0 max-md:hidden",
 };
-const LABEL_KEPALA =
-  "font-normal text-[11px] sm:text-[11px] text-content-muted uppercase tracking-normal";
+const LABEL_KEPALA = "font-normal text-[11px] text-content-muted uppercase tracking-normal";
 
 export const TimelinePanel: React.FC<TimelineProps> = ({
   tasks: tasksProp,
@@ -1047,8 +1046,8 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             // bukan oleh niat penulisnya — pelajaran #692.
                             "min-w-0 flex-1 break-words text-left font-medium leading-tight tracking-tight select-none hover:text-content-strong",
                             isChild
-                              ? "text-xs sm:text-[10px] text-content-secondary"
-                              : "text-xs sm:text-[11px] text-content"
+                              ? "text-[10px] text-content-secondary"
+                              : "text-[11px] text-content"
                           )}
                         >
                           {task.title}
@@ -1127,7 +1126,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             className="flex items-center px-2 py-1 border-r border-border-subtle/50"
                             style={{ width: `${actualDays * pixelsPerDay}px` }}
                           >
-                            <span className="text-xs sm:text-[11px] font-normal text-content-secondary uppercase tracking-normal">
+                            <span className="text-[11px] font-normal text-content-secondary uppercase tracking-normal">
                               {format(m, "MMM yyyy")}
                             </span>
                           </div>
@@ -1146,7 +1145,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             className="flex items-center px-2 py-1 border-r border-border-subtle/50"
                             style={{ width: `${actualDays * pixelsPerDay}px` }}
                           >
-                            <span className="text-xs sm:text-[11px] font-normal text-content-secondary uppercase tracking-normal">
+                            <span className="text-[11px] font-normal text-content-secondary uppercase tracking-normal">
                               {format(y, "yyyy")}
                             </span>
                           </div>
@@ -1161,7 +1160,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                         className="flex items-center justify-center border-r border-border-subtle/50 shrink-0"
                         style={{ width: `${pixelsPerDay}px` }}
                       >
-                        <span className="text-xs sm:text-[10px] font-normal text-content-subtle">
+                        <span className="text-[11px] font-normal text-content-subtle">
                           {format(d, "d")}
                         </span>
                       </div>
@@ -1180,7 +1179,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                           className="flex flex-col items-center justify-center gap-0 border-r border-border-subtle/50 shrink-0"
                           style={{ width: `${actualDays * pixelsPerDay}px` }}
                         >
-                          <span className="text-xs sm:text-[10px] font-normal text-content-secondary leading-tight">
+                          <span className="text-[11px] font-normal text-content-secondary leading-tight">
                             W{format(w, "w")}
                           </span>
                           {/* #698 — nomor minggu saja tidak cukup dibaca: tanpa
@@ -1188,7 +1187,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                               sendiri. Tanggal yang dicetak adalah yang TERLIHAT
                               (`actualStart`/`expectedEnd`), bukan minggu penuh di
                               luar sumbu. */}
-                          <span className="text-[9px] font-normal text-content-subtle leading-tight whitespace-nowrap">
+                          <span className="text-[10px] font-normal text-content-subtle leading-tight whitespace-nowrap">
                             {format(actualStart, "d MMM")} – {format(expectedEnd, "d MMM")}
                           </span>
                         </div>
@@ -1208,7 +1207,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                           className="flex items-center justify-center border-r border-border-subtle/50 shrink-0"
                           style={{ width: `${actualDays * pixelsPerDay}px` }}
                         >
-                          <span className="text-xs sm:text-[10px] font-normal text-content-subtle">
+                          <span className="text-[11px] font-normal text-content-subtle">
                             {format(m, "MMM")}
                           </span>
                         </div>
@@ -1298,7 +1297,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                                   setSelectedTaskForDetail(task);
                                   setIsTaskDetailModalOpen(true);
                                 }}
-                                className="absolute left-6 h-6 px-3 rounded-xl flex items-center bg-surface-sunken/60 border border-border-subtle border-dashed hover:border-primary hover:bg-surface group-hover/row:bg-surface text-xs sm:text-[10px] font-medium text-content-subtle hover:text-primary hover:shadow-soft transition-all cursor-pointer gap-2"
+                                className="absolute left-6 h-6 px-3 rounded-xl flex items-center bg-surface-sunken/60 border border-border-subtle border-dashed hover:border-primary hover:bg-surface group-hover/row:bg-surface text-[11px] font-medium text-content-subtle hover:text-primary hover:shadow-soft transition-all cursor-pointer gap-2"
                                 aria-label={t("roadmap.notPlotted")}
                               >
                                 <span className="w-1.5 h-1.5 rounded-full bg-surface-marker group-hover/row:bg-primary/100 animate-pulse transition-colors" />
@@ -1425,7 +1424,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                               {/* Dynamic Floating Tooltip */}
                               <div
                                 className={cn(
-                                  "absolute -top-12 left-1/2 -translate-x-1/2 bg-surface-inverse-strong border border-border-inverse text-content-inverse text-xs sm:text-[10px] font-medium px-2.5 py-1.5 rounded-lg shadow-xl pointer-events-none z-50 flex items-center gap-1.5 whitespace-nowrap transition-all duration-150 origin-bottom scale-90 opacity-0",
+                                  "absolute -top-12 left-1/2 -translate-x-1/2 bg-surface-inverse-strong border border-border-inverse text-content-inverse text-[11px] font-medium px-2.5 py-1.5 rounded-lg shadow-xl pointer-events-none z-50 flex items-center gap-1.5 whitespace-nowrap transition-all duration-150 origin-bottom scale-90 opacity-0",
                                   "group-hover/bar:opacity-100 group-hover/bar:scale-100",
                                   timelineInteraction?.taskId === task.id
                                     ? "opacity-100 scale-100 ring-2"
@@ -1438,7 +1437,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                                 <span className="font-medium">{format(start, "dd MMM yyyy")}</span>
                                 <span className="text-content-inverse-muted">→</span>
                                 <span className="font-medium">{format(end, "dd MMM yyyy")}</span>
-                                <span className="font-medium px-1.5 py-0.5 rounded text-xs sm:text-[11px] ml-1 bg-surface-inverse/60 text-content-inverse">
+                                <span className="font-medium px-1.5 py-0.5 rounded text-[11px] ml-1 bg-surface-inverse/60 text-content-inverse">
                                   {t("rakit.daysCount", {
                                     count: differenceInDays(end, start) + 1,
                                   })}
@@ -1591,7 +1590,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                       className="absolute top-0 bottom-0 z-20 border-l-2 border-danger border-dashed pointer-events-none"
                       style={{ left: `${todayLeft}%` }}
                     >
-                      <div className="bg-danger-surface text-content-inverse text-xs sm:text-[11px] font-semibold px-2 py-0.5 rounded-md absolute top-1.5 -translate-x-1/2 shadow-soft flex items-center gap-1 z-30 tracking-wider">
+                      <div className="bg-danger-surface text-content-inverse text-[11px] font-semibold px-2 py-0.5 rounded-md absolute top-1.5 -translate-x-1/2 shadow-soft flex items-center gap-1 z-30 tracking-wider">
                         <span className="relative flex h-1.5 w-1.5">
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-surface opacity-75"></span>
                           <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-surface"></span>

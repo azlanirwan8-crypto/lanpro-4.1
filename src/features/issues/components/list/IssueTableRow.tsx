@@ -387,7 +387,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     {!!task.parentId && (
                       <span
                         style={gayaLabel(hexJenis)}
-                        className="label-chip text-xs sm:text-[10px] font-normal px-1.5 py-0.5 rounded border shrink-0"
+                        className="label-chip text-[11px] font-normal px-1.5 py-0.5 rounded border shrink-0"
                       >
                         {t(
                           `issueRow.type${
@@ -540,7 +540,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     </div>
                     <span
                       className={cn(
-                        "text-xs sm:text-[10px] font-normal font-mono w-8 text-right shrink-0",
+                        "text-[11px] font-normal font-mono w-8 text-right shrink-0",
                         progressValue === 100
                           ? "text-emerald-600"
                           : progressValue === 75
@@ -650,13 +650,13 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                         <span
                           key={`${L}-${lIdx}`}
                           title={L}
-                          className="text-xs sm:text-[11px] font-normal rounded border border-border-subtle bg-surface-muted text-content-secondary px-1.5 py-0.5 whitespace-nowrap"
+                          className="text-[11px] font-normal rounded border border-border-subtle bg-surface-muted text-content-secondary px-1.5 py-0.5 whitespace-nowrap"
                         >
                           {L}
                         </span>
                       ))
                     ) : (
-                      <span className="text-xs sm:text-[10px] text-content-subtle">-</span>
+                      <span className="text-[11px] text-content-subtle">-</span>
                     )}
                   </div>
                 );
@@ -671,7 +671,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     disabled={!isEditable}
                     value={dateVal ? format(ensureDate(dateVal), "yyyy-MM-dd") : ""}
                     onChange={(val) => updateTaskField(task.id, col.id, val)}
-                    buttonClassName="bg-transparent border-none text-xs sm:text-[10px] font-medium text-content-muted w-full px-0"
+                    buttonClassName="bg-transparent border-none text-[11px] font-medium text-content-muted w-full px-0"
                   />
                 );
                 break;
@@ -691,14 +691,14 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     masterData={mArr}
                     polos
                     disabled={!isEditable}
-                    className="text-xs sm:text-[10px]"
+                    className="text-[11px]"
                   />
                 );
                 break;
 
               case "updated":
                 content = (
-                  <span className="text-xs sm:text-[10px] font-medium text-content-subtle whitespace-nowrap">
+                  <span className="text-[11px] font-medium text-content-subtle whitespace-nowrap">
                     {task.updatedAt
                       ? formatDistanceToNow(ensureDate(task.updatedAt), { addSuffix: true })
                       : "-"}
@@ -708,7 +708,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
 
               case "created":
                 content = (
-                  <span className="text-xs sm:text-[10px] font-medium text-content-subtle whitespace-nowrap">
+                  <span className="text-[11px] font-medium text-content-subtle whitespace-nowrap">
                     {task.createdAt ? format(ensureDate(task.createdAt), "d MMM yyyy") : "-"}
                   </span>
                 );
@@ -760,7 +760,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                         setCurrentView("issueDetail");
                         setActiveContextMenuTaskId(null);
                       }}
-                      className="w-full text-left px-3 py-1.5 text-xs sm:text-[11px] font-medium text-content-secondary hover:bg-surface-sunken flex items-center gap-2 cursor-pointer"
+                      className="w-full text-left px-3 py-1.5 text-[11px] font-medium text-content-secondary hover:bg-surface-sunken flex items-center gap-2 cursor-pointer"
                     >
                       <Eye className="w-3.5 h-3.5 text-content-subtle" />
                       <span>{t("issueRow.viewDetails")}</span>
@@ -772,7 +772,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                           deleteTask?.(task.id);
                           setActiveContextMenuTaskId(null);
                         }}
-                        className="w-full text-left px-3 py-1.5 text-xs sm:text-[11px] font-medium text-red-600 hover:bg-red-500/10 flex items-center gap-2 cursor-pointer border-t border-border-faint"
+                        className="w-full text-left px-3 py-1.5 text-[11px] font-medium text-red-600 hover:bg-red-500/10 flex items-center gap-2 cursor-pointer border-t border-border-faint"
                       >
                         <Trash className="w-3.5 h-3.5 text-red-400" />
                         <span>{t("issueRow.deleteIssue")}</span>

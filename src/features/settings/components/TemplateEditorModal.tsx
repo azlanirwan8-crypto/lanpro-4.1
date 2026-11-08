@@ -153,7 +153,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                 <button
                   key={variable}
                   onClick={() => insertAtCursor(variable)}
-                  className={`px-2.5 py-1 rounded-md text-xs sm:text-[11px] font-mono font-medium transition-all shadow-xs border ${
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-mono font-medium transition-all shadow-xs border ${
                     mode === "whatsapp"
                       ? "bg-success/10 hover:bg-success/15 text-success-text border-success/20"
                       : "bg-primary-surface/10 hover:bg-primary-surface/15 text-primary border-primary/20"
@@ -164,9 +164,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                 </button>
               ))}
             </div>
-            <p className="text-xs sm:text-[11px] text-content-subtle">
-              {t("template.clickVariable")}
-            </p>
+            <p className="text-[11px] text-content-subtle">{t("template.clickVariable")}</p>
           </div>
 
           {mode === "email" && (
@@ -244,7 +242,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                 </>
               )}
               {mode === "whatsapp" && (
-                <span className="text-xs sm:text-[11px] text-content-subtle ml-2">
+                <span className="text-[11px] text-content-subtle ml-2">
                   {t("template.supportsFormat")}
                 </span>
               )}

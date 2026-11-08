@@ -29,10 +29,8 @@ export const TextField: React.FC<TextFieldProps> = ({
           error ? "border-red-500/30 focus:border-red-400" : ""
         } ${className}`}
       />
-      {error && <p className="text-xs sm:text-[10px] text-red-600 font-normal">{error}</p>}
-      {helperText && !error && (
-        <p className="text-xs sm:text-[10px] text-content-muted">{helperText}</p>
-      )}
+      {error && <p className="text-[11px] text-red-600 font-normal">{error}</p>}
+      {helperText && !error && <p className="text-[11px] text-content-muted">{helperText}</p>}
     </div>
   );
 };

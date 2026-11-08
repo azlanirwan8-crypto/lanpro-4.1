@@ -150,7 +150,7 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
                     disabled={isCreating}
                     title={t("common.save")}
                     aria-label={t("common.save")}
-                    className="p-1 px-2 bg-blue-600 text-content-inverse rounded text-xs sm:text-[10px] font-medium hover:bg-blue-700 disabled:opacity-50 transition-all"
+                    className="p-1 px-2 bg-blue-600 text-content-inverse rounded text-[11px] font-medium hover:bg-blue-700 disabled:opacity-50 transition-all"
                   >
                     {isCreating ? (
                       <div className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />
@@ -170,7 +170,7 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
                     }}
                     title={t("common.cancel")}
                     aria-label={t("common.cancel")}
-                    className="p-1 px-2 bg-surface-muted text-content-subtle rounded text-xs sm:text-[10px] font-medium hover:bg-surface-strong transition-all"
+                    className="p-1 px-2 bg-surface-muted text-content-subtle rounded text-[11px] font-medium hover:bg-surface-strong transition-all"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -212,7 +212,7 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
                               pilihLaluFokus(setTipe)(t.label);
                               setIsInlineTypeOpen(null);
                             }}
-                            className="w-full text-left px-3 py-2 text-xs sm:text-[11px] font-medium text-content-secondary hover:bg-surface-sunken flex items-center gap-2"
+                            className="w-full text-left px-3 py-2 text-[11px] font-medium text-content-secondary hover:bg-surface-sunken flex items-center gap-2"
                           >
                             {t.icon ? (
                               <RenderIcon

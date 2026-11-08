@@ -135,7 +135,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
                         pilihLaluFokus(setInlineAddType)(t.label);
                         setIsInlineTypeOpen(null);
                       }}
-                      className="w-full text-left px-3 py-2 text-xs sm:text-[11px] font-medium text-content-secondary hover:bg-surface-sunken flex items-center gap-2"
+                      className="w-full text-left px-3 py-2 text-[11px] font-medium text-content-secondary hover:bg-surface-sunken flex items-center gap-2"
                     >
                       {t.icon ? (
                         <RenderIcon
@@ -225,7 +225,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
             type="button"
             onClick={createGlobalIssue}
             disabled={isCreating || !quickCreateTitle.trim()}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-surface text-content-inverse hover:bg-primary-surface-hover active:bg-primary-active rounded-lg text-xs sm:text-[11px] font-medium transition-all shadow-xs disabled:opacity-50 shrink-0 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-surface text-content-inverse hover:bg-primary-surface-hover active:bg-primary-active rounded-lg text-[11px] font-medium transition-all shadow-xs disabled:opacity-50 shrink-0 cursor-pointer"
           >
             {isCreating ? (
               <div className="w-3.5 h-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" />

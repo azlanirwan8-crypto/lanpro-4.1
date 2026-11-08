@@ -3072,7 +3072,7 @@ function AppContainer() {
                 <Bug className="w-5 h-5 animate-bounce text-emerald-400" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs sm:text-[10px] font-normal text-emerald-400 uppercase tracking-normal flex items-center gap-1">
+                <p className="text-[11px] font-normal text-emerald-400 uppercase tracking-normal flex items-center gap-1">
                   <span>🔔</span> {t("appShell.qaNotification")}
                 </p>
                 <p className="text-xs font-medium text-content-inverse-strong mt-0.5 leading-snug">

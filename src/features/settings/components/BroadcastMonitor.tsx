@@ -125,7 +125,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
     switch (item.status) {
       case "success":
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[11px] font-medium bg-success/10 text-success-text">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-success/10 text-success-text">
             <CheckCircle2 size={12} className="text-emerald-500" />
             Berhasil
           </span>
@@ -134,7 +134,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
         const isNoPhone = Boolean(item.details?.includes("Nomor WhatsApp belum terdaftar"));
         return (
           <span
-            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[11px] font-medium bg-danger/10 text-danger-text"
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-danger/10 text-danger-text"
             title={
               item.details ||
               (isNoPhone ? "Nomor WhatsApp belum terdaftar di profil pengguna" : "Gagal")
@@ -148,7 +148,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
       case "skipped_no_tasks":
         return (
           <span
-            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[11px] font-medium bg-amber-500/10 text-amber-600 border border-amber-500/20"
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/10 text-amber-600 border border-amber-500/20"
             title={item.details || "0 tugas aktif"}
           >
             <AlertCircle size={12} className="text-amber-500" />0 Tugas Aktif
@@ -156,7 +156,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
         );
       case "pending":
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[11px] font-medium bg-warning/10 text-warning-text">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-warning/10 text-warning-text">
             <Loader2 size={12} className="animate-spin text-amber-500" />
             Pending
           </span>
@@ -164,7 +164,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
       case "not_sent":
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[11px] font-medium bg-surface-muted text-content-subtle border border-border-subtle">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-surface-muted text-content-subtle border border-border-subtle">
             <Clock size={12} className="text-content-subtle" />
             Belum Dikirim
           </span>
@@ -248,7 +248,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
                       <div className="font-medium text-content-strong text-xs truncate">
                         {item.name}
                       </div>
-                      <div className="text-xs sm:text-[11px] text-content-subtle font-normal truncate">
+                      <div className="text-[11px] text-content-subtle font-normal truncate">
                         {item.time}
                       </div>
                     </div>

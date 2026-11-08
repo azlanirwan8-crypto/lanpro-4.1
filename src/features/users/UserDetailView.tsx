@@ -1497,7 +1497,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     className="w-16 h-16 sm:w-20 sm:h-20 shrink-0"
                   />
                   {previewUrl && (
-                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-amber-500 text-content-inverse text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
+                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-amber-500 text-content-inverse text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
                       {t("userDetail.preview")}
                     </span>
                   )}
@@ -2188,7 +2188,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               </div>
 
                               {/* Badges Row */}
-                              <div className="flex flex-wrap items-center gap-2 text-xs sm:text-[11px]">
+                              <div className="flex flex-wrap items-center gap-2 text-[11px]">
                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold border border-primary/20">
                                   <User className="w-3 h-3" />
                                   <span>Product Owner</span>
@@ -2227,7 +2227,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                               {/* Progress Bar Row */}
                               <div className="space-y-1.5">
-                                <div className="flex items-center justify-between text-xs sm:text-[11px]">
+                                <div className="flex items-center justify-between text-[11px]">
                                   <span className="font-medium text-primary">
                                     {progressPercent}% Complete
                                   </span>
@@ -3054,7 +3054,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 <span className="text-xs font-normal text-content-strong uppercase tracking-normal">
                                   {t(section.titleKey)}
                                 </span>
-                                <span className="text-xs sm:text-[10px] text-content-muted font-normal">
+                                <span className="text-[11px] text-content-muted font-normal">
                                   ({section.modules.length} {t("userDetail.module").toLowerCase()})
                                 </span>
                               </div>
@@ -3260,7 +3260,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       selectedAssignProjectRole.toLowerCase()
                     ) && (
                       <div className="pt-2 space-y-1.5 border-t border-primary/30 ">
-                        <label className="text-xs sm:text-[11px] font-normal text-content-strong uppercase tracking-normal block">
+                        <label className="text-[11px] font-normal text-content-strong uppercase tracking-normal block">
                           {t("userDetail.selectSubTeam")}
                         </label>
                         <div className="max-h-36 overflow-y-auto bg-surface border border-border-subtle rounded-md p-2 space-y-1 custom-scrollbar">
@@ -3291,7 +3291,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                   <span className="font-medium">
                                     {u.displayName || u.username || u.email}
                                   </span>
-                                  <span className="text-xs sm:text-[10px] text-content-subtle">
+                                  <span className="text-[11px] text-content-subtle">
                                     ({u.email})
                                   </span>
                                 </label>
@@ -3350,7 +3350,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                     <div className="font-medium text-xs text-content-strong">
                                       {p.name}
                                     </div>
-                                    <div className="text-xs sm:text-[10px] font-mono text-primary uppercase mt-0.5">
+                                    <div className="text-[11px] font-mono text-primary uppercase mt-0.5">
                                       {p.key}
                                     </div>
                                   </div>
@@ -3372,7 +3372,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                           </span>
                                         )}
                                       </div>
-                                      <span className="text-xs sm:text-[10px] text-content-muted font-medium">
+                                      <span className="text-[11px] text-content-muted font-medium">
                                         {t("rakit.membersCount", { count: members.length })}
                                       </span>
                                     </div>
@@ -3382,7 +3382,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 <div className="flex items-center gap-1.5 shrink-0">
                                   <span
                                     className={cn(
-                                      "text-xs sm:text-[10px] font-normal uppercase px-2 py-0.5 rounded-md border",
+                                      "text-[11px] font-normal uppercase px-2 py-0.5 rounded-md border",
                                       peranDikenal
                                         ? "bg-primary/15 text-primary border-primary/30 "
                                         : "bg-amber-500/15 text-amber-800 border-amber-500/30 "
@@ -3428,7 +3428,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               {/* Tasks in project (Collapsable via Dropdown icon) */}
                               {projectTasks.length > 0 && isExpanded && (
                                 <div className="pt-2 border-t border-border-subtle/60 space-y-1.5">
-                                  <div className="flex items-center justify-between text-xs sm:text-[10px] text-content-subtle font-normal uppercase tracking-normal">
+                                  <div className="flex items-center justify-between text-[11px] text-content-subtle font-normal uppercase tracking-normal">
                                     <span>Tugas Terdelegasi ({projectTasks.length}):</span>
                                   </div>
                                   <div className="space-y-1 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
@@ -3441,7 +3441,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                           <div className="font-medium text-content-strong truncate">
                                             {t.title}
                                           </div>
-                                          <div className="text-xs sm:text-[10px] font-mono text-primary uppercase">
+                                          <div className="text-[11px] font-mono text-primary uppercase">
                                             {t.key || "TASK"}
                                           </div>
                                         </div>
@@ -3449,7 +3449,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                           style={gayaLabel(
                                             warnaDariMaster(masterData, "status", t.status)
                                           )}
-                                          className="label-chip text-xs sm:text-[10px] font-normal px-2 py-0.5 rounded border uppercase shrink-0"
+                                          className="label-chip text-[11px] font-normal px-2 py-0.5 rounded border uppercase shrink-0"
                                         >
                                           {t.status || "todo"}
                                         </span>

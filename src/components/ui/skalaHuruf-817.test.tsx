@@ -29,9 +29,10 @@ const kelasUkuran = (konstanta: string) =>
   konstanta.split(/\s+/).filter((k) => /(?:^|[a-z0-9_-]+:)text-(?:xs|sm|base|lg|xl|\[)/.test(k));
 
 describe("skala huruf dasar (#817)", () => {
-  it("th 10 px dan td 12 px absolut — bukan rem yang menyusut oleh akar 13 px", () => {
+  it("th 11 px dan td 12 px absolut — bukan rem yang menyusut oleh akar 13 px", () => {
     const css = baca("src/index.css");
-    expect(blok(css, "th")).toMatch(/font-size:\s*10px;/);
+    // #824 — th naik 10px → 11px agar satu ritme dengan label tabel.
+    expect(blok(css, "th")).toMatch(/font-size:\s*11px;/);
     expect(blok(css, "th")).not.toMatch(/font-size:\s*[\d.]+rem/);
     expect(blok(css, "td")).toMatch(/font-size:\s*12px;/);
     expect(blok(css, "td")).not.toMatch(/font-size:\s*[\d.]+rem/);

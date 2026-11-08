@@ -208,7 +208,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
           <div className="flex items-center justify-between bg-primary/10 border border-primary/30 p-3 rounded-md">
             <div>
               <h4 className="text-xs font-normal text-primary">{t("testCase.needTemplate")}</h4>
-              <p className="text-xs sm:text-[10px] text-content-muted font-normal">
+              <p className="text-[11px] text-content-muted font-normal">
                 {t("testCase.downloadStructure")}
               </p>
             </div>
@@ -228,7 +228,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
               <p className="text-xs font-normal text-content-body">
                 {t("qa.uploadAnExcelFileXlsx")}
               </p>
-              <p className="text-xs sm:text-[10px] text-content-subtle mt-1 font-normal">
+              <p className="text-[11px] text-content-subtle mt-1 font-normal">
                 {t("testCase.columnFormat")}
               </p>
             </div>

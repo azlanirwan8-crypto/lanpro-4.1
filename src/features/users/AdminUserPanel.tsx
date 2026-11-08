@@ -592,7 +592,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 <Users className="w-4.5 h-4.5" />
               </div>
               <div>
-                <div className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+                <div className="text-[11px] font-normal text-content-subtle uppercase tracking-normal">
                   {t("users.totalUser")}
                 </div>
                 <div className="text-lg font-medium text-content-strong leading-none mt-1">
@@ -605,7 +605,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 <CheckCircle className="w-4.5 h-4.5" />
               </div>
               <div>
-                <div className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+                <div className="text-[11px] font-normal text-content-subtle uppercase tracking-normal">
                   {t("users.approved")}
                 </div>
                 <div className="text-lg font-medium text-content-strong leading-none mt-1">
@@ -618,7 +618,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 <Clock className="w-4.5 h-4.5" />
               </div>
               <div>
-                <div className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+                <div className="text-[11px] font-normal text-content-subtle uppercase tracking-normal">
                   {t("users.pending")}
                 </div>
                 <div className="text-lg font-medium text-content-strong leading-none mt-1">
@@ -631,7 +631,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 <Shield className="w-4.5 h-4.5" />
               </div>
               <div>
-                <div className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+                <div className="text-[11px] font-normal text-content-subtle uppercase tracking-normal">
                   {t("users.administrator")}
                 </div>
                 <div className="text-lg font-medium text-content-strong leading-none mt-1">
@@ -769,7 +769,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
             <div className="hidden sm:block overflow-x-auto flex-1">
               <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
                 <thead>
-                  <tr className="bg-primary-surface/5 border-b border-border-subtle text-xs font-normal text-content-subtle whitespace-nowrap">
+                  <tr className="bg-primary-surface/5 border-b border-border-subtle text-content-subtle whitespace-nowrap">
                     <th className="py-3.5 px-4 text-center w-12">
                       <input
                         type="checkbox"
@@ -800,7 +800,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     >
                       <div className="flex items-center gap-1.5">
                         <span>{t("users.user")}</span>
-                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-primary">
+                        <span className="text-[11px] text-content-subtle group-hover:text-primary">
                           {sortField === "name" ? (sortOrder === "asc" ? "▲" : "▼") : "↕"}
                         </span>
                       </div>
@@ -811,7 +811,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     >
                       <div className="flex items-center gap-1.5">
                         <span>{t("users.deptPosition")}</span>
-                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-primary">
+                        <span className="text-[11px] text-content-subtle group-hover:text-primary">
                           {sortField === "department" ? (sortOrder === "asc" ? "▲" : "▼") : "↕"}
                         </span>
                       </div>
@@ -823,7 +823,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     >
                       <div className="flex items-center gap-1.5">
                         <span>{t("users.role")}</span>
-                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-primary">
+                        <span className="text-[11px] text-content-subtle group-hover:text-primary">
                           {sortField === "role" ? (sortOrder === "asc" ? "▲" : "▼") : "↕"}
                         </span>
                       </div>
@@ -834,7 +834,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     >
                       <div className="flex items-center justify-center gap-1.5">
                         <span>{t("users.status")}</span>
-                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-primary">
+                        <span className="text-[11px] text-content-subtle group-hover:text-primary">
                           {sortField === "status" ? (sortOrder === "asc" ? "▲" : "▼") : "↕"}
                         </span>
                       </div>
@@ -889,11 +889,11 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                               <div className="font-medium text-content-strong text-xs group-hover:text-primary transition-colors">
                                 {user?.displayName || user?.username}
                               </div>
-                              <div className="text-xs sm:text-[11px] text-content-muted">
+                              <div className="text-[11px] text-content-muted">
                                 {user?.email || "Email tidak tersedia"}
                               </div>
                               {user.phone && (
-                                <div className="text-xs sm:text-[10px] text-emerald-600 flex items-center gap-1 mt-0.5">
+                                <div className="text-[11px] text-emerald-600 flex items-center gap-1 mt-0.5">
                                   <span>{t("users.waPhone")}</span>
                                   <span>{user.phone}</span>
                                 </div>
@@ -906,7 +906,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                             <span className="text-xs text-content-body">
                               {user.department ? getDepartmentName(user.department) : "-"}
                             </span>
-                            <span className="text-xs sm:text-[10px] text-content-muted uppercase tracking-normal">
+                            <span className="text-[11px] text-content-muted uppercase tracking-normal">
                               {user.position ? getPositionName(user.position) : "-"}
                             </span>
                           </div>
@@ -916,7 +916,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                             <div className="flex items-center gap-2">
                               <span
                                 className={cn(
-                                  "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs sm:text-[10px] font-medium border transition-colors",
+                                  "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium border transition-colors",
                                   userProjectsCount > 0
                                     ? "bg-primary/10 text-primary border-primary/30"
                                     : "bg-surface-sunken/50 text-content-subtle border-border-faint"
@@ -931,7 +931,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                             <div className="flex items-center gap-2">
                               <span
                                 className={cn(
-                                  "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs sm:text-[10px] font-medium border transition-colors",
+                                  "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium border transition-colors",
                                   userTasksCount > 0
                                     ? "bg-primary/10 text-primary border-primary/30"
                                     : "bg-surface-sunken/50 text-content-subtle border-border-faint"
@@ -946,7 +946,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                         <td className="py-3.5 px-4">
                           <span
                             className={cn(
-                              "inline-flex font-normal text-xs sm:text-[11px] tracking-normal uppercase px-2 py-0.5 rounded-md border",
+                              "inline-flex font-normal text-[11px] tracking-normal uppercase px-2 py-0.5 rounded-md border",
                               normalkanPeran(user.role) === "admin"
                                 ? "bg-rose-500/10 text-rose-600 border-rose-500/30"
                                 : normalkanPeran(user.role) === "head"
@@ -1231,13 +1231,13 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
             {/* Enterprise DataTable Pagination & Entries Controls */}
             <div className="border-t border-border-faint p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface-sunken/50 mt-auto">
               <div className="flex items-center gap-3">
-                <span className="text-xs sm:text-[10px] font-normal text-content-muted">
+                <span className="text-[11px] font-normal text-content-muted">
                   {t("common.showing")}{" "}
                   {filteredUsers.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
                   {t("common.to")} {Math.min(currentPage * itemsPerPage, filteredUsers.length)}{" "}
                   {t("common.of")} {filteredUsers.length} {t("common.entries")}
                 </span>
-                <div className="flex items-center gap-1.5 text-xs sm:text-[10px] text-content-muted font-normal">
+                <div className="flex items-center gap-1.5 text-[11px] text-content-muted font-normal">
                   <span>{t("users.rowsPerPage")}</span>
                   <StyledDropdown
                     value={String(itemsPerPage)}
@@ -1251,7 +1251,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       { id: "50", label: "50" },
                       { id: "100", label: "100" },
                     ]}
-                    buttonClassName="bg-surface border border-border-subtle rounded-md px-2 py-1 text-xs sm:text-[10px] text-left font-normal text-content-body"
+                    buttonClassName="bg-surface border border-border-subtle rounded-md px-2 py-1 text-[11px] text-left font-normal text-content-body"
                   />
                 </div>
               </div>
@@ -1262,7 +1262,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   size="sm"
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="rounded-lg h-8 px-2.5 text-xs sm:text-[10px] font-normal"
+                  className="rounded-lg h-8 px-2.5 text-[11px] font-normal"
                 >
                   <ChevronLeft className="w-4 h-4 mr-1" /> {t("users.prev")}
                 </Button>
@@ -1271,7 +1271,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     key={i}
                     onClick={() => setCurrentPage(i + 1)}
                     className={cn(
-                      "w-7 h-7 rounded-lg text-xs sm:text-[10px] font-normal transition-colors",
+                      "w-7 h-7 rounded-lg text-[11px] font-normal transition-colors",
                       currentPage === i + 1
                         ? "bg-primary-surface text-content-inverse shadow-2xs"
                         : "bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken"
@@ -1285,7 +1285,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   size="sm"
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages || totalPages === 0}
-                  className="rounded-lg h-8 px-2.5 text-xs sm:text-[10px] font-normal"
+                  className="rounded-lg h-8 px-2.5 text-[11px] font-normal"
                 >
                   {t("users.next")} <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
@@ -1322,9 +1322,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 }
               />
               {usernameError && (
-                <p className="text-xs sm:text-[10px] font-medium text-rose-500 mt-1">
-                  {usernameError}
-                </p>
+                <p className="text-[11px] font-medium text-rose-500 mt-1">{usernameError}</p>
               )}
             </div>
             <div>
@@ -1349,7 +1347,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 }
               />
               {addPeopleErrors.fullName && (
-                <p className="text-xs sm:text-[10px] font-medium text-rose-500 mt-1">
+                <p className="text-[11px] font-medium text-rose-500 mt-1">
                   {addPeopleErrors.fullName}
                 </p>
               )}
@@ -1367,9 +1365,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 }
               />
               {emailError && (
-                <p className="text-xs sm:text-[10px] font-medium text-rose-500 mt-1">
-                  {emailError}
-                </p>
+                <p className="text-[11px] font-medium text-rose-500 mt-1">{emailError}</p>
               )}
             </div>
             <div>
@@ -1402,7 +1398,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 }
               />
               {addPeopleErrors.password && (
-                <p className="text-xs sm:text-[10px] font-medium text-rose-500 mt-1">
+                <p className="text-[11px] font-medium text-rose-500 mt-1">
                   {addPeopleErrors.password}
                 </p>
               )}
@@ -1422,7 +1418,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   </div>
                   <p
                     className={cn(
-                      "text-xs sm:text-[10px] font-normal uppercase tracking-normal",
+                      "text-[11px] font-normal uppercase tracking-normal",
                       passwordStrength === "weak"
                         ? "text-rose-500"
                         : passwordStrength === "medium"
@@ -1602,9 +1598,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
         >
           <div className="flex items-start gap-2 max-w-[210px]">
             <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-            <span className="leading-snug font-medium text-xs sm:text-[11px]">
-              {hoveredTooltip.text}
-            </span>
+            <span className="leading-snug font-medium text-[11px]">{hoveredTooltip.text}</span>
           </div>
         </div>
       )}

@@ -98,7 +98,7 @@ export const LaciUtas: React.FC<LaciUtasProps> = ({
               <MessageSquare className="w-5 h-5" />
             </div>
             <div className="min-w-0">
-              <span className="text-xs sm:text-[10px] font-normal uppercase tracking-normal text-primary block">
+              <span className="text-[11px] font-normal uppercase tracking-normal text-primary block">
                 {t("discussion.threadDiscussions")}
               </span>
               <h3 className="text-sm font-medium text-content truncate">{titik.concern}</h3>
@@ -120,7 +120,7 @@ export const LaciUtas: React.FC<LaciUtasProps> = ({
                 <MessageSquare className="w-6 h-6" />
               </div>
               <h4 className="text-xs text-content-body">{t("discussion.noReplies")}</h4>
-              <p className="text-xs sm:text-[11px] text-content-subtle mt-1 leading-normal">
+              <p className="text-[11px] text-content-subtle mt-1 leading-normal">
                 {t("discussion.noRepliesHint")}
               </p>
             </div>
@@ -164,7 +164,7 @@ export const LaciUtas: React.FC<LaciUtasProps> = ({
                           name={authorName}
                           className="w-6 h-6"
                         />
-                        <span className="text-xs sm:text-[10px] text-content-muted font-medium">
+                        <span className="text-[11px] text-content-muted font-medium">
                           {authorName}
                         </span>
                       </div>

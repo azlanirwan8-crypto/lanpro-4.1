@@ -529,7 +529,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                                 key={col.id}
                                 className={cn(
                                   styles.tableHeaderCell,
-                                  isCompact ? "py-1 text-xs sm:text-[10px]" : "py-2.5"
+                                  isCompact ? "py-1 text-[11px]" : "py-2.5"
                                 )}
                                 style={{ width: col.width }}
                               >

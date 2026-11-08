@@ -36,7 +36,7 @@ import { cn } from "../../../lib/utils";
  * tanpa ada yang menyadarinya.
  */
 export const labelKelas =
-  "text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-normal"; /**
+  "text-[11px] uppercase font-normal text-content-muted tracking-normal"; /**
  * #712 — SATU pita tinggi untuk seluruh laci ini, dan pita itu adalah pita yang
  * sama dengan baris tambah (`BarisCepat.tsx`): `h-11` (44 px), ambang sentuh yang
  * sudah dipakai `Input` (`CoreUI.tsx:142`) dan tombol tutup `Modal` (`:93`).

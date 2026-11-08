@@ -59,7 +59,7 @@ export const UserBadge = ({
             {name}
           </span>
           {showRole && role && (
-            <span className="text-xs sm:text-[11px] font-normal text-content-subtle uppercase tracking-normal leading-none mt-0.5">
+            <span className="text-[11px] font-normal text-content-subtle uppercase tracking-normal leading-none mt-0.5">
               {role}
             </span>
           )}
@@ -68,7 +68,7 @@ export const UserBadge = ({
 
       {/* Floating Hover Tooltip (NAME ONLY) */}
       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/avatar:flex flex-col items-center z-50 pointer-events-none animate-dropdown">
-        <div className="bg-surface-inverse-strong text-content-inverse px-2.5 py-1 rounded-lg text-xs sm:text-[10px] font-medium whitespace-nowrap shadow-xl border border-border-inverse">
+        <div className="bg-surface-inverse-strong text-content-inverse px-2.5 py-1 rounded-lg text-[11px] font-medium whitespace-nowrap shadow-xl border border-border-inverse">
           <span>{name}</span>
         </div>
         <div className="w-2 h-2 bg-surface-inverse-strong rotate-45 -mt-1"></div>

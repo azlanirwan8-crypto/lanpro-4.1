@@ -154,7 +154,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             <Filter className="w-3.5 h-3.5 text-content-muted shrink-0" />
             <span className="hidden sm:inline">{t("filters.advancedFilters")}</span>
             {activeCount > 0 && (
-              <span className="bg-primary-surface text-content-inverse rounded-full px-1.5 py-0.5 flex items-center justify-center text-[10px] sm:text-[9px] font-semibold leading-none">
+              <span className="bg-primary-surface text-content-inverse rounded-full px-1.5 py-0.5 flex items-center justify-center text-[10px] font-semibold leading-none">
                 {activeCount}
               </span>
             )}
@@ -183,7 +183,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
               <span
                 className={cn(
                   styles.filterPill,
-                  "flex items-center gap-1 py-1 px-2.5 rounded-full text-xs sm:text-[11px] font-medium"
+                  "flex items-center gap-1 py-1 px-2.5 rounded-full text-[11px] font-medium"
                 )}
               >
                 {t("filters.status2")} {listFilterStatus}
@@ -200,7 +200,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
               <span
                 className={cn(
                   styles.filterPillAmber,
-                  "flex items-center gap-1 py-1 px-2.5 rounded-full text-xs sm:text-[11px] font-medium"
+                  "flex items-center gap-1 py-1 px-2.5 rounded-full text-[11px] font-medium"
                 )}
               >
                 {t("filters.priority2")} {listFilterPriority}
@@ -242,7 +242,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
               </span>
             )}
             {listFilterSprint !== "All" && (
-              <span className="text-xs sm:text-[11px] font-medium text-content-secondary bg-surface-muted px-2.5 py-1 rounded-full border border-border-subtle flex items-center gap-1 shadow-soft">
+              <span className="text-[11px] font-medium text-content-secondary bg-surface-muted px-2.5 py-1 rounded-full border border-border-subtle flex items-center gap-1 shadow-soft">
                 {t("filters.sprint2")}{" "}
                 {listFilterSprint === "Backlog"
                   ? "Backlog"
@@ -269,7 +269,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
               </span>
             )}
             {listFilterLabel !== "All" && (
-              <span className="text-xs sm:text-[11px] font-medium text-info-text bg-info/10 px-2.5 py-1 rounded-full border border-info/30 flex items-center gap-1 shadow-soft">
+              <span className="text-[11px] font-medium text-info-text bg-info/10 px-2.5 py-1 rounded-full border border-info/30 flex items-center gap-1 shadow-soft">
                 {t("filters.label2")} {listFilterLabel}
                 <button
                   type="button"
@@ -281,7 +281,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
               </span>
             )}
             {listFilterEnvironment !== "All" && (
-              <span className="text-xs sm:text-[11px] font-medium text-warning-text bg-warning/10 px-2.5 py-1 rounded-full border border-warning/30 flex items-center gap-1 shadow-soft">
+              <span className="text-[11px] font-medium text-warning-text bg-warning/10 px-2.5 py-1 rounded-full border border-warning/30 flex items-center gap-1 shadow-soft">
                 {t("filters.environment")} {listFilterEnvironment}
                 <button
                   type="button"
@@ -305,7 +305,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
               </span>
             )}
             {listFilterRelease !== "All" && (
-              <span className="text-xs sm:text-[11px] font-medium text-success-text bg-success/10 px-2.5 py-1 rounded-full border border-success/30 flex items-center gap-1 shadow-soft">
+              <span className="text-[11px] font-medium text-success-text bg-success/10 px-2.5 py-1 rounded-full border border-success/30 flex items-center gap-1 shadow-soft">
                 {t("filters.release")} {listFilterRelease}
                 <button
                   type="button"
@@ -329,7 +329,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
               </span>
             )}
             {listFilterType !== "All" && (
-              <span className="text-xs sm:text-[11px] font-medium text-content-secondary bg-surface-muted px-2.5 py-1 rounded-full border border-border-subtle flex items-center gap-1 shadow-soft">
+              <span className="text-[11px] font-medium text-content-secondary bg-surface-muted px-2.5 py-1 rounded-full border border-border-subtle flex items-center gap-1 shadow-soft">
                 {t("filters.issueType")} {listFilterType}
                 <button
                   type="button"

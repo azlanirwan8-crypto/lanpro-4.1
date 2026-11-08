@@ -169,7 +169,7 @@ const ShapePaletteBati: React.FC<ShapePaletteProps> = ({
             placeholder={t("shapePalette.searchShape")}
             value={shapeSearchQuery}
             onChange={(e) => setShapeSearchQuery(e.target.value)}
-            className="w-full text-xs sm:text-[11px] bg-surface-sunken border border-border-subtle rounded-lg p-1.5 pl-7 text-content placeholder-content-subtle focus:outline-none focus:ring-1 focus:ring-primary focus:bg-surface transition-all"
+            className="w-full text-[11px] bg-surface-sunken border border-border-subtle rounded-lg p-1.5 pl-7 text-content placeholder-content-subtle focus:outline-none focus:ring-1 focus:ring-primary focus:bg-surface transition-all"
           />
           {shapeSearchQuery && (
             <button
@@ -209,7 +209,7 @@ const ShapePaletteBati: React.FC<ShapePaletteProps> = ({
                     {group.title}
                   </span>
                   {GRUP_BERBADGE.includes(group.title) && (
-                    <span className="text-[9px] leading-none bg-primary/10 text-primary font-medium px-1 py-[1px] rounded border border-primary/30">
+                    <span className="text-[10px] leading-none bg-primary/10 text-primary font-medium px-1 py-[1px] rounded border border-primary/30">
                       FREE
                     </span>
                   )}
@@ -290,7 +290,7 @@ const ShapePaletteBati: React.FC<ShapePaletteProps> = ({
         })}
 
         {!adaHasil && (
-          <div className="text-center py-8 text-content-subtle text-xs sm:text-[11px]">
+          <div className="text-center py-8 text-content-subtle text-[11px]">
             {t("shapePalette.noShapeFound")}
           </div>
         )}

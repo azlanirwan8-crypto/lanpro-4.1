@@ -637,7 +637,7 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
             <div className="mt-1 flex flex-col items-center gap-0.5 w-full">
               <div
                 style={gayaLabel(warnaLabel({ kelompok: "status", label: linkedTask.status }))}
-                className="label-chip flex items-center gap-1 text-xs sm:text-[10px] font-normal uppercase tracking-normal px-1.5 py-0.5 rounded border shadow-soft cursor-pointer whitespace-nowrap"
+                className="label-chip flex items-center gap-1 text-[11px] font-normal uppercase tracking-normal px-1.5 py-0.5 rounded border shadow-soft cursor-pointer whitespace-nowrap"
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedTaskForDetail(linkedTask);

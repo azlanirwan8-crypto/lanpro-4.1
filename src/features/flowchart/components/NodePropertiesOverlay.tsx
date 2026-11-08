@@ -97,7 +97,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
             { id: "curlyLeft", label: `Curly Left {` },
             { id: "curlyRight", label: `Curly Right }` },
           ]}
-          buttonClassName="bg-surface-sunken border border-border-subtle text-xs sm:text-[10px] text-left font-medium text-content-body p-1 rounded-lg hover:bg-surface-muted max-w-[120px]"
+          buttonClassName="bg-surface-sunken border border-border-subtle text-[11px] text-left font-medium text-content-body p-1 rounded-lg hover:bg-surface-muted max-w-[120px]"
         />
       </span>
 
@@ -140,7 +140,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
             node.fontStyle === "sans" ? "serif" : node.fontStyle === "serif" ? "mono" : "sans";
           handleUpdateActiveNode({ fontStyle: nextStyle });
         }}
-        className="p-1 px-1.5 hover:bg-surface-muted text-xs sm:text-[10px] rounded font-normal uppercase"
+        className="p-1 px-1.5 hover:bg-surface-muted text-[11px] rounded font-normal uppercase"
         title={t("shapes.fontFamily")}
       >
         {node.fontStyle || "sans"}
@@ -197,7 +197,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
         >
           -
         </button>
-        <span className="text-xs sm:text-[10px] font-mono font-medium px-0.5 whitespace-nowrap">
+        <span className="text-[11px] font-mono font-medium px-0.5 whitespace-nowrap">
           {node.fontSize || 12}px
         </span>
         <button

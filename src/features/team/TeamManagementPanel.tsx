@@ -533,7 +533,7 @@ export const TeamManagementPanel = ({
                           <span className="block font-medium text-content-strong text-xs md:text-sm">
                             {userAssignedTasks.length}
                           </span>
-                          <span className="text-[9px] md:text-[10px] text-content-subtle font-normal uppercase tracking-normal truncate block">
+                          <span className="text-[10px] md:text-[10px] text-content-subtle font-normal uppercase tracking-normal truncate block">
                             {t("teamPanel.assigned")}
                           </span>
                         </div>
@@ -541,7 +541,7 @@ export const TeamManagementPanel = ({
                           <span className="block font-medium text-content-strong text-xs md:text-sm">
                             {completedTasks.length}
                           </span>
-                          <span className="text-[9px] md:text-[10px] text-content-subtle font-normal uppercase tracking-normal truncate block">
+                          <span className="text-[10px] md:text-[10px] text-content-subtle font-normal uppercase tracking-normal truncate block">
                             {t("teamPanel.done")}
                           </span>
                         </div>
@@ -626,7 +626,7 @@ export const TeamManagementPanel = ({
                                 <div className="font-medium text-content-strong text-xs">
                                   {name}
                                 </div>
-                                <div className="text-xs sm:text-[11px] text-content-subtle">
+                                <div className="text-[11px] text-content-subtle">
                                   {person?.email || "@" + (person?.username || person.uid)}
                                 </div>
                               </div>
@@ -663,7 +663,7 @@ export const TeamManagementPanel = ({
                           </td>
                           <td className="px-5 py-3.5 text-center">
                             <span
-                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs sm:text-[10px] font-normal ${
+                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-normal ${
                                 person.isPending
                                   ? "bg-amber-500/10 text-amber-700 border border-amber-500/30"
                                   : "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30"
@@ -800,7 +800,7 @@ export const TeamManagementPanel = ({
                                 {t.title}
                               </span>
                             </div>
-                            <span className="text-xs sm:text-[10px] font-medium px-1.5 py-0.5 bg-surface-muted text-content-secondary rounded shrink-0">
+                            <span className="text-[11px] font-medium px-1.5 py-0.5 bg-surface-muted text-content-secondary rounded shrink-0">
                               {t.status}
                             </span>
                           </div>

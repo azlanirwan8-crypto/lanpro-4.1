@@ -767,7 +767,7 @@ export function DashboardView(props: DashboardViewProps) {
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle">
+                  <span className="text-[11px] font-normal uppercase tracking-normal text-content-subtle">
                     {t("dashboard.totalTasks")}
                   </span>
                   <h3 className="text-2xl font-semibold text-content-strong mt-1">{totalTasks}</h3>
@@ -794,7 +794,7 @@ export function DashboardView(props: DashboardViewProps) {
                 </span>
                 <button
                   onClick={() => props.setCurrentView("board")}
-                  className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
+                  className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
                 >
                   {t("dashboard.viewAllTasks")}
                 </button>
@@ -809,7 +809,7 @@ export function DashboardView(props: DashboardViewProps) {
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-inverse/70">
+                  <span className="text-[11px] font-normal uppercase tracking-normal text-content-inverse/70">
                     {t("dashboard.runningTasks")}
                   </span>
                   <h3 className="text-2xl font-semibold text-content-inverse mt-1">
@@ -829,7 +829,7 @@ export function DashboardView(props: DashboardViewProps) {
                 </span>
                 <button
                   onClick={() => props.setCurrentView("board")}
-                  className="text-content-inverse/90 hover:text-content-inverse hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-subtle text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
+                  className="text-content-inverse/90 hover:text-content-inverse hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-subtle text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
                 >
                   {t("dashboard.viewActiveBoard")}
                 </button>
@@ -843,7 +843,7 @@ export function DashboardView(props: DashboardViewProps) {
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle">
+                  <span className="text-[11px] font-normal uppercase tracking-normal text-content-subtle">
                     {t("dashboard.doneTasks")}
                   </span>
                   <h3 className="text-2xl font-semibold text-content-strong mt-1">
@@ -876,7 +876,7 @@ export function DashboardView(props: DashboardViewProps) {
                 </span>
                 <button
                   onClick={() => props.setCurrentView("board")}
-                  className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
+                  className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
                 >
                   {t("dashboard.viewDoneListLink")}
                 </button>
@@ -890,7 +890,7 @@ export function DashboardView(props: DashboardViewProps) {
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle">
+                  <span className="text-[11px] font-normal uppercase tracking-normal text-content-subtle">
                     {t("dashboard.blockedTasks")}
                   </span>
                   {/* #111 — nol berarti TIDAK ADA yang tersumbat, itu kabar baik.
@@ -930,7 +930,7 @@ export function DashboardView(props: DashboardViewProps) {
                 </span>
                 <button
                   onClick={() => props.setCurrentView("board")}
-                  className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
+                  className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
                 >
                   {t("dashboard.handleBlockersLink")}
                 </button>
@@ -964,7 +964,7 @@ export function DashboardView(props: DashboardViewProps) {
                       key={filter}
                       onClick={() => setFilterRentang(filter)}
                       className={cn(
-                        "px-3 py-2.5 min-h-11 min-w-11 inline-flex items-center justify-center rounded text-xs sm:text-[11px] font-medium transition cursor-pointer",
+                        "px-3 py-2.5 min-h-11 min-w-11 inline-flex items-center justify-center rounded text-[11px] font-medium transition cursor-pointer",
                         filterRentang === filter
                           ? "bg-primary-surface text-content-inverse shadow-2xs"
                           : "text-content-secondary hover:text-content"
@@ -982,7 +982,7 @@ export function DashboardView(props: DashboardViewProps) {
                   "aktif" ketika yang dipilih sprint lain. */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5 p-4 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
                 <div>
-                  <span className="text-xs sm:text-[11px] font-normal text-content-subtle uppercase">
+                  <span className="text-[11px] font-normal text-content-subtle uppercase">
                     {t("dashboard.sprintDitampilkan")}
                   </span>
                   <p className="text-sm font-normal text-content-strong mt-0.5 truncate">
@@ -990,7 +990,7 @@ export function DashboardView(props: DashboardViewProps) {
                   </p>
                 </div>
                 <div>
-                  <span className="text-xs sm:text-[11px] font-normal text-content-subtle uppercase">
+                  <span className="text-[11px] font-normal text-content-subtle uppercase">
                     {t("dashboard.sprintProgress")}
                   </span>
                   <p className="text-sm font-normal text-success-text mt-0.5">
@@ -1002,7 +1002,7 @@ export function DashboardView(props: DashboardViewProps) {
                   </p>
                 </div>
                 <div>
-                  <span className="text-xs sm:text-[11px] font-normal text-content-subtle uppercase">
+                  <span className="text-[11px] font-normal text-content-subtle uppercase">
                     {t("dashboard.weeklyVelocity")}
                   </span>
                   <p className="text-sm font-normal text-primary mt-0.5">
@@ -1010,7 +1010,7 @@ export function DashboardView(props: DashboardViewProps) {
                   </p>
                 </div>
                 <div>
-                  <span className="text-xs sm:text-[11px] font-normal text-content-subtle uppercase">
+                  <span className="text-[11px] font-normal text-content-subtle uppercase">
                     {t("dashboard.daysLeft")}
                   </span>
                   <p className="text-sm font-medium text-content-strong mt-0.5">
@@ -1170,7 +1170,7 @@ export function DashboardView(props: DashboardViewProps) {
                       dihitung dari `filteredTasks`, jadi "3 Total" berdiri di
                       atas daftar yang berjumlah 12. Itu bukan ambigu, itu
                       salah. */}
-                  <span className="text-xs sm:text-[11px] font-medium text-content-subtle">
+                  <span className="text-[11px] font-medium text-content-subtle">
                     {t("rakit.totalCount", {
                       count: taskTypeBreakdown.reduce((a: number, x) => a + x.value, 0),
                     })}
@@ -1190,9 +1190,7 @@ export function DashboardView(props: DashboardViewProps) {
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-content-strong ">{t.value}</span>
-                          <span className="text-xs sm:text-[11px] text-content-subtle">
-                            ({t.pct}%)
-                          </span>
+                          <span className="text-[11px] text-content-subtle">({t.pct}%)</span>
                         </div>
                       </div>
                       <div className="w-full h-1.5 bg-surface-muted rounded-full overflow-hidden">
@@ -1214,7 +1212,7 @@ export function DashboardView(props: DashboardViewProps) {
                     {t("dashboard.breakdownByStatus")}
                   </h3>
                   {/* #112 — idem, dijumlahkan dari isinya sendiri. */}
-                  <span className="text-xs sm:text-[11px] font-medium text-content-subtle">
+                  <span className="text-[11px] font-medium text-content-subtle">
                     {t("rakit.totalCount", {
                       count: statusBreakdown.reduce((a: number, x) => a + x.value, 0),
                     })}
@@ -1234,9 +1232,7 @@ export function DashboardView(props: DashboardViewProps) {
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-content-strong ">{s.value}</span>
-                          <span className="text-xs sm:text-[11px] text-content-subtle">
-                            ({s.pct}%)
-                          </span>
+                          <span className="text-[11px] text-content-subtle">({s.pct}%)</span>
                         </div>
                       </div>
                       <div className="w-full h-1.5 bg-surface-muted rounded-full overflow-hidden">
@@ -1259,7 +1255,7 @@ export function DashboardView(props: DashboardViewProps) {
                     <Users className="w-4 h-4 text-primary" />
                     {t("dashboard.workloadTitle")}
                   </h3>
-                  <p className="text-xs sm:text-[11px] text-content-subtle mt-0.5 font-medium">
+                  <p className="text-[11px] text-content-subtle mt-0.5 font-medium">
                     {t("dashboard.workloadSubtitle")}
                   </p>
                 </div>
@@ -1274,7 +1270,7 @@ export function DashboardView(props: DashboardViewProps) {
               <div className="overflow-x-auto">
                 <ResponsiveTable className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-border-faint text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle">
+                    <tr className="border-b border-border-faint text-[11px] font-semibold uppercase text-content-subtle">
                       <th className="py-2.5 px-2">{t("dashboard.thMember")}</th>
                       <th className="py-2.5 px-2">{t("dashboard.thRunning")}</th>
                       <th className="py-2.5 px-2">{t("dashboard.thDone")}</th>
@@ -1312,7 +1308,7 @@ export function DashboardView(props: DashboardViewProps) {
                           );
                         } else {
                           capacityBadge = (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] font-medium bg-surface-muted text-content-secondary border border-border-subtle">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-surface-muted text-content-secondary border border-border-subtle">
                               <Minus className="w-3 h-3" /> {t("dashboard.available")}
                             </span>
                           );
@@ -1339,7 +1335,7 @@ export function DashboardView(props: DashboardViewProps) {
                             <td className="py-3 px-2">{capacityBadge}</td>
                             <td className="py-3 px-2 text-right">
                               <div className="flex items-center justify-end gap-2">
-                                <span className="text-xs sm:text-[11px] font-medium text-content-muted w-9">
+                                <span className="text-[11px] font-medium text-content-muted w-9">
                                   {pct}%
                                 </span>
                                 <div className="w-24 h-2 bg-surface-muted rounded-full overflow-hidden">
@@ -1373,7 +1369,7 @@ export function DashboardView(props: DashboardViewProps) {
                     <Target className="w-4 h-4 text-primary" />
                     {t("dashboard.epicTitle")}
                   </h3>
-                  <p className="text-xs sm:text-[11px] text-content-subtle mt-0.5 font-medium">
+                  <p className="text-[11px] text-content-subtle mt-0.5 font-medium">
                     {t("dashboard.epicSubtitle")}
                   </p>
                 </div>
@@ -1401,7 +1397,7 @@ export function DashboardView(props: DashboardViewProps) {
                             {epic.title}
                           </span>
                         </div>
-                        <span className="text-xs sm:text-[11px] font-medium text-content-muted shrink-0">
+                        <span className="text-[11px] font-medium text-content-muted shrink-0">
                           {epic.childCompleted}/{epic.childTotal} {t("dashboard.childTasks")} (
                           {epic.progress}%)
                         </span>
@@ -1433,7 +1429,7 @@ export function DashboardView(props: DashboardViewProps) {
                     <Clock className="w-4 h-4 text-info-text" />
                     {t("dashboard.timeTitle")}
                   </h3>
-                  <p className="text-xs sm:text-[11px] text-content-subtle mt-0.5 font-medium">
+                  <p className="text-[11px] text-content-subtle mt-0.5 font-medium">
                     {t("dashboard.timeSubtitle")}
                   </p>
                 </div>
@@ -1444,7 +1440,7 @@ export function DashboardView(props: DashboardViewProps) {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
-                  <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase">
+                  <span className="text-[11px] font-normal text-content-subtle uppercase">
                     {t("dashboard.estimatedHours")}
                   </span>
                   <p className="text-lg font-medium text-content-strong mt-0.5">
@@ -1452,7 +1448,7 @@ export function DashboardView(props: DashboardViewProps) {
                   </p>
                 </div>
                 <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
-                  <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase">
+                  <span className="text-[11px] font-normal text-content-subtle uppercase">
                     {t("dashboard.loggedHours")}
                   </span>
                   <p className="text-lg font-medium text-primary mt-0.5">
@@ -1460,7 +1456,7 @@ export function DashboardView(props: DashboardViewProps) {
                   </p>
                 </div>
                 <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
-                  <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase">
+                  <span className="text-[11px] font-normal text-content-subtle uppercase">
                     {t("dashboard.remainingDiff")}
                   </span>
                   <p className="text-lg font-medium text-success-text mt-0.5">
@@ -1480,7 +1476,7 @@ export function DashboardView(props: DashboardViewProps) {
                     <Activity className="w-4 h-4 text-success-text" />
                     {t("dashboard.trendTitle")}
                   </h3>
-                  <p className="text-xs sm:text-[11px] text-content-subtle mt-0.5 font-medium">
+                  <p className="text-[11px] text-content-subtle mt-0.5 font-medium">
                     {t("dashboard.trendSubtitle")}
                   </p>
                 </div>
@@ -1644,11 +1640,11 @@ export function DashboardView(props: DashboardViewProps) {
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs sm:text-[10px] font-mono font-normal text-content-subtle uppercase">
+                        <span className="text-[11px] font-mono font-normal text-content-subtle uppercase">
                           {issue.key}
                         </span>
                         {issue.isBlocked && (
-                          <span className="text-[10px] leading-none sm:text-[9px] font-medium text-danger-text bg-danger/10 px-1.5 py-0.5 rounded border border-danger/30">
+                          <span className="text-[10px] leading-none font-medium text-danger-text bg-danger/10 px-1.5 py-0.5 rounded border border-danger/30">
                             BLOCKED
                           </span>
                         )}

@@ -70,10 +70,8 @@ export const SelectField: React.FC<SelectFieldProps> = ({
           error ? "border-danger/30" : "border-border-subtle"
         } ${className}`}
       />
-      {error && <p className="text-xs sm:text-[10px] text-danger-text font-normal">{error}</p>}
-      {helperText && !error && (
-        <p className="text-xs sm:text-[10px] text-content-muted">{helperText}</p>
-      )}
+      {error && <p className="text-[11px] text-danger-text font-normal">{error}</p>}
+      {helperText && !error && <p className="text-[11px] text-content-muted">{helperText}</p>}
     </div>
   );
 };

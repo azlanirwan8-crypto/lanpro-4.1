@@ -61,7 +61,7 @@ export const SingleLoginCollisionModal: React.FC<Props> = ({
               <div className="flex items-start gap-3">
                 <Globe className="w-4 h-4 text-content-subtle mt-0.5 shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <div className="text-xs sm:text-[10px] text-content-subtle font-normal uppercase">
+                  <div className="text-[11px] text-content-subtle font-normal uppercase">
                     {t("collision.ipAddress")}
                   </div>
                   <div className="text-sm font-medium text-content-body truncate">
@@ -73,7 +73,7 @@ export const SingleLoginCollisionModal: React.FC<Props> = ({
               <div className="flex items-start gap-3">
                 <Monitor className="w-4 h-4 text-content-subtle mt-0.5 shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <div className="text-xs sm:text-[10px] text-content-subtle font-normal uppercase">
+                  <div className="text-[11px] text-content-subtle font-normal uppercase">
                     {t("collision.deviceBrowser")}
                   </div>
                   <div className="text-sm font-medium text-content-body truncate">

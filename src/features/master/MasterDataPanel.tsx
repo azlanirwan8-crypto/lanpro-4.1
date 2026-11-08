@@ -618,7 +618,7 @@ export const MasterDataPanel = ({
               <h3 className="font-normal text-content-strong text-xs uppercase tracking-normal">
                 {t("master.masterDatabase")}
               </h3>
-              <p className="text-xs sm:text-[10px] text-content-subtle mt-0.5">
+              <p className="text-[11px] text-content-subtle mt-0.5">
                 {t("master.systemConfiguration")}
               </p>
             </div>
@@ -670,7 +670,7 @@ export const MasterDataPanel = ({
                   </span>
                   <span
                     className={cn(
-                      "text-xs sm:text-[10px] font-medium px-2 py-0.5 rounded-md transition-all shrink-0",
+                      "text-[11px] font-medium px-2 py-0.5 rounded-md transition-all shrink-0",
                       isActive
                         ? "bg-primary/15 text-primary"
                         : "bg-surface-muted text-content-muted group-hover:bg-surface-strong"
@@ -765,7 +765,7 @@ export const MasterDataPanel = ({
                                   {p ? p.name : mod.projectId}
                                 </span>
                               </div>
-                              <p className="text-xs sm:text-[11px] text-content-subtle font-medium mt-0.5">
+                              <p className="text-[11px] text-content-subtle font-medium mt-0.5">
                                 {mod.keterangan || (
                                   <span className="text-content-subtle italic">
                                     {t("master.noDescription")}
@@ -826,7 +826,7 @@ export const MasterDataPanel = ({
                     <span className="text-xs font-medium text-content-body block">
                       {t("master.scopeFilter")}
                     </span>
-                    <span className="text-xs sm:text-[10px] text-content-subtle font-medium block">
+                    <span className="text-[11px] text-content-subtle font-medium block">
                       {t("master.scopeFilterHint")}
                     </span>
                   </div>
@@ -844,7 +844,7 @@ export const MasterDataPanel = ({
                       <span>{t("master.allRoles")}</span>
                       <span
                         className={cn(
-                          "text-xs sm:text-[11px] font-medium px-1.5 py-0.5 rounded-full",
+                          "text-[11px] font-medium px-1.5 py-0.5 rounded-full",
                           roleTabFilter === "ALL"
                             ? "bg-surface-muted text-content-body"
                             : "bg-surface-strong/60 text-content-secondary"
@@ -866,7 +866,7 @@ export const MasterDataPanel = ({
                       <span>{t("master.projectRoles")}</span>
                       <span
                         className={cn(
-                          "text-xs sm:text-[11px] font-medium px-1.5 py-0.5 rounded-full",
+                          "text-[11px] font-medium px-1.5 py-0.5 rounded-full",
                           roleTabFilter === "PROJECT"
                             ? "bg-blue-500/10 text-blue-700"
                             : "bg-surface-strong/60 text-content-secondary"
@@ -896,7 +896,7 @@ export const MasterDataPanel = ({
                       <span>{t("master.systemRoles")}</span>
                       <span
                         className={cn(
-                          "text-xs sm:text-[11px] font-medium px-1.5 py-0.5 rounded-full",
+                          "text-[11px] font-medium px-1.5 py-0.5 rounded-full",
                           roleTabFilter === "SYSTEM"
                             ? "bg-purple-500/10 text-purple-700"
                             : "bg-surface-strong/60 text-content-secondary"
@@ -1087,11 +1087,11 @@ export const MasterDataPanel = ({
                                                 return (
                                                   <div className="flex items-center gap-1 shrink-0 select-none">
                                                     {rType === "PROJECT" ? (
-                                                      <span className="text-[10px] leading-none sm:text-[9px] font-normal px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-700 border border-blue-500/30 uppercase">
+                                                      <span className="text-[10px] leading-none font-normal px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-700 border border-blue-500/30 uppercase">
                                                         {t("master.projectRole")}
                                                       </span>
                                                     ) : (
-                                                      <span className="text-[10px] leading-none sm:text-[9px] font-normal px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-700 border border-purple-500/30 uppercase">
+                                                      <span className="text-[10px] leading-none font-normal px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-700 border border-purple-500/30 uppercase">
                                                         {t("master.systemRole")}
                                                       </span>
                                                     )}
@@ -1117,7 +1117,7 @@ export const MasterDataPanel = ({
                                             )}
                                           </div>
                                           {item.description && (
-                                            <span className="text-xs sm:text-[11px] text-content-subtle font-medium mt-0.5">
+                                            <span className="text-[11px] text-content-subtle font-medium mt-0.5">
                                               {item.description}
                                             </span>
                                           )}
@@ -1203,7 +1203,7 @@ export const MasterDataPanel = ({
                   {newMasterLabel || t("master.labelMasterData")}
                 </span>
                 {selectedType === "project_role" && (
-                  <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal text-primary mt-0.5">
+                  <span className="text-[11px] font-normal uppercase tracking-normal text-primary mt-0.5">
                     {newMasterRoleType === "PROJECT"
                       ? "Project Role (Tim Proyek)"
                       : "System Role (Akses Platform)"}
@@ -1215,7 +1215,7 @@ export const MasterDataPanel = ({
 
           {selectedType === "project_role" && (
             <div className="space-y-2">
-              <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal ml-1">
+              <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal ml-1">
                 {t("master.roleTypeScope")}
               </label>
               <div className="grid grid-cols-2 gap-2 p-1.5 bg-surface-muted rounded-xl border border-border-subtle">
@@ -1244,7 +1244,7 @@ export const MasterDataPanel = ({
                   <span>{t("master.systemRole")}</span>
                 </button>
               </div>
-              <p className="text-xs sm:text-[10px] text-content-muted font-medium ml-1">
+              <p className="text-[11px] text-content-muted font-medium ml-1">
                 {newMasterRoleType === "PROJECT"
                   ? "Peran anggota dalam tim proyek (cth: BA, Lead, QA, Developer)"
                   : "Hak akses global level aplikasi (cth: Administrator, Auditor, Guest)"}
@@ -1254,7 +1254,7 @@ export const MasterDataPanel = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+              <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                 {t("master.labelName")}
               </label>
               <Input
@@ -1275,7 +1275,7 @@ export const MasterDataPanel = ({
             {/* Dynamic Contextual Fields */}
             {selectedType === "priority" && (
               <div>
-                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+                <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                   {t("master.shortCode")}
                 </label>
                 <Input
@@ -1289,7 +1289,7 @@ export const MasterDataPanel = ({
 
             {selectedType === "issue_type" && (
               <div>
-                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+                <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                   {t("master.hierarchyLevel")}
                 </label>
                 <StyledDropdown
@@ -1316,7 +1316,7 @@ export const MasterDataPanel = ({
             {selectedType === "status" && (
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+                  <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                     {t("master.statusGroup")}
                   </label>
                   <StyledDropdown
@@ -1347,7 +1347,7 @@ export const MasterDataPanel = ({
 
             {selectedType === "environment" && (
               <div>
-                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+                <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                   {t("master.endpointBaseUrl")}
                 </label>
                 <Input
@@ -1360,7 +1360,7 @@ export const MasterDataPanel = ({
             )}
 
             <div>
-              <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+              <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                 {t("master.colorAccent")}
               </label>
               <div className="flex gap-2">
@@ -1397,7 +1397,7 @@ export const MasterDataPanel = ({
           </div>
 
           <div>
-            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+            <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
               {t("master.colorPalette")}
             </label>
             <div className="flex flex-wrap gap-2 p-2.5 bg-surface-sunken border border-border-subtle rounded-xl">
@@ -1433,7 +1433,7 @@ export const MasterDataPanel = ({
 
           <div>
             <div className="flex items-center justify-between mb-1.5 ml-1">
-              <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+              <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal">
                 {t("master.pickIcon", { count: filteredNewIcons.length })}
               </label>
             </div>
@@ -1529,7 +1529,7 @@ export const MasterDataPanel = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+                <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                   {t("master.labelName")}
                 </label>
                 <Input
@@ -1544,7 +1544,7 @@ export const MasterDataPanel = ({
                 />
               </div>
               <div>
-                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+                <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                   {t("master.colorAccent")}
                 </label>
                 <div className="flex gap-2">
@@ -1590,7 +1590,7 @@ export const MasterDataPanel = ({
                 dan membuat ulang jenisnya. */}
             {editingMaster.type === "issue_type" && (
               <div>
-                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+                <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                   {t("master.hierarchyLevel")}
                 </label>
                 <StyledDropdown
@@ -1623,7 +1623,7 @@ export const MasterDataPanel = ({
             )}
 
             <div>
-              <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+              <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                 {t("master.colorPalette")}
               </label>
               <div className="flex flex-wrap gap-2 p-2.5 bg-surface-sunken border border-border-subtle rounded-xl">
@@ -1673,7 +1673,7 @@ export const MasterDataPanel = ({
 
             <div>
               <div className="flex items-center justify-between mb-1.5 ml-1">
-                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+                <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal">
                   Ikon ({filteredEditIcons.length} tersedia)
                 </label>
               </div>
@@ -1748,7 +1748,7 @@ export const MasterDataPanel = ({
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+            <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
               {t("master.projectName")}
             </label>
             <StyledDropdown
@@ -1763,7 +1763,7 @@ export const MasterDataPanel = ({
           </div>
 
           <div>
-            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+            <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
               {t("master.moduleName")}
             </label>
             <Input
@@ -1778,7 +1778,7 @@ export const MasterDataPanel = ({
           </div>
 
           <div>
-            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+            <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
               {t("master.remarks")}
             </label>
             <textarea
@@ -1818,7 +1818,7 @@ export const MasterDataPanel = ({
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+            <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
               {t("master.projectName")}
             </label>
             <StyledDropdown
@@ -1833,7 +1833,7 @@ export const MasterDataPanel = ({
           </div>
 
           <div>
-            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+            <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
               {t("master.moduleName")}
             </label>
             <Input
@@ -1848,7 +1848,7 @@ export const MasterDataPanel = ({
           </div>
 
           <div>
-            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+            <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
               {t("master.remarks")}
             </label>
             <textarea

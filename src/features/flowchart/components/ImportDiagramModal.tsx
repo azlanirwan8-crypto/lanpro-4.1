@@ -232,7 +232,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
               <div className="text-[10px] font-semibold uppercase tracking-wide leading-none mt-0.5">
                 {fmt.label}
               </div>
-              <div className="text-[9px] text-content-muted font-medium leading-tight">
+              <div className="text-[10px] text-content-muted font-medium leading-tight">
                 {fmt.subLabel}
               </div>
             </button>

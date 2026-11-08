@@ -1222,17 +1222,17 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-body hover:bg-surface-muted rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
+                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-body hover:bg-surface-muted rounded-md text-[11px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" /> {t("wiki.previous")}
                 </button>
-                <span className="text-xs sm:text-[10px] font-normal px-3 py-1 bg-surface border border-border-subtle rounded-md text-primary shadow-2xs">
+                <span className="text-[11px] font-normal px-3 py-1 bg-surface border border-border-subtle rounded-md text-primary shadow-2xs">
                   {t("rakit.pageOf", { kini: currentPage, total: totalPages })}
                 </span>
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-body hover:bg-surface-muted rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
+                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-body hover:bg-surface-muted rounded-md text-[11px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
                 >
                   {t("wiki.next")} <ChevronRight className="w-3.5 h-3.5" />
                 </button>
@@ -1421,7 +1421,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                 href={previewFileData}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse font-normal text-xs sm:text-[10px] uppercase tracking-normal rounded-md shadow-xs transition-all cursor-pointer whitespace-nowrap"
+                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse font-normal text-[11px] uppercase tracking-normal rounded-md shadow-xs transition-all cursor-pointer whitespace-nowrap"
                               >
                                 <ExternalLink className="w-3 h-3" />
                                 {t("wiki.openNewTab")}
@@ -1429,7 +1429,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
 
                               <button
                                 onClick={() => handleDownload(activeDoc.id, activeDoc.fileName)}
-                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-surface hover:bg-surface-sunken text-content-body font-normal text-xs sm:text-[10px] uppercase tracking-normal border border-border-subtle rounded-md shadow-2xs transition-all cursor-pointer whitespace-nowrap"
+                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-surface hover:bg-surface-sunken text-content-body font-normal text-[11px] uppercase tracking-normal border border-border-subtle rounded-md shadow-2xs transition-all cursor-pointer whitespace-nowrap"
                               >
                                 <Download className="w-3 h-3 text-primary" />
                                 {t("wiki.downloadPdf")}
@@ -1514,14 +1514,14 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                 <p className="text-xs font-medium text-content-strong">
                                   {t("wiki.sematTertutup")}
                                 </p>
-                                <p className="text-xs sm:text-[10px] text-content-subtle max-w-sm leading-normal">
+                                <p className="text-[11px] text-content-subtle max-w-sm leading-normal">
                                   {t("wiki.sematTertutupCara")}
                                 </p>
                                 <a
                                   href={activeDoc.link}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="mt-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs sm:text-[10px] uppercase tracking-normal rounded-md shadow-2xs whitespace-nowrap"
+                                  className="mt-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-[11px] uppercase tracking-normal rounded-md shadow-2xs whitespace-nowrap"
                                 >
                                   <ExternalLink className="w-3 h-3" />
                                   {t("wiki.openNewTab")}
@@ -1579,7 +1579,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                               <h4 className="text-xs font-medium text-content-strong tracking-tight group-hover:text-primary transition-colors">
                                 {t("wiki.noAttachment")}
                               </h4>
-                              <p className="text-xs sm:text-[10px] text-content-subtle font-medium leading-normal mt-1 max-w-xs mx-auto">
+                              <p className="text-[11px] text-content-subtle font-medium leading-normal mt-1 max-w-xs mx-auto">
                                 {canUpdate ? t("wiki.dropPdfHint") : t("wiki.dropPdfHintBacaSaja")}
                               </p>
                             </div>
@@ -1626,7 +1626,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         <MessageSquare className="w-4 h-4 text-primary" />
                         {t("wiki.notesComments")}
                       </span>
-                      <span className="text-xs sm:text-[10px] font-medium text-content-muted bg-surface-strong/60 px-2 py-0.5 rounded-full">
+                      <span className="text-[11px] font-medium text-content-muted bg-surface-strong/60 px-2 py-0.5 rounded-full">
                         {t("wiki.notesCount", {
                           count: (activeDocId ? docCommentsMap[activeDocId] || [] : []).length,
                         })}
@@ -1643,7 +1643,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           <h4 className="text-xs font-medium text-content-strong">
                             {t("wiki.noNotesComments")}
                           </h4>
-                          <p className="text-xs sm:text-[11px] text-content-subtle font-medium mt-1 leading-normal">
+                          <p className="text-[11px] text-content-subtle font-medium mt-1 leading-normal">
                             {t("wiki.anyoneCanComment")}
                           </p>
                         </div>
@@ -1669,7 +1669,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                 )}
                               >
                                 {!isMine && (
-                                  <span className="text-xs sm:text-[10px] font-medium text-content-muted mb-0.5 ml-1">
+                                  <span className="text-[11px] font-medium text-content-muted mb-0.5 ml-1">
                                     {comment.userName}
                                   </span>
                                 )}
@@ -1686,7 +1686,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                   </p>
                                   <span
                                     className={cn(
-                                      "absolute bottom-1 right-3 text-xs sm:text-[10px] font-medium tracking-tight",
+                                      "absolute bottom-1 right-3 text-[11px] font-medium tracking-tight",
                                       isMine ? "text-content-inverse/70" : "text-content-subtle"
                                     )}
                                   >
@@ -1785,7 +1785,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     <h3 className="text-xs md:text-sm font-medium text-content tracking-tight">
                       {isNew ? t("wiki.addNewDocTitle") : t("wiki.editDocTitle")}
                     </h3>
-                    <p className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mt-0.5">
+                    <p className="text-[11px] font-normal text-content-subtle uppercase tracking-normal mt-0.5">
                       {t("wiki.formTitle")}
                     </p>
                   </div>
@@ -1802,7 +1802,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
               <div className="p-5 md:p-6 overflow-y-auto space-y-4">
                 {/* Title Input */}
                 <div className="space-y-1">
-                  <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-normal block">
+                  <label className="text-[11px] font-normal text-content-muted uppercase tracking-normal block">
                     {t("wiki.docTitleLabel")} <span className="text-danger-text">*</span>
                   </label>
                   <input
@@ -1820,10 +1820,10 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 {/* Markdown Text Description Input */}
                 <div className="space-y-1">
                   <div className="flex justify-between items-center select-none">
-                    <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-normal block">
+                    <label className="text-[11px] font-normal text-content-muted uppercase tracking-normal block">
                       {t("wiki.summaryLabel")}
                     </label>
-                    <span className="text-xs sm:text-[10px] font-medium text-content-subtle bg-surface-sunken px-1.5 py-0.5 rounded border border-border-subtle">
+                    <span className="text-[11px] font-medium text-content-subtle bg-surface-sunken px-1.5 py-0.5 rounded border border-border-subtle">
                       {t("wiki.markdownSupport")}
                     </span>
                   </div>
@@ -1839,7 +1839,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Type drop-down selection */}
                   <div className="space-y-1.5">
-                    <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-normal block min-h-[16px]">
+                    <label className="text-[11px] font-normal text-content-muted uppercase tracking-normal block min-h-[16px]">
                       {t("wiki.categoryType")}
                     </label>
                     <StyledDropdown
@@ -1854,7 +1854,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
 
                   {/* External URL Link */}
                   <div className="space-y-1.5">
-                    <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-normal block min-h-[16px]">
+                    <label className="text-[11px] font-normal text-content-muted uppercase tracking-normal block min-h-[16px]">
                       {t("wiki.googleLink")}
                     </label>
                     <input
@@ -1869,7 +1869,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
 
                 {/* File Uploading Drag-Drop Sandbox */}
                 <div className="space-y-1">
-                  <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-normal block">
+                  <label className="text-[11px] font-normal text-content-muted uppercase tracking-normal block">
                     {t("wiki.attachment")}
                   </label>
 
@@ -1899,7 +1899,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           <Paperclip className="w-3 h-3" />
                           {editFile.name}
                         </p>
-                        <p className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mt-1">
+                        <p className="text-[11px] font-normal text-content-subtle uppercase tracking-normal mt-1">
                           {t("wiki.clickToReplace")}
                         </p>
                       </div>
@@ -1910,12 +1910,12 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       <div className="space-y-1">
                         <div className="flex items-center gap-1.5 bg-surface-muted border border-border-subtle px-2.5 py-1 rounded-md justify-center w-max mx-auto">
                           <FileText className="w-3 h-3 text-content-muted" />
-                          <p className="text-xs sm:text-[11px] font-medium text-content-body max-w-[240px] whitespace-normal break-words text-center">
+                          <p className="text-[11px] font-medium text-content-body max-w-[240px] whitespace-normal break-words text-center">
                             {documents.find((d) => d.id === editId)?.fileName}
                           </p>
                         </div>
                         <div className="flex items-center justify-center gap-2">
-                          <p className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+                          <p className="text-[11px] font-normal text-content-subtle uppercase tracking-normal">
                             {t("wiki.clickToUpload")}
                           </p>
                           <button
@@ -1936,7 +1936,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         <h4 className="text-xs font-medium text-content-body group-hover:text-primary transition-colors">
                           {t("wiki.pickFromComputer")}
                         </h4>
-                        <p className="text-xs sm:text-[10px] text-content-subtle font-medium leading-normal">
+                        <p className="text-[11px] text-content-subtle font-medium leading-normal">
                           {t("wiki.dragDrop")}
                         </p>
                       </div>

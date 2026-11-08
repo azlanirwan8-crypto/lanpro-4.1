@@ -154,13 +154,14 @@ describe("TimelinePanel — empat kolom pohon (#700)", () => {
       (b.textContent || "").includes("Onboarding NTB")
     ) as HTMLElement;
 
-    expect(judul.className).toMatch(/sm:text-\[10px\]/);
-    expect(induk.className).toMatch(/sm:text-\[11px\]/);
+    // #824 — hierarki tetap: anak 10px, induk 11px, tanpa pasangan responsif.
+    expect(judul.className).toMatch(/text-\[10px\]/);
+    expect(induk.className).toMatch(/text-\[11px\]/);
     // SATU ukuran per elemen. `cn()` di repo ini hanyalah gabung spasi
-    // (lib/utils.ts:4), jadi dua `sm:text-[..]` akan dimenangkan oleh urutan
+    // (lib/utils.ts:4), jadi dua `text-[..]` akan dimenangkan oleh urutan
     // stylesheet, bukan oleh niat penulisnya — pelajaran #692.
-    expect(judul.className.match(/sm:text-\[\d+px\]/g)).toHaveLength(1);
-    expect(induk.className.match(/sm:text-\[\d+px\]/g)).toHaveLength(1);
+    expect(judul.className.match(/(?:^|\s)text-\[\d+px\]/g)).toHaveLength(1);
+    expect(induk.className.match(/(?:^|\s)text-\[\d+px\]/g)).toHaveLength(1);
   });
 
   it("panel hierarki punya lebar pasti, dengan lantai dan batas", () => {

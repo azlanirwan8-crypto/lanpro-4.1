@@ -192,7 +192,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   <div className="p-3.5 bg-warning/10 border border-warning/30 rounded-lg flex items-start gap-2.5 shadow-2xs">
                     <AlertTriangle className="w-4 h-4 text-warning-text shrink-0 mt-0.5" />
                     <div className="text-xs text-warning-text space-y-0.5">
-                      <p className="font-normal uppercase tracking-normal text-warning-text text-xs sm:text-[11px]">
+                      <p className="font-normal uppercase tracking-normal text-warning-text text-[11px]">
                         {t("issueDetail.epicTimelineWarning")}
                       </p>
                       <p className="font-normal text-content-body">
@@ -255,7 +255,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     {t("issueDetail.linkIssue")}
                   </Button>
                   <div className="ml-auto flex items-center gap-2">
-                    <div className="flex items-center gap-1.5 text-xs sm:text-[11px] font-medium text-content-muted bg-surface-sunken/80 px-2.5 py-1 rounded-md border border-border-subtle/60">
+                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-content-muted bg-surface-sunken/80 px-2.5 py-1 rounded-md border border-border-subtle/60">
                       <Clock className="w-3.5 h-3.5 text-content-subtle" />
                       {t("rakit.updatedPrefix")}{" "}
                       {task.updatedAt
@@ -346,7 +346,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         rows={4}
                         className="w-full p-4 text-xs focus:outline-none resize-y leading-relaxed font-normal text-content-body"
                       />
-                      <div className="bg-surface-sunken border-t border-border-subtle px-3 py-2 flex justify-between items-center text-xs sm:text-[11px] font-medium text-content-subtle">
+                      <div className="bg-surface-sunken border-t border-border-subtle px-3 py-2 flex justify-between items-center text-[11px] font-medium text-content-subtle">
                         <span>{t("issueDetail.markdownHint")}</span>
                       </div>
                     </div>
