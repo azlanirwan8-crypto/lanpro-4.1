@@ -19,7 +19,7 @@ export const LoginSkeletonState = ({ loadingText }: LoginSkeletonStateProps) => 
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
         >
-          <span className="text-xl font-extrabold tracking-wider text-amber-400">LP</span>
+          <span className="text-xl font-bold tracking-wider text-amber-400">LP</span>
         </motion.div>
         {/* Pulsing Outer Ring */}
         <motion.div
