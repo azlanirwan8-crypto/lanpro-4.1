@@ -7,8 +7,9 @@
   --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
 
   /* ── Skala tipografi tambahan (#430) ───────────────────────────────────────
-   * Tailwind hanya menyediakan text-xs (12px) ke atas. Proyek ini memakai
-   * ukuran di bawahnya secara masif: text-[10px] (533x), text-[11px] (284x),
+   * Tailwind menyediakan text-xs ke atas, tetapi di akar 13 px ukurannya
+   * menyusut (text-xs menjadi 9,75 px), sehingga proyek ini memakai ukuran
+   * absolut di bawahnya secara masif: text-[10px] (533x), text-[11px] (284x),
    * text-[9px] (74x), text-[8px] (20x), text-[13px] (16x).
    *
    * Token di bawah menstandarkan ukuran-ukuran itu agar bisa dipanggil
@@ -25,6 +26,27 @@
   --text-xsm--line-height: 16px;
   --text-md: 13px;
   --text-md--line-height: 18px;
+
+  /* ── Skala inti Tailwind dipatok px (#821, Opsi A) ─────────────────────────
+   * Akar `html` 81,25% = 13 px SENGAJA dipertahankan; token teks Tailwind
+   * masih rem dan karena itu menyusut (text-xs 9,75 px, text-sm 11,375 px).
+   * Hanya ukuran huruf yang dipatok; padding, gap, dan radius tetap rem agar
+   * tata letak tidak bergeser.
+   * ──────────────────────────────────────────────────────────────────────── */
+  --text-xs: 12px;
+  --text-xs--line-height: 16px;
+  --text-sm: 13px;
+  --text-sm--line-height: 18px;
+  --text-base: 13px;
+  --text-base--line-height: 18px;
+  --text-lg: 15px;
+  --text-lg--line-height: 22px;
+  --text-xl: 16px;
+  --text-xl--line-height: 22px;
+  --text-2xl: 20px;
+  --text-2xl--line-height: 28px;
+  --text-4xl: 28px;
+  --text-4xl--line-height: 34px;
 
   /* ── Sistem warna semantik ────────────────────────────────────────────────
    * Nilai mode terang di bawah SAMA PERSIS dengan hex yang sebelumnya ditulis
@@ -627,22 +649,23 @@ html {
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Hirarki Judul Halaman Standar Jira */
+  /* Hirarki Judul Halaman Standar Jira. #821 — px absolut; komentar lama
+   * menyebut 18/16/14 px padahal akar 13 px membuatnya 14,625/13/11,375. */
   h1,
   .h1 {
-    font-size: 1.125rem; /* 18px */
+    font-size: 18px;
     font-weight: 600;
     line-height: 1.35;
   }
   h2,
   .h2 {
-    font-size: 1rem; /* 16px */
+    font-size: 16px;
     font-weight: 500;
     line-height: 1.35;
   }
   h3,
   .h3 {
-    font-size: 0.875rem; /* 14px */
+    font-size: 14px;
     font-weight: 500;
   }
 
@@ -670,7 +693,7 @@ html {
   input[type="password"],
   select {
     height: 2.25rem; /* h-9 (36px) */
-    font-size: 0.75rem; /* text-xs (12px) */
+    font-size: 12px; /* #821 — px absolut; 0.75rem menyusut jadi 9,75px */
   }
 }
 
