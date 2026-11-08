@@ -1,21 +1,29 @@
-import React from 'react';
+import React from "react";
 
 /**
- * ResponsiveTable wraps a standard HTML table in a container that provides:
- *  • Horizontal scrolling on overflow (mobile screens)
- *  • Consistent Tailwind classes for a clean Velzon‑styled look
+ * ResponsiveTable membungkus tabel HTML standar dengan wadah gulir horizontal
+ * dan menjaga kepala tabel tetap terlihat (#825).
  *
  * Props:
- *  - className: additional Tailwind classes applied to the <table> element.
- *  - children : table head, body, etc.
+ *  - className: kelas Tailwind tambahan untuk elemen <table>.
+ *  - children : thead, tbody, dan isi tabel lain.
+ *  - scroll   : `false` bila pemanggil sudah menyediakan wadah gulirnya sendiri.
+ *               Dua wadah gulir bersarang membuat `th` sticky tidak pernah
+ *               lengket, karena sticky mengikuti wadah terdalam.
  */
-export const ResponsiveTable: React.FC<{ className?: string; children: React.ReactNode }> = ({
-  className = '',
-  children,
-}) => {
-  return (
-    <div className="w-full overflow-x-auto">
-      <table className={`min-w-full border-collapse text-left ${className}`}>{children}</table>
-    </div>
+export const ResponsiveTable: React.FC<{
+  className?: string;
+  children: React.ReactNode;
+  scroll?: boolean;
+}> = ({ className = "", children, scroll = true }) => {
+  const tabel = (
+    <table
+      className={`min-w-full border-collapse text-left [&>thead>tr>th]:sticky [&>thead>tr>th]:top-0 [&>thead>tr>th]:bg-surface-sunken ${className}`}
+    >
+      {children}
+    </table>
   );
+
+  if (!scroll) return tabel;
+  return <div className="w-full overflow-x-auto">{tabel}</div>;
 };

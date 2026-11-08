@@ -2429,6 +2429,8 @@ export const id = {
     chatTitle: "Obrolan LanPro",
     searchChannel: "Cari saluran atau rekan...",
     channelsAssistant: "Saluran & Asisten",
+    presetImageLabel: "Aset Mockup PNG",
+    presetFileLabel: "Spesifikasi Skema PDF",
     noColleague: "Tidak ada rekan yang sedang online.",
     back: "Kembali",
     searchInChat: "Cari dalam obrolan ini",

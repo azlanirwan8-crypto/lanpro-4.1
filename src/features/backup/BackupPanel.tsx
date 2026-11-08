@@ -295,7 +295,7 @@ export const BackupPanel = (_props: {
           </div>
 
           <div className="hidden sm:block overflow-x-auto">
-            <ResponsiveTable className="w-full text-left border-collapse text-xs">
+            <ResponsiveTable className="w-full text-left border-collapse text-xs" scroll={false}>
               <thead className="bg-surface-muted/70 text-content-body border-b border-border-subtle/80 font-semibold uppercase text-[11px]">
                 <tr>
                   <th className="py-2.5 px-3.5">{t("backup.exportTime")}</th>

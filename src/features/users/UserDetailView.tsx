@@ -3071,7 +3071,10 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                             {/* Accordion Content Table */}
                             {isOpen && (
                               <div className="overflow-x-auto">
-                                <ResponsiveTable className="w-full text-left text-xs border-collapse">
+                                <ResponsiveTable
+                                  className="w-full text-left text-xs border-collapse"
+                                  scroll={false}
+                                >
                                   <thead className="bg-surface-sunken/40 border-b border-border-subtle text-content-muted">
                                     <tr>
                                       <th className="py-2.5 px-4 font-normal text-xs uppercase w-2/5">
@@ -3487,7 +3490,10 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 ) : (
                   <div className="space-y-4">
                     <div className="overflow-x-auto">
-                      <ResponsiveTable className="w-full text-left text-xs border-collapse">
+                      <ResponsiveTable
+                        className="w-full text-left text-xs border-collapse"
+                        scroll={false}
+                      >
                         <thead className="bg-surface-sunken/40 border-b border-border-subtle text-content-muted">
                           <tr>
                             <th className="py-3 px-4 font-normal text-xs uppercase tracking-normal">

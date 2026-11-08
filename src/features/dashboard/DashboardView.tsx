@@ -1268,7 +1268,7 @@ export function DashboardView(props: DashboardViewProps) {
               </div>
 
               <div className="overflow-x-auto">
-                <ResponsiveTable className="w-full text-left border-collapse">
+                <ResponsiveTable className="w-full text-left border-collapse" scroll={false}>
                   <thead>
                     <tr className="border-b border-border-faint text-[11px] font-semibold uppercase text-content-subtle">
                       <th className="py-2.5 px-2">{t("dashboard.thMember")}</th>

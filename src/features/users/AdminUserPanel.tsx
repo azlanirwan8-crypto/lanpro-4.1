@@ -767,7 +767,10 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
 
             {/* Desktop table — #309: kartu di bawah sm */}
             <div className="hidden sm:block overflow-x-auto flex-1">
-              <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
+              <ResponsiveTable
+                className="w-full text-left border-collapse min-w-[900px]"
+                scroll={false}
+              >
                 <thead>
                   <tr className="bg-primary-surface/5 border-b border-border-subtle text-content-subtle whitespace-nowrap">
                     <th className="py-3.5 px-4 text-center w-12">

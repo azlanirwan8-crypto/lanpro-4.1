@@ -531,7 +531,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
       {/* ULTRA-SLEEK 5-COLUMN ENTERPRISE QA TABLE MATRIX (Desktop sm+) */}
       <div className="bg-surface border border-border-subtle/80 rounded-md shadow-xs overflow-hidden">
         <div className="hidden sm:block overflow-x-auto">
-          <ResponsiveTable className="w-full text-left border-collapse">
+          <ResponsiveTable className="w-full text-left border-collapse" scroll={false}>
             <thead>
               <tr className="bg-primary-surface/5 border-b border-border-subtle text-[11px] font-semibold uppercase text-content-subtle">
                 {/* SELECT ALL CHECKBOX (For Admin / Users with edit access) */}
