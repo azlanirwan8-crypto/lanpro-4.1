@@ -43,21 +43,25 @@
   --color-primary-hover: #364473;
   --color-primary-active: #2d3960;
 
-  /* Status */
+  /* Status — #819: `info` dan `secondary` DITUKAR agar sesuai Velzon 4.3.0.
+   * Selama ini `info` memakai `$blue #3577f1` (milik secondary) dan
+   * `secondary` memakai `$cyan #299cdb` (milik info). Nama token tidak
+   * berubah; hanya nilainya yang berpindah ke peran yang benar. */
   --color-success: #0ab39c;
   --color-success-hover: #089683;
   --color-warning: #f7b84b;
   --color-danger: #f06548;
   --color-danger-hover: #d95338;
-  --color-info: #3577f1;
-  --color-secondary: #299cdb;
+  --color-info: #299cdb; /* Velzon $cyan */
+  --color-secondary: #3577f1; /* Velzon $blue */
 
   /* Aksen lembut (#777) — latar alert/toast gaya Velzon "left border".
    * Padatan tombol memakai `-surface`, sedangkan latar alert harus lembut
    * supaya teks `--color-*-text` yang gelap terbaca di atasnya. Versi gelap
-   * di blok `html.dark` di bawah. */
+   * di blok `html.dark` di bawah. #819 — `info-soft` dihitung ulang dari
+   * `info` baru: 15 persen #299cdb di atas putih = #dff0fa. */
   --color-success-soft: #d8f3ee;
-  --color-info-soft: #dce9fd;
+  --color-info-soft: #dff0fa;
   --color-warning-soft: #fcf0db;
   --color-danger-soft: #fde2dd;
 
@@ -141,15 +145,20 @@
    *                    berhenti.
    *
    * Token lama TIDAK diubah, sehingga penambahan ini nol risiko. */
+  /* #819 — `info-text` mengikuti hue `info` baru. #299cdb sendiri hanya
+   * 3,06:1 di atas putih, jadi ia sah untuk ikon tetapi TIDAK untuk teks;
+   * #1a6f99 (cyan tua) memberi 5,56:1 di atas putih dan 4,76:1 di atas
+   * `info-soft` #dff0fa. `-surface` tetap #1a6f99 di kedua mode karena teks
+   * putih di atasnya 5,56:1 — memakai #299cdb akan menjatuhkannya ke 3,06:1. */
   --color-warning-text: #92600a;
   --color-success-text: #047857;
   --color-danger-text: #b91c1c;
-  --color-info-text: #1d4ed8;
+  --color-info-text: #1a6f99;
 
   --color-warning-surface: #b45309;
   --color-success-surface: #047857;
   --color-danger-surface: #b91c1c;
-  --color-info-surface: #1d4ed8;
+  --color-info-surface: #1a6f99;
 
   /* Tiga token bernilai TETAP berikutnya, alasannya sama seperti
    * `surface-inverse`: elemennya duduk di atas permukaan yang tidak ikut
@@ -262,8 +271,12 @@ html.dark {
   --color-warning: #ffca6a;
   --color-danger: #ff8071;
   --color-danger-hover: #ff9585;
-  --color-info: #5b93f7;
-  --color-secondary: #4fb8ef;
+  /* #819 — ikut ditukar seperti mode terang: `info` kini cyan (lebih terang
+   * dari versi terangnya agar terbaca di atas permukaan gelap), `secondary`
+   * kini blue. Keduanya masih lolos sebagai teks: #4fb8ef 6,93:1 dan
+   * #5b93f7 5,11:1 di atas `surface` #212529. */
+  --color-info: #4fb8ef;
+  --color-secondary: #5b93f7;
 
   /* Padanan gelap dari `-soft` di atas (#777) — dicampur ke permukaan gelap
    * supaya hasilnya tetap padat, bukan transparan di atas konten aplikasi. */
@@ -282,7 +295,8 @@ html.dark {
   --color-warning-text: #ffca6a;
   --color-success-text: #2fd5bd;
   --color-danger-text: #ff8071;
-  --color-info-text: #5b93f7;
+  /* #819 — mengikuti `info` baru, bukan blue. */
+  --color-info-text: #4fb8ef;
 
   /* Sengaja SAMA dengan mode terang — lihat catatan di `:root`. */
   --color-surface-inverse: #1e293b;

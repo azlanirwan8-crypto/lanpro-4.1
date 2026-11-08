@@ -5155,7 +5155,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             className="p-2 text-content-muted hover:bg-surface-muted hover:text-info-text rounded-xl transition-all flex items-center justify-center active:scale-95"
                             title={t("flowchart.exportJson")}
                           >
-                            <Download className="w-3.5 h-3.5 text-info" />
+                            <Download className="w-3.5 h-3.5 text-info-text" />
                           </button>
 
                           {/* #659 - berkas .drawio, keluaran yang bisa dibuka draw.io */}

@@ -404,7 +404,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       href={task.figmaUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[10px] leading-none font-medium text-secondary bg-secondary/10 px-2 py-1 rounded-lg hover:bg-secondary/15 transition-all flex items-center gap-1"
+                      className="text-[10px] leading-none font-medium text-primary bg-secondary/10 px-2 py-1 rounded-lg hover:bg-secondary/15 transition-all flex items-center gap-1"
                     >
                       <ExternalLink className="w-3 h-3" />
                       {t("issueDetail.openOriginal")}
