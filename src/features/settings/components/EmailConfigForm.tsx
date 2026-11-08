@@ -458,7 +458,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
             placeholder="https://lanpro.my.id"
             className={inputStyle}
           />
-          <p className="text-xs sm:text-[11px] text-content-muted">
+          <p className="text-[11px] text-content-muted">
             Dipakai untuk tautan di dalam email (tombol "Buka LanPro", tautan reset kata sandi).
             Ganti di sini bila domain berpindah — tidak perlu mengubah berkas di server. Kosongkan
             untuk memakai nilai bawaan dari lingkungan server.

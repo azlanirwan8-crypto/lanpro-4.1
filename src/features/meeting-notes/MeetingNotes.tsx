@@ -739,7 +739,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                               <span className="truncate">{t("meetings.joinRoom")}</span>
                             </a>
                           ) : (
-                            <span className="px-2 py-0.5 bg-surface-muted text-content-muted rounded-md text-xs sm:text-[10px] font-medium">
+                            <span className="px-2 py-0.5 bg-surface-muted text-content-muted rounded-md text-[11px] font-medium">
                               {t("meetings.noLink")}
                             </span>
                           )}
@@ -775,7 +775,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                               membukanya. Sama seperti #645. */}
                           <div className="whitespace-pre-wrap break-words text-justify">
                             {meeting.description || (
-                              <span className="text-content-subtle text-xs sm:text-[11px] italic">
+                              <span className="text-content-subtle text-[11px] italic">
                                 {t("meetings.noDescription")}
                               </span>
                             )}
@@ -866,17 +866,17 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-body hover:bg-surface-muted rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
+                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-body hover:bg-surface-muted rounded-md text-[11px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" /> {t("meetingExtra.previous")}
                 </button>
-                <span className="px-3 py-1 bg-surface border border-border-subtle rounded-md text-primary shadow-2xs text-xs sm:text-[10px] font-normal">
+                <span className="px-3 py-1 bg-surface border border-border-subtle rounded-md text-primary shadow-2xs text-[11px] font-normal">
                   {t("rakit.pageOf", { kini: currentPage, total: totalPages })}
                 </span>
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-body hover:bg-surface-muted rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
+                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-body hover:bg-surface-muted rounded-md text-[11px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
                 >
                   {t("meetingExtra.next")} <ChevronRight className="w-3.5 h-3.5" />
                 </button>
@@ -1127,7 +1127,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                     <button
                       type="button"
                       onClick={() => setNewMeetingFile(null)}
-                      className="text-xs sm:text-[10px] text-danger-text hover:underline font-medium"
+                      className="text-[11px] text-danger-text hover:underline font-medium"
                     >
                       {t("meetingExtra.remove")}
                     </button>
@@ -1158,7 +1158,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                       <span className="text-xs font-medium text-content-strong whitespace-normal break-words">
                         {newMeetingFile.name}
                       </span>
-                      <span className="text-xs sm:text-[10px] text-content-subtle">
+                      <span className="text-[11px] text-content-subtle">
                         ({(newMeetingFile.size / 1024 / 1024).toFixed(2)} MB)
                       </span>
                     </div>
@@ -1169,7 +1169,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                         <span className="text-xs font-medium text-content-strong whitespace-normal break-words">
                           {editingMeeting.fileName}
                         </span>
-                        <span className="text-xs sm:text-[10px] text-content-subtle">
+                        <span className="text-[11px] text-content-subtle">
                           {t("meetings.existing")}
                         </span>
                       </div>
@@ -1191,7 +1191,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                       <p className="text-xs font-medium text-content-secondary">
                         {t("meetings.uploadHint")}
                       </p>
-                      <p className="text-xs sm:text-[10px] text-content-subtle">
+                      <p className="text-[11px] text-content-subtle">
                         {t("meetings.uploadFormats")}
                       </p>
                     </div>

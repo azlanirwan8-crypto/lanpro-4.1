@@ -319,7 +319,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                       <h3 className="font-normal text-content-body text-xs leading-snug">
                         {t("kanban.otherTasks")}
                       </h3>
-                      <p className="mt-0.5 text-xs sm:text-[10px] font-normal text-content-subtle">
+                      <p className="mt-0.5 text-[11px] font-normal text-content-subtle">
                         {t("kanban.otherTasksHint")}
                       </p>
                     </div>
@@ -386,10 +386,10 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                           ) : (
                             <UserAvatar user={member} className="w-5 h-5" />
                           )}
-                          <span className="text-xs sm:text-[10px] font-normal text-content-muted truncate">
+                          <span className="text-[11px] font-normal text-content-muted truncate">
                             {isUnassigned ? t("newTask.unassigned") : t("issueColumns.assignee")}
                           </span>
-                          <span className="ml-auto bg-surface-muted text-content-secondary px-1.5 py-0.5 rounded text-xs sm:text-[10px] font-normal shrink-0">
+                          <span className="ml-auto bg-surface-muted text-content-secondary px-1.5 py-0.5 rounded text-[11px] font-normal shrink-0">
                             {totalIssueCount}
                           </span>
                         </div>

@@ -265,7 +265,7 @@ export const LabelChip = ({
  * #779 — chip TENGGAT satu ritme dengan chip label.
  *
  * `LabelChip` sudah dijaga #564/#590, tetapi chip tanggal ditulis ulang per layar:
- * di pohon perencanaan ia `rounded-md px-1.5` dengan `text-xs sm:text-[10px]`, jadi
+ * di pohon perencanaan ia `rounded-md px-1.5` dengan `text-[11px]`, jadi
  * berdiri di baris yang sama sebelah chip `px-2 text-[10px]` dan tingginya beda
  * beberapa pixel. Pemilik proyek menunjuknya pada 17 Okt: "button nya masih belum
  * standar". Ritme VERTIKAL-nya sekarang diambil dari `CHIP_TINGGI` yang sama — itu
@@ -819,7 +819,7 @@ export const StyledDropdown = ({
                         />
                       ) : type === "member" && (!opt.id || opt.id === "Unassigned") ? (
                         <div className="w-5 h-5 rounded-full bg-surface-muted border border-border-subtle border-dashed flex items-center justify-center flex-shrink-0">
-                          <span className="text-[9px] text-content-subtle font-normal">?</span>
+                          <span className="text-[10px] text-content-subtle font-normal">?</span>
                         </div>
                       ) : isStatus ? (
                         opt.icon ? (

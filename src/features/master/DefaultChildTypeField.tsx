@@ -27,7 +27,7 @@ export const DefaultChildTypeField = ({
   const { t } = useTranslation();
   return (
     <div>
-      <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
+      <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
         {t("master.defaultChildType")}
       </label>
       <StyledDropdown

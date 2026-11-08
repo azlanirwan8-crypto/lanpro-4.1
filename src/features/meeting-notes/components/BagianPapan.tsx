@@ -174,7 +174,7 @@ export const SEL =
  * diurutkan dan dibaca cepat, bukan keterangan tambahan di samping nama.
  *
  * Sekalian kepala papan ini dipindah ke kit gaya rumah
- * (`src/features/issues/styles.ts`, `tableHeaderCell`): `text-[10px] font-normal
+ * (`src/features/issues/styles.ts`, `tableHeaderCell`): `text-[11px] font-semibold
  * py-2.5` dengan pemisah kolom `border-border-faint`. Sebelumnya ia `text-xs
  * py-3` — huruf lebih besar dan baris lebih gemuk daripada tabel mana pun lain
  * di aplikasi yang sama, dan itu bagian dari "tidak Velzon".
@@ -285,7 +285,7 @@ export const KepalaTabel: React.FC<KepalaTabelProps> = ({ sortir, onSortir }) =>
   const tombol =
     "group flex w-full items-center gap-1 uppercase cursor-pointer text-left text-content-subtle hover:text-content-body transition-colors";
   const th =
-    "sticky top-0 z-30 bg-surface-sunken px-4 py-2.5 text-[10px] font-normal text-content-subtle whitespace-nowrap border-b border-b-border-subtle border-r border-r-border-faint last:border-r-0";
+    "sticky top-0 z-30 bg-surface-sunken px-4 py-2.5 text-[11px] font-semibold text-content-subtle whitespace-nowrap border-b border-b-border-subtle border-r border-r-border-faint last:border-r-0";
   return (
     <thead>
       <tr className="text-content-subtle">

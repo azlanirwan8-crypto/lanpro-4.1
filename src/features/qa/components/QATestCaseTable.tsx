@@ -438,7 +438,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                     onClick={() => setIsBulkPicDropdownOpen(false)}
                   />
                   <div className="absolute right-0 top-full mt-1.5 w-60 bg-surface text-content-strong rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-dropdown">
-                    <div className="px-3.5 py-1.5 text-xs sm:text-[10px] font-normal uppercase tracking-normal text-primary border-b border-border-faint mb-1">
+                    <div className="px-3.5 py-1.5 text-[11px] font-normal uppercase tracking-normal text-primary border-b border-border-faint mb-1">
                       {t("rakit.assignPicToTasks", { count: selectedCaseIds.length })}
                     </div>
                     <button
@@ -533,7 +533,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         <div className="hidden sm:block overflow-x-auto">
           <ResponsiveTable className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-primary-surface/5 border-b border-border-subtle text-[10px] font-normal uppercase tracking-normal text-content-subtle">
+              <tr className="bg-primary-surface/5 border-b border-border-subtle text-[11px] font-semibold uppercase text-content-subtle">
                 {/* SELECT ALL CHECKBOX (For Admin / Users with edit access) */}
                 <th className="py-2.5 px-3 w-8 text-center" onClick={(e) => e.stopPropagation()}>
                   {(canUpdate || isAdminRole) && (
@@ -605,7 +605,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                           </span>
                           {tc.linkedBugKey && (
                             <span
-                              className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-danger-surface/40 border border-danger/30 rounded text-[10px] leading-none sm:text-[9px] font-medium text-danger-text shrink-0"
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-danger-surface/40 border border-danger/30 rounded text-[10px] leading-none font-medium text-danger-text shrink-0"
                               title={tc.linkedTaskId ? `Task ${tc.linkedTaskId}` : tc.linkedBugKey}
                             >
                               <Bug className="w-2.5 h-2.5" />
@@ -620,7 +620,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                         <LabelChip
                           kelompok="priority"
                           nilai={tc.priority || "Medium"}
-                          className="text-[9px] sm:text-[11px]"
+                          className="text-[10px] sm:text-[11px]"
                         />
                       </td>
 
@@ -634,7 +634,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                             options={opsiStatusQa}
                             type="qa_status"
                             className="min-w-[100px]"
-                            buttonClassName="py-1 px-2.5 rounded-md text-xs sm:text-[10px] font-normal uppercase tracking-normal border shadow-2xs"
+                            buttonClassName="py-1 px-2.5 rounded-md text-[11px] font-normal uppercase tracking-normal border shadow-2xs"
                           />
 
                           {/* 2. Sleek PIC Avatar Icon Button NEXT TO STATUS */}
@@ -683,7 +683,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                   }}
                                 />
                                 <div className="absolute right-0 top-full mt-1.5 w-56 bg-surface rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-dropdown">
-                                  <div className="px-3.5 py-1.5 text-xs sm:text-[10px] font-normal uppercase tracking-normal text-primary border-b border-border-faint mb-1">
+                                  <div className="px-3.5 py-1.5 text-[11px] font-normal uppercase tracking-normal text-primary border-b border-border-faint mb-1">
                                     {t("qa.assignPicTask")}
                                   </div>
                                   <button

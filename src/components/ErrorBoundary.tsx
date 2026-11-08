@@ -70,7 +70,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </h2>
             <p className="text-sm text-content-muted mb-6">{i18n.t("ui.viewCrashBody")}</p>
             <div className="bg-surface p-3 rounded text-left mb-6 overflow-auto max-h-32 border border-border-faint">
-              <code className="text-xs sm:text-[10px] text-rose-500 font-mono">
+              <code className="text-[11px] text-rose-500 font-mono">
                 {this.state.error?.toString()}
               </code>
             </div>

@@ -157,7 +157,7 @@ export const ActivityLogPanel = ({
               <div className="hidden sm:block overflow-x-auto min-h-[500px]">
                 <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
                   <thead>
-                    <tr className="bg-primary-surface/5 border-b border-border-subtle text-xs font-normal text-content-subtle whitespace-nowrap">
+                    <tr className="bg-primary-surface/5 border-b border-border-subtle text-content-subtle whitespace-nowrap">
                       <th className="px-8 py-5">{t("activityLog.timestamp")}</th>
                       <th className="px-8 py-5">{t("activityLog.eventSignature")}</th>
                       <th className="px-8 py-5">{t("activityLog.subjectActor")}</th>
@@ -176,7 +176,7 @@ export const ActivityLogPanel = ({
                             <div className="text-sm font-medium text-content-strong tabular-nums tracking-tight">
                               {safeFormat(log.createdAt, "MMM dd, yyyy")}
                             </div>
-                            <div className="text-xs sm:text-[10px] font-normal text-content-subtle tabular-nums uppercase mt-1 tracking-normal">
+                            <div className="text-[11px] font-normal text-content-subtle tabular-nums uppercase mt-1 tracking-normal">
                               {safeFormat(log.createdAt, "HH:mm:ss.SSS")}
                             </div>
                           </td>
@@ -231,11 +231,11 @@ export const ActivityLogPanel = ({
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-center gap-2 flex-wrap mb-2">
                                         <span
-                                          className={`text-xs sm:text-[11px] font-normal tracking-[0.15em] uppercase px-2 py-0.5 rounded shadow-soft ${badgeClass}`}
+                                          className={`text-[11px] font-normal tracking-[0.15em] uppercase px-2 py-0.5 rounded shadow-soft ${badgeClass}`}
                                         >
                                           {log.action?.replace(/_/g, " ") || "ACTION_EXECUTED"}
                                         </span>
-                                        <span className="text-xs sm:text-[10px] font-medium text-content-subtle capitalize px-1 ring-1 ring-border-subtle rounded-sm bg-surface-sunken">
+                                        <span className="text-[11px] font-medium text-content-subtle capitalize px-1 ring-1 ring-border-subtle rounded-sm bg-surface-sunken">
                                           {t("activityLog.sourceUi")}
                                         </span>
                                       </div>
@@ -266,7 +266,7 @@ export const ActivityLogPanel = ({
                                 <span className="text-[13px] font-medium text-content-strong truncate">
                                   {actor?.displayName}
                                 </span>
-                                <span className="text-xs sm:text-[10px] font-medium text-content-muted truncate tracking-wide">
+                                <span className="text-[11px] font-medium text-content-muted truncate tracking-wide">
                                   {actor?.email}
                                 </span>
                               </div>
@@ -275,7 +275,7 @@ export const ActivityLogPanel = ({
                           <td className="px-8 py-5 text-right w-48 align-middle">
                             <div className="flex flex-col items-end gap-1.5">
                               <div
-                                className="font-mono text-xs sm:text-[11px] bg-surface-muted text-content-muted px-2 py-1 rounded border border-border-subtle uppercase font-normal tracking-normal select-all opacity-70 group-hover:opacity-100 transition-opacity"
+                                className="font-mono text-[11px] bg-surface-muted text-content-muted px-2 py-1 rounded border border-border-subtle uppercase font-normal tracking-normal select-all opacity-70 group-hover:opacity-100 transition-opacity"
                                 title={log.id}
                               >
                                 ...{log.id?.substring((log.id?.length || 0) - 8)}
@@ -283,7 +283,7 @@ export const ActivityLogPanel = ({
                               <button
                                 type="button"
                                 onClick={() => setInspectedLog(log)}
-                                className="text-xs sm:text-[10px] font-normal text-primary hover:text-primary uppercase tracking-normal flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                                className="text-[11px] font-normal text-primary hover:text-primary uppercase tracking-normal flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
                               >
                                 {t("activityLog.inspect")} <ChevronRight className="w-3 h-3" />
                               </button>
@@ -369,7 +369,7 @@ export const ActivityLogPanel = ({
 
             <dl className="flex flex-col gap-3">
               <div className="flex flex-col gap-1">
-                <dt className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+                <dt className="text-[11px] font-normal text-content-subtle uppercase tracking-normal">
                   {t("activityLog.detailAction")}
                 </dt>
                 <dd className="text-[13px] font-medium text-content-body">
@@ -378,7 +378,7 @@ export const ActivityLogPanel = ({
               </div>
 
               <div className="flex flex-col gap-1">
-                <dt className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+                <dt className="text-[11px] font-normal text-content-subtle uppercase tracking-normal">
                   {t("activityLog.timestamp")}
                 </dt>
                 <dd className="text-[13px] font-medium text-content-body tabular-nums">
@@ -388,7 +388,7 @@ export const ActivityLogPanel = ({
               </div>
 
               <div className="flex flex-col gap-1">
-                <dt className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+                <dt className="text-[11px] font-normal text-content-subtle uppercase tracking-normal">
                   {t("activityLog.detailProject")}
                 </dt>
                 <dd className="text-[13px] font-medium text-content-body">
@@ -397,7 +397,7 @@ export const ActivityLogPanel = ({
               </div>
 
               <div className="flex flex-col gap-1">
-                <dt className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+                <dt className="text-[11px] font-normal text-content-subtle uppercase tracking-normal">
                   {t("activityLog.auditTrailId")}
                 </dt>
                 <dd className="font-mono text-xs text-content-body select-all break-all">
@@ -406,7 +406,7 @@ export const ActivityLogPanel = ({
               </div>
 
               <div className="flex flex-col gap-1">
-                <dt className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+                <dt className="text-[11px] font-normal text-content-subtle uppercase tracking-normal">
                   {t("activityLog.detailDetails")}
                 </dt>
                 <dd className="font-mono text-xs text-content-body bg-surface-sunken border border-border-subtle p-2.5 rounded-lg whitespace-pre-wrap break-words">

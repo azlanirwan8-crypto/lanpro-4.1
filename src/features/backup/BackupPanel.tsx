@@ -289,14 +289,14 @@ export const BackupPanel = (_props: {
                 {t("backup.resultTitle")}
               </h3>
             </div>
-            <span className="text-xs sm:text-[11px] text-content-muted font-medium">
+            <span className="text-[11px] text-content-muted font-medium">
               {t("rakit.totalFiles", { count: exportHistory.length })}
             </span>
           </div>
 
           <div className="hidden sm:block overflow-x-auto">
             <ResponsiveTable className="w-full text-left border-collapse text-xs">
-              <thead className="bg-surface-muted/70 text-content-body border-b border-border-subtle/80 font-normal uppercase tracking-normal text-xs sm:text-[11px]">
+              <thead className="bg-surface-muted/70 text-content-body border-b border-border-subtle/80 font-semibold uppercase text-[11px]">
                 <tr>
                   <th className="py-2.5 px-3.5">{t("backup.exportTime")}</th>
                   <th className="py-2.5 px-3.5">{t("backup.fileName")}</th>
@@ -322,7 +322,7 @@ export const BackupPanel = (_props: {
                       <td className="py-2.5 px-3.5">
                         {item.status === "processing" && (
                           <div className="space-y-1 w-48">
-                            <div className="flex justify-between text-xs sm:text-[10px] text-amber-700 font-medium">
+                            <div className="flex justify-between text-[11px] text-amber-700 font-medium">
                               <span className="flex items-center gap-1">
                                 <Loader2 className="w-3 h-3 animate-spin text-amber-600" />
                                 {t("backupPanel.exporting")}
@@ -354,7 +354,7 @@ export const BackupPanel = (_props: {
                         {item.status === "completed" && (
                           <button
                             onClick={() => handleDownloadItem(item)}
-                            className="px-2.5 py-1 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded font-medium text-xs sm:text-[11px] transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer active:scale-95"
+                            className="px-2.5 py-1 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded font-medium text-[11px] transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer active:scale-95"
                             title={t("backup.downloadBackup")}
                           >
                             <Download className="w-3 h-3" />

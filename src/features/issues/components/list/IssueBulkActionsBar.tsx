@@ -63,12 +63,12 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
       {/* Pagination Controls */}
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2 border-t border-border-subtle bg-surface-sunken shrink-0">
         <div className="flex items-center gap-3">
-          <span className="text-xs sm:text-[10px] font-normal text-content-muted">
+          <span className="text-[11px] font-normal text-content-muted">
             {t("common.showing")} {rangeStart} {t("common.to")} {rangeEnd} {t("common.of")}{" "}
             {totalCount} {t("common.entries")}
           </span>
           <div className="flex items-center gap-1.5 pl-2 border-l border-border-subtle">
-            <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+            <span className="text-[11px] font-normal text-content-subtle uppercase tracking-normal">
               {t("bulkActions.perPage")}
             </span>
             <StyledDropdown
@@ -85,7 +85,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
                 { id: "100", label: "100" },
                 { id: "9999", label: t("bulkActions.all") },
               ]}
-              buttonClassName="text-xs sm:text-[10px] font-normal bg-surface border border-border-subtle rounded-lg px-2 py-0.5 text-left text-content-body shadow-soft"
+              buttonClassName="text-[11px] font-normal bg-surface border border-border-subtle rounded-lg px-2 py-0.5 text-left text-content-body shadow-soft"
             />
           </div>
         </div>
@@ -94,7 +94,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
           <button
             onClick={() => setListPage((p) => Math.max(1, p - 1))}
             disabled={listPage === 1}
-            className="px-2.5 py-1 text-xs sm:text-[10px] font-normal text-content-secondary bg-surface border border-border-subtle rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-sunken transition-all active:scale-95 cursor-pointer shadow-soft"
+            className="px-2.5 py-1 text-[11px] font-normal text-content-secondary bg-surface border border-border-subtle rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-sunken transition-all active:scale-95 cursor-pointer shadow-soft"
           >
             {t("bulkActions.prev")}
           </button>
@@ -104,7 +104,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
                 key={i}
                 onClick={() => setListPage(i + 1)}
                 className={cn(
-                  "w-6 h-6 rounded-lg flex items-center justify-center text-xs sm:text-[11px] font-normal transition-all cursor-pointer active:scale-95 shrink-0",
+                  "w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-normal transition-all cursor-pointer active:scale-95 shrink-0",
                   listPage === i + 1
                     ? "bg-primary-surface text-content-inverse shadow-xs"
                     : "text-content-muted hover:bg-surface-strong/80"
@@ -117,7 +117,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
           <button
             onClick={() => setListPage((p) => Math.min(totalPages, p + 1))}
             disabled={listPage >= totalPages}
-            className="px-2.5 py-1 text-xs sm:text-[10px] font-normal text-content-secondary bg-surface border border-border-subtle rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-sunken transition-all active:scale-95 cursor-pointer shadow-soft"
+            className="px-2.5 py-1 text-[11px] font-normal text-content-secondary bg-surface border border-border-subtle rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-sunken transition-all active:scale-95 cursor-pointer shadow-soft"
           >
             {t("bulkActions.next")}
           </button>
@@ -139,17 +139,17 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
             className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] md:bottom-6 left-1/2 z-40 bg-overlay/95 backdrop-blur-md border border-border-inverse/40 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] px-6 py-3.5 flex flex-wrap items-center gap-6 text-content-inverse text-xs font-medium select-none max-w-[calc(100vw-1.5rem)]"
           >
             <div className="flex items-center gap-2 border-r border-border-inverse pr-4">
-              <span className="bg-primary-surface text-content-inverse text-xs sm:text-[10px] font-medium rounded-full px-2 py-0.5 min-w-[20px] text-center">
+              <span className="bg-primary-surface text-content-inverse text-[11px] font-medium rounded-full px-2 py-0.5 min-w-[20px] text-center">
                 {selectedTaskIds.size}
               </span>
-              <span className="text-content-subtle font-normal uppercase tracking-normal text-xs sm:text-[10px]">
+              <span className="text-content-subtle font-normal uppercase tracking-normal text-[11px]">
                 {t("bulkActions.selectedTasks")}
               </span>
             </div>
 
             {/* Change Status Dropdown */}
             <div className="flex items-center gap-2">
-              <span className="text-content-subtle text-xs sm:text-[10px] uppercase tracking-normal">
+              <span className="text-content-subtle text-[11px] uppercase tracking-normal">
                 {t("bulkActions.status")}
               </span>
               <StyledDropdown
@@ -185,7 +185,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
 
             {/* Change Assignee Dropdown */}
             <div className="flex items-center gap-2">
-              <span className="text-content-subtle text-xs sm:text-[10px] uppercase tracking-normal">
+              <span className="text-content-subtle text-[11px] uppercase tracking-normal">
                 {t("bulkActions.assignee")}
               </span>
               <StyledDropdown
@@ -214,7 +214,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
 
             {/* #468 — Change Priority */}
             <div className="flex items-center gap-2">
-              <span className="text-content-subtle text-xs sm:text-[10px] uppercase tracking-normal">
+              <span className="text-content-subtle text-[11px] uppercase tracking-normal">
                 {t("bulkActions.priority")}
               </span>
               <StyledDropdown
@@ -247,7 +247,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
 
             {/* #468 — Change Sprint */}
             <div className="flex items-center gap-2">
-              <span className="text-content-subtle text-xs sm:text-[10px] uppercase tracking-normal">
+              <span className="text-content-subtle text-[11px] uppercase tracking-normal">
                 {t("bulkActions.sprint")}
               </span>
               <StyledDropdown

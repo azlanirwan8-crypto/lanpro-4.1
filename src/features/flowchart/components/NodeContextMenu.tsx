@@ -107,7 +107,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
       onContextMenu={(e) => e.preventDefault()}
     >
       {/* Node Info Header */}
-      <div className="px-3 py-1.5 text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle border-b border-border-faint mb-1">
+      <div className="px-3 py-1.5 text-[11px] font-normal uppercase tracking-normal text-content-subtle border-b border-border-faint mb-1">
         <span>{t("nodeMenu.title")}</span>
       </div>
 
@@ -156,7 +156,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
         kelompok dan namanya terlalu mirip untuk dibedakan lewat bacaan.
       */}
       <div className="flex items-center gap-1 px-3 pb-1">
-        <span className="text-xs sm:text-[11px] uppercase tracking-normal text-content-subtle mr-1 shrink-0">
+        <span className="text-[11px] uppercase tracking-normal text-content-subtle mr-1 shrink-0">
           {t("nodeMenu.tataLayers")}
         </span>
         {ITEM_TATA_LAYERS.map((item) => (
@@ -177,7 +177,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
       </div>
 
       {/* Change Color Palette Title */}
-      <div className="px-3 py-1 flex items-center gap-1.5 text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle">
+      <div className="px-3 py-1 flex items-center gap-1.5 text-[11px] font-normal uppercase tracking-normal text-content-subtle">
         <Palette className="w-3 h-3 text-content-subtle" />
         <span>{t("nodeMenu.changeColor")}</span>
       </div>

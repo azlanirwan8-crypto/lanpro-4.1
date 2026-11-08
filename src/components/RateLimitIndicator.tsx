@@ -72,14 +72,14 @@ export function RateLimitIndicator() {
             <h4 className="text-xs font-normal uppercase tracking-normal text-amber-50">
               {t("network.serverQueueRateLimit")}
             </h4>
-            <p className="text-xs sm:text-[11px] text-amber-100/90 leading-tight mt-0.5 font-medium">
+            <p className="text-[11px] text-amber-100/90 leading-tight mt-0.5 font-medium">
               {t("network.connectionPendingRetryingIn")}{" "}
               <span className="font-medium underline">{(maxLimit.backoff / 1000).toFixed(1)}s</span>
               ...
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal bg-surface/15 px-2 py-1 rounded-lg whitespace-nowrap">
+            <span className="text-[11px] font-normal uppercase tracking-normal bg-surface/15 px-2 py-1 rounded-lg whitespace-nowrap">
               {t("network.remaining")} {maxLimit.retriesLeft}x
             </span>
             <Loader2 className="w-4 h-4 animate-spin text-content-inverse/80 shrink-0" />

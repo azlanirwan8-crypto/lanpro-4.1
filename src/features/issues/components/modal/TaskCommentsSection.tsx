@@ -139,7 +139,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
             <div className="flex-1 relative">
               <div className="border border-border-subtle rounded-xl bg-surface focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-xs overflow-hidden">
                 <div className="flex items-center gap-1 p-2 border-b border-border-subtle bg-surface-sunken/40 overflow-x-auto">
-                  <button className="flex items-center gap-1.5 px-2 py-1 hover:bg-surface-strong rounded text-xs sm:text-[11px] font-normal text-content-secondary transition-colors shrink-0">
+                  <button className="flex items-center gap-1.5 px-2 py-1 hover:bg-surface-strong rounded text-[11px] font-normal text-content-secondary transition-colors shrink-0">
                     <Sparkles className="w-3 h-3 text-primary" />
                     {t("comments.improveWriting")}
                   </button>
@@ -189,7 +189,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
 
               {mentionState.active && (
                 <div className="absolute z-50 w-72 bg-surface rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden transform bottom-[110%] left-0 animate-dropdown">
-                  <div className="p-3 bg-surface-sunken border-b border-border-subtle text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
+                  <div className="p-3 bg-surface-sunken border-b border-border-subtle text-[11px] font-normal text-content-subtle uppercase tracking-normal">
                     {t("comments.suggestedPeople")}
                   </div>
                   <div className="max-h-60 overflow-y-auto py-1">
@@ -214,7 +214,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                             <p className="text-[13px] font-medium text-content leading-none">
                               {member?.displayName}
                             </p>
-                            <p className="text-xs sm:text-[11px] text-content-subtle mt-0.5">
+                            <p className="text-[11px] text-content-subtle mt-0.5">
                               @{member?.username}
                             </p>
                           </div>
@@ -228,7 +228,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                   size="sm"
                   onClick={wrapSubmit("addComment", () => handleAddComment())}
                   disabled={isSubmitting["addComment"] || !newCommentText.trim() || !isLoggedIn}
-                  className="shadow-soft-lg shadow-primary/20 px-6 font-normal uppercase tracking-normal text-xs sm:text-[10px]"
+                  className="shadow-soft-lg shadow-primary/20 px-6 font-normal uppercase tracking-normal text-[11px]"
                 >
                   {t("comments.save")}
                 </Button>
@@ -469,7 +469,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                     <span className="text-xs font-medium text-content-strong">
                       {actor?.displayName}
                     </span>
-                    <span className="text-xs sm:text-[10px] font-normal text-content-subtle bg-surface border border-border-subtle/60 px-1.5 py-0.5 rounded uppercase tracking-tight">
+                    <span className="text-[11px] font-normal text-content-subtle bg-surface border border-border-subtle/60 px-1.5 py-0.5 rounded uppercase tracking-tight">
                       {safeFormat(log.createdAt, "MMM d, HH:mm")}
                     </span>
                   </div>

@@ -407,7 +407,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
           <div className="hidden sm:block overflow-x-auto min-h-[350px]">
             <table className="w-full text-left border-collapse table-fixed">
               <thead>
-                <tr className="bg-primary-surface/5 border-b border-border-subtle text-xs font-normal text-content-subtle whitespace-nowrap">
+                <tr className="bg-primary-surface/5 border-b border-border-subtle text-content-subtle whitespace-nowrap">
                   <th className="py-2.5 px-3 w-[22%]">{t("sessionMonitor.colUser", "PENGGUNA")}</th>
                   <th className="py-2.5 px-3 w-[16%]">
                     {t("sessionMonitor.colIp", "IP & GEOLOKASI")}
@@ -426,7 +426,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-subtle text-sm">
+              <tbody className="divide-y divide-border-subtle text-xs">
                 {loading ? (
                   <tr>
                     <td colSpan={6} className="py-12 text-center text-content-subtle">

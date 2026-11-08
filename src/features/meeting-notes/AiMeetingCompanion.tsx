@@ -960,7 +960,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
             >
               <ListChecks className="w-3.5 h-3.5 text-primary" /> {t("aiMeeting.followUp")}
               {activeMeetingData?.tab_tindak_lanjut?.length > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 bg-primary-surface text-content-inverse text-xs sm:text-[11px] rounded-full font-medium min-w-[16px] text-center inline-block">
+                <span className="ml-1 px-1.5 py-0.5 bg-primary-surface text-content-inverse text-[11px] rounded-full font-medium min-w-[16px] text-center inline-block">
                   {activeMeetingData.tab_tindak_lanjut.length}
                 </span>
               )}
@@ -1050,7 +1050,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-surface p-4 rounded-xl border border-border-subtle/50 shadow-xs flex flex-col justify-between">
-                      <span className="text-xs sm:text-[11px] text-content-subtle uppercase tracking-normal block">
+                      <span className="text-[11px] text-content-subtle uppercase tracking-normal block">
                         {t("aiMeeting.discussionSegments")}
                       </span>
                       <p className="text-base font-medium text-primary mt-1">
@@ -1061,7 +1061,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                     </div>
 
                     <div className="bg-surface p-4 rounded-xl border border-border-subtle/50 shadow-xs flex flex-col justify-between">
-                      <span className="text-xs sm:text-[11px] text-content-subtle uppercase tracking-normal block">
+                      <span className="text-[11px] text-content-subtle uppercase tracking-normal block">
                         {t("aiMeeting.actionItems")}
                       </span>
                       <p className="text-base font-medium text-emerald-700 mt-1">
@@ -1226,7 +1226,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                           {/* Quick Search Chips and Match Count */}
                           <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
                             <div className="flex flex-wrap items-center gap-1.5">
-                              <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mr-1">
+                              <span className="text-[11px] font-normal text-content-subtle uppercase tracking-normal mr-1">
                                 {t("aiMeeting.quickSearch")}
                               </span>
                               {[
@@ -1241,7 +1241,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                                 <button
                                   key={chip}
                                   onClick={() => setSearchTerm(chip)}
-                                  className={`px-2.5 py-1 text-xs sm:text-[10px]  rounded-lg transition-all cursor-pointer border ${
+                                  className={`px-2.5 py-1 text-[11px]  rounded-lg transition-all cursor-pointer border ${
                                     searchTerm === chip
                                       ? "bg-primary/10 border-primary/20 text-primary font-medium"
                                       : "bg-surface  text-content-muted hover:text-content-body hover:bg-surface-sunken"
@@ -1294,10 +1294,10 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                       {t("aiMeeting.recordLiveMicrophone")}
                     </div>
-                    <p className="text-xs sm:text-[11px] text-content-subtle">
+                    <p className="text-[11px] text-content-subtle">
                       {t("aiMeeting.recordsTheMeetingThroughYour")}
                     </p>
-                    <p className="text-xs sm:text-[11px] text-content-muted">
+                    <p className="text-[11px] text-content-muted">
                       {t("aiMeeting.recordingRetentionNote")}
                     </p>
 
@@ -1421,7 +1421,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             </div>
 
                             {/* Detail of bytes / stage */}
-                            <div className="flex items-center justify-between text-xs sm:text-[10px] text-content-muted">
+                            <div className="flex items-center justify-between text-[11px] text-content-muted">
                               <span>{subtext}</span>
                               <button
                                 onClick={(e) => {
@@ -1450,10 +1450,10 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         />
                         <UploadCloud className="w-8 h-8" />
                         <p className="text-xs text-center">{t("aiMeeting.uploadRecordingCta")}</p>
-                        <p className="text-xs sm:text-[10px] text-content-subtle text-center">
+                        <p className="text-[11px] text-content-subtle text-center">
                           {t("aiMeeting.uploadRecordingFormats")}
                         </p>
-                        <p className="text-xs sm:text-[10px] text-content-muted text-center mt-1">
+                        <p className="text-[11px] text-content-muted text-center mt-1">
                           {t("aiMeeting.recordingRetentionNote")}
                         </p>
                       </div>
@@ -1466,7 +1466,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       <FileUp className="w-4 h-4 text-primary" />
                       {t("aiMeeting.manuscriptUploadLabel")}
                     </div>
-                    <p className="text-xs sm:text-[11px] text-content-subtle">
+                    <p className="text-[11px] text-content-subtle">
                       {t("aiMeeting.manuscriptUploadDesc")}
                     </p>
 
@@ -1483,7 +1483,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       />
                       <FileUp className="w-8 h-8" />
                       <p className="text-xs text-center">{t("aiMeeting.manuscriptDropText")}</p>
-                      <p className="text-xs sm:text-[10px] text-content-subtle text-center">
+                      <p className="text-[11px] text-content-subtle text-center">
                         {t("aiMeeting.manuscriptDropHint")}
                       </p>
                     </div>
@@ -1553,7 +1553,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft hover:shadow-md transition-all space-y-4">
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <div>
-                              <span className="text-xs sm:text-[10px] text-primary font-normal uppercase tracking-normalst block mb-1">
+                              <span className="text-[11px] text-primary font-normal uppercase tracking-normalst block mb-1">
                                 {t("rakit.topicNo", { no: index + 1 })}
                               </span>
                               <div className="flex items-center gap-1.5">
@@ -1568,7 +1568,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                           </div>
 
                           <div className="space-y-2">
-                            <h5 className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normalst">
+                            <h5 className="text-[11px] font-normal text-content-subtle uppercase tracking-normalst">
                               {t("aiMeeting.coreConversation")}
                             </h5>
                             <p className="text-xs text-content-secondary leading-relaxed whitespace-pre-wrap">
@@ -1633,7 +1633,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         className="bg-surface p-4.5 rounded-xl border border-amber-500/30 flex flex-col gap-2 shadow-soft hover:border-amber-500/30 transition-colors"
                       >
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-[3px] bg-amber-500/10 text-[10px] leading-none sm:text-[9px] font-medium uppercase rounded border border-amber-500/30">
+                          <span className="px-2 py-[3px] bg-amber-500/10 text-[10px] leading-none font-medium uppercase rounded border border-amber-500/30">
                             {t("aiMeeting.proposedBy")} {item.diusulkan_oleh}
                           </span>
                         </div>
@@ -1692,7 +1692,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         >
                           <div className="flex-1 space-y-3 min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="px-2 py-[3px] bg-rose-500/10 text-rose-600 text-[10px] leading-none sm:text-[9px] font-medium uppercase rounded border border-rose-500/30">
+                              <span className="px-2 py-[3px] bg-rose-500/10 text-rose-600 text-[10px] leading-none font-medium uppercase rounded border border-rose-500/30">
                                 {t("rakit.meetingConcernNo", { no: index + 1 })}
                               </span>
                               {item.pic && (
@@ -1717,7 +1717,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             </div>
 
                             <div className="pl-3 border-l-2 border-emerald-400 bg-emerald-500/10 py-1.5 pr-2 rounded">
-                              <h4 className="text-xs sm:text-[10px] font-normal text-emerald-600 uppercase tracking-normalr mb-0.5">
+                              <h4 className="text-[11px] font-normal text-emerald-600 uppercase tracking-normalr mb-0.5">
                                 {t("aiMeeting.agreedSolutions")}
                               </h4>
                               <p className="text-xs text-content-secondary leading-normal">
@@ -1790,7 +1790,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
                         <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft hover:shadow-md transition-all">
                           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                            <span className="px-2 py-0.5 bg-pink-500/10 border border-pink-500/30 text-pink-700 text-xs sm:text-[11px] font-medium uppercase rounded">
+                            <span className="px-2 py-0.5 bg-pink-500/10 border border-pink-500/30 text-pink-700 text-[11px] font-medium uppercase rounded">
                               {t("rakit.actionPlanNo", { no: index + 1 })}
                             </span>
                             {item.due_date && (
@@ -1804,7 +1804,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                               {item.action_item}
                             </p>
                             {item.pic && (
-                              <div className="text-xs sm:text-[11px] text-content-muted font-medium flex items-center gap-1">
+                              <div className="text-[11px] text-content-muted font-medium flex items-center gap-1">
                                 <UserCheck className="w-3.5 h-3.5 text-pink-500" />{" "}
                                 {t("aiMeeting.personInChargePic")}{" "}
                                 <span className="text-pink-600 font-medium">{item.pic}</span>
@@ -1836,7 +1836,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* As-Is Card */}
                     <div className="bg-surface-sunken border border-border-subtle p-5 rounded-xl shadow-soft space-y-3">
-                      <div className="flex items-center gap-2 text-content-body font-normal text-xs sm:text-[10px] uppercase tracking-normalst">
+                      <div className="flex items-center gap-2 text-content-body font-normal text-[11px] uppercase tracking-normalst">
                         <span className="w-2 h-2 rounded-full bg-surface-marker" />
                         {t("aiMeeting.currentStateAsIs")}
                       </div>
@@ -1848,7 +1848,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
                     {/* To-Be Card */}
                     <div className="bg-primary/10 border border-primary/20 p-5 rounded-xl shadow-soft space-y-3">
-                      <div className="flex items-center gap-2 text-primary font-normal text-xs sm:text-[10px] uppercase tracking-normalst">
+                      <div className="flex items-center gap-2 text-primary font-normal text-[11px] uppercase tracking-normalst">
                         <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                         {t("aiMeeting.futureTargetToBe")}
                       </div>
@@ -1861,7 +1861,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
                   {/* Transition Steps Card */}
                   <div className="bg-surface border border-border-subtle p-5 rounded-xl shadow-soft space-y-4">
-                    <div className="flex items-center gap-2 text-content-body font-normal text-xs sm:text-[10px] uppercase tracking-normalst">
+                    <div className="flex items-center gap-2 text-content-body font-normal text-[11px] uppercase tracking-normalst">
                       {t("aiMeeting.migrationTransitionSteps")}
                     </div>
 
@@ -1900,7 +1900,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {/* Topic and platform detection */}
                   <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft space-y-3">
-                    <h5 className="text-xs sm:text-[10px] font-normal text-primary uppercase tracking-normalst">
+                    <h5 className="text-[11px] font-normal text-primary uppercase tracking-normalst">
                       {t("aiMeeting.meetingDetail")}
                     </h5>
                     <div className="space-y-2">
@@ -1937,7 +1937,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
                   {/* Active Speakers / Participants */}
                   <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft space-y-3">
-                    <h5 className="text-xs sm:text-[10px] font-normal text-primary uppercase tracking-normalst">
+                    <h5 className="text-[11px] font-normal text-primary uppercase tracking-normalst">
                       {t("aiMeeting.allDetectedMeetingParticipants")}
                     </h5>
 
@@ -1980,9 +1980,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   <h4 className="text-sm font-medium tracking-tight text-content-inverse">
                     {t("aiMeeting.continuousLearning")}
                   </h4>
-                  <p className="text-xs sm:text-[10px] text-content-subtle">
-                    {t("aiMeeting.trainAi")}
-                  </p>
+                  <p className="text-[11px] text-content-subtle">{t("aiMeeting.trainAi")}</p>
                 </div>
               </div>
               <button
@@ -1999,7 +1997,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                 <div className="space-y-1">
                   <h5 className="text-xs font-medium text-primary">{t("aiMeeting.howItWorks")}</h5>
-                  <p className="text-xs sm:text-[11px] text-content-secondary leading-relaxed">
+                  <p className="text-[11px] text-content-secondary leading-relaxed">
                     Masukan kritik, koreksi, atau instruksi detail spesifik Anda pada kolom di
                     bawah. Sebelum melakukan analisis rapat berikutnya, AI kami akan secara dinamis
                     menyuntikkan evaluasi ini ke dalam instruksi utamanya untuk memastikan kesalahan

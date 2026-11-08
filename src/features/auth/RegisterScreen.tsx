@@ -143,7 +143,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             )}
           />
           {fieldErrors.name && (
-            <p className="text-xs sm:text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
+            <p className="text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{fieldErrors.name}</span>
             </p>
@@ -168,7 +168,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             )}
           />
           {fieldErrors.email && (
-            <p className="text-xs sm:text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
+            <p className="text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{fieldErrors.email}</span>
             </p>
@@ -179,7 +179,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         <div className="space-y-1">
           <label className="text-xs font-medium text-content-body tracking-normal block">
             {t("common.username")} <span className="text-danger-text">*</span>{" "}
-            <span className="text-xs sm:text-[11px] text-content-subtle font-normal">
+            <span className="text-[11px] text-content-subtle font-normal">
               {t("register.lettersOnlyMax10")}
             </span>
           </label>
@@ -197,7 +197,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             )}
           />
           {fieldErrors.username && (
-            <p className="text-xs sm:text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
+            <p className="text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{fieldErrors.username}</span>
             </p>
@@ -235,7 +235,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
           {/* Password Strength Indicator Bar */}
           {password.length > 0 && (
             <div className="mt-2 space-y-1.5 p-2.5 bg-surface-sunken border border-border-subtle/80 rounded-lg">
-              <div className="flex items-center justify-between text-xs sm:text-[11px] font-medium">
+              <div className="flex items-center justify-between text-[11px] font-medium">
                 <span className="text-content-secondary">{t("register.passwordStrength")}</span>
                 <span className={passStrength.color}>{t(passStrength.label)}</span>
               </div>
@@ -250,7 +250,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
               </div>
 
               {/* Criteria Checklist */}
-              <div className="grid grid-cols-2 gap-1 text-xs sm:text-[10px] font-medium mt-1.5 text-content-muted">
+              <div className="grid grid-cols-2 gap-1 text-[11px] font-medium mt-1.5 text-content-muted">
                 <div
                   className={cn(
                     "flex items-center gap-1",
@@ -300,7 +300,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
           )}
 
           {fieldErrors.password && (
-            <p className="text-xs sm:text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
+            <p className="text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{fieldErrors.password}</span>
             </p>

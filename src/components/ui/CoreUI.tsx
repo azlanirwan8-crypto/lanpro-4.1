@@ -55,13 +55,13 @@ export const TimelineDatePills = ({
   return (
     <>
       <div className="absolute -left-1 transform -translate-x-full pr-2 top-1/2 -translate-y-1/2 whitespace-nowrap z-50 pointer-events-none">
-        <div className="bg-overlay/90 text-xs sm:text-[10px] font-medium text-content-inverse px-2 py-1 rounded shadow-soft-lg backdrop-blur-sm border border-border-inverse flex items-center gap-1.5 animate-dropdown">
+        <div className="bg-overlay/90 text-[11px] font-medium text-content-inverse px-2 py-1 rounded shadow-soft-lg backdrop-blur-sm border border-border-inverse flex items-center gap-1.5 animate-dropdown">
           <Calendar className="w-2.5 h-2.5 text-content-subtle" />
           {format(start, "MMM d, yyyy")}
         </div>
       </div>
       <div className="absolute -right-1 transform translate-x-full pl-2 top-1/2 -translate-y-1/2 whitespace-nowrap z-50 pointer-events-none">
-        <div className="bg-overlay/90 text-xs sm:text-[10px] font-medium text-content-inverse px-2 py-1 rounded shadow-soft-lg backdrop-blur-sm border border-border-inverse flex items-center gap-1.5 animate-dropdown">
+        <div className="bg-overlay/90 text-[11px] font-medium text-content-inverse px-2 py-1 rounded shadow-soft-lg backdrop-blur-sm border border-border-inverse flex items-center gap-1.5 animate-dropdown">
           <Calendar className="w-2.5 h-2.5 text-content-subtle" />
           {format(end, "MMM d, yyyy")}
           <span className="text-content-subtle font-normal">
@@ -297,7 +297,7 @@ export const Badge = ({
     <span
       className={cn(
         "inline-flex items-center gap-1 px-2.5 py-1 rounded-md border",
-        "text-xs sm:text-[11px] font-normal uppercase tracking-normal whitespace-nowrap",
+        "text-[11px] font-normal uppercase tracking-normal whitespace-nowrap",
         variants[variant],
         className
       )}

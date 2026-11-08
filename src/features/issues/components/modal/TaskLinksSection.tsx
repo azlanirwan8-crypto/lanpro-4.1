@@ -86,7 +86,7 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
           <button
             type="button"
             onClick={() => setIsAddingTaskLinkLocal(!isAddingTaskLinkLocal)}
-            className="text-xs sm:text-[10px] font-medium text-primary hover:underline"
+            className="text-[11px] font-medium text-primary hover:underline"
           >
             {t("issues.link")}
           </button>

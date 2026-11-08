@@ -165,7 +165,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
             {isDueSoon && (
               <div
                 className={cn(
-                  "flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs sm:text-[11px] font-medium tracking-tight select-none border animate-pulse shrink-0",
+                  "flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-medium tracking-tight select-none border animate-pulse shrink-0",
                   isOverdue
                     ? "bg-danger/10 border-danger/20 text-danger-text"
                     : "bg-warning/10 border-warning/20 text-warning-text"
@@ -271,7 +271,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
         {totalCount > 0 && (
           <div className="mt-2 pt-2 border-t border-border-faint">
             <div
-              className="flex items-center justify-between text-xs sm:text-[10px] text-content-muted mb-1 cursor-pointer"
+              className="flex items-center justify-between text-[11px] text-content-muted mb-1 cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsExpanded(!isExpanded);
@@ -313,7 +313,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
                 {subtasks.map((st: any) => (
                   <div
                     key={st.id}
-                    className="flex items-center gap-2 text-xs sm:text-[10px] text-content-secondary cursor-pointer hover:text-primary"
+                    className="flex items-center gap-2 text-[11px] text-content-secondary cursor-pointer hover:text-primary"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleToggleSubtask(st);

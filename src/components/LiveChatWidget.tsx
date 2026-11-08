@@ -588,7 +588,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
               onClick={() => bukaPeninjauan(sumber)}
               referrerPolicy="no-referrer"
             />
-            <span className="text-xs sm:text-[11px] opacity-75 flex items-center gap-1 font-mono tracking-tight">
+            <span className="text-[11px] opacity-75 flex items-center gap-1 font-mono tracking-tight">
               🖼️ {name}
             </span>
           </div>
@@ -631,12 +631,10 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
               <FileText className="w-4 h-4" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-xs sm:text-[11px] font-medium truncate text-content-strong leading-tight">
+              <p className="text-[11px] font-medium truncate text-content-strong leading-tight">
                 {name}
               </p>
-              <p className="text-xs sm:text-[11px] text-content-muted font-mono">
-                {t("chat.downloadFile")}
-              </p>
+              <p className="text-[11px] text-content-muted font-mono">{t("chat.downloadFile")}</p>
             </div>
             <Download className="w-3.5 h-3.5 text-content-subtle shrink-0" />
           </a>
@@ -689,7 +687,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
-              className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-rose-500 text-content-inverse rounded-full flex items-center justify-center text-xs sm:text-[10px] font-medium px-1.5 border border-surface shadow-md animate-pulse"
+              className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-rose-500 text-content-inverse rounded-full flex items-center justify-center text-[11px] font-medium px-1.5 border border-surface shadow-md animate-pulse"
             >
               {totalUnread}
             </motion.div>
@@ -760,7 +758,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                   {/* Channels / Virtual Bots Section */}
                   {filteredVirtuals.length > 0 && (
                     <div className="bg-surface-sunken/40">
-                      <p className="px-4 pt-2.5 pb-1 text-xs sm:text-[11px] font-normal tracking-normal text-content-subtle uppercase">
+                      <p className="px-4 pt-2.5 pb-1 text-[11px] font-normal tracking-normal text-content-subtle uppercase">
                         {t("chat.channelsAssistant")}
                       </p>
                       {filteredVirtuals.map((virtual) => {
@@ -785,12 +783,12 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                                   {virtual?.displayName}
                                 </span>
                                 {lastMsg && (
-                                  <span className="text-xs sm:text-[11px] text-content-subtle">
+                                  <span className="text-[11px] text-content-subtle">
                                     {formatTime(lastMsg.timestamp)}
                                   </span>
                                 )}
                               </div>
-                              <p className="text-xs sm:text-[10px] text-content-muted truncate mt-0.5 font-medium">
+                              <p className="text-[11px] text-content-muted truncate mt-0.5 font-medium">
                                 {lastMsg
                                   ? lastMsg.message.startsWith("[IMAGE:")
                                     ? "🖼️ Mengirim gambar..."
@@ -802,7 +800,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                             </div>
 
                             {unread > 0 && (
-                              <div className="shrink-0 min-w-[16px] h-4 bg-orange-500 text-content-inverse rounded-full flex items-center justify-center text-xs sm:text-[11px] font-medium px-1.5 animate-bounce">
+                              <div className="shrink-0 min-w-[16px] h-4 bg-orange-500 text-content-inverse rounded-full flex items-center justify-center text-[11px] font-medium px-1.5 animate-bounce">
                                 {unread}
                               </div>
                             )}
@@ -814,7 +812,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
                   {/* Direct Message Section */}
                   <div className="bg-surface">
-                    <p className="px-4 pt-3 pb-1 text-xs sm:text-[11px] font-normal tracking-normal text-content-subtle uppercase">
+                    <p className="px-4 pt-3 pb-1 text-[11px] font-normal tracking-normal text-content-subtle uppercase">
                       {t("chat.colleaguesDm")}
                     </p>
                     {filteredUsers.length === 0 ? (
@@ -849,12 +847,12 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                                   {targetUser?.displayName || targetUser?.username}
                                 </span>
                                 {lastMsg && (
-                                  <span className="text-xs sm:text-[11px] text-content-subtle font-mono">
+                                  <span className="text-[11px] text-content-subtle font-mono">
                                     {formatTime(lastMsg.timestamp)}
                                   </span>
                                 )}
                               </div>
-                              <p className="text-xs sm:text-[10px] text-content-muted truncate mt-0.5">
+                              <p className="text-[11px] text-content-muted truncate mt-0.5">
                                 {lastMsg
                                   ? lastMsg.message.startsWith("[IMAGE:")
                                     ? "🖼️ Gambar"
@@ -867,7 +865,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
                             {/* Unread Count Badge */}
                             {userUnread > 0 && (
-                              <div className="shrink-0 min-w-[16px] h-4 bg-orange-500 text-content-inverse rounded-full flex items-center justify-center text-xs sm:text-[11px] font-medium px-1.5 shadow-soft">
+                              <div className="shrink-0 min-w-[16px] h-4 bg-orange-500 text-content-inverse rounded-full flex items-center justify-center text-[11px] font-medium px-1.5 shadow-soft">
                                 {userUnread}
                               </div>
                             )}
@@ -911,14 +909,14 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                         {activeChatUser.id === "lanpro-ai" && (
                           <span
                             title={t("chat.assistantEngine")}
-                            className="px-1 py-0.5 bg-primary/20 text-primary text-xs sm:text-[10px] font-medium rounded uppercase border border-primary/30"
+                            className="px-1 py-0.5 bg-primary/20 text-primary text-[11px] font-medium rounded uppercase border border-primary/30"
                           >
                             AI
                           </span>
                         )}
                       </p>
                       {activeChatUser.id !== "lanpro-ai" && (
-                        <p className="text-xs sm:text-[11px] text-content-subtle">
+                        <p className="text-[11px] text-content-subtle">
                           {adalahOnline(activeChatUser) ? "Sedang Aktif" : "Offline"}
                         </p>
                       )}
@@ -955,7 +953,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       placeholder={t("chat.filterKeyword")}
                       value={msgSearchQuery}
                       onChange={(e) => setMsgSearchQuery(e.target.value)}
-                      className="flex-1 bg-transparent border-none text-xs sm:text-[11px] focus:outline-none focus:ring-0 text-content-strong font-medium"
+                      className="flex-1 bg-transparent border-none text-[11px] focus:outline-none focus:ring-0 text-content-strong font-medium"
                       autoFocus
                     />
                     {msgSearchQuery && (
@@ -974,7 +972,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                   {isLoadingMessages ? (
                     <div className="h-full flex flex-col items-center justify-center gap-1">
                       <Loader2 className="w-5 h-5 text-orange-500 animate-spin" />
-                      <span className="text-xs sm:text-[10px] font-medium text-content-subtle">
+                      <span className="text-[11px] font-medium text-content-subtle">
                         {t("chat.loadingMessages")}
                       </span>
                     </div>
@@ -999,7 +997,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                         >
                           {/* Sender name for AI Assistant messages in direct chat */}
                           {!isSelf && msg.senderId === "lanpro-ai" && (
-                            <span className="text-xs sm:text-[11px] font-medium text-primary mb-0.5 ml-1 flex items-center gap-0.5 select-none font-sans">
+                            <span className="text-[11px] font-medium text-primary mb-0.5 ml-1 flex items-center gap-0.5 select-none font-sans">
                               <Sparkles className="w-2.5 h-2.5" /> {senderDisplayName}
                             </span>
                           )}
@@ -1015,7 +1013,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                           </div>
 
                           {/* Message meta */}
-                          <div className="flex items-center gap-1 mt-1 px-1 text-xs sm:text-[11px] text-content-subtle font-mono">
+                          <div className="flex items-center gap-1 mt-1 px-1 text-[11px] text-content-subtle font-mono">
                             <span>{formatTime(msg.timestamp)}</span>
                             {isSelf && (
                               <span>
@@ -1034,7 +1032,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                   {isPartnerTyping && (
                     <div className="flex flex-col items-start space-y-1">
                       <div className="bg-surface border border-border-faint text-content-strong px-3 py-1.5 rounded-xl rounded-bl-none text-xs shadow-soft flex items-center gap-1.5 text-content-muted font-medium">
-                        <span className="text-xs sm:text-[10px] text-content-subtle">
+                        <span className="text-[11px] text-content-subtle">
                           {activeChatUser?.id === "lanpro-ai"
                             ? "LanPro AI sedang mengetik"
                             : `${activeChatUser?.displayName} sedang mengetik`}
@@ -1061,7 +1059,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
                 {/* Simulation Mode Toggle Panel (Only for Direct Human Chat) */}
                 {activeChatUser.id !== "lanpro-ai" && (
-                  <div className="px-2.5 py-1 bg-surface-sunken border-t border-border-faint/60 flex items-center justify-between text-xs sm:text-[11px] text-content-subtle shrink-0">
+                  <div className="px-2.5 py-1 bg-surface-sunken border-t border-border-faint/60 flex items-center justify-between text-[11px] text-content-subtle shrink-0">
                     <span className="font-medium flex items-center gap-1">
                       <span
                         className={`w-1.5 h-1.5 rounded-full ${simulationEnabled ? "bg-emerald-400 animate-pulse" : "bg-surface-marker"}`}
@@ -1071,7 +1069,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     <button
                       type="button"
                       onClick={() => setSimulationEnabled(!simulationEnabled)}
-                      className={`px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase tracking-normal transition-colors ${
+                      className={`px-1.5 py-0.5 rounded text-[11px] sm:text-[8px] font-normal uppercase tracking-normal transition-colors ${
                         simulationEnabled
                           ? "bg-emerald-500/15 text-emerald-700 hover:bg-emerald-200"
                           : "bg-surface-strong text-content-secondary hover:bg-surface-marker"
@@ -1092,7 +1090,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       className="p-3 bg-surface-sunken border-t border-border-faint flex flex-col gap-2 shrink-0 border-b border-border-faint"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-xs sm:text-[10px] font-normal tracking-normal text-content-muted uppercase">
+                        <span className="text-[11px] font-normal tracking-normal text-content-muted uppercase">
                           {t("chat.sendAttachment")}
                         </span>
                         <button
@@ -1120,12 +1118,10 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                             <Image className="w-3.5 h-3.5" />
                           </span>
                           <div className="min-w-0">
-                            <p className="text-xs sm:text-[10px] font-medium text-content-strong truncate">
+                            <p className="text-[11px] font-medium text-content-strong truncate">
                               UI Mockup Redesign
                             </p>
-                            <p className="text-xs sm:text-[10px] text-content-subtle">
-                              PNG Mockup Asset
-                            </p>
+                            <p className="text-[11px] text-content-subtle">PNG Mockup Asset</p>
                           </div>
                         </button>
 
@@ -1145,12 +1141,10 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                             <FileText className="w-3.5 h-3.5" />
                           </span>
                           <div className="min-w-0">
-                            <p className="text-xs sm:text-[10px] font-medium text-content-strong truncate">
+                            <p className="text-[11px] font-medium text-content-strong truncate">
                               Database Blueprint
                             </p>
-                            <p className="text-xs sm:text-[10px] text-content-subtle">
-                              PDF Schema Spec
-                            </p>
+                            <p className="text-[11px] text-content-subtle">PDF Schema Spec</p>
                           </div>
                         </button>
                       </div>
@@ -1159,7 +1153,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="w-full py-1.5 bg-surface-inverse-strong text-content-inverse rounded-xl text-xs sm:text-[10px] font-normal tracking-normal uppercase flex items-center justify-center gap-1.5 hover:bg-orange-600 transition-colors shadow-soft"
+                        className="w-full py-1.5 bg-surface-inverse-strong text-content-inverse rounded-xl text-[11px] font-normal tracking-normal uppercase flex items-center justify-center gap-1.5 hover:bg-orange-600 transition-colors shadow-soft"
                       >
                         <FileUp className="w-3.5 h-3.5" />
                         {t("chat.uploadFromComputer")}

@@ -25,13 +25,13 @@ export const ListPerPageSelect: React.FC<{
   const { t } = useTranslation();
 
   return (
-    <div className="flex items-center gap-1.5 text-xs sm:text-[10px] text-content-muted font-normal">
+    <div className="flex items-center gap-1.5 text-[11px] text-content-muted font-normal">
       <span>{t("common.rowsPerPage")}</span>
       <StyledDropdown
         value={String(value)}
         onChange={(val) => onChange(Number(val))}
         options={PILIHAN_BARIS_PER_HALAMAN.map((n) => ({ id: String(n), label: String(n) }))}
-        buttonClassName="bg-surface border border-border-subtle rounded-md px-2 py-1 text-xs sm:text-[10px] text-left font-normal text-content-body"
+        buttonClassName="bg-surface border border-border-subtle rounded-md px-2 py-1 text-[11px] text-left font-normal text-content-body"
       />
     </div>
   );

@@ -472,7 +472,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                               {log.entityName}
                             </span>
                           </div>
-                          <div className="text-xs sm:text-[11px] font-medium text-content-subtle flex items-center gap-1 shrink-0">
+                          <div className="text-[11px] font-medium text-content-subtle flex items-center gap-1 shrink-0">
                             <Clock className="w-3 h-3 text-content-subtle" />
                             {formatDate(log.createdAt)}
                           </div>
@@ -483,7 +483,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                             {t("rakit.auditDidAction")}{" "}
                             <span
                               className={cn(
-                                "font-normal uppercase px-1.5 py-0.5 rounded text-xs sm:text-[10px]",
+                                "font-normal uppercase px-1.5 py-0.5 rounded text-[11px]",
                                 log.actionType === "CREATE"
                                   ? "bg-success/10 text-success-text"
                                   : log.actionType === "UPDATE"
@@ -503,17 +503,17 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                         <div className="mt-2.5 flex items-center justify-between pt-2 border-t border-border-faint">
                           <div className="flex items-center gap-2">
                             {log.oldValues && Object.keys(log.oldValues).length > 0 && (
-                              <span className="px-1.5 py-0.5 bg-danger/10 border border-danger/30 rounded text-[10px] leading-none sm:text-[9px] font-normal text-danger-text uppercase">
+                              <span className="px-1.5 py-0.5 bg-danger/10 border border-danger/30 rounded text-[10px] leading-none font-normal text-danger-text uppercase">
                                 {t("audit.before")} {Object.keys(log.oldValues).length} keys
                               </span>
                             )}
                             {log.newValues && Object.keys(log.newValues).length > 0 && (
-                              <span className="px-1.5 py-0.5 bg-success/10 border border-success/30 rounded text-[10px] leading-none sm:text-[9px] font-normal text-success-text uppercase">
+                              <span className="px-1.5 py-0.5 bg-success/10 border border-success/30 rounded text-[10px] leading-none font-normal text-success-text uppercase">
                                 {t("audit.after")} {Object.keys(log.newValues).length} keys
                               </span>
                             )}
                           </div>
-                          <span className="text-xs sm:text-[11px] font-medium text-primary group-hover:text-primary-hover flex items-center gap-1 group-hover:gap-1.5 transition-all">
+                          <span className="text-[11px] font-medium text-primary group-hover:text-primary-hover flex items-center gap-1 group-hover:gap-1.5 transition-all">
                             {t("audit.viewChangeDetails")} <ArrowRight className="w-3 h-3" />
                           </span>
                         </div>
@@ -561,7 +561,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                           {selectedLog.entityName}
                         </span>
                         <span className="text-content-subtle">•</span>
-                        <code className="text-xs sm:text-[10px] font-medium bg-surface-strong/50 text-content-secondary px-2 py-0.5 rounded">
+                        <code className="text-[11px] font-medium bg-surface-strong/50 text-content-secondary px-2 py-0.5 rounded">
                           {selectedLog.entityId}
                         </code>
                       </div>
@@ -577,7 +577,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                 {/* Modal Info Stats */}
                 <div className="grid grid-cols-2 bg-surface-sunken/30 border-b border-border-faint">
                   <div className="p-6 border-r border-border-faint">
-                    <p className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-2">
+                    <p className="text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-2">
                       {t("audit.authorActivity")}
                     </p>
                     <div className="flex items-center gap-3">
@@ -589,14 +589,14 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                         <p className="text-sm font-medium text-content-strong">
                           {selectedLog.userName || "Unknown User"}
                         </p>
-                        <p className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-tighter">
+                        <p className="text-[11px] font-normal text-content-muted uppercase tracking-tighter">
                           {t("audit.auditorAccess")}
                         </p>
                       </div>
                     </div>
                   </div>
                   <div className="p-6">
-                    <p className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-2">
+                    <p className="text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-2">
                       {t("audit.timestampWib")}
                     </p>
                     <div className="flex items-center gap-3 text-content-strong font-medium">
@@ -622,17 +622,17 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
 
                   {/* Raw JSON fallback (Optional for high technical audit) */}
                   <details className="mt-12 group">
-                    <summary className="text-xs sm:text-[10px] font-normal text-content-subtle cursor-pointer uppercase hover:text-content-secondary transition-colors">
+                    <summary className="text-[11px] font-normal text-content-subtle cursor-pointer uppercase hover:text-content-secondary transition-colors">
                       {t("audit.showRawTechnicalTraceJson")}
                     </summary>
-                    <div className="mt-4 p-4 rounded-xl bg-surface-inverse-strong text-info font-mono text-xs sm:text-[10px] overflow-x-auto border border-border-inverse">
+                    <div className="mt-4 p-4 rounded-xl bg-surface-inverse-strong text-info font-mono text-[11px] overflow-x-auto border border-border-inverse">
                       <pre>{JSON.stringify(selectedLog, null, 2)}</pre>
                     </div>
                   </details>
                 </div>
                 {/* Footer */}
                 <div className="p-8 bg-surface-sunken border-t border-border-faint flex justify-between items-center">
-                  <p className="text-xs sm:text-[10px] font-medium text-content-subtle italic">
+                  <p className="text-[11px] font-medium text-content-subtle italic">
                     {t("audit.traceId")} {selectedLog.id}
                   </p>
                   <button

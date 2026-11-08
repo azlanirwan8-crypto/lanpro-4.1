@@ -60,7 +60,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
     return (
       <span
         className={cn(
-          "text-xs sm:text-[10px] font-normal px-1.5 py-0.5 rounded shadow-xs uppercase tracking-normal shrink-0",
+          "text-[11px] font-normal px-1.5 py-0.5 rounded shadow-xs uppercase tracking-normal shrink-0",
           colorClasses
         )}
       >
@@ -142,7 +142,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                 title={t("sidebar.newProject")}
               >
                 <Plus className="w-3.5 h-3.5 text-sidebar-text" />
-                <span className="text-xs sm:text-[10px] font-normal uppercase text-sidebar-text">
+                <span className="text-[11px] font-normal uppercase text-sidebar-text">
                   {t("sidebar.new")}
                 </span>
               </motion.button>
@@ -186,7 +186,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                 {!isSidebarCollapsed && (
                   <>
                     <span className="truncate flex-1 text-left text-xs font-medium">{p.name}</span>
-                    <span className="text-xs sm:text-[11px] font-medium px-1.5 py-0.5 rounded bg-sidebar-item-hover text-sidebar-text-active">
+                    <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-sidebar-item-hover text-sidebar-text-active">
                       {p.key}
                     </span>
                   </>
@@ -270,7 +270,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
             <React.Fragment key={section.id}>
               {!isSidebarCollapsed && (
                 <div className="flex items-center justify-between px-3 mt-5 mb-1.5">
-                  <div className="text-xs sm:text-[11px] font-normal text-sidebar-title uppercase tracking-normal">
+                  <div className="text-[11px] font-normal text-sidebar-title uppercase tracking-normal">
                     {t(section.title)}
                   </div>
                 </div>
@@ -351,7 +351,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                                   : "text-sidebar-text hover:text-sidebar-text-active hover:bg-sidebar-item-hover"
                               )}
                             >
-                              <span className="text-sidebar-title text-xs sm:text-[10px]">—</span>
+                              <span className="text-sidebar-title text-[11px]">—</span>
                               <span className="truncate">{t(subItem.label)}</span>
                             </button>
                           );

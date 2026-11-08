@@ -32,7 +32,7 @@ export const styles = {
   // menjadi kisi.
   tableHeader: "bg-surface-sunken border-b border-border-subtle sticky top-0 z-30 shadow-2xs",
   tableHeaderCell:
-    "group relative px-4 py-2.5 text-[10px] font-normal text-content-subtle whitespace-nowrap border-r border-border-faint",
+    "group relative px-4 py-2.5 text-[11px] font-semibold text-content-subtle whitespace-nowrap border-r border-border-faint",
   // #699 butir-A (12 Okt) — tiga angka yang memutuskan baris ini, bukan rasa.
   // Laporan pemilik proyek: "terlalu putih". Terukur terhadap putih (#ffffff):
   // pemisah baris `border-border-faint` (#f1f5f9) = 1,096:1; hover `bg-surface-sunken/70`

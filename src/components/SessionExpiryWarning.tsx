@@ -313,7 +313,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
                 </div>
 
                 {/* Progress helper indicators */}
-                <div className="flex justify-between items-center mt-2 text-xs sm:text-[10px] text-content-subtle font-medium">
+                <div className="flex justify-between items-center mt-2 text-[11px] text-content-subtle font-medium">
                   <span>{t("session.sec60")}</span>
                   <span
                     className={`${activeTimeLeft > 30 ? "text-amber-500" : "text-rose-500 animate-pulse"}`}
