@@ -1,10 +1,10 @@
-/* Inter dimuat lewat <link rel="stylesheet"> di index.html — @import di sini menunggu CSS ini terurai dulu. */
+/* Poppins dimuat lewat <link rel="stylesheet"> di index.html — @import di sini menunggu CSS ini terurai dulu. */
 @import "tailwindcss";
 
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
 
   /* ── Skala tipografi tambahan (#430) ───────────────────────────────────────
    * Tailwind hanya menyediakan text-xs (12px) ke atas. Proyek ini memakai
@@ -590,7 +590,8 @@ select option {
 /**
  * STANDAR TIPOGRAFI & DENSITAS — #402 (keputusan 03 Sep 2026)
  *
- * Font: Inter (standar Velzon React admin). Bukan Poppins HTML lama.
+ * Font: Poppins (standar Velzon 4.3.0, bobot 300–700). Versi Inter sebelumnya
+ * keliru menyebut dirinya standar Velzon; #820 mengembalikannya ke Poppins.
  * Densitas: html 81.25% (13px) — padat ala Velzon/Jira admin, SENGAJA
  * dipertahankan agar seluruh modul tetap lega di layar data-dense.
  * Mengubah font-size global = ubah seluruh UI; hanya dengan keputusan pemilik.
@@ -602,7 +603,7 @@ html {
 }
 
 @layer base {
-  /* Standarisasi Universal Font Family Inter (#402 — Velzon Admin Standard) */
+  /* Standarisasi Universal Font Family Poppins (#402/#820 — Velzon Admin Standard) */
   *,
   ::before,
   ::after,
@@ -614,7 +615,7 @@ html {
   textarea,
   optgroup {
     font-family:
-      "Inter",
+      "Poppins",
       ui-sans-serif,
       system-ui,
       -apple-system,

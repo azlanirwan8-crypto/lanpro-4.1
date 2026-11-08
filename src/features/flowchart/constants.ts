@@ -10,7 +10,7 @@ import type { FlowNode, FlowNodeType } from "./types";
  *
  * Dipindah ke sini dari `FlowchartNode.tsx` karena label GARIS ternyata tidak
  * pernah memakai salah satunya (#761): pemetaannya hidup di komponen bentuk,
- * jadi label garis kebagian font global aplikasi (Inter) sementara label bentuk
+ * jadi label garis kebagian font global aplikasi sementara label bentuk
  * Helvetica. draw.io memakai Helvetica untuk KEDUANYA. Satu sumber di sini
  * membuat kelas itu tidak bisa lagi dipakai separuh jalur.
  *
