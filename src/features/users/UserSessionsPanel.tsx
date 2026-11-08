@@ -529,7 +529,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                               )}
                             </div>
                             <div className="min-w-0">
-                              <span className="text-xs font-semibold text-content-strong block truncate">
+                              <span className="text-xs font-medium text-content-strong block truncate">
                                 {session.browser || "Unknown Browser"}
                               </span>
                               <span
@@ -547,7 +547,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
 
                         {/* Waktu Login */}
                         <td className="py-2.5 px-3">
-                          <div className="text-xs text-content-strong font-medium flex items-center gap-1.5 whitespace-nowrap">
+                          <div className="text-xs text-content-strong flex items-center gap-1.5 whitespace-nowrap">
                             <Clock className="w-3.5 h-3.5 text-content-subtle" />
                             <span>{formatDate(session.loginAt)}</span>
                           </div>
@@ -671,7 +671,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                           size="md"
                         />
                         <div className="min-w-0">
-                          <span className="font-semibold text-content-strong text-sm block truncate">
+                          <span className="font-medium text-content-strong text-sm block truncate">
                             {session.displayName ||
                               session.username ||
                               t("sessionMonitor.unnamed", "Tanpa Nama")}

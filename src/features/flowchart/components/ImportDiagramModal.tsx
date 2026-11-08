@@ -315,7 +315,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
             <div className="bg-surface rounded-lg border border-success/30 px-3 py-2.5 flex items-center gap-2.5 shadow-inner">
               <Shapes className="w-4 h-4 shrink-0 text-content-subtle" />
               <div>
-                <div className="text-sm font-bold text-content-strong">
+                <div className="text-sm font-semibold text-content-strong">
                   {parsedImportData.nodes.length}
                 </div>
                 <div className="text-[10px] text-content-muted font-medium uppercase tracking-wide">
@@ -326,7 +326,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
             <div className="bg-surface rounded-lg border border-success/30 px-3 py-2.5 flex items-center gap-2.5 shadow-inner">
               <MoveUpRight className="w-4 h-4 shrink-0 text-content-subtle" />
               <div>
-                <div className="text-sm font-bold text-content-strong">
+                <div className="text-sm font-semibold text-content-strong">
                   {parsedImportData.edges.length}
                 </div>
                 <div className="text-[10px] text-content-muted font-medium uppercase tracking-wide">

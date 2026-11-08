@@ -208,7 +208,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
               <th className="py-3 px-4 w-28 text-center">{t("flowchart.thAction")}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border-faint text-xs font-medium text-content-body">
+          <tbody className="divide-y divide-border-faint text-xs text-content-body">
             {currentItems.length === 0 ? (
               <tr>
                 <td colSpan={8} className="text-center py-20 text-content-subtle">

@@ -626,7 +626,7 @@ export const TeamManagementPanel = ({
                                 <div className="font-medium text-content-strong text-xs">
                                   {name}
                                 </div>
-                                <div className="text-xs sm:text-[11px] text-content-subtle font-medium">
+                                <div className="text-xs sm:text-[11px] text-content-subtle">
                                   {person?.email || "@" + (person?.username || person.uid)}
                                 </div>
                               </div>
@@ -650,7 +650,7 @@ export const TeamManagementPanel = ({
                                 />
                               </div>
                             ) : (
-                              <span className="inline-flex px-2.5 py-[3px] rounded-md text-xs font-medium bg-indigo-500/10 text-indigo-700 border border-indigo-500/30 capitalize">
+                              <span className="inline-flex px-2.5 py-[3px] rounded-md text-xs font-normal bg-indigo-500/10 text-indigo-700 border border-indigo-500/30 capitalize">
                                 {isOwner ? "Project Owner" : roleName}
                               </span>
                             )}
@@ -663,7 +663,7 @@ export const TeamManagementPanel = ({
                           </td>
                           <td className="px-5 py-3.5 text-center">
                             <span
-                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs sm:text-[10px] font-medium ${
+                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs sm:text-[10px] font-normal ${
                                 person.isPending
                                   ? "bg-amber-500/10 text-amber-700 border border-amber-500/30"
                                   : "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30"

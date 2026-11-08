@@ -107,7 +107,7 @@ export const IssueMobileCardView: React.FC<IssueMobileCardViewProps> = ({
               {/* Status Badge */}
               <div className="shrink-0 flex items-center gap-1.5">
                 {task.storyPoints !== undefined && task.storyPoints !== null && (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-surface-strong text-content-body">
+                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-surface-strong text-content-body">
                     {task.storyPoints} pts
                   </span>
                 )}
