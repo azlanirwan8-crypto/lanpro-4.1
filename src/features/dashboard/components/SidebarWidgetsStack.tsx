@@ -286,7 +286,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                   <span className="font-medium uppercase text-content-muted">
                     {format(ensureDate(meeting.createdAt), "MMM dd, yyyy")}
                   </span>
-                  <span className="text-info flex items-center gap-1 font-medium">
+                  <span className="text-info-text flex items-center gap-1 font-medium">
                     {t("dashboard.open")} <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>
@@ -338,7 +338,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
         <div className="absolute top-0 right-0 -translate-y-4 translate-x-4 opacity-10 pointer-events-none">
           <Globe className="w-32 h-32" />
         </div>
-        <h3 className="text-xs sm:text-[10px] font-normal uppercase tracking-normal text-info flex items-center gap-2 mb-3 relative z-10">
+        <h3 className="text-xs sm:text-[10px] font-normal uppercase tracking-normal text-info-text flex items-center gap-2 mb-3 relative z-10">
           <Clock className="w-4 h-4 text-info" /> {t("widgets.liveActivity")}
         </h3>
         <div className="space-y-3 max-h-[260px] overflow-y-auto custom-scrollbar pr-1 relative z-10">

@@ -337,7 +337,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
               </div>
             </div>
             <div className="mt-2 pt-2 border-t border-border-subtle flex items-center justify-between text-[11px] text-content-muted">
-              <span className="text-info font-medium">
+              <span className="text-info-text font-medium">
                 {t("sessionMonitor.savedLogsTag", "Rekaman log tersimpan")}
               </span>
             </div>
