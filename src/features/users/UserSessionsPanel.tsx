@@ -468,7 +468,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                               size="md"
                             />
                             <div>
-                              <span className="font-semibold text-content-strong text-sm block">
+                              <span className="font-normal text-content-strong text-sm block">
                                 {session.displayName ||
                                   session.username ||
                                   t("sessionMonitor.unnamed", "Tanpa Nama")}
@@ -485,7 +485,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                           <div className="flex items-start gap-2">
                             <Globe className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                             <div>
-                              <span className="font-medium font-mono text-xs text-content-strong block">
+                              <span className="font-normal font-mono text-xs text-content-strong block">
                                 {session.ipAddress || "127.0.0.1"}
                               </span>
                               <span className="text-xs text-content-subtle flex items-center gap-1 mt-0.5">
@@ -529,7 +529,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                               )}
                             </div>
                             <div className="min-w-0">
-                              <span className="text-xs font-medium text-content-strong block truncate">
+                              <span className="text-xs font-normal text-content-strong block truncate">
                                 {session.browser || "Unknown Browser"}
                               </span>
                               <span
@@ -1025,13 +1025,13 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                                       const humanLabel = humanFieldMap[key] || key;
                                       return (
                                         <tr key={key} className="hover:bg-surface/40">
-                                          <td className="py-2 px-3 font-semibold text-content-strong">
+                                          <td className="py-2 px-3 font-normal text-content-strong">
                                             {humanLabel}
                                           </td>
-                                          <td className="py-2 px-3 text-rose-600 bg-rose-500/5 font-medium">
+                                          <td className="py-2 px-3 text-rose-600 bg-rose-500/5 font-normal">
                                             {oldVal}
                                           </td>
-                                          <td className="py-2 px-3 text-emerald-600 bg-emerald-500/5 font-semibold">
+                                          <td className="py-2 px-3 text-emerald-600 bg-emerald-500/5 font-normal">
                                             {newVal}
                                           </td>
                                         </tr>

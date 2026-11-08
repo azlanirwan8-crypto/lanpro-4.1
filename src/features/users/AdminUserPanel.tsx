@@ -889,7 +889,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           <div className="flex items-center gap-3.5">
                             <UserAvatar user={user} className="w-9 h-9 shrink-0" />
                             <div>
-                              <div className="font-medium text-content-strong text-xs group-hover:text-primary transition-colors">
+                              <div className="font-normal text-content-strong text-xs group-hover:text-primary transition-colors">
                                 {user?.displayName || user?.username}
                               </div>
                               <div className="text-[11px] text-content-muted">

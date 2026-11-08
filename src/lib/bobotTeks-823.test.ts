@@ -36,14 +36,17 @@ function hitung(namaBerkas: string, kelas: string): number {
   return isi.split(kelas).length - 1;
 }
 
-/** Batas atas `font-medium` per berkas tabel, diukur 08 Nov 2026. */
+/** Batas atas `font-medium` per berkas tabel, diukur 09 Nov 2026 sesudah #827. */
 const BATAS_MEDIUM: Record<string, number> = {
-  "features/meeting-notes/MeetingNotes.tsx": 22,
-  "features/users/UserSessionsPanel.tsx": 25,
+  "features/meeting-notes/MeetingNotes.tsx": 21,
+  "features/users/UserSessionsPanel.tsx": 22,
   "features/team/TeamManagementPanel.tsx": 27,
   "features/dashboard/DashboardView.tsx": 47,
-  "features/wiki/WikiView.tsx": 39,
-  "features/users/AdminUserPanel.tsx": 36,
+  "features/wiki/WikiView.tsx": 38,
+  "features/users/AdminUserPanel.tsx": 35,
+  "features/backup/BackupPanel.tsx": 16,
+  "features/activity/ActivityLogPanel.tsx": 15,
+  "features/flowchart/components/FlowchartDashboard.tsx": 2,
 };
 
 /** Berkas yang masih boleh memakai 700. */
