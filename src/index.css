@@ -1,10 +1,10 @@
-/* Poppins dimuat lewat <link rel="stylesheet"> di index.html — @import di sini menunggu CSS ini terurai dulu. */
+/* Inter dimuat lewat <link rel="stylesheet"> di index.html — @import di sini menunggu CSS ini terurai dulu. */
 @import "tailwindcss";
 
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 
   /* ── Skala tipografi tambahan (#430) ───────────────────────────────────────
    * Tailwind menyediakan text-xs ke atas, tetapi di akar 13 px ukurannya
@@ -612,8 +612,10 @@ select option {
 /**
  * STANDAR TIPOGRAFI & DENSITAS — #402 (keputusan 03 Sep 2026)
  *
- * Font: Poppins (standar Velzon 4.3.0, bobot 300–700). Versi Inter sebelumnya
- * keliru menyebut dirinya standar Velzon; #820 mengembalikannya ke Poppins.
+ * Font: Inter (pengganti terdekat HK Grotesk, font primer Velzon default).
+ * Poppins sempat dipakai #820 karena premis keliru: di Velzon ia hanya
+ * `--vz-font-family-secondary`; font primernya `hkgrotesk`. Poppins lebih
+ * lebar dan berstroke tebal sehingga UI terasa gemuk — dikembalikan 08 Nov 2026.
  * Densitas: html 81.25% (13px) — padat ala Velzon/Jira admin, SENGAJA
  * dipertahankan agar seluruh modul tetap lega di layar data-dense.
  * Mengubah font-size global = ubah seluruh UI; hanya dengan keputusan pemilik.
@@ -625,7 +627,7 @@ html {
 }
 
 @layer base {
-  /* Standarisasi Universal Font Family Poppins (#402/#820 — Velzon Admin Standard) */
+  /* Standarisasi Universal Font Family Inter (#402/#820 — pengganti HK Grotesk Velzon) */
   *,
   ::before,
   ::after,
@@ -637,7 +639,7 @@ html {
   textarea,
   optgroup {
     font-family:
-      "Poppins",
+      "Inter",
       ui-sans-serif,
       system-ui,
       -apple-system,
