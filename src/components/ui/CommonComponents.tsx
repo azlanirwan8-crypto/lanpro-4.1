@@ -186,6 +186,11 @@ const KONTROL_KECIL =
   "px-2 py-0.5 bg-surface border border-border-subtle rounded-md text-[10px] font-normal uppercase tracking-tight text-content-body";
 const KONTROL_BENING =
   "px-1.5 py-0.5 bg-surface border border-transparent hover:border-border-subtle rounded text-xs font-normal";
+/* #814 — versi borderless-until-hover untuk baris tabel isu: bingkai hanya
+ * muncul saat hover, ritmenya sama dengan `KONTROL_BENING`; yang berbeda hanya
+ * huruf kapital 10 px milik status/prioritas (#782). */
+const KONTROL_KECIL_BENING =
+  "px-1.5 py-0.5 bg-surface border border-transparent hover:border-border-subtle rounded text-[10px] font-normal uppercase tracking-tight text-content-body";
 const CHIP_BIASA = "px-1.5 py-0.5 border rounded font-normal text-xs tracking-tight";
 
 /** Warna chip selalu milik baris MasterData - satu komponen supaya panel tidak bisa menulis chip-nya sendiri lagi (#590). */
@@ -336,6 +341,7 @@ export const StyledDropdown = ({
   members = [],
   customButton,
   cari,
+  polos,
 }: {
   value: string;
   onChange: (val: string) => void;
@@ -354,6 +360,12 @@ export const StyledDropdown = ({
    * bila opsi melewati `AMBANG_CARI`.
    */
   cari?: boolean;
+  /**
+   * #814 — pemicu tanpa bingkai sampai disentuh kursor, dipakai baris tabel
+   * isu. Ukuran huruf tetap mengikuti jenis kontrolnya (status/prioritas 10 px
+   * uppercase, sisanya 12 px); yang dicabut hanya bingkainya.
+   */
+  polos?: boolean;
 }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -512,6 +524,17 @@ export const StyledDropdown = ({
   const hex = hexChip(type, baris, selected, value);
   /** Pemilih anggota/kosong tetap abu: labelnya memang tidak punya warna. */
   const berwarna = isStatus || isPriority || hex !== WARNA_NETRAL;
+  /* #814 — `polos` memaksa borderless-until-hover; tanpa itu keluarga kontrol
+     lama (#782) tetap berlaku. */
+  const kulit = polos
+    ? isStatus || isPriority
+      ? KONTROL_KECIL_BENING
+      : KONTROL_BENING
+    : isStatus || isPriority
+      ? KONTROL_KECIL
+      : berwarna
+        ? KONTROL_NETRAL
+        : KONTROL_BENING;
 
   return (
     <div className={cn("relative", className)}>
@@ -555,7 +578,7 @@ export const StyledDropdown = ({
           title={selected?.label || value || undefined}
           className={cn(
             "flex items-center gap-1.5 group/dd transition-all cursor-pointer w-full justify-between focus:ring-1 focus:ring-primary/20",
-            isStatus || isPriority ? KONTROL_KECIL : berwarna ? KONTROL_NETRAL : KONTROL_BENING,
+            kulit,
             disabled && "opacity-50 cursor-not-allowed",
             buttonClassName
           )}

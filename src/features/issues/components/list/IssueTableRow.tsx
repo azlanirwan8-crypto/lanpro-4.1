@@ -433,6 +433,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     options={memberOptions}
                     members={projectMembers}
                     type="member"
+                    polos
                     masterData={mArr}
                     disabled={!canManage}
                     className={cn("max-w-[150px]", !canManage && "pointer-events-none opacity-85")}
@@ -456,6 +457,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     options={reporterOptions}
                     members={projectMembers}
                     type="member"
+                    polos
                     masterData={mArr}
                     disabled={!canEditReporter}
                     className={cn(
@@ -478,6 +480,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     options={priorityOptions}
                     masterData={mArr}
                     type="priority"
+                    polos
                     disabled={!isEditable}
                     className="w-fit"
                   />
@@ -495,6 +498,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     options={statusOptions}
                     masterData={mArr}
                     type="status"
+                    polos
                     disabled={!isEditable}
                     className="w-fit"
                   />
@@ -565,6 +569,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     onChange={(val) => updateTaskField(task.id, "resolution", val)}
                     options={resOptions}
                     masterData={mArr}
+                    polos
                     disabled={!isEditable}
                     className="max-w-[120px]"
                   />
@@ -584,6 +589,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     onChange={(val) => updateTaskField(task.id, "category", val)}
                     options={catOptions}
                     masterData={mArr}
+                    polos
                     disabled={!isEditable}
                     className="max-w-[120px]"
                   />
@@ -630,6 +636,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                       })) || []),
                     ]}
                     type="sprint"
+                    polos
                     masterData={mArr}
                   />
                 );
@@ -682,6 +689,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     onChange={(val) => updateTaskField(task.id, "release", val)}
                     options={relOptions}
                     masterData={mArr}
+                    polos
                     disabled={!isEditable}
                     className="text-xs sm:text-[10px]"
                   />
