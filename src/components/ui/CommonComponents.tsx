@@ -370,6 +370,7 @@ export const StyledDropdown = ({
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const [aktif, setAktif] = useState(0);
   const dariPapanKetik = useRef(false);
   const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
@@ -502,6 +503,30 @@ export const StyledDropdown = ({
       }
     }
   }, [isOpen, safeOptions.length]);
+
+  /**
+   * #815 — daftar ditutup oleh `pointerdown` di dokumen, bukan oleh lapisan
+   * `fixed inset-0`. Lapisan itu memang menutup daftar, tapi ia juga MENELAN
+   * klik pertama ke header, notifikasi, atau tombol lain: pengguna harus
+   * mengklik dua kali. Pendengar ini tidak menahan apa pun — ia hanya menutup,
+   * lalu klik yang sama diteruskan ke sasarannya.
+   *
+   * Fase CAPTURE dipakai supaya daftar sudah tertutup sebelum handler klik
+   * sasaran berjalan. Pemicu dikecualikan karena kliknya sendiri yang menutup;
+   * bila di sini ikut ditutup, `onClick` pemicu akan membukanya lagi.
+   */
+  useEffect(() => {
+    if (!isOpen) return;
+    const tutupDiLuar = (e: PointerEvent) => {
+      const sasaran = e.target as Node | null;
+      if (!sasaran) return;
+      if (buttonRef.current?.contains(sasaran)) return;
+      if (panelRef.current?.contains(sasaran)) return;
+      setIsOpen(false);
+    };
+    document.addEventListener("pointerdown", tutupDiLuar, true);
+    return () => document.removeEventListener("pointerdown", tutupDiLuar, true);
+  }, [isOpen]);
 
   /**
    * Sorotan papan ketik ikut menggulir (#594). Daftarnya bisa 27 baris di dalam
@@ -648,35 +673,28 @@ export const StyledDropdown = ({
       )}
       {isOpen &&
         createPortal(
-          <>
-            <div
-              className="fixed inset-0 z-[9999]"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsOpen(false);
-              }}
-            />
-            <div
-              style={{
-                position: "fixed",
-                top: dropdownPos.placement === "bottom" ? dropdownPos.top : undefined,
-                bottom: dropdownPos.placement === "top" ? dropdownPos.bottom : undefined,
-                left: dropdownPos.left,
-                /*
+          <div
+            ref={panelRef}
+            style={{
+              position: "fixed",
+              top: dropdownPos.placement === "bottom" ? dropdownPos.top : undefined,
+              bottom: dropdownPos.placement === "top" ? dropdownPos.bottom : undefined,
+              left: dropdownPos.left,
+              /*
                   #601 — daftar pernah selebar pemicunya SAJA, jadi nama panjang
                   terpotong dua kali: di pemicu dan di dalam daftar yang terbuka
                   (padahal di situlah pengguna sedang memilih namanya). Sekarang
                   daftar boleh melebar mengikuti isinya sampai batas layar; yang
                   tetap adalah sisi kirinya, supaya tidak melompat dari pemicunya.
                 */
-                minWidth: dropdownPos.width,
-                width: "max-content",
-                maxWidth: "min(28rem, 92vw)",
-                zIndex: 10000,
-              }}
-              className="bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden ring-1 ring-border-faint flex flex-col max-h-[300px] animate-dropdown"
-            >
-              {/*
+              minWidth: dropdownPos.width,
+              width: "max-content",
+              maxWidth: "min(28rem, 92vw)",
+              zIndex: 10000,
+            }}
+            className="bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden ring-1 ring-border-faint flex flex-col max-h-[300px] animate-dropdown"
+          >
+            {/*
                 `min-h-0` wajib (#294). Induknya `flex flex-col max-h-[300px]`
                 dengan `overflow-hidden`, dan anak flex punya `min-height: auto`
                 bawaan — tanpa `min-h-0` ia MENOLAK menyusut di bawah tinggi
@@ -684,170 +702,169 @@ export const StyledDropdown = ({
                 induknya DAN tidak bisa digulir sama sekali. Paling terasa di
                 pemilih bentuk flowchart yang punya 27 opsi (~810px).
               */}
-              {/*
+            {/*
                 #727 — kotak cari duduk sebagai anak flex PERTAMA panel, jadi
                 daftar di bawahnya (yang `min-h-0`, #294) menyusut sendiri dan
                 tidak ada pekerjaan posisi baru. `autoFocus` hanya hidup bila
                 `pakaiCari`, jadi daftar pendek tetap membuka persis seperti
                 sebelum item ini — fokus tidak dicuri dari pemicunya.
               */}
-              {pakaiCari && (
-                <div className="relative shrink-0 border-b border-border-faint">
-                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-content-subtle pointer-events-none" />
-                  <input
-                    type="text"
-                    autoFocus
-                    value={kataCari}
-                    aria-label={t("ui.searchOptions")}
-                    placeholder={t("ui.searchOptions")}
-                    onChange={(e) => {
-                      setKataCari(e.target.value);
-                      setAktif(0);
+            {pakaiCari && (
+              <div className="relative shrink-0 border-b border-border-faint">
+                <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-content-subtle pointer-events-none" />
+                <input
+                  type="text"
+                  autoFocus
+                  value={kataCari}
+                  aria-label={t("ui.searchOptions")}
+                  placeholder={t("ui.searchOptions")}
+                  onChange={(e) => {
+                    setKataCari(e.target.value);
+                    setAktif(0);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowDown") {
+                      e.preventDefault();
+                      geserFokusOpsi(0);
+                    } else if (e.key === "Escape") {
+                      e.preventDefault();
+                      tutupKembaliKePemicu();
+                    }
+                  }}
+                  className="w-full h-9 pl-8 pr-2.5 bg-surface text-xs font-normal text-content-body placeholder:text-content-subtle focus:outline-none"
+                />
+              </div>
+            )}
+            <div
+              id={idDaftar}
+              role="listbox"
+              className="min-h-0 overflow-y-auto p-1.5 custom-scrollbar"
+            >
+              {daftarTampil.map((opt, optIdx) => {
+                const isActive = opt.id === value;
+                const adalahAktif = optIdx === aktif;
+                /** Titik/ikon daftar ikut warna label yang sama dengan chipnya. */
+                const hexOpt = warnaLabel({
+                  kelompok: type || "",
+                  label: opt.label,
+                  warnaMaster: opt.color,
+                });
+                return (
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={isActive}
+                    id={idOpsi(optIdx)}
+                    data-aktif={adalahAktif ? "" : undefined}
+                    key={opt.id ? `opt-${opt.id}-${optIdx}` : `opt-idx-${optIdx}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dariPapanKetik.current = e.detail === 0;
+                      const sebelum = document.activeElement;
+                      onChange(opt.id);
+                      setIsOpen(false);
+                      /* Fokus dikembalikan ke pemicu HANYA bila tidak ada yang
+                           memindahkannya: pemanggil seperti baris buat-cepat isu
+                           (#592) sengaja mengembalikannya ke kolom judul supaya
+                           Enter berikutnya hidup. */
+                      if (
+                        dariPapanKetik.current &&
+                        document.activeElement === sebelum &&
+                        buttonRef.current
+                      ) {
+                        const b = buttonRef.current as unknown as HTMLElement;
+                        if (typeof b.focus === "function") b.focus();
+                      }
                     }}
                     onKeyDown={(e) => {
-                      if (e.key === "ArrowDown") {
+                      const k = e.key;
+                      if (k === "ArrowDown" || k === "ArrowUp" || k === "Home" || k === "End") {
                         e.preventDefault();
-                        geserFokusOpsi(0);
-                      } else if (e.key === "Escape") {
+                        geserFokusOpsi(
+                          k === "Home"
+                            ? 0
+                            : k === "End"
+                              ? daftarTampil.length - 1
+                              : k === "ArrowDown"
+                                ? optIdx + 1
+                                : optIdx - 1
+                        );
+                        return;
+                      }
+                      if (k === "Escape") {
                         e.preventDefault();
                         tutupKembaliKePemicu();
                       }
                     }}
-                    className="w-full h-9 pl-8 pr-2.5 bg-surface text-xs font-normal text-content-body placeholder:text-content-subtle focus:outline-none"
-                  />
-                </div>
-              )}
-              <div
-                id={idDaftar}
-                role="listbox"
-                className="min-h-0 overflow-y-auto p-1.5 custom-scrollbar"
-              >
-                {daftarTampil.map((opt, optIdx) => {
-                  const isActive = opt.id === value;
-                  const adalahAktif = optIdx === aktif;
-                  /** Titik/ikon daftar ikut warna label yang sama dengan chipnya. */
-                  const hexOpt = warnaLabel({
-                    kelompok: type || "",
-                    label: opt.label,
-                    warnaMaster: opt.color,
-                  });
-                  return (
-                    <button
-                      type="button"
-                      role="option"
-                      aria-selected={isActive}
-                      id={idOpsi(optIdx)}
-                      data-aktif={adalahAktif ? "" : undefined}
-                      key={opt.id ? `opt-${opt.id}-${optIdx}` : `opt-idx-${optIdx}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        dariPapanKetik.current = e.detail === 0;
-                        const sebelum = document.activeElement;
-                        onChange(opt.id);
-                        setIsOpen(false);
-                        /* Fokus dikembalikan ke pemicu HANYA bila tidak ada yang
-                           memindahkannya: pemanggil seperti baris buat-cepat isu
-                           (#592) sengaja mengembalikannya ke kolom judul supaya
-                           Enter berikutnya hidup. */
-                        if (
-                          dariPapanKetik.current &&
-                          document.activeElement === sebelum &&
-                          buttonRef.current
-                        ) {
-                          const b = buttonRef.current as unknown as HTMLElement;
-                          if (typeof b.focus === "function") b.focus();
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        const k = e.key;
-                        if (k === "ArrowDown" || k === "ArrowUp" || k === "Home" || k === "End") {
-                          e.preventDefault();
-                          geserFokusOpsi(
-                            k === "Home"
-                              ? 0
-                              : k === "End"
-                                ? daftarTampil.length - 1
-                                : k === "ArrowDown"
-                                  ? optIdx + 1
-                                  : optIdx - 1
-                          );
-                          return;
-                        }
-                        if (k === "Escape") {
-                          e.preventDefault();
-                          tutupKembaliKePemicu();
-                        }
-                      }}
-                      className={cn(
-                        "w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md transition-all text-left group/opt",
-                        isActive
-                          ? "bg-primary/10 text-primary"
-                          : adalahAktif
-                            ? "bg-surface-strong text-content-strong"
-                            : "hover:bg-surface-sunken text-content-secondary"
-                      )}
-                    >
-                      <div className="flex items-center gap-2 whitespace-nowrap">
-                        {type === "member" &&
-                        opt.id &&
-                        opt.id !== "Unassigned" &&
-                        opt.id !== "System" ? (
-                          <UserAvatar
-                            uid={opt.id}
-                            members={members}
-                            className="w-5 h-5 flex-shrink-0"
-                          />
-                        ) : type === "member" && (!opt.id || opt.id === "Unassigned") ? (
-                          <div className="w-5 h-5 rounded-full bg-surface-muted border border-border-subtle border-dashed flex items-center justify-center flex-shrink-0">
-                            <span className="text-[9px] text-content-subtle font-normal">?</span>
-                          </div>
-                        ) : isStatus ? (
-                          opt.icon ? (
-                            <RenderIcon
-                              iconName={opt.icon}
-                              className="w-4 h-4 flex-shrink-0"
-                              style={{ color: hexOpt }}
-                            />
-                          ) : (
-                            <div
-                              className="w-2.5 h-2.5 rounded-full shrink-0 shadow-inner border border-border-faint"
-                              style={{ backgroundColor: hexOpt }}
-                            />
-                          )
-                        ) : isPriority ? (
-                          <PriorityIcon
-                            priority={opt.label}
-                            className="w-4 h-4 flex-shrink-0"
-                            masterData={masterData}
-                          />
-                        ) : opt.icon ? (
+                    className={cn(
+                      "w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md transition-all text-left group/opt",
+                      isActive
+                        ? "bg-primary/10 text-primary"
+                        : adalahAktif
+                          ? "bg-surface-strong text-content-strong"
+                          : "hover:bg-surface-sunken text-content-secondary"
+                    )}
+                  >
+                    <div className="flex items-center gap-2 whitespace-nowrap">
+                      {type === "member" &&
+                      opt.id &&
+                      opt.id !== "Unassigned" &&
+                      opt.id !== "System" ? (
+                        <UserAvatar
+                          uid={opt.id}
+                          members={members}
+                          className="w-5 h-5 flex-shrink-0"
+                        />
+                      ) : type === "member" && (!opt.id || opt.id === "Unassigned") ? (
+                        <div className="w-5 h-5 rounded-full bg-surface-muted border border-border-subtle border-dashed flex items-center justify-center flex-shrink-0">
+                          <span className="text-[9px] text-content-subtle font-normal">?</span>
+                        </div>
+                      ) : isStatus ? (
+                        opt.icon ? (
                           <RenderIcon
                             iconName={opt.icon}
                             className="w-4 h-4 flex-shrink-0"
-                            style={{ color: opt.color || hexOpt }}
+                            style={{ color: hexOpt }}
                           />
-                        ) : null}
-                        <span className="text-xs font-normal whitespace-nowrap text-content-body tracking-tight">
-                          {opt.label}
-                        </span>
-                      </div>
-                      {isActive && <div className="w-1.5 h-1.5 rounded-full bg-primary/100" />}
-                    </button>
-                  );
-                })}
-                {safeOptions.length === 0 && (
-                  <div className="p-4 text-center text-xs text-content-subtle italic font-normal">
-                    {t("ui.noOptions")}
-                  </div>
-                )}
-                {safeOptions.length > 0 && daftarTampil.length === 0 && (
-                  <div className="p-4 text-center text-xs text-content-subtle italic font-normal">
-                    {t("ui.noMatchFound")}
-                  </div>
-                )}
-              </div>
+                        ) : (
+                          <div
+                            className="w-2.5 h-2.5 rounded-full shrink-0 shadow-inner border border-border-faint"
+                            style={{ backgroundColor: hexOpt }}
+                          />
+                        )
+                      ) : isPriority ? (
+                        <PriorityIcon
+                          priority={opt.label}
+                          className="w-4 h-4 flex-shrink-0"
+                          masterData={masterData}
+                        />
+                      ) : opt.icon ? (
+                        <RenderIcon
+                          iconName={opt.icon}
+                          className="w-4 h-4 flex-shrink-0"
+                          style={{ color: opt.color || hexOpt }}
+                        />
+                      ) : null}
+                      <span className="text-xs font-normal whitespace-nowrap text-content-body tracking-tight">
+                        {opt.label}
+                      </span>
+                    </div>
+                    {isActive && <div className="w-1.5 h-1.5 rounded-full bg-primary/100" />}
+                  </button>
+                );
+              })}
+              {safeOptions.length === 0 && (
+                <div className="p-4 text-center text-xs text-content-subtle italic font-normal">
+                  {t("ui.noOptions")}
+                </div>
+              )}
+              {safeOptions.length > 0 && daftarTampil.length === 0 && (
+                <div className="p-4 text-center text-xs text-content-subtle italic font-normal">
+                  {t("ui.noMatchFound")}
+                </div>
+              )}
             </div>
-          </>,
+          </div>,
           document.body
         )}
     </div>

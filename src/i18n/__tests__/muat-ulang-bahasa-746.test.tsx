@@ -23,7 +23,12 @@ jest.mock("sonner", () => ({ toast: { error: jest.fn(), success: jest.fn() } }))
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { toast } from "sonner";
-import i18n, { selesaikanBahasaTertunda, tukarBahasa } from "../index";
+import i18n, {
+  MASA_BERLAKU_MUAT_ULANG_MS,
+  mintaMuatUlangBahasa,
+  selesaikanBahasaTertunda,
+  tukarBahasa,
+} from "../index";
 import { LanguageSwitcher } from "../LanguageSwitcher";
 
 const BENDERA = "bahasa-muat-ulang";
@@ -46,14 +51,15 @@ describe("Tombol bahasa saat kamusnya tidak tiba (#746)", () => {
     // Niatnya dicatat SEBELUM halaman hilang, supaya sesudah muat ulang
     // penukaran bisa diselesaikan tanpa pengguna menekan apa pun lagi.
     await waitFor(() => expect(window.sessionStorage.getItem(TUNDA)).toBe("id"));
-    expect(window.sessionStorage.getItem(BENDERA)).toBe("1");
+    // #815 — benderanya kini CAP WAKTU, bukan "1": masa berlakunya 60 detik.
+    expect(Number(window.sessionStorage.getItem(BENDERA))).toBeGreaterThan(0);
     expect(jest.mocked(toast.error)).not.toHaveBeenCalled();
   });
 
   it("tetap tidak menyimpan preferensi yang kamusnya tidak pernah tiba (penjaga #603)", async () => {
     render(<LanguageSwitcher />);
     fireEvent.click(screen.getByTestId("language-switcher"));
-    await waitFor(() => expect(window.sessionStorage.getItem(BENDERA)).toBe("1"));
+    await waitFor(() => expect(window.sessionStorage.getItem(BENDERA)).toBeTruthy());
 
     // Niat boleh menunggu di sessionStorage; kunci preferensi `bahasa` tidak.
     expect(window.localStorage.getItem("bahasa") || "").not.toBe("id");
@@ -61,7 +67,8 @@ describe("Tombol bahasa saat kamusnya tidak tiba (#746)", () => {
   });
 
   it("kegagalan kedua diucapkan ke layar, dan tidak memuat ulang lagi", async () => {
-    window.sessionStorage.setItem(BENDERA, "1");
+    // Muat ulang BARU SAJA dicoba (#815): cap waktu masih di dalam 60 detik.
+    window.sessionStorage.setItem(BENDERA, String(Date.now()));
 
     render(<LanguageSwitcher />);
     fireEvent.click(screen.getByTestId("language-switcher"));
@@ -87,7 +94,7 @@ describe("Menyelesaikan penukaran sesudah muat ulang (#746)", () => {
 
   it("memakai bahasa tertunda lalu menyimpannya bila kamusnya terbukti ada", async () => {
     window.sessionStorage.setItem(TUNDA, "en");
-    window.sessionStorage.setItem(BENDERA, "1");
+    window.sessionStorage.setItem(BENDERA, String(Date.now()));
     await i18n.changeLanguage("id");
 
     await expect(selesaikanBahasaTertunda()).resolves.toBe(true);
@@ -99,12 +106,12 @@ describe("Menyelesaikan penukaran sesudah muat ulang (#746)", () => {
 
   it("memulangkan false dan tidak menyimpan apa pun bila kamusnya masih gagal", async () => {
     window.sessionStorage.setItem(TUNDA, "id");
-    window.sessionStorage.setItem(BENDERA, "1");
+    window.sessionStorage.setItem(BENDERA, String(Date.now()));
 
     await expect(selesaikanBahasaTertunda()).resolves.toBe(false);
     expect(window.localStorage.getItem("bahasa") || "").not.toBe("id");
     // Bendera SENGAJA tidak dilepas: inilah yang mencegah lingkaran muat ulang.
-    expect(window.sessionStorage.getItem(BENDERA)).toBe("1");
+    expect(window.sessionStorage.getItem(BENDERA)).toBeTruthy();
     expect(window.sessionStorage.getItem(TUNDA)).toBeNull();
   });
 
@@ -126,5 +133,38 @@ describe("Kontrak tukarBahasa (#746)", () => {
     jest.spyOn(i18n, "changeLanguage").mockRejectedValueOnce(new Error("backend menolak"));
 
     await expect(tukarBahasa("en")).resolves.toBe(false);
+  });
+});
+
+describe("Masa berlaku bendera muat ulang (#815)", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+    // jsdom tidak menjalankan navigasi; panggilan reload dicatat sebagai galat
+    // konsol yang tidak diperiksa di sini. Yang diuji adalah KEPUTUSAN-nya.
+    jest.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  it("menolak percobaan kedua selama masih di dalam 60 detik", () => {
+    expect(MASA_BERLAKU_MUAT_ULANG_MS).toBe(60_000);
+    window.sessionStorage.setItem(BENDERA, String(Date.now()));
+
+    expect(mintaMuatUlangBahasa("id")).toBe(false);
+    // Niat tidak ditulis ulang: penolakan tidak boleh mengubah keadaan.
+    expect(window.sessionStorage.getItem(TUNDA)).toBeNull();
+  });
+
+  it("mengizinkan percobaan lagi sesudah 60 detik — tab tidak terkunci selamanya", () => {
+    window.sessionStorage.setItem(BENDERA, String(Date.now() - MASA_BERLAKU_MUAT_ULANG_MS - 1_000));
+
+    expect(mintaMuatUlangBahasa("id")).toBe(true);
+    expect(window.sessionStorage.getItem(TUNDA)).toBe("id");
+  });
+
+  it("memperlakukan penanda lama tanpa cap waktu sebagai kedaluwarsa", () => {
+    // Build sebelum #815 menulis "1"; umurnya tidak bisa dipertanggungjawabkan.
+    window.sessionStorage.setItem(BENDERA, "1");
+
+    expect(mintaMuatUlangBahasa("en")).toBe(true);
   });
 });

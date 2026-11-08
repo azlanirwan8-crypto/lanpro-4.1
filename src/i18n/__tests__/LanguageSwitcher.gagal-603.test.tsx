@@ -34,7 +34,8 @@ describe("LanguageSwitcher saat kamus tujuannya tidak datang (#603)", () => {
     window.localStorage.clear();
     window.sessionStorage.clear();
     // Muat ulang sudah pernah dicoba dan tidak menolong: hanya toast yang tersisa.
-    window.sessionStorage.setItem("bahasa-muat-ulang", "1");
+    // #815 — penandanya kini cap waktu; yang masih berlaku adalah yang < 60 detik.
+    window.sessionStorage.setItem("bahasa-muat-ulang", String(Date.now()));
     jest.mocked(toast.error).mockClear();
     await i18n.changeLanguage("en");
   });

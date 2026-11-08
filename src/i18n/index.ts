@@ -137,17 +137,36 @@ export const tukarBahasa = async (bahasa: Bahasa, anggaranMs = 4000): Promise<bo
  * tab baru boleh mencoba lagi, dan tab yang sama tidak akan pernah terperangkap
  * lingkaran muat ulang.
  *
+ * #815 — bendera itu BERLAKU 60 DETIK, bukan seumur tab. Tanpa masa berlaku,
+ * satu kegagalan sesaat membekukan pemulihan untuk sisa umur tab: muat ulang
+ * yang ternyata tidak menolong (jaringan putus, server masih men-deploy)
+ * membuat klik berikutnya tidak pernah mencoba jalan keluar satu-satunya lagi,
+ * dan pengguna hanya melihat toast yang sama selamanya.
+ *
  * Niatnya juga disimpan di sessionStorage, BUKAN di kunci `bahasa`: preferensi
  * yang kamusnya tidak pernah tiba tidak boleh dipersistenkan (penjaga #603),
  * tapi sesudah muat ulang niat itu harus masih ada supaya penukarannya
  * diselesaikan sendiri tanpa pengguna menekan apa pun lagi.
  *
- * @returns `false` bila muat ulang sudah pernah dicoba di tab ini — pemanggil
- *   wajib mengucapkan sesuatu ke layar, bukan diam.
+ * @returns `false` bila muat ulang sudah dicoba dalam 60 detik terakhir —
+ *   pemanggil wajib mengucapkan sesuatu ke layar, bukan diam.
  */
+export const MASA_BERLAKU_MUAT_ULANG_MS = 60_000;
+
+const muatUlangSudahDicoba = (): boolean => {
+  const cap = safeSessionStorage.getItem(KUNCI_MUAT_ULANG);
+  if (!cap) return false;
+  const waktu = Number(cap);
+  /* Nilai lama tanpa cap waktu ("1") tidak bisa dipertanggungjawabkan umurnya;
+     diperlakukan kedaluwarsa supaya tab yang baru di-upgrade tidak kehilangan
+     jalan keluar satu-satunya. */
+  if (!Number.isFinite(waktu)) return false;
+  return Date.now() - waktu < MASA_BERLAKU_MUAT_ULANG_MS;
+};
+
 export const mintaMuatUlangBahasa = (bahasa: Bahasa): boolean => {
-  if (safeSessionStorage.getItem(KUNCI_MUAT_ULANG)) return false;
-  safeSessionStorage.setItem(KUNCI_MUAT_ULANG, "1");
+  if (muatUlangSudahDicoba()) return false;
+  safeSessionStorage.setItem(KUNCI_MUAT_ULANG, String(Date.now()));
   safeSessionStorage.setItem(KUNCI_TUNDA, bahasa);
   window.location.reload();
   return true;

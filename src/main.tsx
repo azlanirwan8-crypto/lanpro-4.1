@@ -113,6 +113,7 @@ window.addEventListener("unhandledrejection", (event) => {
 
 import { bacaHasilSso, bersihkanQuerySso } from "./features/auth/lib/ssoCallback";
 import { setAuthToken } from "./lib/api";
+import { pasangMuatUlangAset } from "./lib/muatUlangAset";
 
 // Menerima kembalian SSO SEBELUM React dirender.
 //
@@ -133,6 +134,12 @@ try {
 } catch (e) {
   console.error("[SSO] Gagal memproses kembalian SSO:", e);
 }
+
+// #815 — dipasang sebelum React dirender: potongan JS yang gagal dimuat sesudah
+// deploy (HTML lama menunjuk hash lama) dijawab dengan muat ulang SEKALI. Tanpa
+// pendengar ini Vite meneruskan galatnya ke ErrorBoundary dan pengguna melihat
+// layar rusak padahal satu muat ulang cukup.
+pasangMuatUlangAset();
 
 // #641 — satu saklar untuk seluruh mesin animasi.
 //
