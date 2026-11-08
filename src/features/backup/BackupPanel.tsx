@@ -305,7 +305,7 @@ export const BackupPanel = (_props: {
                   <th className="py-2.5 px-3.5 text-right">{t("backupPanel.action")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-faint font-medium">
+              <tbody className="divide-y divide-border-faint">
                 {exportHistory.length > 0 ? (
                   exportHistory.map((item) => (
                     <tr key={item.id} className="hover:bg-surface-sunken/80 transition-colors">

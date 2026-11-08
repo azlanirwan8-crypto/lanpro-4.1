@@ -1283,7 +1283,7 @@ export function DashboardView(props: DashboardViewProps) {
                       <th className="py-2.5 px-2 text-right">{t("dashboard.thProgress")}</th>
                     </tr>
                   </thead>
-                  <tbody className="text-xs divide-y divide-border-faint font-medium text-content-body ">
+                  <tbody className="text-xs divide-y divide-border-faint text-content-body ">
                     {workloadData.length > 0 ? (
                       workloadData.map((user, idx) => {
                         const totalUserTasks = user.Done + user.Active;
@@ -1294,7 +1294,7 @@ export function DashboardView(props: DashboardViewProps) {
                         let capacityBadge = null;
                         if (user.Active >= 5) {
                           capacityBadge = (
-                            <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] leading-none font-bold bg-danger/10 text-danger-text border border-danger/30">
+                            <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] leading-none font-semibold bg-danger/10 text-danger-text border border-danger/30">
                               <AlertTriangle className="w-3 h-3" /> Overload ({user.Active})
                             </span>
                           );

@@ -1011,7 +1011,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   <th className="px-4 py-2.5 w-28 text-center">{t("discussion.action")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-subtle text-xs font-medium text-content-body">
+              <tbody className="divide-y divide-border-subtle text-xs text-content-body">
                 {galatDaftar && currentDocs.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="text-center py-16 text-content-subtle">
@@ -1088,7 +1088,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         }}
                         className="hover:bg-surface-sunken/80 transition-colors duration-150 group cursor-pointer"
                       >
-                        <td className="py-2.5 px-4 text-center text-content-subtle font-medium whitespace-nowrap">
+                        <td className="py-2.5 px-4 text-center text-content-subtle whitespace-nowrap">
                           {String(srNo).padStart(2, "0")}
                         </td>
                         <td className="py-2.5 px-4 font-medium text-content group-hover:text-primary transition-colors max-w-[320px] whitespace-normal break-words text-justify">
@@ -1125,7 +1125,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                             <span className="text-content-subtle italic text-xs">—</span>
                           )}
                         </td>
-                        <td className="py-2.5 px-4 text-content-body font-medium">
+                        <td className="py-2.5 px-4 text-content-body">
                           <div className="flex items-center gap-2">
                             <UserAvatar
                               uid={doc.createdBy}
@@ -1138,7 +1138,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                             </span>
                           </div>
                         </td>
-                        <td className="py-2.5 px-4 text-content-muted font-medium">{lastEdited}</td>
+                        <td className="py-2.5 px-4 text-content-muted">{lastEdited}</td>
                         <td
                           className="py-2.5 px-4 text-center"
                           onClick={(e) => e.stopPropagation()}

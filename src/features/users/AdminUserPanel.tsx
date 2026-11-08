@@ -893,7 +893,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                 {user?.email || "Email tidak tersedia"}
                               </div>
                               {user.phone && (
-                                <div className="text-xs sm:text-[10px] font-medium text-emerald-600 flex items-center gap-1 mt-0.5">
+                                <div className="text-xs sm:text-[10px] text-emerald-600 flex items-center gap-1 mt-0.5">
                                   <span>{t("users.waPhone")}</span>
                                   <span>{user.phone}</span>
                                 </div>
@@ -903,7 +903,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                         </td>
                         <td className="py-3.5 px-4">
                           <div className="flex flex-col">
-                            <span className="text-xs font-medium text-content-body">
+                            <span className="text-xs text-content-body">
                               {user.department ? getDepartmentName(user.department) : "-"}
                             </span>
                             <span className="text-xs sm:text-[10px] text-content-muted uppercase tracking-normal">

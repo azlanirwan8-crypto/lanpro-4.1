@@ -1515,7 +1515,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 </div>
 
                 <div className="min-w-0">
-                  <h2 className="text-lg sm:text-xl font-bold text-content-inverse tracking-tight truncate">
+                  <h2 className="text-lg sm:text-xl font-semibold text-content-inverse tracking-tight truncate">
                     {user.displayName || user.username}
                   </h2>
                   <div className="flex flex-wrap items-center gap-1.5 text-xs text-content-inverse/80 font-medium mt-0.5">

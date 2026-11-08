@@ -4362,7 +4362,7 @@ function AppContainer() {
                                   {t("sidebar.issueList")}
                                 </div>
                                 <div className="flex items-center gap-2.5 mt-0.5 min-w-0">
-                                  <h3 className="text-base font-bold text-content-strong tracking-tight truncate">
+                                  <h3 className="text-base font-semibold text-content-strong tracking-tight truncate">
                                     {t("appShell.issueDetails")}
                                   </h3>
                                   <span className="text-xs font-medium text-primary bg-primary/10 px-2.5 py-[3px] rounded-md border border-primary/30 shrink-0">

@@ -699,7 +699,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                         }}
                         className="hover:bg-surface-sunken/70 transition-colors duration-200 group cursor-pointer"
                       >
-                        <td className="py-3 px-4 text-center text-content-subtle font-medium">
+                        <td className="py-3 px-4 text-center text-content-subtle">
                           {String(srNo).padStart(2, "0")}
                         </td>
                         <td className="py-3 px-4 font-medium text-content group-hover:text-primary transition-colors">
@@ -716,7 +716,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                             {meeting.title}
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-content-muted font-medium">
+                        <td className="py-3 px-4 text-content-muted">
                           <div className="flex items-center gap-1.5">
                             <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />
                             <span>{formatDate(meeting.createdAt)}</span>
@@ -758,7 +758,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                             <span className="text-content-subtle italic text-xs">—</span>
                           )}
                         </td>
-                        <td className="py-3 px-4 text-content-body font-medium">
+                        <td className="py-3 px-4 text-content-body">
                           <div className="flex items-center gap-2">
                             <UserAvatar
                               uid={meeting.authorId}

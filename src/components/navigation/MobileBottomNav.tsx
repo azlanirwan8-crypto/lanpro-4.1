@@ -165,7 +165,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                   )}
                 />
                 {item.badge && (
-                  <span className="absolute -top-1 -right-2 min-w-4 h-4 bg-danger text-content-inverse text-[9px] font-bold rounded-full flex items-center justify-center px-1 ring-2 ring-surface">
+                  <span className="absolute -top-1 -right-2 min-w-4 h-4 bg-danger text-content-inverse text-[9px] font-semibold rounded-full flex items-center justify-center px-1 ring-2 ring-surface">
                     {item.badge > 99 ? "99+" : item.badge}
                   </span>
                 )}
