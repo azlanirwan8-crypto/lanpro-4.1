@@ -1094,7 +1094,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         <td className="py-2.5 px-4 text-center text-content-subtle whitespace-nowrap">
                           {String(srNo).padStart(2, "0")}
                         </td>
-                        <td className="py-2.5 px-4 font-medium text-content group-hover:text-primary transition-colors max-w-[320px] whitespace-normal break-words text-justify">
+                        <td className="py-2.5 px-4 font-normal text-content group-hover:text-primary transition-colors max-w-[320px] whitespace-normal break-words text-justify">
                           <div title={doc.title}>{doc.title}</div>
                         </td>
                         <td className="py-2.5 px-4">

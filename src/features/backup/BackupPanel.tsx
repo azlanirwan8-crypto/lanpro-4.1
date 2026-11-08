@@ -313,7 +313,7 @@ export const BackupPanel = (_props: {
                         <Clock className="w-3.5 h-3.5 text-content-subtle" />
                         {format(item.createdAt, "dd MMM yyyy, HH:mm:ss")}
                       </td>
-                      <td className="py-2.5 px-3.5 font-mono text-content-body font-medium">
+                      <td className="py-2.5 px-3.5 font-mono text-content-body font-normal">
                         {item.filename}
                       </td>
                       <td className="py-2.5 px-3.5 text-content-secondary font-mono">

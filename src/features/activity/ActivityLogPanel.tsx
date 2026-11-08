@@ -176,7 +176,7 @@ export const ActivityLogPanel = ({
                           className="hover:bg-surface-sunken border-b border-border-faint transition-colors group cursor-default"
                         >
                           <td className="px-8 py-5 whitespace-nowrap align-top">
-                            <div className="text-sm font-medium text-content-strong tabular-nums tracking-tight">
+                            <div className="text-sm font-normal text-content-strong tabular-nums tracking-tight">
                               {safeFormat(log.createdAt, "MMM dd, yyyy")}
                             </div>
                             <div className="text-[11px] font-normal text-content-subtle tabular-nums uppercase mt-1 tracking-normal">
@@ -242,7 +242,7 @@ export const ActivityLogPanel = ({
                                           {t("activityLog.sourceUi")}
                                         </span>
                                       </div>
-                                      <div className="font-mono text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle p-2.5 rounded-lg shadow-inner whitespace-pre-wrap word-break">
+                                      <div className="font-mono text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle p-2.5 rounded-lg shadow-inner whitespace-pre-wrap word-break">
                                         <span className="text-content-subtle select-none mr-2">
                                           {">"}
                                         </span>
@@ -266,10 +266,10 @@ export const ActivityLogPanel = ({
                                 <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-surface rounded-full"></div>
                               </div>
                               <div className="flex flex-col min-w-0">
-                                <span className="text-[13px] font-medium text-content-strong truncate">
+                                <span className="text-[13px] font-normal text-content-strong truncate">
                                   {actor?.displayName}
                                 </span>
-                                <span className="text-[11px] font-medium text-content-muted truncate tracking-wide">
+                                <span className="text-[11px] font-normal text-content-muted truncate tracking-wide">
                                   {actor?.email}
                                 </span>
                               </div>

@@ -705,7 +705,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                         <td className="py-3 px-4 text-center text-content-subtle">
                           {String(srNo).padStart(2, "0")}
                         </td>
-                        <td className="py-3 px-4 font-medium text-content group-hover:text-primary transition-colors">
+                        <td className="py-3 px-4 font-normal text-content group-hover:text-primary transition-colors">
                           {/* #647 — empat NILAI DATA di layar ini dipotong dan
                               tidak bisa dibuka: judul (`line-clamp-1`), nama
                               berkas rekaman (`truncate max-w-[140px]`), nama

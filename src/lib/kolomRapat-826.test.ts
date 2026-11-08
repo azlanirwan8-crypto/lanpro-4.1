@@ -54,10 +54,10 @@ describe("#826 lebar kolom tabel Catatan Rapat", () => {
     expect(badan).toContain("whitespace-pre-wrap break-words text-justify");
   });
 
-  test("bobot judul 500 dan tanpa pemotongan teks (#823, #647)", () => {
+  test("bobot judul 400 dan tanpa pemotongan teks (#823 direvisi #827, #647)", () => {
     const selJudul =
-      /<td className="([^"]*font-medium[^"]*)">[\s\S]*?<div className="([^"]+)">/.exec(isi);
-    expect(selJudul?.[1] ?? "").toContain("font-medium");
+      /<td className="([^"]*font-normal[^"]*)">[\s\S]*?<div className="([^"]+)">/.exec(isi);
+    expect(selJudul?.[1] ?? "").toContain("font-normal");
     // #647: nilai judul tidak dipotong. `truncate` yang ada di badan tabel
     // hanya milik chip dokumen (max-w 150px), bukan sel judul/keterangan.
     expect(selJudul?.[2] ?? "").toContain("whitespace-normal break-words text-justify");

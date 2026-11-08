@@ -257,7 +257,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                     }}
                     className="hover:bg-surface-sunken/70 transition-colors duration-200 group cursor-pointer"
                   >
-                    <td className="py-3 px-4 text-center text-content-subtle font-medium whitespace-nowrap">
+                    <td className="py-3 px-4 text-center text-content-subtle font-normal whitespace-nowrap">
                       {String(srNo).padStart(2, "0")}
                     </td>
                     {/* #647 — `h-14` di baris ini dan `truncate` pada tiga sel
@@ -278,7 +278,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                         `whitespace-normal` kini ditulis EKSPLISIT di setiap sel
                         data yang melebar, jadi izin-wrap tidak lagi bergantung
                         pada apa yang diwarisi dari baris. */}
-                    <td className="py-3 px-4 font-medium text-content group-hover:text-primary transition-colors max-w-[280px] whitespace-normal break-words text-justify">
+                    <td className="py-3 px-4 font-normal text-content group-hover:text-primary transition-colors max-w-[280px] whitespace-normal break-words text-justify">
                       {fw.name}
                     </td>
                     <td className="py-3 px-4 whitespace-nowrap">
@@ -288,7 +288,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                         kosong={t("flowchart.uncategorized")}
                       />
                     </td>
-                    <td className="py-3 px-4 text-content-muted font-medium max-w-[280px] whitespace-normal break-words text-justify">
+                    <td className="py-3 px-4 text-content-muted font-normal max-w-[280px] whitespace-normal break-words text-justify">
                       {fw.description ? (
                         fw.description
                       ) : (
@@ -337,7 +337,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                         <span className="text-content-subtle font-normal text-xs">-</span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-content-body font-medium whitespace-nowrap">
+                    <td className="py-3 px-4 text-content-body font-normal whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         {/* #770 — lingkaran ini dulu punya kelas warnanya sendiri
                             (`bg-primary-surface/10 text-primary`), jadi rona
@@ -347,7 +347,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                         <span className="whitespace-nowrap">{createdBy}</span>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-content-muted font-medium whitespace-nowrap">
+                    <td className="py-3 px-4 text-content-muted font-normal whitespace-nowrap">
                       {lastEditedAt}
                     </td>
                     <td
