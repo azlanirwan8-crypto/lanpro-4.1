@@ -51,6 +51,29 @@ function blokYangMemuat(penanda: string): string {
 
 const MODE_GELAP = blokYangMemuat("--color-surface: #212529");
 
+/**
+ * #818 — isi blok pembuka, dihitung dengan kedalaman kurung setelah komentar
+ * dibuang. `blokYangMemuat` tidak bisa dipakai untuk `@theme`: komentar di
+ * dalamnya memuat contoh seperti `{aksen}-text`, sehingga kurung kurawal di
+ * dalam komentar dihitung sebagai pembuka/penutup blok.
+ */
+function blokPembuka(pembuka: string): string {
+  const bersih = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const awal = bersih.indexOf(pembuka);
+  if (awal < 0) throw new Error("blok tidak ditemukan: " + pembuka);
+  let dalam = 0;
+  for (let i = awal + pembuka.length - 1; i < bersih.length; i++) {
+    if (bersih[i] === "{") dalam++;
+    else if (bersih[i] === "}") {
+      dalam--;
+      if (dalam === 0) return bersih.slice(awal + pembuka.length, i);
+    }
+  }
+  throw new Error("blok tidak ditutup: " + pembuka);
+}
+
+const MODE_TERANG = blokPembuka("@theme {");
+
 function tokenDi(blok: string, nama: string): string {
   const m = new RegExp(nama + ":\\s*([^;]+);").exec(blok);
   if (!m) throw new Error("token tidak ada: " + nama);
@@ -187,25 +210,57 @@ describe("#682 garis mode gelap", () => {
   });
 });
 
-describe("#682 mode terang tidak bergeser oleh pekerjaan ini", () => {
-  // #679 dan #678 mengubah blok `html.dark` saja. Penjaga ini mengunci bahwa
-  // tidak ada satu pun nilai dasar yang ikut tersentuh, supaya klaim
-  // "mode terang tidak berubah" bukan sekadar kata-kata. Kemunculan PERTAMA tiap
-  // token adalah definisi dasarnya, sebab blok gelap baru dibuka kemudian.
+describe("#818 netral mode terang lolos WCAG AA untuk teks", () => {
+  const angka: string[] = [];
+  afterAll(() => console.log("\n#818 kontras teks terang\n" + angka.join("\n")));
+
+  // Sejak #818, mode terang memakai keluarga netral Velzon SEBELUMNYA hanya
+  // gelap yang diukur. Kanvasnya kini lebih pekat (#f3f3f9), jadi nilai yang
+  // dulu lolos di atas putih bisa gagal di sini; pasangan diukur di semua
+  // permukaan, bukan hanya `surface`.
+  for (const t of TEKS) {
+    const nilaiT = tokenDi(MODE_TERANG, t);
+    for (const l of LATAR) {
+      const nilaiL = tokenDi(MODE_TERANG, l);
+      const r = rasio(nilaiT, nilaiL);
+      angka.push(`  ${t} ${nilaiT} di ${l} ${nilaiL} = ${r.toFixed(2)}:1`);
+      it(`${t} di atas ${l} >= 4,5:1 (dapat ${r.toFixed(2)}:1)`, () => {
+        expect(r).toBeGreaterThanOrEqual(4.5);
+      });
+    }
+  }
+});
+
+describe("#818 garis mode terang", () => {
+  it("garis kontrol dan pemisah bukan nilai permukaan mana pun", () => {
+    for (const nama of [GARIS_KONTROL, GARIS_PISAH]) {
+      const nilai = tokenDi(MODE_TERANG, nama).toLowerCase();
+      for (const l of LATAR) {
+        expect(nilai).not.toBe(tokenDi(MODE_TERANG, l).toLowerCase());
+      }
+    }
+  });
+});
+
+describe("#818 nilai dasar mode terang dikunci", () => {
+  // #679 dan #678 mengubah blok `html.dark` saja, sehingga penjaga ini semula
+  // mengunci bahwa mode terang tidak tersentuh. #818 justru MENYENTUH mode
+  // terang dengan sengaja, jadi angka di bawah adalah garis dasar barunya;
+  // fungsi penjaganya tetap sama: perubahan berikutnya harus disadari.
   const BAWAAN_TERANG: Record<string, string> = {
     "--color-surface": "#ffffff",
-    "--color-surface-muted": "#f4f7f9",
-    "--color-surface-sunken": "#f8fafc",
+    "--color-surface-muted": "#eff2f7",
+    "--color-surface-sunken": "#f3f3f9",
     "--color-surface-raised": "#ffffff",
-    "--color-surface-strong": "#e2e8f0",
-    "--color-content": "#0f172a",
-    "--color-content-strong": "#1e293b",
-    "--color-content-body": "#334155",
-    "--color-content-secondary": "#475569",
-    "--color-content-muted": "#64748b",
-    "--color-content-subtle": "#64748b",
-    [GARIS_KONTROL]: "#e2e8f0",
-    [GARIS_PISAH]: "#f1f5f9",
+    "--color-surface-strong": "#e9ebec",
+    "--color-content": "#212529",
+    "--color-content-strong": "#343a40",
+    "--color-content-body": "#495057",
+    "--color-content-secondary": "#545b62",
+    "--color-content-muted": "#686a6d",
+    "--color-content-subtle": "#686a6d",
+    [GARIS_KONTROL]: "#ced4da",
+    [GARIS_PISAH]: "#f3f6f9",
   };
 
   for (const [nama, nilai] of Object.entries(BAWAAN_TERANG)) {

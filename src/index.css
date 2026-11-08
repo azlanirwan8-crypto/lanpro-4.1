@@ -80,10 +80,11 @@
   --color-border-inverse: #334155;
   --color-content-inverse: #ffffff;
 
-  /* Permukaan terisi setingkat slate-200. Tidak ada padanannya sebelum ini;
-   * `surface-muted` (#f4f7f9) terlalu terang, sehingga 82 pemakaian
-   * `bg-slate-200` tidak bisa dipetakan tanpa menggeser mode terang. */
-  --color-surface-strong: #e2e8f0;
+  /* Permukaan terisi setingkat gray-300. Tidak ada padanannya sebelum ini;
+   * `surface-muted` (#eff2f7) terlalu terang, sehingga 82 pemakaian
+   * `bg-slate-200` tidak bisa dipetakan tanpa menggeser mode terang.
+   * #818 — nilainya kini #e9ebec (gray-300 Velzon), setara dengan garis. */
+  --color-surface-strong: #e9ebec;
 
   /* Tirai modal. SENGAJA sama di kedua mode: latar di baliknya memang harus
    * digelapkan, terang maupun gelap temanya. Dipakai dengan opasitas
@@ -163,37 +164,60 @@
   --color-content-inverse-muted: #e2e8f0;
   --color-surface-marker: #cbd5e1;
 
-  /* Permukaan & teks */
+  /* Permukaan & teks — #818 diselaraskan ke netral Velzon 4.3.0.
+   *
+   * Sebelumnya keluarga slate (bertingkat biru), sementara blok `html.dark`
+   * sudah netral sejak #427. Nilai di bawah diambil dari
+   * `Angular/default/src/assets/scss/config/default/_variables.scss` Velzon
+   * 4.3.0: body-bg #f3f3f9, gray-100 #f3f6f9, gray-200 #eff2f7, gray-300
+   * #e9ebec, gray-700 #495057, gray-800 #343a40, gray-900 #212529.
+   *
+   * DUA penyimpangan yang disengaja, keduanya karena AA:
+   *   - `content-muted`/`content-subtle` = #686a6d, bukan gray-600 Velzon
+   *     #878a99. Nilai Velzon itu hanya 3,43:1 di atas putih — gagal AA, dan
+   *     #108 sudah menolaknya untuk peran teks. #686a6d adalah netral paling
+   *     terang yang masih >=4,5:1 di SEMUA permukaan terang (terburuk 4,54:1
+   *     di atas `surface-strong` #e9ebec).
+   *   - `content-secondary` = #545b62, bukan gray-600. #6c757d (4,69:1 di atas
+   *     putih) akan melonggarkan penjaga banner SSO di
+   *     `features/auth/LengkapiPendaftaran.kontras.test.tsx`: rasio
+   *     `content-secondary` terhadap `primary-surface` harus <1,5:1 karena test
+   *     itu sengaja mengunci alasan layar SSO wajib duduk di atas `bg-surface`.
+   *     #545b62 = 1,11:1 di sana dan 5,76:1 di permukaan terburuk.
+   *
+   * `surface-sunken` adalah kanvas halaman (dipakai `AppContainer` dan
+   * `Dashboard`), jadi ia yang memakai body-bg; `surface-muted` tetap peran
+   * isian/hover dan dinaikkan ke gray-200 supaya terbedakan dari kanvas.
+   * `content-kanvas` (#677) dan token bernilai tetap di atas TIDAK ikut
+   * bergeser: ketiganya duduk di permukaan yang tidak ikut tema. */
   --color-surface: #ffffff;
-  --color-surface-muted: #f4f7f9;
+  --color-surface-muted: #eff2f7; /* isian/hover — Velzon gray-200 */
   --color-surface-raised: #ffffff;
-  --color-border-subtle: #e2e8f0; /* = slate-200 */
-  --color-border-faint: #f1f5f9; /* = slate-100 */
-  --color-surface-sunken: #f8fafc; /* = slate-50  */
-  --color-content: #0f172a; /* = slate-900 */
-  --color-content-strong: #1e293b; /* = slate-800 */
-  --color-content-body: #334155; /* = slate-700 */
-  --color-content-secondary: #475569; /* = slate-600 */
-  --color-content-muted: #64748b; /* = slate-500 */
+  --color-border-subtle: #ced4da; /* batas kontrol — Velzon gray-400 (input) */
+  --color-border-faint: #f3f6f9; /* pemisah — Velzon gray-100 */
+  --color-surface-sunken: #f3f3f9; /* kanvas halaman — Velzon body-bg */
+  --color-content: #212529; /* teks utama — gray-900 */
+  --color-content-strong: #343a40; /* judul — gray-800 */
+  --color-content-body: #495057; /* teks isi — gray-700 */
+  --color-content-secondary: #545b62; /* sekunder — lihat catatan AA di atas */
   /* #108 — SEMULA #94a3b8 (slate-400). Di atas `surface` putih itu hanya
    * 2,56:1: gagal AA teks (4,5), AA teks besar (3,0), DAN komponen antarmuka
    * (3,0) sekaligus. Token ini dipakai 641 tempat, termasuk untuk kontrol yang
    * bisa diklik seperti tautan "Lihat semua tugas" pada 11px.
    *
-   * #64748b (slate-500) memberi 4,76:1 dan lolos AA. Ia kebetulan sama dengan
-   * `content-muted` di mode terang, jadi skala terang kehilangan satu tingkat.
-   * Itu HARGA YANG DISENGAJA: di atas putih, #64748b adalah warna paling
-   * terang yang masih lolos AA, sehingga tingkat yang lebih pucat dari itu
-   * hanya sah untuk teks yang benar-benar non-esensial. Bila kelak butuh
-   * tingkat lebih pucat lagi, ia tidak boleh dipakai untuk teks yang harus
-   * dibaca atau kontrol yang bisa ditekan.
+   * #818 — SEMULA #64748b (4,76:1 di atas putih, tetapi hanya 4,42:1 di atas
+   * `surface-muted` lama #f4f7f9: sudah gagal AA). #686a6d kini lolos di
+   * kanvas baru #f3f3f9 (4,72:1) dan di semua permukaan terang lain. Tingkat
+   * yang lebih pucat dari ini tidak sah untuk teks yang harus dibaca atau
+   * kontrol yang bisa ditekan.
    *
-   * KOREKSI #679: kalimat penutup komentar ini sebelumnya menulis "sisi gelapnya
-   * tidak disentuh: #7c8ba1 di atas kartu gelap sudah 5,03:1". Nilai #7c8ba1
-   * tidak pernah ada di berkas mana pun — sisi gelap yang sebenarnya adalah
-   * #6c757d, yaitu 3,29:1. Klaim tanpa angka itulah yang membuat cacatnya
-   * bertahan sebulan, dan sekarang dijaga test, bukan oleh komentar. */
-  --color-content-subtle: #64748b; /* = slate-500 */
+   * KOREKSI #679: komentar ini dulu menulis "sisi gelapnya tidak disentuh:
+   * #7c8ba1 di atas kartu gelap sudah 5,03:1". Nilai #7c8ba1 tidak pernah ada
+   * di berkas mana pun — sisi gelap yang sebenarnya #6c757d, yaitu 3,29:1.
+   * Klaim tanpa angka itulah yang membuat cacatnya bertahan sebulan, dan
+   * sekarang dijaga test, bukan oleh komentar. */
+  --color-content-muted: #686a6d; /* redup — 5,22:1 di atas putih */
+  --color-content-subtle: #686a6d; /* samar — sama dengan redup sejak #108 */
   /* #677 — `content-kanvas`: warna HURUF yang dipakai kanvas flowchart, dan
    * SENGAJA bernilai sama di `@theme` dan `html.dark`. Kanvas mewakili dokumen,
    * bukan antarmuka (§22.5): isian bentuknya adalah DATA yang tidak ikut tema,
