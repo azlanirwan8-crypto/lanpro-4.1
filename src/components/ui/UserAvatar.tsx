@@ -91,18 +91,20 @@ export const getInitials = (fullName?: string): string => {
  * fontSize dipasang dari tangga di bawah. Kelas ditulis literal di sini agar
  * Tailwind v4 benar-benar melihatnya.
  */
-const TANGGA: Record<string, { lingkaran: string; fs: string; huruf: 1 | 2 }> = {
-  "3.5": { lingkaran: "w-3.5 h-3.5", fs: "text-[8px]", huruf: 1 },
-  "4": { lingkaran: "w-4 h-4", fs: "text-[9px]", huruf: 1 },
-  "5": { lingkaran: "w-5 h-5", fs: "text-[11px]", huruf: 1 },
-  "6": { lingkaran: "w-6 h-6", fs: "text-[8px]", huruf: 2 },
-  "7": { lingkaran: "w-7 h-7", fs: "text-[9px]", huruf: 2 },
-  "8": { lingkaran: "w-8 h-8", fs: "text-[10px]", huruf: 2 },
-  "9": { lingkaran: "w-9 h-9", fs: "text-[11px]", huruf: 2 },
-  "10": { lingkaran: "w-10 h-10", fs: "text-[12px]", huruf: 2 },
-  "12": { lingkaran: "w-12 h-12", fs: "text-[14px]", huruf: 2 },
-  "16": { lingkaran: "w-16 h-16", fs: "text-[18px]", huruf: 2 },
-  "20": { lingkaran: "w-20 h-20", fs: "text-[20px]", huruf: 2 },
+const TANGGA: Record<string, { lingkaran: string; fs: string; bobot: string; huruf: 1 | 2 }> = {
+  "3.5": { lingkaran: "w-3.5 h-3.5", fs: "text-[8px]", bobot: "font-semibold", huruf: 1 },
+  /* #816 — `w-4` turun ke 8 px medium: pada 16 px, glif 9 px semibold menyisakan
+     tepi terlalu tipis dan terbaca berdesakan. Aturan satu huruf #776 tetap. */
+  "4": { lingkaran: "w-4 h-4", fs: "text-[8px]", bobot: "font-medium", huruf: 1 },
+  "5": { lingkaran: "w-5 h-5", fs: "text-[11px]", bobot: "font-semibold", huruf: 1 },
+  "6": { lingkaran: "w-6 h-6", fs: "text-[8px]", bobot: "font-semibold", huruf: 2 },
+  "7": { lingkaran: "w-7 h-7", fs: "text-[9px]", bobot: "font-semibold", huruf: 2 },
+  "8": { lingkaran: "w-8 h-8", fs: "text-[10px]", bobot: "font-semibold", huruf: 2 },
+  "9": { lingkaran: "w-9 h-9", fs: "text-[11px]", bobot: "font-semibold", huruf: 2 },
+  "10": { lingkaran: "w-10 h-10", fs: "text-[12px]", bobot: "font-semibold", huruf: 2 },
+  "12": { lingkaran: "w-12 h-12", fs: "text-[14px]", bobot: "font-semibold", huruf: 2 },
+  "16": { lingkaran: "w-16 h-16", fs: "text-[18px]", bobot: "font-semibold", huruf: 2 },
+  "20": { lingkaran: "w-20 h-20", fs: "text-[20px]", bobot: "font-semibold", huruf: 2 },
 };
 
 const UKURAN_PROP: Record<string, string> = {
@@ -212,9 +214,10 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
          garis tint karena `cn()` hanya merangkai string. Avatar sekarang datar;
          yang butuh pemisah (tumpukan avatar) memakai `ring-*` dari caller. */
       className={cn(
-        "avatar-tint rounded-full flex items-center justify-center font-semibold overflow-hidden shrink-0 select-none transition-all",
+        "avatar-tint rounded-full flex items-center justify-center overflow-hidden shrink-0 select-none transition-all",
         callerPunyaLebar ? "" : tangga.lingkaran,
         tangga.fs,
+        tangga.bobot,
         kelasCaller
       )}
       style={gayaLabel(heksa)}
@@ -258,9 +261,10 @@ export const AvatarKosong = ({ className, title }: { className?: string; title?:
       aria-hidden
       title={title}
       className={cn(
-        "rounded-full border border-border-subtle bg-surface-muted text-content-subtle flex items-center justify-center font-semibold shrink-0 select-none",
+        "rounded-full border border-border-subtle bg-surface-muted text-content-subtle flex items-center justify-center shrink-0 select-none",
         callerPunyaLebar ? "" : tangga.lingkaran,
         tangga.fs,
+        tangga.bobot,
         kelasCaller
       )}
     >

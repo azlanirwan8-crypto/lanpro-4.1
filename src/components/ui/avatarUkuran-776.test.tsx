@@ -34,9 +34,9 @@ const RASIO_MAKS = 0.85;
 const BARIS_TANGGA = () =>
   [
     ...isi().matchAll(
-      /"([\d.]+)": \{ lingkaran: "([^"]+)", fs: "text-\[(\d+)px\]", huruf: (\d) \}/g
+      /"([\d.]+)": \{ lingkaran: "([^"]+)", fs: "text-\[(\d+)px\]", bobot: "([^"]+)", huruf: (\d) \}/g
     ),
-  ].map((b) => [b[1], b[2], b[3], b[4]]);
+  ].map((b) => [b[1], b[2], b[3], b[4], b[5]]);
 
 const kelasYangDirender = (props: any) => {
   const { container } = render(
@@ -61,7 +61,7 @@ describe("tangga ukuran avatar (#776)", () => {
 
   it.each(BARIS_TANGGA())(
     "anak tangga w-%s: inisial muat di lingkarannya",
-    (n, lingkaran, fs, huruf) => {
+    (n, lingkaran, fs, _bobot, huruf) => {
       const diameter = Number(n) * 0.25 * AKAR_PX;
       const lebarInisial = Number(fs) * (Number(huruf) === 2 ? FAKTOR_DUA : FAKTOR_SATU);
       expect(lebarInisial / diameter).toBeLessThanOrEqual(RASIO_MAKS);
@@ -70,10 +70,19 @@ describe("tangga ukuran avatar (#776)", () => {
     }
   );
 
+  it("w-4 memakai 8 px medium — #816, diameter tetap", () => {
+    const el = kelasYangDirender({ className: "w-4 h-4" });
+    expect(el.className).toContain("text-[8px]");
+    expect(el.className).toContain("font-medium");
+    expect(el.className).not.toContain("font-semibold");
+    // Anak tangga lain tetap semibold seperti hasil ukur #776.
+    expect(kelasYangDirender({}).className).toContain("font-semibold");
+  });
+
   it("di bawah 18 px hanya satu huruf yang ditampilkan — dua huruf tidak pernah terbaca", () => {
     const kecil = BARIS_TANGGA().filter(([n]) => Number(n) * 0.25 * AKAR_PX < 18);
     expect(kecil.length).toBeGreaterThan(0);
-    for (const [, , , huruf] of kecil) expect(Number(huruf)).toBe(1);
+    for (const [, , , , huruf] of kecil) expect(Number(huruf)).toBe(1);
     const teks = kelasYangDirender({ className: "w-4 h-4" }).textContent;
     expect(teks).toBe("M");
   });
