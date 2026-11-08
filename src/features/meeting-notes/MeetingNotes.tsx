@@ -633,16 +633,16 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                     label={t("meetings.thTitle")}
                     sortir={sortir}
                     onSortir={pilihSortir}
-                    className="py-3 px-4 min-w-[180px] max-w-[260px]"
+                    className="py-3 px-4 min-w-[220px] max-w-[320px]"
                   />
                   <ThSortir
                     kolom="createdAt"
                     label={t("meetings.thDatetime")}
                     sortir={sortir}
                     onSortir={pilihSortir}
-                    className="py-3 px-4 w-44"
+                    className="py-3 px-4 w-32"
                   />
-                  <th className="py-3 px-4 w-40">{t("meetings.thLink")}</th>
+                  <th className="py-3 px-4 w-28">{t("meetings.thLink")}</th>
                   <ThSortir
                     kolom="fileName"
                     label={t("meetings.thDocument")}
@@ -655,14 +655,14 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                     label={t("meetings.thAuthor")}
                     sortir={sortir}
                     onSortir={pilihSortir}
-                    className="py-3 px-4 w-36"
+                    className="py-3 px-4 w-32"
                   />
                   <ThSortir
                     kolom="description"
                     label={t("meetings.thDescription")}
                     sortir={sortir}
                     onSortir={pilihSortir}
-                    className="py-3 px-4 min-w-[180px] max-w-[260px]"
+                    className="py-3 px-4 min-w-[220px] max-w-[320px]"
                   />
                   <th className="py-3 px-4 w-28 text-center">{t("meetings.thAction")}</th>
                 </tr>
