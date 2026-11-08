@@ -2,9 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 
 /**
- * #822 — bobot huruf dibatasi pada Poppins 300–700 yang BENAR-BENAR dimuat.
+ * #822 — bobot huruf dibatasi pada Inter 400–700 yang BENAR-BENAR dimuat.
  *
- * Poppins yang dimuat #820 hanya 300–700. `font-extrabold` (800) dan
+ * Inter yang dimuat #820 hanya 400–700. `font-extrabold` (800) dan
  * `font-black` (900) tidak punya berkas huruf; peramban menyintesisnya, jadi
  * bentuknya menyimpang dari desain keluarga huruf itu. Penjaga ini:
  *
@@ -48,11 +48,11 @@ function nilai(blok: string, properti: string): string {
   return cocok[1].trim();
 }
 
-describe("#822 tidak ada bobot di luar Poppins 300–700", () => {
-  it("Poppins yang dimuat memang berhenti di 700", () => {
-    const tautan = /family=Poppins:wght@([^&"]+)/.exec(html);
-    if (!tautan) throw new Error("tautan Poppins tidak ditemukan di index.html");
-    expect(tautan[1]).toBe("300;400;500;600;700");
+describe("#822 tidak ada bobot di luar Inter 400–700", () => {
+  it("Inter yang dimuat memang berhenti di 700", () => {
+    const tautan = /family=Inter:wght@([^&"]+)/.exec(html);
+    if (!tautan) throw new Error("tautan Inter tidak ditemukan di index.html");
+    expect(tautan[1]).toBe("400;500;600;700");
   });
 
   it("src tidak memakai font-extrabold, font-black, atau bobot arbitrer 800–999", () => {
