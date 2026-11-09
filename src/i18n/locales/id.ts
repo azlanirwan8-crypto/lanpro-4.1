@@ -3395,6 +3395,7 @@ export const id = {
   },
   language: {
     switchTo: "Ganti ke Bahasa Inggris",
+    sedangMenukar: "Menukar bahasa...",
     gagalMuat:
       "Bahasa tidak bisa ditukar — berkas bahasanya masih belum bisa diunduh walau halaman sudah memuat ulang dirinya. Periksa koneksi Anda, lalu tutup tab ini dan buka LanPro kembali.",
     indonesian: "Bahasa Indonesia",
