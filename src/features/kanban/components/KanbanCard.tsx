@@ -230,12 +230,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
               )}
             >
               <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusColor }} />
-              <span
-                className={cn(
-                  "font-normal transition-colors duration-300",
-                  isCompact ? "text-[10px]" : "text-xs"
-                )}
-              >
+              <span className={cn("font-normal text-[10px] transition-colors duration-300")}>
                 {task.status}
               </span>
             </div>
