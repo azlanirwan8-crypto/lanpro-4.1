@@ -170,7 +170,6 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
           onChange={(val) => updateTaskField(task.id, "status", val)}
           disabled={!isEditable}
           className="w-full"
-          buttonClassName={PEMICU}
         />
       </div>
 
@@ -250,7 +249,6 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
               onChange={(val) => updateTaskField(task.id, "priority", val)}
               disabled={!isEditable || blockMember}
               className={cn("w-full", blockMember && "pointer-events-none opacity-80")}
-              buttonClassName={PEMICU}
             />
           </div>
           <div className="space-y-1">
