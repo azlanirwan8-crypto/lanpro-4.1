@@ -20,6 +20,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 import {
   mintaMuatUlangBahasa,
   praMuatKamus,
@@ -70,6 +71,7 @@ export const LanguageSwitcher = () => {
   const ganti = async () => {
     if (sedangBertukar) return;
     setSedangBertukar(true);
+    toast.info(t("language.sedangMenukar", "Menukar bahasa..."));
     try {
       const berhasil = await tukarBahasa(tujuan);
       // Pilihan hanya disimpan kalau benar-benar terpakai; menyimpan bahasa yang
@@ -96,12 +98,21 @@ export const LanguageSwitcher = () => {
       // tetap kalimat Inggris, dan tombolnya terlihat mati.
       onPointerEnter={() => praMuatKamus(tujuan)}
       onFocus={() => praMuatKamus(tujuan)}
-      className="p-2.5 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-content-strong hover:bg-surface-sunken rounded-full transition-all cursor-pointer relative"
+      className={`p-2.5 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-content-strong hover:bg-surface-sunken rounded-full transition-all relative ${
+        sedangBertukar ? "opacity-50 cursor-wait" : "cursor-pointer"
+      }`}
       title={judul}
       aria-label={judul}
       data-testid="language-switcher"
+      disabled={sedangBertukar}
     >
-      {aktif === "id" ? <BenderaIndonesia /> : <BenderaInggris />}
+      {sedangBertukar ? (
+        <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+      ) : aktif === "id" ? (
+        <BenderaIndonesia />
+      ) : (
+        <BenderaInggris />
+      )}
       <span className="sr-only">{t("language.switchTo")}</span>
     </button>
   );

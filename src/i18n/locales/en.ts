@@ -3367,6 +3367,7 @@ export const en = {
   },
   language: {
     switchTo: "Switch to Indonesian",
+    sedangMenukar: "Switching language...",
     gagalMuat:
       "The language could not be switched — its language file still cannot be downloaded even after the page reloaded itself. Check your connection, then close this tab and open LanPro again.",
     indonesian: "Indonesian",
