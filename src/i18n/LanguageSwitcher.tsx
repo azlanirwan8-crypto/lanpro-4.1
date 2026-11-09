@@ -71,7 +71,15 @@ export const LanguageSwitcher = () => {
   const ganti = async () => {
     if (sedangBertukar) return;
     setSedangBertukar(true);
-    toast.info(t("language.sedangMenukar", "Menukar bahasa..."));
+    // #830 — umpan balik tidak boleh membatalkan penukaran. Sebelum ini panggilan
+    // ini berada DI LUAR `try`: di lingkungan yang tidak punya `toast.info`
+    // (mock lama, pembungkus toast lain), ia melempar dan penukarannya tidak
+    // pernah dimulai — tombol tertinggal sibuk tanpa satu pun kejadian bahasa.
+    try {
+      toast.info(t("language.sedangMenukar", "Menukar bahasa..."));
+    } catch {
+      /* biarkan penukaran berjalan; umpan balik hanyalah pelengkap */
+    }
     try {
       const berhasil = await tukarBahasa(tujuan);
       // Pilihan hanya disimpan kalau benar-benar terpakai; menyimpan bahasa yang
