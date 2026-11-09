@@ -218,23 +218,58 @@ i18n.changeLanguage = (async (lng?: string, callback?: (err: unknown, t: unknown
 }) as typeof i18n.changeLanguage;
 
 /**
+ * #830 — `resolvedLanguage` wajib sama dengan bahasa yang benar-benar tampil.
+ *
+ * `init()` hanya membawa kamus Inggris, jadi pengguna yang tersimpan bahasa
+ * Indonesia memulai dengan `language: "id"` tetapi `resolvedLanguage: "en"`.
+ * `addResourceBundle` TIDAK menghitung ulang `resolvedLanguage`; hanya
+ * `changeLanguage` yang melakukannya. Tanpa penyamaan ini layar berbahasa
+ * Indonesia sementara tombol bendera membaca `resolvedLanguage`, mengira
+ * Inggris yang aktif, lalu menargetkan bahasa yang sudah tampil — kliknya
+ * "berhasil" tanpa mengubah apa pun. Itu keluhan "tidak bisa ganti bahasa".
+ */
+const samakanBahasaTerpakai = async (bahasa: Bahasa) => {
+  if (i18n.resolvedLanguage === bahasa) return;
+  try {
+    await i18n.changeLanguage(bahasa);
+  } catch (error) {
+    console.warn(`[I18N] gagal menyamakan resolvedLanguage(${bahasa}):`, error);
+  }
+};
+
+/** #830 — pembaca layar membaca bahasa halaman dari atribut ini, bukan dari teksnya. */
+const sinkronkanHtmlLang = () => {
+  if (typeof document === "undefined") return;
+  document.documentElement.lang = i18n.resolvedLanguage === "id" ? "id" : "en";
+};
+
+i18n.on("languageChanged", sinkronkanHtmlLang);
+
+/**
  * #515 — render baru boleh mulai setelah kamus bahasa pilihan ada di memori.
  *
  * Tanpa ini, pengguna Inggris yang membuka aplikasi langsung menerima kalimat
  * Indonesia sampai kamusnya tiba, dan `fallbackLng` membuat kejadian itu tidak
  * bersuara: tidak ada nama kunci mentah, tidak ada galat, tidak ada test yang
- * menangkapnya. Bagi pengguna Indonesia tidak ada yang ditunggu sama sekali:
+ * menangkapnya. Bagi pengguna Inggris tidak ada yang ditunggu sama sekali:
  * kamusnya sudah ada sejak `init()`, jadi `siapBahasa` langsung selesai.
  *
  * Batas waktunya bukan hiasan: potongan kamus bisa menggantung di jaringan
  * hotspot. Menampilkan bahasa yang salah lebih murah daripada layar putih
  * tanpa sebab.
  */
-export const siapBahasa: Promise<void> = i18n.hasResourceBundle(bahasaAwal, "translation")
+const bahasaSiapDimuat: Promise<void> = i18n.hasResourceBundle(bahasaAwal, "translation")
   ? Promise.resolve()
   : Promise.race([
       muatKamus(bahasaAwal).then(() => undefined),
       new Promise<void>((resolve) => setTimeout(resolve, 2000)),
     ]);
+
+export const siapBahasa: Promise<void> = bahasaSiapDimuat.then(async () => {
+  // Bahasa yang kamusnya tidak tiba jangan dipaksa: biarkan fallback Inggris
+  // tampil apa adanya lewat jalur kegagalan yang sudah bersuara (#603/#746).
+  if (i18n.hasResourceBundle(bahasaAwal, "translation")) await samakanBahasaTerpakai(bahasaAwal);
+  sinkronkanHtmlLang();
+});
 
 export default i18n;

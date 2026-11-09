@@ -21,7 +21,9 @@
 jest.mock("../locales/id", () => {
   throw new Error("Failed to fetch chunk id-legacy.js (404)");
 });
-jest.mock("sonner", () => ({ toast: { error: jest.fn(), success: jest.fn() } }));
+jest.mock("sonner", () => ({
+  toast: { info: jest.fn(), error: jest.fn(), success: jest.fn() },
+}));
 
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";

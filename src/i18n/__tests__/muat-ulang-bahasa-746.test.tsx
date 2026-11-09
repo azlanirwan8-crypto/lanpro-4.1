@@ -18,6 +18,9 @@
 jest.mock("../locales/id", () => {
   throw new Error("Failed to fetch chunk id-legacy.js (404)");
 });
+// #830 — sengaja TANPA `info`. Berkas ini menekan tombol dan menuntut penukaran
+// berjalan; kalau handler kembali bergantung pada `toast.info` (seperti #828),
+// seluruh rangkaian ini merah lagi — bukan sekadar mock yang kurang lengkap.
 jest.mock("sonner", () => ({ toast: { error: jest.fn(), success: jest.fn() } }));
 
 import React from "react";
