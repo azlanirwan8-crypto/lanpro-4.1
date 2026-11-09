@@ -2,7 +2,6 @@ import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion } from "motion/react";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
-import { GripVertical } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { RenderIcon } from "../../../components/RenderIcon";
 import { KanbanCard } from "./KanbanCard";
@@ -111,36 +110,49 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
+                        {...provided.dragHandleProps}
                         style={provided.draggableProps.style}
-                        className="rounded-lg relative group/drag"
+                        className="rounded-lg"
+                        onKeyDown={(e) => {
+                          // #831 — kartu sekarang pegangan seret; Spasi dipakai
+                          // library untuk mengangkat kartu, jadi Enter tetap
+                          // disediakan untuk membuka detail seperti klik.
+                          if (e.key === "Enter" && !snapshot.isDragging) {
+                            e.preventDefault();
+                            onTaskClick(task);
+                          }
+                        }}
                       >
                         {/*
-                          #357 — handle drag terpisah + touch-action:none agar
-                          scroll kolom tidak merebut gesture di mobile browser.
-                          Di desktop, seluruh kartu tetap bisa digeser lewat
-                          area handle yang lebih lebar (hover).
+                          #831 — seluruh permukaan kartu adalah pegangan seret,
+                          setara Jira. #357 dulu memakai tombol GripVertical
+                          terpisah karena takut merebut gulir mobile; sensor
+                          sentuh @hello-pangea/dnd menunggu tahan 120 ms dan
+                          membatalkan seret begitu jari bergerak, jadi gulir
+                          tetap aman TANPA `touch-action: none` di kartu.
                         */}
-                        <button
-                          type="button"
-                          aria-label={t("kanban.dragHandle", "Geser kartu")}
-                          {...provided.dragHandleProps}
-                          style={{ touchAction: "none" }}
-                          className={cn(
-                            "absolute left-0.5 top-1/2 -translate-y-1/2 z-10",
-                            "flex items-center justify-center w-7 h-9 rounded-md",
-                            "text-content-subtle hover:text-content-strong hover:bg-surface-muted",
-                            "border border-transparent hover:border-border-subtle/70",
-                            "active:scale-95 cursor-grab active:cursor-grabbing touch-none"
-                          )}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <GripVertical className="w-4 h-4" />
-                        </button>
-                        <div className="pl-7">
-                          {/* Bungkus motion HANYA saat tidak sedang di-drag.
-                              Saat drag, DOM harus identik dengan estimasi posisi dnd-kit/hello-pangea
-                              supaya tidak terjadi lompatan/offset. */}
-                          {snapshot.isDragging ? (
+                        {/* Bungkus motion HANYA saat tidak sedang di-drag.
+                            Saat drag, DOM harus identik dengan estimasi posisi dnd-kit/hello-pangea
+                            supaya tidak terjadi lompatan/offset. */}
+                        {snapshot.isDragging ? (
+                          <KanbanCard
+                            task={task}
+                            mArr={mArr}
+                            pArr={pArr}
+                            onClick={() => onTaskClick(task)}
+                            isDragging={snapshot.isDragging}
+                            shakingTaskId={shakingTaskId}
+                          />
+                        ) : (
+                          <motion.div
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{
+                              duration: 0.25,
+                              delay: Math.min(index * 0.03, 0.3),
+                              ease: [0.16, 1, 0.3, 1],
+                            }}
+                          >
                             <KanbanCard
                               task={task}
                               mArr={mArr}
@@ -149,27 +161,8 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
                               isDragging={snapshot.isDragging}
                               shakingTaskId={shakingTaskId}
                             />
-                          ) : (
-                            <motion.div
-                              initial={{ opacity: 0, y: 8 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{
-                                duration: 0.25,
-                                delay: Math.min(index * 0.03, 0.3),
-                                ease: [0.16, 1, 0.3, 1],
-                              }}
-                            >
-                              <KanbanCard
-                                task={task}
-                                mArr={mArr}
-                                pArr={pArr}
-                                onClick={() => onTaskClick(task)}
-                                isDragging={snapshot.isDragging}
-                                shakingTaskId={shakingTaskId}
-                              />
-                            </motion.div>
-                          )}
-                        </div>
+                          </motion.div>
+                        )}
                       </div>
                     )}
                   </Draggable>
