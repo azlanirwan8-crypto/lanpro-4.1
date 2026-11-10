@@ -1704,6 +1704,7 @@ export const en = {
     issue: "Issue:",
     linkTheShapeToThe: "Link the shape to the sprint backlog so its status stays in sync.",
     disconnectFlow: "Disconnect flow",
+    straightenLine: "Straighten line",
     clickAShapeStickyNote:
       "Click a shape, sticky note, or arrow on the canvas to change its properties.",
     snapGrid: "Snap grid",

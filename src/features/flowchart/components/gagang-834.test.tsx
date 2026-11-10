@@ -76,14 +76,16 @@ describe("#834 tampilan gagang", () => {
   });
 
   it("dua waypoint tersimpan: dua titik ungu dan tetap satu gagang", () => {
+    // #835 — waypoint harus benar-benar membelokkan garis; titik yang duduk di
+    // rute otomatis kini dianggap salinan lama dan tidak digambar.
     const { container } = render(
       <FlowchartEdges
         {...propsUntuk({
           edges: [
             garis({
               waypoints: [
-                { x: 300, y: 75 },
-                { x: 300, y: 300 },
+                { x: 300, y: 40 },
+                { x: 430, y: 600 },
               ],
             }),
           ],

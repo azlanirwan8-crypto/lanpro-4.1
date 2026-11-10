@@ -23,6 +23,7 @@ import {
   rapikanWaypoints,
   ruteOrtogonal,
   sisipTekukan,
+  tekukanEfektif,
   waypointsSetelahGeserSegmen,
 } from "../lib/ruteOrtogonal";
 import { cn } from "../../../lib/utils";
@@ -462,6 +463,10 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
    * sepanjang jalur yang terlihat, jadi tekukan lama tetap berurutan tanpa
    * ikut menyeret semua simpul router ke dalam model.
    *
+   * #835 — `dasar` adalah waypoint yang MASIH berlaku (salinan rute otomatis
+   * sudah disaring). Tanpa itu, satu seretan pada garis lama akan menulis
+   * kembali titik-titik salinan yang baru saja diabaikan.
+   *
    * Pendengarnya dipasang di `window`, bukan di lingkaran: jarinya bisa
    * meninggalkan elemen sekecil 5 px di tengah seretan, dan kehilangan peristiwa
    * di tengah jalan berarti garis berhenti di tengah udara.
@@ -471,12 +476,13 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
     edge: FlowEdge,
     indeks: number,
     titikAwal?: Point,
-    jalur?: Point[]
+    jalur?: Point[],
+    dasar?: Point[]
   ) => {
     if (!isEditable) return;
     e.stopPropagation();
     e.preventDefault();
-    const asal = (edge.waypoints || []).slice();
+    const asal = (dasar ?? edge.waypoints ?? []).slice();
     let daftar: Point[];
     let posisi: number;
     if (titikAwal) {
@@ -510,9 +516,9 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
     window.addEventListener("pointerup", lepas);
   };
 
-  const hapusTekukan = (edge: FlowEdge, indeks: number) => {
+  const hapusTekukan = (edge: FlowEdge, indeks: number, dasar?: Point[]) => {
     if (!isEditable) return;
-    const sisa = (edge.waypoints || []).filter((_, i) => i !== indeks);
+    const sisa = (dasar ?? edge.waypoints ?? []).filter((_, i) => i !== indeks);
     onEdgePatch(edge.id, { waypoints: sisa });
   };
 
@@ -529,7 +535,12 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
    * Ambang 3 px memisahkan klik-pilih dari seret: menyentuh garis untuk memilih
    * tidak boleh menggesernya.
    */
-  const mulaiSeretSegmen = (e: React.PointerEvent, edge: FlowEdge, jalur: Point[]) => {
+  const mulaiSeretSegmen = (
+    e: React.PointerEvent,
+    edge: FlowEdge,
+    jalur: Point[],
+    dasar?: Point[]
+  ) => {
     if (!isEditable || jalur.length < 2) return;
     const awalPapan = koordinatPapan(e.clientX, e.clientY);
     if (!awalPapan) return;
@@ -552,7 +563,7 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
       const dy = p.y - awalPapan.y;
       if (!bergerak && Math.hypot(dx, dy) <= 3 / zoomLevel) return;
       bergerak = true;
-      const wp = waypointsSetelahGeserSegmen(jalur, indeks, dx, dy, edge.waypoints || []);
+      const wp = waypointsSetelahGeserSegmen(jalur, indeks, dx, dy, dasar ?? edge.waypoints ?? []);
       if (wp) onEdgePatch(edge.id, { waypoints: wp });
     };
     const lepas = () => {
@@ -739,22 +750,36 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
           // awal, bukan hasil `findSmartRoute` yang diluruskan saat menggambar.
           // Tekukan manual tetap disimpan apa adanya (rapikan=false) supaya
           // setiap titik yang dipegang pengguna tetap punya gagangnya sendiri.
-          const tekukan = edge.waypoints && edge.waypoints.length ? edge.waypoints : null;
-          const pathPoints = tekukan
+          const waypointMentah = edge.waypoints || [];
+          // #835 — rute otomatis juga dihitung saat garis ortogonal punya
+          // waypoint, sebab salinan rute (#833) harus dikenali. Mode lain tidak
+          // dibersihkan: pada bezier, titik manual yang kebetulan segaris ikut
+          // menentukan lengkung, jadi membuangnya mengubah bentuk.
+          let ruteOtomatis: Point[] = [];
+          if (waypointMentah.length === 0 || bentuk === "orthogonal") {
+            ruteOtomatis = ruteDenganCache(
+              `${edge.fromNodeId}>${edge.toNodeId}#${urutan}#${bentuk}`,
+              tandaTangan,
+              terganggu,
+              edge,
+              () =>
+                bentuk === "orthogonal"
+                  ? ruteOrtogonal(start, end, edge.fromNodeId, edge.toNodeId, nodes)
+                  : findSmartRoute(start, end, edge.fromNodeId, edge.toNodeId, nodes),
+              simpananRute
+            );
+          }
+          // Titik yang duduk di rute otomatis tidak mengubah bentuk apa pun,
+          // jadi disaring sebelum menggambar dan sebelum disimpan lagi; selama
+          // salinan itu ada, router tidak pernah dipakai dan garis tidak bisa
+          // diluruskan.
+          const tekukan =
+            bentuk === "orthogonal" ? tekukanEfektif(waypointMentah, ruteOtomatis) : waypointMentah;
+          const pathPoints = tekukan.length
             ? bentuk === "orthogonal"
               ? ortogonalDariTitik([start, ...tekukan, end], start.dir, end.dir, false)
               : [start, ...tekukan, end]
-            : ruteDenganCache(
-                `${edge.fromNodeId}>${edge.toNodeId}#${urutan}#${bentuk}`,
-                tandaTangan,
-                terganggu,
-                edge,
-                () =>
-                  bentuk === "orthogonal"
-                    ? ruteOrtogonal(start, end, edge.fromNodeId, edge.toNodeId, nodes)
-                    : findSmartRoute(start, end, edge.fromNodeId, edge.toNodeId, nodes),
-                simpananRute
-              );
+            : ruteOtomatis;
 
           // Compute custom router path based on active routing types (bezier, straight, orthogonal right-angles)
           let pathD = "";
@@ -867,7 +892,7 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                   // belum dipilih tetap hanya terpilih saat diklik, supaya
                   // menepuk garis di HP tidak diam-diam memindahkannya.
                   if (isSelected && bentuk === "orthogonal") {
-                    mulaiSeretSegmen(e, edge, tergambar);
+                    mulaiSeretSegmen(e, edge, tergambar, tekukan);
                   }
                 }}
                 onPointerMove={(e) => {
@@ -1066,7 +1091,9 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
               {(isSelected || hoveredEdgeId === edge.id) &&
                 isEditable &&
                 (() => {
-                  const daftar = edge.waypoints || [];
+                  // #835 — yang digambar hanya tekukan yang masih berlaku;
+                  // salinan rute lama tidak boleh muncul sebagai titik ungu.
+                  const daftar = tekukan;
                   // #834 — padanan yang lebih kecil: titik tengah yang dipakai
                   // untuk menyisip tekukan hanya SATU, bukan satu per segmen.
                   // Bila kursor sedang di atas salah satu segmen, gagangnya
@@ -1095,10 +1122,12 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                             r={13 / zoomLevel}
                             fill="transparent"
                             className="cursor-grab"
-                            onPointerDown={(e) => mulaiSeretTekukan(e, edge, i)}
+                            onPointerDown={(e) =>
+                              mulaiSeretTekukan(e, edge, i, undefined, undefined, tekukan)
+                            }
                             onDoubleClick={(e) => {
                               e.stopPropagation();
-                              hapusTekukan(edge, i);
+                              hapusTekukan(edge, i, tekukan);
                             }}
                           />
                           <circle
@@ -1127,7 +1156,8 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                                 edge,
                                 gagang!.i,
                                 { x: gagang!.x, y: gagang!.y },
-                                tergambar
+                                tergambar,
+                                tekukan
                               )
                             }
                           />
