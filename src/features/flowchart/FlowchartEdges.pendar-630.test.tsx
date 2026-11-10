@@ -222,10 +222,17 @@ describe("garis papan mengikuti draw.io (#656)", () => {
     );
   });
 
-  it("bawaan perutean papan adalah garis lurus seperti draw.io, bukan bezier", () => {
+  /**
+   * #656 mengunci bawaan "straight" karena saat itu satu-satunya bentuk siku
+   * disintesis saat menggambar. #833 menggantinya dengan router ortogonal
+   * sungguhan: garis baru keluar siku sejak awal, sudutnya membulat, dan tiap
+   * segmennya bisa digeser — seperti draw.io. Jadi yang dikunci sekarang adalah
+   * bawaan ORTOGONAL, bukan lagi garis lurus.
+   */
+  it("bawaan perutean papan adalah ortogonal seperti draw.io, bukan bezier", () => {
     const sumber = readFileSync(join(__dirname, "FlowchartContainer.tsx"), "utf8");
     expect(
-      /useState<"bezier" \| "straight" \| "orthogonal">\(\s*"straight"\s*\)/.test(sumber)
+      /useState<"bezier" \| "straight" \| "orthogonal">\(\s*"orthogonal"\s*\)/.test(sumber)
     ).toBe(true);
   });
 });

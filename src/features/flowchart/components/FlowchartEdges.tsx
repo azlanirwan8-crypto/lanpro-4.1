@@ -12,9 +12,19 @@
  * interaksi dengan bentuk; hanya jalur tak terlihat yang lebar di tiap garis
  * yang menerima klik.
  */
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { motion } from "motion/react";
 import { findSmartRoute, memotongInteriorKotak } from "../lib/routing";
+import {
+  indeksSegmenTerdekat,
+  jarakTitikKeSegmen,
+  ortogonalDariTitik,
+  pathDOrtogonal,
+  rapikanWaypoints,
+  ruteOrtogonal,
+  sisipTekukan,
+  waypointsSetelahGeserSegmen,
+} from "../lib/ruteOrtogonal";
 import { cn } from "../../../lib/utils";
 import { colorPaletteHex, ukuranBentukEfektif, KELAS_HURUF } from "../constants";
 import { EdgeStyleBar } from "./EdgeStyleBar";
@@ -44,12 +54,10 @@ const kotakBentuk = (n: FlowNode): Kotak => ({
  *
  * #766 — dan ini sebabnya gagang tekukan dulu terasa tidak bisa dipakai.
  * `pathPoints` adalah titik MODEL (ujung + tekukan + simpul rute). Bentuk siku
- * yang dipakai draw.io di sini justru disintesis belakangan, langsung ke
- * `pathD`: connector orthogonal mengubah dua titik menjadi siku dengan
- * menyisipkan sudutnya sendiri. Jadi gagang yang dihitung dari `pathPoints`
- * duduk di TENGAH TALI LURUS antara dua ujung — di atas ruang kosong, beberapa
- * puluh px dari garis yang terlihat. Itulah "garis tidak bisa di atur":
- * pegangannya ada, garisnya tidak di sana.
+ * yang dipakai draw.io di sini dulu disintesis belakangan, langsung ke `pathD`.
+ * Sejak #833 router ortogonal memulangkan titik siku itu sebagai model, jadi
+ * jalur bezier satu-satunya yang masih perlu dibaca dari `d` (titik kontrolnya
+ * hanya hidup di sana).
  *
  * Yang dibaca: `M`/`L` (absolut, satu pasangan per perintah) dan `C`
  * (kontrolnya dibuang, titik akhirnya diambil). Cukup untuk ketiga mode papan
@@ -374,6 +382,11 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
 }) => {
   const simpananRute = useRef(new Map<string, SimpananRute>()).current;
 
+  // #834 — segmen yang sedang disorot kursor. Hanya segmen ini yang menampilkan
+  // gagang "tambah tekukan"; sebelumnya satu gagang dipasang di SETIAP segmen
+  // rute otomatis, sehingga garis berbelok tampak penuh lingkaran.
+  const [segmenSorot, setSegmenSorot] = useState<{ edgeId: string; i: number } | null>(null);
+
   // Acuan geometri = kotak SETIAP bentuk pada render terakhir di luar interaksi.
   // Selisihnya terhadap `nodes` sekarang menjawab pertanyaan yang benar: bentuk
   // mana yang BARU SAJA berpindah, dan garis mana yang jalurnya tersentuh salah
@@ -442,12 +455,12 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
    * ada: pemegang "tambah tekukan" duduk di tengah segmen, jadi tekukan baru
    * lahir di sana lalu langsung mengikuti jarinya.
    *
-   * #766 — `basis` membawa bentuk jalur SEBELUM tekukan manual ada. Selama
-   * garis masih dirutekan otomatis, `edge.waypoints` kosong dan titik-titik
-   * beloknya hidup di hasil rute, bukan di model. Menambahkan satu tekukan di
-   * tengah segmen tanpa menyimpan sisa rute akan MELOMPATKAN garis ke bentuk
-   * baru — persis keluhan "garis tidak bisa dibentuk". Dengan basis = simpul
-   * rute yang ada, tekukan baru menyisip tanpa mengubah apa pun yang lain.
+   * #766 — menyisip tidak boleh melompatkan garis yang sudah terbentuk.
+   *
+   * #834 — yang disimpan HANYA titik yang disentuh, bukan seluruh jalur.
+   * `sisipTekukan` menaruhnya di urutan yang benar berdasarkan posisinya di
+   * sepanjang jalur yang terlihat, jadi tekukan lama tetap berurutan tanpa
+   * ikut menyeret semua simpul router ke dalam model.
    *
    * Pendengarnya dipasang di `window`, bukan di lingkaran: jarinya bisa
    * meninggalkan elemen sekecil 5 px di tengah seretan, dan kehilangan peristiwa
@@ -458,17 +471,27 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
     edge: FlowEdge,
     indeks: number,
     titikAwal?: Point,
-    basis?: Point[]
+    jalur?: Point[]
   ) => {
     if (!isEditable) return;
     e.stopPropagation();
     e.preventDefault();
     const asal = (edge.waypoints || []).slice();
-    const sumber = basis ?? asal;
-    const daftar = titikAwal
-      ? sumber.slice(0, indeks).concat([titikAwal], sumber.slice(indeks))
-      : asal;
-    const tulis = (isi: Point[]) => onEdgePatch(edge.id, { waypoints: isi.slice() });
+    let daftar: Point[];
+    let posisi: number;
+    if (titikAwal) {
+      daftar = sisipTekukan(asal, titikAwal, jalur ?? [titikAwal]);
+      posisi = daftar.findIndex((p) => {
+        const dx = p.x - titikAwal.x;
+        const dy = p.y - titikAwal.y;
+        return dx * dx + dy * dy <= 25;
+      });
+      if (posisi < 0) posisi = Math.min(indeks, Math.max(0, daftar.length - 1));
+    } else {
+      daftar = asal;
+      posisi = indeks;
+    }
+    const tulis = (isi: Point[]) => onEdgePatch(edge.id, { waypoints: rapikanWaypoints(isi) });
     if (titikAwal) tulis(daftar);
     const pindah = (ev: PointerEvent) => {
       const p = koordinatPapan(ev.clientX, ev.clientY);
@@ -476,7 +499,7 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
       // di luar jendela, atau lingkungan tanpa layout) menulis NaN ke dalam
       // papan — dan NaN itu ikut tersimpan lalu membuat garisnya hilang.
       if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return;
-      daftar.splice(indeks, 1, p);
+      daftar.splice(posisi, 1, p);
       tulis(daftar);
     };
     const lepas = () => {
@@ -491,6 +514,53 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
     if (!isEditable) return;
     const sisa = (edge.waypoints || []).filter((_, i) => i !== indeks);
     onEdgePatch(edge.id, { waypoints: sisa });
+  };
+
+  /**
+   * #833 — seret SELURUH segmen, seperti draw.io.
+   *
+   * Sebelum ini satu-satunya yang bisa digenggam adalah titik tengah segmen
+   * (gagang tekukan): garis jadi punya sudut baru, tetapi segmennya sendiri
+   * tidak bisa dipindah utuh. Di sini segmen yang disentuh digeser beserta
+   * kedua ujungnya, lalu HANYA ujung ruas itu yang disimpan (#834); sisa jalur
+   * dirutekan ulang, seperti draw.io. Model lama menyimpan seluruh simpul rute,
+   * sehingga satu seretan memunculkan lingkaran di setiap belokan.
+   *
+   * Ambang 3 px memisahkan klik-pilih dari seret: menyentuh garis untuk memilih
+   * tidak boleh menggesernya.
+   */
+  const mulaiSeretSegmen = (e: React.PointerEvent, edge: FlowEdge, jalur: Point[]) => {
+    if (!isEditable || jalur.length < 2) return;
+    const awalPapan = koordinatPapan(e.clientX, e.clientY);
+    if (!awalPapan) return;
+    let indeks = -1;
+    let terdekat = Infinity;
+    for (let i = 0; i < jalur.length - 1; i++) {
+      const d = jarakTitikKeSegmen(awalPapan, jalur[i], jalur[i + 1]);
+      if (d < terdekat) {
+        terdekat = d;
+        indeks = i;
+      }
+    }
+    if (indeks < 0 || terdekat > 14 / zoomLevel) return;
+
+    let bergerak = false;
+    const pindah = (ev: PointerEvent) => {
+      const p = koordinatPapan(ev.clientX, ev.clientY);
+      if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return;
+      const dx = p.x - awalPapan.x;
+      const dy = p.y - awalPapan.y;
+      if (!bergerak && Math.hypot(dx, dy) <= 3 / zoomLevel) return;
+      bergerak = true;
+      const wp = waypointsSetelahGeserSegmen(jalur, indeks, dx, dy, edge.waypoints || []);
+      if (wp) onEdgePatch(edge.id, { waypoints: wp });
+    };
+    const lepas = () => {
+      window.removeEventListener("pointermove", pindah);
+      window.removeEventListener("pointerup", lepas);
+    };
+    window.addEventListener("pointermove", pindah);
+    window.addEventListener("pointerup", lepas);
   };
 
   return (
@@ -649,62 +719,51 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
           const start = geserPort(startPort, langkah);
           const end = geserPort(endPort, langkah);
 
-          // Bentuk jalur per garis: hasilnya disimpan per garis dan hanya
-          // dihitung ulang bila salah satu ujungnya bergerak, atau bila ada
-          // bentuk yang baru berpindah terletak di sepanjang jalurnya lama
-          // (lihat ruteDenganCache di atas berkas — #521, #542, #543).
-          const tandaTangan =
-            `${start.x},${start.y},${start.dir?.x},${start.dir?.y}|` +
-            `${end.x},${end.y},${end.dir?.x},${end.dir?.y}`;
+          // Bentuk jalur per garis: pilihan garis sendiri menang, selain itu ikut
+          // bawaan papan.
+          const bentuk = edge.connector ?? connectorType;
+
           // #533 — kunci simpanan ikut indeks kembar: dua garis searah pada
           // pasangan yang sama dulu berebut satu entri, jadi yang kedua
           // menimpa yang pertama dan keduanya menggambar rute identik.
+          // Tanda tangan geometri: rute hanya dihitung ulang bila salah satu
+          // ujungnya bergerak (#521, #542, #543).
+          const tandaTangan =
+            `${start.x},${start.y},${start.dir?.x},${start.dir?.y}|` +
+            `${end.x},${end.y},${end.dir?.x},${end.dir?.y}`;
           // #653 — begitu garis punya tekukan manual, rute otomatis MUNDUR:
           // jalurnya adalah [ujung, ...tekukan, ujung] apa adanya. Ujungnya
           // tetap menempel pada port yang sama, jadi menggeser bentuk tidak
           // melepas sambungannya — hanya tekukannya yang ikut berpindah.
+          // #833 — mode ortogonal memakai router ortogonal: jalurnya siku sejak
+          // awal, bukan hasil `findSmartRoute` yang diluruskan saat menggambar.
+          // Tekukan manual tetap disimpan apa adanya (rapikan=false) supaya
+          // setiap titik yang dipegang pengguna tetap punya gagangnya sendiri.
           const tekukan = edge.waypoints && edge.waypoints.length ? edge.waypoints : null;
           const pathPoints = tekukan
-            ? [start, ...tekukan, end]
+            ? bentuk === "orthogonal"
+              ? ortogonalDariTitik([start, ...tekukan, end], start.dir, end.dir, false)
+              : [start, ...tekukan, end]
             : ruteDenganCache(
-                `${edge.fromNodeId}>${edge.toNodeId}#${urutan}`,
+                `${edge.fromNodeId}>${edge.toNodeId}#${urutan}#${bentuk}`,
                 tandaTangan,
                 terganggu,
                 edge,
-                () => findSmartRoute(start, end, edge.fromNodeId, edge.toNodeId, nodes),
+                () =>
+                  bentuk === "orthogonal"
+                    ? ruteOrtogonal(start, end, edge.fromNodeId, edge.toNodeId, nodes)
+                    : findSmartRoute(start, end, edge.fromNodeId, edge.toNodeId, nodes),
                 simpananRute
               );
-
-          // Bentuk jalur per garis: pilihan garis sendiri menang, selain itu ikut
-          // bawaan papan.
-          const bentuk = edge.connector ?? connectorType;
 
           // Compute custom router path based on active routing types (bezier, straight, orthogonal right-angles)
           let pathD = "";
           if (bentuk === "straight") {
             pathD = "M " + pathPoints.map((p) => `${p.x} ${p.y}`).join(" L ");
           } else if (bentuk === "orthogonal") {
-            // Connect each consecutive point and align orthogonally beautiful
-            let current = pathPoints[0];
-            const parts = [`M ${current.x} ${current.y}`];
-            for (let i = 1; i < pathPoints.length; i++) {
-              const next = pathPoints[i];
-              if (current.x !== next.x && current.y !== next.y) {
-                if (i === 1) {
-                  const dir = start.dir || { x: 0, y: 1 };
-                  if (dir.x !== 0) {
-                    parts.push(`L ${next.x} ${current.y}`);
-                  } else {
-                    parts.push(`L ${current.x} ${next.y}`);
-                  }
-                } else {
-                  parts.push(`L ${next.x} ${current.y}`);
-                }
-              }
-              parts.push(`L ${next.x} ${next.y}`);
-              current = next;
-            }
-            pathD = parts.join(" ");
+            // #833 — sudut membulat seperti `rounded=1` draw.io. Radius 10 px
+            // papan, dipangkas otomatis pada segmen pendek oleh pathDOrtogonal.
+            pathD = pathDOrtogonal(pathPoints, 10);
           } else {
             // Curved / Bezier
             if (pathPoints.length <= 2) {
@@ -744,6 +803,12 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
               pathD = d;
             }
           }
+
+          // #833 — simpul yang SUNGGUH digambar. Untuk straight/orthogonal
+          // jalurnya sudah persis `pathPoints` (router ortogonal menghasilkan
+          // titik siku), jadi gagang tekukan duduk di segmen yang terlihat.
+          // Bezier tetap dibaca dari `d` karena titik kontrolnya hanya ada di sana.
+          const tergambar = bentuk === "bezier" ? simpulTergambar(pathD, pathPoints) : pathPoints;
 
           if (isSelected) titikBilah = { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
 
@@ -797,6 +862,30 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                 fill="none"
                 stroke="transparent"
                 strokeWidth={16 / zoomLevel}
+                onPointerDown={(e) => {
+                  // #833 — garis terpilih bisa digeser per SEGMEN. Garis yang
+                  // belum dipilih tetap hanya terpilih saat diklik, supaya
+                  // menepuk garis di HP tidak diam-diam memindahkannya.
+                  if (isSelected && bentuk === "orthogonal") {
+                    mulaiSeretSegmen(e, edge, tergambar);
+                  }
+                }}
+                onPointerMove={(e) => {
+                  // #834 — gagang "tambah tekukan" hanya untuk segmen di bawah
+                  // kursor. Keadaan ini sengaja tidak ditulis bila indeksnya
+                  // sama, supaya gerakan kursor tidak memicu render tiap frame.
+                  if (!isEditable || tergambar.length < 2) return;
+                  const p = koordinatPapan(e.clientX, e.clientY);
+                  if (!p) return;
+                  const i = indeksSegmenTerdekat(p, tergambar, 14 / zoomLevel);
+                  const baru = i >= 0 ? { edgeId: edge.id, i } : null;
+                  setSegmenSorot((lama) =>
+                    lama?.edgeId === baru?.edgeId && lama?.i === baru?.i ? lama : baru
+                  );
+                }}
+                onPointerLeave={() => {
+                  setSegmenSorot((lama) => (lama?.edgeId === edge.id ? null : lama));
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedEdgeId(edge.id);
@@ -893,6 +982,7 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                 // sumber menulis `strokeWidth` sendiri.
                 strokeWidth={edge.strokeWidth ?? 1}
                 strokeLinecap={edge.strokeStyle === "dotted" ? "round" : "butt"}
+                strokeLinejoin={bentuk === "orthogonal" ? "round" : undefined}
                 strokeDasharray={edge.dashPattern || DASH[edge.strokeStyle ?? "solid"] || undefined}
                 markerEnd={markerEnd}
                 markerStart={markerStart}
@@ -906,39 +996,41 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
               />
 
               {/* Optional inline description on arrows */}
-              {edge.label && (
-                <foreignObject
-                  x={(start.x + end.x) / 2 - 60}
-                  y={(start.y + end.y) / 2 - 17}
-                  width="120"
-                  height="34"
-                >
-                  {/*
-                    #656 — draw.io menaruh teks di atas garis, tanpa bingkai dan
-                    tanpa bayangan. Dulu kotp: border + shadow-soft + rounded +
-                    font-medium, dan `truncate` yang MEMOTONG isinya. Kotak lebarnya
-                    120 px supaya label panjang bisa membungkus dua baris seperti di
-                    sana, bukan dibuang ke elipsis.
-                  */}
-                  <div
-                    style={{
-                      // #665 - `fontSize=10;fontColor=#ff0000` pada label garis.
-                      fontSize: edge.labelFontSize,
-                      color: warnaTeksAman(edge.labelColor) ?? undefined,
-                    }}
-                    className={cn(
-                      "bg-surface/85 text-xs text-content-strong font-normal px-1 py-0.5 text-center whitespace-pre-wrap break-words",
-                      // #761 — draw.io memakai Helvetica untuk label GARIS juga,
-                      // bukan hanya label bentuk. Kelas yang sama dipakai kedua
-                      // jalur lewat constants.ts, jadi ia tidak bisa lagi
-                      // tertinggal di satu sisi saja.
-                      KELAS_HURUF.sans
-                    )}
-                  >
-                    {edge.label}
-                  </div>
-                </foreignObject>
-              )}
+              {edge.label &&
+                (() => {
+                  // #833 / #522(d) — label duduk di TENGAH SEPANJANG jalur,
+                  // bukan di tengah tali lurus antara kedua ujung. Pada garis
+                  // yang memutar, rata-rata ujung jatuh di ruang kosong.
+                  const tengah = titikTengahJalur(tergambar);
+                  return (
+                    <foreignObject x={tengah.x - 60} y={tengah.y - 17} width="120" height="34">
+                      {/*
+                        #656 — draw.io menaruh teks di atas garis, tanpa bingkai dan
+                        tanpa bayangan. Dulu kotp: border + shadow-soft + rounded +
+                        font-medium, dan `truncate` yang MEMOTONG isinya. Kotak lebarnya
+                        120 px supaya label panjang bisa membungkus dua baris seperti di
+                        sana, bukan dibuang ke elipsis.
+                      */}
+                      <div
+                        style={{
+                          // #665 - `fontSize=10;fontColor=#ff0000` pada label garis.
+                          fontSize: edge.labelFontSize,
+                          color: warnaTeksAman(edge.labelColor) ?? undefined,
+                        }}
+                        className={cn(
+                          "bg-surface/85 text-xs text-content-strong font-normal px-1 py-0.5 text-center whitespace-pre-wrap break-words",
+                          // #761 — draw.io memakai Helvetica untuk label GARIS juga,
+                          // bukan hanya label bentuk. Kelas yang sama dipakai kedua
+                          // jalur lewat constants.ts, jadi ia tidak bisa lagi
+                          // tertinggal di satu sisi saja.
+                          KELAS_HURUF.sans
+                        )}
+                      >
+                        {edge.label}
+                      </div>
+                    </foreignObject>
+                  );
+                })()}
 
               {/*
                 #653 — pemegang tekukan, pada papan yang boleh disunting.
@@ -953,16 +1045,20 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                 jadi jalur membentuk garis praktis tidak ada.
 
                 SEKARANG, meniru draw.io:
-                - SATU gagang di TENGAH SETIAP SEGMEN, bukan satu per garis;
+                - SATU gagang, di TENGAH SEGMEN YANG SEDANG DISOROT kursor;
+                  bila tidak ada yang disorot, di tengah seluruh jalur (#834 —
+                  menggambar satu gagang per segmen membuat rute lima titik
+                  menampilkan empat sasaran sekaligus, dan itu keluhan "banyak
+                  titik");
                 - gagang ikut muncul saat garis hanya DIARAHKAN kursor, supaya
                   ada untuk ditemukan sebelum dipilih;
                 - sasaran sentuhnya 13 px ruang papan (lingkaran transparan),
                   lingkaran ungunya hanya hiasan 4,5 px — jari tidak menarget
                   hiasan;
-                - menarik gagang menyisipkan tekukan PADA INDEKS segmen itu dan
-                - langsung mengikutinya, sementara sisa jalur tetap di tempat
-                  (simpul rute lama disimpan sebagai basis, lihat #766 di
-                  `mulaiSeretTekukan`), jadi garis TIDAK melompat saat dibentuk.
+                - menarik gagang menyisipkan SATU waypoint (`sisipTekukan`),
+                  bukan menyalin seluruh rute router; sisa jalur dihitung ulang
+                  seperti draw.io, jadi garis TIDAK melompat saat dibentuk dan
+                  tidak meninggalkan ekor titik.
 
                 Lingkaran UNGU penuh = tekukan yang sudah ada: seret untuk
                 memindah, klik-ganda untuk membuang.
@@ -971,18 +1067,23 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                 isEditable &&
                 (() => {
                   const daftar = edge.waypoints || [];
-                  // SEGMEN dibaca dari yang TERGAMBAR, bukan dari titik model:
-                  // lihat `simpulTergambar` (#766). Basis tekukan baru ikut yang
-                  // tergambar, supaya menyisip satu tekukan tidak mengubah sisa
-                  // bentuk garisnya.
-                  const tergambar = simpulTergambar(pathD, pathPoints);
-                  const basis = tergambar.slice(1, -1);
-                  // Tengah SETIAP segmen, dihitung dengan helper #653 supaya
-                  // satu definisi "titik tengah" tidak bercabang dua.
-                  const segmen = tergambar.slice(0, -1).map((p, i) => ({
-                    ...titikTengahJalur([p, tergambar[i + 1]]),
-                    i,
-                  }));
+                  // #834 — padanan yang lebih kecil: titik tengah yang dipakai
+                  // untuk menyisip tekukan hanya SATU, bukan satu per segmen.
+                  // Bila kursor sedang di atas salah satu segmen, gagangnya
+                  // duduk di segmen itu; selain itu di tengah seluruh jalur.
+                  const indeksSorot =
+                    segmenSorot && segmenSorot.edgeId === edge.id ? segmenSorot.i : -1;
+                  let gagang: { x: number; y: number; i: number } | null = null;
+                  if (indeksSorot >= 0 && tergambar[indeksSorot] && tergambar[indeksSorot + 1]) {
+                    gagang = {
+                      ...titikTengahJalur([tergambar[indeksSorot], tergambar[indeksSorot + 1]]),
+                      i: indeksSorot,
+                    };
+                  } else {
+                    const tengah = titikTengahJalur(tergambar);
+                    const i = indeksSegmenTerdekat(tengah, tergambar);
+                    if (i >= 0) gagang = { ...tengah, i };
+                  }
                   return (
                     <g>
                       {daftar.map((w, i) => (
@@ -1011,22 +1112,28 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                           />
                         </g>
                       ))}
-                      {segmen.map((sg) => (
-                        <g key={`seg-${sg.i}`}>
+                      {gagang && (
+                        <g key={`seg-${gagang.i}`}>
                           <circle
-                            data-testid={`gagang-tekuk-${sg.i}`}
-                            cx={sg.x}
-                            cy={sg.y}
+                            data-testid={`gagang-tekuk-${gagang.i}`}
+                            cx={gagang.x}
+                            cy={gagang.y}
                             r={13 / zoomLevel}
                             fill="transparent"
                             className="cursor-crosshair"
                             onPointerDown={(e) =>
-                              mulaiSeretTekukan(e, edge, sg.i, { x: sg.x, y: sg.y }, basis)
+                              mulaiSeretTekukan(
+                                e,
+                                edge,
+                                gagang!.i,
+                                { x: gagang!.x, y: gagang!.y },
+                                tergambar
+                              )
                             }
                           />
                           <circle
-                            cx={sg.x}
-                            cy={sg.y}
+                            cx={gagang.x}
+                            cy={gagang.y}
                             r={4.5 / zoomLevel}
                             fill="#ffffff"
                             stroke="#8b5cf6"
@@ -1034,7 +1141,7 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                             pointerEvents="none"
                           />
                         </g>
-                      ))}
+                      )}
                     </g>
                   );
                 })()}
