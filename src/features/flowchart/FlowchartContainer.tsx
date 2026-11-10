@@ -541,11 +541,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const [canvasContextMenu, setCanvasContextMenu] = useState<{ x: number; y: number } | null>(null);
 
   // Custom connection line routing types: bezier (curved), straight (direct), orthogonal (clean right-angles)
-  // #656 — bawaannya LURUS. draw.io menggambar garis baru sebagai garis lurus;
-  // `bezier` di sini adalah sisa papan bergaya Miro, dan ia membuat setiap garis
-  // baru melengkung padahal sumbernya (draw.io) tidak.
+  // #656 — bawaannya LURUS, dan itu keliru: draw.io menggambar garis baru
+  // ORTOGONAL (siku) sebagai bawaan, sementara `bezier` di sini sisa papan
+  // bergaya Miro. Sejak #833 bawaannya ortogonal — siku sejak awal, sudut
+  // membulat, dan tiap segmennya bisa digeser.
   const [connectorType, setConnectorType] = useState<"bezier" | "straight" | "orthogonal">(
-    "straight"
+    "orthogonal"
   );
 
   // Node Interactive Resizing properties
@@ -3801,7 +3802,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   /** Satu jalur menambah garis: dipakai mode klik dan mode tarik. */
-  const tambahSambungan = (dari: string, ke: string, titikLepas?: Point) => {
+  const tambahSambungan = (dari: string, ke: string, titikLepas?: Point, titikMulai?: Point) => {
     if (dari === ke) {
       toast.error(t("toast.connectSelf"));
       return false;
@@ -3817,14 +3818,21 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     // MEMBACA pecahan itu saat impor dan sudah MENGHORMATINYA saat menggambar —
     // yang belum adalah penulisannya dari layar, jadi garis buatan pengguna
     // selalu melompat ke port yang dipapankan.
+    // #833 — SUMBER juga dikunci. Dulu hanya ujung lepas yang di-pin, jadi
+    // garis yang ditarik dari sudut kiri bawah bentuk selalu melompat ke port
+    // tengah pilihan papan. Arah keluar port (dan karena itu bentuk belokan
+    // pertamanya) ikut ditentukan titik ini.
     const sasaran = nodes.find((n) => n.id === ke);
+    const sumber = nodes.find((n) => n.id === dari);
     const nextEdges = [
       ...edges,
       {
         id,
         fromNodeId: dari,
         toNodeId: ke,
+        connector: connectorType,
         ...(titikLepas && sasaran ? { portTujuan: pecahanPort(sasaran, titikLepas) } : null),
+        ...(titikMulai && sumber ? { portSumber: pecahanPort(sumber, titikMulai) } : null),
       },
     ];
     setEdges(nextEdges);
@@ -3979,7 +3987,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       }
 
       if (target && seretSambung && target !== seretSambung) {
-        tambahSambungan(seretSambung, target, titik ?? undefined);
+        tambahSambungan(
+          seretSambung,
+          target,
+          titik ?? undefined,
+          awalSeretSambung.current ?? undefined
+        );
         setConnectSourceId(null);
         setActiveTool("select");
       } else {
