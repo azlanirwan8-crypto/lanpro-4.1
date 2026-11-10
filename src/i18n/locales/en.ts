@@ -1705,6 +1705,22 @@ export const en = {
     linkTheShapeToThe: "Link the shape to the sprint backlog so its status stays in sync.",
     disconnectFlow: "Disconnect flow",
     straightenLine: "Straighten line",
+    // #685 — pinned draw.io editor bridge.
+    drawioBukaEditor: "Edit in draw.io",
+    drawioJudulEditor: "draw.io editor",
+    drawioMemuat: "Loading draw.io editor…",
+    drawioSiap: "Connected",
+    drawioMenyimpan: "Saving…",
+    drawioTersimpan: "Autosaved",
+    drawioGagalMenyimpan: "Not saved",
+    drawioGagalMuat: "draw.io editor is not responding",
+    drawioGagalMuatHint:
+      "Make sure the pinned build has been fetched with `npm run drawio:ambil`, then try again.",
+    drawioCobaLagi: "Try again",
+    drawioSimpanUlang: "Save again",
+    drawioBukanXml: "The editor sent content that is not draw.io XML — not saved.",
+    drawioTerlaluBesar:
+      "The editor's file is {{ukuran}} MB, the source limit is {{batas}} MB. The edit was not saved; shrink the board and try again.",
     clickAShapeStickyNote:
       "Click a shape, sticky note, or arrow on the canvas to change its properties.",
     snapGrid: "Snap grid",

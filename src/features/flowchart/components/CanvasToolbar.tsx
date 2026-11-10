@@ -23,6 +23,7 @@ import {
   Grid3x3,
   Square,
   FileDown,
+  SquarePen,
 } from "lucide-react";
 import type { PolaPapan } from "../types";
 import { toast } from "sonner";
@@ -38,6 +39,13 @@ interface CanvasToolbarProps {
   handleExportJSON: () => void;
   /** #659 - unduh papan sebagai berkas .drawio. */
   handleExportDrawIo: () => void;
+  /**
+   * #685 — tampil hanya untuk papan yang memang punya sumber `.drawio` dan boleh
+   * ditulis. Papan native tidak punya sumber untuk dibuka; menampilkan tombolnya
+   * di sana hanya menjanjikan sesuatu yang tidak ada.
+   */
+  bolehEditorDrawio?: boolean;
+  onBukaEditorDrawio?: () => void;
   isRightSidebarOpen: boolean;
   setIsRightSidebarOpen: (value: boolean) => void;
   /** Papan sedang tampil layar penuh? Hanya papan, bukan seluruh aplikasi. */
@@ -53,6 +61,8 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   handleExportJPG,
   handleExportJSON,
   handleExportDrawIo,
+  bolehEditorDrawio = false,
+  onBukaEditorDrawio,
   isRightSidebarOpen,
   setIsRightSidebarOpen,
   isFullscreen,
@@ -133,6 +143,17 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
 
       {/* Export + properties — icon-first; JPG/JSON juga ada di dock */}
       <div className="flex items-center gap-1.5 pointer-events-auto shrink-0">
+        {bolehEditorDrawio && onBukaEditorDrawio && (
+          <button
+            type="button"
+            onClick={onBukaEditorDrawio}
+            aria-label={t("flowchart.drawioBukaEditor")}
+            title={t("flowchart.drawioBukaEditor")}
+            className="min-h-11 min-w-11 p-2 flex items-center justify-center bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 shadow-[0_6px_18px_rgba(0,0,0,0.05)] rounded-lg text-primary transition-all duration-300 cursor-pointer"
+          >
+            <SquarePen className="w-4 h-4" />
+          </button>
+        )}
         <div className="hidden sm:flex bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-0.5 rounded-lg shadow-[0_6px_18px_rgba(0,0,0,0.05)] items-center gap-0.5 transition-all duration-300">
           <button
             type="button"

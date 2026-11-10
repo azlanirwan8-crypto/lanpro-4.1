@@ -54,6 +54,7 @@ import { FlowchartDashboard } from "./components/FlowchartDashboard";
 import { CanvasToolRail } from "./components/CanvasToolRail";
 import { FlowchartDocumentModal } from "./components/FlowchartDocumentModal";
 import { ImportDiagramModal } from "./components/ImportDiagramModal";
+import { DrawioEmbed } from "./components/DrawioEmbed";
 import { CanvasToolbar } from "./components/CanvasToolbar";
 import { FlowchartNode } from "./components/FlowchartNode";
 import { FlowchartEdges, pecahanPort } from "./components/FlowchartEdges";
@@ -85,6 +86,7 @@ import type { ParsedDiagram } from "./lib/importers";
 // #685 — berkas `.drawio` adalah sumber kanonik: dibaca utuh, disimpan utuh,
 // dan setiap yang TIDAK bertahan dalam konversi native dinyatakan lebih dulu.
 import { putuskanImporDiagram } from "./lib/putuskanImpor";
+import { adalahDrawio, BATAS_BYTE_SUMBER, FORMAT_SUMBER, panjangByte } from "./lib/sumberDrawio";
 import type { BatasKonversi } from "./lib/sumberDrawio";
 // #659 - papan bisa ditulis MENJADI berkas draw.io, bukan dibaca saja.
 import { eksporDrawIo } from "./lib/eksporDrawio";
@@ -679,6 +681,27 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
    * dijaga.
    */
   const [sumberImpor, setSumberImpor] = useState<{ flowId: string; xml: string } | null>(null);
+  /** #685 — editor draw.io patok untuk papan yang memang punya sumber. */
+  const [editorDrawioTerbuka, setEditorDrawioTerbuka] = useState(false);
+  /**
+   * Sumber saat editor dibuka vs sumber terakhir yang tersimpan. Dipakai untuk
+   * memutuskan apakah model native perlu disegarkan saat editor ditutup: tanpa
+   * perbandingan ini, sekadar membuka lalu menutup editor akan membuang
+   * seleksi dan zoom tanpa ada yang berubah.
+   */
+  const sumberSaatBukaDrawio = useRef<string | null>(null);
+  const sumberTersimpanDrawio = useRef<string | null>(null);
+  /**
+   * Sumber `.drawio` yang paling baru: hasil impor yang belum tersimpan
+   * mengalahkan baris server, karena baris itu belum tahu tentang impor tersebut.
+   */
+  const sumberDrawioAktif = useMemo(
+    () =>
+      sumberImpor?.flowId === selectedFlowId
+        ? sumberImpor.xml
+        : (currentFlowMetadata?.sumberDrawio ?? null),
+    [sumberImpor, selectedFlowId, currentFlowMetadata]
+  );
   /** Laporan apa yang TIDAK bertahan dalam konversi — ditampilkan sebelum diterapkan. */
   const [batasImpor, setBatasImpor] = useState<BatasKonversi | null>(null);
   /**
@@ -1185,10 +1208,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     //   • KONVERSI = mxfile yang ditulis ulang dari model native. Bentuknya
     //     mirip, isinya bukan berkas asal.
     // Selama ini yang terjadi selalu yang kedua, dan itu tidak pernah disebut.
-    const sumber =
-      sumberImpor?.flowId === selectedFlowId
-        ? sumberImpor.xml
-        : (currentFlowMetadata?.sumberDrawio ?? null);
+    const sumber = sumberDrawioAktif;
     const dariSumber = !!sumber;
     const isi = dariSumber
       ? (sumber as string)
@@ -2204,7 +2224,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
    * tanpa diminta, jadi membunyikan toast tiap beberapa detik akan menimbun layar;
    * kegagalannya cukup terbaca di bilah status dock.
    */
-  const kirimKanvasKeServer = async (opts: { senyap: boolean }) => {
+  const kirimKanvasKeServer = async (opts: { senyap: boolean; sumberPaksa?: string }) => {
     const idProyek = selectedProject?.id;
     const projId = idProyek || selectedProject?.key || "default";
     if (!selectedFlowId) return;
@@ -2224,8 +2244,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     const dibaca = versiPapan.current.get(selectedFlowId) ?? alur?.versiMuat ?? null;
     // #685 — sumber yang belum disimpan mengalahkan sumber di baris; kalau tidak
     // ada impor baru, berkas yang tersimpan sebelumnya yang dipakai.
+    // #685 — `sumberPaksa` datang dari editor draw.io: XML yang baru diterima
+    // belum tentu sudah masuk state (setState tidak sinkron), dan autosave yang
+    // berjalan sesudahnya harus memakai XML itu, bukan salinan baris yang basi.
     const sumberAktif =
-      sumberImpor?.flowId === selectedFlowId ? sumberImpor.xml : (alur?.sumberDrawio ?? null);
+      opts.sumberPaksa ??
+      (sumberImpor?.flowId === selectedFlowId ? sumberImpor.xml : (alur?.sumberDrawio ?? null));
     try {
       const stempel = await updateFlowchartApi(idProyek, selectedFlowId, {
         // #568 — tanpa ini server tidak bisa membedakan "tab ini basi" dari
@@ -2288,6 +2312,106 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         );
       }
       throw apiErr;
+    }
+  };
+
+  /**
+   * #685 — jembatan simpan editor draw.io.
+   *
+   * Editor mengirim `<mxfile>` lewat `autosave`; yang disimpan adalah byte itu,
+   * bukan hasil konversi model native. Urutannya penting: server dulu, baru
+   * state daftar — kalau state diperbarui lebih dulu, autosave yang berjalan
+   * bersamaan bisa mengirim sumber baru ke baris yang belum menerimanya.
+   */
+  const handleSimpanDrawio = async (xmlSumber: string) => {
+    if (!selectedFlowId) throw new Error(t("flowchart.saveNoServerRow"));
+    // Papan lokal (`flow_...`) belum punya baris server. Tanpa penjagaan ini
+    // autosave editor akan tampak berhasil padahal tidak ada yang tersimpan.
+    if (!selectedProject?.id || selectedFlowId.startsWith("flow_")) {
+      throw new Error(t("flowchart.saveNoServerRow"));
+    }
+    if (!adalahDrawio(xmlSumber)) throw new Error(t("flowchart.drawioBukanXml"));
+    const byte = panjangByte(xmlSumber);
+    if (byte > BATAS_BYTE_SUMBER) {
+      throw new Error(
+        t("flowchart.drawioTerlaluBesar", {
+          ukuran: (byte / 1024 / 1024).toFixed(1),
+          batas: (BATAS_BYTE_SUMBER / 1024 / 1024).toFixed(0),
+        })
+      );
+    }
+    try {
+      await kirimKanvasKeServer({ senyap: true, sumberPaksa: xmlSumber });
+    } catch (galat) {
+      if ((galat as { status?: number })?.status === 409) {
+        throw new Error(t("flowchart.kunciKonflik"));
+      }
+      throw galat instanceof Error ? galat : new Error(String(galat));
+    }
+    sumberTersimpanDrawio.current = xmlSumber;
+    updateFlowchart(selectedFlowId, {
+      sumberDrawio: xmlSumber,
+      formatSumber: FORMAT_SUMBER,
+    });
+    tandaiTersimpanOtomatis();
+  };
+
+  /**
+   * #685 — menyamakan model native dengan sumber yang baru disunting di draw.io.
+   *
+   * Sumber adalah yang kanonik; model native hanya turunannya. Tanpa langkah ini
+   * papan di layar tetap menampilkan bentuk LAMA sesudah editor ditutup, dan
+   * suntingan native berikutnya akan menulis model yang sudah tidak cocok
+   * dengan sumber yang tersimpan. Dijalankan sekali saat menutup editor, bukan
+   * setiap autosave — mengganti nodes/edges di tengah sesi draw.io akan
+   * membuang seleksi dan riwayat berulang kali.
+   */
+  const segarkanModelDariSumber = async (xmlSumber: string) => {
+    try {
+      const keputusan = await putuskanImporDiagram(xmlSumber, "editor.drawio");
+      // Sumber sudah tersimpan. Bila konversi native menolak atau gagal dijeraf,
+      // jangan ganti papan dengan hasil kosong — papan lama lebih baik daripada
+      // kanvas kosong yang terlihat seperti pekerjaan hilang.
+      if (!keputusan.sumber || keputusan.sebab) {
+        console.warn(
+          "Sumber draw.io tersimpan, tetapi model native tidak dapat dijeraf:",
+          keputusan.pesan
+        );
+        return;
+      }
+      const baru = keputusan.hasil;
+      if (!baru || !Array.isArray(baru.nodes) || !Array.isArray(baru.edges)) return;
+      setNodes(baru.nodes);
+      setEdges(baru.edges);
+      setHistoryStack([
+        {
+          nodes: JSON.parse(JSON.stringify(baru.nodes)),
+          edges: JSON.parse(JSON.stringify(baru.edges)),
+        },
+      ]);
+      setHistoryIndex(0);
+      setSelectedNodeId(null);
+      setSelectedEdgeId(null);
+      pasKeLayar(batasSeluruhBentuk(baru.nodes));
+    } catch (galat) {
+      // Sumber sudah tersimpan di server; kegagalan menggambar ulang tidak boleh
+      // menyamar sebagai kegagalan menyimpan. Papan akan memakai versi server
+      // pada muat berikutnya.
+      console.warn("Sumber draw.io tersimpan, tetapi model native gagal disegarkan:", galat);
+    }
+  };
+
+  const bukaEditorDrawio = () => {
+    sumberSaatBukaDrawio.current = sumberDrawioAktif;
+    sumberTersimpanDrawio.current = sumberDrawioAktif;
+    setEditorDrawioTerbuka(true);
+  };
+
+  const tutupEditorDrawio = () => {
+    setEditorDrawioTerbuka(false);
+    const akhir = sumberTersimpanDrawio.current;
+    if (akhir && akhir !== sumberSaatBukaDrawio.current) {
+      void segarkanModelDariSumber(akhir);
     }
   };
 
@@ -4686,6 +4810,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         handleExportJPG={handleExportJPG}
                         handleExportJSON={handleExportJSON}
                         handleExportDrawIo={handleExportDrawIo}
+                        bolehEditorDrawio={
+                          isWorkspaceEditable &&
+                          Boolean(sumberDrawioAktif) &&
+                          Boolean(selectedProject?.id) &&
+                          Boolean(selectedFlowId) &&
+                          !selectedFlowId?.startsWith("flow_")
+                        }
+                        onBukaEditorDrawio={bukaEditorDrawio}
                         isRightSidebarOpen={isRightSidebarOpen}
                         setIsRightSidebarOpen={setIsRightSidebarOpen}
                         isFullscreen={papanPenuh}
@@ -5750,6 +5882,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         handleProcessImportFile={handleProcessImportFile}
         handleApplyImportMerge={handleApplyImportMerge}
         handleApplyImportReplace={handleApplyImportReplace}
+      />
+
+      {/* #685 — editor draw.io patok, hanya untuk papan yang punya sumber. */}
+      <DrawioEmbed
+        isOpen={editorDrawioTerbuka && Boolean(sumberDrawioAktif)}
+        xml={sumberDrawioAktif ?? ""}
+        judul={currentFlowMetadata?.name ?? flowName}
+        onSimpan={handleSimpanDrawio}
+        onTutup={tutupEditorDrawio}
       />
 
       <FlowchartDocumentModal

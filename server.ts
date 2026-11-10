@@ -258,7 +258,10 @@ async function startServer() {
             mediaSrc: ["'self'", "data:", "blob:", "https:"],
             workerSrc: ["'self'", "blob:"],
             objectSrc: ["'none'"],
-            frameAncestors: ["'none'"],
+            // #685 — editor draw.io disajikan same-origin di /drawio dan
+            // disematkan halaman ini. 'none' memblokir sematan itu sendiri;
+            // 'self' tetap menolak semua framing lintas-origin.
+            frameAncestors: ["'self'"],
             baseUri: ["'self'"],
             formAction: ["'self'"],
           },

@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/ambil-drawio.cjs",
     "dev": "tsx watch --clear-screen=false server.ts",
+    "drawio:ambil": "node scripts/ambil-drawio.cjs",
     "doctor": "node scripts/doctor.cjs",
     "db:migrate": "tsx scripts/db/migrate.ts",
     "fix:warna": "node scripts/fix/warna-ke-token.cjs",
@@ -19,6 +21,7 @@
     "db:bersihkan-avatar-yatim": "node scripts/db/bersihkan-avatar-yatim.cjs",
     "db:migrasi-peran": "node scripts/db/migrasi-peran.cjs",
     "db:seed-master": "node scripts/db/seed-master-data.cjs",
+    "prebuild": "node scripts/ambil-drawio.cjs",
     "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
     "preview": "vite preview",

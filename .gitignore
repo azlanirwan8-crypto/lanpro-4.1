@@ -5,6 +5,11 @@ node_modules/
 dist/
 build/
 
+# #685 — build draw.io patok diunduh ulang oleh scripts/ambil-drawio.cjs.
+# Jangan pernah masuk git: ratusan MB, dan isinya bukan kode sumber repo ini.
+public/drawio/
+.cache/
+
 # Environment variables — SEMUA varian. Aturan lama `.env` saja menyisakan
 # .env.development / .env.production tanpa sengaja ter-commit berisi kunci asli.
 .env

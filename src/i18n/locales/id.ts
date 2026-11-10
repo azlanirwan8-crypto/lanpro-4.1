@@ -1716,6 +1716,22 @@ export const id = {
     linkTheShapeToThe: "Hubungkan bentuk dengan backlog fase agar statusnya tersinkron otomatis.",
     disconnectFlow: "Putuskan Alur",
     straightenLine: "Luruskan Garis",
+    // #685 — jembatan editor draw.io patok.
+    drawioBukaEditor: "Edit di draw.io",
+    drawioJudulEditor: "Editor draw.io",
+    drawioMemuat: "Memuat editor draw.io…",
+    drawioSiap: "Tersambung",
+    drawioMenyimpan: "Menyimpan…",
+    drawioTersimpan: "Tersimpan otomatis",
+    drawioGagalMenyimpan: "Belum tersimpan",
+    drawioGagalMuat: "Editor draw.io tidak merespons",
+    drawioGagalMuatHint:
+      "Pastikan build patok sudah diambil dengan `npm run drawio:ambil`, lalu coba lagi.",
+    drawioCobaLagi: "Coba lagi",
+    drawioSimpanUlang: "Simpan ulang",
+    drawioBukanXml: "Editor mengirim isi yang bukan XML draw.io — tidak disimpan.",
+    drawioTerlaluBesar:
+      "Berkas dari editor {{ukuran}} MB, batas sumber {{batas}} MB. Suntingan tidak disimpan; kecilkan papan lalu coba lagi.",
     clickAShapeStickyNote:
       "Klik satu bentuk, catatan tempel, atau anak panah di kanvas untuk mengubah propertinya.",
     snapGrid: "Snap Grid",
