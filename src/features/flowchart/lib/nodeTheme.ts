@@ -44,7 +44,9 @@ export const bentukLatarTerang: string[] = ["card"];
  */
 export const getShapeThemeClasses = (node: FlowNode, isSelected: boolean): string => {
   const palette = colorPalettes[node.color] || colorPalettes.indigo;
-  const ringClass = isSelected ? "ring-4 ring-offset-2 ring-violet-500 z-30" : "";
+  // #836 — draw.io menandai bentuk terpilih dengan garis putus-putus tipis,
+  // bukan cincin tebal yang menggeser persepsi ukuran bentuk.
+  const kelasSeleksi = isSelected ? "outline-2 outline-dashed outline-primary z-30" : "";
 
   const base =
     "transition-all duration-300 flex flex-col justify-center items-center text-center p-3 select-none";
@@ -75,7 +77,7 @@ export const getShapeThemeClasses = (node: FlowNode, isSelected: boolean): strin
         : node.borderStyle === "none"
           ? "border-0 shadow-none"
           : "border-b-[3px] border-black/15";
-    return `${base} justify-start text-left p-4 ${palette.text} ${tepi} rounded-md ${ringClass}`;
+    return `${base} justify-start text-left p-4 ${palette.text} ${tepi} rounded-md ${kelasSeleksi}`;
   }
 
   if (node.type === "rect") {
@@ -85,7 +87,7 @@ export const getShapeThemeClasses = (node: FlowNode, isSelected: boolean): strin
     // #666 — KECUALI berkas sumber yang menyetel `rounded=1`; untuk itu dipakai
     // langkah `rounded-lg` yang sudah ada di garis dasar `audit:radius`, bukan
     // langkah baru, dan `arcSize` bawaan draw.io (10) memang paling dekat ke 8.
-    return `${base} ${borderStyleClass} ${node.rounded ? "rounded-lg" : ""} ${palette.text} ${ringClass}`;
+    return `${base} ${borderStyleClass} ${node.rounded ? "rounded-lg" : ""} ${palette.text} ${kelasSeleksi}`;
   }
 
   // Tidak ada cabang untuk "oval" dan "circle": keduanya terdaftar di
@@ -95,32 +97,32 @@ export const getShapeThemeClasses = (node: FlowNode, isSelected: boolean): strin
   // yang perlu diubah adalah daftar di lib/shapes.tsx.
 
   if (node.type === "cylinder" || node.type === "database") {
-    return `${base} ${borderStyleClass} rounded-t-[20px] rounded-b-[20px] ${palette.text} ${ringClass}`;
+    return `${base} ${borderStyleClass} rounded-t-[20px] rounded-b-[20px] ${palette.text} ${kelasSeleksi}`;
   }
 
   if (node.type === "cloud") {
-    return `${base} ${borderStyleClass} rounded-[28px] ${palette.text} ${ringClass}`;
+    return `${base} ${borderStyleClass} rounded-[28px] ${palette.text} ${kelasSeleksi}`;
   }
 
   if (node.type === "card") {
-    return `${base} border border-border-subtle/80 rounded-xl text-left items-start p-4 bg-white/95 backdrop-blur-sm shadow-sm ${palette.text} ${ringClass}`;
+    return `${base} border border-border-subtle/80 rounded-xl text-left items-start p-4 bg-white/95 backdrop-blur-sm shadow-sm ${palette.text} ${kelasSeleksi}`;
   }
 
   if (node.type === "document") {
-    return `${base} ${borderStyleClass} rounded-tl-lg rounded-tr-2xl rounded-b-lg ${palette.text} ${ringClass}`;
+    return `${base} ${borderStyleClass} rounded-tl-lg rounded-tr-2xl rounded-b-lg ${palette.text} ${kelasSeleksi}`;
   }
 
   if (node.type === "subprocess" || node.type === "predefined") {
-    return `${base} ${borderStyleClass} rounded-lg ${palette.text} ${ringClass}`;
+    return `${base} ${borderStyleClass} rounded-lg ${palette.text} ${kelasSeleksi}`;
   }
 
   if (node.type === "actor") {
-    return `${base} ${borderStyleClass} rounded-full aspect-square ${palette.text} ${ringClass}`;
+    return `${base} ${borderStyleClass} rounded-full aspect-square ${palette.text} ${kelasSeleksi}`;
   }
 
   if (node.type === "folder") {
-    return `${base} ${borderStyleClass} rounded-b-lg rounded-tr-lg ${palette.text} ${ringClass}`;
+    return `${base} ${borderStyleClass} rounded-b-lg rounded-tr-lg ${palette.text} ${kelasSeleksi}`;
   }
 
-  return `${base} ${palette.text} border-0 bg-transparent text-left items-start ${ringClass}`;
+  return `${base} ${palette.text} border-0 bg-transparent text-left items-start ${kelasSeleksi}`;
 };

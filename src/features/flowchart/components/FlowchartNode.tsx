@@ -33,7 +33,8 @@ import type { Task } from "../../../types";
 
 /**
  * #759 — delapan gagang ukuran pada satu bentuk terpilih, meniru draw.io.
- * Sudut digambar kotak (dua sumbu bebas), tepi digambar lingkaran (satu sumbu).
+ * #836 — semua gagang digambar lingkaran `primary` seperti draw.io; arah gerak
+ * dibaca dari kursor, bukan dari bentuk glyph.
  * Kelas Tailwind ditulis penuh di sini, bukan dirakit dari potongan, karena
  * kompilator hanya melihat string utuh.
  */
@@ -47,12 +48,12 @@ import type { Task } from "../../../types";
  * ukuran, dan kursor, yaitu bagian yang memang beda per gagang.
  */
 const KELAS_GAGANG =
-  "absolute bg-violet-600 border border-surface z-30 hover:scale-125 transition-transform shadow-md";
+  "absolute bg-primary border border-surface z-30 hover:scale-125 transition-transform shadow-md";
 
 const GAGANG_UKURAN: { arah: SudutGrup; gaya: string; kunciJudul: string }[] = [
   {
     arah: "nw",
-    gaya: "left-0 top-0 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded cursor-nwse-resize",
+    gaya: "left-0 top-0 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full cursor-nwse-resize",
     kunciJudul: "flowNode.freeSizing",
   },
   {
@@ -62,7 +63,7 @@ const GAGANG_UKURAN: { arah: SudutGrup; gaya: string; kunciJudul: string }[] = [
   },
   {
     arah: "ne",
-    gaya: "right-0 top-0 translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded cursor-nesw-resize",
+    gaya: "right-0 top-0 translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full cursor-nesw-resize",
     kunciJudul: "flowNode.freeSizing",
   },
   {
@@ -72,7 +73,7 @@ const GAGANG_UKURAN: { arah: SudutGrup; gaya: string; kunciJudul: string }[] = [
   },
   {
     arah: "se",
-    gaya: "bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded cursor-nwse-resize",
+    gaya: "bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-2.5 h-2.5 rounded-full cursor-nwse-resize",
     kunciJudul: "flowNode.freeSizing",
   },
   {
@@ -82,7 +83,7 @@ const GAGANG_UKURAN: { arah: SudutGrup; gaya: string; kunciJudul: string }[] = [
   },
   {
     arah: "sw",
-    gaya: "bottom-0 left-0 -translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded cursor-nesw-resize",
+    gaya: "bottom-0 left-0 -translate-x-1/2 translate-y-1/2 w-2.5 h-2.5 rounded-full cursor-nesw-resize",
     kunciJudul: "flowNode.freeSizing",
   },
   {
@@ -359,54 +360,58 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
       id={`val-node-${node.id}`}
     >
       {/* Floating connection ports on hover/select */}
-      {(isHovered || isSelected) && (
+      {isHovered && (
         <div className="absolute inset-0 pointer-events-none z-30">
           {/* TOP PORT */}
           <div
-            className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-violet-500 shadow-md flex items-center justify-center hover:scale-130 hover:bg-violet-500/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
+            className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-primary shadow-md flex items-center justify-center hover:scale-130 hover:bg-primary/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
             onMouseDown={(e) => {
               e.stopPropagation();
               handleConnectPortClick(node.id, "top", e);
             }}
+            data-testid="port-sambung-top"
             title={t("flowNode.dragTop")}
           >
-            <Plus className="w-2 md:w-2.5 h-2 md:h-2.5 text-violet-600 font-medium" />
+            <Plus className="w-2 md:w-2.5 h-2 md:h-2.5 text-primary font-medium" />
           </div>
 
           {/* RIGHT PORT */}
           <div
-            className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-violet-500 shadow-md flex items-center justify-center hover:scale-130 hover:bg-violet-500/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
+            className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-primary shadow-md flex items-center justify-center hover:scale-130 hover:bg-primary/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
             onMouseDown={(e) => {
               e.stopPropagation();
               handleConnectPortClick(node.id, "right", e);
             }}
+            data-testid="port-sambung-right"
             title={t("flowNode.dragRight")}
           >
-            <Plus className="w-2 md:w-2.5 h-2 md:h-2.5 text-violet-600 font-medium" />
+            <Plus className="w-2 md:w-2.5 h-2 md:h-2.5 text-primary font-medium" />
           </div>
 
           {/* BOTTOM PORT */}
           <div
-            className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-violet-500 shadow-md flex items-center justify-center hover:scale-130 hover:bg-violet-500/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
+            className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-primary shadow-md flex items-center justify-center hover:scale-130 hover:bg-primary/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
             onMouseDown={(e) => {
               e.stopPropagation();
               handleConnectPortClick(node.id, "bottom", e);
             }}
+            data-testid="port-sambung-bottom"
             title={t("flowNode.dragBottom")}
           >
-            <Plus className="w-2 md:w-2.5 h-2 md:h-2.5 text-violet-600 font-medium" />
+            <Plus className="w-2 md:w-2.5 h-2 md:h-2.5 text-primary font-medium" />
           </div>
 
           {/* LEFT PORT */}
           <div
-            className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-violet-500 shadow-md flex items-center justify-center hover:scale-130 hover:bg-violet-500/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
+            className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-primary shadow-md flex items-center justify-center hover:scale-130 hover:bg-primary/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
             onMouseDown={(e) => {
               e.stopPropagation();
               handleConnectPortClick(node.id, "left", e);
             }}
+            data-testid="port-sambung-left"
             title={t("flowNode.dragLeft")}
           >
-            <Plus className="w-2 md:w-2.5 h-2 md:h-2.5 text-violet-600 font-medium" />
+            <Plus className="w-2 md:w-2.5 h-2 md:h-2.5 text-primary font-medium" />
           </div>
         </div>
       )}
@@ -484,11 +489,8 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
           isSourceOfConnect
         )}
 
-        {/* #629 — satu cincin per keadaan, tidak berdenyut selamanya. */}
-        {cincin.seleksi && (
-          <div className="absolute -inset-1 rounded-[inherit] border-2 border-violet-500/60 pointer-events-none z-10" />
-        )}
-
+        {/* #836 — seleksi digambar `outline-dashed` pada bentuknya, jadi tidak
+            ada cincin offset kedua di sini. */}
         {cincin.sumberSambung && (
           <div className="absolute -inset-1.5 rounded-[inherit] border-2 border-dashed border-rose-500/80 pointer-events-none z-10" />
         )}
@@ -604,7 +606,7 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
               // di blok gaya papan; tanpa penanda itu ia kalah oleh `index.css:493`
               // yang mengunci `font-family` semua `textarea`, sehingga tombol
               // serif/mono di panel sifat mengubah DATA tanpa mengubah TAMPILAN.
-              "w-full bg-transparent border-0 resize-none text-current focus:outline-none focus:ring-1 focus:ring-violet-300 rounded leading-tight text-center custom-scrollbar",
+              "w-full bg-transparent border-0 resize-none text-current focus:outline-none focus:ring-1 focus:ring-primary/30 rounded leading-tight text-center custom-scrollbar",
               // #754 — selama tidak menyunting, kursor harus terlihat seperti di
               // atas bentuk (bisa diseret), bukan seperti di dalam kotak teks.
               isEditingLabel ? "pointer-events-auto cursor-text" : "pointer-events-none",
@@ -660,9 +662,8 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
         <>
           {/* #759 — delapan gagang, sama seperti draw.io. Dulu hanya tiga
               (`e`, `s`, `se`), jadi sisi kiri dan atas bentuk tidak bisa
-              ditarik. Sudut digambar kotak, tepi digambar lingkaran: bentuk
-              glyph-nya memuat arah, jadi gagang kiri/atas tidak dibaca
-              sebagai hiasan. */}
+              ditarik. #836 — semuanya lingkaran `primary`; arah gerak dibaca
+              dari kursor, bukan dari bentuk gagang. */}
           {GAGANG_UKURAN.map((g) => (
             <div
               key={g.arah}
@@ -678,7 +679,7 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
               adalah lingkarnya. */}
           <div
             data-testid="gagang-putar-batang"
-            className="absolute left-1/2 -translate-x-1/2 top-[-26px] h-[26px] w-px bg-violet-500 pointer-events-none"
+            className="absolute left-1/2 -translate-x-1/2 top-[-26px] h-[26px] w-px bg-primary pointer-events-none"
             aria-hidden="true"
           />
           <div
@@ -687,69 +688,77 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
             title={t("flowNode.rotate")}
             className={cn(
               KELAS_GAGANG,
-              "left-1/2 -translate-x-1/2 top-[-34px] w-3.5 h-3.5 bg-surface border-2 border-violet-600 rounded-full cursor-grab"
+              "left-1/2 -translate-x-1/2 top-[-34px] w-3.5 h-3.5 bg-surface border-2 border-primary rounded-full cursor-grab"
             )}
           />
 
-          {/* Auto-Connector plus direction link helper */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              const nextNodeId = "node_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
-              const nextX = node.x + nodeWidth + 120;
-              const nextY = node.y;
-              const newNode: FlowNode = {
-                ...node,
-                id: nextNodeId,
-                x: nextX,
-                y: nextY,
-                label: "Langkah Alur Baru",
-              };
-              const newRelation: FlowEdge = {
-                id: "edge_" + Date.now(),
-                fromNodeId: node.id,
-                toNodeId: nextNodeId,
-              };
-              setNodes((prev) => [...prev, newNode]);
-              setEdges((prev) => [...prev, newRelation]);
-              setSelectedNodeId(nextNodeId);
-              toast.success(t("toast.autoConnectStep"));
-            }}
-            className="absolute -right-11 top-1/2 -translate-y-1/2 w-7 h-7 bg-surface hover:bg-violet-600 border shadow-soft-lg text-violet-600 hover:text-content-inverse rounded-full flex items-center justify-center font-medium text-base transition-all scale-90 hover:scale-110 z-30"
-            title={t("flowNode.instantConnector")}
-          >
-            <Plus className="w-4 h-4" />
-          </button>
+          {/* #836 — draw.io tidak menampilkan tombol tambah-cepat ini selama
+              bentuk hanya terpilih; keduanya muncul saat kursor menyentuh. */}
+          {isHovered && (
+            <>
+              {/* Auto-Connector plus direction link helper */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const nextNodeId = "node_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+                  const nextX = node.x + nodeWidth + 120;
+                  const nextY = node.y;
+                  const newNode: FlowNode = {
+                    ...node,
+                    id: nextNodeId,
+                    x: nextX,
+                    y: nextY,
+                    label: "Langkah Alur Baru",
+                  };
+                  const newRelation: FlowEdge = {
+                    id: "edge_" + Date.now(),
+                    fromNodeId: node.id,
+                    toNodeId: nextNodeId,
+                  };
+                  setNodes((prev) => [...prev, newNode]);
+                  setEdges((prev) => [...prev, newRelation]);
+                  setSelectedNodeId(nextNodeId);
+                  toast.success(t("toast.autoConnectStep"));
+                }}
+                className="absolute -right-11 top-1/2 -translate-y-1/2 w-7 h-7 bg-surface hover:bg-primary border shadow-soft-lg text-primary hover:text-content-inverse rounded-full flex items-center justify-center font-medium text-base transition-all scale-90 hover:scale-110 z-30"
+                data-testid="tambah-cepat-kanan"
+                title={t("flowNode.instantConnector")}
+              >
+                <Plus className="w-4 h-4" />
+              </button>
 
-          {/* Downward Auto-Connector plus direction link helper */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              const nextNodeId = "node_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
-              const nextX = node.x;
-              const nextY = node.y + nodeHeight + 100;
-              const newNode: FlowNode = {
-                ...node,
-                id: nextNodeId,
-                x: nextX,
-                y: nextY,
-                label: "Langkah Alur Baru",
-              };
-              const newRelation: FlowEdge = {
-                id: "edge_" + Date.now(),
-                fromNodeId: node.id,
-                toNodeId: nextNodeId,
-              };
-              setNodes((prev) => [...prev, newNode]);
-              setEdges((prev) => [...prev, newRelation]);
-              setSelectedNodeId(nextNodeId);
-              toast.success(t("toast.autoConnectDown"));
-            }}
-            className="absolute -bottom-11 left-1/2 -translate-x-1/2 w-7 h-7 bg-surface hover:bg-indigo-600 border shadow-soft-lg text-indigo-600 hover:text-content-inverse rounded-full flex items-center justify-center font-medium text-base transition-all scale-90 hover:scale-110 z-30"
-            title={t("flowNode.instantDownConnector")}
-          >
-            <Plus className="w-4 h-4" />
-          </button>
+              {/* Downward Auto-Connector plus direction link helper */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const nextNodeId = "node_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+                  const nextX = node.x;
+                  const nextY = node.y + nodeHeight + 100;
+                  const newNode: FlowNode = {
+                    ...node,
+                    id: nextNodeId,
+                    x: nextX,
+                    y: nextY,
+                    label: "Langkah Alur Baru",
+                  };
+                  const newRelation: FlowEdge = {
+                    id: "edge_" + Date.now(),
+                    fromNodeId: node.id,
+                    toNodeId: nextNodeId,
+                  };
+                  setNodes((prev) => [...prev, newNode]);
+                  setEdges((prev) => [...prev, newRelation]);
+                  setSelectedNodeId(nextNodeId);
+                  toast.success(t("toast.autoConnectDown"));
+                }}
+                className="absolute -bottom-11 left-1/2 -translate-x-1/2 w-7 h-7 bg-surface hover:bg-primary border shadow-soft-lg text-primary hover:text-content-inverse rounded-full flex items-center justify-center font-medium text-base transition-all scale-90 hover:scale-110 z-30"
+                data-testid="tambah-cepat-bawah"
+                title={t("flowNode.instantDownConnector")}
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </>
+          )}
         </>
       )}
     </motion.div>

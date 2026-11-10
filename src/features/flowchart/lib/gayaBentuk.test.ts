@@ -69,26 +69,23 @@ describe("gayaBentuk (#629)", () => {
     expect(h({ isSvgShape: true, isHovered: true }).boxShadow).toBe("none");
   });
 
-  it("satu keadaan = satu cincin, dan bentuk SVG tidak mendapat cincin HTML", () => {
-    expect(
-      cincinBentuk({
-        isDragging: false,
-        isSelected: true,
-        isHovered: false,
-        isSourceOfConnect: false,
-        adaSumberSambung: false,
-        isSvgShape: false,
-      })
-    ).toEqual({ seleksi: true, sumberSambung: false });
-    expect(
-      cincinBentuk({
-        isDragging: false,
-        isSelected: true,
-        isHovered: false,
-        isSourceOfConnect: false,
-        adaSumberSambung: false,
-        isSvgShape: true,
-      })
-    ).toEqual({ seleksi: false, sumberSambung: false });
+  it("seleksi tidak menggambar cincin kedua; hanya sumber sambungan yang punya cincin (#836)", () => {
+    const dasar = {
+      isDragging: false,
+      isSelected: true,
+      isHovered: false,
+      isSourceOfConnect: false,
+      adaSumberSambung: false,
+      isSvgShape: false,
+    };
+    // #836 — penanda seleksi pindah ke `outline-dashed` pada bentuknya sendiri
+    // (`nodeTheme.test.ts`), supaya tidak ada dua garis seleksi sekaligus.
+    expect(cincinBentuk(dasar)).toEqual({ sumberSambung: false });
+    expect(cincinBentuk({ ...dasar, isSourceOfConnect: true })).toEqual({
+      sumberSambung: true,
+    });
+    expect(cincinBentuk({ ...dasar, isSourceOfConnect: true, isSvgShape: true })).toEqual({
+      sumberSambung: false,
+    });
   });
 });

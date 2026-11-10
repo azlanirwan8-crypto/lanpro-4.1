@@ -53,9 +53,11 @@ describe("getShapeThemeClasses", () => {
     );
   });
 
-  it("menambahkan cincin penanda hanya saat node terpilih", () => {
-    expect(getShapeThemeClasses(node(), true)).toContain("ring-4");
-    expect(getShapeThemeClasses(node(), false)).not.toContain("ring-4");
+  it("menambahkan garis seleksi putus-putus hanya saat node terpilih (#836)", () => {
+    expect(getShapeThemeClasses(node(), true)).toContain("outline-dashed");
+    expect(getShapeThemeClasses(node(), true)).toContain("outline-primary");
+    expect(getShapeThemeClasses(node(), false)).not.toContain("outline-dashed");
+    expect(getShapeThemeClasses(node(), true)).not.toContain("ring-violet-500");
   });
 
   it("membedakan bentuk lewat kelas sudutnya", () => {

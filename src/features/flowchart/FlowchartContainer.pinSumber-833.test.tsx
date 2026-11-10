@@ -107,6 +107,11 @@ describe("#833 pin sumber garis baru", () => {
     // Pilih bentuk supaya paku sambungnya muncul.
     fireEvent.mouseDown(bentuk(container, "a0"), { clientX: 200, clientY: 150, button: 0 });
     fireEvent.mouseUp(window);
+    // #836 — paku sambung mengikuti draw.io: muncul saat kursor MENYENTUH
+    // bentuk, bukan sekadar saat bentuk terpilih. Di peramban sungguhan kursor
+    // sudah berada di atas bentuk ketika orang mengkliknya, jadi hover selalu
+    // aktif; jsdom tidak mengirim `mouseenter` sendiri dan harus diberi tahu.
+    fireEvent.mouseEnter(bentuk(container, "a0"));
 
     const pakuKanan = await screen.findByTitle(/Tarik panah dari sisi kanan/i);
     fireEvent.mouseDown(pakuKanan, { clientX: 300, clientY: 150, button: 0 });

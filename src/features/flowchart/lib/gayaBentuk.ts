@@ -52,17 +52,16 @@ export function gayaBentuk(keadaan: KeadaanBentuk): {
 }
 
 /**
- * Cincin yang boleh digambar untuk satu keadaan. Seleksi dan sumber sambungan
- * dulu DUA lapis (box-shadow + border); kini satu, dan tidak lagi berdenyut
- * selamanya — denyut tak berhenti membuat papan terasa ramai dan membuat tab
- * tetap sibuk padahal pengguna diam.
+ * Cincin yang boleh digambar untuk satu keadaan.
+ *
+ * #836 — seleksi tidak lagi menggambar cincin di sini: penandanya sekarang
+ * garis putus-putus pada bentuk itu sendiri (meniru draw.io), dan cincin offset
+ * lama akan tampil sebagai garis KEDUA di sebelahnya. Yang tersisa hanya cincin
+ * sumber sambungan. Denyut tak berhenti tetap tidak dipakai: papan terasa ramai
+ * dan tab sibuk padahal pengguna diam (#629).
  */
-export function cincinBentuk(keadaan: KeadaanBentuk): {
-  seleksi: boolean;
-  sumberSambung: boolean;
-} {
+export function cincinBentuk(keadaan: KeadaanBentuk): { sumberSambung: boolean } {
   return {
-    seleksi: !keadaan.isSvgShape && keadaan.isSelected,
     sumberSambung: !keadaan.isSvgShape && keadaan.isSourceOfConnect,
   };
 }
