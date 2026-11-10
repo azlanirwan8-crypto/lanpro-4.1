@@ -18,14 +18,16 @@
  *
  * EMPAT hal yang dikunci di sini, semuanya adalah perilaku yang rusak sebelumnya:
  *
- * 1. **Satu gagang per segmen.** Garis yang berbelok punya lebih dari satu
- *    pegangan; jumlahnya ikut jumlah segmennya.
+ * 1. **Gagang sisip selalu ada saat disentuh.** Dulu satu lingkaran kosong 5 px
+ *    di TENGAH SELURUH jalur dan hanya pada garis terpilih. #834 kemudian
+ *    mengubah jumlahnya menjadi SATU gagang (bukan satu per segmen), dan
+ *    memindahkannya ke segmen yang sedang disorot kursor — jumlah gagang per
+ *    segmen membuat garis berbelok tampak penuh lingkaran.
  * 2. **Muncul saat diarahkan, bukan hanya saat dipilih.** Yang tidak terlihat
  *    tidak akan pernah ditemukan.
- * 3. **Menyisip tidak melompat.** Tekukan baru masuk PADA INDEKS segmennya dan
- *    titik-titik lama tetap berurutan — kalau sisanya dihitung ulang, garisnya
- *    justru berubah bentuk saat orang mulai membengkokkannya, dan itu keluhan
- *    "tidak bisa diatur" dalam bentuk paling buruk.
+ * 3. **Tekukan lama tidak hilang.** Menyisip satu tekukan hanya menambah satu
+ *    titik (#834); sisa jalur dirutekan ulang seperti draw.io, dan tekukan yang
+ *    sudah ada tetap ada di urutannya.
  * 4. **Sasaran sentuhnya 13 px ruang papan dan ikut zoom.** Lingkarannya sendiri
  *    tetap kecil supaya tidak menutupi garis; yang dikecil/diperbesar adalah
  *    wilayah jarinya.
@@ -91,11 +93,6 @@ const propsUntuk = (partial: Partial<Props> = {}): Props => ({
 const gagang = (container: HTMLElement) =>
   Array.from(container.querySelectorAll('[data-testid^="gagang-tekuk-"]')) as SVGCircleElement[];
 
-const titikGagang = (el: SVGCircleElement) => ({
-  x: parseFloat(el.getAttribute("cx") || "0"),
-  y: parseFloat(el.getAttribute("cy") || "0"),
-});
-
 /**
  * Seretan sungguhan. Sama seperti #653: pendengarnya duduk di `window`, dan
  * jsdom tidak menjamin peristiwa pointer membawa `clientX`/`clientY` dari
@@ -121,21 +118,21 @@ const adakahUrut = (lama: Point[], baru: Point[]): boolean => {
 };
 
 describe("#766 gagang tekukan per segmen", () => {
-  it("satu garis yang berbelok punya LEBIH DARI SATU gagang, sebanyak segmennya", () => {
+  it("hanya SATU gagang tambah-tekukan tampil, bukan satu per segmen (#834)", () => {
+    // #834 — satu gagang per segmen membuat garis berbelok tampak penuh
+    // lingkaran (satu lingkaran isi + satu cincin untuk tiap ruas). draw.io
+    // hanya menawarkan satu titik sisip; segmen yang sedang disorot kursor
+    // menggeser titik itu ke ruasnya sendiri (diuji terpisah di #834).
     const { container } = render(<FlowchartEdges {...propsUntuk({ selectedEdgeId: "e1" })} />);
     const daftar = gagang(container);
-    expect(daftar.length).toBeGreaterThan(1);
-    // Tiap gagang duduk di tengah segmennya sendiri-sendiri: tidak ada dua
-    // gagang yang bertumpuk di satu titik.
-    const titik = new Set(daftar.map((g) => `${titikGagang(g).x},${titikGagang(g).y}`));
-    expect(titik.size).toBe(daftar.length);
+    expect(daftar).toHaveLength(1);
   });
 
   it("gagang sudah muncul ketika garis hanya diarahkan kursor", () => {
     const { container } = render(
       <FlowchartEdges {...propsUntuk({ selectedEdgeId: null, hoveredEdgeId: "e1" })} />
     );
-    expect(gagang(container).length).toBeGreaterThan(1);
+    expect(gagang(container)).toHaveLength(1);
   });
 
   it("garis yang tidak dipilih dan tidak diarahkan tidak memasang gagang", () => {
@@ -143,19 +140,23 @@ describe("#766 gagang tekukan per segmen", () => {
     expect(gagang(container)).toHaveLength(0);
   });
 
-  it("menyisip tekukan di tengah TIDAK mengubah titik tekukan yang sudah ada", () => {
+  it("menyisip tekukan hanya menambah SATU titik, tanpa menyeret seluruh rute (#834)", () => {
     const onEdgePatch = jest.fn();
     const { container, rerender } = render(
       <FlowchartEdges {...propsUntuk({ selectedEdgeId: "e1", onEdgePatch })} />
     );
 
-    // Tekukan pertama: sisip di segmen terakhir, jadi ada satu titik manual.
+    // Tekukan pertama: satu titik lahir di gagang, lalu mengikuti jari.
     const daftar = gagang(container);
-    const pertama = seret(daftar[daftar.length - 1], { x: 700, y: 120 }, onEdgePatch);
-    const hasilPertama = pertama[0];
-    expect(hasilPertama.length).toBeGreaterThan(1);
+    const pertama = seret(daftar[0], { x: 700, y: 120 }, onEdgePatch);
+    const hasilPertama = pertama[pertama.length - 1];
+    // #834 — titik yang disimpan hanya yang disentuh. Model lama menulis
+    // seluruh simpul rute (lebih dari satu), dan itulah asal lingkaran ungu
+    // yang berdesakan di tangkapan layar pemilik proyek.
+    expect(hasilPertama).toHaveLength(1);
+    expect(hasilPertama[0]).toEqual({ x: 700, y: 120 });
 
-    // Pasang hasilnya, lalu sisip SATU LAGI di tengah segmen nomor 1.
+    // Pasang hasilnya: jumlah gagang TIDAK ikut jumlah segmen rute.
     onEdgePatch.mockClear();
     rerender(
       <FlowchartEdges
@@ -166,19 +167,13 @@ describe("#766 gagang tekukan per segmen", () => {
         })}
       />
     );
-    const gagangKini = gagang(container);
-    expect(gagangKini.length).toBe(hasilPertama.length + 1);
+    expect(gagang(container)).toHaveLength(1);
 
-    const kedua = seret(gagangKini[1], { x: 300, y: 600 }, onEdgePatch);
+    const kedua = seret(gagang(container)[0], { x: 300, y: 600 }, onEdgePatch);
     const hasilKedua = kedua[kedua.length - 1];
-    expect(hasilKedua.length).toBeGreaterThan(hasilPertama.length);
-
-    // INI INTINYA, dan inilah yang dulu gagal: tekukan yang SUDAH ada harus
-    // tetap ada, di urutan yang sama. Yang boleh bertambah hanyalah sudut yang
-    // tadinya disintesis saat menggambar (connector orthogonal membuat sudut
-    // sendiri di atas kertas), karena menyisip tekukan berarti bentuk garis yang
-    // terlihat sekarang disimpan apa adanya ke dalam model.
-    expect(hasilKedua[1]).toEqual({ x: 300, y: 600 });
+    expect(hasilKedua).toHaveLength(2);
+    expect(hasilKedua).toContainEqual({ x: 700, y: 120 });
+    expect(hasilKedua).toContainEqual({ x: 300, y: 600 });
     expect(adakahUrut(hasilPertama, hasilKedua)).toBe(true);
   });
 

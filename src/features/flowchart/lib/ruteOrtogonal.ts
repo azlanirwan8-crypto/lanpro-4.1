@@ -42,6 +42,10 @@ const sumbuDari = (d?: Arah): "h" | "v" | null =>
 const sumbuRuas = (a: Point, b: Point): "h" | "v" | null =>
   a.y === b.y ? "h" : a.x === b.x ? "v" : null;
 
+const JARAK_KEMBAR = 4;
+const TOLERANSI_SEGARIS = 2;
+const LANGKAH_SNAP = 5;
+
 /** Buang titik kembar dan titik yang hanya meneruskan garis lurus. */
 function rampingkan(titik: Point[]): Point[] {
   const keluar: Point[] = [];
@@ -57,7 +61,122 @@ function rampingkan(titik: Point[]): Point[] {
     const c = keluar[i + 1];
     if ((a.x === b.x && b.x === c.x) || (a.y === b.y && b.y === c.y)) keluar.splice(i, 1);
   }
-  return keluar;
+  // #834 — pembersihan di atas bisa menyisakan dua titik yang kini berimpit
+  // (a→b→a berubah menjadi a→a). Tanpa lintasan kedua, segmen nol panjang itu
+  // ikut menggambar gagang yang bertumpuk.
+  const bersih: Point[] = [];
+  for (const p of keluar) {
+    const akhir = bersih[bersih.length - 1];
+    if (akhir && sama(akhir, p)) continue;
+    bersih.push(p);
+  }
+  return bersih;
+}
+
+/**
+ * #834 — waypoint MANUSIA, bukan simpul router.
+ *
+ * Model lama menyimpan seluruh hasil rute setiap kali garis disentuh. Akibatnya
+ * satu seretan menulis lima-enam tekukan, dan lapisan gambar memasang satu
+ * lingkaran ungu pada tiap-tiapnya. Di sini daftar itu dikecilkan: titik nyaris
+ * kembar (jarak < 4 px) digabung, titik yang menyimpang ≤ 2 px dari garis lurus
+ * dibuang, dan koordinatnya disnap ke kisi 5 px supaya dua garis tidak lahir
+ * berjarak satu piksel.
+ */
+export function rapikanWaypoints(titik: Point[]): Point[] {
+  const keluar: Point[] = [];
+  for (const p of titik) {
+    if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) continue;
+    const q = {
+      x: Math.round(p.x / LANGKAH_SNAP) * LANGKAH_SNAP,
+      y: Math.round(p.y / LANGKAH_SNAP) * LANGKAH_SNAP,
+    };
+    const akhir = keluar[keluar.length - 1];
+    if (akhir && Math.hypot(akhir.x - q.x, akhir.y - q.y) < JARAK_KEMBAR) continue;
+    keluar.push(q);
+  }
+  for (let i = keluar.length - 2; i >= 1; i--) {
+    const a = keluar[i - 1];
+    const b = keluar[i];
+    const c = keluar[i + 1];
+    const acx = c.x - a.x;
+    const acy = c.y - a.y;
+    const panjang = Math.hypot(acx, acy);
+    if (panjang === 0) continue;
+    const jarak = Math.abs((b.x - a.x) * acy - (b.y - a.y) * acx) / panjang;
+    const diAntara = (b.x - a.x) * (c.x - b.x) + (b.y - a.y) * (c.y - b.y) >= 0;
+    if (jarak <= TOLERANSI_SEGARIS && diAntara) keluar.splice(i, 1);
+  }
+  const bersih: Point[] = [];
+  for (const p of keluar) {
+    const akhir = bersih[bersih.length - 1];
+    if (akhir && Math.hypot(akhir.x - p.x, akhir.y - p.y) < JARAK_KEMBAR) continue;
+    bersih.push(p);
+  }
+  return bersih;
+}
+
+/** Jarak titik ke ruas garis, dipakai untuk memilih segmen yang disentuh. */
+export function jarakTitikKeSegmen(p: Point, a: Point, b: Point): number {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const panjang = dx * dx + dy * dy;
+  if (panjang === 0) return Math.hypot(p.x - a.x, p.y - a.y);
+  let t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / panjang;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
+}
+
+/** Segmen yang paling dekat dengan sebuah titik; -1 bila di luar toleransi. */
+export function indeksSegmenTerdekat(p: Point, jalur: Point[], toleransi = Infinity): number {
+  let indeks = -1;
+  let terdekat = Infinity;
+  for (let i = 0; i < jalur.length - 1; i++) {
+    const d = jarakTitikKeSegmen(p, jalur[i], jalur[i + 1]);
+    if (d < terdekat) {
+      terdekat = d;
+      indeks = i;
+    }
+  }
+  return terdekat <= toleransi ? indeks : -1;
+}
+
+/** Posisi proyeksi sebuah titik di sepanjang jalur (satuan panjang). */
+function posisiSepanjang(p: Point, jalur: Point[]): number {
+  let terbaik = Infinity;
+  let posisi = 0;
+  let jelajah = 0;
+  for (let i = 0; i < jalur.length - 1; i++) {
+    const a = jalur[i];
+    const b = jalur[i + 1];
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const panjang = Math.hypot(dx, dy);
+    if (panjang === 0) continue;
+    let t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / (panjang * panjang);
+    t = Math.max(0, Math.min(1, t));
+    const jarak = Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
+    if (jarak < terbaik) {
+      terbaik = jarak;
+      posisi = jelajah + t * panjang;
+    }
+    jelajah += panjang;
+  }
+  return posisi;
+}
+
+/**
+ * #834 — sisipkan SATU tekukan tanpa menyeret seluruh rute ke dalam model.
+ *
+ * Urutannya ditentukan oleh posisinya di sepanjang jalur yang sedang terlihat,
+ * bukan oleh indeks segmen: daftar waypoint kini lebih pendek daripada jalur,
+ * jadi indeks keduanya tidak lagi sepadan.
+ */
+export function sisipTekukan(waypoints: Point[], baru: Point, jalur: Point[]): Point[] {
+  const daftar = waypoints.map((w) => ({ p: { x: w.x, y: w.y }, s: posisiSepanjang(w, jalur) }));
+  daftar.push({ p: baru, s: posisiSepanjang(baru, jalur) });
+  daftar.sort((a, b) => a.s - b.s);
+  return rapikanWaypoints(daftar.map((d) => d.p));
 }
 
 /**
@@ -163,22 +282,26 @@ export function ortogonalDariTitik(
 }
 
 /**
- * Titik-titik manual setelah SATU SEGMEN digeser (#833).
+ * Titik-titik manual setelah SATU SEGMEN digeser (#833, diperkecil di #834).
  *
  * draw.io memperlakukan segmen sebagai benda: menyeret segmen horizontal ke
- * atas/bawah menggeser KEDUA ujungnya, dan sisa jalur yang menyambung ke kedua
- * ujung itu ikut membengkok. Ujung yang menempel pada bentuk (indeks 0 dan
- * terakhir) tidak pernah ikut bergeser — ia jangkar port.
+ * atas/bawah menggeser KEDUA ujungnya, dan sisa jalur dirutekan ulang. Yang
+ * disimpan HANYA ujung ruas itu — paling banyak DUA titik. Model lama
+ * mengembalikan seluruh simpul rute, sehingga satu seretan langsung mengubah
+ * garis menjadi belasan tekukan manual dan belasan lingkaran ungu.
  *
- * Hasilnya adalah daftar `waypoints` BARU (tanpa kedua ujung bentuk), atau
- * `null` bila segmen itu tidak bisa digeser (diagonal) atau jarinya tidak
- * bergerak sejauh apa pun.
+ * Ujung yang menempel pada bentuk (indeks 0 dan terakhir) tidak pernah ikut
+ * bergeser — ia jangkar port. Waypoint lama yang berimpit dengan ujung ruas
+ * ikut berpindah; waypoint lain dipertahankan di urutannya.
+ *
+ * `null` bila segmen tidak bisa digeser (diagonal) atau jarinya tidak bergerak.
  */
 export function waypointsSetelahGeserSegmen(
   jalur: Point[],
   indeks: number,
   dx: number,
-  dy: number
+  dy: number,
+  waypoints: Point[] = []
 ): Point[] | null {
   if (jalur.length < 2 || indeks < 0 || indeks >= jalur.length - 1) return null;
   const a = jalur[indeks];
@@ -191,26 +314,29 @@ export function waypointsSetelahGeserSegmen(
   const gy = horizontal ? dy : 0;
   if (gx === 0 && gy === 0) return null;
 
-  const dalam: Point[] = jalur.slice(1, -1).map((p) => ({ x: bulat(p.x), y: bulat(p.y) }));
-  if (dalam.length === 0) {
+  if (jalur.length === 2) {
     // Satu ruas langsung antara dua port: geseran melahirkan dua tekukan yang
     // membuat jalur berbentuk Z, bukan tidak terjadi apa-apa.
-    const ujungAwal = jalur[0];
-    const ujungAkhir = jalur[1];
-    return [
-      { x: bulat(ujungAwal.x + gx), y: bulat(ujungAwal.y + gy) },
-      { x: bulat(ujungAkhir.x + gx), y: bulat(ujungAkhir.y + gy) },
-    ];
+    return rapikanWaypoints([
+      { x: bulat(a.x + gx), y: bulat(a.y + gy) },
+      { x: bulat(b.x + gx), y: bulat(b.y + gy) },
+    ]);
   }
 
-  // Indeks jalur 1..n-2 adalah indeks `dalam` 0..n-3. Kedua ujung segmen yang
-  // digeser ikut bergeser; yang berimpit dengan port dibiarkan.
+  const daftar = waypoints.map((w) => ({
+    p: { x: w.x, y: w.y },
+    s: posisiSepanjang(w, jalur),
+  }));
   for (const i of [indeks, indeks + 1]) {
     if (i <= 0 || i >= jalur.length - 1) continue;
-    const p = dalam[i - 1];
-    dalam[i - 1] = { x: bulat(p.x + gx), y: bulat(p.y + gy) };
+    const asal = jalur[i];
+    const pindah = { x: bulat(asal.x + gx), y: bulat(asal.y + gy) };
+    const cocok = daftar.find((d) => Math.hypot(d.p.x - asal.x, d.p.y - asal.y) <= 0.75);
+    if (cocok) cocok.p = pindah;
+    else daftar.push({ p: pindah, s: posisiSepanjang(asal, jalur) });
   }
-  return dalam;
+  daftar.sort((x, y) => x.s - y.s);
+  return rapikanWaypoints(daftar.map((d) => d.p));
 }
 
 /** Kotak rintangan dengan pelebaran yang SAMA dengan `routing.ts`. */

@@ -182,12 +182,12 @@ describe("waypointsSetelahGeserSegmen (#833) — seret seluruh segmen", () => {
     { x: 500, y: 300 },
   ];
 
-  it("segmen mendatar bergeser tegak, kedua ujungnya ikut", () => {
+  it("segmen mendatar bergeser tegak, hanya ujung dalamnya yang disimpan", () => {
+    // #834 — model lama menyimpan SELURUH simpul dalam jalur (dua titik di
+    // sini), sehingga satu seretan langsung memunculkan dua lingkaran ungu.
+    // Kontrak baru: hanya ujung ruas yang benar-benar bergeser.
     const wp = waypointsSetelahGeserSegmen(jalur, 0, 999, 40);
-    expect(wp).toEqual([
-      { x: 300, y: 140 },
-      { x: 300, y: 300 },
-    ]);
+    expect(wp).toEqual([{ x: 300, y: 140 }]);
     // dx diabaikan: segmen mendatar hanya bergerak naik/turun.
     expect(waypointsSetelahGeserSegmen(jalur, 0, 50, 0)).toBeNull();
   });
@@ -201,11 +201,10 @@ describe("waypointsSetelahGeserSegmen (#833) — seret seluruh segmen", () => {
   });
 
   it("segmen yang menyentuh port hanya menggeser ujung dalamnya", () => {
+    // #834 — ujung yang menempel pada port tidak boleh ikut disimpan sebagai
+    // tekukan; hanya ujung dalam yang bergeser.
     const wp = waypointsSetelahGeserSegmen(jalur, 2, 0, 40);
-    expect(wp).toEqual([
-      { x: 300, y: 100 },
-      { x: 300, y: 340 },
-    ]);
+    expect(wp).toEqual([{ x: 300, y: 340 }]);
   });
 
   it("satu ruas langsung antara dua port melahirkan dua tekukan berbentuk Z", () => {

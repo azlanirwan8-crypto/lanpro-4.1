@@ -105,7 +105,7 @@ describe("#833 seret seluruh segmen", () => {
   it("ruas mendatar bergeser tegak dan ujung port tetap", () => {
     const onEdgePatch = jest.fn();
     const { container } = render(<FlowchartEdges {...propsUntuk({ onEdgePatch })} />);
-    const [start, a, b] = jalur();
+    const [start, a] = jalur();
     // Segmen pertama: start -> a (mendatar pada y=start.y).
     const tengah = { x: (start.x + a.x) / 2, y: start.y };
 
@@ -114,10 +114,10 @@ describe("#833 seret seluruh segmen", () => {
     lepas();
 
     const wp = onEdgePatch.mock.calls.at(-1)![1].waypoints as { x: number; y: number }[];
-    // Ujung `a` ikut turun; `b` tidak bergeser. Start (port) tidak ada di dalam
-    // waypoints — ia jangkar bentuk.
-    expect(wp[0]).toEqual({ x: a.x, y: a.y + 40 });
-    expect(wp[1]).toEqual(b);
+    // #834 — hanya ujung dalam segmen ini yang menjadi tekukan. Sebelumnya
+    // seluruh simpul rute ikut disimpan, dan itulah asal lingkaran yang
+    // berdesakan. Start (port) tetap jangkar bentuk, bukan waypoint.
+    expect(wp).toEqual([{ x: a.x, y: a.y + 40 }]);
   });
 
   it("ruas tegak bergeser mendatar", () => {
