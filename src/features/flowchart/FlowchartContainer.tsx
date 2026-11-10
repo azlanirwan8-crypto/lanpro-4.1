@@ -13,6 +13,7 @@ import { useFlowchartNodes } from "../../hooks/useFlowchartNodes";
 import {
   Plus,
   Trash2,
+  Spline,
   Save,
   Sparkles,
   Eye,
@@ -5680,12 +5681,34 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             </div>
 
                             {isWorkspaceEditable && (
-                              <button
-                                onClick={handlePutuskanGaris}
-                                className="w-full p-2 bg-danger/10 hover:bg-danger/15 border border-danger/30 text-danger-text font-medium rounded text-xs flex items-center justify-center gap-2 transition-all"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" /> {t("flowchart.disconnectFlow")}
-                              </button>
+                              <div className="space-y-1.5">
+                                {/* #835 — pasangan dari tombol ikon di bilah gaya
+                                    garis. Label teks sengaja ada di panel yang
+                                    selalu terlihat saat garis dipilih: keluhan
+                                    pemilik proyek adalah afordans yang sulit
+                                    ditemukan, bukan kurangnya ikon. */}
+                                <button
+                                  onClick={() => handleEdgePatch(selectedEdgeId, { waypoints: [] })}
+                                  disabled={
+                                    // State `edges` memakai tipe sempit milik
+                                    // useFlowchartNodes; `waypoints` hanya ada
+                                    // di tipe lengkap FlowEdge.
+                                    !(
+                                      edges.find((e) => e.id === selectedEdgeId) as
+                                        FlowEdge | undefined
+                                    )?.waypoints?.length
+                                  }
+                                  className="w-full p-2 bg-surface-sunken hover:bg-surface border border-border-subtle disabled:opacity-50 disabled:cursor-not-allowed text-content font-medium rounded text-xs flex items-center justify-center gap-2 transition-all"
+                                >
+                                  <Spline className="w-3.5 h-3.5" /> {t("flowchart.straightenLine")}
+                                </button>
+                                <button
+                                  onClick={handlePutuskanGaris}
+                                  className="w-full p-2 bg-danger/10 hover:bg-danger/15 border border-danger/30 text-danger-text font-medium rounded text-xs flex items-center justify-center gap-2 transition-all"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" /> {t("flowchart.disconnectFlow")}
+                                </button>
+                              </div>
                             )}
                           </div>
                         ) : (

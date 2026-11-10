@@ -1715,6 +1715,7 @@ export const id = {
     issue: "Isu:",
     linkTheShapeToThe: "Hubungkan bentuk dengan backlog fase agar statusnya tersinkron otomatis.",
     disconnectFlow: "Putuskan Alur",
+    straightenLine: "Luruskan Garis",
     clickAShapeStickyNote:
       "Klik satu bentuk, catatan tempel, atau anak panah di kanvas untuk mengubah propertinya.",
     snapGrid: "Snap Grid",

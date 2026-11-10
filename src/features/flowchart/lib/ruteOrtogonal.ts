@@ -141,6 +141,34 @@ export function indeksSegmenTerdekat(p: Point, jalur: Point[], toleransi = Infin
   return terdekat <= toleransi ? indeks : -1;
 }
 
+/**
+ * #835 — buang waypoint yang hanya SALINAN rute otomatis.
+ *
+ * #833 pernah menulis seluruh jalur router ke `edge.waypoints`. Sejak #834
+ * suntingan baru hanya menyimpan tekukan niat pengguna, tetapi garis lama masih
+ * membawa salinan itu — dan selama waypoint ada, router otomatis dilewati,
+ * sehingga garis terlihat seperti punya belokan yang tidak bisa diluruskan.
+ *
+ * Titik yang berjarak ≤ `toleransi` dari rute otomatis tidak menambah bentuk
+ * apa pun, jadi diperlakukan sebagai tidak ada. Titik yang benar-benar
+ * membelokkan jalur tetap dipertahankan apa adanya.
+ */
+export function tekukanEfektif(
+  waypoints: Point[],
+  ruteOtomatis: Point[],
+  toleransi = TOLERANSI_SEGARIS
+): Point[] {
+  const salinan = waypoints.map((w) => ({ x: w.x, y: w.y }));
+  if (salinan.length === 0 || ruteOtomatis.length < 2) return salinan;
+  return salinan.filter((w) => {
+    for (let i = 0; i < ruteOtomatis.length - 1; i++) {
+      const d = jarakTitikKeSegmen(w, ruteOtomatis[i], ruteOtomatis[i + 1]);
+      if (d <= toleransi) return false;
+    }
+    return true;
+  });
+}
+
 /** Posisi proyeksi sebuah titik di sepanjang jalur (satuan panjang). */
 function posisiSepanjang(p: Point, jalur: Point[]): number {
   let terbaik = Infinity;

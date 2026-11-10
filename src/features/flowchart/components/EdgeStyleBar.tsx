@@ -13,7 +13,7 @@
  */
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Trash2 } from "lucide-react";
+import { Spline, Trash2 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import type { FlowEdge } from "../types";
 import { BENTUK_KEPALA, gambarKepala } from "./kepalaPanah";
@@ -173,6 +173,21 @@ export const EdgeStyleBar: React.FC<EdgeStyleBarProps> = ({
             </svg>
           </Tombol>
         ))}
+
+        {/* #835 — setara "Reset Waypoints" draw.io: satu klik mengembalikan
+            garis ke rute otomatis. Hanya muncul bila ada tekukan tersimpan;
+            bilah ini melayang di garis terpilih, jadi aksinya ada di tempat
+            yang sedang dilihat. */}
+        {(edge.waypoints?.length ?? 0) > 0 && (
+          <Tombol
+            aktif={false}
+            penanda="tombol-luruskan-garis"
+            judul={t("flowchart.straightenLine")}
+            onClick={() => onPatch({ waypoints: [] })}
+          >
+            <Spline className="w-3.5 h-3.5" />
+          </Tombol>
+        )}
 
         <div className="w-px h-4 bg-surface-strong mx-0.5" />
 
