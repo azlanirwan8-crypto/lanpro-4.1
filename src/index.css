@@ -816,6 +816,31 @@ html.dark .shadow-xs {
   animation: velzon-in 120ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* 3b. #841 — token simulasi MERAMBAT SEPANJANG garis, bukan sekadar bentuk
+ *    yang menyala. Yang digerakkan hanya `stroke-dashoffset` pada satu jalur
+ *    dengan `pathLength=1` dan goresan putus-putus pendek: dash-nya bergerak
+ *    dari pangkal ke ujung, dan ketika animasinya selesai React mendapat
+ *    `animationend` lalu melangkah ke garis berikutnya. Tidak ada satu pun
+ *    setTimeout dan tidak ada loop requestAnimationFrame — persis cacat yang
+ *    membuat simulasi lama tidak bisa dijeda, dan persis penyebab #642 dulu.
+ *
+ *    Lamanya dibaca dari variabel `--alur-durasi` yang dipasang container
+ *    (0,5× / 1× / 2×), bukan dari gaya sebaris: aturan universal
+ *    `prefers-reduced-motion` di bawah sudah menyetop gerakannya lewat
+ *    `!important` dan tetap membiarkan `animationend` terjadi, jadi langkah
+ *    simulasi tidak ikut mati bagi orang yang meminta gerakan dikurangi. */
+@keyframes alur-merambat {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -1;
+  }
+}
+.alur-merambat {
+  animation: alur-merambat var(--alur-durasi, 900ms) linear forwards;
+}
+
 /* 4. Hormati preferensi pengguna yang meminta gerakan dikurangi. Tanpa blok
  *    ini, seluruh kehalusan di atas justru menjadi gangguan bagi sebagian
  *    orang — dan itu kegagalan aksesibilitas, bukan sekadar preferensi. */
