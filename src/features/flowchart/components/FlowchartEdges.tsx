@@ -26,6 +26,7 @@ import {
   tekukanEfektif,
   waypointsSetelahGeserSegmen,
 } from "../lib/ruteOrtogonal";
+import { geserPort, pilihPort, sebarPort } from "../lib/portCabang";
 import { cn } from "../../../lib/utils";
 import { colorPaletteHex, ukuranBentukEfektif, KELAS_HURUF } from "../constants";
 import { EdgeStyleBar } from "./EdgeStyleBar";
@@ -472,6 +473,15 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
   }
 
   /**
+   * #849 — geseran saudara sekolompok pada SATU sisi bentuk. `kembar` di atas
+   * hanya mengenal pasangan yang sama (`a|b`), jadi dua cabang sebuah keputusan
+   * yang sama-sama keluar dari sisi `right` tidak pernah digeser dan menggambar
+   * satu garis di atas garis yang lain sepanjang koridor awal. Angka ini ditambahkan
+   * di atas `langkah` #533, bukan menggantikannya.
+   */
+  const sebaran = sebarPort(edges, nodes);
+
+  /**
    * #653 — seret satu tekukan. `titikAwal` diisi hanya bila tekukan ini belum
    * ada: pemegang "tambah tekukan" duduk di tengah segmen, jadi tekukan baru
    * lahir di sana lalu langsung mengikuti jarinya.
@@ -676,60 +686,21 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
           if (startCenter.x === 0 || endCenter.x === 0) return null;
 
           // Magnetic Snapping and Dynamic Port Connection Locator
-          const getClosestPortsPoint = (srcNode: FlowNode, tgtNode: FlowNode) => {
-            const src = ukuranBentukEfektif(srcNode);
-            const tgt = ukuranBentukEfektif(tgtNode);
-            const sW = src.width;
-            const sH = src.height;
-            const tW = tgt.width;
-            const tH = tgt.height;
-
-            const sourcePorts = [
-              { name: "top", x: srcNode.x + sW / 2, y: srcNode.y, dir: { x: 0, y: -1 } },
-              { name: "right", x: srcNode.x + sW, y: srcNode.y + sH / 2, dir: { x: 1, y: 0 } },
-              { name: "bottom", x: srcNode.x + sW / 2, y: srcNode.y + sH, dir: { x: 0, y: 1 } },
-              { name: "left", x: srcNode.x, y: srcNode.y + sH / 2, dir: { x: -1, y: 0 } },
-            ];
-
-            const targetPorts = [
-              { name: "top", x: tgtNode.x + tW / 2, y: tgtNode.y, dir: { x: 0, y: -1 } },
-              { name: "right", x: tgtNode.x + tW, y: tgtNode.y + tH / 2, dir: { x: 1, y: 0 } },
-              { name: "bottom", x: tgtNode.x + tW / 2, y: tgtNode.y + tH, dir: { x: 0, y: 1 } },
-              { name: "left", x: tgtNode.x, y: tgtNode.y + tH / 2, dir: { x: -1, y: 0 } },
-            ];
-
-            let minDistance = Infinity;
-            let bestSource = sourcePorts[2]; // bottom fallback
-            let bestTarget = targetPorts[0]; // top fallback
-
-            for (const sP of sourcePorts) {
-              for (const tP of targetPorts) {
-                const dx = tP.x - sP.x;
-                const dy = tP.y - sP.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < minDistance) {
-                  minDistance = dist;
-                  bestSource = sP;
-                  bestTarget = tP;
-                }
-              }
-            }
-
-            return { source: bestSource, target: bestTarget };
-          };
-
+          // #849 — aturannya pindah utuh ke `lib/portCabang.ts` supaya
+          // pengelompokan saudara (`sebarPort`) memilih sisi yang SAMA dengan
+          // yang nanti digambar; dua salinan aturan akan cepat berbeda.
+          const otomatis =
+            source && target
+              ? pilihPort(source, target)
+              : {
+                  source: { x: startCenter.x, y: startCenter.y, dir: { x: 0, y: 1 } },
+                  target: { x: endCenter.x, y: endCenter.y, dir: { x: 0, y: -1 } },
+                };
           // #669 — berkas yang menulis titik sambung sendiri tidak boleh dilompati
           // oleh pilihan papan. Yang digantikan HANYA titik ujungnya: rute di
           // antara kedua ujung (tekukan manual,cache, dan `findSmartRoute`) tetap
           // jalur yang sama, jadi garis yang menempel di kiri bawah bentuk datang
           // di kiri bawah, bukan di sisi terdekat seperti sebelumnya.
-          const otomatis =
-            source && target
-              ? getClosestPortsPoint(source, target)
-              : {
-                  source: { x: startCenter.x, y: startCenter.y, dir: { x: 0, y: 1 } },
-                  target: { x: endCenter.x, y: endCenter.y, dir: { x: 0, y: -1 } },
-                };
           const startPort =
             source && edge.portSumber ? titikPort(source, edge.portSumber) : otomatis.source;
           const endPort =
@@ -741,14 +712,12 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
           const daftar = kembar.get(kunciPasangan(edge.fromNodeId, edge.toNodeId)) || [];
           const urutan = daftar.indexOf(edge.id);
           const langkah = daftar.length > 1 ? (urutan - (daftar.length - 1) / 2) * 18 : 0;
-          const geserPort = <T extends { x: number; y: number; dir?: { x: number; y: number } }>(
-            p: T,
-            d: number
-          ): T =>
-            d === 0 ? p : p.dir && p.dir.x !== 0 ? { ...p, y: p.y + d } : { ...p, x: p.x + d };
 
-          const start = geserPort(startPort, langkah);
-          const end = geserPort(endPort, langkah);
+          // #849 — di atas itu, geseran saudara SESISI. Port yang dipaku
+          // pengguna sudah sengaja tidak diberi angka oleh `sebarPort`.
+          const sebar = sebaran.get(edge.id) || { keluar: 0, masuk: 0 };
+          const start = geserPort(startPort, langkah + sebar.keluar);
+          const end = geserPort(endPort, langkah + sebar.masuk);
 
           // Bentuk jalur per garis: pilihan garis sendiri menang, selain itu ikut
           // bawaan papan.
@@ -1032,6 +1001,7 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
               garis, sedangkan gaya goresan diambil dari garis itu sendiri.
             */}
               <path
+                data-testid={`garis-${edge.id}`}
                 d={pathD}
                 fill="none"
                 stroke={warnaTepi}
