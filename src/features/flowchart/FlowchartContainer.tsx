@@ -43,6 +43,11 @@ import {
   ChevronLeft,
   ChevronRight,
   FileDown,
+  LayoutGrid,
+  Square,
+  Dot,
+  Grid3x3,
+  SquarePen,
 } from "lucide-react";
 import { Task, Project } from "../../types";
 import { cn } from "../../lib/utils";
@@ -4802,24 +4807,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       className="flex-1 relative overflow-hidden bg-surface flex flex-col h-full min-h-0"
                     >
                       {/* FLOATING QUICK CANVAS CONTROL BAR ON TOP OF THE BOARD */}
+                      {/* #839 — bilah atas hanya menyisakan layar penuh di kiri
+                          atas; kendali lainnya pindah ke dock bawah supaya satu
+                          fungsi hanya punya satu rumah. */}
                       <CanvasToolbar
-                        isSnapToGrid={isSnapToGrid}
-                        setIsSnapToGrid={setIsSnapToGrid}
-                        polaPapan={polaPapan}
-                        setPolaPapan={setPolaPapan}
-                        handleExportJPG={handleExportJPG}
-                        handleExportJSON={handleExportJSON}
-                        handleExportDrawIo={handleExportDrawIo}
-                        bolehEditorDrawio={
-                          isWorkspaceEditable &&
-                          Boolean(sumberDrawioAktif) &&
-                          Boolean(selectedProject?.id) &&
-                          Boolean(selectedFlowId) &&
-                          !selectedFlowId?.startsWith("flow_")
-                        }
-                        onBukaEditorDrawio={bukaEditorDrawio}
-                        isRightSidebarOpen={isRightSidebarOpen}
-                        setIsRightSidebarOpen={setIsRightSidebarOpen}
                         isFullscreen={papanPenuh}
                         onToggleFullscreen={togglePapanPenuh}
                       />
@@ -5191,10 +5182,16 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           )}
                         </button>
 
-                        {/* FLOATING CANVAS ACTION RIBBON (CENTER DOCK) — #321: naik/sembunyi saat sheet HP */}
+                        {/* FLOATING CANVAS ACTION RIBBON (CENTER DOCK) — #321: naik/sembunyi saat sheet HP.
+                            #839 — dock jadi satu-satunya rumah kendali papan, jadi
+                            ia ikut melebar: lantainya `min-h-11` (target sentuh
+                            #535 dibawa ikut, bukan ditinggal di bilah atas) dan
+                            isinya boleh digeser mendatar bila layar sempit,
+                            supaya tidak ada tombol yang hilang diam-diam. */}
                         <div
+                          data-testid="dock-kanvas"
                           className={cn(
-                            "absolute left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1 px-2 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] select-none max-w-[90%] md:max-w-full transition-all duration-300",
+                            "absolute left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 min-h-11 overflow-x-auto bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1 px-2 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] select-none max-w-[90%] md:max-w-full transition-all duration-300",
                             isRightSidebarOpen || isShapeDropdownOpen
                               ? "max-md:opacity-0 max-md:pointer-events-none max-md:translate-y-4 bottom-4"
                               : "bottom-4 opacity-100"
@@ -5229,6 +5226,85 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           >
                             <Redo className="w-3.5 h-3.5" />
                           </button>
+
+                          {/*
+                            #839 — snap kisi dan pola papan pindah dari bilah atas
+                            ke sini. Kelas `min-h-11 min-w-11` BAWAAN mereka (#535)
+                            ikut dipindah, jadi kepindahan ini tidak menurunkan
+                            target sentuh yang sudah dikunci test.
+                          */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const nextSnap = !isSnapToGrid;
+                              setIsSnapToGrid(nextSnap);
+                              toast.success(
+                                t("toast.snapToGrid", {
+                                  keadaan: t(nextSnap ? "common.aktif" : "common.mati"),
+                                })
+                              );
+                            }}
+                            className={cn(
+                              "min-h-11 min-w-11 p-2 rounded-lg transition-all flex items-center justify-center cursor-pointer border shrink-0",
+                              isSnapToGrid
+                                ? "bg-primary/10 text-primary hover:bg-primary/15 border-primary/30"
+                                : "text-content-subtle hover:bg-surface-muted border-transparent"
+                            )}
+                            aria-pressed={isSnapToGrid}
+                            title={t("flowchart.snapGridJudul", {
+                              keadaan: t(isSnapToGrid ? "common.aktif" : "common.mati"),
+                            })}
+                            aria-label={
+                              isSnapToGrid ? t("flowchart.snapGrid") : t("flowchart.freeMove")
+                            }
+                          >
+                            <LayoutGrid
+                              className={cn(
+                                "w-4 h-4",
+                                isSnapToGrid ? "text-primary" : "text-content-subtle"
+                              )}
+                            />
+                          </button>
+
+                          {/* #613 — tiga pola latar, keadaan aktif terlihat tanpa klik */}
+                          <div className="flex items-center gap-0.5 shrink-0">
+                            {(
+                              [
+                                ["polos", Square, "flowchart.polaPolos"],
+                                ["titik", Dot, "flowchart.polaTitik"],
+                                ["kisi", Grid3x3, "flowchart.polaKisi"],
+                              ] as const
+                            ).map(([nilai, Ikon, kunci]) => (
+                              <button
+                                key={nilai}
+                                type="button"
+                                aria-pressed={polaPapan === nilai}
+                                aria-label={t(kunci)}
+                                title={t(kunci)}
+                                onClick={() => {
+                                  if (polaPapan === nilai) return;
+                                  setPolaPapan(nilai);
+                                  toast.success(t("flowchart.polaDiubah", { pola: t(kunci) }));
+                                }}
+                                className={cn(
+                                  "min-h-11 min-w-11 p-2 rounded-lg transition-all flex items-center justify-center cursor-pointer border",
+                                  polaPapan === nilai
+                                    ? "bg-primary/10 text-primary hover:bg-primary/15 border-primary/30"
+                                    : "text-content-subtle hover:bg-surface-muted border-transparent"
+                                )}
+                              >
+                                <Ikon
+                                  className={cn(
+                                    polaPapan === nilai
+                                      ? "w-4 h-4 text-primary"
+                                      : "w-4 h-4 text-content-subtle",
+                                    nilai === "titik" && "fill-current",
+                                    nilai === "kisi" && "[&_path]:stroke-[1.2]"
+                                  )}
+                                />
+                              </button>
+                            ))}
+                          </div>
 
                           <div className="w-px h-5 bg-surface-strong mx-1" />
 
@@ -5312,6 +5388,27 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           >
                             <FileDown className="w-3.5 h-3.5 text-primary" />
                           </button>
+                          {/*
+                            #839 — pembuka editor `.drawio` ikut ke dock. Syarat
+                            tampilnya TIDAK berubah dari bilah atas (#685): papan
+                            yang tidak punya sumber .drawio tidak punya apa pun
+                            untuk dibuka, jadi tombolnya tetap tidak ada di sana.
+                          */}
+                          {isWorkspaceEditable &&
+                            Boolean(sumberDrawioAktif) &&
+                            Boolean(selectedProject?.id) &&
+                            Boolean(selectedFlowId) &&
+                            !selectedFlowId?.startsWith("flow_") && (
+                              <button
+                                type="button"
+                                onClick={bukaEditorDrawio}
+                                aria-label={t("flowchart.drawioBukaEditor")}
+                                title={t("flowchart.drawioBukaEditor")}
+                                className="p-2 text-content-muted hover:bg-surface-muted hover:text-primary rounded-xl transition-all flex items-center justify-center active:scale-95"
+                              >
+                                <SquarePen className="w-3.5 h-3.5 text-primary" />
+                              </button>
+                            )}
                           {/*
                 Impor diagram dari Draw.io, Miro, atau JSON.
                 Seluruh alurnya (modal, handler, dan parser Draw.io/Miro
