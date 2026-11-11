@@ -354,6 +354,24 @@ interface FlowchartEdgesProps {
   draggingNodeId: string | null;
   /** Bentuk yang SEDANG diperbesar; null bila tidak ada. Penanda yang sama (#542). */
   resizingNodeId: string | null;
+  /**
+   * #841 — keadaan perjalanan simulasi. `tepiId` = garis yang SEDANG dilalui
+   * token, `dilewati` = garis yang sudah selesai (jejaknya dibiarkan kelihatan),
+   * `jeda` membekukan token di tengah garis, `durasiMs` untuk satu garis.
+   * Kosong = tidak ada simulasi berjalan dan tidak ada satu piksel pun yang
+   * bergerak.
+   */
+  alur?: PerjalananAlur | null;
+  /** Dipanggil peramban saat token tiba di ujung garisnya. Tanpa setTimeout. */
+  onAlurSelesai?: () => void;
+}
+
+/** Bentuk satu perjalanan token simulasi — lihat `alur` di props. */
+export interface PerjalananAlur {
+  tepiId: string | null;
+  dilewati: string[];
+  durasiMs: number;
+  jeda: boolean;
 }
 
 export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
@@ -380,6 +398,8 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
   getNodeCenter,
   draggingNodeId,
   resizingNodeId,
+  alur,
+  onAlurSelesai,
 }) => {
   const simpananRute = useRef(new Map<string, SimpananRute>()).current;
 
@@ -1031,6 +1051,57 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                   setConnectSourceId(null);
                 }}
               />
+
+              {/*
+                #841 — JALUR YANG SUDAH DILALUI token. Tebal dan warna saja, tanpa
+                apa pun yang bergerak: jejak harus tetap terbaca setelah simulasi
+                berhenti, dan itu hanya bisa dijamin kalau ia tidak bergantung pada
+                animasi.
+              */}
+              {alur?.dilewati.includes(edge.id) && (
+                <path
+                  data-testid={`jejak-alur-${edge.id}`}
+                  d={pathD}
+                  fill="none"
+                  stroke="var(--color-primary)"
+                  strokeWidth={3}
+                  strokeLinecap="round"
+                  opacity={0.32}
+                  className="pointer-events-none"
+                />
+              )}
+
+              {/*
+                #841 — TOKEN yang merambat sepanjang garis. Satu-satunya yang
+                bergerak adalah `stroke-dashoffset` (keyframes `alur-merambat` di
+                index.css) pada jalur dengan `pathLength=1`: dash pendek yang
+                digeser dari pangkal ke ujung tampak seperti titik yang berjalan di
+                dalam garis, termasuk di setiap tekukan rute ortogonal, karena yang
+                dilalui adalah jalur yang SUNGGUH tergambar. Animasinya `forwards`
+                dan sekali jalan; `onAnimationEnd`-nya yang menggerakkan mesin
+                langkah. Tidak ada timer di sini — itu sebabnya jeda bisa membekukan
+                token di tengah garis, hal yang mustahil pada simulasi lama.
+              */}
+              {alur?.tepiId === edge.id && (
+                <path
+                  data-testid={`token-alur-${edge.id}`}
+                  d={pathD}
+                  fill="none"
+                  stroke="var(--color-primary)"
+                  strokeWidth={3.5}
+                  strokeLinecap="round"
+                  pathLength={1}
+                  strokeDasharray="0.13 1"
+                  className="alur-merambat pointer-events-none"
+                  style={
+                    {
+                      "--alur-durasi": `${alur.durasiMs}ms`,
+                      animationPlayState: alur.jeda ? "paused" : "running",
+                    } as React.CSSProperties
+                  }
+                  onAnimationEnd={onAlurSelesai}
+                />
+              )}
 
               {/* Optional inline description on arrows */}
               {edge.label &&

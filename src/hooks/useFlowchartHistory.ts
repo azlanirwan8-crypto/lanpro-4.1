@@ -1,5 +1,5 @@
 import i18n from "../i18n";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 // FlowNode sebelumnya didefinisikan ulang di sini dengan `type: string` yang
@@ -26,18 +26,19 @@ export interface HistorySnapshot {
 
 /**
  * useFlowchartHistory
- * Manages undo/redo stack and flow simulation state
- * Supports up to 50 history snapshots with forward/backward navigation
+ * Manages undo/redo stack. Supports up to 50 history snapshots with
+ * forward/backward navigation.
+ *
+ * #841 Fase 1 — keadaan simulasi (simpul aktif, bendera "sedang berjalan",
+ * ref pembatal) DIHAPUS dari hook ini. Ketiganya tidak pernah dipakai fungsi
+ * riwayat mana pun, dan simulasi baru tidak lagi berbentuk satu timer global:
+ * langkahnya hidup bersama geometry papan di `FlowchartContainer`, tempat
+ * token animasi benar-benar digambar.
  */
 export function useFlowchartHistory() {
   // Undo/Redo stack management
   const [historyStack, setHistoryStack] = useState<HistorySnapshot[]>([]);
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
-
-  // Flow simulation state
-  const [activeSimNodeId, setActiveSimNodeId] = useState<string | null>(null);
-  const [isSimulating, setIsSimulating] = useState<boolean>(false);
-  const simCancelRef = useRef<boolean>(false);
 
   // Record a state snapshot into history (called after mutations)
   const recordHistory = (nodes: FlowNode[], edges: FlowEdge[]) => {
@@ -120,25 +121,6 @@ export function useFlowchartHistory() {
     setHistoryIndex(0);
   };
 
-  // Start flow simulation
-  const startSimulation = (nodeId: string) => {
-    setActiveSimNodeId(nodeId);
-    setIsSimulating(true);
-    simCancelRef.current = false;
-  };
-
-  // Stop flow simulation
-  const stopSimulation = () => {
-    setIsSimulating(false);
-    setActiveSimNodeId(null);
-    simCancelRef.current = false;
-  };
-
-  // Cancel ongoing simulation
-  const cancelSimulation = () => {
-    simCancelRef.current = true;
-  };
-
   // Get current history depth (for info display)
   const getHistoryDepth = (): number => historyStack.length;
 
@@ -149,15 +131,10 @@ export function useFlowchartHistory() {
     // State
     historyStack,
     historyIndex,
-    activeSimNodeId,
-    isSimulating,
-    simCancelRef,
 
     // Setters (for external control)
     setHistoryStack,
     setHistoryIndex,
-    setActiveSimNodeId,
-    setIsSimulating,
 
     // History management
     recordHistory,
@@ -169,10 +146,5 @@ export function useFlowchartHistory() {
     initializeHistory,
     getHistoryDepth,
     getHistoryPosition,
-
-    // Simulation control
-    startSimulation,
-    stopSimulation,
-    cancelSimulation,
   };
 }

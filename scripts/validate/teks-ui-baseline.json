@@ -129,11 +129,6 @@
     "teks": "Mobile Bottom Navigation",
     "jenis": "atribut"
   },
-  "components/navigation/WebAppsDropdown.tsx:Sistem Peta & Lokasi Cabang": {
-    "berkas": "components/navigation/WebAppsDropdown.tsx",
-    "teks": "Sistem Peta & Lokasi Cabang",
-    "jenis": "definisi"
-  },
   "components/RenderIcon.tsx:Zap Off": {
     "berkas": "components/RenderIcon.tsx",
     "teks": "Zap Off",
@@ -239,19 +234,9 @@
     "teks": "${node.label} (Salinan)",
     "jenis": "definisi"
   },
-  "features/flowchart/FlowchartContainer.tsx:Stop Sim": {
-    "berkas": "features/flowchart/FlowchartContainer.tsx",
-    "teks": "Stop Sim",
-    "jenis": "ternary"
-  },
   "features/flowchart/FlowchartContainer.tsx:[${task.key}] ${task.title} (${task.status})": {
     "berkas": "features/flowchart/FlowchartContainer.tsx",
     "teks": "[${task.key}] ${task.title} (${task.status})",
-    "jenis": "definisi"
-  },
-  "features/flowchart/FlowchartContainer.tsx:Sistem menelusuri alur kerja dari titik awal hingga akhir.": {
-    "berkas": "features/flowchart/FlowchartContainer.tsx",
-    "teks": "Sistem menelusuri alur kerja dari titik awal hingga akhir.",
     "jenis": "definisi"
   },
   "features/flowchart/lib/shapes.tsx:drop-shadow(0 20px 25px rgba(0,0,0,0.18)) drop-shadow(0 10px 10px rgba(0,0,0,0.12))": {
@@ -424,11 +409,6 @@
     "teks": "PIC Task: ${matchedMember?.displayName || matchedMember?.username || tc.assignedTo}",
     "jenis": "ternary"
   },
-  "features/qa/components/QATestCaseTable.tsx:PIC Task": {
-    "berkas": "features/qa/components/QATestCaseTable.tsx",
-    "teks": "PIC Task",
-    "jenis": "ternary"
-  },
   "features/settings/components/BroadcastMonitor.tsx:Nomor WhatsApp belum terdaftar di profil pengguna": {
     "berkas": "features/settings/components/BroadcastMonitor.tsx",
     "teks": "Nomor WhatsApp belum terdaftar di profil pengguna",
@@ -524,15 +504,15 @@
     "teks": "· ${getPositionName(user.position)}",
     "jenis": "ternary"
   },
-  "features/users/UserDetailView.tsx:Administrator (Super User)": {
-    "berkas": "features/users/UserDetailView.tsx",
-    "teks": "Administrator (Super User)",
-    "jenis": "definisi"
-  },
   "features/users/UserDetailView.tsx:Edit Profile": {
     "berkas": "features/users/UserDetailView.tsx",
     "teks": "Edit Profile",
     "jenis": "atribut"
+  },
+  "features/users/UserDetailView.tsx:Administrator (Super User)": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Administrator (Super User)",
+    "jenis": "definisi"
   },
   "features/users/UserDetailView.tsx:Department Head": {
     "berkas": "features/users/UserDetailView.tsx",
@@ -544,16 +524,6 @@
     "teks": "Project Manager",
     "jenis": "definisi"
   },
-  "features/users/UserDetailView.tsx:Standard User (Anggota Tim)": {
-    "berkas": "features/users/UserDetailView.tsx",
-    "teks": "Standard User (Anggota Tim)",
-    "jenis": "definisi"
-  },
-  "features/users/UserDetailView.tsx:Observer (Read-Only)": {
-    "berkas": "features/users/UserDetailView.tsx",
-    "teks": "Observer (Read-Only)",
-    "jenis": "definisi"
-  },
   "features/users/UserDetailView.tsx:No pending tasks": {
     "berkas": "features/users/UserDetailView.tsx",
     "teks": "No pending tasks",
@@ -563,6 +533,16 @@
     "berkas": "features/users/UserDetailView.tsx",
     "teks": "${userTasks.filter((t) => t.status !==",
     "jenis": "ternary"
+  },
+  "features/users/UserDetailView.tsx:Standard User (Anggota Tim)": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Standard User (Anggota Tim)",
+    "jenis": "definisi"
+  },
+  "features/users/UserDetailView.tsx:Observer (Read-Only)": {
+    "berkas": "features/users/UserDetailView.tsx",
+    "teks": "Observer (Read-Only)",
+    "jenis": "definisi"
   },
   "features/users/UserDetailView.tsx:Grid View": {
     "berkas": "features/users/UserDetailView.tsx",
@@ -597,11 +577,6 @@
   "features/users/UserDetailView.tsx:${item.browser ||": {
     "berkas": "features/users/UserDetailView.tsx",
     "teks": "${item.browser ||",
-    "jenis": "ternary"
-  },
-  "features/users/UserDetailView.tsx:Peran ini tidak ada di katalog Master Data — perlu dimigrasikan": {
-    "berkas": "features/users/UserDetailView.tsx",
-    "teks": "Peran ini tidak ada di katalog Master Data — perlu dimigrasikan",
     "jenis": "ternary"
   },
   "features/users/UserDetailView.tsx:Active Now": {

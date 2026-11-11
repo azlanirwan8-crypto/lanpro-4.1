@@ -33,6 +33,10 @@ import {
   Undo,
   Redo,
   Play,
+  Pause,
+  SkipForward,
+  Gauge,
+  ListChecks,
   Download,
   RefreshCw,
   Upload,
@@ -64,6 +68,7 @@ import { CanvasToolbar } from "./components/CanvasToolbar";
 import { FlowchartNode } from "./components/FlowchartNode";
 import { FlowchartEdges, pecahanPort } from "./components/FlowchartEdges";
 import { FlowchartMinimap } from "./components/FlowchartMinimap";
+import { LaporanAlur } from "./components/LaporanAlur";
 import { NodeContextMenu } from "./components/NodeContextMenu";
 import { CanvasContextMenu } from "./components/CanvasContextMenu";
 // #642 — `AnimatePresence` adalah satu-satunya cara gerakan KELUAR dijalankan
@@ -104,6 +109,10 @@ import { abaikanChromeEkspor } from "./lib/abaikanEkspor";
 // #840 - "Auto Align" memakai penataan bertingkat murni (level jalur terpanjang,
 // urutan minim-silang, jarak sadar ukuran) yang bisa diuji tanpa React.
 import { tataLetakBertingkat } from "./lib/rapiAuto";
+// #841 Fase 1 — laporan validasi struktur dan satu jejak skenario untuk
+// dianimasikan. Keputusan analisisnya murni dan diuji tanpa React; kontainer
+// hanya menyimpan langkah dan mengumpankannya ke garis serta panel laporan.
+import { analisaAlur, skenarioAlur, type SkenarioAlur } from "./lib/analisaAlur";
 import {
   colorPaletteHex,
   UKURAN_BENTUK,
@@ -148,6 +157,21 @@ const PEGANGAN_GRUP: { arah: SudutGrup; gaya: React.CSSProperties; kursor: strin
   { arah: "sw", gaya: { left: -5, bottom: -5 }, kursor: "nesw-resize" },
   { arah: "w", gaya: { left: -5, top: "50%", marginTop: -5 }, kursor: "ew-resize" },
 ];
+
+/**
+ * #841 — keadaan pemutar simulasi. `satu` berarti jalankan SATU garis lalu
+ * bekukan: itulah tombol "Langkah". `selesai` menahan jejak tetap tergambar
+ * supaya orang sempat membacanya setelah token tiba di ujung.
+ */
+type StatusAlur = "main" | "jeda" | "satu" | "selesai";
+interface PerjalananPapan {
+  skenario: SkenarioAlur;
+  langkah: number;
+  status: StatusAlur;
+}
+/** Lamanya satu garis dilalui pada kecepatan 1×. */
+const DURASI_GARIS = 900;
+const KECEPATAN_ALUR = [0.5, 1, 2];
 
 const CADANGAN_KATEGORI_DOKUMEN = [
   { id: "PRD", label: "PRD", icon: "FileText", color: "#8B5CF6" },
@@ -374,16 +398,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const {
     historyStack,
     historyIndex,
-    activeSimNodeId,
-    isSimulating,
-    simCancelRef,
-    // Keempat setter di bawah dipakai langsung oleh handleApplyImportReplace dan
-    // handleSimulateFlow. Sebelumnya tidak ikut di-destructure, sehingga kedua
-    // handler itu melempar ReferenceError begitu tombolnya ditekan.
+    // Dua setter ini dipakai langsung oleh handleApplyImportReplace. Sebelumnya
+    // tidak ikut di-destructure, sehingga handler itu melempar ReferenceError
+    // begitu dipanggil. Keadaan simulasi TIDAK ada di sini lagi: #841 memindah
+    // -nya ke kontainer, karena langkah animasi kini terikat pada geometry
+    // papan, bukan pada satu timer global.
     setHistoryStack,
     setHistoryIndex,
-    setActiveSimNodeId,
-    setIsSimulating,
     recordHistory,
     handleUndo,
     handleRedo,
@@ -393,9 +414,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     initializeHistory,
     getHistoryDepth,
     getHistoryPosition,
-    startSimulation,
-    stopSimulation,
-    cancelSimulation,
   } = historyHook;
 
   // Node/Edge Selection & Tool Management
@@ -1050,66 +1068,112 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     toast.success(t("toast.autoLayoutOk"));
   };
 
-  // Sequential Live Flow Simulator Trace
-  const handleSimulateFlow = async () => {
+  /**
+   * #841 Fase 1 — pemutar simulasi.
+   *
+   * Perjalanan bukan lagi "setiap bentuk menyala satu detik" hasil BFS, melainkan
+   * SATU jejak skenario dari `lib/analisaAlur.ts` yang merambat sepanjang garis,
+   * dan mesinnya tidak punya satu pun `setTimeout`. Langkah berikutnya dipicu
+   * `animationend` pada token di `FlowchartEdges`. Dua sebab teknis yang sekalian
+   * dibereskan: penjagaan pembatalan tidak lagi bergantung pada ref yang
+   * diperiksa "tepat sebelum await" (celah yang membuat Stop kadang telambat
+   * satu langkah), dan membongkar papan di tengah perjalanan tidak lagi
+   * meninggalkan loop yang memanggil setState pada komponen yang sudah tiada.
+   */
+  const [alur, setAlur] = useState<PerjalananPapan | null>(null);
+  const [kecepatanAlur, setKecepatanAlur] = useState(1);
+  const [laporanBuka, setLaporanBuka] = useState(false);
+
+  // Struktur papan berubah tiap suntingan, jadi laporannya ikut dihitung ulang:
+  // itulah yang dilihat orang saat menekan "Laporan Alur".
+  const hasilAlur = useMemo(() => analisaAlur(nodes, edges), [nodes, edges]);
+
+  const alurBerjalan = alur !== null && alur.status !== "selesai";
+  const simpulAlurAktif = alur
+    ? alur.skenario.simpulIds[Math.min(alur.langkah, alur.skenario.simpulIds.length - 1)]
+    : null;
+  const perjalananAlur = alur
+    ? {
+        tepiId: alur.status === "selesai" ? null : alur.skenario.tepiIds[alur.langkah],
+        dilewati:
+          alur.status === "selesai"
+            ? alur.skenario.tepiIds
+            : alur.skenario.tepiIds.slice(0, alur.langkah),
+        durasiMs: Math.round(DURASI_GARIS / kecepatanAlur),
+        jeda: alur.status === "jeda",
+      }
+    : null;
+
+  const mulaiAlur = (status: StatusAlur): PerjalananPapan | null => {
+    const skenario = skenarioAlur(nodes, edges);
+    if (!skenario || skenario.tepiIds.length === 0) return null;
+    return { skenario, langkah: 0, status };
+  };
+
+  const handleSimulateFlow = () => {
     if (nodes.length === 0) {
       toast.error(t("toast.canvasEmptySim"));
       return;
     }
-
-    if (isSimulating) {
-      simCancelRef.current = true;
-      setIsSimulating(false);
-      setActiveSimNodeId(null);
+    if (alurBerjalan) {
+      setAlur(null);
       toast.info(t("toast.simStopped"));
       return;
     }
+    const baru = mulaiAlur("main");
+    if (!baru) {
+      // Papan punya bentuk tapi tidak ada satu pun perjalanan dari awal ke
+      // akhir — biasanya lingkaran tertutup. Laporan yang menjelaskan, bukan
+      // toast yang mengulang angka.
+      setLaporanBuka(true);
+      toast.error(t("alur.tanpaJejak"));
+      return;
+    }
+    setAlur(baru);
+    setLaporanBuka(true);
+    toast.success(t("toast.simStarting"));
+  };
 
-    simCancelRef.current = false;
-    setIsSimulating(true);
-    toast.success(t("toast.simStarting"), {
-      description: "Sistem menelusuri alur kerja dari titik awal hingga akhir.",
+  /** Token tiba di ujung garisnya: satu langkah ke depan, atau selesai. */
+  const handleAlurSelesai = () => {
+    setAlur((sekarang: PerjalananPapan | null) => {
+      if (!sekarang || sekarang.status === "selesai") return sekarang;
+      const berikut = sekarang.langkah + 1;
+      const status: StatusAlur =
+        berikut >= sekarang.skenario.tepiIds.length
+          ? "selesai"
+          : sekarang.status === "satu"
+            ? "jeda"
+            : sekarang.status;
+      return { ...sekarang, langkah: berikut, status };
     });
+  };
 
-    const incomingEdgeTargets = new Set(edges.map((e) => e.toNodeId));
-    let startNodes = nodes.filter((n) => !incomingEdgeTargets.has(n.id));
+  const handleAlurJeda = () => {
+    setAlur((sekarang: PerjalananPapan | null) => {
+      if (!sekarang || sekarang.status === "selesai") return sekarang;
+      return { ...sekarang, status: sekarang.status === "jeda" ? "main" : "jeda" };
+    });
+  };
 
-    if (startNodes.length === 0) {
-      startNodes = nodes.filter(
-        (n) =>
-          n.type === "oval" ||
-          n.label.toLowerCase().includes("mulai") ||
-          n.label.toLowerCase().includes("start")
-      );
+  /** Satu garis per klik. Dari papan yang belum jalan, ia mulai dari awal. */
+  const handleAlurLangkah = () => {
+    if (alur && alur.status !== "selesai") {
+      setAlur({ ...alur, status: "satu" });
+      return;
     }
-    if (startNodes.length === 0 && nodes.length > 0) {
-      startNodes = [nodes[0]];
+    const baru = mulaiAlur("satu");
+    if (!baru) {
+      toast.error(t("alur.tanpaJejak"));
+      return;
     }
+    setAlur(baru);
+    setLaporanBuka(true);
+  };
 
-    const visited = new Set<string>();
-    const queue: string[] = startNodes.map((n) => n.id);
-
-    while (queue.length > 0 && !simCancelRef.current) {
-      const currentId = queue.shift()!;
-      if (visited.has(currentId)) continue;
-      visited.add(currentId);
-
-      setActiveSimNodeId(currentId);
-      // Wait to capture animation effect
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      if (simCancelRef.current) break;
-
-      const outEdges = edges.filter((e) => e.fromNodeId === currentId);
-      const childIds = outEdges.map((e) => e.toNodeId);
-      queue.push(...childIds);
-    }
-
-    setActiveSimNodeId(null);
-    setIsSimulating(false);
-    if (!simCancelRef.current) {
-      toast.success(t("toast.simDone"));
-    }
+  const handleAlurKecepatan = () => {
+    const i = KECEPATAN_ALUR.indexOf(kecepatanAlur);
+    setKecepatanAlur(KECEPATAN_ALUR[(i + 1) % KECEPATAN_ALUR.length]);
   };
 
   // Download JSON backup
@@ -4996,6 +5060,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             getNodeCenter={getNodeCenter}
                             draggingNodeId={draggingNodeId}
                             resizingNodeId={resizingNodeId}
+                            alur={perjalananAlur}
+                            onAlurSelesai={handleAlurSelesai}
                           />
 
                           {/* RENDER DYNAMIC SHAPES */}
@@ -5012,7 +5078,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               isHovered={hoveredNodeId === node.id}
                               setHoveredNodeId={setHoveredNodeId}
                               isDragging={draggingNodeId === node.id}
-                              isActiveSim={activeSimNodeId === node.id}
+                              isActiveSim={simpulAlurAktif === node.id}
                               canvasTheme={canvasTheme}
                               isWorkspaceEditable={isWorkspaceEditable}
                               setActiveTool={setActiveTool}
@@ -5079,6 +5145,28 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           canvasContainerRef={canvasContainerRef}
                           canvasTheme={canvasTheme}
                         />
+
+                        {/*
+                          #841 Fase 1 — laporan struktur alur. Diletakkan SESUDAH
+                          lapisan dunia pada urutan DOM dan tanpa kelas `z-` apa
+                          pun: tangga z dikunci `audit:z` per berkas, dan tanpa
+                          z pun panel ini sudah di atas papan (saudara berikutnya
+                          menggambar di atas saudaranya yang tidak menciptakan
+                          stacking context sendiri).
+                        */}
+                        {laporanBuka && (
+                          <LaporanAlur
+                            hasil={hasilAlur}
+                            skenario={alur ? alur.skenario : null}
+                            nodes={nodes}
+                            edges={edges}
+                            onPilih={(id) => {
+                              setSelectedNodeId(id);
+                              setSelectedEdgeId(null);
+                            }}
+                            onTutup={() => setLaporanBuka(false)}
+                          />
+                        )}
 
                         {/* Miro Coordinate & Element Stats Hover HUD overlay (HIDDEN AS REQUESTED) */}
                         {/* <div className={cn(
@@ -5263,28 +5351,101 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             <span className="hidden sm:inline">{t("flowchart.autoAlign")}</span>
                           </button>
 
-                          {/* Live Flow Simulator */}
+                          {/*
+                            #841 Fase 1 — pemutar simulasi, kontrolnya, dan pintu
+                            laporannya. Kelas `min-h-11 min-w-11` ikut ditulis di
+                            sini dengan sengaja: pelajaran #839 adalah memindahkan
+                            atau menambah tombol di dock TANPA lantai sentuh 44 px
+                            membuat target sentuh turun diam-diam, karena garis
+                            dasar #535 hanya mengunci bilah atas.
+                          */}
                           <button
                             onClick={handleSimulateFlow}
+                            data-testid="tombol-simulasi"
                             className={cn(
-                              "p-1 px-2 rounded-xl transition-all flex items-center gap-1 active:scale-95 text-[11px] font-medium",
-                              isSimulating
-                                ? "bg-danger/10 text-danger-text hover:bg-danger/15 border  shadow-soft"
+                              "min-h-11 px-2 rounded-xl transition-all flex items-center gap-1 active:scale-95 text-[11px] font-medium",
+                              alurBerjalan
+                                ? "bg-danger/10 text-danger-text hover:bg-danger/15 border shadow-soft"
                                 : "text-content-body hover:bg-surface-muted hover:text-success-text"
                             )}
-                            title={isSimulating ? t("flowchart.stopSim") : t("flowchart.startSim")}
+                            title={alurBerjalan ? t("flowchart.stopSim") : t("flowchart.startSim")}
                           >
                             <Play
                               className={cn(
                                 "w-3.5 h-3.5",
-                                isSimulating
-                                  ? "text-danger fill-danger/20 animate-pulse"
+                                alurBerjalan
+                                  ? "text-danger fill-danger/20"
                                   : "text-success fill-success/20"
                               )}
                             />
                             <span className="hidden sm:inline">
-                              {isSimulating ? "Stop Sim" : "Simulasikan"}
+                              {alurBerjalan ? t("alur.hentikan") : t("alur.simulasikan")}
                             </span>
+                          </button>
+
+                          {/*
+                            Keempat kendali selalu menempati slotnya sendiri.
+                            Dulu jeda/kecepatan baru muncul setelah perjalanan
+                            ada, yang membuat tombol Langkah melompat satu slot
+                            tiap kali Simulasi ditekan — dan menghapus satu-satunya
+                            jalan untuk berjalan selangkah demi selangkah tanpa
+                            menontonnya. Jeda satu-satunya yang boleh mati, dan
+                            hanya ketika memang tidak ada yang bisa dijeda.
+                          */}
+                          <button
+                            onClick={handleAlurJeda}
+                            disabled={alur === null || alur.status === "selesai"}
+                            data-testid="tombol-alur-jeda"
+                            className="min-h-11 min-w-11 rounded-xl transition-all flex items-center justify-center active:scale-95 text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:hover:bg-transparent"
+                            title={alur?.status === "jeda" ? t("alur.lanjut") : t("alur.jeda")}
+                          >
+                            {alur?.status === "jeda" ? (
+                              <Play className="w-3.5 h-3.5" />
+                            ) : (
+                              <Pause className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+
+                          <button
+                            onClick={handleAlurLangkah}
+                            data-testid="tombol-alur-langkah"
+                            className="min-h-11 min-w-11 rounded-xl transition-all flex items-center justify-center active:scale-95 text-content-body hover:bg-surface-muted"
+                            title={t("alur.langkah")}
+                          >
+                            <SkipForward className="w-3.5 h-3.5" />
+                          </button>
+
+                          <button
+                            onClick={handleAlurKecepatan}
+                            data-testid="tombol-alur-kecepatan"
+                            className="min-h-11 px-2 rounded-xl transition-all flex items-center gap-1 active:scale-95 text-[11px] font-medium text-content-body hover:bg-surface-muted"
+                            title={t("alur.kecepatan", { x: kecepatanAlur })}
+                          >
+                            <Gauge className="w-3.5 h-3.5" />
+                            <span>{kecepatanAlur}×</span>
+                          </button>
+
+                          <button
+                            onClick={() => setLaporanBuka((sekarang) => !sekarang)}
+                            data-testid="tombol-laporan-alur"
+                            className={cn(
+                              "min-h-11 px-2 rounded-xl transition-all flex items-center gap-1 active:scale-95 text-[11px] font-medium",
+                              laporanBuka
+                                ? "bg-primary/15 text-primary"
+                                : "text-content-body hover:bg-surface-muted"
+                            )}
+                            title={t("alur.laporanHint")}
+                          >
+                            <ListChecks className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">{t("alur.laporan")}</span>
+                            {hasilAlur.jumlahGalat > 0 && (
+                              <span
+                                data-testid="lencana-galat-alur"
+                                className="rounded-full bg-danger/15 px-1.5 text-[10px] text-danger-text"
+                              >
+                                {hasilAlur.jumlahGalat}
+                              </span>
+                            )}
                           </button>
 
                           <div className="w-px h-5 bg-surface-strong mx-1" />
