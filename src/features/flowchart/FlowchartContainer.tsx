@@ -5818,19 +5818,25 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                     garis. Label teks sengaja ada di panel yang
                                     selalu terlihat saat garis dipilih: keluhan
                                     pemilik proyek adalah afordans yang sulit
-                                    ditemukan, bukan kurangnya ikon. */}
+                                    ditemukan, bukan kurangnya ikon.
+                                    #838 — tombol tidak pernah mati: waypoint
+                                    kosong berarti undakan bawaan rute otomatis,
+                                    dan klik itu mengubah garis jadi satu segmen
+                                    lurus (connector "straight"). State `edges`
+                                    memakai tipe sempit milik useFlowchartNodes;
+                                    `waypoints` hanya ada di tipe lengkap FlowEdge. */}
                                 <button
-                                  onClick={() => handleEdgePatch(selectedEdgeId, { waypoints: [] })}
-                                  disabled={
-                                    // State `edges` memakai tipe sempit milik
-                                    // useFlowchartNodes; `waypoints` hanya ada
-                                    // di tipe lengkap FlowEdge.
-                                    !(
-                                      edges.find((e) => e.id === selectedEdgeId) as
-                                        FlowEdge | undefined
-                                    )?.waypoints?.length
-                                  }
-                                  className="w-full p-2 bg-surface-sunken hover:bg-surface border border-border-subtle disabled:opacity-50 disabled:cursor-not-allowed text-content font-medium rounded text-xs flex items-center justify-center gap-2 transition-all"
+                                  onClick={() => {
+                                    const edge = edges.find((e) => e.id === selectedEdgeId) as
+                                      FlowEdge | undefined;
+                                    handleEdgePatch(
+                                      selectedEdgeId,
+                                      edge?.waypoints?.length
+                                        ? { waypoints: [] }
+                                        : { connector: "straight" }
+                                    );
+                                  }}
+                                  className="w-full p-2 bg-surface-sunken hover:bg-surface border border-border-subtle text-content font-medium rounded text-xs flex items-center justify-center gap-2 transition-all"
                                 >
                                   <Spline className="w-3.5 h-3.5" /> {t("flowchart.straightenLine")}
                                 </button>

@@ -146,8 +146,15 @@ describe("#835 aksi Luruskan Garis", () => {
     expect(onPatch).toHaveBeenCalledWith({ waypoints: [] });
   });
 
-  it("tidak menampilkan aksi pada garis yang belum punya tekukan", () => {
-    render(<EdgeStyleBar {...dasar} edge={garis()} />);
-    expect(screen.queryByTestId("tombol-luruskan-garis")).toBeNull();
+  it("garis polos tetap punya aksinya, dan klik meluruskannya (#838)", () => {
+    // Sebelum #838 tombol ini disembunyikan bila waypoint kosong — padahal
+    // justru kasus itulah yang tidak bisa diluruskan apa pun: undakannya
+    // bawaan rute otomatis, bukan waypoint.
+    const onPatch = jest.fn();
+    render(<EdgeStyleBar {...dasar} onPatch={onPatch} edge={garis()} />);
+
+    const tombol = screen.getByTestId("tombol-luruskan-garis");
+    fireEvent.click(tombol);
+    expect(onPatch).toHaveBeenCalledWith({ connector: "straight" });
   });
 });

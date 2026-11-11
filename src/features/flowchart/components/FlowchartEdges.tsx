@@ -773,8 +773,13 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
           // jadi disaring sebelum menggambar dan sebelum disimpan lagi; selama
           // salinan itu ada, router tidak pernah dipakai dan garis tidak bisa
           // diluruskan.
+          // #838 — toleransi panggil 4 px, bukan bawaan 2 px: sisa snap kisi 5 px
+          // menyimpang sampai ±3,5 px dan selama ini lolos sebagai "tekukan"
+          // palsu. 4 px sengaja di bawah ambang seretan segmen nyata (#790).
           const tekukan =
-            bentuk === "orthogonal" ? tekukanEfektif(waypointMentah, ruteOtomatis) : waypointMentah;
+            bentuk === "orthogonal"
+              ? tekukanEfektif(waypointMentah, ruteOtomatis, 4)
+              : waypointMentah;
           const pathPoints = tekukan.length
             ? bentuk === "orthogonal"
               ? ortogonalDariTitik([start, ...tekukan, end], start.dir, end.dir, false)
