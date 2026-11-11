@@ -19,8 +19,9 @@
  *     bertumpuk di kolom simpul awal.
  *
  * Modul ini murni: tanpa React, tanpa DOM, tanpa toast. Yang dijanjikan hanya
- * hal yang bisa dihitung — level jalur-terpanjang, urutan minim-silang, jarak
- * sadar ukuran, dan nol tumpang-tindih.
+ * hal yang bisa dihitung — level jalur-terpanjang, urutan minim-silang yang
+ * MENYIMPAN susunan tangan pengguna bila jumlah silangnya tidak turun (#850),
+ * jarak sadar ukuran, dan nol tumpang-tindih.
  */
 import { ukuranBentukEfektif } from "../constants";
 
@@ -28,6 +29,14 @@ export interface SimpulLetak {
   id: string;
   width?: number;
   height?: number;
+  /**
+   * #850 — tinggi bentuk di papan SAAT INI, dibaca hanya untuk urutan di dalam
+   * kolom. Penghuni papan sudah menaruh bentuknya di atas-bawah dengan tangannya
+   * sendiri; menata ulang tanpa membacanya membuat "Rapikan Otomatis" terasa
+   * seperti merusak pekerjaan. Kosong pada papan yang diimpor tanpa koordinat,
+   * dan kalau kosong urutannya kembali ke id seperti #840.
+   */
+  y?: number;
 }
 
 export interface GarisLetak {
@@ -167,7 +176,17 @@ function urutkanKolom(kolom: string[][], keluar: Peta, masuk: Peta): string[][] 
   return hasil;
 }
 
-/** Perkiraan jumlah persilangan antar kolom bertetangga (untuk memilih hasil). */
+/**
+ * Perkiraan jumlah persilangan antar kolom bertetangga (untuk memilih hasil).
+ *
+ * #850 — sepasang tepi yang BERSUMBER sama tidak dihitung lagi. Fungsi ini dulu menghitung
+ * `ik_a < ik_b` lawan `jk_a < jk_b` tanpa memeriksa apakah kedua tepi itu
+ * keluar dari simpul yang SAMA: kipas satu keputusan ke dua cabangnya sendiri
+ * maka tercatat sebagai "satu silang" kalau cabangnya disusun sesuai urutan
+ * array `edges`, dan nol kalau disusun kebalikannya. Angka itu bukan ukuran
+ * apa pun, dan persis itulah yang membuat heuristik median boleh membabat
+ * susunan tangan pengguna pada papan yang jumlah silangnya sebenarnya imbang.
+ */
 function hitungSilang(kolom: string[][], keluar: Peta): number {
   let silang = 0;
   for (let i = 0; i < kolom.length - 1; i++) {
@@ -182,6 +201,7 @@ function hitungSilang(kolom: string[][], keluar: Peta): number {
     for (let a = 0; a < tepi.length; a++)
       for (let b = a + 1; b < tepi.length; b++) {
         if (tepi[a][1] === tepi[b][1]) continue;
+        if (tepi[a][0] === tepi[b][0]) continue; // kipas satu simpul: tidak bersilang
         if (tepi[a][0] < tepi[b][0] !== tepi[a][1] < tepi[b][1]) silang++;
       }
   }
@@ -232,6 +252,24 @@ export function tataLetakBertingkat(
   komponen.sort((a, b) => b.length - a.length || a[0].localeCompare(b[0]));
 
   const ukuran = new Map(nodes.map((n) => [n.id, ukuranBentukEfektif(n)]));
+
+  /**
+   * #850 — benih urutan dalam kolom: posisi vertikal PENGGUNA dulu, id hanya
+   * pemecah dasi. Bentuk yang tidak punya y (impordan tanpa koordinat) didaftar
+   * belakang atas nama id, jadi papan lama yang testnya #840 kunci tetap
+   * menghasilkan susunan yang sama persis.
+   */
+  const letak = new Map(nodes.map((n) => [n.id, n.y]));
+  const benihkan = (a: string, b: string): number => {
+    const ay = letak.get(a);
+    const by = letak.get(b);
+    const aYa = Number.isFinite(ay);
+    const bYa = Number.isFinite(by);
+    if (aYa !== bYa) return aYa ? -1 : 1;
+    if (aYa && bYa && ay !== by) return ay! - by!;
+    return a.localeCompare(b);
+  };
+
   let barisY = MARGIN;
 
   for (const gugus of komponen) {
@@ -239,13 +277,16 @@ export function tataLetakBertingkat(
     const maxLevel = Math.max(...gugus.map((id) => level.get(id) || 0));
     const kolomRaw: string[][] = Array.from({ length: maxLevel + 1 }, () => []);
     for (const id of gugus) kolomRaw[level.get(id) || 0].push(id);
-    kolomRaw.forEach((k) => k.sort((a, b) => a.localeCompare(b)));
+    kolomRaw.forEach((k) => k.sort(benihkan));
 
     const tersortir = urutkanKolom(kolomRaw, keluar, masuk);
-    // Heuristik median boleh kalah dari urutan id bila persilangannya justru
-    // lebih banyak — papan tidak pernah boleh jadi lebih ruwet setelah dirapikan.
+    // #840 — heuristik median boleh kalah bila persilangannya justru lebih
+    // banyak; papan tidak pernah boleh jadi lebih ruwet setelah dirapikan.
+    // #850 — "boleh kalah" kini berarti "hanya menang kalau jumlah silangnya
+    // benar-benar turun": pada susunan yang imbang, urutan tangan pemilik papan
+    // yang dipakai, bukan urutan median yang kebetulan sama bagusnya.
     const pakai =
-      hitungSilang(tersortir, keluar) <= hitungSilang(kolomRaw, keluar) ? tersortir : kolomRaw;
+      hitungSilang(tersortir, keluar) < hitungSilang(kolomRaw, keluar) ? tersortir : kolomRaw;
 
     const tinggiKolom = pakai.map(
       (k) =>
