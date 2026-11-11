@@ -844,6 +844,23 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
               className="pointer-events-auto cursor-pointer"
               onMouseEnter={() => setHoveredEdgeId(edge.id)}
               onMouseLeave={() => setHoveredEdgeId(null)}
+              // #837 — fokus segmen dibaca di SELURUH gugus garis, bukan hanya
+              // di jalur sentuh 16 px. Kursor yang pindah dari jalur ke gagang
+              // (anak lain di gugus yang sama) tidak lagi mengosongkan fokus,
+              // jadi gagang tidak melompat ke tengah jalur dan berkedip.
+              onPointerMove={(e) => {
+                if (!isEditable || tergambar.length < 2) return;
+                const p = koordinatPapan(e.clientX, e.clientY);
+                if (!p) return;
+                const i = indeksSegmenTerdekat(p, tergambar, 14 / zoomLevel);
+                const baru = i >= 0 ? { edgeId: edge.id, i } : null;
+                setSegmenSorot((lama) =>
+                  lama?.edgeId === baru?.edgeId && lama?.i === baru?.i ? lama : baru
+                );
+              }}
+              onPointerLeave={() => {
+                setSegmenSorot((lama) => (lama?.edgeId === edge.id ? null : lama));
+              }}
             >
               {/*
                 #665 - mata panah yang ditulis berkas sumber hidup di DALAM
@@ -895,22 +912,12 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                     mulaiSeretSegmen(e, edge, tergambar, tekukan);
                   }
                 }}
-                onPointerMove={(e) => {
-                  // #834 — gagang "tambah tekukan" hanya untuk segmen di bawah
-                  // kursor. Keadaan ini sengaja tidak ditulis bila indeksnya
-                  // sama, supaya gerakan kursor tidak memicu render tiap frame.
-                  if (!isEditable || tergambar.length < 2) return;
-                  const p = koordinatPapan(e.clientX, e.clientY);
-                  if (!p) return;
-                  const i = indeksSegmenTerdekat(p, tergambar, 14 / zoomLevel);
-                  const baru = i >= 0 ? { edgeId: edge.id, i } : null;
-                  setSegmenSorot((lama) =>
-                    lama?.edgeId === baru?.edgeId && lama?.i === baru?.i ? lama : baru
-                  );
-                }}
-                onPointerLeave={() => {
-                  setSegmenSorot((lama) => (lama?.edgeId === edge.id ? null : lama));
-                }}
+                // #837 — peramban tetap mengirim `mousedown` sesudah
+                // `pointerdown`, dan `stopPropagation()` pada pointerdown tidak
+                // menghentikannya. Tanpa baris ini mousedown sampai ke kanvas,
+                // mengosongkan seleksi, dan memulai kotak seleksi di tengah
+                // seretan.
+                onMouseDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedEdgeId(edge.id);
@@ -1125,6 +1132,8 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                             onPointerDown={(e) =>
                               mulaiSeretTekukan(e, edge, i, undefined, undefined, tekukan)
                             }
+                            // #837 — hentikan juga mousedown-nya; lihat jalur sentuh.
+                            onMouseDown={(e) => e.stopPropagation()}
                             onDoubleClick={(e) => {
                               e.stopPropagation();
                               hapusTekukan(edge, i, tekukan);
@@ -1160,6 +1169,8 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                                 tekukan
                               )
                             }
+                            // #837 — hentikan juga mousedown-nya; lihat jalur sentuh.
+                            onMouseDown={(e) => e.stopPropagation()}
                           />
                           <circle
                             cx={gagang.x}
