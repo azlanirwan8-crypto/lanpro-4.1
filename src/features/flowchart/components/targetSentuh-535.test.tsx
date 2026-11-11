@@ -13,32 +13,23 @@
  * DOM, bukan string kelas yang mungkin tidak terpasang. Test ini juga menghitung
  * tombolnya, jadi tombol baru tanpa `min-h-11` membuat test merah dengan
  * menyebut tombol mana yang kurang.
+ *
+ * #839 — hitungannya 9 → 1. Bukan karena target sentuh dilonggarkan, tapi
+ * karena delapan tombol itu memang tidak tinggal di sini lagi: snap kisi, tiga
+ * pola, dua ekspor, satu .drawio, dan satu pembuka panel pindah ke dock bawah
+ * (dan yang terakhir itu dicabut, bukan pindah). Test `dock-839.test.tsx` yang
+ * sekarang menjaga keempat puluhan px itu di rumah barunya.
  */
 import React from "react";
 import { render } from "@testing-library/react";
 import { CanvasToolbar } from "./CanvasToolbar";
 
-const pasang = () =>
-  render(
-    <CanvasToolbar
-      isSnapToGrid={false}
-      setIsSnapToGrid={() => {}}
-      polaPapan="titik"
-      setPolaPapan={() => {}}
-      handleExportJPG={() => {}}
-      handleExportJSON={() => {}}
-      handleExportDrawIo={() => {}}
-      isRightSidebarOpen={false}
-      setIsRightSidebarOpen={() => {}}
-      isFullscreen={false}
-      onToggleFullscreen={() => {}}
-    />
-  );
+const pasang = () => render(<CanvasToolbar isFullscreen={false} onToggleFullscreen={() => {}} />);
 
 describe("#535 — satu tinggi untuk semua kendali bilah kanvas", () => {
-  it("sembilan tombolnya terhitung, jadi yang baru tidak bisa menyelinap", () => {
+  it("satu tombolnya terhitung, jadi yang baru tidak bisa menyelinap", () => {
     const { container } = pasang();
-    expect(container.querySelectorAll("button")).toHaveLength(9);
+    expect(container.querySelectorAll("button")).toHaveLength(1);
   });
 
   it("setiap tombol memakai min-h-11 (44 px)", () => {
