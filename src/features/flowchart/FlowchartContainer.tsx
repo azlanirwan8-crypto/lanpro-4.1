@@ -101,6 +101,9 @@ import { buatPembandingSortirAlur } from "./lib/sortirAlur";
 import { useSetelanSortir } from "../../hooks/useSetelanSortir";
 // #537 - chrome bertanda `data-abai-ekspor` tidak boleh ikut terpotret ekspor JPG.
 import { abaikanChromeEkspor } from "./lib/abaikanEkspor";
+// #840 - "Auto Align" memakai penataan bertingkat murni (level jalur terpanjang,
+// urutan minim-silang, jarak sadar ukuran) yang bisa diuji tanpa React.
+import { tataLetakBertingkat } from "./lib/rapiAuto";
 import {
   colorPaletteHex,
   UKURAN_BENTUK,
@@ -1028,80 +1031,22 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       return;
     }
 
-    const incomingMap = new Map<string, string[]>();
-    const outgoingMap = new Map<string, string[]>();
-
-    edges.forEach((e) => {
-      const incoming = incomingMap.get(e.toNodeId) || [];
-      incoming.push(e.fromNodeId);
-      incomingMap.set(e.toNodeId, incoming);
-
-      const outgoing = outgoingMap.get(e.fromNodeId) || [];
-      outgoing.push(e.toNodeId);
-      outgoingMap.set(e.fromNodeId, outgoing);
-    });
-
-    const nodeLevels = new Map<string, number>();
-    const visited = new Set<string>();
-
-    const startNodes = nodes.filter((n) => !incomingMap.has(n.id));
-    const queue: { id: string; level: number }[] = [];
-
-    if (startNodes.length > 0) {
-      startNodes.forEach((sn) => queue.push({ id: sn.id, level: 0 }));
-    } else {
-      queue.push({ id: nodes[0].id, level: 0 });
-    }
-
-    while (queue.length > 0) {
-      const current = queue.shift()!;
-      if (visited.has(current.id)) continue;
-      visited.add(current.id);
-
-      const currentLevel = Math.max(nodeLevels.get(current.id) || 0, current.level);
-      nodeLevels.set(current.id, currentLevel);
-
-      const children = outgoingMap.get(current.id) || [];
-      children.forEach((childId) => {
-        queue.push({ id: childId, level: currentLevel + 1 });
-      });
-    }
-
-    nodes.forEach((n) => {
-      if (!nodeLevels.has(n.id)) {
-        nodeLevels.set(n.id, 0);
-      }
-    });
-
-    const levelGroups = new Map<number, string[]>();
-    nodeLevels.forEach((level, nodeId) => {
-      const group = levelGroups.get(level) || [];
-      group.push(nodeId);
-      levelGroups.set(level, group);
-    });
-
-    const gapX = 260;
-    const gapY = 150;
-    const startX = 180;
-    const startY = 160;
-
-    const alignedNodes = nodes.map((node) => {
-      const level = nodeLevels.get(node.id) || 0;
-      const group = levelGroups.get(level) || [];
-      const indexInGroup = group.indexOf(node.id);
-
-      const levelHeight = (group.length - 1) * gapY;
-      const offsetY = indexInGroup * gapY - levelHeight / 2;
-
-      return {
-        ...node,
-        x: startX + level * gapX,
-        y: Math.max(60, startY + offsetY + 200),
-      };
-    });
+    const posisi = tataLetakBertingkat(nodes, edges);
+    const alignedNodes = nodes.map((node) => ({ ...node, ...posisi.get(node.id)! }));
+    // Waypoint adalah koordinat papan yang mengikat rute LAMA. Setelah seluruh
+    // simpul pindah, waypoint lama tidak lagi berada di atas rute baru: ia
+    // tampil sebagai tekukan palsu — kelas kerusakan yang sama dengan #838 —
+    // dan satu-satunya cara membersihkannya adalah tombol Luruskan Garis per
+    // garis. Merapikan papan sekaligus melepas rute tangan yang sudah mati.
+    const alignedEdges = edges.map((edge) => ({ ...edge, waypoints: [] }));
 
     setNodes(alignedNodes);
-    recordHistory(alignedNodes, edges);
+    setEdges(alignedEdges);
+    recordHistory(alignedNodes, alignedEdges);
+    // Hasil tata letak selalu mulai dari margin kiri-atas papan, jadi pandangan
+    // lama (yang mungkin sudah diseret jauh) hampir pasti tidak menunjukkan
+    // hasilnya. Ditunjukkan dulu, bukan hanya dihitung.
+    pasKeLayar(batasSeluruhBentuk(alignedNodes), true);
     toast.success(t("toast.autoLayoutOk"));
   };
 
