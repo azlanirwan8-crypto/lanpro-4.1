@@ -110,7 +110,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
     <nav
       aria-label="Mobile Bottom Navigation"
       data-testid="mobile-bottom-nav"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-md border-t border-border-subtle shadow-soft transition-all duration-200"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-md border-t border-border-divider shadow-soft transition-all duration-200"
     >
       <div className="flex items-center justify-around h-16 px-2 safe-area-pb">
         {navItems.map((item) => {

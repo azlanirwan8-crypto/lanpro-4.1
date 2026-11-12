@@ -418,7 +418,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
           Poin Diskusi. Yang dulu beda: chip halaman di sini blok merek PEKAT
           (`bg-primary-surface` + teks putih) sementara papan memakai chip
           bergaris dengan angka primer; dan tanpa chevron. */}
-      <div className="px-6 py-3.5 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+      <div className="px-6 py-3.5 border-t border-border-divider bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-3">
           <span className="text-[11px] text-content-subtle font-normal">
             {t("common.showing")} {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}

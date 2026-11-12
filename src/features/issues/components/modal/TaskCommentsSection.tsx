@@ -94,7 +94,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
 
   return (
     <div className={cn(KARTU_SECTION, "p-4 md:p-5 space-y-4")}>
-      <div className="flex items-center gap-6 border-b border-border-subtle">
+      <div className="flex items-center gap-6 border-b border-border-divider">
         <button
           className={cn(
             "pb-4 text-xs font-normal uppercase tracking-normal transition-all relative",
@@ -138,7 +138,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
             <UserAvatar user={user} uid={user?.uid || user?.id} className="w-8 h-8 shrink-0" />
             <div className="flex-1 relative">
               <div className="border border-border-subtle rounded-xl bg-surface focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-xs overflow-hidden">
-                <div className="flex items-center gap-1 p-2 border-b border-border-subtle bg-surface-sunken/40 overflow-x-auto">
+                <div className="flex items-center gap-1 p-2 border-b border-border-divider bg-surface-sunken/40 overflow-x-auto">
                   <button className="flex items-center gap-1.5 px-2 py-1 hover:bg-surface-strong rounded text-[11px] font-normal text-content-secondary transition-colors shrink-0">
                     <Sparkles className="w-3 h-3 text-primary" />
                     {t("comments.improveWriting")}
@@ -189,7 +189,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
 
               {mentionState.active && (
                 <div className="absolute z-50 w-72 bg-surface rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden transform bottom-[110%] left-0 animate-dropdown">
-                  <div className="p-3 bg-surface-sunken border-b border-border-subtle text-[11px] font-normal text-content-subtle uppercase tracking-normal">
+                  <div className="p-3 bg-surface-sunken border-b border-border-divider text-[11px] font-normal text-content-subtle uppercase tracking-normal">
                     {t("comments.suggestedPeople")}
                   </div>
                   <div className="max-h-60 overflow-y-auto py-1">
@@ -301,7 +301,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
 
                       {/* Nested Replies Thread (Indented with connector border) */}
                       {(replies.length > 0 || activeReplyId === root.id) && (
-                        <div className="mt-2.5 ml-3 pl-3 border-l-2 border-border-subtle/60 space-y-3">
+                        <div className="mt-2.5 ml-3 pl-3 border-l-2 border-border-divider/60 space-y-3">
                           {/* List of Replies */}
                           {replies.map((reply, rIdx) => {
                             const replyAuthor = (projectMembers || []).find(

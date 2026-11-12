@@ -65,7 +65,7 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
   }
 
   return (
-    <div className="sm:hidden flex flex-col divide-y divide-border-subtle/60 pb-16">
+    <div className="sm:hidden flex flex-col divide-y divide-border-divider/60 pb-16">
       {points.map((p, index) => {
         const isCompleted = p.status === "completed";
         const bolehStatus = canToggleStatus(p);

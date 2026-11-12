@@ -72,6 +72,7 @@ describe("#824 skala label dan kepala tabel", () => {
       path.join(SRC, "features", "users", "UserSessionsPanel.tsx"),
       "utf8"
     );
-    expect(isi).toContain('<tbody className="divide-y divide-border-subtle text-xs">');
+    // #862 — garis antar baris = token pemisah, bukan token batas kontrol.
+    expect(isi).toContain('<tbody className="divide-y divide-border-divider text-xs">');
   });
 });

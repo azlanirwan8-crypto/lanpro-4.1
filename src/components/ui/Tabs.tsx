@@ -99,7 +99,7 @@ export function Tabs<T extends string>({
     <div
       role="tablist"
       className={cn(
-        "flex border-b border-border-subtle/80 overflow-x-auto custom-scrollbar shrink-0",
+        "flex border-b border-border-divider/80 overflow-x-auto custom-scrollbar shrink-0",
         className
       )}
     >

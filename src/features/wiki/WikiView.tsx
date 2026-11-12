@@ -1014,7 +1014,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   <th className="px-4 py-2.5 w-28 text-center">{t("discussion.action")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-subtle text-xs text-content-body">
+              <tbody className="divide-y divide-border-divider text-xs text-content-body">
                 {galatDaftar && currentDocs.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="text-center py-16 text-content-subtle">
@@ -1204,7 +1204,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
           </div>
 
           {/* Table Footer / Pagination */}
-          <div className="px-6 py-3.5 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+          <div className="px-6 py-3.5 border-t border-border-divider bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
             <div className="flex items-center gap-3">
               <span className="text-[11px] text-content-subtle font-normal">
                 {t("common.showing")} {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
@@ -1365,7 +1365,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     )}
                   >
                     {/* Title Bar Left Pane */}
-                    <div className="px-4 py-2.5 bg-surface-sunken border-b border-border-subtle/80 flex items-center justify-between shrink-0 select-none">
+                    <div className="px-4 py-2.5 bg-surface-sunken border-b border-border-divider/80 flex items-center justify-between shrink-0 select-none">
                       <span className="text-xs font-normal text-content-muted uppercase tracking-normal flex items-center gap-1.5">
                         <Eye className="w-3.5 h-3.5 text-primary" />
                         {t("wiki.mainPreview")}
@@ -1460,7 +1460,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                            dalam iframe), yang tersisa adalah halaman abu-abu milik
                            Google tanpa satu pun jalan keluar di layar. */
                         <div className="flex-1 flex flex-col relative min-h-0 overflow-hidden bg-surface-sunken">
-                          <div className="shrink-0 flex items-center gap-2 px-3 sm:px-4 py-2 border-b border-border-subtle bg-surface text-xs min-w-0">
+                          <div className="shrink-0 flex items-center gap-2 px-3 sm:px-4 py-2 border-b border-border-divider bg-surface text-xs min-w-0">
                             <LinkIcon className="w-3.5 h-3.5 text-content-muted shrink-0" />
                             <a
                               href={activeDoc.link}
@@ -1624,7 +1624,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     )}
                   >
                     {/* Side Pane Header */}
-                    <div className="px-4 py-3 bg-surface-sunken border-b border-border-subtle/80 flex items-center justify-between shrink-0 select-none">
+                    <div className="px-4 py-3 bg-surface-sunken border-b border-border-divider/80 flex items-center justify-between shrink-0 select-none">
                       <span className="text-xs font-normal text-content-muted uppercase tracking-normal flex items-center gap-1.5">
                         <MessageSquare className="w-4 h-4 text-primary" />
                         {t("wiki.notesComments")}
@@ -1707,7 +1707,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     </div>
 
                     {/* Input Bar for Comments */}
-                    <div className="p-3 border-t border-border-subtle bg-surface shrink-0">
+                    <div className="p-3 border-t border-border-divider bg-surface shrink-0">
                       <div className="flex items-center gap-2 bg-surface-sunken rounded-md px-3 py-1 border border-border-subtle focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all">
                         <input
                           type="text"
@@ -1779,7 +1779,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
               className="bg-surface rounded-xl shadow-xl border border-border-subtle max-w-2xl w-full flex flex-col relative overflow-hidden my-auto max-h-[90vh]"
             >
               {/* Modal header decor */}
-              <div className="bg-surface-sunken/80 px-5 py-3.5 border-b border-border-subtle flex justify-between items-center select-none">
+              <div className="bg-surface-sunken/80 px-5 py-3.5 border-b border-border-divider flex justify-between items-center select-none">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 bg-primary/10 border border-primary/20 text-primary rounded-md flex items-center justify-center shadow-2xs">
                     {isNew ? <Plus className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
@@ -1977,7 +1977,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
               </div>
 
               {/* Action Buttons Footer */}
-              <div className="px-5 py-3.5 bg-surface-sunken border-t border-border-subtle flex items-center justify-end gap-2.5 shrink-0 select-none rounded-b-xl">
+              <div className="px-5 py-3.5 bg-surface-sunken border-t border-border-divider flex items-center justify-end gap-2.5 shrink-0 select-none rounded-b-xl">
                 <button
                   onClick={() => setShowFormModal(false)}
                   className="px-4 py-2 bg-surface hover:bg-surface-muted border border-border-subtle text-content-secondary hover:text-content rounded-md text-xs font-medium transition-all cursor-pointer shadow-2xs"

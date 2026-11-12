@@ -68,7 +68,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
     >
       {/* INNER DRAWER CONTAINER (PREVENT CLICK PROPAGATION & COMPACT SLIM VELZON LOOK) */}
       <div
-        className="w-full max-w-lg bg-surface h-full shadow-2xl flex flex-col justify-between border-l border-border-subtle cursor-default"
+        className="w-full max-w-lg bg-surface h-full shadow-2xl flex flex-col justify-between border-l border-border-divider cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Velzon Offcanvas Header - COMPACT INTEGRATED HEADER & STATUS */}
@@ -115,7 +115,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
         </div>
 
         {/* Velzon Compact Tab Switcher */}
-        <div className="flex border-b border-border-subtle bg-surface-muted/80 p-1 gap-1">
+        <div className="flex border-b border-border-divider bg-surface-muted/80 p-1 gap-1">
           <button
             type="button"
             onClick={() => setDrawerActiveTab("details")}

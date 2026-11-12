@@ -269,7 +269,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                 <Activity className="w-4 h-4" />
               </div>
             </div>
-            <div className="mt-2 pt-2 border-t border-border-subtle flex items-center justify-between text-[11px] text-content-muted">
+            <div className="mt-2 pt-2 border-t border-border-divider flex items-center justify-between text-[11px] text-content-muted">
               <span className="inline-flex items-center gap-1 text-emerald-600 font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
                 {t("sessionMonitor.connectedSessionsTag", "Sesi terhubung saat ini")}
@@ -292,7 +292,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                 <User className="w-4 h-4" />
               </div>
             </div>
-            <div className="mt-2 pt-2 border-t border-border-subtle flex items-center justify-between text-[11px] text-content-muted">
+            <div className="mt-2 pt-2 border-t border-border-divider flex items-center justify-between text-[11px] text-content-muted">
               <span className="text-primary font-medium">
                 {t("sessionMonitor.uniqueActiveUsersTag", "Akun aktif unik")}
               </span>
@@ -314,7 +314,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                 <Clock className="w-4 h-4" />
               </div>
             </div>
-            <div className="mt-2 pt-2 border-t border-border-subtle flex items-center justify-between text-[11px] text-content-muted">
+            <div className="mt-2 pt-2 border-t border-border-divider flex items-center justify-between text-[11px] text-content-muted">
               <span className="text-amber-600 font-medium">
                 {t("sessionMonitor.todayAuthTag", "Total autentikasi 24j")}
               </span>
@@ -336,7 +336,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                 <ShieldCheck className="w-4 h-4" />
               </div>
             </div>
-            <div className="mt-2 pt-2 border-t border-border-subtle flex items-center justify-between text-[11px] text-content-muted">
+            <div className="mt-2 pt-2 border-t border-border-divider flex items-center justify-between text-[11px] text-content-muted">
               <span className="text-info-text font-medium">
                 {t("sessionMonitor.savedLogsTag", "Rekaman log tersimpan")}
               </span>
@@ -407,7 +407,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
           <div className="hidden sm:block overflow-x-auto min-h-[350px]">
             <table className="w-full text-left border-collapse table-fixed">
               <thead>
-                <tr className="bg-primary-surface/5 border-b border-border-subtle text-content-subtle leading-tight [&>th]:sticky [&>th]:top-0 [&>th]:bg-surface-sunken">
+                <tr className="bg-primary-surface/5 border-b border-border-divider text-content-subtle leading-tight [&>th]:sticky [&>th]:top-0 [&>th]:bg-surface-sunken">
                   <th className="py-2.5 px-3 w-[22%]">{t("sessionMonitor.colUser", "PENGGUNA")}</th>
                   <th className="py-2.5 px-3 w-[16%]">
                     {t("sessionMonitor.colIp", "IP & GEOLOKASI")}
@@ -426,7 +426,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-subtle text-xs">
+              <tbody className="divide-y divide-border-divider text-xs">
                 {loading ? (
                   <tr>
                     <td colSpan={6} className="py-12 text-center text-content-subtle">
@@ -628,7 +628,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
           </div>
 
           {/* #309 — kartu sesi di bawah sm */}
-          <div className="sm:hidden divide-y divide-border-subtle/60 min-h-[350px]">
+          <div className="sm:hidden divide-y divide-border-divider/60 min-h-[350px]">
             {loading ? (
               <div className="py-12 text-center text-content-subtle">
                 <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" />
@@ -758,7 +758,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
           </div>
 
           {/* Card Footer Pagination */}
-          <div className="p-4 border-t border-border-subtle bg-surface flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="p-4 border-t border-border-divider bg-surface flex flex-col sm:flex-row items-center justify-between gap-4">
             <span className="text-xs text-content-subtle font-medium">
               {t("sessionMonitor.pageInfo", "Halaman {{page}} dari {{totalPages}}", {
                 page,
@@ -797,7 +797,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/60 backdrop-blur-xs">
             <div className="bg-surface border border-border-subtle rounded-2xl shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
               {/* Modal Header */}
-              <div className="p-5 border-b border-border-subtle bg-surface flex items-center justify-between">
+              <div className="p-5 border-b border-border-divider bg-surface flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <UserAvatar
                     name={selectedUserForActivity.name}
@@ -857,7 +857,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                     </p>
                   </div>
                 ) : (
-                  <div className="relative border-l-2 border-border-subtle ml-2 pl-6 space-y-6">
+                  <div className="relative border-l-2 border-border-divider ml-2 pl-6 space-y-6">
                     {userActivities.map((act) => {
                       const actionType = (act.action || "").toUpperCase();
                       const isUpdate = actionType.includes("UPDATE");
@@ -968,7 +968,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
 
                           {/* Event Card */}
                           <div className="bg-surface border border-border-subtle rounded-xl p-4 shadow-xs hover:border-primary/40 transition-all">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2 pb-2 border-b border-border-subtle">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2 pb-2 border-b border-border-divider">
                               <div className="flex items-center gap-2">
                                 <span
                                   className={`px-2 py-0.5 rounded text-xs font-normal border uppercase tracking-normal ${actionBadgeBg}`}
@@ -1002,7 +1002,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                               <div className="mt-3 overflow-x-auto border border-border-subtle rounded-lg bg-surface-sunken">
                                 <table className="w-full text-left text-xs">
                                   <thead>
-                                    <tr className="border-b border-border-subtle text-[11px] font-normal uppercase tracking-normal text-content-subtle bg-surface/50">
+                                    <tr className="border-b border-border-divider text-[11px] font-normal uppercase tracking-normal text-content-subtle bg-surface/50">
                                       <th className="py-1.5 px-3">
                                         {t("sessionMonitor.fieldHeader", "Properti")}
                                       </th>
@@ -1014,7 +1014,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                                       </th>
                                     </tr>
                                   </thead>
-                                  <tbody className="divide-y divide-border-subtle font-sans text-xs">
+                                  <tbody className="divide-y divide-border-divider font-sans text-xs">
                                     {activeKeys.map((key) => {
                                       const oldVal = formatDiffVal(
                                         oldObj ? oldObj[key] : undefined
@@ -1056,7 +1056,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                             )}
 
                             {/* Card Footer: Metadata IP & UserAgent */}
-                            <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-content-subtle mt-3 pt-2 border-t border-border-subtle">
+                            <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-content-subtle mt-3 pt-2 border-t border-border-divider">
                               <div className="flex items-center gap-3">
                                 {act.ipAddress && (
                                   <span className="flex items-center gap-1 font-mono text-[11px] text-content-muted">
@@ -1086,7 +1086,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
               </div>
 
               {/* Modal Footer */}
-              <div className="p-4 border-t border-border-subtle bg-surface flex justify-end">
+              <div className="p-4 border-t border-border-divider bg-surface flex justify-end">
                 <button
                   onClick={handleCloseModal}
                   className="px-4 py-2 text-xs font-semibold text-content-strong bg-surface hover:bg-surface-hover border border-border-subtle rounded-lg transition-colors shadow-xs"

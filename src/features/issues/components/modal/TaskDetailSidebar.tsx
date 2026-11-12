@@ -142,12 +142,12 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
   return (
     <div
       className={cn(
-        "lg:col-span-4 bg-surface-sunken/60 p-3.5 sm:p-4 md:p-5 space-y-3 sm:space-y-4 border-t lg:border-t-0 lg:border-l border-border-subtle min-h-full transition-opacity text-left",
+        "lg:col-span-4 bg-surface-sunken/60 p-3.5 sm:p-4 md:p-5 space-y-3 sm:space-y-4 border-t lg:border-t-0 lg:border-l border-border-divider min-h-full transition-opacity text-left",
         isUpdatingTask?.[task.id] && "opacity-50 pointer-events-none"
       )}
     >
       {/* Header Title */}
-      <div className="flex items-center justify-between pb-2.5 border-b border-border-subtle/80">
+      <div className="flex items-center justify-between pb-2.5 border-b border-border-divider/80">
         <h4 className="text-[11px] font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
           <Activity className="w-3.5 h-3.5 text-primary" />
           {t("issueDetail.issueAttributes")}
@@ -528,7 +528,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
                 {workLogs.slice(0, 8).map((w) => (
                   <li
                     key={w.id}
-                    className="flex justify-between gap-2 text-[10px] text-content-muted border-t border-border-subtle pt-1"
+                    className="flex justify-between gap-2 text-[10px] text-content-muted border-t border-border-divider pt-1"
                   >
                     <span className="truncate">
                       {Number(w.hours)}h{w.note ? ` — ${w.note}` : ""}

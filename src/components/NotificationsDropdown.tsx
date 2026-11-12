@@ -107,7 +107,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
         <div className="md:hidden flex justify-center pt-2 pb-0 shrink-0" aria-hidden>
           <div className="w-10 h-1 rounded-full bg-surface-marker" />
         </div>
-        <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between bg-surface shrink-0">
+        <div className="px-5 py-4 border-b border-border-divider flex items-center justify-between bg-surface shrink-0">
           <h3 className="font-medium text-content text-[16px]">{t("notifications.title")}</h3>
           <div className="flex items-center gap-2.5">
             <span className="bg-violet-500/15 text-violet-700 text-xs font-medium px-2.5 py-1 rounded-md">
@@ -203,7 +203,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
                         }
                       }
                     }}
-                    className="py-3.5 px-5 hover:bg-surface-muted transition-all cursor-pointer flex gap-3 items-start relative border-b border-border-subtle last:border-b-0"
+                    className="py-3.5 px-5 hover:bg-surface-muted transition-all cursor-pointer flex gap-3 items-start relative border-b border-border-divider last:border-b-0"
                   >
                     <div
                       className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${parsed.iconBgClass || "bg-violet-500/10 text-violet-600"}`}
@@ -234,7 +234,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
         </div>
 
         {/* Dropdown Footer — #345 preferensi minimal */}
-        <div className="p-4 border-t border-border-subtle bg-surface space-y-3 shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-4">
+        <div className="p-4 border-t border-border-divider bg-surface space-y-3 shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-4">
           <label className="flex items-center justify-between gap-3 text-xs text-content-secondary cursor-pointer select-none">
             <span>{t("notifications.dueReminderPref", "Pengingat jatuh tempo (24 jam)")}</span>
             <input

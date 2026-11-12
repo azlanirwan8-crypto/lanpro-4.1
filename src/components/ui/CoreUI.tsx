@@ -253,7 +253,7 @@ export const Card = ({
 export const CardHeader = ({ children, className = "", ...props }: any) => (
   <div
     className={cn(
-      "px-5 py-4 border-b border-border-subtle flex items-center justify-between gap-3",
+      "px-5 py-4 border-b border-border-divider flex items-center justify-between gap-3",
       className
     )}
     {...props}

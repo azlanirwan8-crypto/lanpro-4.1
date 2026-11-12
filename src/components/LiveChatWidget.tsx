@@ -946,7 +946,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
                 {/* Inline Message Search Bar */}
                 {isMsgSearchOpen && (
-                  <div className="px-2.5 py-1.5 bg-surface-sunken border-b border-border-subtle/50 flex items-center gap-1.5 shrink-0">
+                  <div className="px-2.5 py-1.5 bg-surface-sunken border-b border-border-divider/50 flex items-center gap-1.5 shrink-0">
                     <Search className="w-3 h-3 text-content-subtle" />
                     <input
                       type="text"

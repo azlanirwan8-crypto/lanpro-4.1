@@ -88,7 +88,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
   }, [legal, inlineAddType]);
 
   return (
-    <div className="p-2 bg-surface border-t border-border-subtle shrink-0 shadow-[0_-2px_4px_-1px_rgba(0,0,0,0.03)] z-20">
+    <div className="p-2 bg-surface border-t border-border-divider shrink-0 shadow-[0_-2px_4px_-1px_rgba(0,0,0,0.03)] z-20">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 border border-border-subtle rounded-xl bg-surface-sunken shadow-soft p-1.5 sm:p-1">
         <div className="flex items-center gap-2 w-full sm:w-auto flex-1 min-w-0">
           <div className="relative pl-1 shrink-0">
@@ -166,7 +166,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-border-subtle">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-border-divider">
           <div className="w-[120px] sm:w-[130px] shrink-0">
             <StyledDropdown
               value={inlineAddSprintId || ""}

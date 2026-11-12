@@ -61,7 +61,7 @@ export const IssueMobileCardView: React.FC<IssueMobileCardViewProps> = ({
   }
 
   return (
-    <div className="sm:hidden flex flex-col divide-y divide-border-subtle/60 pb-20">
+    <div className="sm:hidden flex flex-col divide-y divide-border-divider/60 pb-20">
       {tasks.map((task) => {
         const isSelected = selectedTaskIds.has(task.id);
         const assignee = projectMembers.find(

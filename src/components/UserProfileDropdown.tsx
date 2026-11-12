@@ -166,7 +166,7 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
         </div>
 
         {/* Divider */}
-        <div className="border-t border-border-subtle my-1" />
+        <div className="border-t border-border-divider my-1" />
 
         {/* Logout */}
         <div className="py-0.5">

@@ -6,7 +6,7 @@ export const styles = {
     "flex flex-col bg-surface rounded-lg border border-border-subtle/80 shadow-xs font-sans relative flex-1 min-h-[500px] overflow-hidden",
   // #363 — kontrol utama (search/filter/config) 1 baris di HP; pill aktif di baris bawah.
   toolbar:
-    "flex flex-col gap-2 px-3 sm:px-4 py-3 border-b border-border-subtle/80 bg-surface-sunken/50 shrink-0",
+    "flex flex-col gap-2 px-3 sm:px-4 py-3 border-b border-border-divider/80 bg-surface-sunken/50 shrink-0",
   searchWrapper: "relative group min-w-0 flex-1 sm:flex-none",
   searchInput:
     "pl-9 pr-3 sm:pr-4 py-2 bg-surface border border-border-subtle rounded-md text-xs font-normal text-content-body w-full sm:w-64 min-w-0 placeholder:font-normal placeholder:text-content-subtle focus:ring-1 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-2xs",
@@ -30,7 +30,7 @@ export const styles = {
   // #e2e8f0). Pemisah kolom ikut ke garis pemisah karena ia hiasan, bukan batas
   // kontrol: garis setajam garis kontrol di setiap kolom akan mengubah tabel
   // menjadi kisi.
-  tableHeader: "bg-surface-sunken border-b border-border-subtle sticky top-0 z-30 shadow-2xs",
+  tableHeader: "bg-surface-sunken border-b border-border-divider sticky top-0 z-30 shadow-2xs",
   tableHeaderCell:
     "group relative sticky top-0 bg-surface-sunken px-4 py-2.5 text-[11px] font-semibold text-content-subtle whitespace-nowrap border-r border-border-faint",
   // #699 butir-A (12 Okt) — tiga angka yang memutuskan baris ini, bukan rasa.
@@ -48,7 +48,7 @@ export const styles = {
   // hilang di mode terang adalah soal NILAI TOKEN, dan itu #699 butir-B — bukan
   // sesuatu yang boleh ditambal dari satu layar (§22.4).
   tableRow:
-    "group hover:bg-surface-strong/60 transition-all duration-150 cursor-default border-b border-border-subtle",
+    "group hover:bg-surface-strong/60 transition-all duration-150 cursor-default border-b border-border-divider",
   selectedTableRow: "bg-primary/10",
   inlineAddRow: "bg-surface group/inline-add relative overflow-visible",
   // #486 — tanpa border-y-2 border-primary (terlalu tebal); cukup pemisah kolom tipis

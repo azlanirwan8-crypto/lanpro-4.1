@@ -96,7 +96,7 @@ export const LaporanAlur: React.FC<LaporanAlurProps> = ({
       className="absolute top-3 right-3 flex max-h-[min(70vh,32rem)] w-[min(21rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-xl border border-border-subtle/40 bg-surface/90 text-content-body shadow-lg backdrop-blur"
       aria-label={t("alur.judul")}
     >
-      <header className="flex items-center gap-2 border-b border-border-subtle/40 px-3 py-2">
+      <header className="flex items-center gap-2 border-b border-border-divider/40 px-3 py-2">
         <Route className="w-4 h-4 text-primary" />
         <h3 className="flex-1 text-[13px] font-medium">{t("alur.judul")}</h3>
         <span
@@ -173,7 +173,7 @@ export const LaporanAlur: React.FC<LaporanAlurProps> = ({
         )}
 
         {skenario && (
-          <section className="mt-3 border-t border-border-subtle/40 pt-2">
+          <section className="mt-3 border-t border-border-divider/40 pt-2">
             <h4 className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-content-subtle">
               <Route className="w-3 h-3" />
               {t("alur.jejak")}

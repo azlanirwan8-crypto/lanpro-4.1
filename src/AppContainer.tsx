@@ -4028,7 +4028,7 @@ function AppContainer() {
               topbar (profil, notifikasi, web apps, More) #672 dirender lewat
               portal ke document.body di z-[44]: di atas bar dan sticky konten,
               di bawah scrim (z-[45]) dan modal (z-50). */}
-          <header className="flex items-center justify-between w-full px-4 md:px-5 py-2 bg-surface-raised border-b border-border-subtle shrink-0 pl-14 md:pl-5 text-content-strong transition-all z-40">
+          <header className="flex items-center justify-between w-full px-4 md:px-5 py-2 bg-surface-raised border-b border-border-divider shrink-0 pl-14 md:pl-5 text-content-strong transition-all z-40">
             <div className="flex items-center gap-3 min-w-0">
               {selectedProject &&
               ![
@@ -4050,7 +4050,7 @@ function AppContainer() {
                   >
                     {selectedProject.name}
                   </h2>
-                  <div className="h-3.5 w-px border-l border-border-subtle mx-1 shrink-0" />
+                  <div className="h-3.5 w-px border-l border-border-divider mx-1 shrink-0" />
                   <HeaderAvatarGroup
                     allUsers={allUsers}
                     currentUserUid={currentUser?.uid || currentUser?.id}
@@ -4346,7 +4346,7 @@ function AppContainer() {
                       <div className="w-full flex-1 flex flex-col p-3 md:p-4 min-h-0 overflow-hidden bg-surface-sunken text-left">
                         {/* #418 — full-page TaskDetail chrome = Card + title bar Velzon (bukan Modal overlay) */}
                         <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle rounded-lg shadow-soft overflow-hidden">
-                          <div className="px-4 py-3 md:px-5 md:py-3.5 border-b border-border-subtle bg-surface-sunken/40 flex items-center justify-between gap-4 shrink-0">
+                          <div className="px-4 py-3 md:px-5 md:py-3.5 border-b border-border-divider bg-surface-sunken/40 flex items-center justify-between gap-4 shrink-0">
                             <div className="flex items-center gap-3 min-w-0">
                               <button
                                 type="button"

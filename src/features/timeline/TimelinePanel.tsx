@@ -875,13 +875,13 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               // panjang TIDAK dipotong, ia turun ke baris dua dan barisnya yang
               // tumbuh — lihat `tinggiRow`. Batas bawah/atas (#566) dipertahankan
               // supaya satu judul 200 karakter tidak pernah memakan papan Gantt.
-              "w-[38rem] min-w-[32rem] max-w-[min(56vw,44rem)] shrink-0 border-r border-border-subtle/80 flex flex-col z-20 bg-surface relative",
+              "w-[38rem] min-w-[32rem] max-w-[min(56vw,44rem)] shrink-0 border-r border-border-divider/80 flex flex-col z-20 bg-surface relative",
               "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:w-[min(80vw,20rem)] max-md:shadow-xl max-md:border-y-0 max-md:border-l-0",
               "max-md:transition-transform max-md:duration-200",
               hierarchyOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full"
             )}
           >
-            <div className="z-30 h-[73px] bg-surface-sunken/90 backdrop-blur-sm border-b border-border-subtle px-3 flex items-center gap-2">
+            <div className="z-30 h-[73px] bg-surface-sunken/90 backdrop-blur-sm border-b border-border-divider px-3 flex items-center gap-2">
               <span className={cn(LABEL_KEPALA, "min-w-0 flex-1")}>
                 {t("roadmap.itemHierarchy")}
               </span>
@@ -1110,8 +1110,8 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                   : {}),
               }}
             >
-              <div className="shrink-0 z-30 h-[73px] bg-surface-sunken/90 backdrop-blur-sm border-b border-border-subtle shadow-soft box-border flex flex-col">
-                <div className="flex h-8 border-b border-border-subtle/50">
+              <div className="shrink-0 z-30 h-[73px] bg-surface-sunken/90 backdrop-blur-sm border-b border-border-divider shadow-soft box-border flex flex-col">
+                <div className="flex h-8 border-b border-border-divider/50">
                   {timelineZoom !== "months"
                     ? timelineMonths.map((m: any) => {
                         const mStart = startOfMonth(m);
@@ -1123,7 +1123,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                         return (
                           <div
                             key={m.toISOString()}
-                            className="flex items-center px-2 py-1 border-r border-border-subtle/50"
+                            className="flex items-center px-2 py-1 border-r border-border-divider/50"
                             style={{ width: `${actualDays * pixelsPerDay}px` }}
                           >
                             <span className="text-[11px] font-normal text-content-secondary uppercase tracking-normal">
@@ -1142,7 +1142,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                         return (
                           <div
                             key={y.toISOString()}
-                            className="flex items-center px-2 py-1 border-r border-border-subtle/50"
+                            className="flex items-center px-2 py-1 border-r border-border-divider/50"
                             style={{ width: `${actualDays * pixelsPerDay}px` }}
                           >
                             <span className="text-[11px] font-normal text-content-secondary uppercase tracking-normal">
@@ -1157,7 +1157,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                     timelineDays.map((d: any, i: number) => (
                       <div
                         key={d.toISOString()}
-                        className="flex items-center justify-center border-r border-border-subtle/50 shrink-0"
+                        className="flex items-center justify-center border-r border-border-divider/50 shrink-0"
                         style={{ width: `${pixelsPerDay}px` }}
                       >
                         <span className="text-[11px] font-normal text-content-subtle">
@@ -1176,7 +1176,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                       return (
                         <div
                           key={w.toISOString()}
-                          className="flex flex-col items-center justify-center gap-0 border-r border-border-subtle/50 shrink-0"
+                          className="flex flex-col items-center justify-center gap-0 border-r border-border-divider/50 shrink-0"
                           style={{ width: `${actualDays * pixelsPerDay}px` }}
                         >
                           <span className="text-[11px] font-normal text-content-secondary leading-tight">
@@ -1204,7 +1204,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                       return (
                         <div
                           key={m.toISOString()}
-                          className="flex items-center justify-center border-r border-border-subtle/50 shrink-0"
+                          className="flex items-center justify-center border-r border-border-divider/50 shrink-0"
                           style={{ width: `${actualDays * pixelsPerDay}px` }}
                         >
                           <span className="text-[11px] font-normal text-content-subtle">

@@ -1534,7 +1534,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
               value={activeTab}
               onChange={setActiveTab}
               tone="primary"
-              className="bg-surface border-t border-border-subtle/60 border-b-0 px-4 sm:px-6 gap-6 sm:gap-8"
+              className="bg-surface border-t border-border-divider/60 border-b-0 px-4 sm:px-6 gap-6 sm:gap-8"
               itemClassName="px-0 py-3.5"
               tabs={
                 pageMode === "view"
@@ -1884,7 +1884,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   </div>
 
                   <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-4">
-                    <div className="flex items-center justify-between border-b border-border-subtle/60 pb-3">
+                    <div className="flex items-center justify-between border-b border-border-divider/60 pb-3">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                           <Activity className="w-4.5 h-4.5" />
@@ -1924,7 +1924,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       </p>
                     ) : (
                       <div className="max-h-[300px] overflow-y-auto pr-2 pl-4 py-1 custom-scrollbar">
-                        <div className="relative pl-8 space-y-6 border-l-2 border-border-subtle ml-2">
+                        <div className="relative pl-8 space-y-6 border-l-2 border-border-divider ml-2">
                           {userActivityLogsFiltered.map((log) => {
                             const actDate = ensureDate(log.createdAt);
 
@@ -1976,7 +1976,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   </div>
 
                   <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-4">
-                    <div className="flex items-center justify-between border-b border-border-subtle/60 pb-3">
+                    <div className="flex items-center justify-between border-b border-border-divider/60 pb-3">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                           <Sparkles className="w-4.5 h-4.5" />
@@ -2331,7 +2331,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 <div className="lg:col-span-4 space-y-4">
                   {/* Widget 1: Ringkasan Project */}
                   <div className="bg-surface p-4 sm:p-5 rounded-xl border border-border-subtle shadow-xs space-y-4">
-                    <div className="flex items-center gap-2 border-b border-border-subtle/60 pb-3">
+                    <div className="flex items-center gap-2 border-b border-border-divider/60 pb-3">
                       <Activity className="w-4 h-4 text-primary" />
                       <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
                         Ringkasan Project
@@ -2417,7 +2417,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                   {/* Widget 2: Timeline Aktivitas */}
                   <div className="bg-surface p-4 sm:p-5 rounded-xl border border-border-subtle shadow-xs space-y-4">
-                    <div className="flex items-center gap-2 border-b border-border-subtle/60 pb-3">
+                    <div className="flex items-center gap-2 border-b border-border-divider/60 pb-3">
                       <Clock className="w-4 h-4 text-primary" />
                       <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
                         Timeline Aktivitas
@@ -2509,7 +2509,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 {/* Tab: Personal Detail Form */}
                 {activeTab === "personal" && (
                   <div className="bg-surface p-6 sm:p-8 rounded-2xl border border-border-subtle shadow-xs space-y-6">
-                    <div className="border-b border-border-subtle/60 pb-4">
+                    <div className="border-b border-border-divider/60 pb-4">
                       <h3 className="text-sm font-normal text-content-strong uppercase tracking-normal">
                         {t("userDetail.personalInfoTitle", "PERSONAL DETAILS")}
                       </h3>
@@ -2691,7 +2691,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex items-center justify-end gap-3 pt-6 border-t border-border-subtle/60">
+                    <div className="flex items-center justify-end gap-3 pt-6 border-t border-border-divider/60">
                       <button
                         type="button"
                         onClick={exitEditMode}
@@ -2721,7 +2721,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   <div className="space-y-6">
                     {/* Card 1: Change Password Fields */}
                     <div className="bg-surface p-6 sm:p-8 rounded-2xl border border-border-subtle shadow-xs space-y-6">
-                      <div className="flex items-center gap-3 border-b border-border-subtle/60 pb-4">
+                      <div className="flex items-center gap-3 border-b border-border-divider/60 pb-4">
                         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                           <Lock className="w-5 h-5" />
                         </div>
@@ -2862,7 +2862,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-end gap-3 pt-5 border-t border-border-subtle/60">
+                      <div className="flex items-center justify-end gap-3 pt-5 border-t border-border-divider/60">
                         <button
                           type="button"
                           onClick={exitEditMode}
@@ -2890,7 +2890,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                     {/* Card 2: Login History Session Manager */}
                     <div className="bg-surface p-6 sm:p-8 rounded-2xl border border-border-subtle shadow-xs space-y-5">
-                      <div className="flex items-center justify-between border-b border-border-subtle/60 pb-4">
+                      <div className="flex items-center justify-between border-b border-border-divider/60 pb-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                             <Clock className="w-5 h-5" />
@@ -3006,7 +3006,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 {/* Tab: Settings (Admin Matrix - 4-Group Collapsible Accordion ala Sidebar) */}
                 {activeTab === "settings" && isAdmin && (
                   <div className="space-y-5">
-                    <div className="flex items-center justify-between border-b border-border-subtle pb-3.5">
+                    <div className="flex items-center justify-between border-b border-border-divider pb-3.5">
                       <div>
                         <h4 className="font-normal text-content-strong text-sm uppercase tracking-normal">
                           {t("userDetail.activePermissions")}
@@ -3043,7 +3043,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                   toggleSection(section.id);
                                 }
                               }}
-                              className="w-full flex items-center justify-between px-4 py-3 bg-surface-sunken hover:bg-surface-muted/60 transition-colors cursor-pointer text-left select-none border-b border-border-subtle/50"
+                              className="w-full flex items-center justify-between px-4 py-3 bg-surface-sunken hover:bg-surface-muted/60 transition-colors cursor-pointer text-left select-none border-b border-border-divider/50"
                             >
                               <div className="flex items-center gap-2.5">
                                 {isOpen ? (
@@ -3075,7 +3075,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                   className="w-full text-left text-xs border-collapse"
                                   scroll={false}
                                 >
-                                  <thead className="bg-surface-sunken/40 border-b border-border-subtle text-content-muted">
+                                  <thead className="bg-surface-sunken/40 border-b border-border-divider text-content-muted">
                                     <tr>
                                       <th className="py-2.5 px-4 font-normal text-xs uppercase w-2/5">
                                         {t("userDetail.module")}
@@ -3430,7 +3430,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                               {/* Tasks in project (Collapsable via Dropdown icon) */}
                               {projectTasks.length > 0 && isExpanded && (
-                                <div className="pt-2 border-t border-border-subtle/60 space-y-1.5">
+                                <div className="pt-2 border-t border-border-divider/60 space-y-1.5">
                                   <div className="flex items-center justify-between text-[11px] text-content-subtle font-normal uppercase tracking-normal">
                                     <span>Tugas Terdelegasi ({projectTasks.length}):</span>
                                   </div>
@@ -3474,7 +3474,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
             {/* Tab: Document — Tabel Dokumen ala Velzon */}
             {activeTab === "document" && (
               <div className="bg-surface p-4 sm:p-5 rounded-lg border border-border-subtle shadow-xs space-y-4">
-                <div className="flex items-center justify-between border-b border-border-subtle/60 pb-3">
+                <div className="flex items-center justify-between border-b border-border-divider/60 pb-3">
                   <div className="flex items-center gap-2">
                     <FileText className="w-4 h-4 text-primary" />
                     <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
@@ -3494,7 +3494,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         className="w-full text-left text-xs border-collapse"
                         scroll={false}
                       >
-                        <thead className="bg-surface-sunken/40 border-b border-border-subtle text-content-muted">
+                        <thead className="bg-surface-sunken/40 border-b border-border-divider text-content-muted">
                           <tr>
                             <th className="py-3 px-4 font-normal text-xs uppercase tracking-normal">
                               File Name

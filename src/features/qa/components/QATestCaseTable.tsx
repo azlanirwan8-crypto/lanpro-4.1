@@ -533,7 +533,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         <div className="hidden sm:block overflow-x-auto">
           <ResponsiveTable className="w-full text-left border-collapse" scroll={false}>
             <thead>
-              <tr className="bg-primary-surface/5 border-b border-border-subtle text-[11px] font-semibold uppercase text-content-subtle">
+              <tr className="bg-primary-surface/5 border-b border-border-divider text-[11px] font-semibold uppercase text-content-subtle">
                 {/* SELECT ALL CHECKBOX (For Admin / Users with edit access) */}
                 <th className="py-2.5 px-3 w-8 text-center" onClick={(e) => e.stopPropagation()}>
                   {(canUpdate || isAdminRole) && (
@@ -826,7 +826,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         </div>
 
         {setCasesPage && (
-          <div className="px-4 py-3 border-t border-border-subtle flex items-center justify-between text-[11px] text-content-subtle">
+          <div className="px-4 py-3 border-t border-border-divider flex items-center justify-between text-[11px] text-content-subtle">
             <div>
               {(casesPage - 1) * casesPerPage + (searchedCases.length ? 1 : 0)}–
               {Math.min(casesPage * casesPerPage, casesTotal)} / {casesTotal}

@@ -708,7 +708,7 @@ export const MasterDataPanel = ({
                 false,
                 currentUserProfile?.permissions
               ) && (
-                <div className="px-4 py-3 border-b border-border-subtle/80 flex justify-end shrink-0">
+                <div className="px-4 py-3 border-b border-border-divider/80 flex justify-end shrink-0">
                   <button
                     onClick={() => {
                       setNewModuleProjectId(projects?.[0]?.id || "");
@@ -923,7 +923,7 @@ export const MasterDataPanel = ({
                   false,
                   currentUserProfile?.permissions
                 ) && (
-                  <div className="px-3.5 py-3 border-b border-border-subtle/80 flex justify-end shrink-0">
+                  <div className="px-3.5 py-3 border-b border-border-divider/80 flex justify-end shrink-0">
                     <button
                       onClick={() => {
                         setNewMasterType(selectedType);

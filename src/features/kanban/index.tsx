@@ -159,9 +159,9 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
     return (
       <div className="relative w-fit min-w-full pb-16">
         {/* Header Bar - Static Sidebar and Scrollable Status Headers */}
-        <div className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[260px_1fr] sticky top-0 z-30 bg-surface border-b border-border-subtle/80">
+        <div className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[260px_1fr] sticky top-0 z-30 bg-surface border-b border-border-divider/80">
           {/* Bagian A Header */}
-          <div className="sticky left-0 z-50 bg-surface border-r border-border-subtle/80 h-11 flex items-center px-3 relative">
+          <div className="sticky left-0 z-50 bg-surface border-r border-border-divider/80 h-11 flex items-center px-3 relative">
             <div className="text-[11px] font-medium text-content-body tracking-wide flex items-center justify-between w-full gap-1.5">
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="font-medium text-[11px] text-content-strong shrink-0">
@@ -245,10 +245,10 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
               {filteredEpics.map((epic, epicIndex) => (
                 <div
                   key={epic.id}
-                  className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[260px_1fr] items-stretch border-b border-border-subtle/70 min-h-[110px]"
+                  className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[260px_1fr] items-stretch border-b border-border-divider/70 min-h-[110px]"
                 >
                   {/* Bagian A Row Cell - Sticky Sidebar */}
-                  <div className="sticky left-0 z-50 bg-surface border-r border-border-subtle/80 px-3.5 py-3 relative">
+                  <div className="sticky left-0 z-50 bg-surface border-r border-border-divider/80 px-3.5 py-3 relative">
                     {/* Epic Card Content */}
                     <div
                       className={cn(
@@ -307,9 +307,9 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
               ))}
               {/* Standalone Tasks when Epic grouped */}
               {standaloneTasks.length > 0 && (
-                <div className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[260px_1fr] items-stretch border-b border-border-subtle/70 min-h-[110px]">
+                <div className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[260px_1fr] items-stretch border-b border-border-divider/70 min-h-[110px]">
                   {/* Bagian A Row Cell - Sticky Sidebar */}
-                  <div className="sticky left-0 z-50 bg-surface border-r border-border-subtle/80 px-3.5 py-3 relative">
+                  <div className="sticky left-0 z-50 bg-surface border-r border-border-divider/80 px-3.5 py-3 relative">
                     <div
                       className={cn(
                         "bg-surface-sunken/70 rounded-lg border border-dashed border-border-subtle h-fit p-3",
@@ -367,10 +367,10 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                 return (
                   <div
                     key={uId}
-                    className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[260px_1fr] items-stretch border-b border-border-subtle/70 min-h-[110px]"
+                    className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[260px_1fr] items-stretch border-b border-border-divider/70 min-h-[110px]"
                   >
                     {/* Bagian A Row Cell - Sticky Sidebar */}
-                    <div className="sticky left-0 z-50 bg-surface border-r border-border-subtle/80 px-3.5 py-3 relative">
+                    <div className="sticky left-0 z-50 bg-surface border-r border-border-divider/80 px-3.5 py-3 relative">
                       <div
                         className={cn(
                           "bg-surface rounded-lg shadow-2xs border border-border-subtle/80 border-l-4 p-3 transition-all",
