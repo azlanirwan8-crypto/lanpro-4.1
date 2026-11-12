@@ -5216,6 +5216,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               setSelectedTaskForDetail={setSelectedTaskForDetail}
                               setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
                               suppressNodeOverlay={isRightSidebarOpen}
+                              zoomLevel={zoomLevel}
                             />
                           ))}
 

@@ -93,7 +93,9 @@ const Tombol: React.FC<{
       onClick();
     }}
     className={cn(
-      "h-7 w-7 flex items-center justify-center rounded-md transition-all cursor-pointer",
+      // #856 — di layar sentuh tidak ada hover, jadi sasaran ketuknya dinaikkan
+      // ke ruang minimum; di layar lebar kembali ke ukuran bilah semula.
+      "h-7 w-7 min-h-11 min-w-11 md:min-h-0 md:min-w-0 flex items-center justify-center rounded-md transition-all cursor-pointer",
       aktif
         ? "bg-primary/15 text-primary border border-primary/40"
         : "text-content-secondary hover:bg-surface-muted border border-transparent"
@@ -123,7 +125,7 @@ const TombolKepala: React.FC<{
       onClick();
     }}
     className={cn(
-      "h-6 w-8 flex items-center justify-center rounded transition-all cursor-pointer",
+      "h-6 w-8 min-h-11 min-w-11 md:min-h-0 md:min-w-0 flex items-center justify-center rounded transition-all cursor-pointer",
       aktif
         ? "bg-primary/15 border border-primary/40"
         : "border border-transparent hover:bg-surface-muted"
