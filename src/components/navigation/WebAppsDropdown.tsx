@@ -100,7 +100,7 @@ export const WebAppsDropdown: React.FC<WebAppsDropdownProps> = ({
         className="z-[44] w-72 rounded-xl border border-border-subtle bg-surface shadow-soft-lg p-3 animate-in fade-in zoom-in-95 duration-150"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-1 pb-2.5 mb-2 border-b border-border-subtle">
+        <div className="flex items-center justify-between px-1 pb-2.5 mb-2 border-b border-border-divider">
           <span className="text-xs font-semibold text-content-strong">
             {t("appShell.webApps", "Web Apps")}
           </span>

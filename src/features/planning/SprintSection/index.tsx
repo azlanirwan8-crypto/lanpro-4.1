@@ -136,7 +136,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
             >
               {/* Header Sprint (Presisi Gambar 1) */}
               <div
-                className="p-4 sm:p-5 flex flex-col gap-4 cursor-pointer hover:bg-surface-sunken/40 transition border-b border-border-subtle"
+                className="p-4 sm:p-5 flex flex-col gap-4 cursor-pointer hover:bg-surface-sunken/40 transition border-b border-border-divider"
                 onClick={() => setExpandedSprintId(isExpanded ? "" : sprint.id)}
               >
                 {/* #364 — judul + fase + aksi sejajar 1 baris; tanggal di bawah */}
@@ -198,7 +198,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                   </div>
 
                   {/* Sisi Tengah: Sprint Goal (Pemisah Garis Vertikal - Tanpa Ikon Pensil) */}
-                  <div className="hidden md:flex flex-col min-w-0 flex-1 border-l border-border-subtle/80 pl-5 my-0.5 max-w-md">
+                  <div className="hidden md:flex flex-col min-w-0 flex-1 border-l border-border-divider/80 pl-5 my-0.5 max-w-md">
                     <div className="text-xs font-normal text-primary">Sprint Goal</div>
                     <p className="text-xs text-content-body font-normal leading-relaxed line-clamp-2 mt-0.5">
                       {sprint.goal ||

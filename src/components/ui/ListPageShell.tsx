@@ -21,7 +21,7 @@ export const LIST_SEARCH_INPUT_CLASS =
  * 0,01:1, jadi tampilan yang sudah disetujui pemilik proyek tidak bergeser.
  * Kelas ini dipakai 9 tabel sekaligus. */
 export const LIST_THEAD_ROW_CLASS =
-  "bg-primary-surface/5 border-b border-border-subtle text-content-subtle whitespace-nowrap";
+  "bg-primary-surface/5 border-b border-border-divider text-content-subtle whitespace-nowrap";
 
 /** Wrapper scroll tabel desktop di dalam kartu konten. */
 export const LIST_TABLE_WRAP_CLASS =
@@ -29,7 +29,7 @@ export const LIST_TABLE_WRAP_CLASS =
 
 /** Strip toolbar Search + Tambah di atas isi kartu (#424). */
 const LIST_CARD_TOOLBAR_CLASS =
-  "px-4 py-3 border-b border-border-subtle/80 bg-surface shrink-0 flex flex-wrap items-center justify-end gap-2";
+  "px-4 py-3 border-b border-border-divider/80 bg-surface shrink-0 flex flex-wrap items-center justify-end gap-2";
 
 type ListPageShellProps = {
   /** `<PageHeader />` — panel putih full-bleed, di luar padding konten. */

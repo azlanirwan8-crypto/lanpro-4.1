@@ -242,7 +242,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
 
       {/* Form Konfigurasi Koneksi Email (Item #264) */}
       <div className="space-y-3.5 pt-1 border border-border-subtle/80 bg-surface rounded-lg p-3.5 shadow-2xs">
-        <div className="flex items-center justify-between pb-2 border-b border-border-subtle/60">
+        <div className="flex items-center justify-between pb-2 border-b border-border-divider/60">
           <div className="flex items-center gap-2">
             <Server size={15} className="text-content-body" />
             <span className="text-xs font-semibold text-content-strong">
@@ -446,7 +446,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
           di Pengaturan Operasional sudah dihapus di #302(a) karena tidak pernah
           dibaca siapa pun. */}
       <div className="space-y-3.5 border border-border-subtle/80 bg-surface rounded-lg p-3.5 shadow-2xs">
-        <div className="flex items-center gap-2 pb-2 border-b border-border-subtle/60">
+        <div className="flex items-center gap-2 pb-2 border-b border-border-divider/60">
           <Globe size={15} className="text-content-body" />
           <span className="text-xs font-semibold text-content-strong">Tautan di Dalam Email</span>
         </div>

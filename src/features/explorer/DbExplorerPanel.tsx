@@ -173,7 +173,7 @@ export const DbExplorerPanel: React.FC<any> = ({
         {activeTab === "explorer" && (
           <div className="flex-1 bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden flex flex-col min-h-0 relative z-10">
             {/* Database Mode Banner */}
-            <div className="px-4 py-2.5 border-b border-border-subtle/80 flex flex-wrap items-center justify-between gap-4 shrink-0 bg-emerald-500/10 text-emerald-800">
+            <div className="px-4 py-2.5 border-b border-border-divider/80 flex flex-wrap items-center justify-between gap-4 shrink-0 bg-emerald-500/10 text-emerald-800">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full animate-pulse bg-emerald-500" />
                 <span className="text-xs font-medium flex items-center gap-1.5">
@@ -223,13 +223,13 @@ export const DbExplorerPanel: React.FC<any> = ({
               {/* Sidebar: Table List — laci di bawah md */}
               <div
                 className={cn(
-                  "w-[240px] bg-surface-sunken/50 border-r border-border-subtle/80 flex flex-col overflow-y-auto shrink-0 custom-scrollbar",
+                  "w-[240px] bg-surface-sunken/50 border-r border-border-divider/80 flex flex-col overflow-y-auto shrink-0 custom-scrollbar",
                   "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:bg-surface max-md:shadow-xl",
                   "max-md:transition-transform max-md:duration-200",
                   sidebarOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full"
                 )}
               >
-                <div className="px-3.5 py-2.5 text-[11px] font-normal text-content-muted uppercase tracking-normal sticky top-0 bg-surface-sunken border-b border-border-subtle/80 flex justify-between items-center z-10">
+                <div className="px-3.5 py-2.5 text-[11px] font-normal text-content-muted uppercase tracking-normal sticky top-0 bg-surface-sunken border-b border-border-divider/80 flex justify-between items-center z-10">
                   <span>{t("dbExplorer.tables")}</span>
                   <button
                     type="button"
@@ -288,7 +288,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                   </button>
                 </div>
                 {/* Query Editor */}
-                <div className="p-3.5 border-b border-border-subtle/80 bg-surface-sunken/50 shrink-0">
+                <div className="p-3.5 border-b border-border-divider/80 bg-surface-sunken/50 shrink-0">
                   <div className="relative">
                     <textarea
                       value={query}
@@ -341,13 +341,13 @@ export const DbExplorerPanel: React.FC<any> = ({
                               Object.keys(result[0]).map((key) => (
                                 <th
                                   key={key}
-                                  className="p-3 border-b border-border-subtle font-medium truncate max-w-[200px]"
+                                  className="p-3 border-b border-border-divider font-medium truncate max-w-[200px]"
                                 >
                                   {key}
                                 </th>
                               ))
                             ) : (
-                              <th className="p-3 border-b border-border-subtle font-medium text-content-subtle">
+                              <th className="p-3 border-b border-border-divider font-medium text-content-subtle">
                                 {t("dbExplorer.result0Rows")}
                               </th>
                             )}

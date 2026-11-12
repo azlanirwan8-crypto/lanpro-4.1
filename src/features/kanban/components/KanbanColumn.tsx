@@ -50,7 +50,7 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
         )}
       >
         {showHeader && (
-          <div className="flex items-center justify-between px-3.5 py-2 border-b border-border-subtle/70 bg-surface rounded-t-md shadow-2xs">
+          <div className="flex items-center justify-between px-3.5 py-2 border-b border-border-divider/70 bg-surface rounded-t-md shadow-2xs">
             <div className="flex items-center gap-2">
               {status.icon ? (
                 <RenderIcon

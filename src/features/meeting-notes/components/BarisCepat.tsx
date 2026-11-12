@@ -270,7 +270,7 @@ export const BarisCepat: React.FC<BarisCepatProps> = (props) => {
   const jumlahLampiran = tautanTerisi + nilai.berkas.length;
 
   return (
-    <div className="hidden sm:block p-2 bg-surface border-t border-border-subtle shrink-0">
+    <div className="hidden sm:block p-2 bg-surface border-t border-border-divider shrink-0">
       <div className="rounded-xl border border-border-subtle bg-surface-sunken p-1.5">
         <div className="flex flex-wrap items-center gap-1.5">
           <textarea

@@ -82,7 +82,7 @@ export const Modal = ({
             <div className="w-10 h-1 rounded-full bg-surface-marker" />
           </div>
           {!hideHeader && title != null && (
-            <div className="px-5 py-3.5 border-b border-border-subtle flex justify-between items-center shrink-0 gap-3">
+            <div className="px-5 py-3.5 border-b border-border-divider flex justify-between items-center shrink-0 gap-3">
               <h3 className="text-base font-medium text-content-strong min-w-0 truncate">
                 {title}
               </h3>
@@ -105,7 +105,7 @@ export const Modal = ({
             {children}
           </div>
           {footer != null && (
-            <div className="px-5 py-3.5 border-t border-border-subtle bg-surface-sunken/40 flex flex-wrap items-center justify-end gap-2 shrink-0 pb-[max(0.875rem,env(safe-area-inset-bottom))] md:pb-3.5">
+            <div className="px-5 py-3.5 border-t border-border-divider bg-surface-sunken/40 flex flex-wrap items-center justify-end gap-2 shrink-0 pb-[max(0.875rem,env(safe-area-inset-bottom))] md:pb-3.5">
               {footer}
             </div>
           )}

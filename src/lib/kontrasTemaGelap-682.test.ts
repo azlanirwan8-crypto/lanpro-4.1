@@ -138,6 +138,8 @@ const TEKS = [
 
 const GARIS_KONTROL = "--color-border-subtle";
 const GARIS_PISAH = "--color-border-faint";
+/** #862 — token yang dipakai GARIS DEKORATIF (kepala tabel, footer panel). */
+const GARIS_DEKORASI = "--color-border-divider";
 
 describe("#682 token mode gelap lolos WCAG AA untuk teks", () => {
   const angka: string[] = [];
@@ -205,8 +207,32 @@ describe("#682 garis mode gelap", () => {
     expect(luminansi(keRgb(kontrol))).toBeGreaterThan(luminansi(keRgb(pisah)));
   });
 
-  it("garis sidebar ikut dinaikkan karena komentarnya menulis sama dengan garis", () => {
-    expect(tokenDi(MODE_GELAP, "--color-sidebar-border")).toBe(kontrol);
+  // #862 — garis dekoratif adalah PEMISAH, bukan batas kontrol. Kesalahan yang
+  // dikunci di sini bukan "terlalu redup": sebelum #862 141 pasangan satu-sisi
+  // dan 12 `divide` memakai token kontrol, sehingga kepala tabel dan footer
+  // panel bergaris 4,90:1 — sekokoh tepi kolom isian.
+  const dekorasi = tokenDi(MODE_GELAP, GARIS_DEKORASI);
+  for (const l of LATAR) {
+    const nilaiL = tokenDi(MODE_GELAP, l);
+    const r = rasio(dekorasi, nilaiL);
+    angka.push(`  ${GARIS_DEKORASI} ${dekorasi} di ${l} = ${r.toFixed(2)}:1`);
+    it(`${GARIS_DEKORASI} ${dekorasi} tidak boleh sama nilainya dengan ${l} ${nilaiL}`, () => {
+      expect(dekorasi.toLowerCase()).not.toBe(nilaiL.toLowerCase());
+    });
+    it(`${GARIS_DEKORASI} masih terlihat di ${l} >= 1,3:1 (dapat ${r.toFixed(2)}:1)`, () => {
+      expect(r).toBeGreaterThanOrEqual(1.3);
+    });
+  }
+
+  it("garis dekoratif lebih redup dari garis kontrol (peran tidak tertukar)", () => {
+    expect(luminansi(keRgb(kontrol))).toBeGreaterThan(luminansi(keRgb(dekorasi)));
+  });
+
+  it("tepi sidebar adalah garis pemisah, bukan garis kontrol (#862)", () => {
+    // #678 menyamakannya dengan garis kontrol karena komentarnya waktu itu
+    // menulis "= border". Itu membuat tepi menu 4,90:1 terhadap permukaannya
+    // sendiri — garis paling terang di layar, dan Velzon tidak begitu.
+    expect(tokenDi(MODE_GELAP, "--color-sidebar-border")).toBe(pisah);
   });
 });
 
@@ -233,7 +259,7 @@ describe("#818 netral mode terang lolos WCAG AA untuk teks", () => {
 
 describe("#818 garis mode terang", () => {
   it("garis kontrol dan pemisah bukan nilai permukaan mana pun", () => {
-    for (const nama of [GARIS_KONTROL, GARIS_PISAH]) {
+    for (const nama of [GARIS_KONTROL, GARIS_PISAH, GARIS_DEKORASI]) {
       const nilai = tokenDi(MODE_TERANG, nama).toLowerCase();
       for (const l of LATAR) {
         expect(nilai).not.toBe(tokenDi(MODE_TERANG, l).toLowerCase());
@@ -261,6 +287,9 @@ describe("#818 nilai dasar mode terang dikunci", () => {
     "--color-content-subtle": "#686a6d",
     [GARIS_KONTROL]: "#ced4da",
     [GARIS_PISAH]: "#f3f6f9",
+    // #862 — sengaja SAMA dengan garis kontrol di mode terang: pemindahan
+    // pemakaian ke token ini tidak boleh menggeser tampilan terang.
+    [GARIS_DEKORASI]: "#ced4da",
   };
 
   for (const [nama, nilai] of Object.entries(BAWAAN_TERANG)) {

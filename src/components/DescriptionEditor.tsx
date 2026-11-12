@@ -45,7 +45,7 @@ export const DescriptionEditor: React.FC<Props> = ({ task, onSave, onCancel, onA
           }
         }}
       />
-      <div className="bg-surface-sunken border-t border-border-subtle px-4 py-3 flex justify-between items-center text-[11px] font-medium text-content-subtle">
+      <div className="bg-surface-sunken border-t border-border-divider px-4 py-3 flex justify-between items-center text-[11px] font-medium text-content-subtle">
         <span>{t("common.markdownFullySupportedAutoSaves")}</span>
       </div>
     </div>

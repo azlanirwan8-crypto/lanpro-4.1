@@ -129,7 +129,7 @@ export const ActivityLogPanel = ({
 
         <div className="bg-surface border border-border-subtle rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
           {/* #426 — search + export dipindah ke dalam card Audit Trail */}
-          <div className="px-4 py-3 border-b border-border-subtle/80 bg-surface shrink-0 flex flex-wrap items-center justify-between gap-2">
+          <div className="px-4 py-3 border-b border-border-divider/80 bg-surface shrink-0 flex flex-wrap items-center justify-between gap-2">
             <div className="flex min-w-0 flex-1 md:flex-none bg-surface-sunken border border-border-subtle rounded-lg px-3 py-2 items-center gap-2">
               <Search className="w-3.5 h-3.5 text-content-subtle shrink-0" />
               <input
@@ -160,7 +160,7 @@ export const ActivityLogPanel = ({
                   scroll={false}
                 >
                   <thead>
-                    <tr className="bg-primary-surface/5 border-b border-border-subtle text-content-subtle whitespace-nowrap">
+                    <tr className="bg-primary-surface/5 border-b border-border-divider text-content-subtle whitespace-nowrap">
                       <th className="px-8 py-5">{t("activityLog.timestamp")}</th>
                       <th className="px-8 py-5">{t("activityLog.eventSignature")}</th>
                       <th className="px-8 py-5">{t("activityLog.subjectActor")}</th>
@@ -300,7 +300,7 @@ export const ActivityLogPanel = ({
               </div>
 
               {/* #309 — kartu log di bawah sm */}
-              <div className="sm:hidden divide-y divide-border-subtle/60 min-h-[200px]">
+              <div className="sm:hidden divide-y divide-border-divider/60 min-h-[200px]">
                 {filteredLogs.map((log) => {
                   const actor = getActor(log);
                   return (

@@ -151,7 +151,9 @@ describe("ritme dan chrome (#726)", () => {
       expect(k).toContain("py-2.5");
       expect(k).not.toContain("py-3 ");
     }
-    expect(s).toContain('<tbody className="divide-y divide-border-subtle');
+    // #862 — garis antar baris memakai token PEMISAH; token kontrol masih
+    // dipertahankan untuk batas kolom isian, bukan untuk garis tabel.
+    expect(s).toContain('<tbody className="divide-y divide-border-divider');
   });
 
   it("satu tinggi untuk semua kontrol satu-baris: tidak ada nilai arbitrer", () => {

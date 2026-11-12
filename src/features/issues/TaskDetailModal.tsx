@@ -165,7 +165,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         <div className="flex-1 overflow-auto custom-scrollbar">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 h-full">
             {/* Left Column (Main Info) */}
-            <div className="lg:col-span-8 p-3.5 sm:p-5 md:p-6 lg:p-7 space-y-4 sm:space-y-6 border-r border-border-subtle bg-surface-sunken/40">
+            <div className="lg:col-span-8 p-3.5 sm:p-5 md:p-6 lg:p-7 space-y-4 sm:space-y-6 border-r border-border-divider bg-surface-sunken/40">
               {(() => {
                 const parentEpic = task?.parentId
                   ? (tasks || []).find((t) => t.id === task.parentId)
@@ -229,7 +229,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 />
 
                 {/* Actions Bar */}
-                <div className="flex flex-wrap items-center gap-2.5 pt-1 border-b border-border-subtle pb-3">
+                <div className="flex flex-wrap items-center gap-2.5 pt-1 border-b border-border-divider pb-3">
                   <Button
                     variant="secondary"
                     size="sm"
@@ -346,7 +346,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         rows={4}
                         className="w-full p-4 text-xs focus:outline-none resize-y leading-relaxed font-normal text-content-body"
                       />
-                      <div className="bg-surface-sunken border-t border-border-subtle px-3 py-2 flex justify-between items-center text-[11px] font-medium text-content-subtle">
+                      <div className="bg-surface-sunken border-t border-border-divider px-3 py-2 flex justify-between items-center text-[11px] font-medium text-content-subtle">
                         <span>{t("issueDetail.markdownHint")}</span>
                       </div>
                     </div>

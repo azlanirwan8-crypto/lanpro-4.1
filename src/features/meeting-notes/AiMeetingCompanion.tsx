@@ -908,7 +908,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       {/* Continuous Learning Loop Feedback Modal Trigger — tombol feedback dipasang subtil jika ada data, atau diakses lewat modal */}
       {/* Tabs navigation */}
       {aiData && (
-        <div className="border-b border-border-subtle/80 bg-surface-sunken/70 p-1 flex flex-wrap items-center justify-between gap-1 rounded-t-lg">
+        <div className="border-b border-border-divider/80 bg-surface-sunken/70 p-1 flex flex-wrap items-center justify-between gap-1 rounded-t-lg">
           <div className="flex flex-wrap gap-1">
             <button
               onClick={() => setActiveTab("summary")}
@@ -1726,7 +1726,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             </div>
 
                             {item.bukti_cuplikan ? (
-                              <blockquote className="text-xs text-content-muted italic border-l-2 border-border-subtle pl-3">
+                              <blockquote className="text-xs text-content-muted italic border-l-2 border-border-divider pl-3">
                                 {t("aiMeeting.evidenceQuote")}: “{item.bukti_cuplikan}”
                               </blockquote>
                             ) : null}
@@ -1811,7 +1811,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                               </div>
                             )}
                             {item.bukti_cuplikan ? (
-                              <blockquote className="text-xs text-content-muted italic border-l-2 border-border-subtle pl-3">
+                              <blockquote className="text-xs text-content-muted italic border-l-2 border-border-divider pl-3">
                                 {t("aiMeeting.evidenceQuote")}: “{item.bukti_cuplikan}”
                               </blockquote>
                             ) : null}

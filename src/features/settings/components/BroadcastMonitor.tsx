@@ -283,7 +283,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
       {isPreviewOpen && (
         <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 transition-all">
           <div className="bg-surface rounded-lg shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[85vh] border border-border-subtle">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle shrink-0">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border-divider shrink-0">
               <h3 className="font-medium text-sm text-content-strong flex items-center gap-2">
                 <Eye size={16} className="text-primary" />
                 {t("broadcast.templatePreview")}
@@ -305,7 +305,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
                   {t("broadcast.emailPreview")}
                 </div>
                 <div className="bg-surface-sunken border border-border-faint rounded-xl p-4 text-sm font-mono text-content-body whitespace-pre-wrap shadow-soft">
-                  <div className="font-medium border-b border-border-subtle pb-3 mb-3 text-content-strong">
+                  <div className="font-medium border-b border-border-divider pb-3 mb-3 text-content-strong">
                     {t("settings.subject")}: {replaceMockData(emailTemplate.subject)}
                   </div>
                   <div className="leading-relaxed">{replaceMockData(emailTemplate.body)}</div>

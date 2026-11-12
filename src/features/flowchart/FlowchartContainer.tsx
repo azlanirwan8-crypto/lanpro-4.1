@@ -4872,7 +4872,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       {/* LEFT PANE: Daftar Dokumen */}
                       <div className="w-full flex-1 bg-surface-sunken/50 flex flex-col">
                         {/* Header Left Pane */}
-                        <div className="p-4 border-b border-border-subtle flex items-center justify-between bg-surface shrink-0">
+                        <div className="p-4 border-b border-border-divider flex items-center justify-between bg-surface shrink-0">
                           <h4 className="text-sm font-semibold text-content-strong flex items-center gap-2">
                             <FileText className="w-4 h-4 text-primary" />
                             {t("flowchart.documentList")}
@@ -6197,7 +6197,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             </div>
 
                             {/* Integration with Workspace tasks list (LINKING TASKS BACKLOG TO SHAPES) */}
-                            <div className="space-y-1.5 pt-2 border-t border-border-subtle">
+                            <div className="space-y-1.5 pt-2 border-t border-border-divider">
                               <label className="text-[11px] font-medium text-content-muted flex items-center gap-1">
                                 <Workflow className="w-3.5 h-3.5 text-primary" />
                                 <span>{t("flowchart.linkTaskBacklog")}</span>
@@ -6436,7 +6436,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       {isUploadDocModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay/60 backdrop-blur-xs p-4">
           <div className="bg-surface rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col border border-border-subtle">
-            <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between bg-surface">
+            <div className="px-5 py-4 border-b border-border-divider flex items-center justify-between bg-surface">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-md bg-primary-surface/10 text-primary flex items-center justify-center">
                   <FileText className="w-4 h-4" />

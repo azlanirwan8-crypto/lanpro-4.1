@@ -91,7 +91,7 @@ export const LaciUtas: React.FC<LaciUtasProps> = ({
   return (
     <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs z-[9999] flex justify-end">
       <div className="absolute inset-0" onClick={onTutup} />
-      <div className="relative bg-surface w-full max-w-lg h-full shadow-2xl border-l border-border-subtle flex flex-col text-left">
+      <div className="relative bg-surface w-full max-w-lg h-full shadow-2xl border-l border-border-divider flex flex-col text-left">
         <div className="p-5 border-b border-border-faint flex items-center justify-between bg-surface-sunken/80 shrink-0">
           <div className="flex items-center gap-3 pr-4 min-w-0">
             <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center border border-primary/20 shrink-0">
@@ -191,7 +191,7 @@ export const LaciUtas: React.FC<LaciUtasProps> = ({
           )}
         </div>
 
-        <div className="p-4 border-t border-border-subtle bg-surface shrink-0">
+        <div className="p-4 border-t border-border-divider bg-surface shrink-0">
           <div className="flex items-center gap-2 bg-surface-muted rounded-full px-4 py-2">
             <input
               type="text"

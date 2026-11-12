@@ -847,7 +847,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
           </div>
 
           {/* Table Footer / Pagination */}
-          <div className="px-6 py-3.5 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+          <div className="px-6 py-3.5 border-t border-border-divider bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
             <div className="flex items-center gap-3">
               <span className="text-[11px] text-content-subtle font-normal">
                 {t("common.showing")}{" "}

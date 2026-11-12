@@ -282,7 +282,7 @@ export const BackupPanel = (_props: {
 
         {/* Export History DataTable */}
         <div className="bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden">
-          <div className="px-4 py-3 bg-surface-sunken/80 border-b border-border-subtle/80 flex items-center justify-between">
+          <div className="px-4 py-3 bg-surface-sunken/80 border-b border-border-divider/80 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-content-muted" />
               <h3 className="text-xs font-normal text-content-body uppercase tracking-normal">
@@ -296,7 +296,7 @@ export const BackupPanel = (_props: {
 
           <div className="hidden sm:block overflow-x-auto">
             <ResponsiveTable className="w-full text-left border-collapse text-xs" scroll={false}>
-              <thead className="bg-surface-muted/70 text-content-body border-b border-border-subtle/80 font-semibold uppercase text-[11px]">
+              <thead className="bg-surface-muted/70 text-content-body border-b border-border-divider/80 font-semibold uppercase text-[11px]">
                 <tr>
                   <th className="py-2.5 px-3.5">{t("backup.exportTime")}</th>
                   <th className="py-2.5 px-3.5">{t("backup.fileName")}</th>
@@ -388,7 +388,7 @@ export const BackupPanel = (_props: {
           </div>
 
           {/* #388 — kartu riwayat backup di bawah sm */}
-          <div className="sm:hidden divide-y divide-border-subtle/60">
+          <div className="sm:hidden divide-y divide-border-divider/60">
             {exportHistory.length > 0 ? (
               exportHistory.map((item) => (
                 <div key={item.id} className="p-4 flex flex-col gap-3">

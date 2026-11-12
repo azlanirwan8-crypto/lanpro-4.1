@@ -148,7 +148,7 @@ export const SettingsPage: React.FC = () => {
               menempelkan monitor di sana hanya mengisi ruang.
             */}
               {activeTab !== "konfigurasi" && (
-                <div className="lg:col-span-7 border-t border-border-subtle/80 pt-5 lg:border-t-0 lg:border-l lg:pl-5 lg:pt-0">
+                <div className="lg:col-span-7 border-t border-border-divider/80 pt-5 lg:border-t-0 lg:border-l lg:pl-5 lg:pt-0">
                   <BroadcastMonitor
                     channel={activeTab === "taskBroadcast" ? "email" : "whatsapp"}
                     emailTemplate={{

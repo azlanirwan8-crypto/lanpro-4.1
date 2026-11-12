@@ -84,7 +84,7 @@ export const SystemConfigForm: React.FC = () => {
       dilaporkan pemilik proyek sebagai "kurang rapi".
     */
     <div className="space-y-3.5 text-left border border-border-subtle/80 bg-surface rounded-lg p-3.5 shadow-2xs">
-      <div className="space-y-1 pb-2 border-b border-border-subtle/60">
+      <div className="space-y-1 pb-2 border-b border-border-divider/60">
         <div className="flex items-center gap-2">
           <Shield size={15} className="text-content-body" />
           <span className="text-xs font-semibold text-content-strong">
@@ -232,7 +232,7 @@ export const SystemConfigForm: React.FC = () => {
         token `success-surface` (bukan warna keras): satu aksi utama per kartu,
         rupa yang sama untuk peran yang sama.
       */}
-      <div className="pt-3 border-t border-border-subtle/60 flex justify-end">
+      <div className="pt-3 border-t border-border-divider/60 flex justify-end">
         <button
           type="button"
           onClick={handleSave}

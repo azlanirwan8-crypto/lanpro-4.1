@@ -38,7 +38,7 @@ interface KepalaProps {
 export const KepalaPapan: React.FC<KepalaProps> = ({ tampilAI, onToggleAI, cari, onCari }) => {
   const { t } = useTranslation();
   return (
-    <div className="px-3 sm:px-5 py-3 border-b border-border-subtle/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface-sunken/40 shrink-0">
+    <div className="px-3 sm:px-5 py-3 border-b border-border-divider/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface-sunken/40 shrink-0">
       <div className="flex items-center gap-3 min-w-0">
         <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-2xs shrink-0">
           <Search className="w-4 h-4" />
@@ -429,7 +429,7 @@ export const KakiPapan: React.FC<KakiProps> = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div className="px-5 py-3 bg-surface-sunken/40 border-t border-border-subtle flex items-center justify-between text-[11px] text-content-subtle font-normal shrink-0">
+    <div className="px-5 py-3 bg-surface-sunken/40 border-t border-border-divider flex items-center justify-between text-[11px] text-content-subtle font-normal shrink-0">
       <div className="flex items-center gap-3">
         <span>{t("discussion.showingPoints", { shown: tampil, filtered: total, total })}</span>
         <ListPerPageSelect value={perHalaman} onChange={onPerHalaman} />

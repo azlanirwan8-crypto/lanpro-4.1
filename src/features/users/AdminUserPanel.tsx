@@ -643,7 +643,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
 
           {/* User List */}
           <div className="bg-surface rounded-xl shadow-soft border border-border-subtle/50 overflow-hidden flex-1 flex flex-col">
-            <div className="px-4 py-3 border-b border-border-subtle/80 flex flex-wrap items-center justify-end gap-2 shrink-0">
+            <div className="px-4 py-3 border-b border-border-divider/80 flex flex-wrap items-center justify-end gap-2 shrink-0">
               <div className="relative min-w-0 flex-1 lg:flex-none lg:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-subtle pointer-events-none" />
                 <input
@@ -772,7 +772,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 scroll={false}
               >
                 <thead>
-                  <tr className="bg-primary-surface/5 border-b border-border-subtle text-content-subtle whitespace-nowrap">
+                  <tr className="bg-primary-surface/5 border-b border-border-divider text-content-subtle whitespace-nowrap">
                     <th className="py-3.5 px-4 text-center w-12">
                       <input
                         type="checkbox"
@@ -1079,7 +1079,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
             </div>
 
             {/* #309 — kartu pengguna di bawah sm */}
-            <div className="sm:hidden flex-1 overflow-y-auto divide-y divide-border-subtle/60 min-h-[200px]">
+            <div className="sm:hidden flex-1 overflow-y-auto divide-y divide-border-divider/60 min-h-[200px]">
               {paginatedUsers.length === 0 ? (
                 <div className="py-12 text-center text-content-muted text-sm space-y-3">
                   <p>{t("users.empty")}</p>

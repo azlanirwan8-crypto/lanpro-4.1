@@ -226,6 +226,12 @@
   --color-surface-raised: #ffffff;
   --color-border-subtle: #ced4da; /* batas kontrol — Velzon gray-400 (input) */
   --color-border-faint: #f3f6f9; /* pemisah — Velzon gray-100 */
+  /* #862 — garis pemisah DEKORATIF punya token sendiri, terpisah dari batas
+   * kontrol. Nilai terangnya sengaja SAMA dengan `--color-border-subtle` di atas
+   * (#ced4da), jadi memindahkan pemakaian ke token ini tidak menggeser mode
+   * terang satu piksel; yang bergeser hanya mode gelap, tempat batas kontrol
+   * dituntut 3:1 tetapi pemisah hiasan justru tidak boleh sekuat itu. */
+  --color-border-divider: #ced4da; /* pemisah — tampilan terang tidak berubah */
   --color-surface-sunken: #f3f3f9; /* kanvas halaman — Velzon body-bg */
   --color-content: #212529; /* teks utama — gray-900 */
   --color-content-strong: #343a40; /* judul — gray-800 */
@@ -376,6 +382,12 @@ html.dark {
    * Keduanya dikunci `src/lib/kontrasTemaGelap-682.test.ts`. */
   --color-border-subtle: #8b9299; /* batas kontrol — 3,65:1 terburuk */
   --color-border-faint: #4b5259; /* pemisah — 1,45:1, tidak lagi = surface-raised */
+  /* #862 — pemisah dekoratif memakai nilai pemisah gelap (#4b5259), bukan
+   * #8b9299 milik kontrol. Sebelum ini 141 pasangan satu-sisi (kepala tabel,
+   * footer panel, tepi anak panel) dan 12 `divide` menggambar baris dengan
+   * 4,90:1 di atas kartu — sekokoh tepi kolom isian — sehingga layar terbaca
+   * bergaris dibanding Velzon (#32383e di atas #212529 = 1,30:1). */
+  --color-border-divider: #4b5259; /* pemisah — 1,95:1 di atas kartu */
   --color-surface-sunken: #171a1e; /* kanvas terdalam */
   /* #679 — Tangga teks dinaikkan satu tingkat. Alasannya terukur, bukan rasa:
    * mode gelap menaikkan TERANG latar pada tiap elevasi (sunken 0,0101 →
@@ -409,10 +421,12 @@ html.dark {
 
   /* #427 — Sidebar diselaraskan ke Velzon neutral gray */
   --color-sidebar-surface: #212529; /* = card bg */
-  /* #678 — komentarnya menulis "= border", jadi ia ikut naik bersama
-   * `--color-border-subtle`. Kalau tidak, komentar itu menjadi bohong dan tepi sidebar
-   * kembali jadi garis yang tidak ada. */
-  --color-sidebar-border: #8b9299; /* = garis kontrol, lihat di atas */
+  /* #862 — tepi sidebar adalah PEMISAH, bukan batas kontrol: tidak ada kolom
+   * isian yang tepinya digambar oleh token ini. #678 membuatnya ikut naik ke
+   * garis kontrol, sehingga tepi menu 4,90:1 terhadap permukaannya sendiri —
+   * garis paling terang di layar, dan Velzon tidak begitu. Kini memakai nilai
+   * pemisah; test #682 diubah SADAR untuk mengunci peran barunya. */
+  --color-sidebar-border: #4b5259; /* = garis pemisah, bukan garis kontrol */
   /* #524 — label seksi naik dari #878a99 (4,50:1, nyaris tanpa margin) ke
    * 5,20:1. Teks menu mode ini sudah lolos (7,43:1) dan tidak disentuh.
    * #679 menulis ulang komentar di bawahnya: sejak tangga teks dinaikkan, nilai

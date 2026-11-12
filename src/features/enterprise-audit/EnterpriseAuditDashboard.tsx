@@ -322,7 +322,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                 : t("audit.notifFailuresEmpty", "Tidak ada gagal kirim tercatat.")}
             </p>
           ) : (
-            <ul className="divide-y divide-border-subtle/60 max-h-40 overflow-y-auto text-xs">
+            <ul className="divide-y divide-border-divider/60 max-h-40 overflow-y-auto text-xs">
               {notifFailures.slice(0, 10).map((row) => (
                 <li
                   key={row.id}

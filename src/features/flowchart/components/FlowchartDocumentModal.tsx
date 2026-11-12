@@ -133,7 +133,7 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
   return (
     <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
       <div className="bg-surface border border-border-subtle w-full max-w-3xl rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[88vh] text-content-strong">
-        <div className="px-6 py-4 bg-surface border-b border-border-subtle flex justify-between items-center shrink-0">
+        <div className="px-6 py-4 bg-surface border-b border-border-divider flex justify-between items-center shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
               <Layers className="w-5 h-5" />
@@ -242,7 +242,7 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
             </div>
           </div>
 
-          <div className="px-6 py-4 flex justify-between items-center gap-2 border-t border-border-subtle bg-surface-sunken/50 shrink-0">
+          <div className="px-6 py-4 flex justify-between items-center gap-2 border-t border-border-divider bg-surface-sunken/50 shrink-0">
             <span className="text-[11px] text-content-subtle">{t("flowchart.requiredNote")}</span>
             <div className="flex items-center gap-2">
               <button
