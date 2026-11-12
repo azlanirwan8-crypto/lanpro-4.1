@@ -7,6 +7,9 @@
  * garis seleksi putus-putus (bukan cincin tebal), semua gagang lingkaran dengan
  * warna tema (bukan kotak/lingkaran violet), dan port sambung hanya muncul saat
  * bentuk DISOROT — draw.io tidak memenuhi bentuk terpilih dengan tombol `+`.
+ * #856 mengubah bagian terakhir: port kini muncul juga saat bentuk DIPILIH
+ * (layar sentuh tidak punya hover), sedangkan tombol tambah-cepat tetap hanya
+ * saat disorot.
  *
  * Yang diuji adalah DOM sungguhan, bukan string sumber: `cn()` dan kondisional
  * render bisa menghasilkan kelas/elemen yang berbeda dari yang tertulis.
@@ -100,9 +103,11 @@ describe("#836 seleksi kanvas native", () => {
     expect(putar.className).not.toContain("violet");
   });
 
-  it("port dan tombol tambah-cepat TIDAK tampil hanya karena bentuk terpilih", () => {
+  it("port tampil juga saat bentuk hanya terpilih, sedangkan tambah-cepat tidak", () => {
+    // #856 — port adalah satu-satunya jalan membuat garis di layar sentuh,
+    // jadi seleksi saja harus menampilkannya. Tambah-cepat tetap khusus hover.
     const { container } = render(<FlowchartNode {...props(bentuk())} />);
-    expect(container.querySelectorAll('[data-testid^="port-sambung-"]')).toHaveLength(0);
+    expect(container.querySelectorAll('[data-testid^="port-sambung-"]')).toHaveLength(4);
     expect(container.querySelector('[data-testid="tambah-cepat-kanan"]')).toBeNull();
     expect(container.querySelector('[data-testid="tambah-cepat-bawah"]')).toBeNull();
   });

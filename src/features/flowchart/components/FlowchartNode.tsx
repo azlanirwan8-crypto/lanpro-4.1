@@ -147,6 +147,12 @@ interface FlowchartNodeProps {
   setIsTaskDetailModalOpen: (isOpen: boolean) => void;
   /** #321 — sembunyikan overlay node bila panel properti terbuka. */
   suppressNodeOverlay?: boolean;
+  /**
+   * #856 — zoom papan. Port sambung hidup di dalam kanvas yang diskalakan, jadi
+   * ukuran layarnya ikut mengecil tanpa angka ini. Bawaan 1 supaya pemanggil
+   * lama (dan test komponen) tidak berubah.
+   */
+  zoomLevel?: number;
 }
 
 /**
@@ -176,6 +182,18 @@ const kelasKeluargaHuruf = (node: FlowNode): string => {
   const dariSumber = KELUARGA_KE_KELAS[(node.fontFamily || "").trim().toLowerCase()];
   return dariSumber || KELAS_HURUF.sans;
 };
+
+/**
+ * #856 — posisi keempat port sambung, dinyatakan sebagai titik tepi bentuk dan
+ * bukan offset piksel. Pembungkusnya digeser -50%/-50%, jadi pusatnya duduk
+ * tepat di tepi berapa pun zoom-nya.
+ */
+const PAKU_SAMBUNG = [
+  { nama: "top", kunci: "flowNode.dragTop", kiri: "50%", atas: "0%" },
+  { nama: "right", kunci: "flowNode.dragRight", kiri: "100%", atas: "50%" },
+  { nama: "bottom", kunci: "flowNode.dragBottom", kiri: "50%", atas: "100%" },
+  { nama: "left", kunci: "flowNode.dragLeft", kiri: "0%", atas: "50%" },
+] as const;
 
 const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
   node,
@@ -210,9 +228,20 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
   setSelectedTaskForDetail,
   setIsTaskDetailModalOpen,
   suppressNodeOverlay = false,
+  zoomLevel = 1,
 }) => {
   const { t } = useTranslation();
   const linkedTask = getLinkedTaskDetails(node.taskId);
+
+  /**
+   * #856 — port sambung: 32 px LAYAR ruang transparan penangkap dan 14 px
+   * LAYAR titik ungunya. Keduanya dibagi `zoomLevel` karena seluruh isi node
+   * hidup di dalam div kanvas yang diskalakan; tanpa pembagian ini port ikut
+   * menyusut sampai sekitar 4,5 px di zoom 40% dan tidak bisa ditekan di HP.
+   */
+  const skalaPapan = zoomLevel || 1;
+  const ukuranTangkapPort = 32 / skalaPapan;
+  const ukuranTitikPort = 14 / skalaPapan;
 
   /**
    * #754 — kotak label difokuskan dan diseleksi seluruh isinya begitu
@@ -359,60 +388,39 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
       transition={{ type: "spring", stiffness: 450, damping: 22, mass: 0.5 }}
       id={`val-node-${node.id}`}
     >
-      {/* Floating connection ports on hover/select */}
-      {isHovered && (
+      {/* #856 — port sambung tampil saat DISOROT atau DIPILIH. Di layar
+          sentuh tidak ada hover, jadi bentuk yang baru diketuk harus tetap
+          menawarkan jalan membuat garis. */}
+      {(isHovered || isSelected) && (
         <div className="absolute inset-0 pointer-events-none z-30">
-          {/* TOP PORT */}
-          <div
-            className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-primary shadow-md flex items-center justify-center hover:scale-130 hover:bg-primary/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              handleConnectPortClick(node.id, "top", e);
-            }}
-            data-testid="port-sambung-top"
-            title={t("flowNode.dragTop")}
-          >
-            <Plus className="w-2 md:w-2.5 h-2 md:h-2.5 text-primary font-medium" />
-          </div>
-
-          {/* RIGHT PORT */}
-          <div
-            className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-primary shadow-md flex items-center justify-center hover:scale-130 hover:bg-primary/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              handleConnectPortClick(node.id, "right", e);
-            }}
-            data-testid="port-sambung-right"
-            title={t("flowNode.dragRight")}
-          >
-            <Plus className="w-2 md:w-2.5 h-2 md:h-2.5 text-primary font-medium" />
-          </div>
-
-          {/* BOTTOM PORT */}
-          <div
-            className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-primary shadow-md flex items-center justify-center hover:scale-130 hover:bg-primary/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              handleConnectPortClick(node.id, "bottom", e);
-            }}
-            data-testid="port-sambung-bottom"
-            title={t("flowNode.dragBottom")}
-          >
-            <Plus className="w-2 md:w-2.5 h-2 md:h-2.5 text-primary font-medium" />
-          </div>
-
-          {/* LEFT PORT */}
-          <div
-            className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-primary shadow-md flex items-center justify-center hover:scale-130 hover:bg-primary/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              handleConnectPortClick(node.id, "left", e);
-            }}
-            data-testid="port-sambung-left"
-            title={t("flowNode.dragLeft")}
-          >
-            <Plus className="w-2 md:w-2.5 h-2 md:h-2.5 text-primary font-medium" />
-          </div>
+          {PAKU_SAMBUNG.map((paku) => (
+            <div
+              key={paku.nama}
+              data-testid={`port-sambung-${paku.nama}`}
+              title={t(paku.kunci)}
+              className="group absolute flex items-center justify-center rounded-full pointer-events-auto cursor-crosshair"
+              style={{
+                left: paku.kiri,
+                top: paku.atas,
+                width: ukuranTangkapPort,
+                height: ukuranTangkapPort,
+                transform: "translate(-50%, -50%)",
+              }}
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                handleConnectPortClick(node.id, paku.nama, e);
+              }}
+            >
+              {/* Titik yang terlihat tetap kecil supaya garis yang sudah ada
+                  tidak tertutup; yang 32 px adalah ruang transparannya. */}
+              <div
+                className="rounded-full bg-surface border-2 border-primary shadow-md flex items-center justify-center group-hover:scale-130 group-hover:bg-primary/10 transition-all active:scale-95"
+                style={{ width: ukuranTitikPort, height: ukuranTitikPort }}
+              >
+                <Plus className="w-2 md:w-2.5 h-2 md:h-2.5 text-primary font-medium" />
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
