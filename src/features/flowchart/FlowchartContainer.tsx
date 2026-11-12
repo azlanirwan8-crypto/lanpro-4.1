@@ -536,6 +536,17 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     edgeExists,
   } = nodesHook;
 
+  /**
+   * #851 — cermin keadaan papan terakhir. Penutup `pointerup` pada seret garis
+   * lahir di render SAAT SERET DIMULAI, jadi `nodes`/`edges` yang dibacanya
+   * sudah basi. Snapshot riwayat harus berisi keadaan SESUDAH seret, bukan
+   * sebelum; cermin ini menyediakannya tanpa membaca state basi itu.
+   */
+  const papanTerkini = useRef({ nodes, edges });
+  useEffect(() => {
+    papanTerkini.current = { nodes, edges };
+  }, [nodes, edges]);
+
   const currentFlowMetadata = useMemo(() => {
     return getCurrentFlowchart();
   }, [flowcharts, selectedFlowId]);
@@ -4162,11 +4173,33 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
    * punya field gaya, dan satu-satunya pengatur bentuk jalur (connectorType) tidak
    * pernah bisa diubah dari antarmuka mana pun.
    */
-  const handleEdgePatch = (id: string, patch: Partial<FlowEdge>) => {
+  const handleEdgePatch = (
+    id: string,
+    patch: Partial<FlowEdge>,
+    opsi?: { sementara?: boolean }
+  ) => {
     if (!isWorkspaceEditable) return;
     const updatedEdges = edges.map((edge) => (edge.id === id ? { ...edge, ...patch } : edge));
     setEdges(updatedEdges);
-    recordHistory(nodes, updatedEdges);
+    // #851 — `sementara` berarti papan sedang di bawah jari: gambar bergerak,
+    // riwayat diam. Tanpa ini satu seretan 60 langkah menulis 61 snapshot,
+    // melewati batas 50, dan Ctrl+Z hanya bisa memutar ulang tengah seretan.
+    if (!opsi?.sementara) recordHistory(nodes, updatedEdges);
+  };
+
+  /**
+   * #851 — satu-satunya titik catat riwayat untuk seret garis. Dipanggil
+   * `FlowchartEdges` saat jari diangkat, dengan waypoint TERAKHIR yang sudah
+   * dirapikan; keadaan papan diambil dari cermin karena penutupnya basi.
+   */
+  const handleSeretGarisSelesai = (id: string, patch: Partial<FlowEdge>) => {
+    if (!isWorkspaceEditable) return;
+    const terkini = papanTerkini.current;
+    const updatedEdges = terkini.edges.map((edge) =>
+      edge.id === id ? { ...edge, ...patch } : edge
+    );
+    setEdges(updatedEdges);
+    recordHistory(terkini.nodes, updatedEdges);
   };
 
   /**
@@ -5053,6 +5086,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             connectorType={connectorType}
                             zoomLevel={zoomLevel}
                             onEdgePatch={handleEdgePatch}
+                            onSeretSelesai={handleSeretGarisSelesai}
                             mulaiUbahUjung={aksiBentuk.mulaiUbahUjung}
                             koordinatPapan={koordinatPapan}
                             onDeleteEdge={handlePutuskanGaris}
