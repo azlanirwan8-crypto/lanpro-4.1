@@ -329,7 +329,14 @@ interface FlowchartEdgesProps {
   /** Skala papan saat ini — bilah gaya dibalik skalanya agar tetap terbaca. */
   zoomLevel: number;
   /** Simpan bentuk/goresan satu garis (popup mini saat garis diklik). */
-  onEdgePatch: (id: string, patch: Partial<FlowEdge>) => void;
+  onEdgePatch: (id: string, patch: Partial<FlowEdge>, opsi?: { sementara?: boolean }) => void;
+  /**
+   * #851 — seret garis SELESAI. Selama jari bergerak, `onEdgePatch` dipanggil
+   * dengan `{ sementara: true }`: papan tetap ikut bergerak, tetapi tiap
+   * peristiwa tidak dicatat sebagai langkah riwayat. Satu snapshot dicatat di
+   * sini, saat jari diangkat — sama seperti seret bentuk.
+   */
+  onSeretSelesai?: (id: string, patch: Partial<FlowEdge>) => void;
   /**
    * Layar → koordinat papan (#653). Dipakai pemegang tekukan: tanpa konversi
    * ini, menyeret di zoom 0,5 memindahkan titik dua kali lipat dari jarinya.
@@ -392,6 +399,7 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
   connectorType,
   zoomLevel,
   onEdgePatch,
+  onSeretSelesai,
   koordinatPapan,
   onDeleteEdge,
   mulaiUbahUjung,
@@ -527,7 +535,20 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
       daftar = asal;
       posisi = indeks;
     }
-    const tulis = (isi: Point[]) => onEdgePatch(edge.id, { waypoints: rapikanWaypoints(isi) });
+    // #851 — satu seretan puluhan langkah dulu menulis puluhan snapshot dan
+    // menggeser riwayat 50 langkah keluar jendela; sekarang hanya saat lepas.
+    let berubah = false;
+    // Tanpa `onSeretSelesai` (pemakai lama, mis. test komponen) tidak ada
+    // yang mencatat riwayat; patch per gerakan sudah cukup dan TIDAK diulang.
+    const akhirkan = (patch: Partial<FlowEdge>) => onSeretSelesai?.(edge.id, patch);
+    const tulis = (isi: Point[]) => {
+      berubah = true;
+      onEdgePatch(
+        edge.id,
+        { waypoints: rapikanWaypoints(isi) },
+        onSeretSelesai ? { sementara: true } : undefined
+      );
+    };
     if (titikAwal) tulis(daftar);
     const pindah = (ev: PointerEvent) => {
       const p = koordinatPapan(ev.clientX, ev.clientY);
@@ -541,6 +562,7 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
     const lepas = () => {
       window.removeEventListener("pointermove", pindah);
       window.removeEventListener("pointerup", lepas);
+      if (berubah) akhirkan({ waypoints: rapikanWaypoints(daftar) });
     };
     window.addEventListener("pointermove", pindah);
     window.addEventListener("pointerup", lepas);
@@ -586,6 +608,8 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
     if (indeks < 0 || terdekat > 14 / zoomLevel) return;
 
     let bergerak = false;
+    let wpTerakhir: Point[] | null = null;
+    const akhirkan = (patch: Partial<FlowEdge>) => onSeretSelesai?.(edge.id, patch);
     const pindah = (ev: PointerEvent) => {
       const p = koordinatPapan(ev.clientX, ev.clientY);
       if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return;
@@ -594,11 +618,15 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
       if (!bergerak && Math.hypot(dx, dy) <= 3 / zoomLevel) return;
       bergerak = true;
       const wp = waypointsSetelahGeserSegmen(jalur, indeks, dx, dy, dasar ?? edge.waypoints ?? []);
-      if (wp) onEdgePatch(edge.id, { waypoints: wp });
+      if (wp) {
+        wpTerakhir = wp;
+        onEdgePatch(edge.id, { waypoints: wp }, onSeretSelesai ? { sementara: true } : undefined);
+      }
     };
     const lepas = () => {
       window.removeEventListener("pointermove", pindah);
       window.removeEventListener("pointerup", lepas);
+      if (wpTerakhir) akhirkan({ waypoints: wpTerakhir });
     };
     window.addEventListener("pointermove", pindah);
     window.addEventListener("pointerup", lepas);
