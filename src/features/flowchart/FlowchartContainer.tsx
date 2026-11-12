@@ -647,6 +647,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const [suntingLabelId, setSuntingLabelId] = useState<string | null>(null);
 
   /**
+   * #853 — garis yang labelnya sedang disunting di tempat. Sama seperti label
+   * bentuk (#754): per huruf papan diperbarui tanpa menyentuh riwayat, dan
+   * satu snapshot dicatat saat suntingan ditutup.
+   */
+  const [suntingLabelGarisId, setSuntingLabelGarisId] = useState<string | null>(null);
+
+  /**
    * #614 — kelompok yang terseleksi sekarang punya SATU kotak pemilih bersama.
    * State ini menyimpan kotak pada saat tarikan dimulai plus letur tiap
    * anggotanya, sehingga satu pegangan mengubah ukuran semua anggota dengan
@@ -2845,6 +2852,31 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setSelectedNodeId(id);
     setSelectedEdgeId(null);
     setSuntingLabelId(id);
+  };
+
+  /**
+   * #853 — klik-ganda garis membuka kotak label DI ATAS garis itu, seperti
+   * draw.io. Sebelumnya satu-satunya jalan adalah panel kanan yang bawaannya
+   * tertutup: pilih garis, buka panel, cari kolomnya.
+   */
+  const mulaiSuntingLabelGaris = (id: string) => {
+    if (!isWorkspaceEditable) return;
+    setSelectedEdgeId(id);
+    setSelectedNodeId(null);
+    setSuntingLabelGarisId(id);
+  };
+
+  /**
+   * #853 — menutup suntingan label garis dan mencatat riwayat SEKALI. Nilai
+   * terakhir dibaca dari cermin papan, bukan closure render ini: ketikan
+   * terakhir bisa belum masuk ke render yang memegang callback ini.
+   */
+  const akhiriSuntingLabelGaris = () => {
+    if (!suntingLabelGarisId) return;
+    const id = suntingLabelGarisId;
+    setSuntingLabelGarisId(null);
+    const garis = papanTerkini.current.edges.find((e) => e.id === id);
+    if (garis) handleSeretGarisSelesai(id, { label: garis.label });
   };
 
   // Add flow symbol/shape to workspace
@@ -5140,6 +5172,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             zoomLevel={zoomLevel}
                             onEdgePatch={handleEdgePatch}
                             onSeretSelesai={handleSeretGarisSelesai}
+                            suntingLabelGarisId={suntingLabelGarisId}
+                            mulaiSuntingLabelGaris={mulaiSuntingLabelGaris}
+                            akhiriSuntingLabelGaris={akhiriSuntingLabelGaris}
                             mulaiUbahUjung={aksiBentuk.mulaiUbahUjung}
                             koordinatPapan={koordinatPapan}
                             onDeleteEdge={handlePutuskanGaris}

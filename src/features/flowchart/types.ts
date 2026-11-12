@@ -243,6 +243,13 @@ export interface FlowEdge {
   labelFontSize?: number;
   labelColor?: string;
   /**
+   * #853 — geseran label dari titik tengah jalur, dalam koordinat papan.
+   * Kosong berarti label duduk tepat di tengah jalur seperti sebelumnya, jadi
+   * papan lama tidak bergeser satu piksel pun. Disimpan dalam ruang papan
+   * (bukan piksel layar) supaya ikut benar saat zoom berubah.
+   */
+  labelOffset?: Point;
+  /**
    * #669 - `exitX/exitY` dan `entryX/entryY` draw.io: GARIS ITU MENEMPEL DI MANA,
    * dinyatakan sebagai pecahan 0-1 dari lebar dan tinggi bentuk (0,0 = kiri atas,
    * 1,0.5 = tengah kanan). Kosong = papan memilih sendiri pasangan titik tengah

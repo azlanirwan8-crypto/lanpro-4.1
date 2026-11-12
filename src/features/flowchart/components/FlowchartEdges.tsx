@@ -338,6 +338,14 @@ interface FlowchartEdgesProps {
    */
   onSeretSelesai?: (id: string, patch: Partial<FlowEdge>) => void;
   /**
+   * #853 — label garis yang SEDANG disunting di tempat, plus dua panggilan
+   * pembukanya. Perubahan per huruf dikirim lewat `onEdgePatch` dengan
+   * `sementara: true`; riwayat dicatat sekali saat suntingan ditutup.
+   */
+  suntingLabelGarisId?: string | null;
+  mulaiSuntingLabelGaris?: (id: string) => void;
+  akhiriSuntingLabelGaris?: () => void;
+  /**
    * Layar → koordinat papan (#653). Dipakai pemegang tekukan: tanpa konversi
    * ini, menyeret di zoom 0,5 memindahkan titik dua kali lipat dari jarinya.
    */
@@ -400,6 +408,9 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
   zoomLevel,
   onEdgePatch,
   onSeretSelesai,
+  suntingLabelGarisId,
+  mulaiSuntingLabelGaris,
+  akhiriSuntingLabelGaris,
   koordinatPapan,
   onDeleteEdge,
   mulaiUbahUjung,
@@ -627,6 +638,43 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
       window.removeEventListener("pointermove", pindah);
       window.removeEventListener("pointerup", lepas);
       if (wpTerakhir) akhirkan({ waypoints: wpTerakhir });
+    };
+    window.addEventListener("pointermove", pindah);
+    window.addEventListener("pointerup", lepas);
+  };
+
+  /**
+   * #853 — seret LABEL garis. draw.io membiarkan label dipindah supaya tidak
+   * menutupi bentuk pada garis pendek; geserannya disimpan sebagai
+   * `labelOffset` dalam koordinat papan, jadi ikut benar saat zoom berubah.
+   * Ambang 3 px memisahkan klik-ganda (menyunting) dari seret.
+   */
+  const mulaiSeretLabel = (e: React.PointerEvent, edge: FlowEdge) => {
+    if (!isEditable) return;
+    e.stopPropagation();
+    e.preventDefault();
+    const awal = koordinatPapan(e.clientX, e.clientY);
+    if (!awal) return;
+    const dasar = edge.labelOffset ?? { x: 0, y: 0 };
+    let bergerak = false;
+    let akhir: Point | null = null;
+    const tulis = (isi: Point) => {
+      akhir = isi;
+      onEdgePatch(edge.id, { labelOffset: isi }, onSeretSelesai ? { sementara: true } : undefined);
+    };
+    const pindah = (ev: PointerEvent) => {
+      const p = koordinatPapan(ev.clientX, ev.clientY);
+      if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return;
+      const dx = p.x - awal.x;
+      const dy = p.y - awal.y;
+      if (!bergerak && Math.hypot(dx, dy) <= 3 / zoomLevel) return;
+      bergerak = true;
+      tulis({ x: Math.round(dasar.x + dx), y: Math.round(dasar.y + dy) });
+    };
+    const lepas = () => {
+      window.removeEventListener("pointermove", pindah);
+      window.removeEventListener("pointerup", lepas);
+      if (akhir) onSeretSelesai?.(edge.id, { labelOffset: akhir });
     };
     window.addEventListener("pointermove", pindah);
     window.addEventListener("pointerup", lepas);
@@ -940,6 +988,16 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                 // mengosongkan seleksi, dan memulai kotak seleksi di tengah
                 // seretan.
                 onMouseDown={(e) => e.stopPropagation()}
+                // #853 — klik-ganda membuka sunting label di tempat. Tanpa
+                // `stopPropagation`, peristiwa yang sama sampai ke kanvas dan
+                // memunculkan catatan tempel baru di atas garis.
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  if (!isEditable) return;
+                  setSelectedEdgeId(edge.id);
+                  setSelectedNodeId(null);
+                  mulaiSuntingLabelGaris?.(edge.id);
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedEdgeId(edge.id);
@@ -1042,6 +1100,15 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                 markerEnd={markerEnd}
                 markerStart={markerStart}
                 className="transition-all"
+                // #853 — garisnya sendiri juga menerima klik-ganda; pada garis
+                // tebal jalur visual inilah yang paling mungkin kena.
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  if (!isEditable) return;
+                  setSelectedEdgeId(edge.id);
+                  setSelectedNodeId(null);
+                  mulaiSuntingLabelGaris?.(edge.id);
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedEdgeId(edge.id);
@@ -1102,29 +1169,90 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
               )}
 
               {/* Optional inline description on arrows */}
-              {edge.label &&
-                (() => {
-                  // #833 / #522(d) — label duduk di TENGAH SEPANJANG jalur,
-                  // bukan di tengah tali lurus antara kedua ujung. Pada garis
-                  // yang memutar, rata-rata ujung jatuh di ruang kosong.
-                  const tengah = titikTengahJalur(tergambar);
-                  return (
-                    <foreignObject x={tengah.x - 60} y={tengah.y - 17} width="120" height="34">
-                      {/*
-                        #656 — draw.io menaruh teks di atas garis, tanpa bingkai dan
-                        tanpa bayangan. Dulu kotp: border + shadow-soft + rounded +
-                        font-medium, dan `truncate` yang MEMOTONG isinya. Kotak lebarnya
-                        120 px supaya label panjang bisa membungkus dua baris seperti di
-                        sana, bukan dibuang ke elipsis.
-                      */}
+              {(() => {
+                // #853 — klik-ganda membuka kotak sunting DI ATAS garis,
+                // seperti draw.io. Label kosong pun bisa disunting, jadi
+                // syaratnya bukan "ada label" saja.
+                const sedangSunting = suntingLabelGarisId === edge.id;
+                if (!edge.label && !sedangSunting) return null;
+                // #833 / #522(d) — label duduk di TENGAH SEPANJANG jalur,
+                // bukan di tengah tali lurus antara kedua ujung. Pada garis
+                // yang memutar, rata-rata ujung jatuh di ruang kosong.
+                // #853 — `labelOffset` menggesernya dari titik itu; kosong
+                // berarti posisi lama, jadi papan lama tidak bergeser.
+                const tengah = titikTengahJalur(tergambar);
+                const geser = edge.labelOffset ?? { x: 0, y: 0 };
+                const pusat = { x: tengah.x + geser.x, y: tengah.y + geser.y };
+                // #656 — draw.io menaruh teks di atas garis, tanpa bingkai dan
+                // tanpa bayangan. Kotak lebarnya 120 px supaya label panjang
+                // membungkus dua baris, bukan dipotong elipsis.
+                return (
+                  <foreignObject
+                    data-testid={`label-garis-${edge.id}`}
+                    x={pusat.x - 60}
+                    y={pusat.y - 17}
+                    width="120"
+                    height="34"
+                  >
+                    {sedangSunting ? (
+                      <input
+                        data-testid={`sunting-label-garis-${edge.id}`}
+                        autoFocus
+                        value={edge.label ?? ""}
+                        onFocus={(e) => e.currentTarget.select()}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) =>
+                          onEdgePatch(
+                            edge.id,
+                            { label: e.target.value },
+                            onSeretSelesai ? { sementara: true } : undefined
+                          )
+                        }
+                        onBlur={() => akhiriSuntingLabelGaris?.()}
+                        onKeyDown={(e) => {
+                          if (e.key === "Escape") {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            e.currentTarget.blur();
+                            return;
+                          }
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            e.currentTarget.blur();
+                          }
+                          e.stopPropagation();
+                        }}
+                        style={{ fontSize: edge.labelFontSize }}
+                        className={cn(
+                          "w-full bg-surface text-xs text-content-strong font-normal px-1 py-0.5 text-center border border-primary rounded outline-none focus:ring-1 focus:ring-primary",
+                          KELAS_HURUF.sans
+                        )}
+                      />
+                    ) : (
                       <div
+                        onPointerDown={(e) => mulaiSeretLabel(e, edge)}
+                        // #853 — `mousedown` tetap dikirim peramban sesudah
+                        // `pointerdown`; tanpa baris ini kanvas mengosongkan
+                        // seleksi dan memulai kotak seleksi di tengah seretan.
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedEdgeId(edge.id);
+                          setSelectedNodeId(null);
+                        }}
+                        onDoubleClick={(e) => {
+                          e.stopPropagation();
+                          mulaiSuntingLabelGaris?.(edge.id);
+                        }}
                         style={{
                           // #665 - `fontSize=10;fontColor=#ff0000` pada label garis.
                           fontSize: edge.labelFontSize,
                           color: warnaTeksAman(edge.labelColor) ?? undefined,
                         }}
                         className={cn(
-                          "bg-surface/85 text-xs text-content-strong font-normal px-1 py-0.5 text-center whitespace-pre-wrap break-words",
+                          "bg-surface/85 text-xs text-content-strong font-normal px-1 py-0.5 text-center whitespace-pre-wrap break-words cursor-move select-none",
                           // #761 — draw.io memakai Helvetica untuk label GARIS juga,
                           // bukan hanya label bentuk. Kelas yang sama dipakai kedua
                           // jalur lewat constants.ts, jadi ia tidak bisa lagi
@@ -1134,9 +1262,10 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
                       >
                         {edge.label}
                       </div>
-                    </foreignObject>
-                  );
-                })()}
+                    )}
+                  </foreignObject>
+                );
+              })()}
 
               {/*
                 #653 — pemegang tekukan, pada papan yang boleh disunting.
