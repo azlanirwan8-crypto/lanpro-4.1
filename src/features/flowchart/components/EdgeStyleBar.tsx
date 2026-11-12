@@ -13,9 +13,10 @@
  */
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Spline, Trash2 } from "lucide-react";
+import { Palette, Spline, Trash2 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import type { FlowEdge } from "../types";
+import { warnaTeksAman } from "../lib/gayaImpor";
 import { BENTUK_KEPALA, gambarKepala } from "./kepalaPanah";
 
 type Bentuk = NonNullable<FlowEdge["connector"]>;
@@ -32,6 +33,33 @@ const GORESAN: { id: Goresan; kunci: string; dash?: string }[] = [
   { id: "dashed", kunci: "flowchart.lineDashed", dash: "4 3" },
   { id: "dotted", kunci: "flowchart.lineDotted", dash: "0.6 3.6" },
 ];
+
+/**
+ * #854 — pilihan warna diambil dari token tema, bukan daftar hex bebas. Hex-nya
+ * dibaca dari `src/index.css` saat tombol diklik, sehingga warna garis tetap
+ * ikut aturan token (dan `audit:warna`) tanpa menyimpan nama token di
+ * `strokeColor`: atribut SVG `stroke` tidak mengenal `var(...)`.
+ */
+const WARNA: { id: string; token: string; kunci: string }[] = [
+  { id: "primary", token: "--color-primary", kunci: "flowchart.lineColorPrimary" },
+  { id: "success", token: "--color-success", kunci: "flowchart.lineColorSuccess" },
+  { id: "warning", token: "--color-warning", kunci: "flowchart.lineColorWarning" },
+  { id: "danger", token: "--color-danger", kunci: "flowchart.lineColorDanger" },
+  { id: "info", token: "--color-info", kunci: "flowchart.lineColorInfo" },
+  { id: "strong", token: "--color-content-strong", kunci: "flowchart.lineColorStrong" },
+];
+
+const TEBAL: { id: number; kunci: string }[] = [
+  { id: 1, kunci: "flowchart.lineWidthThin" },
+  { id: 2, kunci: "flowchart.lineWidthMedium" },
+  { id: 4, kunci: "flowchart.lineWidthThick" },
+];
+
+const bacaToken = (nama: string): string | null => {
+  if (typeof window === "undefined") return null;
+  const nilai = getComputedStyle(document.documentElement).getPropertyValue(nama).trim();
+  return warnaTeksAman(nilai);
+};
 
 interface EdgeStyleBarProps {
   edge: FlowEdge;
@@ -135,6 +163,16 @@ export const EdgeStyleBar: React.FC<EdgeStyleBarProps> = ({
    * draw.io kepala panah memang bagian dari gaya garis, bukan properti bentuk.
    */
   const [bukaKepala, setBukaKepala] = React.useState(false);
+  /** #854 — dua pemilih berbagi satu tempat di bawah bilah; jangan menumpuk. */
+  const [bukaWarna, setBukaWarna] = React.useState(false);
+  const toggleKepala = () => {
+    setBukaWarna(false);
+    setBukaKepala((v) => !v);
+  };
+  const toggleWarna = () => {
+    setBukaKepala(false);
+    setBukaWarna((v) => !v);
+  };
 
   return (
     <div
@@ -216,11 +254,45 @@ export const EdgeStyleBar: React.FC<EdgeStyleBarProps> = ({
 
         <div className="w-px h-4 bg-surface-strong mx-0.5" />
 
+        {/* #854 — tebal garis: tiga angka yang sama dengan yang dipakai
+            draw.io (1/2/4). Garis yang digambar sudah membaca `strokeWidth`
+            sejak #665; yang kurang hanya kontrolnya. */}
+        {TEBAL.map((opsi) => (
+          <Tombol
+            key={opsi.id}
+            aktif={(edge.strokeWidth ?? 1) === opsi.id}
+            penanda={`tebal-garis-${opsi.id}`}
+            judul={t(opsi.kunci)}
+            onClick={() => onPatch({ strokeWidth: opsi.id })}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+              <path
+                d="M1 8 L15 8"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={Math.max(1, opsi.id * 1.2)}
+                strokeLinecap="round"
+              />
+            </svg>
+          </Tombol>
+        ))}
+
+        <Tombol
+          aktif={bukaWarna}
+          penanda="tombol-warna-garis"
+          judul={t("flowchart.lineColor")}
+          onClick={toggleWarna}
+        >
+          <Palette className="w-3.5 h-3.5" />
+        </Tombol>
+
+        <div className="w-px h-4 bg-surface-strong mx-0.5" />
+
         <Tombol
           aktif={bukaKepala}
           penanda="tombol-mata-panah"
           judul={t("flowchart.arrowHead")}
-          onClick={() => setBukaKepala((v) => !v)}
+          onClick={toggleKepala}
         >
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
             <path d="M1 8 L11 8" fill="none" stroke="currentColor" strokeWidth="1.6" />
@@ -238,6 +310,63 @@ export const EdgeStyleBar: React.FC<EdgeStyleBarProps> = ({
           </>
         )}
       </div>
+
+      {/* #854 — pemilih warna garis. Nilainya dibaca dari token tema saat
+          diklik, jadi tidak ada daftar hex yang bisa menyimpang dari palet. */}
+      {bukaWarna && (
+        <div
+          data-testid="pemilih-warna-garis"
+          className="pointer-events-auto absolute left-1/2 top-5 -translate-x-1/2 w-[204px] max-w-[86vw] bg-surface/95 backdrop-blur-md border border-border-subtle/60 rounded-lg p-2 shadow-soft-lg select-none"
+        >
+          <div className="text-[10px] text-content-muted mb-1">{t("flowchart.lineColor")}</div>
+          <div className="flex flex-wrap gap-1.5">
+            {WARNA.map((warna) => {
+              const hex = bacaToken(warna.token);
+              const aktif = hex !== null && edge.strokeColor === hex;
+              return (
+                <button
+                  key={warna.id}
+                  type="button"
+                  title={t(warna.kunci)}
+                  aria-label={t(warna.kunci)}
+                  aria-pressed={aktif}
+                  data-testid={`warna-garis-${warna.id}`}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (hex) onPatch({ strokeColor: hex });
+                  }}
+                  className={cn(
+                    "h-6 w-6 rounded-full transition-all cursor-pointer",
+                    aktif
+                      ? "border-2 border-primary"
+                      : "border border-border-subtle hover:border-primary/60"
+                  )}
+                  style={{ backgroundColor: `var(${warna.token})` }}
+                />
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            data-testid="warna-garis-tema"
+            aria-pressed={!edge.strokeColor}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              onPatch({ strokeColor: undefined });
+            }}
+            className={cn(
+              "mt-2 w-full h-7 rounded-md text-[11px] transition-all cursor-pointer",
+              !edge.strokeColor
+                ? "bg-primary/15 text-primary border border-primary/40"
+                : "text-content-secondary hover:bg-surface-muted border border-transparent"
+            )}
+          >
+            {t("flowchart.lineColorTheme")}
+          </button>
+        </div>
+      )}
 
       {bukaKepala && (
         <div
