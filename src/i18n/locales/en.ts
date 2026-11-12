@@ -1746,6 +1746,7 @@ export const en = {
     linkTheShapeToThe: "Link the shape to the sprint backlog so its status stays in sync.",
     disconnectFlow: "Disconnect flow",
     straightenLine: "Straighten line",
+    reverseEdge: "Reverse direction",
     // #685 — pinned draw.io editor bridge.
     drawioBukaEditor: "Edit in draw.io",
     drawioJudulEditor: "draw.io editor",

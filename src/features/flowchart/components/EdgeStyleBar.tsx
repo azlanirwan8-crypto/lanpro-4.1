@@ -13,7 +13,7 @@
  */
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Palette, Spline, Trash2 } from "lucide-react";
+import { ArrowRightLeft, Palette, Spline, Trash2 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import type { FlowEdge } from "../types";
 import { warnaTeksAman } from "../lib/gayaImpor";
@@ -228,6 +228,25 @@ export const EdgeStyleBar: React.FC<EdgeStyleBarProps> = ({
           }
         >
           <Spline className="w-3.5 h-3.5" />
+        </Tombol>
+
+        {/* #855 — balik arah: tukar kedua ujung BESERTA portnya lewat satu
+            patch. Menghapus lalu menggambar ulang akan melenyapkan label,
+            gaya, dan tekukan, dan mencatat dua keadaan riwayat. */}
+        <Tombol
+          aktif={false}
+          penanda="tombol-balik-arah"
+          judul={t("flowchart.reverseEdge")}
+          onClick={() =>
+            onPatch({
+              fromNodeId: edge.toNodeId,
+              toNodeId: edge.fromNodeId,
+              portSumber: edge.portTujuan,
+              portTujuan: edge.portSumber,
+            })
+          }
+        >
+          <ArrowRightLeft className="w-3.5 h-3.5" />
         </Tombol>
 
         <div className="w-px h-4 bg-surface-strong mx-0.5" />
