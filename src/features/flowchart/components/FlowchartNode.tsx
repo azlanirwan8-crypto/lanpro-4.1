@@ -153,6 +153,12 @@ interface FlowchartNodeProps {
    * lama (dan test komponen) tidak berubah.
    */
   zoomLevel?: number;
+  /**
+   * #858 — bentuk ini adalah SASARAN sambungan yang sedang ditarik. draw.io
+   * menandainya dengan kotak biru sebelum jari diangkat; penandanya digambar
+   * DI DALAM bentuk supaya tidak butuh tangga z baru (gerbang `audit:z`).
+   */
+  isTargetSambung?: boolean;
 }
 
 /**
@@ -229,6 +235,7 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
   setIsTaskDetailModalOpen,
   suppressNodeOverlay = false,
   zoomLevel = 1,
+  isTargetSambung = false,
 }) => {
   const { t } = useTranslation();
   const linkedTask = getLinkedTaskDetails(node.taskId);
@@ -768,6 +775,16 @@ const FlowchartNodeBati: React.FC<FlowchartNodeProps> = ({
             </>
           )}
         </>
+      )}
+
+      {/* #858 — penanda sasaran sambung. Digambar paling akhir supaya berada di
+          atas badan bentuk tanpa z-index baru; port sambung (z-30) tetap di
+          atasnya. */}
+      {isTargetSambung && (
+        <div
+          data-testid="sasaran-sambung"
+          className="pointer-events-none absolute -inset-1 rounded-[inherit] border-2 border-primary bg-primary/10"
+        />
       )}
     </motion.div>
   );

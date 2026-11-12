@@ -67,6 +67,7 @@ import { DrawioEmbed } from "./components/DrawioEmbed";
 import { CanvasToolbar } from "./components/CanvasToolbar";
 import { FlowchartNode } from "./components/FlowchartNode";
 import { FlowchartEdges, pecahanPort } from "./components/FlowchartEdges";
+import { titikTepiTerdekat } from "./lib/portCabang";
 import { FlowchartMinimap } from "./components/FlowchartMinimap";
 import { LaporanAlur } from "./components/LaporanAlur";
 import { NodeContextMenu } from "./components/NodeContextMenu";
@@ -173,6 +174,17 @@ interface PerjalananPapan {
 /** Lamanya satu garis dilalui pada kecepatan 1×. */
 const DURASI_GARIS = 900;
 const KECEPATAN_ALUR = [0.5, 1, 2];
+
+/**
+ * #858 — pecahan tepi untuk tiap paku sambung. Pangkal pratinjau duduk tepat
+ * di titik paku yang ditekan, sama seperti bentuk yang digambar `FlowchartNode`.
+ */
+const PECAHAN_PAKU: Record<string, { x: number; y: number }> = {
+  top: { x: 0.5, y: 0 },
+  right: { x: 1, y: 0.5 },
+  bottom: { x: 0.5, y: 1 },
+  left: { x: 0, y: 0.5 },
+};
 
 const CADANGAN_KATEGORI_DOKUMEN = [
   { id: "PRD", label: "PRD", icon: "FileText", color: "#8B5CF6" },
@@ -676,6 +688,24 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
    */
   const [seretSambung, setSeretSambung] = useState<string | null>(null);
   const awalSeretSambung = useRef<{ x: number; y: number } | null>(null);
+
+  /**
+   * #858 — pratinjau garis jujur. `sambungDari` adalah titik paku yang
+   * digenggam (pangkal pratinjau), `sasaranSambung` adalah bentuk yang sedang
+   * berada di bawah kursor dan akan menerima garis. Keduanya kosong saat tidak
+   * ada sambungan berjalan.
+   */
+  const [sambungDari, setSambungDari] = useState<Point | null>(null);
+  const [sasaranSambung, setSasaranSambung] = useState<string | null>(null);
+
+  /** #858 — tutup mode sambung beserta seluruh penanda sementaranya. */
+  const akhiriSambung = () => {
+    setConnectSourceId(null);
+    setSeretSambung(null);
+    awalSeretSambung.current = null;
+    setSambungDari(null);
+    setSasaranSambung(null);
+  };
 
   /**
    * #759 — ujung garis yang SEDANG diseret untuk dipindahkan ke bentuk lain.
@@ -1701,7 +1731,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         if (e.key === "Escape") {
           setSelectedNodeId(null);
           setSelectedEdgeId(null);
-          setConnectSourceId(null);
+          akhiriSambung();
           setCopiedNodes([]);
           setActiveTool("select");
         }
@@ -1728,7 +1758,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         }
         setSelectedNodeId(null);
         setSelectedEdgeId(null);
-        setConnectSourceId(null);
+        akhiriSambung();
         setCopiedNodes([]);
         setActiveTool("select");
       }
@@ -2079,7 +2109,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       // Clean selections
       setSelectedNodeId(null);
       setSelectedEdgeId(null);
-      setConnectSourceId(null);
+      akhiriSambung();
       // #534 — papan yang isinya jauh dari titik asal dulu "direset" menjadi
       // layar kosong. Yang benar adalah menunjukkannya, bukan memindahkan angka.
       pasKeLayar(batasSeluruhBentuk(loadedNodes));
@@ -3506,6 +3536,21 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       return;
     }
 
+    // #858 — setelah sebuah paku ditekan (mode sambung hidup TANPA tool
+    // "connect"), mengklik BADAN bentuk sasaran kini MENYAMBUNG. Dulu klik itu
+    // jatuh ke jalur pilih-dan-seret, jadi toast "pilih bentuk sasaran" menyuruh
+    // sesuatu yang tidak bisa dilakukan — di draw.io klik sasaran justru cara
+    // menyelesaikan garis.
+    if (connectSourceId && connectSourceId !== node.id) {
+      tambahSambungan(connectSourceId, node.id);
+      setActiveTool("select");
+      return;
+    }
+    // Mengklik bentuk ASAL membatalkan mode sambung, lalu kliknya berlanjut
+    // sebagai pilihan biasa — tanpa ini bentuk asal ikut terseret bersama garis
+    // bantu yang masih hidup.
+    if (connectSourceId === node.id) akhiriSambung();
+
     // #614 — Shift+klik menambah atau mengeluarkan SATU bentuk dari kelompok.
     // #754 — Ctrl/Cmd+klik melakukan hal yang sama, karena itulah tombol yang
     // dipakai draw.io, Figma, dan hampir setiap editor diagram; sebelumnya hanya
@@ -3555,7 +3600,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     // hanya selesai lewat Escape atau klik port tujuan, sehingga siapa pun yang
     // salah menekan paku sambung lalu mengklik kosong dibiarkan "menarik garis"
     // selamanya: garis bantu + titik ungu terus menempel di kursor.
-    if (connectSourceId) setConnectSourceId(null);
+    // #858 — penutupnya sekarang satu pintu: pratinjau dan sorotan sasaran ikut
+    // mati, bukan hanya garis bantunya.
+    if (connectSourceId || seretSambung) akhiriSambung();
 
     // #754 MEMBALIKKAN #540, dan itu disengaja: perintah pemilik 15 Okt adalah
     // "feel saat buat flowchart berasa sama dengan draw.io". Di draw.io seret
@@ -3975,10 +4022,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
    * sumber lalu menunggu klik kedua. `portName` dulu dibuang di fungsi ini
    * padahal tooltips-nya ("Tarik panah dari sisi atas") sudah menjanjikan
    * gerakan ini sejak lama.
+   *
+   * #858 — `sisi` dipakai: pangkal pratinjau duduk tepat di paku yang ditekan,
+   * bukan di pusat bentuk. Bentuknya sama persis dengan titik yang tergambar
+   * `FlowchartNode` (pecahan 0,5 tengah sisi), jadi garis bantu tidak melompat
+   * saat lahir.
    */
   const handleConnectPortClick = (
     nodeId: string,
-    _sisi: string,
+    sisi: string,
     e?: { clientX: number; clientY: number }
   ) => {
     const rect = canvasContainerRef.current?.getBoundingClientRect();
@@ -3988,6 +4040,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         y: Math.round((e.clientY - rect.top - panOffset.y) / zoomLevel),
       };
     }
+    const sumber = nodes.find((n) => n.id === nodeId);
+    const pecahan = PECAHAN_PAKU[sisi];
+    if (sumber && pecahan) {
+      const u = ukuranBentukEfektif(sumber);
+      setSambungDari({ x: sumber.x + u.width * pecahan.x, y: sumber.y + u.height * pecahan.y });
+    } else {
+      setSambungDari(null);
+    }
+    setSasaranSambung(null);
     setSeretSambung(nodeId);
     handleConnectClick(nodeId);
   };
@@ -4025,6 +4086,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     ];
     setEdges(nextEdges);
     recordHistory(nodes, nextEdges);
+    // #858 — satu tempat penutup untuk kedua jalur (tarik dan klik): genggaman
+    // dan penanda pratinjau tidak boleh tertinggal hidup setelah garis lahir,
+    // sebab efek seret masih mendengarkan dan akan menambah garis KEDUA.
+    setSeretSambung(null);
+    awalSeretSambung.current = null;
+    setSambungDari(null);
+    setSasaranSambung(null);
     toast.success(t("toast.arrowAdded"));
     return true;
   };
@@ -4083,7 +4151,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       // baru langsung lahir dengan titik ungu nyasar di sudut papan (dilaporkan
       // pemilik papan 26 Sep: "saat membuat garis ada titik yang bergerak").
       setHoverCoords(getNodeCenter(nodeId));
-      toast.info(t("toast.pickTargetShape"));
+      setSasaranSambung(null);
+      // #858 — toast "pilih bentuk sasaran" DILEPAS. Ia menembak setiap kali
+      // paku ditekan (termasuk saat pengguna langsung menyeret dan berhasil),
+      // dan pratinjau yang kini mengikuti kursor sudah menyampaikan hal yang
+      // sama tanpa menutupi papan. draw.io tidak punya toast seperti ini.
     } else {
       // #855 — klik pada bentuk yang sama membuat putaran sendiri, bukan
       // ditolak: `tambahSambungan` sekarang menanganinya.
@@ -4108,10 +4180,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
    * memicu render seluruh papan — persis keluhan "tidak responsif" yang dilaporkan.
    */
   useEffect(() => {
-    if (!seretSambung && !ujingSeret) return;
+    // #858 — efek ini juga hidup selama mode KLIK (paku ditekan lalu dilepas):
+    // pratinjau harus mengikuti kursor tanpa tombol ditekan, dan bentuk sasaran
+    // harus tersorot sebelum pengguna mengkliknya.
+    if (!seretSambung && !ujingSeret && !connectSourceId) return;
 
     let raf = 0;
     let berikut: { x: number; y: number } | null = null;
+    let sasaranBerikut: string | null = null;
 
     const papanDari = (cx: number, cy: number) => {
       const rect = canvasContainerRef.current?.getBoundingClientRect();
@@ -4122,18 +4198,42 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       };
     };
 
+    /** Sisi garis yang TIDAK ikut bergerak saat salah satu ujungnya digenggam. */
+    const sisiTetap = (): string | null => {
+      if (!ujingSeret) return null;
+      const garis = edges.find((x) => x.id === ujingSeret.edgeId);
+      if (!garis) return null;
+      return ujingSeret.ujung === "akhir" ? garis.fromNodeId : garis.toNodeId;
+    };
+
     const onMove = (e: MouseEvent) => {
-      berikut = papanDari(e.clientX, e.clientY);
+      const papan = papanDari(e.clientX, e.clientY);
+      if (!papan) return;
+      const tetap = sisiTetap();
+      const asal = seretSambung ?? connectSourceId ?? tetap;
+      const kandidat = bentukDiTitik(papan.x, papan.y);
+      const sah = kandidat && kandidat !== asal && kandidat !== tetap ? kandidat : null;
+      const nodeSah = sah ? nodes.find((n) => n.id === sah) : null;
+      // #858 — ujung pratinjau MENEMPEL ke tepi sasaran, bukan mengikuti kursor
+      // ke dalam bentuknya; itulah titik yang akan dipaku saat dilepas.
+      berikut = nodeSah ? titikTepiTerdekat(nodeSah, papan) : papan;
+      sasaranBerikut = sah;
       if (raf) return;
       raf = requestAnimationFrame(() => {
         raf = 0;
         if (berikut) setHoverCoords(berikut);
+        setSasaranSambung(sasaranBerikut);
       });
     };
 
     const onUp = (e: MouseEvent) => {
-      const titik = papanDari(e.clientX, e.clientY);
-      const target = titik ? bentukDiTitik(titik.x, titik.y) : null;
+      // Mode klik: mouseup bukan akhir seret dan tidak menyelesaikan apa pun.
+      if (!ujingSeret && !seretSambung) return;
+
+      const mentah = papanDari(e.clientX, e.clientY);
+      const target = mentah ? bentukDiTitik(mentah.x, mentah.y) : null;
+      const targetNode = target ? nodes.find((n) => n.id === target) : null;
+      const titik = mentah && targetNode ? titikTepiTerdekat(targetNode, mentah) : mentah;
 
       // #759 — genggaman ujung: satu sisi garis yang dipindahkan, sisi lainnya
       // tetap menjadi sumber garis bantu.
@@ -4155,19 +4255,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           );
           setEdges(nextEdges);
           recordHistory(nodes, nextEdges);
-          setConnectSourceId(null);
+          akhiriSambung();
           setUjingSeret(null);
-          awalSeretSambung.current = null;
-          setSeretSambung(null);
           return;
         }
         // Dilepas di kosong atau di bentuk yang sama: garisnya TIDAK berubah.
         // Membuang garis karena jari pengguna meleset adalah kerusakan yang
         // lebih besar daripada tidak memindahkan apa pun.
-        setConnectSourceId(null);
+        akhiriSambung();
         setUjingSeret(null);
-        awalSeretSambung.current = null;
-        setSeretSambung(null);
         return;
       }
 
@@ -4181,14 +4277,22 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         setConnectSourceId(null);
         setActiveTool("select");
       } else {
+        // #858 — yang diukur adalah GERAKAN KURSOR (`mentah`), bukan jarak ke
+        // titik yang sudah menempel di tepi bentuk. Pada zoom 0,9 satu klik
+        // pada paku tengah-kanan jatuh 11 px papan dari tepi terdekat, jadi
+        // hitungan berbasis `titik` membaca klik biasa sebagai seret dan
+        // mematikan mode sambung justru pada jalur klik-lalu-klik.
         const awal = awalSeretSambung.current;
-        const digerakkan = !!titik && !!awal && Math.hypot(titik.x - awal.x, titik.y - awal.y) > 8;
+        const digerakkan =
+          !!mentah && !!awal && Math.hypot(mentah.x - awal.x, mentah.y - awal.y) > 8;
         // Dilepas di tempat kosong SETELAH bergerak = batal. Dilepas tanpa
-        // bergerak = klik biasa, mode klik-lalu-klik dibiarkan hidup.
-        if (digerakkan) setConnectSourceId(null);
+        // bergerak = klik biasa, mode klik-lalu-klik dibiarkan hidup — dan
+        // pratinjau tetap berangkat dari paku yang tadi ditekan.
+        if (digerakkan) akhiriSambung();
       }
       setSeretSambung(null);
       awalSeretSambung.current = null;
+      setSasaranSambung(null);
     };
 
     window.addEventListener("mousemove", onMove, { passive: true });
@@ -4199,7 +4303,16 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       if (raf) cancelAnimationFrame(raf);
     };
     // nodes/edges ikut karena penambah garis dan uji sasaran membacanya.
-  }, [seretSambung, ujingSeret, panOffset.x, panOffset.y, zoomLevel, nodes, edges]);
+  }, [
+    seretSambung,
+    ujingSeret,
+    connectSourceId,
+    panOffset.x,
+    panOffset.y,
+    zoomLevel,
+    nodes,
+    edges,
+  ]);
 
   // Node / Arrow delete handler
   /**
@@ -5162,6 +5275,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             connectSourceId={connectSourceId}
                             setConnectSourceId={setConnectSourceId}
                             hoverCoords={hoverCoords}
+                            connectFrom={sambungDari}
                             connectorType={connectorType}
                             zoomLevel={zoomLevel}
                             onEdgePatch={handleEdgePatch}
@@ -5217,8 +5331,16 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
                               suppressNodeOverlay={isRightSidebarOpen}
                               zoomLevel={zoomLevel}
+                              isTargetSambung={sasaranSambung === node.id}
                             />
                           ))}
+
+                          {/*
+                            #858 — sorotan bentuk sasaran digambar di dalam
+                            `FlowchartNode` (`isTargetSambung`), bukan sebagai
+                            lapisan absolut di sini: penanda itu butuh berada di
+                            atas bentuk tanpa menambah tangga z berkas ini.
+                          */}
 
                           {/*
                             #614 — satu kotak pemilih bersama untuk kelompok.

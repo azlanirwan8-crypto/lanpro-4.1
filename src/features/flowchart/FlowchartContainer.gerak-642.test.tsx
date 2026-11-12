@@ -20,9 +20,10 @@
  * normal, dan tab kembali sibuk saat pengguna tidak berbuat apa-apa. Yang
  * dibaca di sini: loop apa yang TINGGAL dan di blok mana ia duduk.
  *
- * Yang sengaja TETAP ADA dan tidak akan membuat test ini merah: animasi garis
- * bantu SEDANG menarik sambungan (`strokeDashoffset: [-20, 0]`). Itu keadaan
- * aktif, berhenti saat mouse lepas, dan Miro/FigJam pun menandainya bergerak.
+ * #858 menutup satu-satunya loop yang tersisa di `FlowchartEdges`: pratinjau
+ * sambungan sekarang jalur statis yang sama bentuknya dengan garis hasilnya
+ * (`data-testid="pratinjau-sambung"`), bukan dash yang mengalir tanpa henti.
+ * Jadi hitungan loop di berkas itu harus NOL — bukan lagi satu.
  */
 import React from "react";
 import { readFileSync } from "fs";
@@ -144,9 +145,8 @@ describe("loop yang tidak membawa informasi dilepas (#642)", () => {
     // Yang dilarang adalah PEMAKAIANNYA, bukan penyebutannya: kelas ini juga
     // disebut di komentar yang menjelaskan kenapa ia dilepas.
     expect(edges).not.toMatch(/className="[^"]*animate-ping/);
-    // Loop yang TINGGAL hanya satu dan duduk di penanda "sedang menarik".
-    expect(edges.match(/repeat: Infinity/g) || []).toHaveLength(1);
-    expect(edges).toContain("strokeDashoffset: [-20, 0]");
+    // #858 — pratinjau sambung kini jalur statis. Tidak ada loop tersisa.
+    expect(edges.match(/repeat: Infinity/g) || []).toHaveLength(0);
   });
 
   it("tombol minimap tidak lagi berdenyut sepanjang panel terbuka", () => {
