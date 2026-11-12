@@ -13,7 +13,6 @@
  * yang menerima klik.
  */
 import React, { useRef, useState } from "react";
-import { motion } from "motion/react";
 import { findSmartRoute, memotongInteriorKotak } from "../lib/routing";
 import {
   indeksSegmenTerdekat,
@@ -27,7 +26,7 @@ import {
   tekukanEfektif,
   waypointsSetelahGeserSegmen,
 } from "../lib/ruteOrtogonal";
-import { geserPort, pilihPort, sebarPort } from "../lib/portCabang";
+import { geserPort, pilihPort, sebarPort, titikTepiTerdekat } from "../lib/portCabang";
 import { cn } from "../../../lib/utils";
 import { colorPaletteHex, ukuranBentukEfektif, KELAS_HURUF } from "../constants";
 import { EdgeStyleBar } from "./EdgeStyleBar";
@@ -325,6 +324,13 @@ interface FlowchartEdgesProps {
   setConnectSourceId: (id: string | null) => void;
   /** Posisi kursor di ruang kanvas, dipakai ujung garis bantu. */
   hoverCoords: { x: number; y: number };
+  /**
+   * #858 — titik paku yang DIGENGGAM saat sambungan dimulai. Pratinjau
+   * berangkat dari sini, bukan dari pusat bentuk; kosong berarti sambungan
+   * dimulai lewat tool (tidak ada paku), dan pangkalnya dihitung dari tepi
+   * terdekat ke kursor.
+   */
+  connectFrom?: Point | null;
   /** Bentuk garis penghubung bawaan papan; dipakai garis yang belum punya pilihan. */
   connectorType: "bezier" | "straight" | "orthogonal";
   /** Skala papan saat ini — bilah gaya dibalik skalanya agar tetap terbaca. */
@@ -405,6 +411,7 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
   connectSourceId,
   setConnectSourceId,
   hoverCoords,
+  connectFrom,
   connectorType,
   zoomLevel,
   onEdgePatch,
@@ -1419,64 +1426,67 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
           );
         })}
 
-        {/* Real-time interactive dotted helper path while creating connection lines */}
+        {/*
+          #858 — pratinjau garis dibuat JUJUR: ia berangkat dari paku yang
+          digenggam (atau tepi terdekat bila sambungan dimulai lewat tool),
+          memakai BENTUK JALUR yang akan lahir (ortogonal/straight/bezier),
+          dan berwarna token primary. Sebelumnya pangkalnya pusat bentuk,
+          bentuknya kurva ungu keras, dan kontras dengan garis ortogonal hitam
+          yang langsung menggantikannya saat jari diangkat — persis keluhan
+          "tidak bersih" dibandingkan draw.io.
+        */}
         {connectSourceId &&
           (() => {
             const srcNode = nodes.find((n) => n.id === connectSourceId);
             if (!srcNode) return null;
-            const sW = srcNode.width || 130;
-            const sH = srcNode.height || 70;
-            const startX = srcNode.x + sW / 2;
-            const startY = srcNode.y + sH / 2;
+            const awal = connectFrom ?? titikTepiTerdekat(srcNode, hoverCoords);
             const endX = hoverCoords.x;
             const endY = hoverCoords.y;
+            const jarak = Math.hypot(endX - awal.x, endY - awal.y);
+            // Titik awal dan kursor yang sama belum membentuk garis; menahan
+            // diri lebih bersih daripada menggambar titik yang berkedip.
+            if (jarak < 6) return null;
 
-            const dx = endX - startX;
-            const dy = endY - startY;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            const k = Math.min(100, Math.max(30, dist * 0.45));
-            const pathD = `M ${startX} ${startY} C ${startX + k} ${startY}, ${endX - k} ${endY}, ${endX} ${endY}`;
+            let pathD: string;
+            if (connectorType === "straight") {
+              pathD = `M ${awal.x} ${awal.y} L ${endX} ${endY}`;
+            } else if (connectorType === "orthogonal") {
+              // Siku dengan satu belokan di tengah, mengikuti sumbu gerak yang
+              // dominan — bentuk yang sama dengan rute ortogonal hasilnya.
+              if (Math.abs(endY - awal.y) >= Math.abs(endX - awal.x)) {
+                const tengahY = (awal.y + endY) / 2;
+                pathD = `M ${awal.x} ${awal.y} L ${awal.x} ${tengahY} L ${endX} ${tengahY} L ${endX} ${endY}`;
+              } else {
+                const tengahX = (awal.x + endX) / 2;
+                pathD = `M ${awal.x} ${awal.y} L ${tengahX} ${awal.y} L ${tengahX} ${endY} L ${endX} ${endY}`;
+              }
+            } else {
+              const dx = endX - awal.x;
+              pathD = `M ${awal.x} ${awal.y} C ${awal.x + dx * 0.5} ${awal.y}, ${endX - dx * 0.5} ${endY}, ${endX} ${endY}`;
+            }
 
             return (
-              <motion.g
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.15 }}
-              >
-                <motion.path
+              <g data-testid="pratinjau-sambung">
+                <path
                   d={pathD}
                   fill="none"
-                  stroke="#a78bfa"
-                  strokeWidth="3"
-                  strokeDasharray="6,4"
-                  animate={{
-                    strokeDashoffset: [-20, 0],
-                  }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 0.8,
-                    ease: "linear",
-                  }}
+                  stroke="var(--color-primary)"
+                  strokeWidth={1.5 / zoomLevel}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
-                {/* Ujung garis yang sedang ditarik. #642 — lingkaran luarnya
-                    dulu `animate-ping`, yaitu satu animasi tak berhenti di
-                    titik yang justru paling dilihat pengguna. Cincin statis
-                    memberi bobot yang sama tanpa loop. Loop dash di atas
-                    sengaja TINGGAL: ia menandai "sedang menarik", berhenti saat
-                    mouse lepas, dan bukan pada keadaan diam. Kelas
-                    `titik-ujung-sambung` dipakai test sebagai identitas penanda
-                    ini — sebelumnya penanda itu dicari lewat kelas
-                    `animate-ping`, yaitu nama animasi yang justru dilepas. */}
+                {/* Ujung garis yang sedang ditarik. #642 — lingkaran ini
+                    statis; `animate-ping` dan loop dash tidak boleh kembali. */}
                 <circle
                   cx={endX}
                   cy={endY}
-                  r="6"
-                  fill="#8b5cf6"
-                  opacity="0.25"
+                  r={5 / zoomLevel}
+                  fill="var(--color-primary)"
+                  opacity="0.2"
                   className="titik-ujung-sambung"
                 />
-                <circle cx={endX} cy={endY} r="4" fill="#8b5cf6" />
-              </motion.g>
+                <circle cx={endX} cy={endY} r={2.5 / zoomLevel} fill="var(--color-primary)" />
+              </g>
             );
           })()}
       </svg>

@@ -66,6 +66,35 @@ const portBentuk = (node: SimpulPort): Port[] => {
   ];
 };
 
+/**
+ * #858 — titik TEPI terdekat dari sebuah titik papan.
+ *
+ * Pratinjau garis dulu berangkat dari PUSAT bentuk, jadi garis bantu terlihat
+ * keluar dari tengah kotak lalu melompat ke tepi saat garisnya lahir. draw.io
+ * selalu menggambar pratinjau dari tepi. Titik di luar bentuk diproyeksikan
+ * tegak lurus ke tepi; titik di dalam bentuk diproyeksikan ke tepi terdekat,
+ * sehingga melepas kursor di tengah bentuk pun menempel di perbatasan.
+ */
+export function titikTepiTerdekat(
+  node: SimpulPort,
+  titik: { x: number; y: number }
+): { x: number; y: number } {
+  const { width, height } = ukuranBentukEfektif(node);
+  const kanan = node.x + width;
+  const bawah = node.y + height;
+  const x = Math.min(kanan, Math.max(node.x, titik.x));
+  const y = Math.min(bawah, Math.max(node.y, titik.y));
+  const keKiri = x - node.x;
+  const keKanan = kanan - x;
+  const keAtas = y - node.y;
+  const keBawah = bawah - y;
+  const terdekat = Math.min(keKiri, keKanan, keAtas, keBawah);
+  if (terdekat === keAtas) return { x, y: node.y };
+  if (terdekat === keBawah) return { x, y: bawah };
+  if (terdekat === keKiri) return { x: node.x, y };
+  return { x: kanan, y };
+}
+
 /** Pasangan port terdekat — aturan yang sama yang dipakai papan sejak #533. */
 export const pilihPort = (src: SimpulPort, tgt: SimpulPort): { source: Port; target: Port } => {
   const sourcePorts = portBentuk(src);
