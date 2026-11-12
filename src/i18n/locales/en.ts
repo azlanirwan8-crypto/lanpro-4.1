@@ -3369,6 +3369,12 @@ export const en = {
     zTurun: "Send backward",
     zBelakang: "Send to back",
   },
+  edgeMenu: {
+    title: "Line Actions",
+    editLabel: "Edit Label",
+    straighten: "Straighten Line",
+    delete: "Delete Line",
+  },
   editSuite: {
     title: "Edit Suite Document Info",
     docName: "Document Name",

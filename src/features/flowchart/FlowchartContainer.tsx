@@ -70,6 +70,7 @@ import { FlowchartEdges, pecahanPort } from "./components/FlowchartEdges";
 import { FlowchartMinimap } from "./components/FlowchartMinimap";
 import { LaporanAlur } from "./components/LaporanAlur";
 import { NodeContextMenu } from "./components/NodeContextMenu";
+import { EdgeContextMenu } from "./components/EdgeContextMenu";
 import { CanvasContextMenu } from "./components/CanvasContextMenu";
 // #642 — `AnimatePresence` adalah satu-satunya cara gerakan KELUAR dijalankan
 // oleh mesin animasi: tanpa pembungkus ini prop `exit` yang sudah ditulis di
@@ -579,6 +580,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     nodeId: string;
   } | null>(null);
   const [canvasContextMenu, setCanvasContextMenu] = useState<{ x: number; y: number } | null>(null);
+  // #852 — klik-kanan pada GARIS dulu lolos ke menu kanvas, jadi pengguna yang
+  // ingin menghapus garis malah ditawari menambah bentuk. Menu garis punya
+  // jalurnya sendiri, dengan bentuk data yang sama seperti menu bentuk.
+  const [edgeContextMenu, setEdgeContextMenu] = useState<{
+    x: number;
+    y: number;
+    edgeId: string;
+  } | null>(null);
 
   // Custom connection line routing types: bezier (curved), straight (direct), orthogonal (clean right-angles)
   // #656 — bawaannya LURUS, dan itu keliru: draw.io menggambar garis baru
@@ -4312,6 +4321,36 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setIsRightSidebarOpen(true);
   };
 
+  /**
+   * #852 — tiga aksi menu klik-kanan garis. "Ubah label" membuka panel kanan
+   * yang sudah memuat kolom label (sunting-di-tempat menyusul di #853), jadi
+   * pengguna tidak perlu mencari dulu ke mana harus pergi.
+   */
+  const handleContextMenuEditEdge = (edgeId: string) => {
+    setSelectedEdgeId(edgeId);
+    setSelectedNodeId(null);
+    setIsRightSidebarOpen(true);
+  };
+
+  const handleContextMenuStraightenEdge = (edgeId: string) => {
+    if (!isWorkspaceEditable) return;
+    const edge = edges.find((e) => e.id === edgeId) as FlowEdge | undefined;
+    handleEdgePatch(
+      edgeId,
+      edge?.waypoints?.length ? { waypoints: [] } : { connector: "straight" }
+    );
+  };
+
+  /** Hapus SATU garis menurut id — jalur menu, bukan seleksi. */
+  const handleHapusGaris = (edgeId: string) => {
+    if (!isWorkspaceEditable) return;
+    const updatedEdges = edges.filter((edge) => edge.id !== edgeId);
+    setEdges(updatedEdges);
+    recordHistory(nodes, updatedEdges);
+    if (selectedEdgeId === edgeId) setSelectedEdgeId(null);
+    toast.success(t("toast.connectionCancelled"));
+  };
+
   const handleContextMenuChangeColor = (nodeId: string, newColor: string) => {
     const updated = nodes.map((n) => (n.id === nodeId ? { ...n, color: newColor } : n));
     setNodes(updated);
@@ -4908,6 +4947,20 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           e.preventDefault();
                           e.stopPropagation();
                           setNodeContextMenu(null);
+                          setCanvasContextMenu(null);
+                          // #852 — garis punya menunya sendiri: ubah label,
+                          // luruskan, hapus. Tanpa cabang ini klik-kanan garis
+                          // membuka daftar bentuk, dan garisnya tidak bisa
+                          // dihapus dari situ sama sekali.
+                          const gugusGaris = targetElement.closest("[data-edge-id]");
+                          if (gugusGaris && isWorkspaceEditable) {
+                            const edgeId = gugusGaris.getAttribute("data-edge-id") || "";
+                            setSelectedEdgeId(edgeId);
+                            setSelectedNodeId(null);
+                            setEdgeContextMenu({ x: e.clientX, y: e.clientY, edgeId });
+                            return;
+                          }
+                          setEdgeContextMenu(null);
                           if (isWorkspaceEditable) {
                             setCanvasContextMenu({
                               x: e.clientX,
@@ -6179,6 +6232,20 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                   : nodes.filter((n) => n.id === nodeId)
               )
             }
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {edgeContextMenu && (
+          <EdgeContextMenu
+            key="menu-garis"
+            x={edgeContextMenu.x}
+            y={edgeContextMenu.y}
+            onClose={() => setEdgeContextMenu(null)}
+            onEditLabel={() => handleContextMenuEditEdge(edgeContextMenu.edgeId)}
+            onStraighten={() => handleContextMenuStraightenEdge(edgeContextMenu.edgeId)}
+            onDelete={() => handleHapusGaris(edgeContextMenu.edgeId)}
           />
         )}
       </AnimatePresence>
