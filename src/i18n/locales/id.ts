@@ -1757,6 +1757,7 @@ export const id = {
     linkTheShapeToThe: "Hubungkan bentuk dengan backlog fase agar statusnya tersinkron otomatis.",
     disconnectFlow: "Putuskan Alur",
     straightenLine: "Luruskan Garis",
+    reverseEdge: "Balik Arah",
     // #685 — jembatan editor draw.io patok.
     drawioBukaEditor: "Edit di draw.io",
     drawioJudulEditor: "Editor draw.io",

@@ -571,6 +571,36 @@ export function ruteOrtogonal(
 }
 
 /**
+ * #855 — rute khusus garis ke diri sendiri (self-loop).
+ *
+ * `ruteOrtogonal` menganggap asal dan tujuan BERBEDA; bila dipaksa pada bentuk
+ * yang sama, kedua ujungnya jatuh di port yang sama dan jalurnya nol panjang.
+ * draw.io keluar dari sisi kanan lalu masuk lagi dari sisi atas. Bentuk itu
+ * yang dikembalikan di sini: seluruh segmen horizontal/vertikal, semua
+ * belokannya di LUAR kotak bentuk, jadi garis tidak menabrak bentuknya sendiri.
+ *
+ * Titik pertama memakai arah keluar kanan dan titik terakhir arah masuk atas;
+ * `ortogonalDariTitik` meneruskannya apa adanya karena setiap ruas sudah
+ * sejajar dengan port ujungnya.
+ */
+export function ruteLingkarSendiri(
+  node: { x: number; y: number; width?: number; height?: number },
+  jarak = 40
+): Point[] {
+  const { width, height } = ukuranBentukEfektif(node);
+  const kanan = node.x + width;
+  const tengahY = node.y + height / 2;
+  const tengahX = node.x + width / 2;
+  return [
+    { x: kanan, y: tengahY },
+    { x: kanan + jarak, y: tengahY },
+    { x: kanan + jarak, y: node.y - jarak },
+    { x: tengahX, y: node.y - jarak },
+    { x: tengahX, y: node.y },
+  ];
+}
+
+/**
  * `d` SVG dengan sudut membulat. Hanya untuk jalur ortogonal; radius dipangkas
  * ke setengah segmen terpendek di tiap sudut supaya dua belokan yang berdekatan
  * tidak saling memakan.

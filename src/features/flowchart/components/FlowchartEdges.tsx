@@ -21,6 +21,7 @@ import {
   ortogonalDariTitik,
   pathDOrtogonal,
   rapikanWaypoints,
+  ruteLingkarSendiri,
   ruteOrtogonal,
   sisipTekukan,
   tekukanEfektif,
@@ -765,8 +766,21 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
           // #849 — aturannya pindah utuh ke `lib/portCabang.ts` supaya
           // pengelompokan saudara (`sebarPort`) memilih sisi yang SAMA dengan
           // yang nanti digambar; dua salinan aturan akan cepat berbeda.
-          const otomatis =
-            source && target
+          // #855 — garis ke diri sendiri punya rute sendiri. `pilihPort` pada
+          // bentuk yang sama memilih satu port untuk kedua ujung, jadi titik
+          // awalnya bertumpuk dan rutenya nol panjang. Ujung putarannya tetap:
+          // keluar dari kanan, masuk dari atas, dan port simpanan diabaikan.
+          const sendiri = !!source && edge.fromNodeId === edge.toNodeId;
+          const lingkaran = sendiri && source ? ruteLingkarSendiri(source) : null;
+          const ujungLingkar = lingkaran
+            ? {
+                source: { ...lingkaran[0], dir: { x: 1, y: 0 } },
+                target: { ...lingkaran[lingkaran.length - 1], dir: { x: 0, y: -1 } },
+              }
+            : null;
+          const otomatis = ujungLingkar
+            ? ujungLingkar
+            : source && target
               ? pilihPort(source, target)
               : {
                   source: { x: startCenter.x, y: startCenter.y, dir: { x: 0, y: 1 } },
@@ -777,21 +791,32 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
           // antara kedua ujung (tekukan manual,cache, dan `findSmartRoute`) tetap
           // jalur yang sama, jadi garis yang menempel di kiri bawah bentuk datang
           // di kiri bawah, bukan di sisi terdekat seperti sebelumnya.
-          const startPort =
-            source && edge.portSumber ? titikPort(source, edge.portSumber) : otomatis.source;
-          const endPort =
-            target && edge.portTujuan ? titikPort(target, edge.portTujuan) : otomatis.target;
+          const startPort = ujungLingkar
+            ? ujungLingkar.source
+            : source && edge.portSumber
+              ? titikPort(source, edge.portSumber)
+              : otomatis.source;
+          const endPort = ujungLingkar
+            ? ujungLingkar.target
+            : target && edge.portTujuan
+              ? titikPort(target, edge.portTujuan)
+              : otomatis.target;
 
           // #533 — kembar digeser berlawanan arah sepanjang tepi bentuknya,
           // dengan langkah yang sama di kedua ujungnya, sehingga dua garis
           // tetap sejajar dan tidak bersilang di tengah.
           const daftar = kembar.get(kunciPasangan(edge.fromNodeId, edge.toNodeId)) || [];
           const urutan = daftar.indexOf(edge.id);
-          const langkah = daftar.length > 1 ? (urutan - (daftar.length - 1) / 2) * 18 : 0;
+          // #855 — putaran sendiri tidak ikut digeser: menggeser ujungnya
+          // sepanjang tepi akan memutus sambungan ke rute putarannya.
+          const langkah =
+            !lingkaran && daftar.length > 1 ? (urutan - (daftar.length - 1) / 2) * 18 : 0;
 
           // #849 — di atas itu, geseran saudara SESISI. Port yang dipaku
           // pengguna sudah sengaja tidak diberi angka oleh `sebarPort`.
-          const sebar = sebaran.get(edge.id) || { keluar: 0, masuk: 0 };
+          const sebar = lingkaran
+            ? { keluar: 0, masuk: 0 }
+            : sebaran.get(edge.id) || { keluar: 0, masuk: 0 };
           const start = geserPort(startPort, langkah + sebar.keluar);
           const end = geserPort(endPort, langkah + sebar.masuk);
 
@@ -828,9 +853,10 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
               terganggu,
               edge,
               () =>
-                bentuk === "orthogonal"
+                lingkaran ??
+                (bentuk === "orthogonal"
                   ? ruteOrtogonal(start, end, edge.fromNodeId, edge.toNodeId, nodes)
-                  : findSmartRoute(start, end, edge.fromNodeId, edge.toNodeId, nodes),
+                  : findSmartRoute(start, end, edge.fromNodeId, edge.toNodeId, nodes)),
               simpananRute
             );
           }

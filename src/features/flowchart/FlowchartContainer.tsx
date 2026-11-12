@@ -3994,15 +3994,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
   /** Satu jalur menambah garis: dipakai mode klik dan mode tarik. */
   const tambahSambungan = (dari: string, ke: string, titikLepas?: Point, titikMulai?: Point) => {
-    if (dari === ke) {
-      toast.error(t("toast.connectSelf"));
-      return false;
-    }
-    const sudahAda = edges.some((edge) => edge.fromNodeId === dari && edge.toNodeId === ke);
-    if (sudahAda) {
-      toast.info(t("toast.connectionExists"));
-      return false;
-    }
+    // #855 — garis ke diri sendiri dan garis KEDUA pada pasangan yang sama
+    // kini sah. draw.io membolehkan keduanya: putaran sendiri menggambarkan
+    // langkah yang kembali ke bentuk asal, dan dua garis A→B dengan label
+    // berbeda (Ya/Tidak) adalah cara biasa menulis satu keputusan. Lapisan
+    // gambar sudah memisahkannya (#533 menggeser kembaran 18 px; self-loop
+    // memakai rute putaran sendiri).
     const id = "edge_" + Date.now();
     // #762 — garis BARU pun mengunci titik yang disentuh, sama seperti ujung
     // yang dipindah. draw.io menyimpan ini sebagai exitX/entryX; papan ini sudah
@@ -4088,11 +4085,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       setHoverCoords(getNodeCenter(nodeId));
       toast.info(t("toast.pickTargetShape"));
     } else {
-      if (connectSourceId === nodeId) {
-        toast.error(t("toast.connectSelf"));
-        setConnectSourceId(null);
-        return;
-      }
+      // #855 — klik pada bentuk yang sama membuat putaran sendiri, bukan
+      // ditolak: `tambahSambungan` sekarang menanganinya.
       tambahSambungan(connectSourceId, nodeId);
       setConnectSourceId(null);
       setActiveTool("select");
