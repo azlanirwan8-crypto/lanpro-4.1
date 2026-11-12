@@ -3397,6 +3397,12 @@ export const id = {
     zTurun: "Turun satu tingkat",
     zBelakang: "Paling belakang",
   },
+  edgeMenu: {
+    title: "Aksi Garis",
+    editLabel: "Ubah Label",
+    straighten: "Luruskan Garis",
+    delete: "Hapus Garis",
+  },
   editSuite: {
     title: "Ubah Info Dokumen Suite",
     docName: "Nama Dokumen",

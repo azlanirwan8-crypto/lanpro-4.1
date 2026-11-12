@@ -157,9 +157,11 @@ describe("loop yang tidak membawa informasi dilepas (#642)", () => {
   it("pembungkusnya ada dan prop exit-nya masih ada — kalau salah satu hilang, gerakannya mati lagi", () => {
     const papan = baca("src/features/flowchart/FlowchartContainer.tsx");
     expect(papan).toContain('import { AnimatePresence } from "motion/react"');
-    expect(papan.match(/<AnimatePresence>/g) || []).toHaveLength(2);
+    // #852 — menu konteks GARIS menjadi pembungkus ketiga; hitungannya ikut
+    // dinaikkan supaya menu keempat tidak bisa lahir tanpa pembungkus.
+    expect(papan.match(/<AnimatePresence>/g) || []).toHaveLength(3);
 
-    for (const berkas of ["NodeContextMenu", "CanvasContextMenu"]) {
+    for (const berkas of ["NodeContextMenu", "CanvasContextMenu", "EdgeContextMenu"]) {
       const menu = baca(`src/features/flowchart/components/${berkas}.tsx`);
       expect(menu).toContain("exit={{");
     }

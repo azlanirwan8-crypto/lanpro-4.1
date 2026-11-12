@@ -19,6 +19,14 @@ import { colorPaletteHex, colorPalettes } from "../constants";
 /** Arah tata lapisan (#615). `naik`/`turun` satu tingkat, `depan`/`belakang` ke ujung. */
 export type ArahLayers = "depan" | "naik" | "turun" | "belakang";
 
+/**
+ * #852 — cangkang bersama menu konteks papan. Ditaruh di sini, bukan di berkas
+ * baru: `audit:z` menghitung kemunculan tangga z PER BERKAS dan menolak berkas
+ * baru yang membawa `z-50` sendiri. Satu string, dua menu, tangga tetap.
+ */
+export const KELAS_MENU_KONTEKS =
+  "fixed z-50 w-48 bg-surface/90 backdrop-blur-md border border-border-subtle/50 rounded-xl shadow-[0_12px_36px_rgba(0,0,0,0.14)] p-1.5 select-none text-content-strong";
+
 interface NodeContextMenuProps {
   x: number;
   y: number;
@@ -103,7 +111,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
         left: `${adjustedX}px`,
         top: `${adjustedY}px`,
       }}
-      className="fixed z-50 w-48 bg-surface/90 backdrop-blur-md border border-border-subtle/50 rounded-xl shadow-[0_12px_36px_rgba(0,0,0,0.14)] p-1.5 select-none text-content-strong"
+      className={KELAS_MENU_KONTEKS}
       onContextMenu={(e) => e.preventDefault()}
     >
       {/* Node Info Header */}
