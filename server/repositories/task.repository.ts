@@ -196,10 +196,27 @@ export class TaskRepository {
     const params: unknown[] = [projectId];
     let rootWhere = "projectId = ? AND (parentId IS NULL OR parentId = '')";
     if (search?.trim()) {
-      rootWhere +=
-        " AND (LOWER(COALESCE(title, '')) LIKE ? OR LOWER(COALESCE(taskKey, '')) LIKE ?)";
+      const cocok = "(LOWER(COALESCE(title, '')) LIKE ? OR LOWER(COALESCE(taskKey, '')) LIKE ?)";
       const term = `%${search.trim().toLowerCase()}%`;
+      // #863 — judul/kunci ANAK LANGSUNG juga ikut mencari: akar dari anak yang
+      // cocok diangkat menjadi kandidat halaman, walau judul akarnya sendiri
+      // tidak cocok. Kedalaman sengaja SATU tingkat, sejajar dengan yang
+      // dirender UI Daftar Isu dan yang dicek saringan klien (`childMatches`
+      // di `src/features/issues/hooks.ts`); CTE berkedalaman penuh akan
+      // mengangkat akar yang lalu disembunyikan klien lagi.
+      const [anakRows]: any = await connection.query(
+        `SELECT DISTINCT p.id FROM Tasks p
+           INNER JOIN Tasks c ON c.parentId = p.id
+          WHERE p.projectId = ? AND (p.parentId IS NULL OR p.parentId = '')
+            AND c.projectId = ?
+            AND (LOWER(COALESCE(c.title, '')) LIKE ? OR LOWER(COALESCE(c.taskKey, '')) LIKE ?)`,
+        [projectId, projectId, term, term]
+      );
+      const akarLewatAnak: string[] = (anakRows || []).map((r: any) => r.id).filter(Boolean);
+      rootWhere += ` AND (${cocok}${akarLewatAnak.length ? " OR id IN (?)" : ""})`;
       params.push(term, term);
+      // `IN (?)` + array, bukan `IN (?,?,…)`: lihat catatan di bawah.
+      if (akarLewatAnak.length) params.push(akarLewatAnak);
     }
 
     const [countRows]: any = await connection.query(
