@@ -200,10 +200,12 @@ export class TaskRepository {
       const term = `%${search.trim().toLowerCase()}%`;
       // #863 — judul/kunci ANAK LANGSUNG juga ikut mencari: akar dari anak yang
       // cocok diangkat menjadi kandidat halaman, walau judul akarnya sendiri
-      // tidak cocok. Kedalaman sengaja SATU tingkat, sejajar dengan yang
-      // dirender UI Daftar Isu dan yang dicek saringan klien (`childMatches`
-      // di `src/features/issues/hooks.ts`); CTE berkedalaman penuh akan
-      // mengangkat akar yang lalu disembunyikan klien lagi.
+      // tidak cocok. Kedalaman sengaja SATU tingkat karena dua saringan klien
+      // juga berhenti di situ: `childMatches` hanya mengecek anak langsung
+      // (`hooks.ts:295`) dan baris anak yang tidak cocok dibuang dari daftar
+      // induknya (`IssueTableRow.tsx:150-156`) walau render-nya rekursif
+      // (`IssueTableRow.tsx:814-825`). CTE berkedalaman penuh di sini akan
+      // mengangkat akar yang tetap disembunyikan klien — #864.
       const [anakRows]: any = await connection.query(
         `SELECT DISTINCT p.id FROM Tasks p
            INNER JOIN Tasks c ON c.parentId = p.id
