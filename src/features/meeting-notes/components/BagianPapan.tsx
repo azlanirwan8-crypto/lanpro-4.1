@@ -128,7 +128,7 @@ export const KepalaPapan: React.FC<KepalaProps> = ({ tampilAI, onToggleAI, cari,
  * stylesheet, bukan maksud penulisnya.
  */
 export const SEL =
-  "px-4 border-b border-b-border-subtle border-r border-r-border-faint last:border-r-0 overflow-hidden";
+  "border-b border-b-border-subtle border-r border-r-border-faint last:border-r-0 overflow-hidden";
 
 /**
  * #707 — kepala tabel desktop. `position: sticky` hanya bekerja terhadap
@@ -172,12 +172,6 @@ export const SEL =
  * "siapa dan kapan satu niat"; pemilik proyek menolaknya ("datetime kenapa di
  * gabung dengan pic, kolom pisah saja"), dan ia benar: tanggal adalah data yang
  * diurutkan dan dibaca cepat, bukan keterangan tambahan di samping nama.
- *
- * Sekalian kepala papan ini dipindah ke kit gaya rumah
- * (`src/features/issues/styles.ts`, `tableHeaderCell`): `text-[11px] font-semibold
- * py-2.5` dengan pemisah kolom `border-border-faint`. Sebelumnya ia `text-xs
- * py-3` — huruf lebih besar dan baris lebih gemuk daripada tabel mana pun lain
- * di aplikasi yang sama, dan itu bagian dari "tidak Velzon".
  *
  * Jumlahnya jadi sebelas kolom: 170, 66, 220, 190, 200, 220, 200, 170, 150, 130,
  * 92 = 1.808 px. `min-w` wadah gulir WAJIB sama dengan jumlah ini; test
@@ -285,7 +279,7 @@ export const KepalaTabel: React.FC<KepalaTabelProps> = ({ sortir, onSortir }) =>
   const tombol =
     "group flex w-full items-center gap-1 uppercase cursor-pointer text-left text-content-subtle hover:text-content-body transition-colors";
   const th =
-    "sticky top-0 z-30 bg-surface-sunken px-4 py-2.5 text-[11px] font-semibold text-content-subtle whitespace-nowrap border-b border-b-border-subtle border-r border-r-border-faint last:border-r-0";
+    "sticky top-0 z-30 bg-surface-sunken text-content-subtle whitespace-nowrap border-b border-b-border-subtle border-r border-r-border-faint last:border-r-0";
   return (
     <thead>
       <tr className="text-content-subtle">

@@ -331,23 +331,20 @@ export const DbExplorerPanel: React.FC<any> = ({
 
                   {!loading && result && Array.isArray(result) && (
                     <div className="border border-border-subtle rounded-lg overflow-x-auto">
-                      <ResponsiveTable
-                        className="w-full text-left border-collapse text-sm"
-                        scroll={false}
-                      >
+                      <ResponsiveTable className="w-full text-left border-collapse" scroll={false}>
                         <thead className="bg-primary-surface/5 text-primary font-semibold uppercase">
                           <tr>
                             {result.length > 0 ? (
                               Object.keys(result[0]).map((key) => (
                                 <th
                                   key={key}
-                                  className="p-3 border-b border-border-divider font-medium truncate max-w-[200px]"
+                                  className="border-b border-border-divider truncate max-w-[200px]"
                                 >
                                   {key}
                                 </th>
                               ))
                             ) : (
-                              <th className="p-3 border-b border-border-divider font-medium text-content-subtle">
+                              <th className="border-b border-border-divider text-content-subtle">
                                 {t("dbExplorer.result0Rows")}
                               </th>
                             )}
@@ -358,8 +355,8 @@ export const DbExplorerPanel: React.FC<any> = ({
                             result.map((row: any, i: number) => (
                               <tr key={i} className="hover:bg-surface-sunken">
                                 {Object.keys(row).map((key: string, j: number) => (
-                                  <td key={j} className="p-3 max-w-[300px]">
-                                    <div className="truncate w-full text-content-secondary font-mono text-xs">
+                                  <td key={j} className="max-w-[300px]">
+                                    <div className="truncate w-full text-content-secondary font-mono">
                                       {row[key] === null ? (
                                         <span className="text-content-subtle italic">null</span>
                                       ) : typeof row[key] === "object" ? (

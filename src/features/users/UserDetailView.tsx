@@ -3072,20 +3072,15 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                             {isOpen && (
                               <div className="overflow-x-auto">
                                 <ResponsiveTable
-                                  className="w-full text-left text-xs border-collapse"
+                                  className="w-full text-left border-collapse"
                                   scroll={false}
                                 >
                                   <thead className="bg-surface-sunken/40 border-b border-border-divider text-content-muted">
                                     <tr>
-                                      <th className="py-2.5 px-4 font-normal text-xs uppercase w-2/5">
-                                        {t("userDetail.module")}
-                                      </th>
+                                      <th className="w-2/5">{t("userDetail.module")}</th>
                                       {(["read", "create", "update", "delete"] as const).map(
                                         (action) => (
-                                          <th
-                                            key={action}
-                                            className="py-2.5 px-2 font-normal text-xs uppercase text-center w-20"
-                                          >
+                                          <th key={action} className="text-center w-20">
                                             {action}
                                           </th>
                                         )
@@ -3104,7 +3099,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                           key={module}
                                           className="hover:bg-surface-sunken/40 transition-colors"
                                         >
-                                          <td className="py-2.5 px-4 font-medium text-content-strong text-xs">
+                                          <td className="font-medium text-content-strong">
                                             <div
                                               className="inline-flex items-center gap-1.5"
                                               title={moduleInfo.desc}
@@ -3125,7 +3120,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                               const isOverride = isChecked !== isDefaultGranted;
 
                                               return (
-                                                <td key={action} className="py-2 px-2 text-center">
+                                                <td key={action} className="text-center">
                                                   <div
                                                     onClick={() =>
                                                       handleTogglePermission(module, action)
@@ -3490,27 +3485,14 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 ) : (
                   <div className="space-y-4">
                     <div className="overflow-x-auto">
-                      <ResponsiveTable
-                        className="w-full text-left text-xs border-collapse"
-                        scroll={false}
-                      >
+                      <ResponsiveTable className="w-full text-left border-collapse" scroll={false}>
                         <thead className="bg-surface-sunken/40 border-b border-border-divider text-content-muted">
                           <tr>
-                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-normal">
-                              File Name
-                            </th>
-                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-normal">
-                              Type
-                            </th>
-                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-normal">
-                              Size
-                            </th>
-                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-normal">
-                              Upload Date
-                            </th>
-                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-normal text-right">
-                              Action
-                            </th>
+                            <th>File Name</th>
+                            <th>Type</th>
+                            <th>Size</th>
+                            <th>Upload Date</th>
+                            <th className="text-right">Action</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-border-faint bg-surface">
@@ -3532,7 +3514,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 className="hover:bg-surface-sunken/40 transition-colors group"
                               >
                                 {/* File Name + Icon (Clickable to download/open) */}
-                                <td className="py-3 px-4">
+                                <td>
                                   <div className="flex items-center gap-3">
                                     <div
                                       className={cn(
@@ -3548,7 +3530,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         download={doc.name}
-                                        className="font-medium text-xs text-content-strong hover:text-primary hover:underline transition-colors block truncate max-w-xs sm:max-w-md cursor-pointer"
+                                        className="font-medium text-content-strong hover:text-primary hover:underline transition-colors block truncate max-w-xs sm:max-w-md cursor-pointer"
                                         title={`Unduh / Buka: ${doc.name}`}
                                       >
                                         {doc.name}
@@ -3563,22 +3545,22 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 </td>
 
                                 {/* Type */}
-                                <td className="py-3 px-4 text-content-muted font-medium whitespace-nowrap">
+                                <td className="text-content-muted font-medium whitespace-nowrap">
                                   {info.typeLabel}
                                 </td>
 
                                 {/* Size */}
-                                <td className="py-3 px-4 text-content-muted whitespace-nowrap">
+                                <td className="text-content-muted whitespace-nowrap">
                                   {doc.size || "1.20 MB"}
                                 </td>
 
                                 {/* Upload Date */}
-                                <td className="py-3 px-4 text-content-muted whitespace-nowrap font-mono text-[11px]">
+                                <td className="text-content-muted whitespace-nowrap font-mono">
                                   {uploadDateStr}
                                 </td>
 
                                 {/* Action: Download Button */}
-                                <td className="py-3 px-4 text-right whitespace-nowrap">
+                                <td className="text-right whitespace-nowrap">
                                   <a
                                     href={doc.url}
                                     target="_blank"

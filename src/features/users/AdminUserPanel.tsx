@@ -773,7 +773,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               >
                 <thead>
                   <tr className="bg-primary-surface/5 border-b border-border-divider text-content-subtle whitespace-nowrap">
-                    <th className="py-3.5 px-4 text-center w-12">
+                    <th className="text-center w-12">
                       <input
                         type="checkbox"
                         checked={
@@ -799,7 +799,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     </th>
                     <th
                       onClick={() => handleSort("name")}
-                      className="py-3.5 px-4 w-60 cursor-pointer hover:bg-surface-muted/80 transition-colors select-none group"
+                      className="w-60 cursor-pointer hover:bg-surface-muted/80 transition-colors select-none group"
                     >
                       <div className="flex items-center gap-1.5">
                         <span>{t("users.user")}</span>
@@ -810,7 +810,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     </th>
                     <th
                       onClick={() => handleSort("department")}
-                      className="py-3.5 px-4 w-60 cursor-pointer hover:bg-surface-muted/80 transition-colors select-none group"
+                      className="w-60 cursor-pointer hover:bg-surface-muted/80 transition-colors select-none group"
                     >
                       <div className="flex items-center gap-1.5">
                         <span>{t("users.deptPosition")}</span>
@@ -819,10 +819,10 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                         </span>
                       </div>
                     </th>
-                    <th className="py-3.5 px-4 w-40">{t("users.projectsTasks")}</th>
+                    <th className="w-40">{t("users.projectsTasks")}</th>
                     <th
                       onClick={() => handleSort("role")}
-                      className="py-3.5 px-4 w-28 cursor-pointer hover:bg-surface-muted/80 transition-colors select-none group"
+                      className="w-28 cursor-pointer hover:bg-surface-muted/80 transition-colors select-none group"
                     >
                       <div className="flex items-center gap-1.5">
                         <span>{t("users.role")}</span>
@@ -833,7 +833,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     </th>
                     <th
                       onClick={() => handleSort("status")}
-                      className="py-3.5 px-4 w-28 text-center cursor-pointer hover:bg-surface-muted/80 transition-colors select-none group"
+                      className="w-28 text-center cursor-pointer hover:bg-surface-muted/80 transition-colors select-none group"
                     >
                       <div className="flex items-center justify-center gap-1.5">
                         <span>{t("users.status")}</span>
@@ -842,7 +842,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                         </span>
                       </div>
                     </th>
-                    <th className="py-3.5 px-4 w-28 text-center">{t("users.action")}</th>
+                    <th className="w-28 text-center">{t("users.action")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-faint/60">
@@ -866,7 +866,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
 
                     return (
                       <tr key={user.id} className="hover:bg-primary/10 transition-colors group">
-                        <td className="py-3.5 px-4 text-center">
+                        <td className="text-center">
                           <input
                             type="checkbox"
                             checked={selectedUserIds.includes(user.id)}
@@ -881,7 +881,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           />
                         </td>
                         <td
-                          className="py-3.5 px-4 cursor-pointer"
+                          className="cursor-pointer"
                           onClick={() => {
                             if (props.onSelectUserForDetail) props.onSelectUserForDetail(user);
                           }}
@@ -889,7 +889,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           <div className="flex items-center gap-3.5">
                             <UserAvatar user={user} className="w-9 h-9 shrink-0" />
                             <div>
-                              <div className="font-normal text-content-strong text-xs group-hover:text-primary transition-colors">
+                              <div className="font-normal text-content-strong group-hover:text-primary transition-colors">
                                 {user?.displayName || user?.username}
                               </div>
                               <div className="text-[11px] text-content-muted">
@@ -904,9 +904,9 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                             </div>
                           </div>
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td>
                           <div className="flex flex-col">
-                            <span className="text-xs text-content-body">
+                            <span className="text-content-body">
                               {user.department ? getDepartmentName(user.department) : "-"}
                             </span>
                             <span className="text-[11px] text-content-muted uppercase tracking-normal">
@@ -914,7 +914,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                             </span>
                           </div>
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td>
                           <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-2">
                               <span
@@ -946,7 +946,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                             </div>
                           </div>
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td>
                           <span
                             className={cn(
                               "inline-flex font-normal text-[11px] tracking-normal uppercase px-2 py-0.5 rounded-md border",
@@ -960,7 +960,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                             {user.role}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4 text-center">
+                        <td className="text-center">
                           <div className="flex justify-center">
                             {user.status === "approved" ? (
                               <div
@@ -986,7 +986,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                             )}
                           </div>
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td>
                           <div className="flex items-center justify-center gap-1.5">
                             <button
                               // Cabang else sebelumnya membuka modal edit bawaan panel ini.

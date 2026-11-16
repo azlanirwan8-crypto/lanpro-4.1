@@ -144,7 +144,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
      `ensureDate()` jatuh ke `new Date()` untuk nilai kosong, jadi tooltipnya
      hanya ada kalau tanggalnya memang ada: baris tanpa `createdAt` tidak boleh
      terlihat dibuat hari ini. */
-  const kelasNo = cn(SEL, "py-2.5 text-center text-content-subtle font-normal align-top");
+  const kelasNo = cn(SEL, "text-center text-content-subtle font-normal align-top");
   const judulDibuat = p.createdAt
     ? t("discussion.dibuatPada", {
         date: format(ensureDate(p.createdAt), "d MMM yyyy HH:mm", {
@@ -167,7 +167,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
           1.626 px, jadi yang paling sering dibaca justru baru terlihat setelah
           menggulir horizontal. Kartu mobile sudah menaruh keduanya di atas
           sejak lama; desktop menyusul. */}
-      <td className={cn(SEL, "py-2.5 align-top")}>
+      <td className={cn(SEL, "align-top")}>
         {/* #795 — `justify-between`, bukan `gap-1` saja. Badge komentar dulu
             menempel tepat di belakang pil, sementara lebar pil mengikuti
             panjang labelnya, jadi tepi kiri badge berpindah 8,7 px antara baris
@@ -231,14 +231,14 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
       </td>
 
       {/* Concern — follow-up tidak lagi menumpang di sel ini; ia kolom sendiri (#703 butir 3). */}
-      <td className={cn(SEL, "py-2.5 align-top")}>
+      <td className={cn(SEL, "align-top")}>
         <div className="font-normal text-content-strong leading-snug whitespace-pre-wrap break-words text-justify max-h-16 overflow-y-auto">
           <Paragraf teks={p.concern} />
         </div>
       </td>
 
       {/* Notes / Keterangan — #645: TIDAK boleh dipotong. */}
-      <td className={cn(SEL, "py-2.5 align-top text-content-body font-normal")}>
+      <td className={cn(SEL, "align-top text-content-body font-normal")}>
         <div className="whitespace-pre-wrap break-words text-justify max-h-16 overflow-y-auto">
           <Paragraf teks={p.keterangan || p.comment || "-"} />
         </div>
@@ -246,7 +246,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
 
       {/* Context / Tags — #703 (B1 = a): isu nyata dari Daftar Isu, plus label
           `fitur` lama yang datanya tetap ada di basis data. */}
-      <td className={cn(SEL, "py-2.5 align-top")}>
+      <td className={cn(SEL, "align-top")}>
         {/* #800 — chip disusun SEBARIS dan dirata-lebar, bukan dialirkan.
             Terukur pada kolom 200 px (168 px isi) dengan delapan judul isu nyata
             dari tangkapan layar pemilik proyek: susun lama menghasilkan LIMA
@@ -352,7 +352,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
 
       {/* Follow-up — #703 butir 3: field-nya sudah ada dan sudah tersimpan
           (`"tindakanLanjut" TEXT`), hanya kolomnya yang belum pernah tampil. */}
-      <td className={cn(SEL, "py-2.5 align-top text-content-body font-normal")}>
+      <td className={cn(SEL, "align-top text-content-body font-normal")}>
         {p.tindakanLanjut || p.next_action ? (
           <div className="whitespace-pre-wrap break-words text-justify max-h-16 overflow-y-auto">
             <Paragraf teks={p.tindakanLanjut || p.next_action} />
@@ -367,7 +367,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
           13 Okt ("datetime kenapa di gabung dengan pic, kolom pisah saja") dan
           ia kembali berdiri sendiri. Yang menahan tinggi baris bukan tanggalnya,
           melainkan lebar kolom PIC — itu yang naik dari 150 ke 200 px. */}
-      <td className={cn(SEL, "py-2.5 align-top text-content-body font-normal")}>
+      <td className={cn(SEL, "align-top text-content-body font-normal")}>
         <div className="flex flex-wrap items-center gap-1">
           {namaPenerima.length > 0 ? (
             namaPenerima.map(({ id, nama }) => {
@@ -401,9 +401,9 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
 
       {/* Target Date — kolom sendiri, dan tetap satu baris tanggal yang bisa
           dibaca cepat. */}
-      <td className={cn(SEL, "py-2.5 align-top text-content-muted font-normal")}>
+      <td className={cn(SEL, "align-top text-content-muted font-normal")}>
         {p.targetDate ? (
-          <div className="flex items-center gap-1 text-[11px]">
+          <div className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />
             <span className="break-words">{p.targetDate}</span>
           </div>
@@ -417,9 +417,9 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
           Baris yang sudah selesai SEBELUM item ini ada tetap berbintang "-":
           tidak ada satu pun sumber yang jujur tentang kapan ia diselesaikan,
           dan menambalnya berarti mengarang data rapat orang lain. */}
-      <td className={cn(SEL, "py-2.5 align-top text-content-muted font-normal")}>
+      <td className={cn(SEL, "align-top text-content-muted font-normal")}>
         {p.tanggalUpdateStatus ? (
-          <div className="flex items-center gap-1 text-[11px]">
+          <div className="flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5 text-content-subtle shrink-0" />
             <span className="break-words">{p.tanggalUpdateStatus}</span>
           </div>
@@ -432,7 +432,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
           lengkap: tautan dan berkas bukan-gambar sebagai chip, gambar sebagai
           miniatur. Yang berhenti adalah dua kolom terpisah yang keduanya hampir
           selalu berisi "-". */}
-      <td className={cn(SEL, "py-2.5 align-top")}>
+      <td className={cn(SEL, "align-top")}>
         {tautan.length === 0 && berkas.length === 0 ? (
           kosong("-")
         ) : (
@@ -495,7 +495,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
 
       {/* #792 — sel kanan hanya menyisakan PERINTAH baris: sunting dan hapus.
           Keadaan baris (status, komentar) sudah pindah ke kolom pertama. */}
-      <td className={cn(SEL, "py-2.5 align-top")}>
+      <td className={cn(SEL, "align-top")}>
         <div className="flex flex-wrap items-center gap-1">
           {bolehSunting && (
             <button

@@ -535,7 +535,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             <thead>
               <tr className="bg-primary-surface/5 border-b border-border-divider text-[11px] font-semibold uppercase text-content-subtle">
                 {/* SELECT ALL CHECKBOX (For Admin / Users with edit access) */}
-                <th className="py-2.5 px-3 w-8 text-center" onClick={(e) => e.stopPropagation()}>
+                <th className="w-8 text-center" onClick={(e) => e.stopPropagation()}>
                   {(canUpdate || isAdminRole) && (
                     <input
                       type="checkbox"
@@ -545,14 +545,14 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                     />
                   )}
                 </th>
-                <th className="py-2.5 px-3 w-8 text-center">#</th>
-                <th className="py-2.5 px-4 min-w-[280px]">{t("qa.testScenario")}</th>
-                <th className="py-2.5 px-3 min-w-[90px] text-center">{t("qa.priority")}</th>
-                <th className="py-2.5 px-3 min-w-[180px] text-center">{t("qa.statusPic")}</th>
-                <th className="py-2.5 px-3 w-28 text-center">{t("qaTable.actions")}</th>
+                <th className="w-8 text-center">#</th>
+                <th className="min-w-[280px]">{t("qa.testScenario")}</th>
+                <th className="min-w-[90px] text-center">{t("qa.priority")}</th>
+                <th className="min-w-[180px] text-center">{t("qa.statusPic")}</th>
+                <th className="w-28 text-center">{t("qaTable.actions")}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border-faint text-xs font-normal text-content-body">
+            <tbody className="divide-y divide-border-faint font-normal text-content-body">
               {searchedCases.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="text-center py-10 text-content-subtle font-normal">
@@ -581,7 +581,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                       }`}
                     >
                       {/* Checkbox Multi-Select */}
-                      <td className="py-2.5 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                      <td className="text-center" onClick={(e) => e.stopPropagation()}>
                         {(canUpdate || isAdminRole) && (
                           <input
                             type="checkbox"
@@ -593,14 +593,14 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                       </td>
 
                       {/* Row Num */}
-                      <td className="py-2.5 px-3 text-center font-normal text-content-subtle text-xs group-hover:text-primary">
+                      <td className="text-center font-normal text-content-subtle group-hover:text-primary">
                         {tc.rowNum || idx + 1}
                       </td>
 
                       {/* Title & Linked Bug Key */}
-                      <td className="py-2.5 px-4 font-normal text-content-strong">
+                      <td className="font-normal text-content-strong">
                         <div className="flex items-center gap-2">
-                          <span className="line-clamp-1 text-xs group-hover:text-primary transition-colors">
+                          <span className="line-clamp-1 group-hover:text-primary transition-colors">
                             {tc.title}
                           </span>
                           {tc.linkedBugKey && (
@@ -616,7 +616,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                       </td>
 
                       {/* Velzon Priority Compact Pill Badge */}
-                      <td className="py-2.5 px-3 text-center">
+                      <td className="text-center">
                         <LabelChip
                           kelompok="priority"
                           nilai={tc.priority || "Medium"}
@@ -625,7 +625,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                       </td>
 
                       {/* STATUS & PIC ASSIGNEE (COMPACT SMOOTH PILL LAYOUT) */}
-                      <td className="py-2.5 px-3" onClick={(e) => e.stopPropagation()}>
+                      <td onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-center gap-1.5">
                           {/* 1. Status Dropdown Pill (ALL USERS CAN UPDATE STATUS) */}
                           <StyledDropdown
@@ -744,7 +744,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                       </td>
 
                       {/* Minimalist Action Icons */}
-                      <td className="py-2.5 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                      <td className="text-center" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => setSelectedTestCase(tc)}

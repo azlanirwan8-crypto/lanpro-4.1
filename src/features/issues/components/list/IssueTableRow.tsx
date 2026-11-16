@@ -288,12 +288,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
             ) : null}
           </td>
         )}
-        <td
-          className={cn(
-            "w-12 px-4 border-r border-border-faint/50",
-            isCompact ? "py-0.5" : "py-1.5"
-          )}
-        >
+        <td className={cn("w-12 border-r border-border-faint/50", isCompact && "py-0.5")}>
           <div className="flex items-center justify-center">
             <input
               type="checkbox"
@@ -376,7 +371,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                         setIsTaskDetailModalOpen(false);
                         setCurrentView("issueDetail" as any);
                       }}
-                      className="text-xs font-normal text-content-body hover:text-blue-600 transition-colors cursor-pointer whitespace-nowrap block truncate"
+                      className="font-normal text-content-body hover:text-blue-600 transition-colors cursor-pointer whitespace-nowrap block truncate"
                       title={`${task.title || (task as any).summary || (task as any).name || ""} — ${t(
                         "issueRow.openDetail"
                       )}`}
@@ -540,7 +535,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     </div>
                     <span
                       className={cn(
-                        "text-[11px] font-normal font-mono w-8 text-right shrink-0",
+                        "font-normal font-mono w-8 text-right shrink-0",
                         progressValue === 100
                           ? "text-emerald-600"
                           : progressValue === 75
@@ -698,7 +693,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
 
               case "updated":
                 content = (
-                  <span className="text-[11px] font-medium text-content-subtle whitespace-nowrap">
+                  <span className="font-medium text-content-subtle whitespace-nowrap">
                     {task.updatedAt
                       ? formatDistanceToNow(ensureDate(task.updatedAt), { addSuffix: true })
                       : "-"}
@@ -708,7 +703,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
 
               case "created":
                 content = (
-                  <span className="text-[11px] font-medium text-content-subtle whitespace-nowrap">
+                  <span className="font-medium text-content-subtle whitespace-nowrap">
                     {task.createdAt ? format(ensureDate(task.createdAt), "d MMM yyyy") : "-"}
                   </span>
                 );
@@ -719,8 +714,8 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
               <td
                 key={col.id}
                 className={cn(
-                  "px-4 border-r border-border-faint/50 whitespace-nowrap overflow-hidden text-ellipsis",
-                  isCompact ? "py-0.5" : "py-1.5"
+                  "border-r border-border-faint/50 whitespace-nowrap overflow-hidden text-ellipsis",
+                  isCompact && "py-0.5"
                 )}
                 style={{ width: col.width }}
               >
@@ -729,7 +724,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
             );
           })}
 
-        <td className={cn("px-2 relative", isCompact ? "py-0.5" : "py-1.5")}>
+        <td className={cn("relative", isCompact && "py-0.5")}>
           <div className="flex items-center justify-center gap-1.5">
             {/* #604 — tombol Hapus pindah ke DEPAN judul (sel "work"). */}
             <div className="relative">

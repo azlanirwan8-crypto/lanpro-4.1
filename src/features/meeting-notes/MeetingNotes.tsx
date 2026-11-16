@@ -627,47 +627,47 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
             >
               <thead>
                 <tr className={LIST_THEAD_ROW_CLASS}>
-                  <th className="py-3 px-4 w-14 text-center">{t("meetings.thNo")}</th>
+                  <th className="w-14 text-center">{t("meetings.thNo")}</th>
                   <ThSortir
                     kolom="title"
                     label={t("meetings.thTitle")}
                     sortir={sortir}
                     onSortir={pilihSortir}
-                    className="py-3 px-4 min-w-[220px] max-w-[320px]"
+                    className="min-w-[220px] max-w-[320px]"
                   />
                   <ThSortir
                     kolom="createdAt"
                     label={t("meetings.thDatetime")}
                     sortir={sortir}
                     onSortir={pilihSortir}
-                    className="py-3 px-4 w-32"
+                    className="w-32"
                   />
-                  <th className="py-3 px-4 w-28">{t("meetings.thLink")}</th>
+                  <th className="w-28">{t("meetings.thLink")}</th>
                   <ThSortir
                     kolom="fileName"
                     label={t("meetings.thDocument")}
                     sortir={sortir}
                     onSortir={pilihSortir}
-                    className="py-3 px-4 w-40"
+                    className="w-40"
                   />
                   <ThSortir
                     kolom="authorId"
                     label={t("meetings.thAuthor")}
                     sortir={sortir}
                     onSortir={pilihSortir}
-                    className="py-3 px-4 w-32"
+                    className="w-32"
                   />
                   <ThSortir
                     kolom="description"
                     label={t("meetings.thDescription")}
                     sortir={sortir}
                     onSortir={pilihSortir}
-                    className="py-3 px-4 min-w-[220px] max-w-[320px]"
+                    className="min-w-[220px] max-w-[320px]"
                   />
-                  <th className="py-3 px-4 w-28 text-center">{t("meetings.thAction")}</th>
+                  <th className="w-28 text-center">{t("meetings.thAction")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-faint text-xs text-content-body">
+              <tbody className="divide-y divide-border-faint text-content-body">
                 {paginatedMeetings.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="text-center py-16 text-content-subtle">
@@ -702,10 +702,10 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                         }}
                         className="hover:bg-surface-sunken/70 transition-colors duration-200 group cursor-pointer"
                       >
-                        <td className="py-3 px-4 text-center text-content-subtle">
+                        <td className="text-center text-content-subtle">
                           {String(srNo).padStart(2, "0")}
                         </td>
-                        <td className="py-3 px-4 font-normal text-content group-hover:text-primary transition-colors">
+                        <td className="font-normal text-content group-hover:text-primary transition-colors">
                           {/* #647 — empat NILAI DATA di layar ini dipotong dan
                               tidak bisa dibuka: judul (`line-clamp-1`), nama
                               berkas rekaman (`truncate max-w-[140px]`), nama
@@ -719,13 +719,13 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                             {meeting.title}
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-content-muted">
+                        <td className="text-content-muted">
                           <div className="flex items-center gap-1.5">
                             <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />
                             <span>{formatDate(meeting.createdAt)}</span>
                           </div>
                         </td>
-                        <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
+                        <td onClick={(e) => e.stopPropagation()}>
                           {meeting.meetingLink ? (
                             <a
                               href={
@@ -747,7 +747,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                             </span>
                           )}
                         </td>
-                        <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
+                        <td onClick={(e) => e.stopPropagation()}>
                           {meeting.fileName ? (
                             <button
                               onClick={() => handleDownloadMeeting(meeting.id!, meeting.fileName!)}
@@ -761,7 +761,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                             <span className="text-content-subtle italic text-xs">—</span>
                           )}
                         </td>
-                        <td className="py-3 px-4 text-content-body">
+                        <td className="text-content-body">
                           <div className="flex items-center gap-2">
                             <UserAvatar
                               uid={meeting.authorId}
@@ -772,7 +772,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                             <span className="whitespace-nowrap">{author.name}</span>
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-content-muted font-normal">
+                        <td className="text-content-muted font-normal">
                           {/* #647 — keterangan rapat adalah paragraf; satu baris
                               dengan elipsis menyembunyikan sisanya tanpa cara
                               membukanya. Sama seperti #645. */}
@@ -784,7 +784,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                             )}
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-center" onClick={(e) => e.stopPropagation()}>
+                        <td className="text-center" onClick={(e) => e.stopPropagation()}>
                           <div className="inline-flex items-center justify-center gap-1">
                             <button
                               onClick={() => {

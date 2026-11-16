@@ -166,15 +166,21 @@ describe("#715 — papan ikut keputusan garis #699 dan #678b", () => {
     }
   });
 
-  it("kepala tabel memakai ritme kit rumah, bukan ukuran sendiri", () => {
+  it("kepala dan sel tidak membawa padding/ukuran sendiri — standar global (#865)", () => {
     const th = blok(baca(KEPALA), "const th =", "return (");
-    // #824 — ritme kepala tabel rumah: 11px, 600. Sebelumnya 10px/400 ditulis
-    // sendiri di sini sementara `th` dasar `src/index.css` 10px/600.
-    expect(th).toContain("text-[11px]");
-    expect(th).toContain("font-semibold");
-    expect(th).toContain("py-2.5");
+    // Ukuran sel diwarisi dari standar global, bukan kit per fitur.
+    expect(th).not.toMatch(/\b(?:p|px|py|pt|pb|pl|pr)-[\d.]/);
+    expect(th).not.toContain("text-[11px]");
+    expect(th).not.toContain("font-semibold");
     expect(th).not.toContain("text-xs");
-    // Sel data ikut menipis satu tingkat supaya kepala dan badan satu ritme.
-    expect(baca(BARIS).match(/cn\(SEL, "py-2\.5/g)?.length).toBeGreaterThanOrEqual(9);
+    const sel = blok(baca(KEPALA), "export const SEL", ";");
+    expect(sel).not.toMatch(/\b(?:p|px|py|pt|pb|pl|pr)-[\d.]/);
+    const baris = baca(BARIS);
+    expect(baris.match(/cn\(SEL, "/g)?.length).toBeGreaterThanOrEqual(10);
+    expect(baris).not.toContain("py-2.5");
+    for (const penanda of ["{p.targetDate ?", "{p.tanggalUpdateStatus ?"]) {
+      const tanggal = blok(baris, penanda, "</td>");
+      expect(tanggal).not.toMatch(/text-(?:\[\d+px\]|xs\b|sm\b)/);
+    }
   });
 });

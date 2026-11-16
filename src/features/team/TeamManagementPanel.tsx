@@ -582,12 +582,12 @@ export const TeamManagementPanel = ({
                 <ResponsiveTable className="w-full text-left" scroll={false}>
                   <thead>
                     <tr className={LIST_THEAD_ROW_CLASS}>
-                      <th className="px-5 py-3">{t("team.member")}</th>
-                      <th className="px-5 py-3">{t("team.role")}</th>
-                      <th className="px-5 py-3 text-center">{t("team.assignedTasks")}</th>
-                      <th className="px-5 py-3 text-center">{t("team.completed")}</th>
-                      <th className="px-5 py-3 text-center">{t("team.status")}</th>
-                      <th className="px-5 py-3 text-right">{t("team.action")}</th>
+                      <th>{t("team.member")}</th>
+                      <th>{t("team.role")}</th>
+                      <th className="text-center">{t("team.assignedTasks")}</th>
+                      <th className="text-center">{t("team.completed")}</th>
+                      <th className="text-center">{t("team.status")}</th>
+                      <th className="text-right">{t("team.action")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border-faint">
@@ -614,7 +614,7 @@ export const TeamManagementPanel = ({
                           key={person.uid || i}
                           className="hover:bg-surface-sunken/60 transition-colors"
                         >
-                          <td className="px-5 py-3.5">
+                          <td>
                             <div className="flex items-center gap-3">
                               <div className="relative">
                                 <UserAvatar user={person} className="w-9 h-9" />
@@ -623,16 +623,14 @@ export const TeamManagementPanel = ({
                                 />
                               </div>
                               <div>
-                                <div className="font-medium text-content-strong text-xs">
-                                  {name}
-                                </div>
+                                <div className="font-medium text-content-strong">{name}</div>
                                 <div className="text-[11px] text-content-subtle">
                                   {person?.email || "@" + (person?.username || person.uid)}
                                 </div>
                               </div>
                             </div>
                           </td>
-                          <td className="px-5 py-3.5">
+                          <td>
                             {bolehUbahPeran && !isOwner ? (
                               <div className="w-[140px]">
                                 <CommonStyledDropdown
@@ -655,13 +653,13 @@ export const TeamManagementPanel = ({
                               </span>
                             )}
                           </td>
-                          <td className="px-5 py-3.5 text-center font-medium text-content-strong text-xs">
+                          <td className="text-center font-medium text-content-strong">
                             {userAssignedTasks.length}
                           </td>
-                          <td className="px-5 py-3.5 text-center font-medium text-emerald-600 text-xs">
+                          <td className="text-center font-medium text-emerald-600">
                             {completedTasks.length}
                           </td>
-                          <td className="px-5 py-3.5 text-center">
+                          <td className="text-center">
                             <span
                               className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-normal ${
                                 person.isPending
@@ -675,7 +673,7 @@ export const TeamManagementPanel = ({
                               {person.isPending ? "Pending" : "Active"}
                             </span>
                           </td>
-                          <td className="px-5 py-3.5 text-right">
+                          <td className="text-right">
                             <div className="flex items-center justify-end gap-2">
                               <button
                                 onClick={() => setSelectedProfileUser(person)}
