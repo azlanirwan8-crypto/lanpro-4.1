@@ -152,27 +152,27 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
         <ResponsiveTable className="w-full text-left border-collapse min-w-[880px]">
           <thead>
             <tr className={LIST_THEAD_ROW_CLASS}>
-              <th className="py-3 px-4 w-14 text-center">No</th>
+              <th className="w-14 text-center">No</th>
               <ThSortir
                 kolom="name"
                 label={t("flowchart.thTitle")}
                 sortir={sortir}
                 onSortir={onSortir}
-                className="py-3 px-4 min-w-[180px] max-w-[280px]"
+                className="min-w-[180px] max-w-[280px]"
               />
               <ThSortir
                 kolom="category"
                 label={t("flowchart.thCategory")}
                 sortir={sortir}
                 onSortir={onSortir}
-                className="py-3 px-4 w-36"
+                className="w-36"
               />
               <ThSortir
                 kolom="description"
                 label={t("flowchart.thDescription")}
                 sortir={sortir}
                 onSortir={onSortir}
-                className="py-3 px-4 min-w-[180px] max-w-[280px]"
+                className="min-w-[180px] max-w-[280px]"
               />
               {/* #773 — w-44 terlalu sempit untuk judul isu yang masih tergolong
                   pendek: "Setting & Services" dengan prefiks kuncinya (±150 px +
@@ -189,23 +189,23 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                 label={t("flowchart.thLinkedIssue")}
                 sortir={sortir}
                 onSortir={onSortir}
-                className="py-3 px-4 w-56"
+                className="w-56"
               />
               <ThSortir
                 kolom="author"
                 label={t("flowchart.thAuthor")}
                 sortir={sortir}
                 onSortir={onSortir}
-                className="py-3 px-4 w-40"
+                className="w-40"
               />
               <ThSortir
                 kolom="lastEditedAt"
                 label={t("wiki.thLastUpdated")}
                 sortir={sortir}
                 onSortir={onSortir}
-                className="py-3 px-4 w-36"
+                className="w-36"
               />
-              <th className="py-3 px-4 w-28 text-center">{t("flowchart.thAction")}</th>
+              <th className="w-28 text-center">{t("flowchart.thAction")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border-faint text-xs text-content-body">
@@ -257,7 +257,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                     }}
                     className="hover:bg-surface-sunken/70 transition-colors duration-200 group cursor-pointer"
                   >
-                    <td className="py-3 px-4 text-center text-content-subtle font-normal whitespace-nowrap">
+                    <td className="text-center text-content-subtle font-normal whitespace-nowrap">
                       {String(srNo).padStart(2, "0")}
                     </td>
                     {/* #647 — `h-14` di baris ini dan `truncate` pada tiga sel
@@ -278,17 +278,17 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                         `whitespace-normal` kini ditulis EKSPLISIT di setiap sel
                         data yang melebar, jadi izin-wrap tidak lagi bergantung
                         pada apa yang diwarisi dari baris. */}
-                    <td className="py-3 px-4 font-normal text-content group-hover:text-primary transition-colors max-w-[280px] whitespace-normal break-words text-justify">
+                    <td className="font-normal text-content group-hover:text-primary transition-colors max-w-[280px] whitespace-normal break-words text-justify">
                       {fw.name}
                     </td>
-                    <td className="py-3 px-4 whitespace-nowrap">
+                    <td className="whitespace-nowrap">
                       <LabelChip
                         kelompok="jenis_dokumen"
                         nilai={fw.category}
                         kosong={t("flowchart.uncategorized")}
                       />
                     </td>
-                    <td className="py-3 px-4 text-content-muted font-normal max-w-[280px] whitespace-normal break-words text-justify">
+                    <td className="text-content-muted font-normal max-w-[280px] whitespace-normal break-words text-justify">
                       {fw.description ? (
                         fw.description
                       ) : (
@@ -297,7 +297,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                         </span>
                       )}
                     </td>
-                    <td className="py-3 px-4 whitespace-nowrap">
+                    <td className="whitespace-nowrap">
                       {linkedIsu ? (
                         /* #797 — span biasa menjadi tombol sungguhan. Bukan
                            kosmetik: onClick tidak bisa dijangkau papan ketik di
@@ -337,7 +337,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                         <span className="text-content-subtle font-normal text-xs">-</span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-content-body font-normal whitespace-nowrap">
+                    <td className="text-content-body font-normal whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         {/* #770 — lingkaran ini dulu punya kelas warnanya sendiri
                             (`bg-primary-surface/10 text-primary`), jadi rona
@@ -347,11 +347,11 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                         <span className="whitespace-nowrap">{createdBy}</span>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-content-muted font-normal whitespace-nowrap">
+                    <td className="text-content-muted font-normal whitespace-nowrap">
                       {lastEditedAt}
                     </td>
                     <td
-                      className="py-3 px-4 text-center whitespace-nowrap"
+                      className="text-center whitespace-nowrap"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="inline-flex items-center justify-center gap-1.5">

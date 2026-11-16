@@ -295,31 +295,31 @@ export const BackupPanel = (_props: {
           </div>
 
           <div className="hidden sm:block overflow-x-auto">
-            <ResponsiveTable className="w-full text-left border-collapse text-xs" scroll={false}>
-              <thead className="bg-surface-muted/70 text-content-body border-b border-border-divider/80 font-semibold uppercase text-[11px]">
+            <ResponsiveTable className="w-full text-left border-collapse" scroll={false}>
+              <thead className="bg-surface-muted/70 text-content-body border-b border-border-divider/80">
                 <tr>
-                  <th className="py-2.5 px-3.5">{t("backup.exportTime")}</th>
-                  <th className="py-2.5 px-3.5">{t("backup.fileName")}</th>
-                  <th className="py-2.5 px-3.5">{t("backupPanel.size")}</th>
-                  <th className="py-2.5 px-3.5">{t("backup.processStatus")}</th>
-                  <th className="py-2.5 px-3.5 text-right">{t("backupPanel.action")}</th>
+                  <th>{t("backup.exportTime")}</th>
+                  <th>{t("backup.fileName")}</th>
+                  <th>{t("backupPanel.size")}</th>
+                  <th>{t("backup.processStatus")}</th>
+                  <th className="text-right">{t("backupPanel.action")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-faint">
                 {exportHistory.length > 0 ? (
                   exportHistory.map((item) => (
                     <tr key={item.id} className="hover:bg-surface-sunken/80 transition-colors">
-                      <td className="py-2.5 px-3.5 text-content-secondary flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-content-subtle" />
-                        {format(item.createdAt, "dd MMM yyyy, HH:mm:ss")}
+                      <td className="text-content-secondary">
+                        <span className="flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5 text-content-subtle" />
+                          {format(item.createdAt, "dd MMM yyyy, HH:mm:ss")}
+                        </span>
                       </td>
-                      <td className="py-2.5 px-3.5 font-mono text-content-body font-normal">
-                        {item.filename}
-                      </td>
-                      <td className="py-2.5 px-3.5 text-content-secondary font-mono">
+                      <td className="font-mono text-content-body font-normal">{item.filename}</td>
+                      <td className="text-content-secondary font-mono">
                         {item.status === "completed" ? formatSize(item.sizeBytes) : "-"}
                       </td>
-                      <td className="py-2.5 px-3.5">
+                      <td>
                         {item.status === "processing" && (
                           <div className="space-y-1 w-48">
                             <div className="flex justify-between text-[11px] text-amber-700 font-medium">
@@ -350,7 +350,7 @@ export const BackupPanel = (_props: {
                           </span>
                         )}
                       </td>
-                      <td className="py-2.5 px-3.5 text-right space-x-1.5">
+                      <td className="text-right space-x-1.5">
                         {item.status === "completed" && (
                           <button
                             onClick={() => handleDownloadItem(item)}

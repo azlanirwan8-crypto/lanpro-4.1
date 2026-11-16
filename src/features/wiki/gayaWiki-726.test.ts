@@ -136,20 +136,20 @@ describe("data tampil penuh di tabel DOCUMENTATION (#645 -> #726)", () => {
 });
 
 describe("ritme dan chrome (#726)", () => {
-  it("kepala tabel memakai ritme Velzon yang sama dengan sel datanya", () => {
+  it("kepala dan sel mengikuti standar global, bukan ritme sendiri (#865)", () => {
     const s = isi(DAFTAR);
-    // #772: sebagian kepala kini dirender lewat ThSortir, jadi ritme harus
-    // dibaca dari keduanya — menghitung `<th>` saja membuat penjaga ini tetap
-    // hijau sementara kelas sel sebenarnya sudah berpindah tempat.
-    const th = [...s.matchAll(/<th className="([^"]*)"/g)].map((m) => m[1]);
-    const thSortir = [...s.matchAll(/<ThSortir[\s\S]{0,220}?className="([^"]*)"/g)].map(
-      (m) => m[1]
-    );
-    const semua = [...th, ...thSortir];
-    expect(semua.length).toBeGreaterThanOrEqual(7);
+    // Sel colSpan adalah keadaan kosong/galat, bukan baris data.
+    const kepala = [...s.matchAll(/<(?:th|ThSortir)\b[^>]*>/g)].map((m) => m[0]);
+    const data = [...s.matchAll(/<td\b[^>]*>/g)]
+      .map((m) => m[0])
+      .filter((tag) => !/\bcolSpan=/.test(tag));
+    expect(kepala).toHaveLength(7);
+    expect(data).toHaveLength(7);
+    const semua = [...kepala, ...data].map((tag) => /className="([^"]*)"/.exec(tag)?.[1] ?? "");
     for (const k of semua) {
-      expect(k).toContain("py-2.5");
-      expect(k).not.toContain("py-3 ");
+      expect(k).not.toMatch(/\b(?:p|px|py|pt|pb|pl|pr)-[\d.]/);
+      expect(k).not.toMatch(/\btext-(?:xs|sm|2xs|3xs)\b/);
+      expect(k).not.toMatch(/text-\[\d+px\]/);
     }
     // #862 — garis antar baris memakai token PEMISAH; token kontrol masih
     // dipertahankan untuk batas kolom isian, bukan untuk garis tabel.

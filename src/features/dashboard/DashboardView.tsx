@@ -1271,15 +1271,15 @@ export function DashboardView(props: DashboardViewProps) {
                 <ResponsiveTable className="w-full text-left border-collapse" scroll={false}>
                   <thead>
                     <tr className="border-b border-border-faint text-[11px] font-semibold uppercase text-content-subtle">
-                      <th className="py-2.5 px-2">{t("dashboard.thMember")}</th>
-                      <th className="py-2.5 px-2">{t("dashboard.thRunning")}</th>
-                      <th className="py-2.5 px-2">{t("dashboard.thDone")}</th>
-                      <th className="py-2.5 px-2">{t("dashboard.thAllocated")}</th>
-                      <th className="py-2.5 px-2">{t("dashboard.thLoadStatus")}</th>
-                      <th className="py-2.5 px-2 text-right">{t("dashboard.thProgress")}</th>
+                      <th>{t("dashboard.thMember")}</th>
+                      <th>{t("dashboard.thRunning")}</th>
+                      <th>{t("dashboard.thDone")}</th>
+                      <th>{t("dashboard.thAllocated")}</th>
+                      <th>{t("dashboard.thLoadStatus")}</th>
+                      <th className="text-right">{t("dashboard.thProgress")}</th>
                     </tr>
                   </thead>
-                  <tbody className="text-xs divide-y divide-border-faint text-content-body ">
+                  <tbody className="divide-y divide-border-faint text-content-body">
                     {workloadData.length > 0 ? (
                       workloadData.map((user, idx) => {
                         const totalUserTasks = user.Done + user.Active;
@@ -1316,7 +1316,7 @@ export function DashboardView(props: DashboardViewProps) {
 
                         return (
                           <tr key={idx} className="hover:bg-surface-sunken transition">
-                            <td className="py-3 px-2">
+                            <td>
                               <div className="flex items-center gap-2.5">
                                 {/* #776 — lingkaran ini dibuat sendiri (`slice(0,2)`
                                     + palet keras), jadi inisialnya "MO" untuk
@@ -1327,17 +1327,13 @@ export function DashboardView(props: DashboardViewProps) {
                                 </span>
                               </div>
                             </td>
-                            <td className="py-3 px-2 font-medium text-info-text">{user.Active}</td>
-                            <td className="py-3 px-2 font-medium text-success-text">{user.Done}</td>
-                            <td className="py-3 px-2 font-medium text-content-strong ">
-                              {totalUserTasks}
-                            </td>
-                            <td className="py-3 px-2">{capacityBadge}</td>
-                            <td className="py-3 px-2 text-right">
+                            <td className="font-medium text-info-text">{user.Active}</td>
+                            <td className="font-medium text-success-text">{user.Done}</td>
+                            <td className="font-medium text-content-strong ">{totalUserTasks}</td>
+                            <td>{capacityBadge}</td>
+                            <td className="text-right">
                               <div className="flex items-center justify-end gap-2">
-                                <span className="text-[11px] font-medium text-content-muted w-9">
-                                  {pct}%
-                                </span>
+                                <span className="font-medium text-content-muted w-9">{pct}%</span>
                                 <div className="w-24 h-2 bg-surface-muted rounded-full overflow-hidden">
                                   <div
                                     className="h-full bg-success rounded-full transition-all duration-500 motion-reduce:transition-none"

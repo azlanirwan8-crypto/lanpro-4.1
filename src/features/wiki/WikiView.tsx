@@ -975,46 +975,46 @@ export const WikiView: React.FC<WikiViewProps> = ({
             >
               <thead>
                 <tr className={LIST_THEAD_ROW_CLASS}>
-                  <th className="px-4 py-2.5 w-14 text-center">No</th>
+                  <th className="w-14 text-center">No</th>
                   <ThSortir
                     kolom="title"
                     label={t("wiki.thTitle")}
                     sortir={sortir}
                     onSortir={pilihSortir}
-                    className="px-4 py-2.5 min-w-[200px] max-w-[320px]"
+                    className="min-w-[200px] max-w-[320px]"
                   />
                   <ThSortir
                     kolom="type"
                     label={t("wiki.thCategory")}
                     sortir={sortir}
                     onSortir={pilihSortir}
-                    className="px-4 py-2.5 w-44"
+                    className="w-44"
                   />
                   <ThSortir
                     kolom="fileName"
                     label={t("wiki.thFile")}
                     sortir={sortir}
                     onSortir={pilihSortir}
-                    className="px-4 py-2.5 w-44"
+                    className="w-44"
                   />
                   <ThSortir
                     kolom="createdBy"
                     label={t("meetings.thAuthor")}
                     sortir={sortir}
                     onSortir={pilihSortir}
-                    className="px-4 py-2.5 w-40"
+                    className="w-40"
                   />
                   <ThSortir
                     kolom="createdAt"
                     label={t("wiki.thLastUpdated")}
                     sortir={sortir}
                     onSortir={pilihSortir}
-                    className="px-4 py-2.5 w-36"
+                    className="w-36"
                   />
-                  <th className="px-4 py-2.5 w-28 text-center">{t("discussion.action")}</th>
+                  <th className="w-28 text-center">{t("discussion.action")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-divider text-xs text-content-body">
+              <tbody className="divide-y divide-border-divider text-content-body">
                 {galatDaftar && currentDocs.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="text-center py-16 text-content-subtle">
@@ -1091,13 +1091,13 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         }}
                         className="hover:bg-surface-sunken/80 transition-colors duration-150 group cursor-pointer"
                       >
-                        <td className="py-2.5 px-4 text-center text-content-subtle whitespace-nowrap">
+                        <td className="text-center text-content-subtle whitespace-nowrap">
                           {String(srNo).padStart(2, "0")}
                         </td>
-                        <td className="py-2.5 px-4 font-normal text-content group-hover:text-primary transition-colors max-w-[320px] whitespace-normal break-words text-justify">
+                        <td className="font-normal text-content group-hover:text-primary transition-colors max-w-[320px] whitespace-normal break-words text-justify">
                           <div title={doc.title}>{doc.title}</div>
                         </td>
-                        <td className="py-2.5 px-4">
+                        <td>
                           {/* #726 verifikasi visual — chip kategori SATU baris: label
                               jenis_dokumen adalah kosakata terkendali dan wadah tabel
                               sudah overflow-x-auto, jadi kolom melebar mengikuti isi
@@ -1109,7 +1109,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                             className="whitespace-nowrap"
                           />
                         </td>
-                        <td className="py-2.5 px-4" onClick={(e) => e.stopPropagation()}>
+                        <td onClick={(e) => e.stopPropagation()}>
                           {doc.fileName ? (
                             <button
                               onClick={() => handleDownload(doc.id, doc.fileName || undefined)}
@@ -1128,7 +1128,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                             <span className="text-content-subtle italic text-xs">—</span>
                           )}
                         </td>
-                        <td className="py-2.5 px-4 text-content-body">
+                        <td className="text-content-body">
                           <div className="flex items-center gap-2">
                             <UserAvatar
                               uid={doc.createdBy}
@@ -1141,11 +1141,8 @@ export const WikiView: React.FC<WikiViewProps> = ({
                             </span>
                           </div>
                         </td>
-                        <td className="py-2.5 px-4 text-content-muted">{lastEdited}</td>
-                        <td
-                          className="py-2.5 px-4 text-center"
-                          onClick={(e) => e.stopPropagation()}
-                        >
+                        <td className="text-content-muted">{lastEdited}</td>
+                        <td className="text-center" onClick={(e) => e.stopPropagation()}>
                           <div className="inline-flex items-center justify-center gap-1">
                             <button
                               onClick={() => {

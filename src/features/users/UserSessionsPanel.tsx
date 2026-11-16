@@ -408,25 +408,19 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
             <table className="w-full text-left border-collapse table-fixed">
               <thead>
                 <tr className="bg-primary-surface/5 border-b border-border-divider text-content-subtle leading-tight [&>th]:sticky [&>th]:top-0 [&>th]:bg-surface-sunken">
-                  <th className="py-2.5 px-3 w-[22%]">{t("sessionMonitor.colUser", "PENGGUNA")}</th>
-                  <th className="py-2.5 px-3 w-[16%]">
-                    {t("sessionMonitor.colIp", "IP & GEOLOKASI")}
-                  </th>
-                  <th className="py-2.5 px-3 w-[26%]">
+                  <th className="w-[22%]">{t("sessionMonitor.colUser", "PENGGUNA")}</th>
+                  <th className="w-[16%]">{t("sessionMonitor.colIp", "IP & GEOLOKASI")}</th>
+                  <th className="w-[26%]">
                     {t("sessionMonitor.colDevice", "PERANGKAT / BROWSER")}
                   </th>
-                  <th className="py-2.5 px-3 w-[18%]">
-                    {t("sessionMonitor.colLogin", "WAKTU LOGIN")}
-                  </th>
-                  <th className="py-2.5 px-3 w-[12%]">
+                  <th className="w-[18%]">{t("sessionMonitor.colLogin", "WAKTU LOGIN")}</th>
+                  <th className="w-[12%]">
                     {t("sessionMonitor.colStatus", "STATUS / WAKTU LOGOUT")}
                   </th>
-                  <th className="py-2.5 px-3 w-[6%] text-center">
-                    {t("sessionMonitor.colAction", "AKSI")}
-                  </th>
+                  <th className="w-[6%] text-center">{t("sessionMonitor.colAction", "AKSI")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-divider text-xs">
+              <tbody className="divide-y divide-border-divider">
                 {loading ? (
                   <tr>
                     <td colSpan={6} className="py-12 text-center text-content-subtle">
@@ -460,7 +454,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                         className="hover:bg-surface-hover/70 transition-colors group"
                       >
                         {/* Pengguna */}
-                        <td className="py-3.5 px-4">
+                        <td>
                           <div className="flex items-center gap-3">
                             <UserAvatar
                               name={session.displayName || session.username || "User"}
@@ -468,7 +462,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                               size="md"
                             />
                             <div>
-                              <span className="font-normal text-content-strong text-sm block">
+                              <span className="font-normal text-content-strong block">
                                 {session.displayName ||
                                   session.username ||
                                   t("sessionMonitor.unnamed", "Tanpa Nama")}
@@ -481,11 +475,11 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                         </td>
 
                         {/* IP & Geolokasi */}
-                        <td className="py-2.5 px-3">
+                        <td>
                           <div className="flex items-start gap-2">
                             <Globe className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                             <div>
-                              <span className="font-normal font-mono text-xs text-content-strong block">
+                              <span className="font-normal font-mono text-content-strong block">
                                 {session.ipAddress || "127.0.0.1"}
                               </span>
                               <span className="text-xs text-content-subtle flex items-center gap-1 mt-0.5">
@@ -519,7 +513,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                         </td>
 
                         {/* Perangkat & Browser */}
-                        <td className="py-2.5 px-3">
+                        <td>
                           <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-lg bg-surface-sunken border border-border-subtle flex items-center justify-center text-content-base shrink-0">
                               {isMobile ? (
@@ -529,7 +523,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                               )}
                             </div>
                             <div className="min-w-0">
-                              <span className="text-xs font-normal text-content-strong block truncate">
+                              <span className="font-normal text-content-strong block truncate">
                                 {session.browser || "Unknown Browser"}
                               </span>
                               <span
@@ -546,15 +540,15 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                         </td>
 
                         {/* Waktu Login */}
-                        <td className="py-2.5 px-3">
-                          <div className="text-xs text-content-strong flex items-center gap-1.5 whitespace-nowrap">
+                        <td>
+                          <div className="text-content-strong flex items-center gap-1.5 whitespace-nowrap">
                             <Clock className="w-3.5 h-3.5 text-content-subtle" />
                             <span>{formatDate(session.loginAt)}</span>
                           </div>
                         </td>
 
                         {/* Status / Waktu Logout */}
-                        <td className="py-2 px-3 whitespace-nowrap">
+                        <td className="whitespace-nowrap">
                           {isActive ? (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -567,7 +561,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                                 <XCircle className="w-2.5 h-2.5" />
                                 {t("sessionMonitor.statusForceLogout", "Diputus Admin")}
                               </span>
-                              <span className="text-[10px] text-content-subtle block mt-0.5">
+                              <span className="text-content-subtle block mt-0.5">
                                 {formatDate(session.logoutAt)}
                               </span>
                             </div>
@@ -577,7 +571,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                                 <LogOut className="w-2.5 h-2.5 text-content-subtle" />
                                 {t("sessionMonitor.statusLoggedOut", "Sudah Keluar")}
                               </span>
-                              <span className="text-[10px] text-content-subtle block mt-0.5">
+                              <span className="text-content-subtle block mt-0.5">
                                 {formatDate(session.logoutAt)}
                               </span>
                             </div>
@@ -585,7 +579,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                         </td>
 
                         {/* Aksi */}
-                        <td className="py-2.5 px-3 text-center">
+                        <td className="text-center">
                           <div className="flex items-center justify-center gap-1.5">
                             {/* Activity Log Viewer Button */}
                             <button
@@ -1000,21 +994,15 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                             {/* Visual Diff Table Viewer (Ramah Manusia ala Jira) */}
                             {activeKeys.length > 0 ? (
                               <div className="mt-3 overflow-x-auto border border-border-subtle rounded-lg bg-surface-sunken">
-                                <table className="w-full text-left text-xs">
+                                <table className="w-full text-left">
                                   <thead>
                                     <tr className="border-b border-border-divider text-[11px] font-normal uppercase tracking-normal text-content-subtle bg-surface/50">
-                                      <th className="py-1.5 px-3">
-                                        {t("sessionMonitor.fieldHeader", "Properti")}
-                                      </th>
-                                      <th className="py-1.5 px-3">
-                                        {t("sessionMonitor.beforeHeader", "Nilai Sebelum")}
-                                      </th>
-                                      <th className="py-1.5 px-3">
-                                        {t("sessionMonitor.afterHeader", "Nilai Sesudah")}
-                                      </th>
+                                      <th>{t("sessionMonitor.fieldHeader", "Properti")}</th>
+                                      <th>{t("sessionMonitor.beforeHeader", "Nilai Sebelum")}</th>
+                                      <th>{t("sessionMonitor.afterHeader", "Nilai Sesudah")}</th>
                                     </tr>
                                   </thead>
-                                  <tbody className="divide-y divide-border-divider font-sans text-xs">
+                                  <tbody className="divide-y divide-border-divider font-sans">
                                     {activeKeys.map((key) => {
                                       const oldVal = formatDiffVal(
                                         oldObj ? oldObj[key] : undefined
@@ -1025,13 +1013,13 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                                       const humanLabel = humanFieldMap[key] || key;
                                       return (
                                         <tr key={key} className="hover:bg-surface/40">
-                                          <td className="py-2 px-3 font-normal text-content-strong">
+                                          <td className="font-normal text-content-strong">
                                             {humanLabel}
                                           </td>
-                                          <td className="py-2 px-3 text-rose-600 bg-rose-500/5 font-normal">
+                                          <td className="text-rose-600 bg-rose-500/5 font-normal">
                                             {oldVal}
                                           </td>
-                                          <td className="py-2 px-3 text-emerald-600 bg-emerald-500/5 font-normal">
+                                          <td className="text-emerald-600 bg-emerald-500/5 font-normal">
                                             {newVal}
                                           </td>
                                         </tr>

@@ -509,7 +509,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                       <thead>
                         <tr className={styles.tableHeader}>
                           {canReorder && <th className="w-8 px-1 text-center bg-surface-sunken" />}
-                          <th className={cn("w-12 px-4", isCompact ? "py-1" : "py-2.5")}>
+                          <th className={cn("w-12", isCompact && "py-1")}>
                             <div className="flex justify-center">
                               <input
                                 type="checkbox"
@@ -527,10 +527,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                             .map((col: any) => (
                               <th
                                 key={col.id}
-                                className={cn(
-                                  styles.tableHeaderCell,
-                                  isCompact ? "py-1 text-[11px]" : "py-2.5"
-                                )}
+                                className={cn(styles.tableHeaderCell, isCompact && "py-1")}
                                 style={{ width: col.width }}
                               >
                                 <div className="flex items-center justify-between">
@@ -541,8 +538,8 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                             ))}
                           <th
                             className={cn(
-                              "w-12 px-2 sticky right-0 bg-surface-sunken z-[30]",
-                              isCompact ? "py-1" : "py-2.5"
+                              "w-12 sticky right-0 bg-surface-sunken z-[30]",
+                              isCompact && "py-1"
                             )}
                           >
                             <List className="w-4 h-4 text-content-subtle mx-auto" />

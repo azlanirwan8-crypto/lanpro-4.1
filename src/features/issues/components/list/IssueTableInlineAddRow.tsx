@@ -120,8 +120,8 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
       )}
       <td
         className={cn(
-          "px-4 border-r border-border-faint/50 border-y-2 border-blue-500",
-          isCompact ? "py-0.5" : "py-1.5"
+          "border-r border-border-faint/50 border-y-2 border-blue-500",
+          isCompact && "py-0.5"
         )}
       />
       {issueTableColumns

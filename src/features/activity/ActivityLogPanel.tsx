@@ -161,10 +161,10 @@ export const ActivityLogPanel = ({
                 >
                   <thead>
                     <tr className="bg-primary-surface/5 border-b border-border-divider text-content-subtle whitespace-nowrap">
-                      <th className="px-8 py-5">{t("activityLog.timestamp")}</th>
-                      <th className="px-8 py-5">{t("activityLog.eventSignature")}</th>
-                      <th className="px-8 py-5">{t("activityLog.subjectActor")}</th>
-                      <th className="px-8 py-5 text-right">{t("activityLog.auditTrailId")}</th>
+                      <th>{t("activityLog.timestamp")}</th>
+                      <th>{t("activityLog.eventSignature")}</th>
+                      <th>{t("activityLog.subjectActor")}</th>
+                      <th className="text-right">{t("activityLog.auditTrailId")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border-faint">
@@ -175,15 +175,15 @@ export const ActivityLogPanel = ({
                           key={log.id}
                           className="hover:bg-surface-sunken border-b border-border-faint transition-colors group cursor-default"
                         >
-                          <td className="px-8 py-5 whitespace-nowrap align-top">
-                            <div className="text-sm font-normal text-content-strong tabular-nums tracking-tight">
+                          <td className="whitespace-nowrap align-top">
+                            <div className="font-normal text-content-strong tabular-nums tracking-tight">
                               {safeFormat(log.createdAt, "MMM dd, yyyy")}
                             </div>
                             <div className="text-[11px] font-normal text-content-subtle tabular-nums uppercase mt-1 tracking-normal">
                               {safeFormat(log.createdAt, "HH:mm:ss.SSS")}
                             </div>
                           </td>
-                          <td className="px-8 py-5 w-[45%]">
+                          <td className="w-[45%]">
                             <div className="flex items-start gap-4">
                               {(() => {
                                 const a = (log.action || "").toLowerCase();
@@ -242,7 +242,7 @@ export const ActivityLogPanel = ({
                                           {t("activityLog.sourceUi")}
                                         </span>
                                       </div>
-                                      <div className="font-mono text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle p-2.5 rounded-lg shadow-inner whitespace-pre-wrap word-break">
+                                      <div className="font-mono font-normal text-content-body bg-surface-sunken border border-border-subtle p-2.5 rounded-lg shadow-inner whitespace-pre-wrap word-break">
                                         <span className="text-content-subtle select-none mr-2">
                                           {">"}
                                         </span>
@@ -254,7 +254,7 @@ export const ActivityLogPanel = ({
                               })()}
                             </div>
                           </td>
-                          <td className="px-8 py-5 min-w-[200px]">
+                          <td className="min-w-[200px]">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 shrink-0 shadow-inner border-2 border-surface rounded-full bg-surface-muted flex items-center justify-center relative ring-1 ring-border-subtle">
                                 <UserAvatar
@@ -266,7 +266,7 @@ export const ActivityLogPanel = ({
                                 <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-surface rounded-full"></div>
                               </div>
                               <div className="flex flex-col min-w-0">
-                                <span className="text-[13px] font-normal text-content-strong truncate">
+                                <span className="font-normal text-content-strong truncate">
                                   {actor?.displayName}
                                 </span>
                                 <span className="text-[11px] font-normal text-content-muted truncate tracking-wide">
@@ -275,7 +275,7 @@ export const ActivityLogPanel = ({
                               </div>
                             </div>
                           </td>
-                          <td className="px-8 py-5 text-right w-48 align-middle">
+                          <td className="text-right w-48 align-middle">
                             <div className="flex flex-col items-end gap-1.5">
                               <div
                                 className="font-mono text-[11px] bg-surface-muted text-content-muted px-2 py-1 rounded border border-border-subtle uppercase font-normal tracking-normal select-all opacity-70 group-hover:opacity-100 transition-opacity"
