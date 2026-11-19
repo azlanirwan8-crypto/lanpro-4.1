@@ -1260,6 +1260,8 @@ export const en = {
     toggleFilterPanel: "Toggle advanced filter panel",
   },
   userDetail: {
+    fileName: "File name",
+    uploadDate: "Upload date",
     emptyProjectRoleCatalog: "(project role catalog is empty — fill it in Master Data)",
     adminAccessPrefix: "The",
     adminAccessSuffix:

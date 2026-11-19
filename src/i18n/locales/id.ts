@@ -1270,6 +1270,8 @@ export const id = {
     toggleFilterPanel: "Alihkan Panel Saringan Lanjutan",
   },
   userDetail: {
+    fileName: "Nama berkas",
+    uploadDate: "Tanggal unggah",
     emptyProjectRoleCatalog: "(katalog peran proyek kosong — isi di Master Data)",
     adminAccessPrefix: "Role",
     adminAccessSuffix:
