@@ -42,8 +42,8 @@ interface QATestCaseTableProps {
   remainingTime: number;
   handleForceUnlock: () => void;
   releaseLockManually: () => void;
-  isGeneratingAi: boolean;
   handleGenerateWithAi: () => void;
+  generationPanel?: React.ReactNode;
   handleExportQAReport: () => void;
   handleMigrateSuitePhase: () => void;
   setIsAddCaseOpen: (open: boolean) => void;
@@ -105,8 +105,8 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
   remainingTime,
   handleForceUnlock,
   releaseLockManually,
-  isGeneratingAi,
   handleGenerateWithAi,
+  generationPanel,
   handleExportQAReport,
   handleMigrateSuitePhase,
   setIsAddCaseOpen,
@@ -280,14 +280,11 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             {canCreate && (
               <button
                 onClick={handleGenerateWithAi}
-                disabled={isGeneratingAi}
                 className="px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-primary to-indigo-600 hover:from-indigo-700 hover:to-indigo-800 disabled:opacity-50 text-content-inverse font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95 shrink-0"
                 title={t("qaTable.generateAi")}
               >
-                <Sparkles className={`w-3.5 h-3.5 ${isGeneratingAi ? "animate-spin" : ""}`} />
-                <span className="hidden sm:inline">
-                  {isGeneratingAi ? "Menganalisis..." : "Generate AI"}
-                </span>
+                <Sparkles className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{t("qaTable.generateAi")}</span>
               </button>
             )}
 
@@ -529,6 +526,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
       )}
 
       {/* ULTRA-SLEEK 5-COLUMN ENTERPRISE QA TABLE MATRIX (Desktop sm+) */}
+      {generationPanel}
       <div className="bg-surface border border-border-subtle/80 rounded-md shadow-xs overflow-hidden">
         <div className="hidden sm:block overflow-x-auto">
           <ResponsiveTable className="w-full text-left border-collapse" scroll={false}>

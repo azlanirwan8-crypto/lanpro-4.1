@@ -23,6 +23,50 @@
 
 import { safeLocalStorage } from "../../../lib/safeStorage";
 import { apiRequest, getAuthToken } from "../../../lib/api";
+import type { QAGenerationDraft, QAGenerationSource, QATestSuite } from "../types";
+
+function suiteGenerationPath({ projectId, id }: Pick<QATestSuite, "projectId" | "id">) {
+  return `/api/projects/${encodeURIComponent(projectId)}/qa-test-suites/${encodeURIComponent(id)}`;
+}
+
+export async function searchGenerationSources(
+  suite: QATestSuite,
+  search: string
+): Promise<QAGenerationSource[]> {
+  const result = await apiRequest(
+    `${suiteGenerationPath(suite)}/generation-sources?search=${encodeURIComponent(search.trim())}`
+  );
+  return result.data;
+}
+
+export function fetchGenerationSources(
+  suite: QATestSuite
+): Promise<{ data: QAGenerationSource[]; missing: number }> {
+  return apiRequest(`${suiteGenerationPath(suite)}/selected-sources`);
+}
+
+export async function generateSuiteDrafts(
+  suite: QATestSuite,
+  sources: QAGenerationSource[]
+): Promise<QAGenerationDraft[]> {
+  const result = await apiRequest(
+    `${suiteGenerationPath(suite)}/generate-drafts`,
+    { method: "POST", body: { sources: sources.map(({ kind, id }) => ({ kind, id })) } },
+    0
+  );
+  return result.data;
+}
+
+export async function saveSuiteDrafts(
+  suite: QATestSuite,
+  drafts: Array<QAGenerationDraft & { id: string }>
+): Promise<Array<{ id: string; status: "saved" | "duplicate" }>> {
+  const result = await apiRequest(`${suiteGenerationPath(suite)}/save-drafts`, {
+    method: "POST",
+    body: { drafts },
+  });
+  return result.data;
+}
 
 /**
  * Transport mentah dengan token terlampir.
