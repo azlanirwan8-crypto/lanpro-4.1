@@ -247,16 +247,20 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                 <section className="space-y-1">
                   <h4 className="text-sm font-medium">
                     {selectedTestCase.generationDetails.kind === "positive"
-                      ? "Skenario positif"
-                      : "Skenario negatif"}
+                      ? t("qaGenerate.positive")
+                      : t("qaGenerate.negative")}
                   </h4>
                   {selectedTestCase.generationDetails.preconditions && (
-                    <p>Prasyarat · {selectedTestCase.generationDetails.preconditions}</p>
+                    <p>
+                      {t("qaGenerate.pre")} · {selectedTestCase.generationDetails.preconditions}
+                    </p>
                   )}
                   {selectedTestCase.generationDetails.testData && (
-                    <p>Data uji · {selectedTestCase.generationDetails.testData}</p>
+                    <p>
+                      {t("qaGenerate.data")} · {selectedTestCase.generationDetails.testData}
+                    </p>
                   )}
-                  <h5 className="font-medium">Rujukan pengujian</h5>
+                  <h5 className="font-medium">{t("qaGenerate.refs")}</h5>
                   <ul className="list-disc pl-5">
                     {selectedTestCase.generationDetails.sources.map((source) => (
                       <li key={`${source.kind}:${source.id}`}>

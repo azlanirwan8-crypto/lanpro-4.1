@@ -51,8 +51,7 @@ export function QAGeneration({
 }
 
 function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: () => void }) {
-  const { t } = useTranslation();
-  const tr = (key: string, args?: Record<string, string | number>) => t("qaGenerate." + key, args);
+  const { t: tr } = useTranslation(undefined, { keyPrefix: "qaGenerate" });
   const [sources, setSources] = useState<QAGenerationSource[]>([]);
   const [options, setOptions] = useState<QAGenerationSource[]>([]);
   const [search, setSearch] = useState("");
@@ -85,15 +84,15 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
         if (!active) return;
         setSources(result.data);
         setReady(true);
-        if (result.missing) setError(t("qaGenerate.missing"));
+        if (result.missing) setError(tr("missing"));
       })
       .catch(() => {
-        if (active) setError(t("qaGenerate.failed"));
+        if (active) setError(tr("failed"));
       });
     return () => {
       active = false;
     };
-  }, [suite.id, suite.projectId, retry, t]);
+  }, [suite.id, suite.projectId, retry, tr]);
   useEffect(() => {
     let active = true;
     setLoading(true);
@@ -106,7 +105,7 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
           .catch(() => {
             if (active) {
               setOptions([]);
-              setError(t("qaGenerate.failed"));
+              setError(tr("failed"));
             }
           })
           .finally(() => {
@@ -119,7 +118,7 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
       active = false;
       window.clearTimeout(timer);
     };
-  }, [suite.id, suite.projectId, search, retry, t]);
+  }, [suite.id, suite.projectId, search, retry, tr]);
 
   async function submit() {
     if (pending.current) return;
