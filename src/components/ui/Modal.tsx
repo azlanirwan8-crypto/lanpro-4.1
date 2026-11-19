@@ -17,6 +17,7 @@ type ModalProps = {
   bodyClassName?: string;
   /** Hide default header (custom chrome inside children). */
   hideHeader?: boolean;
+  dialogLabel?: string;
 };
 
 /**
@@ -34,6 +35,7 @@ export const Modal = ({
   className,
   bodyClassName,
   hideHeader = false,
+  dialogLabel,
 }: ModalProps) => {
   React.useEffect(() => {
     // #599 — modal yang tertutup tidak punya apa pun untuk dipasang ATAU dibongkar.
@@ -69,6 +71,26 @@ export const Modal = ({
         }}
       >
         <motion.div
+          role={dialogLabel ? "dialog" : undefined}
+          aria-modal={dialogLabel ? true : undefined}
+          aria-label={dialogLabel}
+          onKeyDown={(event) => {
+            if (!dialogLabel || event.key !== "Tab") return;
+            const controls = Array.from(
+              event.currentTarget.querySelectorAll<HTMLElement>(
+                "button:not(:disabled),input:not(:disabled),summary,textarea:not(:disabled),[tabindex='0']"
+              )
+            ).filter((node) => node.getClientRects().length > 0);
+            const first = controls[0];
+            const last = controls[controls.length - 1];
+            if (event.shiftKey && event.target === first) {
+              event.preventDefault();
+              last?.focus();
+            } else if (!event.shiftKey && event.target === last) {
+              event.preventDefault();
+              first?.focus();
+            }
+          }}
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.18, ease: "easeOut" }}

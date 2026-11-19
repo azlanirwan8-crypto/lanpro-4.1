@@ -1,4 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Search } from "lucide-react";
+import { toast } from "sonner";
+import { Modal } from "../../../components/ui/Modal";
 import {
   fetchGenerationSources,
   generateSuiteDrafts,
@@ -7,257 +11,361 @@ import {
 } from "../services/qa.service";
 import type { QAGenerationDraft, QAGenerationSource, QATestSuite } from "../types";
 
-const labels = {
-  document: "Documents",
-  flowchart: "Flowchart",
-  meeting: "Meeting Notes",
-  issue: "Issue List",
-};
-const draftLabels = { positive: "Positif", negative: "Negatif", clarify: "Perlu konfirmasi" };
-const sourceKey = (source: QAGenerationSource) => `${source.kind}:${source.id}`;
-const button = "rounded-md border border-border-subtle px-3 py-1.5 text-sm disabled:opacity-50";
+type SuiteProps = { suite: QATestSuite; onSaved: () => Promise<void> };
+const categories = ["all", "document", "meeting", "flowchart", "issue"] as const;
+const keyOf = (source: QAGenerationSource) => source.kind + ":" + source.id;
+const secondary =
+  "rounded-md border border-border-subtle px-3 py-2 text-sm hover:bg-surface-muted disabled:opacity-50";
+const primary = "btn-primary rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50";
 
 export function QAGeneration({
   suite,
   onSaved,
   register,
-}: {
-  suite: QATestSuite;
-  onSaved: () => Promise<void>;
+}: SuiteProps & {
   register: React.RefObject<(() => void) | null>;
 }) {
-  const [sources, setSources] = useState<QAGenerationSource[] | null>(null);
-  const [options, setOptions] = useState<QAGenerationSource[] | null>(null);
-  const [search, setSearch] = useState(suite.name);
+  const [open, setOpen] = useState(false);
+  const trigger = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    register.current = () => {
+      trigger.current =
+        document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      setOpen(true);
+    };
+    return () => {
+      register.current = null;
+    };
+  }, [register]);
+  if (!open) return null;
+  return (
+    <GenerationDialog
+      suite={suite}
+      onSaved={onSaved}
+      onClose={() => {
+        setOpen(false);
+        trigger.current?.focus();
+      }}
+    />
+  );
+}
+
+function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: () => void }) {
+  const { t } = useTranslation();
+  const tr = (key: string, args?: Record<string, string | number>) => t("qaGenerate." + key, args);
+  const [sources, setSources] = useState<QAGenerationSource[]>([]);
+  const [options, setOptions] = useState<QAGenerationSource[]>([]);
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState<(typeof categories)[number]>("all");
   const [drafts, setDrafts] = useState<Array<QAGenerationDraft & { id: string }> | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
   const [error, setError] = useState("");
-  const [busy, setBusy] = useState("");
-  const inFlight = useRef(false);
+  const [ready, setReady] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [retry, setRetry] = useState(0);
+  const [busy, setBusy] = useState<"generating" | "saving" | null>(null);
+  const pending = useRef(false);
   const mounted = useRef(false);
-
+  const heading = useRef<HTMLHeadingElement>(null);
+  const review = drafts !== null;
   useEffect(() => {
     mounted.current = true;
     return () => {
       mounted.current = false;
     };
   }, []);
+  useEffect(() => {
+    if (review) heading.current?.focus();
+  }, [review]);
+  useEffect(() => {
+    let active = true;
+    setReady(false);
+    fetchGenerationSources(suite)
+      .then((result) => {
+        if (!active) return;
+        setSources(result.data);
+        setReady(true);
+        if (result.missing) setError(t("qaGenerate.missing"));
+      })
+      .catch(() => {
+        if (active) setError(t("qaGenerate.failed"));
+      });
+    return () => {
+      active = false;
+    };
+  }, [suite.id, suite.projectId, retry, t]);
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    const timer = window.setTimeout(
+      () => {
+        searchGenerationSources(suite, search)
+          .then((rows) => {
+            if (active) setOptions(rows);
+          })
+          .catch(() => {
+            if (active) {
+              setOptions([]);
+              setError(t("qaGenerate.failed"));
+            }
+          })
+          .finally(() => {
+            if (active) setLoading(false);
+          });
+      },
+      search ? 180 : 0
+    );
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [suite.id, suite.projectId, search, retry, t]);
 
-  async function run(message: string, action: () => Promise<void>) {
-    if (inFlight.current) return;
-    inFlight.current = true;
-    setBusy(message);
+  async function submit() {
+    if (pending.current) return;
+    pending.current = true;
+    setBusy(review ? "saving" : "generating");
     setError("");
     try {
-      await action();
+      if (drafts === null) {
+        const generated = await generateSuiteDrafts(suite, sources);
+        if (!mounted.current) return;
+        const rows = generated.map((draft) => ({ ...draft, id: crypto.randomUUID() }));
+        setDrafts(rows);
+        setSelected(rows.filter((row) => row.kind !== "clarify").map((row) => row.id));
+      } else {
+        const saved = await saveSuiteDrafts(
+          suite,
+          drafts.filter((row) => row.kind !== "clarify" && selected.includes(row.id))
+        );
+        if (!mounted.current) return;
+        const duplicates = saved.filter((row) => row.status === "duplicate").length;
+        if (duplicates) toast.info(tr("duplicates", { count: duplicates }));
+        await onSaved();
+        if (mounted.current) onClose();
+      }
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Permintaan QA gagal.");
+      if (mounted.current) setError(cause instanceof Error ? cause.message : tr("failed"));
     } finally {
-      inFlight.current = false;
-      setBusy("");
+      pending.current = false;
+      if (mounted.current) setBusy(null);
     }
   }
 
-  async function fetchOptions() {
-    setOptions([]);
-    setOptions(await searchGenerationSources(suite, search));
-  }
-
-  async function fetchSavedSources() {
-    if (sources) return { data: sources, missing: 0 };
-    const result = await fetchGenerationSources(suite);
-    setSources(result.data);
-    return result;
-  }
-
-  function findSources() {
-    return run("Mencari sumber…", async () => {
-      await fetchSavedSources();
-      await fetchOptions();
-    });
-  }
-
-  function generate() {
-    if (inFlight.current) return;
-    void run("Membuat draf test case…", async () => {
-      const { data: confirmed, missing } = await fetchSavedSources();
-      if (!confirmed.length || missing) {
-        await fetchOptions();
-        if (missing)
-          setError(`${missing} rujukan sudah tidak tersedia. Periksa sumber sebelum melanjutkan.`);
-        return;
-      }
-      const generated = await generateSuiteDrafts(suite, confirmed);
-      const next = generated.map((draft) => ({ ...draft, id: crypto.randomUUID() }));
-      setOptions(null);
-      setDrafts(next);
-      setSelected(next.filter((draft) => draft.kind !== "clarify").map(({ id }) => id));
-    });
-  }
-  useEffect(() => {
-    register.current = generate;
-    return () => {
-      register.current = null;
-    };
-  });
-
-  function save() {
-    void run("Menyimpan test case…", async () => {
-      const choices = (drafts || []).filter(
-        ({ id, kind }) => kind !== "clarify" && selected.includes(id)
-      );
-      const saved = await saveSuiteDrafts(suite, choices);
-      const processed = new Set(saved.map(({ id }) => id));
-      setDrafts((current) => current?.filter(({ id }) => !processed.has(id)) || null);
-      setSelected((current) => current.filter((id) => !processed.has(id)));
-      const duplicates = saved.filter(({ status }) => status === "duplicate").length;
-      if (duplicates) setError(`${duplicates} draf dilewati karena test case sudah ada di suite.`);
-      if (mounted.current) await onSaved();
-    });
-  }
+  const chosen = new Set(sources.map(keyOf));
+  const query = search.trim().toLocaleLowerCase();
+  const visible = [
+    ...sources.filter((row) => row.label.toLocaleLowerCase().includes(query)),
+    ...options.filter((row) => !chosen.has(keyOf(row))),
+  ].filter((row) => category === "all" || category === row.kind);
+  const blocked = review
+    ? !selected.length || drafts.some((row) => selected.includes(row.id) && !row.title.trim())
+    : !ready || !sources.length;
 
   return (
-    <section className="space-y-3 p-3" aria-label="Generate AI Quality Assessment">
-      <button type="button" className={button} onClick={findSources} disabled={Boolean(busy)}>
-        Sumber AI{sources && ` (${sources.length})`}
-      </button>
-      {busy && <p role="status">{busy}</p>}
-      {error && <p role="alert">{error}</p>}
-      {options && (
-        <div className="space-y-2">
-          <form
-            className="flex flex-wrap gap-2"
-            onSubmit={(event) => {
-              event.preventDefault();
-              void findSources();
-            }}
+    <Modal
+      isOpen
+      title={tr("title")}
+      dialogLabel={tr("title")}
+      maxWidth="max-w-2xl"
+      onClose={() => {
+        if (busy !== "saving") onClose();
+      }}
+      footer={
+        <>
+          <span className="mr-auto text-xs text-content-subtle">
+            {suite.name} · {suite.phase}
+          </span>
+          <button
+            type="button"
+            className={secondary}
+            disabled={!!busy}
+            onClick={() => (review ? setDrafts(null) : onClose())}
           >
-            <input
-              className={button}
-              aria-label="Cari sumber QA"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-            />
-            <button className={button} disabled={Boolean(busy)}>
-              Cari sumber
-            </button>
-          </form>
-          <p>Pilih sumber yang berkaitan dengan {suite.name}. Maksimal 12 sumber.</p>
-          <p className="text-sm text-content-subtle">
-            Cuplikan sumber terpilih diproses oleh Gemini.
-          </p>
-          <div className="max-h-60 space-y-1 overflow-auto">
-            {[
-              ...(sources || []),
-              ...options.filter(
-                (option) => !sources?.some((item) => sourceKey(item) === sourceKey(option))
-              ),
-            ].map((source) => {
-              const key = sourceKey(source);
-              const checked = sources?.some((item) => sourceKey(item) === key) || false;
-              return (
-                <label key={key} className="flex items-center gap-2">
+            {tr(review ? "back" : "cancel")}
+          </button>
+          <button type="button" className={primary} disabled={!!busy || blocked} onClick={submit}>
+            {busy
+              ? tr(busy)
+              : review
+                ? tr("save", { count: selected.length, phase: suite.phase })
+                : tr("generate")}
+          </button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <h4 ref={heading} tabIndex={-1} className="flex items-center gap-3 text-sm font-medium">
+          <span className={review ? "text-content-subtle" : "text-primary"}>
+            1 · {tr("sources")}
+          </span>
+          <span aria-hidden="true" className="h-px w-6 bg-surface-marker" />
+          <span className={review ? "text-primary" : "text-content-subtle"}>
+            2 · {tr("review")}
+          </span>
+        </h4>
+        {error && (
+          <div role="alert" className="text-sm text-danger-text">
+            {error}{" "}
+            {!review && (
+              <button
+                className="underline"
+                onClick={() => {
+                  setError("");
+                  setRetry((n) => n + 1);
+                }}
+              >
+                {tr("retry")}
+              </button>
+            )}
+          </div>
+        )}
+        {busy && <p role="status">{tr(busy)}</p>}
+        {drafts === null ? (
+          <>
+            <label className="flex items-center gap-2 rounded-md border border-border-subtle px-3 py-2 focus-within:border-primary">
+              <Search size={16} aria-hidden="true" className="text-content-subtle" />
+              <input
+                autoFocus
+                type="search"
+                aria-label={tr("search")}
+                placeholder={tr("search")}
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                className="min-w-0 flex-1 bg-transparent text-sm outline-none"
+              />
+            </label>
+            <div className="flex flex-wrap gap-1">
+              {categories.map((kind) => (
+                <button
+                  key={kind}
+                  aria-pressed={category === kind}
+                  className={
+                    category === kind
+                      ? "rounded-md bg-primary px-3 py-1 text-sm text-content-inverse"
+                      : "rounded-md px-3 py-1 text-sm text-content-secondary hover:bg-surface-muted"
+                  }
+                  onClick={() => setCategory(kind)}
+                >
+                  {tr(kind)}
+                </button>
+              ))}
+            </div>
+            <div className="divide-y divide-border-divider rounded-md border border-border-subtle">
+              {loading ? (
+                <p role="status" className="p-4 text-sm">
+                  {tr("loading")}
+                </p>
+              ) : visible.length ? (
+                visible.map((row) => {
+                  const key = keyOf(row);
+                  const checked = chosen.has(key);
+                  return (
+                    <label
+                      key={key}
+                      className="flex items-center gap-3 px-3 py-3 text-sm hover:bg-surface-muted"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        disabled={!ready || !!busy || (!checked && sources.length >= 12)}
+                        onChange={() =>
+                          setSources((items) =>
+                            checked ? items.filter((item) => keyOf(item) !== key) : [...items, row]
+                          )
+                        }
+                      />
+                      <span className="min-w-0 flex-1 break-words">{row.label}</span>
+                      <span className="text-xs text-content-subtle">{tr(row.kind)}</span>
+                    </label>
+                  );
+                })
+              ) : (
+                <div className="p-4 text-sm text-content-secondary">
+                  {query ? tr("noMatch", { query: search }) : tr("none")}
+                  {query && (
+                    <button className="ml-2 text-primary underline" onClick={() => setSearch("")}>
+                      {tr("clear")}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="space-y-1 text-xs text-content-subtle">
+              <p>{tr("count", { count: sources.length })}</p>
+              <p>{tr("privacy")}</p>
+            </div>
+          </>
+        ) : (
+          <>
+            {!drafts.length && <p className="text-sm">{tr("empty")}</p>}
+            {drafts.map((row) => (
+              <article
+                key={row.id}
+                className="space-y-2 rounded-md border border-border-subtle p-3 text-sm"
+              >
+                <label className="flex items-center gap-2 font-medium">
                   <input
                     type="checkbox"
-                    checked={checked}
-                    disabled={Boolean(busy) || (!checked && (sources?.length || 0) >= 12)}
+                    disabled={!!busy || row.kind === "clarify"}
+                    checked={selected.includes(row.id)}
                     onChange={() =>
-                      setSources((items) =>
-                        checked
-                          ? (items || []).filter((item) => sourceKey(item) !== key)
-                          : [...(items || []), source]
+                      setSelected((ids) =>
+                        ids.includes(row.id) ? ids.filter((id) => id !== row.id) : [...ids, row.id]
                       )
                     }
                   />
-                  {labels[source.kind]} · {source.label}
+                  {tr(row.kind)} · {row.title}
                 </label>
-              );
-            })}
-            {!options.length && !busy && <p>Belum ada hasil pencarian sumber.</p>}
-          </div>
-          <button
-            type="button"
-            className={button}
-            onClick={generate}
-            disabled={!sources?.length || Boolean(busy)}
-          >
-            Generate dari sumber terpilih
-          </button>
-        </div>
-      )}
-      {drafts && (
-        <div className="space-y-2">
-          <h3 className="font-medium">
-            Draf test case · {suite.name} · {suite.phase}
-          </h3>
-          {!drafts.length && <p>Tidak ada draf baru untuk ditinjau.</p>}
-          {drafts.map((draft) => (
-            <article key={draft.id} className="rounded-md border border-border-subtle p-2">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={selected.includes(draft.id)}
-                  disabled={draft.kind === "clarify" || Boolean(busy)}
-                  onChange={() =>
-                    setSelected((ids) =>
-                      ids.includes(draft.id)
-                        ? ids.filter((id) => id !== draft.id)
-                        : [...ids, draft.id]
-                    )
-                  }
-                />
-                {draftLabels[draft.kind]} · {draft.title}
-              </label>
-              <details className="mt-1">
-                <summary>Langkah dan rujukan</summary>
-                {draft.kind !== "clarify" && (
-                  <label className="my-2 block">
-                    Judul skenario
-                    <input
-                      value={draft.title}
-                      maxLength={255}
-                      disabled={Boolean(busy)}
-                      className={`${button} block w-full`}
-                      onChange={(event) => {
-                        const title = event.target.value;
-                        setDrafts(
-                          (items) =>
-                            items?.map((item) =>
-                              item.id === draft.id ? { ...item, title } : item
-                            ) || null
-                        );
-                      }}
-                    />
-                  </label>
-                )}
-                {draft.preconditions && <p>Prasyarat · {draft.preconditions}</p>}
-                {draft.testData && <p>Data uji · {draft.testData}</p>}
-                <ol className="list-decimal pl-5">
-                  {draft.steps.map((step, index) => (
-                    <li key={index}>{step}</li>
-                  ))}
-                </ol>
-                <p>Hasil yang diharapkan · {draft.expected}</p>
-                <p>
-                  {draft.sources
-                    .map((source) => `${labels[source.kind]} · ${source.label}`)
-                    .join(" | ")}
-                </p>
-              </details>
-            </article>
-          ))}
-          {drafts.length > 0 && (
-            <button
-              type="button"
-              className={button}
-              onClick={save}
-              disabled={!selected.length || Boolean(busy)}
-            >
-              Simpan {selected.length} test case ke {suite.phase}
-            </button>
-          )}
-        </div>
-      )}
-    </section>
+                <details>
+                  <summary className="cursor-pointer text-primary">{tr("details")}</summary>
+                  <div className="mt-2 space-y-2">
+                    {row.kind !== "clarify" && (
+                      <label className="block">
+                        {tr("name")}
+                        <input
+                          className={secondary + " block w-full"}
+                          value={row.title}
+                          maxLength={255}
+                          disabled={!!busy}
+                          onChange={(event) =>
+                            setDrafts(
+                              drafts.map((item) =>
+                                item.id === row.id ? { ...item, title: event.target.value } : item
+                              )
+                            )
+                          }
+                        />
+                      </label>
+                    )}
+                    {row.preconditions && (
+                      <p>
+                        {tr("pre")} · {row.preconditions}
+                      </p>
+                    )}
+                    {row.testData && (
+                      <p>
+                        {tr("data")} · {row.testData}
+                      </p>
+                    )}
+                    <ol className="list-decimal pl-5">
+                      {row.steps.map((step, i) => (
+                        <li key={i}>{step}</li>
+                      ))}
+                    </ol>
+                    <p>
+                      {tr("expected")} · {row.expected}
+                    </p>
+                    <p>
+                      {tr("refs")} · {row.sources.map((source) => source.label).join(", ")}
+                    </p>
+                  </div>
+                </details>
+              </article>
+            ))}
+          </>
+        )}
+      </div>
+    </Modal>
   );
 }
