@@ -5,6 +5,22 @@ export interface QAComment {
   timestamp: string;
 }
 
+export type QAGenerationSource = {
+  id: string;
+  kind: "document" | "flowchart" | "meeting" | "issue";
+  label: string;
+};
+
+export type QAGenerationDraft = {
+  title: string;
+  kind: "positive" | "negative" | "clarify";
+  preconditions: string;
+  testData: string;
+  steps: string[];
+  expected: string;
+  sources: QAGenerationSource[];
+};
+
 export interface QAEvidence {
   id: string;
   name: string;
@@ -37,6 +53,12 @@ export interface QATestCase {
   evidences?: QAEvidence[];
   history?: any[];
   activeTesterId?: string;
+  generationDetails?: {
+    kind: "positive" | "negative";
+    preconditions: string;
+    testData: string;
+    sources: Array<{ id: string; kind: string; label: string }>;
+  } | null;
 }
 
 export interface TestQAPanelProps {

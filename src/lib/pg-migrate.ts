@@ -653,6 +653,9 @@ export async function runMigrations(pool: Pool): Promise<void> {
     await client.query(
       `ALTER TABLE "QATestSuites" ADD COLUMN IF NOT EXISTS "assignedTo" VARCHAR(255);`
     );
+    await client.query(
+      `ALTER TABLE "QATestSuites" ADD COLUMN IF NOT EXISTS "generationSources" JSONB NOT NULL DEFAULT '[]';`
+    );
 
     // ── QATestCases ──────────────────────────────────────────────────────────
     await client.query(`
@@ -688,6 +691,9 @@ export async function runMigrations(pool: Pool): Promise<void> {
     `);
     await client.query(
       `ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "assignedTo" VARCHAR(255);`
+    );
+    await client.query(
+      `ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "generationDetails" JSONB;`
     );
     // #463 — FK lunak ke Tasks.id; linkedBugKey tetap untuk tampilan/kunci isu.
     await client.query(

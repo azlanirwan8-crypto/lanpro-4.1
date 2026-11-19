@@ -139,6 +139,10 @@ export class QaRepository {
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
+      await connection.query(
+        "SELECT id FROM QATestSuites WHERE id = ? AND projectId = ? FOR UPDATE",
+        [id, projectId]
+      );
       // #474 — execution logs sebelum case/suite (hindari orphan)
       await connection.query(
         `DELETE FROM QATestCaseExecutionLogs WHERE projectId = ? AND (
@@ -314,6 +318,7 @@ export class QaRepository {
       suiteId: row.suiteId,
       rowNum: row.rowNum,
       modulId: row.modulId,
+      generationDetails: row.generationDetails ?? null,
       history: safeParse(row.history, []),
       comment: row.comment,
       evidenceUrl: row.evidenceUrl,

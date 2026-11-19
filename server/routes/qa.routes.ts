@@ -20,6 +20,14 @@ import {
   updateQASuiteSchema,
 } from "../schemas/qa.schema";
 import { qaRepository } from "../repositories/qa.repository";
+import {
+  generateQASuiteDrafts,
+  getQASuiteSources,
+  listQASourceOptions,
+  qaGenerationRequest,
+  qaSaveDraftRequest,
+  saveQASuiteDrafts,
+} from "../controllers/qa-generation.controller";
 
 export function setupQARoutes(
   app: Express,
@@ -35,6 +43,29 @@ export function setupQARoutes(
     newValues: any
   ) => Promise<any>
 ) {
+  const sourceAccess = [
+    jagaProyek("qa", "C"),
+    jagaProyek("wiki", "R"),
+    jagaProyek("flowchart", "R"),
+    jagaProyek("meetingNotes", "R"),
+    jagaProyek("list", "R"),
+  ];
+  const generationPath = "/api/projects/:projectId/qa-test-suites/:suiteId";
+  app.get(`${generationPath}/generation-sources`, ...sourceAccess, listQASourceOptions);
+  app.get(`${generationPath}/selected-sources`, ...sourceAccess, getQASuiteSources);
+  app.post(
+    `${generationPath}/generate-drafts`,
+    ...sourceAccess,
+    validasiBody(qaGenerationRequest),
+    generateQASuiteDrafts
+  );
+  app.post(
+    `${generationPath}/save-drafts`,
+    ...sourceAccess,
+    validasiBody(qaSaveDraftRequest),
+    saveQASuiteDrafts
+  );
+
   // GET: List QA Test Suites
   app.get(
     "/api/projects/:projectId/qa-test-suites",

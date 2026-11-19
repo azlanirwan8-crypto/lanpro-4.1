@@ -24,6 +24,7 @@ import { QAComment, QATestCase, QATestSuite, TestQAPanelProps } from "./types";
 import { QATopBar } from "./components/QATopBar";
 import { QASuiteSidebar } from "./components/QASuiteSidebar";
 import { QATestCaseTable } from "./components/QATestCaseTable";
+import { QAGeneration } from "./components/QAGeneration";
 import { QADetailDrawer } from "./components/QADetailDrawer";
 import { QAModals } from "./components/QAModals";
 
@@ -124,7 +125,7 @@ export function TestQAPanel({
   const [bugDescriptionInput, setBugDescriptionInput] = useState("");
   const [isSubmittingBug, setIsSubmittingBug] = useState(false);
 
-  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const generateAi = useRef<(() => void) | null>(null);
 
   const currentUserUid = user?.uid || user?.id || "anonymous-user";
   const currentUserName = user?.displayName || user?.name || user?.username || "QA Tester";
@@ -755,10 +756,6 @@ export function TestQAPanel({
     toast.success(t("toast.moduleMigrated", { fase: nextPhase }));
   };
 
-  const handleGenerateWithAi = () => {
-    toast.info(t("toast.aiGeneratorSimulated"));
-  };
-
   const activeSuiteObj = suites.find((s) => s.id === selectedSuiteId);
   const suitesForFilter = suites.filter((s) => phaseFilter === "ALL" || s.phase === phaseFilter);
   const filteredCases =
@@ -809,8 +806,18 @@ export function TestQAPanel({
             remainingTime={remainingTime}
             handleForceUnlock={handleForceUnlock}
             releaseLockManually={releaseLockManually}
-            isGeneratingAi={isGeneratingAi}
-            handleGenerateWithAi={handleGenerateWithAi}
+            handleGenerateWithAi={() => generateAi.current?.()}
+            generationPanel={
+              canCreate &&
+              activeSuiteObj && (
+                <QAGeneration
+                  key={`${selectedProject.id}:${activeSuiteObj.id}`}
+                  suite={activeSuiteObj}
+                  register={generateAi}
+                  onSaved={() => loadCasesForActiveSuite(activeSuiteObj.id)}
+                />
+              )
+            }
             handleExportQAReport={handleExportQAReport}
             handleMigrateSuitePhase={handleMigrateSuitePhase}
             setIsAddCaseOpen={setIsAddCaseOpen}
