@@ -454,6 +454,8 @@ export const id = {
     minutesCount: "{{count}} menit",
     joinMeeting: "Gabung Rapat",
     modulesCount: "{{count}} Modul",
+    modulesCount_one: "{{count}} Modul",
+    modulesCount_other: "{{count}} Modul",
     tasksSelected: "{{count}} Tugas Terpilih",
     assignPicToTasks: "Tetapkan PIC ke {{count}} Tugas",
     setTo: "Ubah ke {{nilai}}",

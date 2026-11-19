@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 
 interface AnimatedLogoutIconProps {
   size?: number;
@@ -10,6 +10,7 @@ export const AnimatedLogoutIcon: React.FC<AnimatedLogoutIconProps> = ({
   size = 96,
   className = "",
 }) => {
+  const reduceMotion = useReducedMotion();
   return (
     <div
       className={`relative flex items-center justify-center ${className}`}
@@ -18,7 +19,7 @@ export const AnimatedLogoutIcon: React.FC<AnimatedLogoutIconProps> = ({
     >
       {/* Outer pulsing soft ring */}
       <motion.div
-        animate={{
+        animate={reduceMotion ? undefined : {
           scale: [1, 1.08, 1],
           opacity: [0.35, 0.65, 0.35],
         }}
@@ -56,7 +57,7 @@ export const AnimatedLogoutIcon: React.FC<AnimatedLogoutIconProps> = ({
             r="5"
             stroke="#f7b84b"
             strokeWidth="3"
-            animate={{
+            animate={reduceMotion ? undefined : {
               x: [0, 4, 0],
             }}
             transition={{
@@ -72,7 +73,7 @@ export const AnimatedLogoutIcon: React.FC<AnimatedLogoutIconProps> = ({
             stroke="#f7b84b"
             strokeWidth="3"
             strokeLinecap="round"
-            animate={{
+            animate={reduceMotion ? undefined : {
               x: [0, 4, 0],
             }}
             transition={{
@@ -84,7 +85,7 @@ export const AnimatedLogoutIcon: React.FC<AnimatedLogoutIconProps> = ({
 
           {/* Directional Exit Arrow */}
           <motion.g
-            animate={{
+            animate={reduceMotion ? undefined : {
               x: [0, 7, 0],
               opacity: [0.6, 1, 0.6],
             }}
@@ -120,7 +121,7 @@ export const AnimatedLogoutIcon: React.FC<AnimatedLogoutIconProps> = ({
             cy="24"
             r="1.5"
             fill="#f7b84b"
-            animate={{
+            animate={reduceMotion ? undefined : {
               opacity: [0.2, 0.8, 0.2],
               scale: [0.8, 1.2, 0.8],
             }}
@@ -136,7 +137,7 @@ export const AnimatedLogoutIcon: React.FC<AnimatedLogoutIconProps> = ({
             cy="24"
             r="1.5"
             fill="#f7b84b"
-            animate={{
+            animate={reduceMotion ? undefined : {
               opacity: [0.4, 1, 0.4],
               scale: [0.8, 1.2, 0.8],
             }}

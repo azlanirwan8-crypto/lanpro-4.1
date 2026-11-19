@@ -99,7 +99,6 @@ export function DashboardView(props: DashboardViewProps) {
 
   const {
     tasks,
-    nonEpicTasks,
     dueSoonTasks,
     overdueTasks,
     completedTasks,
@@ -813,10 +812,7 @@ export function DashboardView(props: DashboardViewProps) {
                     {t("dashboard.runningTasks")}
                   </span>
                   <h3 className="text-2xl font-semibold text-content-inverse mt-1">
-                    {
-                      nonEpicTasks.filter((t) => t.status !== "Done" && t.status !== "Selesai")
-                        .length
-                    }
+                    {inProgressTasks.length}
                   </h3>
                 </div>
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-surface/15 flex items-center justify-center text-content-inverse border border-border-inverse/40">
@@ -825,7 +821,7 @@ export function DashboardView(props: DashboardViewProps) {
               </div>
               <div className="mt-4 flex items-center justify-between text-xs border-t border-border-inverse/30 pt-3">
                 <span className="font-medium text-content-inverse/85">
-                  {t("dashboard.notDoneYet", { count: inProgressTasks.length })}
+                  {t("dashboard.notDoneYet", { count: totalTasks - completedTasks.length })}
                 </span>
                 <button
                   onClick={() => props.setCurrentView("board")}

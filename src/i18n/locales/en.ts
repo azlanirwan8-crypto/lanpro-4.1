@@ -444,6 +444,8 @@ export const en = {
     minutesCount: "{{count}} minutes",
     joinMeeting: "Join Meeting",
     modulesCount: "{{count}} Modules",
+    modulesCount_one: "{{count}} Module",
+    modulesCount_other: "{{count}} Modules",
     tasksSelected: "{{count}} Tasks Selected",
     assignPicToTasks: "Assign PIC to {{count}} tasks",
     setTo: "Set to {{nilai}}",
