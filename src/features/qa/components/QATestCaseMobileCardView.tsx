@@ -15,6 +15,7 @@ import { UserAvatar } from "../../../components/ui/UserAvatar";
 import type { QATestCase } from "../types";
 
 interface QATestCaseMobileCardViewProps {
+  filtered?: boolean;
   cases: QATestCase[];
   selectedCaseIds: string[];
   projectMembers: any[];
@@ -34,6 +35,7 @@ interface QATestCaseMobileCardViewProps {
 
 export const QATestCaseMobileCardView: React.FC<QATestCaseMobileCardViewProps> = ({
   cases,
+  filtered = false,
   selectedCaseIds,
   projectMembers = [],
   canUpdate,
@@ -101,7 +103,9 @@ export const QATestCaseMobileCardView: React.FC<QATestCaseMobileCardViewProps> =
   if (cases.length === 0) {
     return (
       <div className="p-8 text-center bg-surface border border-border-subtle/80 rounded-lg shadow-2xs">
-        <p className="text-xs text-content-subtle">{t("qaTable.emptyFilter")}</p>
+        <p className="text-xs text-content-subtle">
+          {t(filtered ? "qaTable.emptyFilter" : "qaGenerate.emptySuite")}
+        </p>
       </div>
     );
   }

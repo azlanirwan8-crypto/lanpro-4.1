@@ -270,10 +270,10 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                   setActiveAddTab("single");
                 }}
                 className="btn-animation waves-effect waves-light btn-primary h-8 px-2.5 sm:px-3 rounded-lg text-xs font-medium flex items-center gap-1 cursor-pointer shrink-0 shadow-xs"
-                title={t("qa.addTask")}
+                title={t("qaGenerate.manual")}
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{t("qa.addTask")}</span>
+                <span className="hidden sm:inline">{t("qaGenerate.manual")}</span>
               </button>
             )}
 
@@ -284,7 +284,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                 title={t("qaTable.generateAi")}
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{t("qaTable.generateAi")}</span>
+                <span className="hidden sm:inline">{t("qaGenerate.trigger")}</span>
               </button>
             )}
 
@@ -365,7 +365,9 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         <div className="flex items-center justify-between gap-2.5 pt-2.5 border-t border-border-faint">
           <div className="text-xs font-normal text-content-strong flex items-center gap-1.5">
             <FileSpreadsheet className="w-3.5 h-3.5 text-primary" />
-            <span>Matriks Skenario Test Case ({searchedCases.length})</span>
+            <span>
+              {t("qaGenerate.matrix")} ({searchedCases.length})
+            </span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -554,7 +556,11 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               {searchedCases.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="text-center py-10 text-content-subtle font-normal">
-                    {t("qaTable.emptyFilter")}
+                    {t(
+                      searchTerm.trim() || statusFilter !== "ALL"
+                        ? "qaTable.emptyFilter"
+                        : "qaGenerate.emptySuite"
+                    )}
                   </td>
                 </tr>
               ) : (
@@ -801,6 +807,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         {/* Mobile Card List View (< 640px) */}
         <div className="sm:hidden p-4 space-y-3">
           <QATestCaseMobileCardView
+            filtered={Boolean(searchTerm.trim()) || statusFilter !== "ALL"}
             cases={searchedCases}
             selectedCaseIds={selectedCaseIds}
             projectMembers={projectMembers}
