@@ -425,6 +425,7 @@ export const id = {
   rakit: {
     ssoDivider: "Masuk dengan",
     ssoSignIn: "Masuk dengan {{penyedia}}",
+    ssoSignUpDivider: "Daftar dengan",
     ssoSignUp: "Daftar dengan {{penyedia}}",
     auditDidAction: "Melakukan aksi",
     supportsExt: "Mendukung ekstensi",

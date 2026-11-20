@@ -101,27 +101,27 @@ export const SsoButtons = ({ mode }: SsoButtonsProps) => {
       <div className="flex items-center gap-3 mb-4">
         <span className="h-px flex-1 border-t border-border-divider" />
         <span className="text-xs text-content-muted">
-          {isLogin ? t("rakit.ssoDivider") : t("ui.or")}
+          {isLogin ? t("rakit.ssoDivider") : t("rakit.ssoSignUpDivider")}
         </span>
         <span className="h-px flex-1 border-t border-border-divider" />
       </div>
 
-      <div className={isLogin ? "flex gap-2.5" : "flex flex-col gap-2.5"}>
+      <div className="flex gap-2.5">
         {providers.map((p) => (
           <a
             key={p}
             href={urlMulaiSso(p, mode)}
-            aria-label={isLogin ? t("rakit.ssoSignIn", { penyedia: NAMA[p] }) : undefined}
-            className={`inline-flex items-center justify-center min-h-11 rounded-lg
+            aria-label={t(isLogin ? "rakit.ssoSignIn" : "rakit.ssoSignUp", { penyedia: NAMA[p] })}
+            className="inline-flex items-center justify-center min-h-11 rounded-lg
                        border border-border-subtle bg-surface
                        text-sm font-medium text-content-body
                        transition-colors duration-150
                        hover:bg-surface-muted focus:outline-none
                        focus:ring-2 focus:ring-primary/40
-                       ${isLogin ? "min-w-0 flex-1 gap-1.5 px-1.5 whitespace-nowrap" : "w-full gap-2.5 px-4"}`}
+                       min-w-0 flex-1 gap-1.5 px-1.5 whitespace-nowrap"
           >
             {p === "google" ? <LogoGoogle /> : <LogoMicrosoft />}
-            <span>{isLogin ? NAMA[p] : t("rakit.ssoSignUp", { penyedia: NAMA[p] })}</span>
+            <span>{NAMA[p]}</span>
           </a>
         ))}
       </div>

@@ -415,6 +415,7 @@ export const en = {
   rakit: {
     ssoDivider: "Sign in with",
     ssoSignIn: "Sign in with {{penyedia}}",
+    ssoSignUpDivider: "Sign up with",
     ssoSignUp: "Sign up with {{penyedia}}",
     auditDidAction: "Performed action",
     supportsExt: "Supports extensions",

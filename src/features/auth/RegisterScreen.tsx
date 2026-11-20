@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 import React, { useState, useMemo } from "react";
-import { ArrowRight, Eye, EyeOff, AlertCircle, X } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, X } from "lucide-react";
 import { motion } from "motion/react";
-import { cn } from "../../components/ui/CoreUI";
+import { Button, cn } from "../../components/ui/CoreUI";
 import { registrationSchema, evaluatePasswordStrength } from "../../lib/registrationSchema";
 import { VelzonSuccessIcon } from "../../components/AuthToastContainer";
 import { SsoButtons } from "./components/SsoButtons";
@@ -136,7 +136,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder={t("register.namePlaceholder")}
             className={cn(
-              "w-full h-11 px-3.5 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
+              "w-full h-11 px-3.5 bg-surface border rounded-md focus:ring-2 transition-colors outline-none text-base font-normal text-content placeholder:text-content-muted",
               fieldErrors.name
                 ? "border-danger focus:ring-danger/20 focus:border-danger"
                 : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -161,7 +161,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             onChange={(e) => handleEmailChange(e.target.value)}
             placeholder={t("register.emailPlaceholder")}
             className={cn(
-              "w-full h-11 px-3.5 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
+              "w-full h-11 px-3.5 bg-surface border rounded-md focus:ring-2 transition-colors outline-none text-base font-normal text-content placeholder:text-content-muted",
               fieldErrors.email
                 ? "border-danger focus:ring-danger/20 focus:border-danger"
                 : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -190,7 +190,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             onChange={handleUsernameChange}
             placeholder={t("register.usernamePlaceholder")}
             className={cn(
-              "w-full h-11 px-3.5 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
+              "w-full h-11 px-3.5 bg-surface border rounded-md focus:ring-2 transition-colors outline-none text-base font-normal text-content placeholder:text-content-muted",
               fieldErrors.username
                 ? "border-danger focus:ring-danger/20 focus:border-danger"
                 : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -216,7 +216,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
               onChange={(e) => handlePasswordChange(e.target.value)}
               placeholder={t("register.passwordPlaceholder")}
               className={cn(
-                "w-full h-11 pl-3.5 pr-10 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
+                "w-full h-11 pl-3.5 pr-10 bg-surface border rounded-md focus:ring-2 transition-colors outline-none text-base font-normal text-content placeholder:text-content-muted",
                 fieldErrors.password
                   ? "border-danger focus:ring-danger/20 focus:border-danger"
                   : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -307,23 +307,25 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
           )}
         </div>
 
-        <button
+        <Button
           type="submit"
+          variant="success"
+          size="lg"
           disabled={isRegistering}
-          className="btn-primary w-full py-3 rounded-lg font-normal uppercase tracking-normal text-xs transition-all shadow-md shadow-primary/20 active:scale-[0.99] mt-3 flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+          className="w-full mt-3"
         >
           {isRegistering ? (
-            <>
-              <div className="w-4 h-4 border-2 border-border-glass/20 border-t-border-glass rounded-full animate-spin" />
-              <span>{t("register.creating")}</span>
-            </>
+            <span className="inline-flex items-center gap-2">
+              <span
+                aria-hidden="true"
+                className="w-4 h-4 border-2 border-border-glass/20 border-t-border-glass rounded-full animate-spin"
+              />
+              {t("register.creating")}
+            </span>
           ) : (
-            <>
-              <span>{t("register.register")}</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </>
+            t("register.register")
           )}
-        </button>
+        </Button>
       </form>
 
       {/* Alternatif daftar. Berbeda dari tombol di layar masuk: yang ini BOLEH
