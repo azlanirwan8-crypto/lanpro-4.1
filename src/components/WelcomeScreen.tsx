@@ -99,7 +99,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                 <button
                   type="button"
                   onClick={onOpenProfile}
-                  className="mt-3 px-6 py-2 min-h-9 rounded-lg bg-primary hover:bg-primary-hover text-content-inverse text-xs font-semibold transition-colors"
+                  className="btn-primary mt-3 px-6 py-2 min-h-9 rounded-lg text-xs font-semibold transition-colors"
                 >
                   {t("welcome.openProfile")}
                 </button>
@@ -119,7 +119,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                   <button
                     type="button"
                     onClick={onCreateProject}
-                    className="mt-3 px-6 py-2 min-h-9 rounded-lg bg-primary hover:bg-primary-hover text-content-inverse text-xs font-semibold transition-colors flex items-center gap-2"
+                    className="btn-primary mt-3 px-6 py-2 min-h-9 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>{t("appShell.createNewProject")}</span>

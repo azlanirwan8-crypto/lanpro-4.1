@@ -225,7 +225,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
             type="button"
             onClick={createGlobalIssue}
             disabled={isCreating || !quickCreateTitle.trim()}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-surface text-content-inverse hover:bg-primary-surface-hover active:bg-primary-active rounded-lg text-[11px] font-medium transition-all shadow-xs disabled:opacity-50 shrink-0 cursor-pointer"
+            className="btn-primary flex items-center gap-1.5 px-3 py-1.5 active:bg-primary-active rounded-lg text-[11px] font-medium transition-all shadow-xs disabled:opacity-50 shrink-0 cursor-pointer"
           >
             {isCreating ? (
               <div className="w-3.5 h-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" />

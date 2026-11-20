@@ -687,14 +687,14 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   <button
                     onClick={() => handleBulkAction("approve")}
                     disabled={isBulkActionPending}
-                    className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-content-inverse text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="btn-success px-3.5 py-1.5 disabled:opacity-50 text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
                   >
                     <CheckCircle className="w-3.5 h-3.5" /> {t("users.approve")}
                   </button>
                   <button
                     onClick={() => handleBulkAction("reject")}
                     disabled={isBulkActionPending}
-                    className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-content-inverse text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="btn-warning px-3.5 py-1.5 disabled:opacity-50 text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
                   >
                     <Clock className="w-3.5 h-3.5" /> {t("users.pendingReject")}
                   </button>
@@ -750,7 +750,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       await handleBulkAction("delete");
                     }}
                     disabled={isBulkActionPending}
-                    className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-content-inverse text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="btn-danger px-3.5 py-1.5 disabled:opacity-50 text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" /> {t("users.bulkDelete")}
                   </button>
@@ -1066,7 +1066,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                         <button
                           type="button"
                           onClick={() => setIsInviteModalOpen(true)}
-                          className="mt-3 inline-flex items-center gap-1.5 min-h-11 px-4 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium cursor-pointer"
+                          className="btn-primary mt-3 inline-flex items-center gap-1.5 min-h-11 px-4 rounded-lg text-xs font-medium cursor-pointer"
                         >
                           <UserPlus className="w-3.5 h-3.5" />
                           {t("users.addUser")}
@@ -1086,7 +1086,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   <button
                     type="button"
                     onClick={() => setIsInviteModalOpen(true)}
-                    className="inline-flex items-center gap-1.5 min-h-11 px-4 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium cursor-pointer"
+                    className="btn-primary inline-flex items-center gap-1.5 min-h-11 px-4 rounded-lg text-xs font-medium cursor-pointer"
                   >
                     <UserPlus className="w-3.5 h-3.5" />
                     {t("users.addUser")}

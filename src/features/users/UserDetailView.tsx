@@ -228,10 +228,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 bg-surface-sunken">
         <h2 className="text-xl font-medium text-content-strong mb-2">{t("userDetail.notFound")}</h2>
-        <button
-          onClick={onBack}
-          className="px-4 py-2 bg-primary-surface text-content-inverse rounded-md text-xs font-medium"
-        >
+        <button onClick={onBack} className="btn-primary px-4 py-2 rounded-lg text-xs font-medium">
           {t("userDetail.back")}
         </button>
       </div>
@@ -1476,7 +1473,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     <button
                       onClick={handleSaveUser}
                       disabled={isSaving}
-                      className="flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-content-inverse rounded-full text-xs font-medium shadow-soft transition disabled:opacity-50 cursor-pointer"
+                      className="btn-success flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium shadow-soft transition disabled:opacity-50 cursor-pointer"
                     >
                       {isSaving ? (
                         <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -2703,7 +2700,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         type="button"
                         onClick={handleSaveUser}
                         disabled={isSaving}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-xl text-xs font-semibold shadow-soft transition disabled:opacity-50 cursor-pointer"
+                        className="btn-primary flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-semibold shadow-soft transition disabled:opacity-50 cursor-pointer"
                       >
                         {isSaving ? (
                           <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -2876,7 +2873,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           disabled={
                             isSaving || !editPassword.trim() || editPassword !== editConfirmPassword
                           }
-                          className="flex items-center gap-2 px-5 py-2.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-xl text-xs font-semibold shadow-soft transition disabled:opacity-50 cursor-pointer"
+                          className="btn-primary flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-semibold shadow-soft transition disabled:opacity-50 cursor-pointer"
                         >
                           {isSaving ? (
                             <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -3245,7 +3242,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         <button
                           type="button"
                           onClick={handleAssignToProject}
-                          className="w-full flex items-center justify-center gap-1 px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium shadow-xs transition"
+                          className="btn-primary w-full flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium shadow-xs transition"
                         >
                           <Plus className="w-3.5 h-3.5" />
                           <span>{t("userDetail.delegate")}</span>

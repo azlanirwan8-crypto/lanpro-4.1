@@ -254,7 +254,7 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium rounded-lg text-sm shadow-xs transition-all"
+                className="btn-primary px-4 py-2 font-medium rounded-lg text-sm shadow-xs transition-all"
               >
                 {modalMode === "create"
                   ? t("flowchart.createDocument")

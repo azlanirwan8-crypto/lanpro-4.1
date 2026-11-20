@@ -143,7 +143,7 @@ export const ModalTenggatLogin: React.FC<Props> = ({ sudahLogin, abaikanPenjagaS
             ref={tombolTutup}
             type="button"
             onClick={tutup}
-            className="px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-content-inverse hover:bg-primary-hover transition-colors cursor-pointer"
+            className="btn-primary px-3 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer"
           >
             {t("tenggat.mengerti")}
           </button>

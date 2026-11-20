@@ -702,6 +702,14 @@ html {
     font-size: 12px;
   }
 
+  @media (min-width: 768px) {
+    .table-compact > tbody > tr > td:not([colspan]) {
+      height: 40px;
+      padding-block: 4px;
+      vertical-align: middle;
+    }
+  }
+
   /* Standarisasi Form Input & Dropdown Velzon Admin (Height 36px) */
   input[type="text"],
   input[type="email"],

@@ -501,7 +501,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
           type="button"
           onClick={handleSaveConfig}
           disabled={isSaving}
-          className="flex items-center justify-center gap-1.5 bg-success-surface hover:bg-success-surface/90 text-content-inverse px-3.5 py-1.5 rounded-md text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95 disabled:opacity-50 w-full sm:w-auto"
+          className="btn-success flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95 disabled:opacity-50 w-full sm:w-auto"
         >
           {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
           Simpan Konfigurasi Email
@@ -551,7 +551,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
                 type="button"
                 onClick={() => handleTestEmail(testTargetEmail)}
                 disabled={isTesting}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-emerald-600 text-content-inverse text-xs font-medium hover:bg-emerald-700 shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                className="btn-success flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium shadow-xs transition-colors cursor-pointer disabled:opacity-50"
               >
                 {isTesting ? <Loader2 size={13} className="animate-spin" /> : <Mail size={13} />}
                 {isTesting ? t("common.sending") : t("emailCfg.sendTest")}

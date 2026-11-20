@@ -304,7 +304,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                         )}
                         <button
                           onClick={() => handleRemoveSpecificEvidenceFromDrawer(ev.id)}
-                          className="absolute top-1 right-1 p-1 bg-danger-surface text-content-inverse rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="btn-danger absolute top-1 right-1 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                           title={t("qaDetail.deleteEvidence")}
                         >
                           <Trash2 className="w-3 h-3" />
@@ -351,7 +351,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                   />
                   <button
                     type="submit"
-                    className="p-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md transition-colors cursor-pointer shadow-2xs"
+                    className="btn-primary p-2 rounded-lg transition-colors cursor-pointer shadow-2xs"
                   >
                     <Send className="w-4 h-4" />
                   </button>
@@ -363,7 +363,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                 <div className="pt-2 border-t border-border-faint">
                   <button
                     onClick={() => handleOpenCreateBugModal(selectedTestCase)}
-                    className="w-full py-2 bg-danger-surface hover:bg-danger-hover text-content-inverse font-medium rounded-md text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
+                    className="btn-danger w-full py-2 font-medium rounded-lg text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
                   >
                     <Bug className="w-4 h-4" />
                     <span>{t("qaDetail.createBugFromCase")}</span>

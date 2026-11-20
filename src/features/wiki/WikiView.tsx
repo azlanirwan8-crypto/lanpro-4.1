@@ -970,7 +970,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
           {/* Datatable Container (Desktop sm+) */}
           <div className={LIST_TABLE_WRAP_CLASS}>
             <ResponsiveTable
-              className="w-full text-left border-collapse min-w-[880px]"
+              className="table-compact w-full text-left border-collapse min-w-[880px]"
               scroll={false}
             >
               <thead>
@@ -1725,7 +1725,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         <button
                           onClick={handleSendDocComment}
                           disabled={!newDocCommentText.trim()}
-                          className="p-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse disabled:opacity-40 cursor-pointer rounded-md transition-all shrink-0 shadow-2xs flex items-center justify-center"
+                          className="btn-primary p-1.5 disabled:opacity-40 cursor-pointer rounded-lg transition-all shrink-0 shadow-2xs flex items-center justify-center"
                           title={t("wiki.sendNote")}
                         >
                           <Send className="w-3.5 h-3.5" />
@@ -1750,7 +1750,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 {canCreate && (
                   <button
                     onClick={handleCreateNew}
-                    className="mt-5 px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all flex items-center gap-2 cursor-pointer"
+                    className="btn-primary mt-5 px-4 py-2 active:bg-primary-active rounded-lg text-xs font-medium shadow-xs transition-all flex items-center gap-2 cursor-pointer"
                   >
                     <Plus className="w-4 h-4" /> {t("wiki.addNewDocument")}
                   </button>
@@ -1984,7 +1984,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 <button
                   onClick={handleSave}
                   disabled={loading}
-                  className="px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                  className="btn-primary px-4 py-2 active:bg-primary-active rounded-lg text-xs font-medium shadow-xs flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
                 >
                   <Save className="w-3.5 h-3.5" />
                   <span>{loading ? t("wiki.saving") : t("wiki.saveDocument")}</span>

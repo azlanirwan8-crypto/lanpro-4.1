@@ -254,7 +254,7 @@ export const ConnectPanel = ({ hideHeader }: { hideHeader?: boolean } = {}) => {
                   type="button"
                   onClick={() => setIsConfirmOpen(true)}
                   disabled={loading || saveLoading}
-                  className="bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium py-2 px-5 rounded-md shadow-2xs active:scale-95 transition-all flex items-center justify-center text-xs cursor-pointer disabled:opacity-50"
+                  className="btn-primary font-medium py-2 px-5 rounded-lg shadow-2xs active:scale-95 transition-all flex items-center justify-center text-xs cursor-pointer disabled:opacity-50"
                 >
                   {saveLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

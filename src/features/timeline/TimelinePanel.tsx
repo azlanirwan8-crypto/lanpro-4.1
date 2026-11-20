@@ -747,7 +747,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               <button
                 type="button"
                 onClick={() => setMilestoneExpanded(true)}
-                className="h-9 px-3 md:px-4 bg-success-surface hover:bg-success-hover text-content-inverse rounded-lg text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                className="btn-success h-9 px-3 md:px-4 rounded-lg text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
                 title={t("roadmap.milestoneAdd")}
               >
                 <Flag className="w-3.5 h-3.5 shrink-0" />
@@ -764,7 +764,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               <button
                 type="button"
                 onClick={exportTimelineToPdf}
-                className="h-9 px-3 md:px-4 rounded-l-lg bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer"
+                className="btn-primary h-9 px-3 md:px-4 rounded-l-lg active:bg-primary-active text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer"
                 title={t("roadmap.pdfDocument")}
               >
                 <Download className="w-3.5 h-3.5 shrink-0" />
@@ -776,7 +776,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                 aria-haspopup="menu"
                 aria-expanded={isExportMenuOpen}
                 onClick={() => setIsExportMenuOpen((buka) => !buka)}
-                className="h-9 px-2 rounded-r-lg bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse transition-all flex items-center justify-center cursor-pointer"
+                className="btn-primary h-9 px-2 rounded-r-lg active:bg-primary-active transition-all flex items-center justify-center cursor-pointer"
                 title={t("roadmap.exportAs")}
               >
                 <ChevronDown className="w-3.5 h-3.5" />
@@ -875,8 +875,8 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               // panjang TIDAK dipotong, ia turun ke baris dua dan barisnya yang
               // tumbuh — lihat `tinggiRow`. Batas bawah/atas (#566) dipertahankan
               // supaya satu judul 200 karakter tidak pernah memakan papan Gantt.
-              "w-[38rem] min-w-[32rem] max-w-[min(56vw,44rem)] shrink-0 border-r border-border-divider/80 flex flex-col z-20 bg-surface relative",
-              "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:w-[min(80vw,20rem)] max-md:shadow-xl max-md:border-y-0 max-md:border-l-0",
+              "w-[44rem] min-w-[min(32rem,56vw)] max-w-[56vw] shrink-0 border-r border-border-divider/80 flex flex-col z-20 bg-surface relative",
+              "max-md:fixed max-md:min-w-0 max-md:max-w-full max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:w-[min(80vw,20rem)] max-md:shadow-xl max-md:border-y-0 max-md:border-l-0",
               "max-md:transition-transform max-md:duration-200",
               hierarchyOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full"
             )}

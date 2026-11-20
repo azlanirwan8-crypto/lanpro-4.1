@@ -398,7 +398,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                     fetchLogs(true);
                     scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
                   }}
-                  className="bg-primary-surface hover:bg-primary-surface-hover text-content-inverse px-4 py-1.5 rounded-full text-xs font-medium shadow-md flex items-center gap-1.5 transition-all border border-primary/40 cursor-pointer"
+                  className="btn-primary px-4 py-1.5 rounded-full text-xs font-medium shadow-md flex items-center gap-1.5 transition-all border border-primary/40 cursor-pointer"
                 >
                   <ArrowDown className="w-3.5 h-3.5" />
                   <span>{t("audit.newLogDetected")}</span>
@@ -637,7 +637,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                   </p>
                   <button
                     onClick={() => setSelectedLog(null)}
-                    className="px-8 py-3 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-medium rounded-xl transition-all shadow-xl active:scale-95"
+                    className="btn-primary px-8 py-3 text-xs font-medium rounded-lg transition-all shadow-xl active:scale-95"
                   >
                     {t("audit.doneReviewing")}
                   </button>

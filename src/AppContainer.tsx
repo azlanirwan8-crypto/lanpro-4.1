@@ -4556,7 +4556,7 @@ function AppContainer() {
                 ) && (
                   <button
                     onClick={() => setIsNewProjectModalOpen(true)}
-                    className="px-5 py-2.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-xl font-medium text-sm shadow-md shadow-primary/20 transition-all flex items-center gap-2"
+                    className="btn-primary px-5 py-2.5 rounded-lg font-medium text-sm shadow-md shadow-primary/20 transition-all flex items-center gap-2"
                   >
                     <Plus className="w-4 h-4" />
                     <span>{t("appShell.createNewProject")}</span>

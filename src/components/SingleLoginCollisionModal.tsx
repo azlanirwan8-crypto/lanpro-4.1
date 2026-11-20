@@ -98,7 +98,7 @@ export const SingleLoginCollisionModal: React.FC<Props> = ({
             <button
               onClick={onForceLogout}
               disabled={isLoading}
-              className="flex-1 px-4 py-2.5 bg-rose-500 text-content-inverse rounded-xl font-medium text-sm hover:bg-rose-600 transition-colors shadow-soft shadow-rose-200 flex items-center justify-center gap-2 disabled:opacity-70"
+              className="btn-danger flex-1 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors shadow-soft shadow-rose-200 flex items-center justify-center gap-2 disabled:opacity-70"
             >
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-border-glass/30 border-t-border-glass rounded-full animate-spin" />

@@ -4879,7 +4879,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           </h4>
                           <button
                             onClick={openUploadDocumentModal}
-                            className="p-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium rounded text-xs transition-colors cursor-pointer shadow-soft active:scale-95 flex items-center gap-2"
+                            className="btn-primary p-2 font-medium rounded-lg text-xs transition-colors cursor-pointer shadow-soft active:scale-95 flex items-center gap-2"
                             title={t("flowchart.uploadNewDocument")}
                           >
                             <Plus className="w-4 h-4" /> {t("flowchart.addDocument")}
@@ -5775,7 +5775,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             <>
                               <button
                                 onClick={() => handleSaveWorkspace()}
-                                className="p-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium rounded-xl flex items-center gap-1.5 transition-all shadow-soft active:scale-95"
+                                className="btn-primary p-2 font-medium rounded-lg flex items-center gap-1.5 transition-all shadow-soft active:scale-95"
                                 title={t("flowchart.saveFlowchart")}
                               >
                                 <Save className="w-3.5 h-3.5" />
@@ -6500,7 +6500,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               <button
                 onClick={handleSaveDocument}
                 disabled={!uploadDocName || !uploadDocLink}
-                className="px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-50 text-content-inverse text-xs font-medium rounded-md transition-all shadow-xs active:scale-95 cursor-pointer"
+                className="btn-primary px-4 py-2 active:bg-primary-active disabled:opacity-50 text-xs font-medium rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer"
               >
                 {t("flowchart.simpanTautan")}
               </button>

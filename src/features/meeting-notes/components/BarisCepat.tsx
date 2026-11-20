@@ -367,7 +367,7 @@ export const BarisCepat: React.FC<BarisCepatProps> = (props) => {
             type="button"
             onClick={onTambah}
             disabled={sedangMenyimpan || !nilai.concern.trim()}
-            className="shrink-0 h-11 px-4 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-40 text-content-inverse rounded-md text-xs font-normal shadow-xs transition-all cursor-pointer inline-flex items-center justify-center gap-1"
+            className="btn-primary shrink-0 h-11 px-4 active:bg-primary-active disabled:opacity-40 rounded-lg text-xs font-normal shadow-xs transition-all cursor-pointer inline-flex items-center justify-center gap-1"
             title={t("discussion.addPoint")}
           >
             <Plus className="w-3.5 h-3.5" />
@@ -520,7 +520,7 @@ export const BlokCepatMobile: React.FC<BarisCepatProps> = (props) => {
         type="button"
         onClick={onTambah}
         disabled={sedangMenyimpan || !nilai.concern.trim()}
-        className="w-full min-h-11 px-3 py-2.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-40 text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+        className="btn-primary w-full min-h-11 px-3 py-2.5 active:bg-primary-active disabled:opacity-40 rounded-lg text-xs font-medium shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
       >
         <Plus className="w-4 h-4" />
         <span>{t("discussion.add")}</span>

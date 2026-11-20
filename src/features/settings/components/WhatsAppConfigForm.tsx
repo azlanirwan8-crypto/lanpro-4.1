@@ -472,7 +472,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
           type="button"
           onClick={handleSaveConfig}
           disabled={isSaving || isBroadcasting}
-          className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-content-inverse px-3.5 py-2 sm:py-1.5 rounded-md text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95 disabled:opacity-50 w-full sm:w-auto"
+          className="btn-success flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-1.5 rounded-lg text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95 disabled:opacity-50 w-full sm:w-auto"
         >
           {isSaving ? (
             <Loader2 size={14} className="animate-spin shrink-0" />
@@ -509,7 +509,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
               </button>
               <button
                 onClick={() => handleTestWhatsApp(testTargetNumber)}
-                className="px-3.5 py-1.5 rounded-md bg-emerald-600 text-content-inverse text-xs font-medium hover:bg-emerald-700 shadow-xs transition-colors"
+                className="btn-success px-3.5 py-1.5 rounded-lg text-xs font-medium shadow-xs transition-colors"
               >
                 {t("whatsapp.send")}
               </button>

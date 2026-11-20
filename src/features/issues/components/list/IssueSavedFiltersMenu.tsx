@@ -90,7 +90,7 @@ export const IssueSavedFiltersMenu: React.FC<IssueSavedFiltersMenuProps> = ({
                 setName("");
                 toast.success(t("toast.savedFilterSaved", { name: trimmed }));
               }}
-              className="shrink-0 px-2.5 py-1.5 text-xs font-medium rounded-md bg-primary-surface text-content-inverse cursor-pointer"
+              className="btn-primary shrink-0 px-2.5 py-1.5 text-xs font-medium rounded-lg cursor-pointer"
             >
               {t("filters.saveFilter")}
             </button>

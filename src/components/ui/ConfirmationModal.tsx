@@ -183,7 +183,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                   type="button"
                   disabled={isLoading}
                   onClick={onConfirm}
-                  className="min-w-[5rem] px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-normal rounded text-[0.8125rem] shadow-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  className="btn-primary min-w-[5rem] px-4 py-2 font-normal rounded-lg text-[0.8125rem] shadow-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5"
                 >
                   {isLoading && (
                     <svg
@@ -216,7 +216,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                     type="button"
                     disabled={isLoading}
                     onClick={onClose}
-                    className="min-w-[5rem] px-4 py-2 bg-danger-surface hover:bg-danger-hover text-content-inverse font-normal rounded text-[0.8125rem] shadow-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                    className="btn-danger min-w-[5rem] px-4 py-2 font-normal rounded-lg text-[0.8125rem] shadow-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
                   >
                     {cancelText || t("common.cancel")}
                   </button>

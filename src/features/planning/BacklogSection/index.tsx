@@ -209,7 +209,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
                 type="button"
                 onClick={onAddSprint}
                 title={t("planning.newSprint")}
-                className="h-6 px-2 sm:px-2.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-[10px] font-medium shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                className="btn-primary h-6 px-2 sm:px-2.5 active:bg-primary-active rounded-lg text-[10px] font-medium shadow-xs transition-all flex items-center gap-1 cursor-pointer"
               >
                 <Plus className="w-3 h-3 shrink-0" />
                 <span className="hidden sm:inline">{t("planning.newSprint")}</span>

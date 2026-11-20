@@ -215,7 +215,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
             <button
               type="button"
               onClick={onDownloadTemplate}
-              className="px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-normal rounded-md transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              className="btn-primary px-3.5 py-1.5 text-xs font-normal rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <Download className="w-3.5 h-3.5" />
               <span>{t("testCase.downloadTemplate")}</span>

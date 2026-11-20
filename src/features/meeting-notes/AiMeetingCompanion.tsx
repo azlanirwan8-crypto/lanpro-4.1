@@ -1173,7 +1173,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                               setTranscript(editedTranscriptText);
                               await runAnalysisApi(editedTranscriptText, meetingLink);
                             }}
-                            className="btn-primary px-5 py-2.5 text-xs font-medium rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer hover:scale-[1.01] transition-transform"
+                            className="btn-primary px-5 py-2.5 text-xs font-medium rounded-lg shadow-md flex items-center gap-1.5 cursor-pointer hover:scale-[1.01] transition-transform"
                           >
                             <Save className="w-4 h-4" />
                             {t("aiMeeting.saveReanalyse")}
@@ -1523,7 +1523,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 <div className="flex justify-end">
                   <button
                     onClick={handleAnalyze}
-                    className="btn-primary px-6 py-3 rounded-xl text-xs font-medium shadow-soft-lg flex items-center gap-2 cursor-pointer hover:scale-[1.01] transition-transform"
+                    className="btn-primary px-6 py-3 rounded-lg text-xs font-medium shadow-soft-lg flex items-center gap-2 cursor-pointer hover:scale-[1.01] transition-transform"
                   >
                     <Sparkles className="w-4 h-4 text-content-inverse/80" />{" "}
                     {t("aiMeeting.startAiAnalysis")}
@@ -1660,7 +1660,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     <button
                       onClick={handleImportAllActionItems}
                       disabled={importingIds.length > 0}
-                      className="btn-primary px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 shadow-soft transition-colors cursor-pointer disabled:opacity-55"
+                      className="btn-primary px-4 py-2 rounded-lg text-xs font-medium flex items-center gap-1.5 shadow-soft transition-colors cursor-pointer disabled:opacity-55"
                     >
                       <Database className="w-3.5 h-3.5 text-content-inverse/80" />{" "}
                       {t("aiMeeting.importAllIntoDiscussionPoints")}
@@ -2033,7 +2033,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
               </button>
               <button
                 onClick={handleSubmitFeedback}
-                className="btn-primary px-4 py-2.5 text-xs font-medium rounded-xl shadow-md hover:shadow-soft-lg flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                className="btn-primary px-4 py-2.5 text-xs font-medium rounded-lg shadow-md hover:shadow-soft-lg flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
                 disabled={submittingFeedback || !feedbackText.trim()}
               >
                 {submittingFeedback ? (

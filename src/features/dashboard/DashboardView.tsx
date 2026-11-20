@@ -800,32 +800,31 @@ export function DashboardView(props: DashboardViewProps) {
               </div>
             </Card>
 
-            {/* Card 2: Running — varian solid primary ala Velzon Orders (#415) */}
+            {/* Card 2: Active tasks */}
             <Card
-              variant="primary"
               hoverLift
-              className="p-3 sm:p-5 flex flex-col justify-between relative overflow-hidden"
+              className="p-3 sm:p-5 shadow-2xs flex flex-col justify-between relative overflow-hidden"
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <span className="text-[11px] font-normal uppercase tracking-normal text-content-inverse/70">
+                  <span className="text-[11px] font-normal uppercase tracking-normal text-content-muted">
                     {t("dashboard.runningTasks")}
                   </span>
-                  <h3 className="text-2xl font-semibold text-content-inverse mt-1">
+                  <h3 className="text-2xl font-semibold text-content-strong mt-1">
                     {inProgressTasks.length}
                   </h3>
                 </div>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-surface/15 flex items-center justify-center text-content-inverse border border-border-inverse/40">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
                   <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center justify-between text-xs border-t border-border-inverse/30 pt-3">
-                <span className="font-medium text-content-inverse/85">
+              <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">
+                <span className="font-medium text-content-muted">
                   {t("dashboard.notDoneYet", { count: totalTasks - completedTasks.length })}
                 </span>
                 <button
                   onClick={() => props.setCurrentView("board")}
-                  className="text-content-inverse/90 hover:text-content-inverse hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-subtle text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
+                  className="text-primary hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-subtle text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
                 >
                   {t("dashboard.viewActiveBoard")}
                 </button>

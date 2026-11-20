@@ -223,7 +223,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                   </p>
                   <button
                     onClick={openCreateModal}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs shadow-primary/20 cursor-pointer"
+                    className="btn-primary inline-flex items-center gap-1.5 px-4 py-2 active:bg-primary-active rounded-lg text-xs font-medium transition-all shadow-xs shadow-primary/20 cursor-pointer"
                   >
                     <Plus className="w-4 h-4" /> {t("flowchart.addFlowchart")}
                   </button>

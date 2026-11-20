@@ -299,7 +299,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                     <button
                       onClick={() => handleRunQuery(query)}
                       disabled={loading || !query.trim()}
-                      className="absolute bottom-3 right-3 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse h-8 px-3.5 rounded-md shadow-2xs font-medium text-xs flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+                      className="btn-primary absolute bottom-3 right-3 h-8 px-3.5 rounded-lg shadow-2xs font-medium text-xs flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
                     >
                       <Play className="w-3.5 h-3.5" />
                       <span>{t("dbExplorer.runQuery")}</span>

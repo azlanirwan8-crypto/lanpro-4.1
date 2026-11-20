@@ -682,7 +682,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                         <button
                           type="button"
                           onClick={startAddMeeting}
-                          className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium shadow-xs cursor-pointer"
+                          className="btn-primary mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium shadow-xs cursor-pointer"
                         >
                           <Plus className="w-4 h-4" /> {t("meetings.addMeeting")}
                         </button>
@@ -1004,7 +1004,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                           setActiveMeetingId(null);
                           setMobileViewMode("list");
                         }}
-                        className="mt-2 inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium shadow-xs cursor-pointer"
+                        className="btn-primary mt-2 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium shadow-xs cursor-pointer"
                       >
                         <ArrowLeft className="w-3.5 h-3.5" />
                         {t("meetings.backToList")}
@@ -1230,7 +1230,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   type="button"
                   onClick={handleCreateMeeting}
                   disabled={loading || !newTitle.trim()}
-                  className="px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-50 text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all flex items-center gap-2 cursor-pointer"
+                  className="btn-primary px-5 py-2 active:bg-primary-active disabled:opacity-50 rounded-lg text-xs font-medium shadow-xs transition-all flex items-center gap-2 cursor-pointer"
                 >
                   {loading ? (
                     <>

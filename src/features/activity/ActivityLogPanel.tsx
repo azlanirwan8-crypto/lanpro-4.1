@@ -142,7 +142,7 @@ export const ActivityLogPanel = ({
             <button
               onClick={exportTasksToCSV}
               title={t("activityLog.exportCsv")}
-              className="shrink-0 px-2.5 sm:px-4 py-2 bg-primary-surface border border-primary text-content-inverse rounded-lg text-xs font-normal shadow-soft transition-all flex items-center gap-2 tracking-normal hover:bg-primary-surface-hover active:scale-95 uppercase"
+              className="btn-primary shrink-0 px-2.5 sm:px-4 py-2 border border-primary rounded-lg text-xs font-normal shadow-soft transition-all flex items-center gap-2 tracking-normal active:scale-95 uppercase"
             >
               <DownloadCloud className="w-4 h-4" />
               <span className="hidden sm:inline">{t("activityLog.exportCsv")}</span>

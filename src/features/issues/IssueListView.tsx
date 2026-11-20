@@ -494,7 +494,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                 <Droppable droppableId="backlog-droppable" type="backlog-tasks">
                   {(providedDroppable) => (
                     <table
-                      className={styles.table}
+                      className={cn(styles.table, !isCompact && "table-compact")}
                       style={{
                         minWidth: issueTableColumns
                           .filter((c) => c.visible)

@@ -198,7 +198,7 @@ export const MilestonePanel: React.FC<MilestonePanelProps> = ({
             <button
               type="submit"
               disabled={saving || !name.trim()}
-              className="inline-flex items-center justify-center gap-1.5 rounded-md bg-primary text-content-inverse px-3 py-2 text-sm font-medium disabled:opacity-50 shrink-0"
+              className="btn-primary inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium disabled:opacity-50 shrink-0"
             >
               <Plus className="w-4 h-4" />
               <span className="sm:inline">{t("roadmap.milestoneAdd")}</span>

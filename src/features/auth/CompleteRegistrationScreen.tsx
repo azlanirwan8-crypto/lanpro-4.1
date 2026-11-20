@@ -165,8 +165,7 @@ export const CompleteRegistrationScreen = ({
         <button
           type="button"
           onClick={kembali}
-          className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-primary-surface px-6
-                     text-sm font-medium text-content-inverse transition-colors duration-150 hover:bg-primary-surface-hover"
+          className="btn-primary mt-6 inline-flex min-h-11 items-center justify-center rounded-lg px-6 text-sm font-medium transition-colors duration-150"
         >
           {t("completeReg.backToLogin")}
         </button>
@@ -236,10 +235,7 @@ export const CompleteRegistrationScreen = ({
         <button
           type="submit"
           disabled={mengirim || !username}
-          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg
-                     bg-primary-surface px-4 text-sm font-medium text-content-inverse
-                     transition-colors duration-150 hover:bg-primary-surface-hover
-                     disabled:cursor-not-allowed disabled:opacity-60"
+          className="btn-primary inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {mengirim ? t("completeReg.submitting") : t("completeReg.submit")}
           {!mengirim && <ArrowRight className="h-4 w-4" />}

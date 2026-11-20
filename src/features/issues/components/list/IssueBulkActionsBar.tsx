@@ -308,7 +308,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
                       }
                       setSelectedTaskIds(new Set());
                     }}
-                    className="bg-rose-600 hover:bg-rose-700 active:scale-95 text-content-inverse font-medium rounded-xl px-4 py-2 flex items-center gap-1.5 transition-all shadow-soft cursor-pointer"
+                    className="btn-danger active:scale-95 font-medium rounded-lg px-4 py-2 flex items-center gap-1.5 transition-all shadow-soft cursor-pointer"
                   >
                     <Trash className="w-3.5 h-3.5" />
                     <span>{t("bulkActions.deleteCount", { count: deletableIds.length })}</span>
