@@ -266,7 +266,7 @@ export function DashboardView(props: DashboardViewProps) {
     if (id === "sidebar-widgets-stack") {
       return cn(
         heightClass,
-        "flex flex-col rounded-lg bg-surface border border-border-subtle text-content-strong shadow-soft p-6 transition-all duration-300 relative overflow-hidden"
+        "flex flex-col rounded-lg bg-surface border border-border-divider text-content-strong shadow-soft p-6 transition-all duration-300 relative overflow-hidden"
       );
     }
     if (id === "sprint-banner") {
@@ -283,7 +283,7 @@ export function DashboardView(props: DashboardViewProps) {
     }
     return cn(
       heightClass,
-      "flex flex-col rounded-lg transition-all duration-300 relative border border-border-subtle bg-surface text-content-strong shadow-soft p-6 overflow-hidden"
+      "flex flex-col rounded-lg transition-all duration-300 relative border border-border-divider bg-surface text-content-strong shadow-soft p-6 overflow-hidden"
     );
   };
 
@@ -747,7 +747,7 @@ export function DashboardView(props: DashboardViewProps) {
             {[0, 1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="p-3 sm:p-5 rounded-lg border border-border-subtle bg-surface shadow-2xs animate-pulse motion-reduce:animate-none"
+                className="p-3 sm:p-5 rounded-lg border border-border-divider bg-surface shadow-2xs animate-pulse motion-reduce:animate-none"
               >
                 <div className="h-2.5 w-16 rounded bg-surface-muted" />
                 <div className="mt-3 h-6 w-12 rounded bg-surface-muted" />
@@ -761,6 +761,7 @@ export function DashboardView(props: DashboardViewProps) {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6">
             {/* Card 1: Total Tasks — putih + soft icon + hover lift (#415) */}
             <Card
+              variant="panel"
               hoverLift
               className="p-3 sm:p-5 shadow-2xs flex flex-col justify-between relative overflow-hidden"
             >
@@ -802,6 +803,7 @@ export function DashboardView(props: DashboardViewProps) {
 
             {/* Card 2: Active tasks */}
             <Card
+              variant="panel"
               hoverLift
               className="p-3 sm:p-5 shadow-2xs flex flex-col justify-between relative overflow-hidden"
             >
@@ -833,6 +835,7 @@ export function DashboardView(props: DashboardViewProps) {
 
             {/* Card 3: Done — putih + soft primary icon */}
             <Card
+              variant="panel"
               hoverLift
               className="p-3 sm:p-5 shadow-2xs flex flex-col justify-between relative overflow-hidden"
             >
@@ -880,6 +883,7 @@ export function DashboardView(props: DashboardViewProps) {
 
             {/* Card 4: Blocked — putih; angka danger hanya bila >0 */}
             <Card
+              variant="panel"
               hoverLift
               className="p-3 sm:p-5 shadow-2xs flex flex-col justify-between relative overflow-hidden"
             >
@@ -939,7 +943,7 @@ export function DashboardView(props: DashboardViewProps) {
           {/* Main Column: Left Area */}
           <div className="lg:col-span-8 space-y-6">
             {/* Sprint Velocity & Progress Chart */}
-            <Card hoverLift className="p-5 shadow-2xs">
+            <Card variant="panel" hoverLift className="p-5 shadow-2xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
                 <div>
                   <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
@@ -975,7 +979,7 @@ export function DashboardView(props: DashboardViewProps) {
                   sprint yang DITUNJUK (pilihan header, atau sprint aktif bila
                   header di "All Sprints"), jadi labelnya tidak boleh menyebut
                   "aktif" ketika yang dipilih sprint lain. */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5 p-4 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5 p-4 bg-surface-sunken rounded-lg border border-border-divider/60 ">
                 <div>
                   <span className="text-[11px] font-normal text-content-subtle uppercase">
                     {t("dashboard.sprintDitampilkan")}
@@ -1021,7 +1025,11 @@ export function DashboardView(props: DashboardViewProps) {
                     data={realVelocityChartData}
                     margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="var(--color-border-faint)"
+                    />
                     <XAxis
                       dataKey="name"
                       tick={{ fontSize: 11, fill: "#64748b" }}
@@ -1096,7 +1104,11 @@ export function DashboardView(props: DashboardViewProps) {
                         data={burndownData}
                         margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                       >
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          vertical={false}
+                          stroke="var(--color-border-faint)"
+                        />
                         <XAxis
                           dataKey="date"
                           tick={{ fontSize: 10, fill: "#64748b" }}
@@ -1154,7 +1166,7 @@ export function DashboardView(props: DashboardViewProps) {
             {/* Task Breakdown Grid (Jenis Task & Status Breakdown) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* {t("dashboard.breakdownByType")} (Epic, Story, Task, Bug, Subtask) */}
-              <Card hoverLift className="p-5 shadow-2xs space-y-4">
+              <Card variant="panel" hoverLift className="p-5 shadow-2xs space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                   <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
                     <LayoutGrid className="w-4 h-4 text-primary" />
@@ -1200,7 +1212,7 @@ export function DashboardView(props: DashboardViewProps) {
               </Card>
 
               {/* {t("dashboard.breakdownByStatus")} (To Do, In Progress, Review, Done, Blocked) */}
-              <Card hoverLift className="p-5 shadow-2xs space-y-4">
+              <Card variant="panel" hoverLift className="p-5 shadow-2xs space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                   <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
                     <PieChartIcon className="w-4 h-4 text-success-text" />
@@ -1243,7 +1255,7 @@ export function DashboardView(props: DashboardViewProps) {
             </div>
 
             {/* Task Allocation per Team Member (Workload per User) */}
-            <Card hoverLift className="p-5 shadow-2xs">
+            <Card variant="panel" hoverLift className="p-5 shadow-2xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-border-faint pb-3 gap-2">
                 <div>
                   <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
@@ -1353,7 +1365,7 @@ export function DashboardView(props: DashboardViewProps) {
             </Card>
 
             {/* Widget 4: Epic & Roadmap Delivery Status (Waterfall & Agile Milestone Tracker) */}
-            <Card hoverLift className="p-5 shadow-2xs space-y-4">
+            <Card variant="panel" hoverLift className="p-5 shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <div>
                   <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
@@ -1377,7 +1389,7 @@ export function DashboardView(props: DashboardViewProps) {
                   epicsList.slice(0, 4).map((epic, idx) => (
                     <div
                       key={idx}
-                      className="p-3 bg-surface-sunken/70 rounded-lg border border-border-subtle/60 space-y-2"
+                      className="p-3 bg-surface-sunken/70 rounded-lg border border-border-divider/60 space-y-2"
                     >
                       <div className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2 min-w-0">
@@ -1405,7 +1417,7 @@ export function DashboardView(props: DashboardViewProps) {
                     </div>
                   ))
                 ) : (
-                  <div className="p-4 text-center bg-surface-sunken/50 rounded-lg border border-dashed border-border-subtle text-xs text-content-subtle">
+                  <div className="p-4 text-center bg-surface-sunken/50 rounded-lg border border-dashed border-border-divider text-xs text-content-subtle">
                     {t("dashboard.noEpicsConfiguredYetCreate")}
                   </div>
                 )}
@@ -1413,7 +1425,7 @@ export function DashboardView(props: DashboardViewProps) {
             </Card>
 
             {/* Widget 5: Sprint Time Tracking & Estimation Accuracy */}
-            <Card hoverLift className="p-5 shadow-2xs space-y-4">
+            <Card variant="panel" hoverLift className="p-5 shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <div>
                   <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
@@ -1430,7 +1442,7 @@ export function DashboardView(props: DashboardViewProps) {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
+                <div className="p-3 bg-surface-sunken rounded-lg border border-border-divider/60 ">
                   <span className="text-[11px] font-normal text-content-subtle uppercase">
                     {t("dashboard.estimatedHours")}
                   </span>
@@ -1438,7 +1450,7 @@ export function DashboardView(props: DashboardViewProps) {
                     {timeTrackingStats.totalEst} {t("dashboard.hours")}
                   </p>
                 </div>
-                <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
+                <div className="p-3 bg-surface-sunken rounded-lg border border-border-divider/60 ">
                   <span className="text-[11px] font-normal text-content-subtle uppercase">
                     {t("dashboard.loggedHours")}
                   </span>
@@ -1446,7 +1458,7 @@ export function DashboardView(props: DashboardViewProps) {
                     {timeTrackingStats.totalLog} {t("dashboard.hours")}
                   </p>
                 </div>
-                <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
+                <div className="p-3 bg-surface-sunken rounded-lg border border-border-divider/60 ">
                   <span className="text-[11px] font-normal text-content-subtle uppercase">
                     {t("dashboard.remainingDiff")}
                   </span>
@@ -1460,7 +1472,7 @@ export function DashboardView(props: DashboardViewProps) {
             </Card>
 
             {/* Widget 6: 7-Day Activity Trend & Task Creation Rate */}
-            <Card hoverLift className="p-5 shadow-2xs space-y-4">
+            <Card variant="panel" hoverLift className="p-5 shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <div>
                   <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
@@ -1491,7 +1503,11 @@ export function DashboardView(props: DashboardViewProps) {
                     }
                     margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="var(--color-border-faint)"
+                    />
                     <XAxis
                       dataKey="name"
                       tick={{ fontSize: 10, fill: "#64748b" }}
@@ -1558,7 +1574,7 @@ export function DashboardView(props: DashboardViewProps) {
           {/* Right Column: Priority Distribution & Watchlist */}
           <div className="lg:col-span-4 space-y-6">
             {/* Priority Breakdown */}
-            <Card hoverLift className="p-5 shadow-2xs space-y-4">
+            <Card variant="panel" hoverLift className="p-5 shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
                   <Zap className="w-4 h-4 text-warning-text" />
@@ -1608,7 +1624,7 @@ export function DashboardView(props: DashboardViewProps) {
             </Card>
 
             {/* Blocked & Overdue Watchlist */}
-            <Card hoverLift className="p-5 shadow-2xs space-y-4">
+            <Card variant="panel" hoverLift className="p-5 shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
                   <ShieldAlert className="w-4 h-4 text-danger-text" />

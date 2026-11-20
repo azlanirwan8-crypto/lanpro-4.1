@@ -211,7 +211,7 @@ export const VelzonFloatingParticles = () => {
  * sesuai contoh KPI Velzon (1–2 kartu solid + sisanya putih).
  * ───────────────────────────────────────────────────────────────────────── */
 
-export type CardVariant = "default" | "primary" | "success" | "info" | "inverse";
+export type CardVariant = "default" | "panel" | "primary" | "success" | "info" | "inverse";
 
 export const Card = ({
   children,
@@ -229,6 +229,7 @@ export const Card = ({
 }) => {
   const variants: Record<CardVariant, string> = {
     default: "bg-surface border border-border-subtle text-content-strong shadow-soft",
+    panel: "bg-surface border border-border-divider text-content-strong shadow-soft",
     primary: "bg-primary-surface border border-primary-surface text-content-inverse shadow-soft",
     success: "bg-success-surface border border-success-surface text-content-inverse shadow-soft",
     info: "bg-info-surface border border-info-surface text-content-inverse shadow-soft",

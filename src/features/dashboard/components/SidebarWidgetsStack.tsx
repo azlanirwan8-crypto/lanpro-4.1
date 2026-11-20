@@ -62,7 +62,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 h-auto p-1 select-none">
       {/* My Active Tasks — #413 Card hoverLift */}
-      <Card hoverLift className="p-5 rounded-xl">
+      <Card variant="panel" hoverLift className="p-5 rounded-xl">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-[11px] font-normal uppercase tracking-normal text-primary flex items-center gap-2">
             <Zap className="w-4 h-4 text-primary" /> {t("widgets.myActiveTasks")} (
@@ -116,7 +116,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       </Card>
 
       {/* Blocked / Stoppers */}
-      <Card hoverLift className="p-5 rounded-xl border-danger-border/40">
+      <Card variant="panel" hoverLift className="p-5 rounded-xl border-danger-border/40">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-[11px] font-normal uppercase tracking-normal text-danger flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-danger animate-bounce" />{" "}
@@ -170,7 +170,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       </Card>
 
       {/* Needs Attention / Overdue */}
-      <Card hoverLift className="p-5 rounded-xl border-danger-border/30">
+      <Card variant="panel" hoverLift className="p-5 rounded-xl border-danger-border/30">
         <h3 className="text-[11px] font-normal uppercase tracking-normal text-content-strong flex items-center gap-2 mb-3">
           <AlertCircle className="w-4 h-4 text-danger animate-pulse" />{" "}
           {t("widgets.needsAttention")} ({overdueTasks.length})
@@ -205,7 +205,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       </Card>
 
       {/* Due Soon */}
-      <Card hoverLift className="p-5 rounded-xl">
+      <Card variant="panel" hoverLift className="p-5 rounded-xl">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-[11px] font-normal uppercase tracking-normal text-content-strong flex items-center gap-2">
             <Zap className="w-4 h-4 text-warning" /> {t("widgets.dueSoon")} ({dueSoonTasks.length})
@@ -260,7 +260,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       </Card>
 
       {/* Recent Meeting Notes */}
-      <Card hoverLift className="p-5 rounded-xl">
+      <Card variant="panel" hoverLift className="p-5 rounded-xl">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-[11px] font-normal uppercase tracking-normal text-content-strong flex items-center gap-2">
             <Video className="w-4 h-4 text-info" /> {t("widgets.recentMeetings")} ({meetings.length}
@@ -297,7 +297,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       </Card>
 
       {/* Recent Documentation */}
-      <Card hoverLift className="p-5 rounded-xl">
+      <Card variant="panel" hoverLift className="p-5 rounded-xl">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-[11px] font-normal uppercase tracking-normal text-content-strong flex items-center gap-2">
             <FileText className="w-4 h-4 text-success" /> {t("widgets.documentation")} (
