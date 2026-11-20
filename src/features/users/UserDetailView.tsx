@@ -3488,10 +3488,10 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       <ResponsiveTable className="w-full text-left border-collapse" scroll={false}>
                         <thead className="bg-surface-sunken/40 border-b border-border-divider text-content-muted">
                           <tr>
-                            <th>File Name</th>
+                            <th>{t("userDetail.fileName")}</th>
                             <th>Type</th>
                             <th>Size</th>
-                            <th>Upload Date</th>
+                            <th>{t("userDetail.uploadDate")}</th>
                             <th className="text-right">Action</th>
                           </tr>
                         </thead>

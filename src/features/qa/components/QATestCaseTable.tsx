@@ -328,7 +328,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               {t("qaTable.passedRate")}
             </span>
             <span className="text-sm font-semibold text-content-strong block mt-0.5">
-              {passedPercent}%
+              {totalCasesCount > 0 ? `${passedPercent}%` : "—"}
             </span>
           </div>
           <div className="bg-emerald-500/10 p-2 rounded-md border border-emerald-500/30 text-center">
@@ -362,7 +362,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         </div>
 
         {/* ELEGANT TOP RIGHT SEARCH & FILTER BAR */}
-        <div className="flex items-center justify-between gap-2.5 pt-2.5 border-t border-border-faint">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 pt-2.5 border-t border-border-faint">
           <div className="text-xs font-normal text-content-strong flex items-center gap-1.5">
             <FileSpreadsheet className="w-3.5 h-3.5 text-primary" />
             <span>
@@ -370,7 +370,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="grid grid-cols-2 sm:flex items-center gap-2">
             {/* Elegant Search Input */}
             <div className="relative">
               <Search className="w-3.5 h-3.5 absolute left-2.5 top-2 text-content-subtle" />
@@ -379,12 +379,12 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                 placeholder={t("qaTable.searchScenario")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-7 pr-2.5 py-1 bg-surface-sunken border border-border-subtle/80 rounded-md text-xs font-normal text-content-body focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-36 sm:w-48"
+                className="pl-7 pr-2.5 py-1 bg-surface-sunken border border-border-subtle/80 rounded-md text-xs font-normal text-content-body focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-colors w-full sm:w-48"
               />
             </div>
 
             {/* Elegant Filter Status Select */}
-            <div className="w-36 sm:w-44">
+            <div className="min-w-0 sm:w-44">
               <StyledDropdown
                 value={statusFilter}
                 onChange={(val) => setStatusFilter(val as any)}
@@ -831,7 +831,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         </div>
 
         {setCasesPage && (
-          <div className="px-4 py-3 border-t border-border-divider flex items-center justify-between text-[11px] text-content-subtle">
+          <div className="px-4 py-3 border-t border-border-divider flex items-center justify-between text-[11px] text-content-subtle md:pr-20">
             <div>
               {(casesPage - 1) * casesPerPage + (searchedCases.length ? 1 : 0)}–
               {Math.min(casesPage * casesPerPage, casesTotal)} / {casesTotal}

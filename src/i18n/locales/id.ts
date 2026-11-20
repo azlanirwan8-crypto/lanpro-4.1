@@ -454,6 +454,8 @@ export const id = {
     minutesCount: "{{count}} menit",
     joinMeeting: "Gabung Rapat",
     modulesCount: "{{count}} Modul",
+    modulesCount_one: "{{count}} Modul",
+    modulesCount_other: "{{count}} Modul",
     tasksSelected: "{{count}} Tugas Terpilih",
     assignPicToTasks: "Tetapkan PIC ke {{count}} Tugas",
     setTo: "Ubah ke {{nilai}}",
@@ -1268,6 +1270,8 @@ export const id = {
     toggleFilterPanel: "Alihkan Panel Saringan Lanjutan",
   },
   userDetail: {
+    fileName: "Nama berkas",
+    uploadDate: "Tanggal unggah",
     emptyProjectRoleCatalog: "(katalog peran proyek kosong — isi di Master Data)",
     adminAccessPrefix: "Role",
     adminAccessSuffix:

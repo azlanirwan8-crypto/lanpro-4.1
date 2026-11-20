@@ -891,10 +891,23 @@ html.dark .shadow-xs {
 /* ==========================================
  * VELZON ANIMATION BUTTONS & RIPPLE WAVES EFFECT
  * ========================================== */
+.btn-animation,
+.btn-primary,
+.btn-secondary,
+.btn-success,
+.btn-info,
+.btn-warning,
+.btn-danger,
+.btn-dark,
+.btn-soft-primary {
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: 180ms;
+  transition-timing-function: ease-out;
+}
+
 .btn-animation {
   position: relative;
   overflow: hidden;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   border-width: 1px;
   @apply rounded-lg;
 }
@@ -927,7 +940,6 @@ html.dark .shadow-xs {
   background-color: var(--color-primary-surface);
   color: var(--color-content-inverse);
   border-color: var(--color-primary-surface);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-primary:hover {
   background-color: var(--color-primary-surface-hover);
@@ -942,7 +954,6 @@ html.dark .shadow-xs {
   background-color: var(--color-secondary);
   color: var(--color-content-inverse);
   border-color: var(--color-secondary);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-secondary:hover {
   filter: brightness(1.08);
@@ -951,7 +962,6 @@ html.dark .shadow-xs {
   background-color: var(--color-success-surface);
   color: var(--color-content-inverse);
   border-color: var(--color-success-surface);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-success:hover {
   filter: brightness(1.08);
@@ -960,7 +970,6 @@ html.dark .shadow-xs {
   background-color: var(--color-info-surface);
   color: var(--color-content-inverse);
   border-color: var(--color-info-surface);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-info:hover {
   filter: brightness(1.08);
@@ -969,7 +978,6 @@ html.dark .shadow-xs {
   background-color: var(--color-warning-surface);
   color: var(--color-content-inverse);
   border-color: var(--color-warning-surface);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-warning:hover {
   filter: brightness(1.08);
@@ -978,7 +986,6 @@ html.dark .shadow-xs {
   background-color: var(--color-danger-surface);
   color: var(--color-content-inverse);
   border-color: var(--color-danger-surface);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-danger:hover {
   filter: brightness(1.08);
@@ -987,7 +994,6 @@ html.dark .shadow-xs {
   background-color: var(--color-surface-inverse-strong);
   color: var(--color-content-inverse);
   border-color: var(--color-surface-inverse-strong);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-dark:hover {
   filter: brightness(1.15);
@@ -997,7 +1003,6 @@ html.dark .shadow-xs {
   background-color: color-mix(in srgb, var(--color-primary-surface) 12%, transparent);
   color: var(--color-primary);
   border-color: color-mix(in srgb, var(--color-primary-surface) 25%, transparent);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-soft-primary:hover {
   background-color: color-mix(in srgb, var(--color-primary-surface) 20%, transparent);

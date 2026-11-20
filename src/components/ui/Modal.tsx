@@ -78,7 +78,7 @@ export const Modal = ({
             if (!dialogLabel || event.key !== "Tab") return;
             const controls = Array.from(
               event.currentTarget.querySelectorAll<HTMLElement>(
-                "button:not(:disabled),input:not(:disabled),summary,textarea:not(:disabled),[tabindex='0']"
+                "a[href],button:not(:disabled),input:not(:disabled),select:not(:disabled),summary,textarea:not(:disabled),[tabindex='0']"
               )
             ).filter((node) => node.getClientRects().length > 0);
             const first = controls[0];
