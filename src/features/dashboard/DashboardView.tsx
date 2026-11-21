@@ -1026,7 +1026,7 @@ export function DashboardView(props: DashboardViewProps) {
                     margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                   >
                     <CartesianGrid
-                      strokeDasharray="3 3"
+                      strokeDasharray="var(--dashboard-grid-dash, 3 3)"
                       vertical={false}
                       stroke="var(--color-border-faint)"
                     />
@@ -1105,7 +1105,7 @@ export function DashboardView(props: DashboardViewProps) {
                         margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                       >
                         <CartesianGrid
-                          strokeDasharray="3 3"
+                          strokeDasharray="var(--dashboard-grid-dash, 3 3)"
                           vertical={false}
                           stroke="var(--color-border-faint)"
                         />
@@ -1504,7 +1504,7 @@ export function DashboardView(props: DashboardViewProps) {
                     margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                   >
                     <CartesianGrid
-                      strokeDasharray="3 3"
+                      strokeDasharray="var(--dashboard-grid-dash, 3 3)"
                       vertical={false}
                       stroke="var(--color-border-faint)"
                     />
@@ -1637,16 +1637,17 @@ export function DashboardView(props: DashboardViewProps) {
 
               <div className="space-y-2.5 max-h-[290px] overflow-y-auto custom-scrollbar pr-1">
                 {[...blockedTasks, ...overdueTasks].map((issue, idx) => (
-                  <div
+                  <button
+                    type="button"
                     key={idx}
                     onClick={() => {
                       props.setSelectedTaskForDetail(issue);
                       props.setIsTaskDetailModalOpen(true);
                     }}
-                    className="p-3 rounded-lg border border-border-subtle/70 bg-surface-sunken/50 hover:bg-surface hover:border-primary/30 transition cursor-pointer flex items-center justify-between gap-3 shadow-2xs group"
+                    className="w-full text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary p-3 rounded-lg border border-border-divider bg-surface-sunken/50 hover:bg-surface hover:border-primary/30 transition cursor-pointer flex items-center justify-between gap-3 shadow-2xs group"
                   >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-2">
                         <span className="text-[11px] font-mono font-normal text-content-subtle uppercase">
                           {issue.key}
                         </span>
@@ -1655,13 +1656,13 @@ export function DashboardView(props: DashboardViewProps) {
                             BLOCKED
                           </span>
                         )}
-                      </div>
-                      <p className="text-xs font-medium text-content-strong truncate mt-0.5 group-hover:text-primary transition">
+                      </span>
+                      <span className="block text-xs font-medium text-content-strong truncate mt-0.5 group-hover:text-primary transition">
                         {issue.title}
-                      </p>
-                    </div>
+                      </span>
+                    </span>
                     <ArrowUpRight className="w-4 h-4 text-content-subtle group-hover:text-primary transition shrink-0" />
-                  </div>
+                  </button>
                 ))}
                 {blockedTasks.length === 0 && overdueTasks.length === 0 && (
                   <div className="py-4 text-center text-xs text-content-subtle italic">

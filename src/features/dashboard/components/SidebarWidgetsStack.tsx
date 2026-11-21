@@ -81,35 +81,36 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             </div>
           ) : (
             myActiveTasks.map((task) => (
-              <div
+              <button
+                type="button"
                 key={task.id}
                 className={cn(
-                  "group p-3 rounded-xl border transition-all cursor-pointer bg-surface",
+                  "block w-full text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary group p-3 rounded-xl border transition-all cursor-pointer bg-surface",
                   isDueSoon24h(task.endDate)
                     ? "border-warning bg-warning-surface/10 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-warning hover:bg-warning-surface/20"
-                    : "border-border-subtle hover:border-primary-border/60 hover:shadow-2xs"
+                    : "border-border-divider hover:border-primary/60 hover:shadow-2xs"
                 )}
                 onClick={() => {
                   setSelectedTaskForDetail(task);
                   setIsTaskDetailModalOpen(true);
                 }}
               >
-                <div className="flex justify-between items-center mb-1">
-                  <div className="flex items-center gap-1.5">
+                <span className="flex justify-between items-center mb-1">
+                  <span className="flex items-center gap-1.5">
                     {isDueSoon24h(task.endDate) && (
                       <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[11px] font-normal uppercase tracking-normal bg-warning text-content-inverse animate-pulse">
                         ⏰ {getRemainingHours(task.endDate)}
                       </span>
                     )}
-                  </div>
-                  <div className="text-[11px] font-normal text-content-muted uppercase tracking-normal">
+                  </span>
+                  <span className="block text-[11px] font-normal text-content-muted uppercase tracking-normal">
                     {task.priority}
-                  </div>
-                </div>
-                <div className="text-xs font-medium text-content-strong leading-snug line-clamp-2">
+                  </span>
+                </span>
+                <span className="block text-xs font-medium text-content-strong leading-snug line-clamp-2">
                   {task.title}
-                </div>
-              </div>
+                </span>
+              </button>
             ))
           )}
         </div>
@@ -135,35 +136,36 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             </div>
           ) : (
             blockedTasks.map((task) => (
-              <div
+              <button
+                type="button"
                 key={task.id}
                 className={cn(
-                  "group p-3 rounded-xl border transition-all cursor-pointer bg-surface",
+                  "block w-full text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary group p-3 rounded-xl border transition-all cursor-pointer bg-surface",
                   isDueSoon24h(task.endDate)
                     ? "border-warning bg-warning-surface/10 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-warning hover:bg-warning-surface/20"
-                    : "border-danger-border/30 hover:border-danger-border/60 hover:shadow-2xs"
+                    : "border-danger-border/30 hover:border-danger/60 hover:shadow-2xs"
                 )}
                 onClick={() => {
                   setSelectedTaskForDetail(task);
                   setIsTaskDetailModalOpen(true);
                 }}
               >
-                <div className="flex justify-between items-center mb-1">
-                  <div className="flex items-center gap-1.5">
+                <span className="flex justify-between items-center mb-1">
+                  <span className="flex items-center gap-1.5">
                     {isDueSoon24h(task.endDate) && (
                       <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[11px] font-normal uppercase tracking-normal bg-warning text-content-inverse animate-pulse">
                         ⏰ {getRemainingHours(task.endDate)}
                       </span>
                     )}
-                  </div>
-                  <div className="text-[11px] font-normal text-danger uppercase tracking-normal">
+                  </span>
+                  <span className="block text-[11px] font-normal text-danger uppercase tracking-normal">
                     Blocked
-                  </div>
-                </div>
-                <div className="text-xs font-medium text-content-strong leading-snug line-clamp-2">
+                  </span>
+                </span>
+                <span className="block text-xs font-medium text-content-strong leading-snug line-clamp-2">
                   {task.title}
-                </div>
-              </div>
+                </span>
+              </button>
             ))
           )}
         </div>
@@ -182,23 +184,24 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             </div>
           ) : (
             overdueTasks.map((task) => (
-              <div
+              <button
+                type="button"
                 key={task.id}
-                className="group p-3 rounded-xl border border-border-subtle hover:border-danger-border/60 hover:shadow-2xs transition-all cursor-pointer bg-surface"
+                className="block w-full text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary group p-3 rounded-xl border border-border-divider hover:border-danger/60 hover:shadow-2xs transition-all cursor-pointer bg-surface"
                 onClick={() => {
                   setSelectedTaskForDetail(task);
                   setIsTaskDetailModalOpen(true);
                 }}
               >
-                <div className="flex justify-between items-start mb-1">
-                  <div className="text-[11px] font-normal text-danger uppercase tracking-normal">
+                <span className="flex justify-between items-start mb-1">
+                  <span className="block text-[11px] font-normal text-danger uppercase tracking-normal">
                     {t("dashboard.overdue")}
-                  </div>
-                </div>
-                <div className="text-xs font-medium text-content-strong leading-snug line-clamp-2">
+                  </span>
+                </span>
+                <span className="block text-xs font-medium text-content-strong leading-snug line-clamp-2">
                   {task.title}
-                </div>
-              </div>
+                </span>
+              </button>
             ))
           )}
         </div>
@@ -223,37 +226,38 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             </div>
           ) : (
             dueSoonTasks.map((task) => (
-              <div
+              <button
+                type="button"
                 key={task.id}
                 className={cn(
-                  "group p-3 rounded-xl border transition-all cursor-pointer bg-surface",
+                  "block w-full text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary group p-3 rounded-xl border transition-all cursor-pointer bg-surface",
                   isDueSoon24h(task.endDate)
                     ? "border-warning bg-warning-surface/10 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-warning hover:bg-warning-surface/20"
-                    : "border-border-subtle hover:border-primary-border/60 hover:shadow-2xs"
+                    : "border-border-divider hover:border-primary/60 hover:shadow-2xs"
                 )}
                 onClick={() => {
                   setSelectedTaskForDetail(task);
                   setIsTaskDetailModalOpen(true);
                 }}
               >
-                <div className="flex justify-between items-center mb-1">
-                  <div className="flex items-center gap-1.5">
+                <span className="flex justify-between items-center mb-1">
+                  <span className="flex items-center gap-1.5">
                     {isDueSoon24h(task.endDate) && (
                       <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[11px] font-normal uppercase tracking-normal bg-warning text-content-inverse animate-pulse">
                         ⏰ {getRemainingHours(task.endDate)}
                       </span>
                     )}
-                  </div>
-                  <div className="text-[11px] font-medium text-content-muted">
+                  </span>
+                  <span className="block text-[11px] font-medium text-content-muted">
                     {formatDistanceToNow(ensureDate(task.endDate!), {
                       addSuffix: true,
                     })}
-                  </div>
-                </div>
-                <div className="text-xs font-medium text-content-strong leading-snug line-clamp-2">
+                  </span>
+                </span>
+                <span className="block text-xs font-medium text-content-strong leading-snug line-clamp-2">
                   {task.title}
-                </div>
-              </div>
+                </span>
+              </button>
             ))
           )}
         </div>
