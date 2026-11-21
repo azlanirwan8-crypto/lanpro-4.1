@@ -14,6 +14,7 @@ import {
   type IssueFilterSnapshot,
 } from "./lib/issueFilterSnapshot";
 import { cocokJenisIsu, kunciJenisIsu } from "../../lib/jenisIsu";
+import { indeksAnak, indeksId, keturunanCocok, rantaiLeluhur } from "./lib/cariKedalaman";
 
 export const useIssueList = (props: IssueListViewProps) => {
   const { tasks, roots, selectedProject, user, masterData, userRole } = props;
@@ -197,6 +198,8 @@ export const useIssueList = (props: IssueListViewProps) => {
       new Map((rawRootList || []).filter((t) => t && t.id).map((t) => [t.id, t])).values()
     );
     const query = issueSearch.toLowerCase().trim();
+    const anakIndeks = indeksAnak(tArr);
+    const byId = indeksId(tArr);
 
     return rootList.filter((root: Task) => {
       const matchesFiltersAndSearch = (t: Task) => {
@@ -291,14 +294,23 @@ export const useIssueList = (props: IssueListViewProps) => {
       };
 
       const rootMatches = matchesFiltersAndSearch(root);
-      const subtasks = tArr.filter((c) => c.parentId === root.id);
-      const childMatches = subtasks.some((child) => matchesFiltersAndSearch(child));
+      // #864 — kecocokan dicari di SEMUA kedalaman, bukan hanya anak langsung.
+      // Render baris memang sudah rekursif (`IssueTableRow` `depth + 1`); yang
+      // membatasi selama ini hanyalah pemeriksaan satu langkah di sini.
+      const keturunan =
+        rootMatches && !query ? [] : keturunanCocok(root.id, anakIndeks, matchesFiltersAndSearch);
+      const childMatches = keturunan.length > 0;
 
       if (childMatches && query) {
+        // Yang dibuka bukan cuma akar: simpul antara harus ikut, kalau tidak
+        // cucu yang cocok tidak pernah tersentuh walau akarnya sudah tampil.
+        const rantai = new Set<string>([root.id]);
+        for (const s of keturunan) for (const id of rantaiLeluhur(s.id, byId)) rantai.add(id);
         setExpandedTasks((prev) => {
-          if (prev.has(root.id)) return prev;
+          const berikutnya = [...rantai].filter((id) => !prev.has(id));
+          if (berikutnya.length === 0) return prev;
           const next = new Set(prev);
-          next.add(root.id);
+          for (const id of berikutnya) next.add(id);
           return next;
         });
       }

@@ -20,11 +20,11 @@ import {
   UncontrolledInput,
 } from "../../../../components/ui/CommonComponents";
 import { LanproDatePicker } from "../../../../components/ui/LanproDatePicker";
-import { cocokJenisIsu } from "../../../../lib/jenisIsu";
 import { gayaLabel, warnaDariMaster } from "../../../../lib/warnaLabel";
 import { Task, MasterData, UserProfile, Sprint } from "../../../../types";
 import { styles } from "../../styles";
 import { IssueTableInlineAddRow } from "./IssueTableInlineAddRow";
+import { cocokDenganSaringanBaris, indeksAnak, keturunanCocok } from "../../lib/cariKedalaman";
 
 interface IssueTableRowProps {
   task: Task;
@@ -145,87 +145,36 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
   const tArr = tasks || [];
 
   const isExpanded = expandedTasks.has(task.id);
+  const saringanBaris = {
+    issueSearch,
+    listFilterStatus,
+    listFilterPriority,
+    listFilterAssignee,
+    listFilterCategory,
+    listFilterSprint,
+    listFilterEnvironment,
+    listFilterProjectRisk,
+    listFilterRelease,
+    listFilterResolution,
+    listFilterType,
+    listFilterLabel,
+    listFilterStartDate,
+    listFilterEndDate,
+    listFilterDateType,
+  };
+  const cocokBaris = (s: Task) => cocokDenganSaringanBaris(s, mArr, saringanBaris);
+  const anakIndeks = React.useMemo(() => indeksAnak(tArr), [tArr]);
+
+  // #864 — anak yang tidak cocok TETAP tampil selama salah satu KETURUNANNYA
+  // cocok. Aturan ini dulu mustahil: saringan di bawah ini berhenti di anak
+  // langsung, padahal render baris rekursif (`IssueTableRow` `depth + 1`), jadi
+  // cucu tidak pernah tersentuh walau datanya ada di layar.
+  const adaCari = Boolean(issueSearch && issueSearch.trim());
   const rawSubtasks = tArr
     .filter((t) => t.parentId === task.id)
-    .filter((s) => {
-      if (issueSearch) {
-        const query = issueSearch.toLowerCase().trim();
-        const matchesQuery =
-          (s.title || "").toLowerCase().includes(query) ||
-          (s.key || "").toLowerCase().includes(query);
-        if (!matchesQuery) return false;
-      }
-      if (listFilterStatus && listFilterStatus !== "All" && s.status !== listFilterStatus)
-        return false;
-      if (listFilterPriority && listFilterPriority !== "All" && s.priority !== listFilterPriority)
-        return false;
-      if (listFilterAssignee && listFilterAssignee !== "All" && s.assigneeId !== listFilterAssignee)
-        return false;
-      if (listFilterCategory && listFilterCategory !== "All" && s.category !== listFilterCategory)
-        return false;
-      if (listFilterSprint && listFilterSprint !== "All") {
-        if (listFilterSprint === "Backlog" && s.sprintId) return false;
-        if (listFilterSprint !== "Backlog" && s.sprintId !== listFilterSprint) return false;
-      }
-      if (
-        listFilterEnvironment &&
-        listFilterEnvironment !== "All" &&
-        s.environment !== listFilterEnvironment
-      )
-        return false;
-      if (
-        listFilterProjectRisk &&
-        listFilterProjectRisk !== "All" &&
-        s.projectRisk !== listFilterProjectRisk
-      )
-        return false;
-      if (listFilterRelease && listFilterRelease !== "All" && s.release !== listFilterRelease)
-        return false;
-      if (
-        listFilterResolution &&
-        listFilterResolution !== "All" &&
-        s.resolution !== listFilterResolution
-      )
-        return false;
-      // #705 — anak disaring dengan aturan yang SAMA seperti induknya; lihat
-      // `src/lib/jenisIsu.ts` kenapa ini tidak boleh perbandingan string mentah.
-      if (!cocokJenisIsu(mArr, s.type, listFilterType)) return false;
-      if (listFilterLabel && listFilterLabel !== "All") {
-        if (!s.labels || !Array.isArray(s.labels) || !s.labels.includes(listFilterLabel))
-          return false;
-      }
-      if (listFilterStartDate || listFilterEndDate) {
-        const col = listFilterDateType || "dueDate";
-        const checkSubDate = (key: string): boolean => {
-          const rawVal = s[key as keyof Task];
-          if (!rawVal) return false;
-          try {
-            const itemDate = new Date(rawVal);
-            if (isNaN(itemDate.getTime())) return false;
-            const time = itemDate.getTime();
-            const startOk = listFilterStartDate
-              ? time >= new Date(listFilterStartDate + "T00:00:00").getTime()
-              : true;
-            const endOk = listFilterEndDate
-              ? time <= new Date(listFilterEndDate + "T23:59:59").getTime()
-              : true;
-            return startOk && endOk;
-          } catch {
-            return false;
-          }
-        };
-
-        if (col === "any") {
-          const hasAnyMatch = ["startDate", "endDate", "dueDate", "createdAt"].some((c) =>
-            checkSubDate(c)
-          );
-          if (!hasAnyMatch) return false;
-        } else {
-          if (!checkSubDate(col)) return false;
-        }
-      }
-      return true;
-    });
+    .filter(
+      (s) => cocokBaris(s) || (adaCari && keturunanCocok(s.id, anakIndeks, cocokBaris).length > 0)
+    );
 
   const subtasks = Array.from(
     new Map(rawSubtasks.filter((s) => s && s.id).map((s) => [s.id, s])).values()

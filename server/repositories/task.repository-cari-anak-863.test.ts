@@ -11,19 +11,22 @@
  * kehabisan data karena server tidak pernah mengirim akar itu.
  *
  * YANG DIUJI DI SINI, dan hanya bisa diuji di lapis ini karena query-nya SQL:
- *   1. judul/kunci ANAK LANGSUNG yang cocok mengangkat akarnya jadi kandidat
+ *   1. judul/kunci KETURUNAN yang cocok mengangkat akarnya jadi kandidat
  *      halaman, lalu pohonnya diturunkan seperti biasa;
- *   2. akar yang cocok LANGSUNG tetap jalan walau tidak punya anak cocok;
- *   3. tanpa kecocokan anak, klausa `id IN (?)` tambahan TIDAK ditambahkan —
+ *   2. akar yang cocok LANGSUNG tetap jalan walau tidak ada keturunan cocok;
+ *   3. tanpa kecocokan, klausa `id IN (?)` tambahan TIDAK ditambahkan —
  *      bentuk query tanpa search harus tetap persis seperti semula;
  *   4. istilah di-trim, di-lower, dan dibungkus `%…%`;
- *   5. query anak mengikat `projectId` dua kali (akar DAN anak) supaya anak
+ *   5. query rantai mengikat `projectId` di kedua langkah supaya keturunan
  *      milik proyek lain tidak mengangkat akar di proyek ini.
  *
- * BATAS KEDALAMAN yang disengaja: hanya ANAK LANGSUNG. UI Daftar Isu merender
- * dua tingkat dan saringan klien hanya mengecek anak langsung; mencari kedalaman
- * penuh akan mengangkat akar yang lalu disembunyikan klien. Kecocokan cucu
- * (data impor) tetap tidak ditemukan — konsisten dengan klien yang sudah ada.
+ * BATAS KEDALAMAN — DIUBAH SADAR oleh #864. Berkas ini dulu mengunci "hanya ANAK
+ * LANGSUNG" karena dua saringan klien juga berhenti di situ. #864 mengubah
+ * ketiganya (server, `displayRoots`, baris anak) menjadi kedalaman penuh, jadi
+ * yang dikunci di sini bukan lagi kedalamannya melainkan ENAM perilaku #863 yang
+ * tidak boleh hilang: pengangkatan akar lewat keturunan, klausa `id IN` yang
+ * hanya muncul bila ada hasil, bentuk query tanpa search, pemrosesan istilah,
+ * dan ikatan `projectId` di kedua langkah rantai.
  */
 jest.mock("../../src/lib/db", () => ({
   __esModule: true,
@@ -37,7 +40,7 @@ const pagination = { page: 1, limit: 25, offset: 0 } as any;
 const baris = (rows: any[]) => [rows, []];
 
 interface Jawaban {
-  anak?: any[];
+  naik?: any[];
   total?: any[];
   akar?: any[];
   tree?: any[];
@@ -49,7 +52,7 @@ function pasang(jawaban: Jawaban) {
   (db.getConnection as jest.Mock).mockResolvedValue({
     query: async (sql: string, params: unknown[]) => {
       panggilan.push({ sql, params: params ?? [] });
-      if (/SELECT DISTINCT p\.id/i.test(sql)) return baris(jawaban.anak ?? []);
+      if (/WITH RECURSIVE naik/i.test(sql)) return baris(jawaban.naik ?? []);
       if (/COUNT\(\*\)/i.test(sql)) return baris(jawaban.total ?? []);
       if (/WITH RECURSIVE tree/i.test(sql)) return baris(jawaban.tree ?? []);
       return baris(jawaban.akar ?? []);
@@ -78,7 +81,7 @@ afterEach(() => jest.restoreAllMocks());
 describe("#863 pencarian Daftar Isu menemukan isu lewat judul anak", () => {
   it("judul anak yang cocok mengangkat akarnya: pohon diturunkan, total = 1 akar", async () => {
     const panggilan = pasang({
-      anak: [{ id: "epic-1" }],
+      naik: [{ id: "epic-1" }],
       total: [{ total: 1 }],
       akar: [{ id: "epic-1" }],
       tree: [{ id: "epic-1" }, { id: "sub-homepage" }],
@@ -97,7 +100,7 @@ describe("#863 pencarian Daftar Isu menemukan isu lewat judul anak", () => {
 
   it("akar yang cocok langsung tetap jalan walau tidak ada anak cocok", async () => {
     pasang({
-      anak: [],
+      naik: [],
       total: [{ total: 1 }],
       akar: [{ id: "akar-homepage" }],
       tree: [{ id: "akar-homepage" }],
@@ -112,7 +115,7 @@ describe("#863 pencarian Daftar Isu menemukan isu lewat judul anak", () => {
 
   it("tanpa kecocokan anak, klausa id IN tambahan tidak ditambahkan", async () => {
     const panggilan = pasang({
-      anak: [],
+      naik: [],
       total: [{ total: 1 }],
       akar: [{ id: "akar-homepage" }],
       tree: [{ id: "akar-homepage" }],
@@ -129,7 +132,7 @@ describe("#863 pencarian Daftar Isu menemukan isu lewat judul anak", () => {
 
   it("istilah di-trim, di-lower, dan dibungkus wildcard", async () => {
     const panggilan = pasang({
-      anak: [],
+      naik: [],
       total: [{ total: 0 }],
       akar: [],
       tree: [],
@@ -138,15 +141,15 @@ describe("#863 pencarian Daftar Isu menemukan isu lewat judul anak", () => {
 
     await taskRepository.findIssueListPage("p1", pagination, "  HomePage  ");
 
-    const anak = panggilan.find((p) => /SELECT DISTINCT p\.id/i.test(p.sql))!;
-    expect(anak.params).toEqual(["p1", "p1", "%homepage%", "%homepage%"]);
+    const naik = panggilan.find((p) => /WITH RECURSIVE naik/i.test(p.sql))!;
+    expect(naik.params).toEqual(["p1", "%homepage%", "%homepage%", "p1"]);
     const hitung = panggilan.find((p) => /COUNT\(\*\)/i.test(p.sql))!;
     expect(hitung.params).toEqual(["p1", "%homepage%", "%homepage%"]);
   });
 
-  it("query anak mengikat projectId untuk akar dan anak (tidak silang proyek)", async () => {
+  it("query naik mengikat projectId di anchor dan langkah rekursif (tidak silang proyek)", async () => {
     const panggilan = pasang({
-      anak: [],
+      naik: [],
       total: [{ total: 0 }],
       akar: [],
       tree: [],
@@ -155,12 +158,12 @@ describe("#863 pencarian Daftar Isu menemukan isu lewat judul anak", () => {
 
     await taskRepository.findIssueListPage("p1", pagination, "homepage");
 
-    const anak = panggilan.find((p) => /SELECT DISTINCT p\.id/i.test(p.sql))!;
-    expect(anak.params[0]).toBe("p1");
-    expect(anak.sql.match(/projectId = \?/g)?.length).toBeGreaterThanOrEqual(2);
+    const naik = panggilan.find((p) => /WITH RECURSIVE naik/i.test(p.sql))!;
+    expect(naik.params[0]).toBe("p1");
+    expect(naik.sql.match(/projectId = \?/g)?.length).toBeGreaterThanOrEqual(2);
   });
 
-  it("tanpa search, query anak sama sekali tidak dikirim", async () => {
+  it("tanpa search, query naik sama sekali tidak dikirim", async () => {
     const panggilan = pasang({
       total: [{ total: 1 }],
       akar: [{ id: "akar-1" }],
@@ -170,6 +173,6 @@ describe("#863 pencarian Daftar Isu menemukan isu lewat judul anak", () => {
 
     await taskRepository.findIssueListPage("p1", pagination);
 
-    expect(panggilan.some((p) => /SELECT DISTINCT p\.id/i.test(p.sql))).toBe(false);
+    expect(panggilan.some((p) => /WITH RECURSIVE naik/i.test(p.sql))).toBe(false);
   });
 });

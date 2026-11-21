@@ -198,27 +198,27 @@ export class TaskRepository {
     if (search?.trim()) {
       const cocok = "(LOWER(COALESCE(title, '')) LIKE ? OR LOWER(COALESCE(taskKey, '')) LIKE ?)";
       const term = `%${search.trim().toLowerCase()}%`;
-      // #863 — judul/kunci ANAK LANGSUNG juga ikut mencari: akar dari anak yang
-      // cocok diangkat menjadi kandidat halaman, walau judul akarnya sendiri
-      // tidak cocok. Kedalaman sengaja SATU tingkat karena dua saringan klien
-      // juga berhenti di situ: `childMatches` hanya mengecek anak langsung
-      // (`hooks.ts:295`) dan baris anak yang tidak cocok dibuang dari daftar
-      // induknya (`IssueTableRow.tsx:150-156`) walau render-nya rekursif
-      // (`IssueTableRow.tsx:814-825`). CTE berkedalaman penuh di sini akan
-      // mengangkat akar yang tetap disembunyikan klien — #864.
-      const [anakRows]: any = await connection.query(
-        `SELECT DISTINCT p.id FROM Tasks p
-           INNER JOIN Tasks c ON c.parentId = p.id
-          WHERE p.projectId = ? AND (p.parentId IS NULL OR p.parentId = '')
-            AND c.projectId = ?
-            AND (LOWER(COALESCE(c.title, '')) LIKE ? OR LOWER(COALESCE(c.taskKey, '')) LIKE ?)`,
-        [projectId, projectId, term, term]
+      // #864: UNION menyimpan setiap pasangan id/parentId sekali. Rantai
+      // melingkar berhenti saat simpul lama ditemukan, tanpa batas kedalaman.
+      // Kedua langkah dibatasi pada proyek yang sedang dicari.
+      const [naikRows]: any = await connection.query(
+        `WITH RECURSIVE naik AS (
+           SELECT t.id, t.parentId
+             FROM Tasks t
+            WHERE t.projectId = ? AND ${cocok}
+           UNION
+           SELECT p.id, p.parentId
+             FROM Tasks p INNER JOIN naik n ON p.id = n.parentId
+            WHERE p.projectId = ?
+         )
+         SELECT DISTINCT id FROM naik WHERE parentId IS NULL OR parentId = ''`,
+        [projectId, term, term, projectId]
       );
-      const akarLewatAnak: string[] = (anakRows || []).map((r: any) => r.id).filter(Boolean);
-      rootWhere += ` AND (${cocok}${akarLewatAnak.length ? " OR id IN (?)" : ""})`;
+      const akarLewatKeturunan: string[] = (naikRows || []).map((r: any) => r.id).filter(Boolean);
+      rootWhere += ` AND (${cocok}${akarLewatKeturunan.length ? " OR id IN (?)" : ""})`;
       params.push(term, term);
       // `IN (?)` + array, bukan `IN (?,?,…)`: lihat catatan di bawah.
-      if (akarLewatAnak.length) params.push(akarLewatAnak);
+      if (akarLewatKeturunan.length) params.push(akarLewatKeturunan);
     }
 
     const [countRows]: any = await connection.query(
