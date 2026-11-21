@@ -821,6 +821,18 @@ html.dark .shadow-2xs {
     0 1px 1px rgb(0 0 0 / 0.35),
     0 0 0 1px rgb(255 255 255 / 0.05);
 }
+/* #862: Dashboard surfaces provide separation in the dark theme. The
+ * generic shadow-2xs seam and decorative shell borders stay for other views. */
+html.dark .dashboard-panel,
+html.dark .dashboard-task-card:not(:hover) {
+  border-color: transparent;
+  box-shadow: none;
+}
+html.dark .dashboard-page-header,
+html.dark [data-dashboard-shell] [data-dashboard-divider] {
+  border-color: transparent;
+}
+
 html.dark .shadow-xs {
   box-shadow:
     0 1px 2px rgb(0 0 0 / 0.4),

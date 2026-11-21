@@ -71,6 +71,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
 
   return (
     <motion.aside
+      data-dashboard-divider
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
@@ -96,6 +97,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
 
       {/* Brand Header */}
       <div
+        data-dashboard-divider
         className={cn(
           styles.logoWrapper,
           isSidebarCollapsed ? "justify-center" : "justify-between"
@@ -125,7 +127,10 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
       </div>
 
       {/* Active Projects Section — FIXED / NON-SCROLLABLE WITH MENU */}
-      <div className="shrink-0 px-3 pt-2 pb-2.5 border-b border-sidebar-border/60">
+      <div
+        data-dashboard-divider
+        className="shrink-0 px-3 pt-2 pb-2.5 border-b border-sidebar-border/60"
+      >
         {!isSidebarCollapsed && (
           <motion.div
             initial={{ opacity: 0 }}

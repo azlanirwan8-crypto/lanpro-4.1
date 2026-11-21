@@ -85,7 +85,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                 type="button"
                 key={task.id}
                 className={cn(
-                  "block w-full text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary group p-3 rounded-xl border transition-all cursor-pointer bg-surface",
+                  "dashboard-task-card block w-full text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary group p-3 rounded-xl border transition-all cursor-pointer bg-surface",
                   isDueSoon24h(task.endDate)
                     ? "border-warning bg-warning-surface/10 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-warning hover:bg-warning-surface/20"
                     : "border-border-divider hover:border-primary/60 hover:shadow-2xs"
@@ -140,7 +140,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                 type="button"
                 key={task.id}
                 className={cn(
-                  "block w-full text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary group p-3 rounded-xl border transition-all cursor-pointer bg-surface",
+                  "dashboard-task-card block w-full text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary group p-3 rounded-xl border transition-all cursor-pointer bg-surface",
                   isDueSoon24h(task.endDate)
                     ? "border-warning bg-warning-surface/10 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-warning hover:bg-warning-surface/20"
                     : "border-danger-border/30 hover:border-danger/60 hover:shadow-2xs"
@@ -187,7 +187,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
               <button
                 type="button"
                 key={task.id}
-                className="block w-full text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary group p-3 rounded-xl border border-border-divider hover:border-danger/60 hover:shadow-2xs transition-all cursor-pointer bg-surface"
+                className="dashboard-task-card block w-full text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary group p-3 rounded-xl border border-border-divider hover:border-danger/60 hover:shadow-2xs transition-all cursor-pointer bg-surface"
                 onClick={() => {
                   setSelectedTaskForDetail(task);
                   setIsTaskDetailModalOpen(true);
@@ -230,7 +230,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                 type="button"
                 key={task.id}
                 className={cn(
-                  "block w-full text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary group p-3 rounded-xl border transition-all cursor-pointer bg-surface",
+                  "dashboard-task-card block w-full text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary group p-3 rounded-xl border transition-all cursor-pointer bg-surface",
                   isDueSoon24h(task.endDate)
                     ? "border-warning bg-warning-surface/10 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-warning hover:bg-warning-surface/20"
                     : "border-border-divider hover:border-primary/60 hover:shadow-2xs"

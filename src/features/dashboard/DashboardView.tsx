@@ -266,7 +266,7 @@ export function DashboardView(props: DashboardViewProps) {
     if (id === "sidebar-widgets-stack") {
       return cn(
         heightClass,
-        "flex flex-col rounded-lg bg-surface border border-border-divider text-content-strong shadow-soft p-6 transition-all duration-300 relative overflow-hidden"
+        "flex flex-col rounded-lg dashboard-panel bg-surface border border-border-divider text-content-strong shadow-soft p-6 transition-all duration-300 relative overflow-hidden"
       );
     }
     if (id === "sprint-banner") {
@@ -283,7 +283,7 @@ export function DashboardView(props: DashboardViewProps) {
     }
     return cn(
       heightClass,
-      "flex flex-col rounded-lg transition-all duration-300 relative border border-border-divider bg-surface text-content-strong shadow-soft p-6 overflow-hidden"
+      "flex flex-col rounded-lg transition-all duration-300 relative dashboard-panel border border-border-divider bg-surface text-content-strong shadow-soft p-6 overflow-hidden"
     );
   };
 
@@ -665,6 +665,7 @@ export function DashboardView(props: DashboardViewProps) {
     <div className={styles.container}>
       {/* #446/#485 — PageHeader salam kiri; filter sprint + chip Active di pojok kanan (actions) */}
       <PageHeader
+        className="dashboard-page-header"
         uppercase={false}
         breadcrumbs={[
           { label: t("dashboard.breadcrumbGroup", "PROJECT") },
@@ -747,7 +748,7 @@ export function DashboardView(props: DashboardViewProps) {
             {[0, 1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="p-3 sm:p-5 rounded-lg border border-border-divider bg-surface shadow-2xs animate-pulse motion-reduce:animate-none"
+                className="dashboard-panel p-3 sm:p-5 rounded-lg border border-border-divider bg-surface shadow-2xs animate-pulse motion-reduce:animate-none"
               >
                 <div className="h-2.5 w-16 rounded bg-surface-muted" />
                 <div className="mt-3 h-6 w-12 rounded bg-surface-muted" />
@@ -1644,7 +1645,7 @@ export function DashboardView(props: DashboardViewProps) {
                       props.setSelectedTaskForDetail(issue);
                       props.setIsTaskDetailModalOpen(true);
                     }}
-                    className="w-full text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary p-3 rounded-lg border border-border-divider bg-surface-sunken/50 hover:bg-surface hover:border-primary/30 transition cursor-pointer flex items-center justify-between gap-3 shadow-2xs group"
+                    className="dashboard-task-card w-full text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary p-3 rounded-lg border border-border-divider bg-surface-sunken/50 hover:bg-surface hover:border-primary/30 transition cursor-pointer flex items-center justify-between gap-3 shadow-2xs group"
                   >
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-2">
