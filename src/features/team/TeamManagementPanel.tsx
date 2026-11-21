@@ -577,7 +577,7 @@ export const TeamManagementPanel = ({
 
           {/* List View Mode - Sleek Table / Cards */}
           {viewMode === "list" && (
-            <div className="bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden">
+            <div className="surface-panel bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden">
               <div className="overflow-x-auto">
                 <ResponsiveTable className="w-full text-left" scroll={false}>
                   <thead>

@@ -4852,7 +4852,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 />
 
                 {/* Main Viewport (Detail / Dokumen / Canvas) */}
-                <div className="bg-surface border border-border-subtle rounded-lg shadow-soft flex-1 min-h-[600px] relative flex flex-col overflow-hidden">
+                <div className="surface-panel bg-surface border border-border-subtle rounded-lg shadow-soft flex-1 min-h-[600px] relative flex flex-col overflow-hidden">
                   {rightViewMode === "detail" ? (
                     <div className="flex-1 overflow-y-auto">
                       <FlowchartDetail

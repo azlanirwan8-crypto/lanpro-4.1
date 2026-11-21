@@ -856,7 +856,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
 
         <div
           ref={timelineContainerRef}
-          className="print-roadmap-container flex flex-1 w-full relative bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden select-none min-h-0"
+          className="surface-panel print-roadmap-container flex flex-1 w-full relative bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden select-none min-h-0"
         >
           {hierarchyOpen && (
             <button

@@ -80,12 +80,25 @@ const css = fs.readFileSync(CSS, "utf8");
 describe("#862 token garis dekoratif", () => {
   it("token pemisah ada dan bukan token kontrol di mode gelap", () => {
     expect(css).toContain("--color-border-divider:");
-    const semua = [...css.matchAll(/--color-border-divider:\s*([^;]+);/g)].map((m) => m[1].trim());
+    const semua = [...css.matchAll(/--color-border-divider:\s*(#[a-f0-9]{6});/gi)].map((m) =>
+      m[1].trim()
+    );
     expect(semua).toHaveLength(2);
     // Terang = tampilan `--color-border-subtle` sekarang (#ced4da) agar tidak bergeser.
     expect(semua[0]).toBe("#ced4da");
     // Gelap = nilai pemisah (#4b5259), bukan nilai kontrol (#8b9299).
     expect(semua[1]).toBe("#4b5259");
+    expect(css).toMatch(
+      /html\.dark \.surface-panel \{\s*--color-border-divider: var\(--color-border-panel-divider\);/
+    );
+  });
+
+  it("bayangan kecil di tema gelap tidak menambah garis putih", () => {
+    for (const kelas of ["shadow-2xs", "shadow-xs"]) {
+      const aturan = css.split(`html.dark .${kelas} {`)[1]?.split("}")[0];
+      expect(aturan).toMatch(/box-shadow:\s*0 1px [12]px rgb\(0 0 0/);
+      expect(aturan).not.toContain("255 255 255");
+    }
   });
 
   it("tidak ada lagi garis dekoratif yang memakai token kontrol", () => {

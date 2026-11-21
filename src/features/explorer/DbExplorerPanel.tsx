@@ -171,7 +171,7 @@ export const DbExplorerPanel: React.FC<any> = ({
         )}
 
         {activeTab === "explorer" && (
-          <div className="flex-1 bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden flex flex-col min-h-0 relative z-10">
+          <div className="surface-panel flex-1 bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden flex flex-col min-h-0 relative z-10">
             {/* Database Mode Banner */}
             <div className="px-4 py-2.5 border-b border-border-divider/80 flex flex-wrap items-center justify-between gap-4 shrink-0 bg-emerald-500/10 text-emerald-800">
               <div className="flex items-center gap-2">

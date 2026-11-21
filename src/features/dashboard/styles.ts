@@ -10,6 +10,6 @@
  */
 export const styles = {
   container:
-    "flex-1 overflow-auto bg-surface-sunken custom-scrollbar [--color-border-divider:var(--color-border-dashboard-panel)] [--color-border-faint:var(--color-border-dashboard-grid)]",
+    "flex-1 overflow-auto bg-surface-sunken custom-scrollbar [--color-border-divider:var(--color-border-panel-divider)] [--color-border-faint:var(--color-border-dashboard-grid)]",
   wrapper: "space-y-8 w-full px-3 md:px-6 pt-3 md:pt-4 pb-20 md:pb-28",
 };

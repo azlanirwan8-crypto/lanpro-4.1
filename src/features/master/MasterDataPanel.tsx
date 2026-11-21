@@ -607,7 +607,7 @@ export const MasterDataPanel = ({
         {/* Sidebar for Master Data Types — laci di bawah md */}
         <div
           className={cn(
-            "w-[260px] shrink-0 flex flex-col h-full bg-surface border border-border-subtle/80 rounded-lg overflow-hidden shadow-2xs",
+            "w-[260px] shrink-0 flex flex-col h-full surface-panel bg-surface border border-border-subtle/80 rounded-lg overflow-hidden shadow-2xs",
             "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:rounded-none max-md:border-y-0 max-md:border-l-0",
             "max-md:transition-transform max-md:duration-200",
             sidebarOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full"
@@ -700,7 +700,7 @@ export const MasterDataPanel = ({
           </button>
 
           {selectedType === "modul_aplikasi" ? (
-            <div className="bg-surface rounded-lg border border-border-subtle/80 shadow-2xs flex-1 overflow-hidden flex flex-col min-h-0">
+            <div className="surface-panel bg-surface rounded-lg border border-border-subtle/80 shadow-2xs flex-1 overflow-hidden flex flex-col min-h-0">
               {hasPermission(
                 userRole as PeranEfektif,
                 "configuration",
@@ -915,7 +915,7 @@ export const MasterDataPanel = ({
                 </div>
               )}
 
-              <div className="bg-surface rounded-lg border border-border-subtle/80 shadow-2xs flex-1 overflow-hidden flex flex-col min-h-0">
+              <div className="surface-panel bg-surface rounded-lg border border-border-subtle/80 shadow-2xs flex-1 overflow-hidden flex flex-col min-h-0">
                 {hasPermission(
                   userRole as PeranEfektif,
                   "configuration",

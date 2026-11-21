@@ -83,7 +83,7 @@ export const ActivityLogPanel = ({
       <div className="space-y-4 sm:space-y-6 w-full px-3 md:px-5 pt-3 md:pt-4 pb-3 md:pb-5">
         {/* Summary Metric Cards — #361: 2 kolom di HP */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-6 mb-4 sm:mb-8">
-          <div className="bg-surface p-3.5 sm:p-6 rounded-xl border border-border-subtle shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-24 sm:h-32 relative overflow-hidden">
+          <div className="surface-panel bg-surface p-3.5 sm:p-6 rounded-xl border border-border-subtle shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-24 sm:h-32 relative overflow-hidden">
             <div className="absolute right-0 top-0 opacity-[0.03] scale-150 -translate-y-4 translate-x-4">
               <Activity className="w-32 h-32" />
             </div>
@@ -94,7 +94,7 @@ export const ActivityLogPanel = ({
               {activityLogs.length}
             </div>
           </div>
-          <div className="bg-surface p-3.5 sm:p-6 rounded-xl border border-border-subtle shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-24 sm:h-32 relative overflow-hidden">
+          <div className="surface-panel bg-surface p-3.5 sm:p-6 rounded-xl border border-border-subtle shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-24 sm:h-32 relative overflow-hidden">
             <div className="absolute right-0 top-0 opacity-[0.03] scale-150 -translate-y-4 translate-x-4">
               <Users className="w-32 h-32" />
             </div>
@@ -105,7 +105,7 @@ export const ActivityLogPanel = ({
               {activeActorsCount}
             </div>
           </div>
-          <div className="bg-surface p-3.5 sm:p-6 rounded-xl border border-border-subtle shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-24 sm:h-32 relative overflow-hidden col-span-2 md:col-span-1">
+          <div className="surface-panel bg-surface p-3.5 sm:p-6 rounded-xl border border-border-subtle shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-24 sm:h-32 relative overflow-hidden col-span-2 md:col-span-1">
             <div className="absolute right-0 top-0 opacity-[0.03] scale-150 -translate-y-4 translate-x-4">
               <Clock className="w-32 h-32" />
             </div>
@@ -127,7 +127,7 @@ export const ActivityLogPanel = ({
           </div>
         </div>
 
-        <div className="bg-surface border border-border-subtle rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+        <div className="surface-panel bg-surface border border-border-subtle rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
           {/* #426 — search + export dipindah ke dalam card Audit Trail */}
           <div className="px-4 py-3 border-b border-border-divider/80 bg-surface shrink-0 flex flex-wrap items-center justify-between gap-2">
             <div className="flex min-w-0 flex-1 md:flex-none bg-surface-sunken border border-border-subtle rounded-lg px-3 py-2 items-center gap-2">

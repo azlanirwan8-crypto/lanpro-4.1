@@ -559,7 +559,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
   const bukaRincianIsu = useBukaRincianIsu(setSelectedTaskForDetail, setIsTaskDetailModalOpen);
 
   return (
-    <div className="bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden flex-1 flex flex-col min-h-0 font-sans text-left">
+    <div className="surface-panel bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden flex-1 flex flex-col min-h-0 font-sans text-left">
       {/* #703 — kepala dan kaki papan ikut keluar ke components/BagianPapan.tsx:
           induknya masih melewati batas 800 baris §4 sesudah empat blok lain pergi,
           dan keduanya tidak punya state sendiri — hanya props. */}

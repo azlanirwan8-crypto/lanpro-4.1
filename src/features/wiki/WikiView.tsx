@@ -1357,7 +1357,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   {/* LEFT PANE / MAIN VIEW (DOCUMENT VIEWER) */}
                   <div
                     className={cn(
-                      "flex-1 bg-surface border border-border-subtle/80 rounded-lg flex flex-col min-h-0 overflow-hidden relative shadow-2xs",
+                      "surface-panel flex-1 bg-surface border border-border-subtle/80 rounded-lg flex flex-col min-h-0 overflow-hidden relative shadow-2xs",
                       mobileDetailTab !== "preview" && "hidden md:flex"
                     )}
                   >
@@ -1615,7 +1615,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   {/* RIGHT PANE / SIDE WIDGET (CATATAN & KOMENTAR CHAT BUBBLE) */}
                   <div
                     className={cn(
-                      "w-full md:w-[350px] lg:w-[400px] shrink-0 bg-surface border border-border-subtle/80 rounded-lg flex flex-col min-h-0 overflow-hidden shadow-2xs transition-all duration-300",
+                      "w-full md:w-[350px] lg:w-[400px] surface-panel shrink-0 bg-surface border border-border-subtle/80 rounded-lg flex flex-col min-h-0 overflow-hidden shadow-2xs transition-all duration-300",
                       isFullscreenPreview ? "hidden md:hidden" : "flex",
                       mobileDetailTab !== "notes" && "hidden md:flex"
                     )}

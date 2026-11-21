@@ -229,8 +229,7 @@ export const Card = ({
 }) => {
   const variants: Record<CardVariant, string> = {
     default: "bg-surface border border-border-subtle text-content-strong shadow-soft",
-    panel:
-      "dashboard-panel bg-surface border border-border-divider text-content-strong shadow-soft",
+    panel: "bg-surface border border-border-divider text-content-strong shadow-soft",
     primary: "bg-primary-surface border border-primary-surface text-content-inverse shadow-soft",
     success: "bg-success-surface border border-success-surface text-content-inverse shadow-soft",
     info: "bg-info-surface border border-info-surface text-content-inverse shadow-soft",
@@ -242,6 +241,10 @@ export const Card = ({
       className={cn(
         "rounded-lg overflow-hidden",
         variants[variant] || variants.default,
+        (variant === "default" || variant === "panel") &&
+          !props.onClick &&
+          props.tabIndex == null &&
+          "surface-panel",
         hoverLift && "card-lift",
         className
       )}

@@ -890,7 +890,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
       ) : (
         /* DETAIL VIEW — #422: tanpa PageHeader dalam card; panel detail di kartu */
         <div className="w-full flex-1 flex flex-col p-3 md:p-6 min-h-0 overflow-hidden bg-surface-muted text-left">
-          <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden">
+          <div className="surface-panel flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden">
             <div className="flex-1 flex flex-col min-h-0 bg-surface-sunken/50 w-full">
               {activeMeeting ? (
                 <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 md:p-6 space-y-4">

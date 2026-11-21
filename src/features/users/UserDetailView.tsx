@@ -1419,7 +1419,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
               sebelumnya cuma gradien dekoratif + localStorage lokal. Tombol
               aksi (Back, Edit Profile / Save) ada di pojok cover, persis
               posisi Velzon. */}
-          <div className="bg-surface rounded-2xl shadow-xs border border-border-subtle overflow-hidden">
+          <div className="surface-panel bg-surface rounded-2xl shadow-xs border border-border-subtle overflow-hidden">
             {/* Purple Gradient Cover Banner */}
             <div
               className="min-h-[150px] sm:min-h-[175px] w-full bg-gradient-to-r from-primary-surface via-primary to-primary-surface-active relative p-4 sm:p-6 flex flex-col justify-between transition-all"
@@ -1639,7 +1639,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
                 {/* LEFT: kartu "Info" ala Velzon, Team, dan Login History */}
                 <div className="lg:col-span-4 space-y-5">
-                  <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-4">
+                  <div className="surface-panel bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
@@ -1880,7 +1880,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     </div>
                   </div>
 
-                  <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-4">
+                  <div className="surface-panel bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-4">
                     <div className="flex items-center justify-between border-b border-border-divider/60 pb-3">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
@@ -1972,7 +1972,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     )}
                   </div>
 
-                  <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-4">
+                  <div className="surface-panel bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-4">
                     <div className="flex items-center justify-between border-b border-border-divider/60 pb-3">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">

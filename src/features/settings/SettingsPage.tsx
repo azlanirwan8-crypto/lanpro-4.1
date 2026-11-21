@@ -71,7 +71,7 @@ export const SettingsPage: React.FC = () => {
       />
 
       <div className="flex-1 overflow-y-auto custom-scrollbar p-3.5 sm:p-6 pb-24 sm:pb-8">
-        <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden">
+        <div className="surface-panel flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden">
           <div className="flex-1 overflow-auto flex flex-col">
             {/* Tabs — #368 scroll HP + #432 komponen bersama */}
             <Tabs

@@ -45,7 +45,7 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
     return (
       <div
         className={cn(
-          "shrink-0 flex flex-col h-full rounded-md transition-all duration-200 group/col relative bg-surface-muted/50 border border-border-subtle/70 w-full",
+          "shrink-0 flex flex-col h-full rounded-md transition-all duration-200 group/col relative bg-surface-muted/50 border border-border-divider/70 w-full",
           overWip && "border-warning/50"
         )}
       >

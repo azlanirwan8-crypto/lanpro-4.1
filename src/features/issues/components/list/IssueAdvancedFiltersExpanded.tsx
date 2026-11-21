@@ -108,7 +108,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
       animate={{ height: "auto", opacity: 1 }}
       exit={{ height: 0, opacity: 0 }}
       transition={{ duration: 0.2, ease: "easeInOut" }}
-      className="mx-6 mb-4 bg-surface rounded-xl border border-border-subtle shadow-soft overflow-hidden relative"
+      className="surface-panel mx-6 mb-4 bg-surface rounded-xl border border-border-subtle shadow-soft overflow-hidden relative"
     >
       <div className="p-5 space-y-5">
         {/* Kelompok 1 — Status & kepemilikan (4 kolom, tanpa baris yatim) */}

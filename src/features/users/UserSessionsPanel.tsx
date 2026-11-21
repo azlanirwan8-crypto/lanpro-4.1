@@ -255,7 +255,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
         {/* Velzon Stat Widgets Grid — #360: 2 kolom di HP */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
           {/* Card 1: Sesi Aktif */}
-          <div className="bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-emerald-500/30">
+          <div className="surface-panel bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-emerald-500/30">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-[10px] font-normal uppercase tracking-normal text-content-subtle">
@@ -278,7 +278,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
           </div>
 
           {/* Card 2: Pengguna Online */}
-          <div className="bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-primary/30">
+          <div className="surface-panel bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-primary/30">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-[10px] font-normal uppercase tracking-normal text-content-subtle">
@@ -300,7 +300,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
           </div>
 
           {/* Card 3: Login Hari Ini */}
-          <div className="bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-amber-500/30">
+          <div className="surface-panel bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-amber-500/30">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-[10px] font-normal uppercase tracking-normal text-content-subtle">
@@ -322,7 +322,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
           </div>
 
           {/* Card 4: Total Riwayat Sesi */}
-          <div className="bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-info/30">
+          <div className="surface-panel bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-info/30">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-[10px] font-normal uppercase tracking-normal text-content-subtle">

@@ -113,7 +113,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ duration: 0.25 }}
-      className="w-full max-w-md bg-surface rounded-2xl shadow-2xl border border-border-faint/90 p-5 sm:p-6 relative z-10 font-sans mx-auto my-auto"
+      className="surface-panel w-full max-w-md bg-surface rounded-2xl shadow-2xl border border-border-faint/90 p-5 sm:p-6 relative z-10 font-sans mx-auto my-auto"
     >
       {/* Velzon Header */}
       <div className="text-center space-y-1 mb-4">

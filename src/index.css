@@ -232,7 +232,7 @@
    * terang satu piksel; yang bergeser hanya mode gelap, tempat batas kontrol
    * dituntut 3:1 tetapi pemisah hiasan justru tidak boleh sekuat itu. */
   --color-border-divider: #ced4da; /* pemisah — tampilan terang tidak berubah */
-  --color-border-dashboard-panel: #ced4da;
+  --color-border-panel-divider: #ced4da;
   --color-border-dashboard-grid: #f3f6f9;
   --color-surface-sunken: #f3f3f9; /* kanvas halaman — Velzon body-bg */
   --color-content: #212529; /* teks utama — gray-900 */
@@ -391,7 +391,7 @@ html.dark {
    * bergaris dibanding Velzon (#32383e di atas #212529 = 1,30:1). */
   --color-border-divider: #4b5259; /* pemisah — 1,95:1 di atas kartu */
   /* #862: garis Dashboard mengikuti pemisah halus pada acuan Velzon. */
-  --color-border-dashboard-panel: #32383e;
+  --color-border-panel-divider: #32383e;
   --color-border-dashboard-grid: #2b3035;
   --dashboard-grid-dash: none;
   --color-surface-sunken: #171a1e; /* kanvas terdalam */
@@ -802,41 +802,26 @@ html.dark .shadow-soft-lg {
     0 12px 32px rgb(0 0 0 / 0.4);
 }
 
-/* #680 — `shadow-2xs` (280 pemakaian) dan `shadow-xs` (129) tidak pernah punya
- * definisi DI SINI, jadi keduanya jatuh ke bawaan Tailwind: hitam 5 %. Di atas
- * `#e2e8f0` (mode terang) itu sudah tipis, dan di atas `#212529` praktis nol —
- * seluruh pemisahan elevasi lewat bayangan hilang di mode gelap persis di
- * elemen yang paling banyak memakainya (kepala tabel, kartu, dropdown tanggal).
- * `shadow-soft` sudah punya override gelap sejak #415; dua utilitas ini hanya
- * lupa ikut.
- *
- * Bentuk override-nya bukan hitam yang ditebalkan. Bayangan hitam beralpha
- * tinggi di atas charcoal tidak membuat kartu terbaca, hanya membuatnya kotor —
- * yang membuat kartu gelap terpisah dari latarnya adalah SEAM: garis selebar 1px
- * yang sedikit lebih terang dari permukaannya (cara Material 3 dan Velzon
- * sendiri menangani elevasi di gelap). Jadi lapis pertama tetap hitam untuk
- * menjatuhkan, lapis kedua putih 6 % untuk memberi tepi. */
+/* #862: surface separation comes from the backgrounds. Small shadows
+ * retain depth without the white outline that outlined panels in dark mode. */
 html.dark .shadow-2xs {
-  box-shadow:
-    0 1px 1px rgb(0 0 0 / 0.35),
-    0 0 0 1px rgb(255 255 255 / 0.05);
+  box-shadow: 0 1px 1px rgb(0 0 0 / 0.35);
 }
-/* #862: Dashboard surfaces provide separation in the dark theme. The
- * generic shadow-2xs seam and decorative shell borders stay for other views. */
-html.dark .dashboard-panel,
+html.dark .shadow-xs {
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+}
+
+html.dark .surface-panel {
+  --color-border-divider: var(--color-border-panel-divider);
+}
+html.dark .surface-panel,
 html.dark .dashboard-task-card:not(:hover) {
   border-color: transparent;
   box-shadow: none;
 }
-html.dark .dashboard-page-header,
-html.dark [data-dashboard-shell] [data-dashboard-divider] {
+html.dark .page-header-divider,
+html.dark [data-shell-divider] {
   border-color: transparent;
-}
-
-html.dark .shadow-xs {
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.4),
-    0 0 0 1px rgb(255 255 255 / 0.06);
 }
 
 /* 3. Animasi masuk dropdown & popover (#403 — standar Velzon LanPro):
