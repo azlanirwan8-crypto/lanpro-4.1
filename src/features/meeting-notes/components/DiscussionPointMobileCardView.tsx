@@ -206,7 +206,7 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
 
             {/* Notes / Keterangan */}
             {p.keterangan && (
-              <div className="p-2 bg-surface-sunken/60 rounded-md border border-border-subtle/60 text-xs text-content-body leading-relaxed">
+              <div className="p-2 bg-surface-sunken/60 rounded-md border border-border-panel-divider/60 text-xs text-content-body leading-relaxed">
                 <span className="text-[10px] font-normal uppercase tracking-normal text-content-subtle block mb-0.5">
                   {t("discussion.thNotes")}
                 </span>
@@ -279,7 +279,7 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                 {p.fitur ? (
                   // #645 — label tag dan nama PIC tidak boleh dipotong; catatan
                   // di kartu ini sudah utuh, tinggal dua potongan ini yang tersisa.
-                  <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-surface-sunken text-content-body border border-border-subtle whitespace-normal break-words">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-surface-sunken text-content-body border border-border-panel-divider whitespace-normal break-words">
                     {contextMeta?.label || p.fitur}
                   </span>
                 ) : null}
@@ -364,7 +364,7 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                     target="_blank"
                     rel="noopener noreferrer"
                     title={b.name || b.originalName || ""}
-                    className="inline-flex items-center gap-1 max-w-full text-[10px] font-medium px-2 py-0.5 rounded-md bg-surface-sunken text-content-body border border-border-subtle break-all"
+                    className="inline-flex items-center gap-1 max-w-full text-[10px] font-medium px-2 py-0.5 rounded-md bg-surface-sunken text-content-body border border-border-panel-divider break-all"
                   >
                     <IkonGambar className="w-3 h-3 shrink-0 text-content-subtle" />
                     <span className="break-words">{b.name || b.originalName || b.fileRef}</span>
@@ -376,7 +376,7 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                     href={b.url || undefined}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block w-14 h-14 rounded-md border border-border-subtle overflow-hidden bg-surface-sunken shrink-0"
+                    className="block w-14 h-14 rounded-md border border-border-panel-divider overflow-hidden bg-surface-sunken shrink-0"
                   >
                     <img
                       src={b.url || ""}

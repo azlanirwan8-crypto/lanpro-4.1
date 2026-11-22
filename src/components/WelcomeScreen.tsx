@@ -75,7 +75,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 
           {/* Langkah — status jujur, bukan ajakan yang tidak bisa dijalankan */}
           <div className="mt-7 space-y-2.5">
-            <div className="flex items-start gap-3 px-4 py-5 rounded-xl bg-surface border border-border-subtle">
+            <div className="flex items-start gap-3 px-4 py-5 rounded-xl bg-surface border border-border-panel-divider">
               <BadgeCheck className="w-5 h-5 shrink-0 text-success mt-0.5" />
               <div className="min-w-0">
                 <div className="text-sm font-medium text-content-strong">
@@ -87,7 +87,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               </div>
             </div>
 
-            <div className="flex items-start gap-3 px-4 py-5 rounded-xl bg-surface border border-border-subtle">
+            <div className="flex items-start gap-3 px-4 py-5 rounded-xl bg-surface border border-border-panel-divider">
               <UserCog className="w-5 h-5 shrink-0 text-primary mt-0.5" />
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-medium text-content-strong">
@@ -106,7 +106,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               </div>
             </div>
 
-            <div className="flex items-start gap-3 px-4 py-5 rounded-xl bg-surface border border-border-subtle">
+            <div className="flex items-start gap-3 px-4 py-5 rounded-xl bg-surface border border-border-panel-divider">
               <CircleDashed className="w-5 h-5 shrink-0 text-content-subtle mt-0.5" />
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-medium text-content-strong">

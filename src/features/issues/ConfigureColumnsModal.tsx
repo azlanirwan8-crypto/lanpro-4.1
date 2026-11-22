@@ -55,7 +55,7 @@ export const ConfigureColumnsModal: React.FC<ConfigureColumnsModalProps> = ({
                         ref={dragProvided.innerRef}
                         {...dragProvided.draggableProps}
                         className={cn(
-                          "flex items-center justify-between p-2.5 bg-surface-sunken/80 rounded-md hover:bg-surface-muted/80 transition-colors group border border-border-subtle/60",
+                          "flex items-center justify-between p-2.5 bg-surface-sunken/80 rounded-md hover:bg-surface-muted/80 transition-colors group border border-border-panel-divider/60",
                           snapshot.isDragging ? "shadow-md bg-surface border-primary/40 z-[70]" : ""
                         )}
                       >
@@ -79,7 +79,7 @@ export const ConfigureColumnsModal: React.FC<ConfigureColumnsModalProps> = ({
                                 "w-4 h-4 rounded-md border flex items-center justify-center transition-all cursor-pointer",
                                 col.visible
                                   ? "bg-primary-surface border-primary"
-                                  : "bg-surface border-border-subtle"
+                                  : "bg-surface border-border-panel-divider"
                               )}
                             >
                               {col.visible && <Check className="w-3 h-3 text-content-inverse" />}

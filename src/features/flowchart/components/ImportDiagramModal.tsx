@@ -217,7 +217,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
                 "p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1 relative",
                 isActive
                   ? fmt.activeClass
-                  : "border-border-subtle hover:bg-surface-sunken hover:border-border-subtle"
+                  : "border-border-panel-divider hover:bg-surface-sunken hover:border-border-panel-divider"
               )}
             >
               {isActive && (
@@ -241,7 +241,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
       </div>
 
       {/* Hint box */}
-      <div className="bg-surface-sunken border border-border-subtle rounded-xl px-3.5 py-2.5 text-[11px] leading-relaxed text-content-body flex items-start gap-1.5">
+      <div className="bg-surface-sunken border border-border-panel-divider rounded-xl px-3.5 py-2.5 text-[11px] leading-relaxed text-content-body flex items-start gap-1.5">
         <Lightbulb className="w-3.5 h-3.5 shrink-0 mt-px text-content-subtle" />
         <span>{activeFormat.hint}</span>
       </div>
@@ -266,7 +266,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
             ? "border-primary bg-primary/5 text-primary scale-[1.01]"
             : parsedImportData
               ? "border-success/40 bg-success/5 text-success-text"
-              : "border-border-subtle hover:border-primary/40 hover:bg-surface-sunken text-content-muted"
+              : "border-border-panel-divider hover:border-primary/40 hover:bg-surface-sunken text-content-muted"
         )}
       >
         {parsedImportData ? (
@@ -274,7 +274,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
         ) : dragOverImport ? (
           <FolderOpen className="w-8 h-8 text-primary" />
         ) : (
-          <div className="p-3 rounded-full bg-surface-muted border border-border-subtle">
+          <div className="p-3 rounded-full bg-surface-muted border border-border-panel-divider">
             <Upload className="w-5 h-5 text-content-subtle" />
           </div>
         )}
@@ -296,7 +296,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
           )}
 
           {parsedFilename && (
-            <span className="inline-flex items-center gap-1 text-[10px] text-content-secondary font-mono mt-1.5 bg-surface-muted px-2.5 py-1 rounded-lg border border-border-subtle">
+            <span className="inline-flex items-center gap-1 text-[10px] text-content-secondary font-mono mt-1.5 bg-surface-muted px-2.5 py-1 rounded-lg border border-border-panel-divider">
               <FileText className="w-3 h-3 shrink-0" />
               {parsedFilename}
             </span>
@@ -350,7 +350,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
             blok di atasnya, yang merupakan utang #623.
           */}
           {laporanBatas && (
-            <div className="bg-surface-raised border border-border-subtle rounded-lg p-3 space-y-2">
+            <div className="bg-surface-raised border border-border-panel-divider rounded-lg p-3 space-y-2">
               <div className="text-[11px] font-medium uppercase tracking-wide text-content-strong">
                 {t("flowchart.batasJudul")}
               </div>

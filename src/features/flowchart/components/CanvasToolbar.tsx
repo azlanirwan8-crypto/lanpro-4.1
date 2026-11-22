@@ -35,7 +35,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   const { t } = useTranslation();
   return (
     <div data-testid="bilah-atas-kanvas" className="absolute top-3 left-3 z-30 pointer-events-none">
-      <div className="pointer-events-auto flex items-center bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1 rounded-lg shadow-[0_6px_18px_rgba(0,0,0,0.05)] transition-all duration-300">
+      <div className="pointer-events-auto flex items-center bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-panel-divider/40 p-1 rounded-lg shadow-[0_6px_18px_rgba(0,0,0,0.05)] transition-all duration-300">
         <button
           type="button"
           onClick={onToggleFullscreen}

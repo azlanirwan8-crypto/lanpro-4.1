@@ -25,7 +25,7 @@ export type ArahLayers = "depan" | "naik" | "turun" | "belakang";
  * baru yang membawa `z-50` sendiri. Satu string, dua menu, tangga tetap.
  */
 export const KELAS_MENU_KONTEKS =
-  "fixed z-50 w-48 bg-surface/90 backdrop-blur-md border border-border-subtle/50 rounded-xl shadow-[0_12px_36px_rgba(0,0,0,0.14)] p-1.5 select-none text-content-strong";
+  "fixed z-50 w-48 bg-surface/90 backdrop-blur-md border border-border-panel-divider/50 rounded-xl shadow-[0_12px_36px_rgba(0,0,0,0.14)] p-1.5 select-none text-content-strong";
 
 interface NodeContextMenuProps {
   x: number;

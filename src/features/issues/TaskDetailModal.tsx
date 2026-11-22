@@ -255,7 +255,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     {t("issueDetail.linkIssue")}
                   </Button>
                   <div className="ml-auto flex items-center gap-2">
-                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-content-muted bg-surface-sunken/80 px-2.5 py-1 rounded-md border border-border-subtle/60">
+                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-content-muted bg-surface-sunken/80 px-2.5 py-1 rounded-md border border-border-panel-divider/60">
                       <Clock className="w-3.5 h-3.5 text-content-subtle" />
                       {t("rakit.updatedPrefix")}{" "}
                       {task.updatedAt
@@ -296,7 +296,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     />
                   ) : (
                     <div
-                      className="min-h-[110px] border border-border-subtle/70 hover:border-primary/30 rounded-md p-4 bg-surface-sunken/30 hover:bg-surface transition-all cursor-text shadow-2xs"
+                      className="min-h-[110px] border border-border-panel-divider/70 hover:border-primary/30 rounded-md p-4 bg-surface-sunken/30 hover:bg-surface transition-all cursor-text shadow-2xs"
                       onClick={() => isEditable && setIsEditingDescription(true)}
                     >
                       {task.description ? (
@@ -352,7 +352,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     </div>
                   ) : (
                     <div
-                      className="min-h-[90px] border border-border-subtle/70 hover:border-success/40 rounded-md p-4 bg-surface-sunken/30 hover:bg-surface transition-all cursor-text shadow-2xs"
+                      className="min-h-[90px] border border-border-panel-divider/70 hover:border-success/40 rounded-md p-4 bg-surface-sunken/30 hover:bg-surface transition-all cursor-text shadow-2xs"
                       onClick={() => isEditable && setIsEditingAcceptanceCriteria(true)}
                     >
                       {task.acceptanceCriteria ? (
@@ -410,7 +410,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       {t("issueDetail.openOriginal")}
                     </a>
                   </div>
-                  <div className="rounded-lg border border-border-subtle overflow-hidden shadow-md h-[480px] bg-surface-muted relative group">
+                  <div className="rounded-lg border border-border-panel-divider overflow-hidden shadow-md h-[480px] bg-surface-muted relative group">
                     <iframe
                       width="100%"
                       height="100%"

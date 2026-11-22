@@ -344,7 +344,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
                   className={`px-2.5 py-1 rounded-md text-xs font-medium border transition cursor-pointer ${
                     active
                       ? "bg-emerald-600 border-emerald-600 text-content-inverse"
-                      : "bg-surface border-border-subtle text-content-body hover:bg-surface-sunken"
+                      : "bg-surface border-border-panel-divider text-content-body hover:bg-surface-sunken"
                   }`}
                 >
                   {t(day.labelKey)}

@@ -261,7 +261,7 @@ export const AvatarKosong = ({ className, title }: { className?: string; title?:
       aria-hidden
       title={title}
       className={cn(
-        "rounded-full border border-border-subtle bg-surface-muted text-content-subtle flex items-center justify-center shrink-0 select-none",
+        "rounded-full border border-border-panel-divider bg-surface-muted text-content-subtle flex items-center justify-center shrink-0 select-none",
         callerPunyaLebar ? "" : tangga.lingkaran,
         tangga.fs,
         tangga.bobot,

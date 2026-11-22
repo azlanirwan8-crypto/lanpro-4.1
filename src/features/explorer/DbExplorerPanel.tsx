@@ -104,7 +104,7 @@ export const DbExplorerPanel: React.FC<any> = ({
         ]}
         title={t("dbExplorer.databaseTools")}
         actions={
-          <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80 shrink-0 shadow-2xs">
+          <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-panel-divider/80 shrink-0 shadow-2xs">
             <button
               onClick={() => setActiveTab("backup")}
               className={cn(
@@ -171,7 +171,7 @@ export const DbExplorerPanel: React.FC<any> = ({
         )}
 
         {activeTab === "explorer" && (
-          <div className="surface-panel flex-1 bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden flex flex-col min-h-0 relative z-10">
+          <div className="surface-panel flex-1 bg-surface rounded-lg border border-border-panel-divider/80 shadow-2xs overflow-hidden flex flex-col min-h-0 relative z-10">
             {/* Database Mode Banner */}
             <div className="px-4 py-2.5 border-b border-border-divider/80 flex flex-wrap items-center justify-between gap-4 shrink-0 bg-emerald-500/10 text-emerald-800">
               <div className="flex items-center gap-2">
@@ -279,7 +279,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                   <button
                     type="button"
                     onClick={() => setSidebarOpen(true)}
-                    className="w-full flex items-center gap-2 px-3 py-2.5 bg-surface-sunken border border-border-subtle rounded-lg text-xs font-medium text-content-strong cursor-pointer"
+                    className="w-full flex items-center gap-2 px-3 py-2.5 bg-surface-sunken border border-border-panel-divider rounded-lg text-xs font-medium text-content-strong cursor-pointer"
                   >
                     <Menu className="w-4 h-4 text-primary shrink-0" />
                     <span className="truncate">
@@ -330,7 +330,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                   )}
 
                   {!loading && result && Array.isArray(result) && (
-                    <div className="border border-border-subtle rounded-lg overflow-x-auto">
+                    <div className="border border-border-panel-divider rounded-lg overflow-x-auto">
                       <ResponsiveTable className="w-full text-left border-collapse" scroll={false}>
                         <thead className="bg-primary-surface/5 text-primary font-semibold uppercase">
                           <tr>
@@ -382,7 +382,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                   )}
 
                   {!loading && result && !Array.isArray(result) && (
-                    <div className="bg-surface-sunken border border-border-subtle text-content-body p-4 rounded-lg font-mono text-sm break-words">
+                    <div className="bg-surface-sunken border border-border-panel-divider text-content-body p-4 rounded-lg font-mono text-sm break-words">
                       {t("dbExplorer.queryOk")} <br />
                       {JSON.stringify(result, null, 2)}
                     </div>

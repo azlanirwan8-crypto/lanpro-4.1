@@ -443,7 +443,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
           <div
             role="alert"
             data-testid="isu-galat-muat"
-            className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 mb-2 rounded-md border border-border-subtle bg-surface-sunken"
+            className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 mb-2 rounded-md border border-border-panel-divider bg-surface-sunken"
           >
             <div>
               <p className="text-xs font-medium text-content-strong">

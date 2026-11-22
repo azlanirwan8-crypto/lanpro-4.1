@@ -584,7 +584,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             <img
               src={sumber}
               alt={name}
-              className="rounded-xl max-w-full h-auto border border-border-subtle/50 shadow-soft max-h-40 object-cover cursor-zoom-in hover:brightness-95 transition-all"
+              className="rounded-xl max-w-full h-auto border border-border-panel-divider/50 shadow-soft max-h-40 object-cover cursor-zoom-in hover:brightness-95 transition-all"
               onClick={() => bukaPeninjauan(sumber)}
               referrerPolicy="no-referrer"
             />
@@ -705,7 +705,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             ref={chatBoxRef}
-            className="absolute bottom-16 right-0 max-md:fixed max-md:inset-x-0 max-md:bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] max-md:right-0 max-md:left-0 w-full md:w-80 h-[min(72vh,520px)] md:h-[480px] bg-surface rounded-t-2xl md:rounded-xl border border-border-subtle/80 shadow-2xl flex flex-col overflow-hidden z-40 bg-opacity-95 backdrop-blur-md"
+            className="absolute bottom-16 right-0 max-md:fixed max-md:inset-x-0 max-md:bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] max-md:right-0 max-md:left-0 w-full md:w-80 h-[min(72vh,520px)] md:h-[480px] bg-surface rounded-t-2xl md:rounded-xl border border-border-panel-divider/80 shadow-2xl flex flex-col overflow-hidden z-40 bg-opacity-95 backdrop-blur-md"
           >
             {/* VIEW A: CONTACT LIST VIEW */}
             {!activeChatUser ? (
@@ -1185,7 +1185,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     className={`p-2 rounded-xl transition-all border shrink-0 flex items-center justify-center ${
                       isAttachmentMenuOpen
                         ? "bg-orange-500/10 border-orange-500/30 text-orange-600"
-                        : "bg-surface-sunken border-border-subtle text-content-muted hover:bg-surface-muted hover:text-content-strong"
+                        : "bg-surface-sunken border-border-panel-divider text-content-muted hover:bg-surface-muted hover:text-content-strong"
                     }`}
                     title={t("chat.insertFile")}
                   >

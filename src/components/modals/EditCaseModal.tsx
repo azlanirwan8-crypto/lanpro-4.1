@@ -66,7 +66,7 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({
             onKeyDown={enterUntukSimpan(() => {
               if (editTitle.trim()) onSubmit();
             })}
-            className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-normal text-content-body"
+            className="w-full text-xs p-2.5 bg-surface-sunken border border-border-panel-divider rounded-md font-normal text-content-body"
           />
         </div>
         <div className="space-y-1">
@@ -115,7 +115,7 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({
             rows={3}
             value={editSteps}
             onChange={(e) => onStepsChange(e.target.value)}
-            className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-normal text-content-body"
+            className="w-full text-xs p-2.5 bg-surface-sunken border border-border-panel-divider rounded-md font-normal text-content-body"
           />
         </div>
         <div className="space-y-1">
@@ -126,7 +126,7 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({
             rows={2}
             value={editExpected}
             onChange={(e) => onExpectedChange(e.target.value)}
-            className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-normal text-content-body"
+            className="w-full text-xs p-2.5 bg-surface-sunken border border-border-panel-divider rounded-md font-normal text-content-body"
           />
         </div>
       </div>

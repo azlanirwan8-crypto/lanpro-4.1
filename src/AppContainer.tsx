@@ -4132,7 +4132,7 @@ function AppContainer() {
                     open={isHeaderMoreOpen}
                     onClose={() => setIsHeaderMoreOpen(false)}
                     triggerRef={headerMoreRef}
-                    className="z-[44] min-w-[11rem] rounded-lg border border-border-subtle bg-surface shadow-soft-lg py-1"
+                    className="z-[44] min-w-[11rem] rounded-lg border border-border-panel-divider bg-surface shadow-soft-lg py-1"
                   >
                     {selectedProject &&
                       hasPermission(
@@ -4345,13 +4345,13 @@ function AppContainer() {
                     {currentView === "issueDetail" && (
                       <div className="w-full flex-1 flex flex-col p-3 md:p-4 min-h-0 overflow-hidden bg-surface-sunken text-left">
                         {/* #418 — full-page TaskDetail chrome = Card + title bar Velzon (bukan Modal overlay) */}
-                        <div className="flex-1 flex flex-col min-h-0 surface-panel bg-surface border border-border-subtle rounded-lg shadow-soft overflow-hidden">
+                        <div className="flex-1 flex flex-col min-h-0 surface-panel bg-surface border border-border-panel-divider rounded-lg shadow-soft overflow-hidden">
                           <div className="px-4 py-3 md:px-5 md:py-3.5 border-b border-border-divider bg-surface-sunken/40 flex items-center justify-between gap-4 shrink-0">
                             <div className="flex items-center gap-3 min-w-0">
                               <button
                                 type="button"
                                 onClick={() => setIsTaskDetailModalOpen(false)}
-                                className="h-9 w-9 rounded-lg bg-surface border border-border-subtle text-content-secondary hover:bg-primary/10 hover:text-primary hover:border-primary/30 flex items-center justify-center transition-all shadow-2xs shrink-0"
+                                className="h-9 w-9 rounded-lg bg-surface border border-border-panel-divider text-content-secondary hover:bg-primary/10 hover:text-primary hover:border-primary/30 flex items-center justify-center transition-all shadow-2xs shrink-0"
                                 title={t("appShell.back")}
                               >
                                 <ArrowLeft className="w-4 h-4" />

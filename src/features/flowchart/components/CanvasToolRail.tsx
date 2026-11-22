@@ -48,7 +48,7 @@ const CanvasToolRailBati: React.FC<CanvasToolRailProps> = ({
   const bukaPalet = useCallback(() => setIsRightSidebarOpen(false), [setIsRightSidebarOpen]);
 
   return (
-    <div className="absolute top-24 md:top-20 z-20 flex flex-col gap-1.5 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1.5 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] shrink-0 select-none items-center transition-all duration-300 left-3">
+    <div className="absolute top-24 md:top-20 z-20 flex flex-col gap-1.5 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-panel-divider/40 p-1.5 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] shrink-0 select-none items-center transition-all duration-300 left-3">
       <button
         type="button"
         onClick={() => {

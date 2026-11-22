@@ -69,7 +69,7 @@ export const MeetingMobileCardView: React.FC<MeetingMobileCardViewProps> = ({
 
   if (meetings.length === 0) {
     return (
-      <div className="p-8 text-center bg-surface border border-border-subtle/80 rounded-lg shadow-2xs">
+      <div className="p-8 text-center bg-surface border border-border-panel-divider/80 rounded-lg shadow-2xs">
         <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-3 text-primary shadow-2xs">
           <Calendar className="w-6 h-6" />
         </div>
@@ -147,7 +147,7 @@ export const MeetingMobileCardView: React.FC<MeetingMobileCardViewProps> = ({
 
             {/* Date, Time & Meeting Link */}
             <div className="flex flex-wrap items-center gap-2 text-xs text-content-subtle">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-sunken border border-border-subtle font-medium">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-sunken border border-border-panel-divider font-medium">
                 <Calendar className="w-3 h-3 text-primary" />
                 {formatDate(meeting.createdAt)}
               </span>

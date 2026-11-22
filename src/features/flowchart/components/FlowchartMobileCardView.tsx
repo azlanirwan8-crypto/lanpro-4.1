@@ -54,7 +54,7 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
 
   if (flowcharts.length === 0) {
     return (
-      <div className="p-8 text-center bg-surface border border-border-subtle/80 rounded-lg shadow-2xs">
+      <div className="p-8 text-center bg-surface border border-border-panel-divider/80 rounded-lg shadow-2xs">
         <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto mb-3 text-primary shadow-2xs">
           <Workflow className="w-6 h-6" />
         </div>

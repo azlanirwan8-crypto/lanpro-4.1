@@ -208,7 +208,7 @@ export const CompleteRegistrationScreen = ({
             onChange={(e) => ubahUsername(e.target.value)}
             placeholder={t("completeReg.usernamePlaceholder")}
             autoFocus
-            className="min-h-11 w-full rounded-lg border border-border-subtle bg-surface px-3.5
+            className="min-h-11 w-full rounded-lg border border-border-panel-divider bg-surface px-3.5
                        text-sm text-content transition-colors duration-150
                        focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
           />

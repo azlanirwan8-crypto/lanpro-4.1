@@ -53,7 +53,7 @@ export const EditSuiteModal: React.FC<EditSuiteModalProps> = ({
             onKeyDown={enterUntukSimpan(() => {
               if (editName.trim()) onSubmit();
             })}
-            className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-normal text-content-body"
+            className="w-full text-xs p-2.5 bg-surface-sunken border border-border-panel-divider rounded-md font-normal text-content-body"
           />
         </div>
       </div>

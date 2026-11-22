@@ -468,7 +468,7 @@ select option {
  * garis 1,03:1 dan teks redup lama sementara seluruh aplikasi sudah diperbaiki.
  * Sekarang semuanya mengacu ke token. */
 .dark .markdown-body h2 {
-  border-bottom-color: var(--color-border-subtle);
+  border-bottom-color: var(--color-border-panel-divider);
 }
 .dark .markdown-body blockquote {
   border-left-color: #495057; /* #427 — Velzon gray-700, bukan salinan token */
@@ -1061,7 +1061,7 @@ html.dark [data-shell-divider] {
   background-color: color-mix(in srgb, var(--lbr, var(--color-surface-marker)) 6%, transparent);
 }
 .label-edge {
-  border-left-color: var(--lbr, var(--color-border-subtle));
+  border-left-color: var(--lbr, var(--color-border-panel-divider));
 }
 
 /*

@@ -89,7 +89,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
           onClick={() => onTabChange("single")}
           className={`flex-1 py-1.5 text-xs font-normal rounded-md transition-all cursor-pointer ${
             activeTab === "single"
-              ? "bg-surface text-primary shadow-xs border border-border-subtle/80 font-medium"
+              ? "bg-surface text-primary shadow-xs border border-border-panel-divider/80 font-medium"
               : "text-content-muted hover:text-content-body"
           }`}
         >
@@ -100,7 +100,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
           onClick={() => onTabChange("bulk")}
           className={`flex-1 py-1.5 text-xs font-normal rounded-md transition-all cursor-pointer ${
             activeTab === "bulk"
-              ? "bg-surface text-primary shadow-xs border border-border-subtle/80 font-medium"
+              ? "bg-surface text-primary shadow-xs border border-border-panel-divider/80 font-medium"
               : "text-content-muted hover:text-content-body"
           }`}
         >

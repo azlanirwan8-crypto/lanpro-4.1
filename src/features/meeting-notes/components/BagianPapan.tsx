@@ -72,7 +72,7 @@ export const KepalaPapan: React.FC<KepalaProps> = ({ tampilAI, onToggleAI, cari,
           className={cn(
             "inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-md text-xs font-normal transition-all border shadow-2xs cursor-pointer shrink-0",
             tampilAI
-              ? "bg-surface-muted hover:bg-surface-strong text-content-body border-border-subtle"
+              ? "bg-surface-muted hover:bg-surface-strong text-content-body border-border-panel-divider"
               : "bg-primary/10 hover:bg-primary/15 text-primary border-primary/20"
           )}
           title={tampilAI ? t("discussion.closeAiAssistant") : t("discussion.aiAssistant")}
@@ -425,7 +425,7 @@ export const KakiPapan: React.FC<KakiProps> = ({
         >
           <ChevronLeft className="w-3.5 h-3.5" /> {t("discussion.prev")}
         </button>
-        <span className="px-3 py-1 bg-surface border border-border-subtle rounded-md text-primary shadow-2xs text-xs font-normal">
+        <span className="px-3 py-1 bg-surface border border-border-panel-divider rounded-md text-primary shadow-2xs text-xs font-normal">
           {halaman} {t("common.of")} {totalPages}
         </span>
         <button

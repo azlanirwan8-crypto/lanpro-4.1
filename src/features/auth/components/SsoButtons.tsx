@@ -113,7 +113,7 @@ export const SsoButtons = ({ mode }: SsoButtonsProps) => {
             href={urlMulaiSso(p, mode)}
             aria-label={t(isLogin ? "rakit.ssoSignIn" : "rakit.ssoSignUp", { penyedia: NAMA[p] })}
             className="inline-flex items-center justify-center min-h-11 rounded-lg
-                       border border-border-subtle bg-surface
+                       border border-border-panel-divider bg-surface
                        text-sm font-medium text-content-body
                        transition-colors duration-150
                        hover:bg-surface-muted focus:outline-none

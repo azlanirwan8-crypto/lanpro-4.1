@@ -35,7 +35,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
             <span className="text-sm font-medium text-content-body">
               {t("shortcuts.openCreateTask")}
             </span>
-            <kbd className="px-2.5 py-1 text-xs font-medium font-mono bg-surface-muted text-content-strong rounded border border-border-subtle shadow-soft">
+            <kbd className="px-2.5 py-1 text-xs font-medium font-mono bg-surface-muted text-content-strong rounded border border-border-panel-divider shadow-soft">
               n
             </kbd>
           </div>
@@ -43,7 +43,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
             <span className="text-sm font-medium text-content-body">
               {t("shortcuts.openCreateProject")}
             </span>
-            <kbd className="px-2.5 py-1 text-xs font-medium font-mono bg-surface-muted text-content-strong rounded border border-border-subtle shadow-soft">
+            <kbd className="px-2.5 py-1 text-xs font-medium font-mono bg-surface-muted text-content-strong rounded border border-border-panel-divider shadow-soft">
               p
             </kbd>
           </div>
@@ -51,7 +51,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
             <span className="text-sm font-medium text-content-body">
               {t("shortcuts.focusSearch")}
             </span>
-            <kbd className="px-2.5 py-1 text-xs font-medium font-mono bg-surface-muted text-content-strong rounded border border-border-subtle shadow-soft">
+            <kbd className="px-2.5 py-1 text-xs font-medium font-mono bg-surface-muted text-content-strong rounded border border-border-panel-divider shadow-soft">
               /
             </kbd>
           </div>
@@ -59,7 +59,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
             <span className="text-sm font-medium text-content-body">
               {t("shortcuts.toggleShortcuts")}
             </span>
-            <kbd className="px-2.5 py-1 text-xs font-medium font-mono bg-surface-muted text-content-strong rounded border border-border-subtle shadow-soft">
+            <kbd className="px-2.5 py-1 text-xs font-medium font-mono bg-surface-muted text-content-strong rounded border border-border-panel-divider shadow-soft">
               ?
             </kbd>
           </div>
@@ -67,7 +67,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
             <span className="text-sm font-medium text-content-body">
               {t("shortcuts.closeModals")}
             </span>
-            <kbd className="px-2.5 py-1 text-xs font-medium font-mono bg-surface-muted text-content-strong rounded border border-border-subtle shadow-soft">
+            <kbd className="px-2.5 py-1 text-xs font-medium font-mono bg-surface-muted text-content-strong rounded border border-border-panel-divider shadow-soft">
               Esc
             </kbd>
           </div>

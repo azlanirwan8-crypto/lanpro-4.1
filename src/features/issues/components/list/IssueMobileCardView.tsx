@@ -97,7 +97,7 @@ export const IssueMobileCardView: React.FC<IssueMobileCardViewProps> = ({
                 {sprint && (
                   <span
                     title={sprint.name}
-                    className="text-[10px] px-1.5 py-0.5 rounded bg-surface-sunken text-content-muted border border-border-subtle truncate max-w-[90px]"
+                    className="text-[10px] px-1.5 py-0.5 rounded bg-surface-sunken text-content-muted border border-border-panel-divider truncate max-w-[90px]"
                   >
                     {sprint.name}
                   </span>

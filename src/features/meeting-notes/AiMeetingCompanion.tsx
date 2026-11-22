@@ -914,7 +914,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
               onClick={() => setActiveTab("summary")}
               className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === "summary"
-                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  ? "bg-surface text-primary shadow-2xs border border-border-panel-divider/80"
                   : "text-content-secondary hover:text-content hover:bg-surface-muted"
               }`}
             >
@@ -924,7 +924,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
               onClick={() => setActiveTab("chronology")}
               className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === "chronology"
-                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  ? "bg-surface text-primary shadow-2xs border border-border-panel-divider/80"
                   : "text-content-secondary hover:text-content hover:bg-surface-muted"
               }`}
             >
@@ -934,7 +934,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
               onClick={() => setActiveTab("conclusions")}
               className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === "conclusions"
-                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  ? "bg-surface text-primary shadow-2xs border border-border-panel-divider/80"
                   : "text-content-secondary hover:text-content hover:bg-surface-muted"
               }`}
             >
@@ -944,7 +944,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
               onClick={() => setActiveTab("suggestions")}
               className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === "suggestions"
-                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  ? "bg-surface text-primary shadow-2xs border border-border-panel-divider/80"
                   : "text-content-secondary hover:text-content hover:bg-surface-muted"
               }`}
             >
@@ -954,7 +954,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
               onClick={() => setActiveTab("actionItems")}
               className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer relative ${
                 activeTab === "actionItems"
-                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  ? "bg-surface text-primary shadow-2xs border border-border-panel-divider/80"
                   : "text-content-secondary hover:text-content hover:bg-surface-muted"
               }`}
             >
@@ -969,7 +969,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
               onClick={() => setActiveTab("nextPlan")}
               className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === "nextPlan"
-                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  ? "bg-surface text-primary shadow-2xs border border-border-panel-divider/80"
                   : "text-content-secondary hover:text-content hover:bg-surface-muted"
               }`}
             >
@@ -979,7 +979,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
               onClick={() => setActiveTab("toBeScenario")}
               className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === "toBeScenario"
-                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  ? "bg-surface text-primary shadow-2xs border border-border-panel-divider/80"
                   : "text-content-secondary hover:text-content hover:bg-surface-muted"
               }`}
             >
@@ -989,7 +989,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
               onClick={() => setActiveTab("metadata")}
               className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === "metadata"
-                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  ? "bg-surface text-primary shadow-2xs border border-border-panel-divider/80"
                   : "text-content-secondary hover:text-content hover:bg-surface-muted"
               }`}
             >
@@ -999,7 +999,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
               onClick={() => setActiveTab("transcript")}
               className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === "transcript"
-                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  ? "bg-surface text-primary shadow-2xs border border-border-panel-divider/80"
                   : "text-content-secondary hover:text-content hover:bg-surface-muted"
               }`}
             >
@@ -1049,7 +1049,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-surface p-4 rounded-xl border border-border-subtle/50 shadow-xs flex flex-col justify-between">
+                    <div className="bg-surface p-4 rounded-xl border border-border-panel-divider/50 shadow-xs flex flex-col justify-between">
                       <span className="text-[11px] text-content-subtle uppercase tracking-normal block">
                         {t("aiMeeting.discussionSegments")}
                       </span>
@@ -1060,7 +1060,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                       </p>
                     </div>
 
-                    <div className="bg-surface p-4 rounded-xl border border-border-subtle/50 shadow-xs flex flex-col justify-between">
+                    <div className="bg-surface p-4 rounded-xl border border-border-panel-divider/50 shadow-xs flex flex-col justify-between">
                       <span className="text-[11px] text-content-subtle uppercase tracking-normal block">
                         {t("aiMeeting.actionItems")}
                       </span>
@@ -1074,7 +1074,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                 </div>
 
                 {/* PMO Enterprise Notulen Rapat Document */}
-                <div className="bg-surface p-8 md:p-10 rounded-xl border border-border-subtle/80 shadow-md relative overflow-hidden">
+                <div className="bg-surface p-8 md:p-10 rounded-xl border border-border-panel-divider/80 shadow-md relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-full h-1.5 bg-primary-surface"></div>
 
                   {/* Premium Markdown styling with .prose */}
@@ -1111,7 +1111,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
             {activeTab === "transcript" && (
               <div className="space-y-8">
                 {activeMeetingData && (
-                  <div className="p-6 bg-surface border border-border-subtle/80 rounded-xl shadow-soft space-y-4">
+                  <div className="p-6 bg-surface border border-border-panel-divider/80 rounded-xl shadow-soft space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border-faint">
                       <div className="flex items-center gap-2">
                         <h4 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
@@ -1183,7 +1183,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     ) : transcript ? (
                       <div className="space-y-4 text-left">
                         {/* Search and Filter Bar */}
-                        <div className="bg-surface-sunken p-4 border border-border-subtle/60 rounded-xl space-y-3">
+                        <div className="bg-surface-sunken p-4 border border-border-panel-divider/60 rounded-xl space-y-3">
                           <div className="flex flex-col sm:flex-row gap-3">
                             {/* Search Input */}
                             <div className="relative flex-1">
@@ -1213,7 +1213,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                               className={`px-4 py-2.5 rounded-xl border text-xs font-medium transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
                                 filterOnlyMatches
                                   ? "bg-primary-surface border-primary text-content-inverse shadow-md"
-                                  : "bg-surface border-border-subtle  hover:text-content-strong hover:bg-surface-sunken"
+                                  : "bg-surface border-border-panel-divider  hover:text-content-strong hover:bg-surface-sunken"
                               }`}
                             >
                               <Filter className="w-3.5 h-3.5" />
@@ -1261,7 +1261,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         </div>
 
                         {/* Transcript Display Container */}
-                        <div className="p-4 bg-surface-sunken border border-border-subtle/60 rounded-xl max-h-[380px] overflow-y-auto text-xs font-mono text-content-body leading-relaxed whitespace-pre-wrap select-text space-y-2">
+                        <div className="p-4 bg-surface-sunken border border-border-panel-divider/60 rounded-xl max-h-[380px] overflow-y-auto text-xs font-mono text-content-body leading-relaxed whitespace-pre-wrap select-text space-y-2">
                           {getProcessedTranscript().length > 0 ? (
                             getProcessedTranscript().map((line, idx) => (
                               <div
@@ -1315,7 +1315,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       </span>
                       {isRecording && (
                         <div className="w-full max-w-[220px] space-y-1">
-                          <div className="h-2 rounded-full bg-surface-sunken overflow-hidden border border-border-subtle">
+                          <div className="h-2 rounded-full bg-surface-sunken overflow-hidden border border-border-panel-divider">
                             <div
                               className="h-full bg-success-surface transition-[width] duration-100"
                               style={{ width: `${Math.round(micLevel * 100)}%` }}
@@ -1541,7 +1541,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 </div>
 
                 {activeMeetingData.tab_kronologi_rapat.length === 0 ? (
-                  <div className="text-center py-8 text-xs bg-surface border border-border-subtle/40 rounded-xl">
+                  <div className="text-center py-8 text-xs bg-surface border border-border-panel-divider/40 rounded-xl">
                     {t("aiMeeting.noChronology")}
                   </div>
                 ) : (
@@ -1550,7 +1550,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       <div key={index} className="relative group">
                         <span className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-primary border-4 border-surface group-hover:scale-125 transition-transform shadow-soft" />
 
-                        <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft hover:shadow-md transition-all space-y-4">
+                        <div className="bg-surface p-5 rounded-xl border border-border-panel-divider/50 shadow-soft hover:shadow-md transition-all space-y-4">
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <div>
                               <span className="text-[11px] text-primary font-normal uppercase tracking-normalst block mb-1">
@@ -1592,7 +1592,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 </div>
 
                 {activeMeetingData.tab_kesimpulan.length === 0 ? (
-                  <div className="text-center py-8 text-xs bg-surface border border-border-subtle/40 rounded-xl">
+                  <div className="text-center py-8 text-xs bg-surface border border-border-panel-divider/40 rounded-xl">
                     {t("aiMeeting.noConclusion")}
                   </div>
                 ) : (
@@ -1622,7 +1622,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 </div>
 
                 {activeMeetingData.tab_saran_dan_ide.length === 0 ? (
-                  <div className="text-center py-8 text-xs bg-surface border border-border-subtle/40 rounded-xl">
+                  <div className="text-center py-8 text-xs bg-surface border border-border-panel-divider/40 rounded-xl">
                     {t("aiMeeting.noIdeas")}
                   </div>
                 ) : (
@@ -1669,7 +1669,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 </div>
 
                 {activeMeetingData.tab_tindak_lanjut.length === 0 ? (
-                  <div className="text-center py-8 text-xs bg-surface border border-border-subtle/40 rounded-xl">
+                  <div className="text-center py-8 text-xs bg-surface border border-border-panel-divider/40 rounded-xl">
                     {t("aiMeeting.noActionItems")}
                   </div>
                 ) : (
@@ -1688,7 +1688,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       return (
                         <div
                           key={index}
-                          className="bg-surface rounded-xl border border-border-subtle/80 p-5 shadow-soft flex flex-col md:flex-row justify-between items-start md:items-center gap-5 hover:border-primary/20 transition-all"
+                          className="bg-surface rounded-xl border border-border-panel-divider/80 p-5 shadow-soft flex flex-col md:flex-row justify-between items-start md:items-center gap-5 hover:border-primary/20 transition-all"
                         >
                           <div className="flex-1 space-y-3 min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
@@ -1701,7 +1701,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                                 </span>
                               )}
                               {item.due_date && (
-                                <span className="px-2 py-[3px] bg-surface-sunken text-content-secondary text-[10px] leading-none font-medium rounded border border-border-subtle">
+                                <span className="px-2 py-[3px] bg-surface-sunken text-content-secondary text-[10px] leading-none font-medium rounded border border-border-panel-divider">
                                   {t("aiMeeting.target")} {item.due_date}
                                 </span>
                               )}
@@ -1779,7 +1779,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 </div>
 
                 {activeMeetingData.tab_next_plan.length === 0 ? (
-                  <div className="text-center py-8 text-xs bg-surface border border-border-subtle/40 rounded-xl">
+                  <div className="text-center py-8 text-xs bg-surface border border-border-panel-divider/40 rounded-xl">
                     {t("aiMeeting.noNextPlan")}
                   </div>
                 ) : (
@@ -1788,7 +1788,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       <div key={index} className="relative group">
                         <span className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-pink-500 border-4 border-surface group-hover:scale-125 transition-transform shadow-soft" />
 
-                        <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft hover:shadow-md transition-all">
+                        <div className="bg-surface p-5 rounded-xl border border-border-panel-divider/50 shadow-soft hover:shadow-md transition-all">
                           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                             <span className="px-2 py-0.5 bg-pink-500/10 border border-pink-500/30 text-pink-700 text-[11px] font-medium uppercase rounded">
                               {t("rakit.actionPlanNo", { no: index + 1 })}
@@ -1835,7 +1835,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* As-Is Card */}
-                    <div className="bg-surface-sunken border border-border-subtle p-5 rounded-xl shadow-soft space-y-3">
+                    <div className="bg-surface-sunken border border-border-panel-divider p-5 rounded-xl shadow-soft space-y-3">
                       <div className="flex items-center gap-2 text-content-body font-normal text-[11px] uppercase tracking-normalst">
                         <span className="w-2 h-2 rounded-full bg-surface-marker" />
                         {t("aiMeeting.currentStateAsIs")}
@@ -1860,7 +1860,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   </div>
 
                   {/* Transition Steps Card */}
-                  <div className="bg-surface border border-border-subtle p-5 rounded-xl shadow-soft space-y-4">
+                  <div className="bg-surface border border-border-panel-divider p-5 rounded-xl shadow-soft space-y-4">
                     <div className="flex items-center gap-2 text-content-body font-normal text-[11px] uppercase tracking-normalst">
                       {t("aiMeeting.migrationTransitionSteps")}
                     </div>
@@ -1899,7 +1899,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {/* Topic and platform detection */}
-                  <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft space-y-3">
+                  <div className="bg-surface p-5 rounded-xl border border-border-panel-divider/50 shadow-soft space-y-3">
                     <h5 className="text-[11px] font-normal text-primary uppercase tracking-normalst">
                       {t("aiMeeting.meetingDetail")}
                     </h5>
@@ -1918,7 +1918,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       </div>
                       <div className="text-xs text-content-secondary">
                         {t("aiMeeting.platform")}{" "}
-                        <span className="font-medium px-1.5 py-0.5 bg-surface-muted rounded border border-border-subtle">
+                        <span className="font-medium px-1.5 py-0.5 bg-surface-muted rounded border border-border-panel-divider">
                           {activeMeetingData.tab_metadata.platform_digunakan || "Zoom"}
                         </span>
                       </div>
@@ -1936,7 +1936,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   </div>
 
                   {/* Active Speakers / Participants */}
-                  <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft space-y-3">
+                  <div className="bg-surface p-5 rounded-xl border border-border-panel-divider/50 shadow-soft space-y-3">
                     <h5 className="text-[11px] font-normal text-primary uppercase tracking-normalst">
                       {t("aiMeeting.allDetectedMeetingParticipants")}
                     </h5>
@@ -1950,7 +1950,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                           (speaker: string, index: number) => (
                             <span
                               key={index}
-                              className="px-3 py-1.5 bg-surface-muted border border-border-subtle text-content-body text-xs font-medium rounded-lg flex items-center gap-1.5 shadow-soft/50"
+                              className="px-3 py-1.5 bg-surface-muted border border-border-panel-divider text-content-body text-xs font-medium rounded-lg flex items-center gap-1.5 shadow-soft/50"
                             >
                               <Users className="w-3.5 h-3.5 text-content-subtle" /> {speaker}
                             </span>

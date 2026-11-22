@@ -83,7 +83,7 @@ export const ActivityLogPanel = ({
       <div className="space-y-4 sm:space-y-6 w-full px-3 md:px-5 pt-3 md:pt-4 pb-3 md:pb-5">
         {/* Summary Metric Cards — #361: 2 kolom di HP */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-6 mb-4 sm:mb-8">
-          <div className="surface-panel bg-surface p-3.5 sm:p-6 rounded-xl border border-border-subtle shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-24 sm:h-32 relative overflow-hidden">
+          <div className="surface-panel bg-surface p-3.5 sm:p-6 rounded-xl border border-border-panel-divider shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-24 sm:h-32 relative overflow-hidden">
             <div className="absolute right-0 top-0 opacity-[0.03] scale-150 -translate-y-4 translate-x-4">
               <Activity className="w-32 h-32" />
             </div>
@@ -94,7 +94,7 @@ export const ActivityLogPanel = ({
               {activityLogs.length}
             </div>
           </div>
-          <div className="surface-panel bg-surface p-3.5 sm:p-6 rounded-xl border border-border-subtle shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-24 sm:h-32 relative overflow-hidden">
+          <div className="surface-panel bg-surface p-3.5 sm:p-6 rounded-xl border border-border-panel-divider shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-24 sm:h-32 relative overflow-hidden">
             <div className="absolute right-0 top-0 opacity-[0.03] scale-150 -translate-y-4 translate-x-4">
               <Users className="w-32 h-32" />
             </div>
@@ -105,7 +105,7 @@ export const ActivityLogPanel = ({
               {activeActorsCount}
             </div>
           </div>
-          <div className="surface-panel bg-surface p-3.5 sm:p-6 rounded-xl border border-border-subtle shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-24 sm:h-32 relative overflow-hidden col-span-2 md:col-span-1">
+          <div className="surface-panel bg-surface p-3.5 sm:p-6 rounded-xl border border-border-panel-divider shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-24 sm:h-32 relative overflow-hidden col-span-2 md:col-span-1">
             <div className="absolute right-0 top-0 opacity-[0.03] scale-150 -translate-y-4 translate-x-4">
               <Clock className="w-32 h-32" />
             </div>
@@ -127,10 +127,10 @@ export const ActivityLogPanel = ({
           </div>
         </div>
 
-        <div className="surface-panel bg-surface border border-border-subtle rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+        <div className="surface-panel bg-surface border border-border-panel-divider rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
           {/* #426 — search + export dipindah ke dalam card Audit Trail */}
           <div className="px-4 py-3 border-b border-border-divider/80 bg-surface shrink-0 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex min-w-0 flex-1 md:flex-none bg-surface-sunken border border-border-subtle rounded-lg px-3 py-2 items-center gap-2">
+            <div className="flex min-w-0 flex-1 md:flex-none bg-surface-sunken border border-border-panel-divider rounded-lg px-3 py-2 items-center gap-2">
               <Search className="w-3.5 h-3.5 text-content-subtle shrink-0" />
               <input
                 value={auditLogSearch}
@@ -189,9 +189,9 @@ export const ActivityLogPanel = ({
                                 const a = (log.action || "").toLowerCase();
                                 let Icon = Activity;
                                 let colorClass =
-                                  "text-content-muted bg-surface-sunken border-border-subtle group-hover:bg-surface-muted group-hover:text-content-body group-hover:border-border-subtle";
+                                  "text-content-muted bg-surface-sunken border-border-panel-divider group-hover:bg-surface-muted group-hover:text-content-body group-hover:border-border-panel-divider";
                                 let badgeClass =
-                                  "bg-surface-muted text-content-secondary border border-border-subtle";
+                                  "bg-surface-muted text-content-secondary border border-border-panel-divider";
                                 if (a.includes("create") || a.includes("add")) {
                                   Icon = PlusSquare;
                                   colorClass =
@@ -242,7 +242,7 @@ export const ActivityLogPanel = ({
                                           {t("activityLog.sourceUi")}
                                         </span>
                                       </div>
-                                      <div className="font-mono font-normal text-content-body bg-surface-sunken border border-border-subtle p-2.5 rounded-lg shadow-inner whitespace-pre-wrap word-break">
+                                      <div className="font-mono font-normal text-content-body bg-surface-sunken border border-border-panel-divider p-2.5 rounded-lg shadow-inner whitespace-pre-wrap word-break">
                                         <span className="text-content-subtle select-none mr-2">
                                           {">"}
                                         </span>
@@ -278,7 +278,7 @@ export const ActivityLogPanel = ({
                           <td className="text-right w-48 align-middle">
                             <div className="flex flex-col items-end gap-1.5">
                               <div
-                                className="font-mono text-[11px] bg-surface-muted text-content-muted px-2 py-1 rounded border border-border-subtle uppercase font-normal tracking-normal select-all opacity-70 group-hover:opacity-100 transition-opacity"
+                                className="font-mono text-[11px] bg-surface-muted text-content-muted px-2 py-1 rounded border border-border-panel-divider uppercase font-normal tracking-normal select-all opacity-70 group-hover:opacity-100 transition-opacity"
                                 title={log.id}
                               >
                                 ...{log.id?.substring((log.id?.length || 0) - 8)}
@@ -311,7 +311,7 @@ export const ActivityLogPanel = ({
                       className="w-full text-left p-3.5 flex flex-col gap-2 bg-surface hover:bg-surface-sunken/60 active:bg-surface-sunken cursor-pointer"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] font-normal tracking-normal uppercase px-2 py-0.5 rounded bg-surface-muted text-content-secondary border border-border-subtle truncate max-w-[70%]">
+                        <span className="text-[10px] font-normal tracking-normal uppercase px-2 py-0.5 rounded bg-surface-muted text-content-secondary border border-border-panel-divider truncate max-w-[70%]">
                           {log.action?.replace(/_/g, " ") || "ACTION"}
                         </span>
                         <span className="text-[10px] text-content-subtle tabular-nums shrink-0">
@@ -412,7 +412,7 @@ export const ActivityLogPanel = ({
                 <dt className="text-[11px] font-normal text-content-subtle uppercase tracking-normal">
                   {t("activityLog.detailDetails")}
                 </dt>
-                <dd className="font-mono text-xs text-content-body bg-surface-sunken border border-border-subtle p-2.5 rounded-lg whitespace-pre-wrap break-words">
+                <dd className="font-mono text-xs text-content-body bg-surface-sunken border border-border-panel-divider p-2.5 rounded-lg whitespace-pre-wrap break-words">
                   {inspectedLog.details || "No payload details provided."}
                 </dd>
               </div>
@@ -422,7 +422,7 @@ export const ActivityLogPanel = ({
               <button
                 type="button"
                 onClick={() => setInspectedLog(null)}
-                className="text-[13px] font-medium px-3 py-1.5 rounded-md border border-border-subtle text-content-secondary hover:bg-surface-muted transition-colors"
+                className="text-[13px] font-medium px-3 py-1.5 rounded-md border border-border-panel-divider text-content-secondary hover:bg-surface-muted transition-colors"
               >
                 {t("activityLog.detailClose")}
               </button>

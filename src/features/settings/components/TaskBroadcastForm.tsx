@@ -192,7 +192,7 @@ export const TaskBroadcastForm: React.FC = () => {
             if (!menyimpan) simpan();
           })}
           placeholder={t("taskBroadcast.subjekPlaceholder")}
-          className="w-full px-3 py-2 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none shadow-2xs"
+          className="w-full px-3 py-2 bg-surface border border-border-panel-divider rounded-md text-xs font-medium text-content-strong outline-none shadow-2xs"
         />
       </div>
 
@@ -203,7 +203,7 @@ export const TaskBroadcastForm: React.FC = () => {
           value={isiTemplat}
           onChange={(e) => setIsiTemplat(e.target.value)}
           placeholder={t("taskBroadcast.templatPlaceholder")}
-          className="w-full px-3 py-2 bg-surface border border-border-subtle rounded-md text-[11px] font-mono text-content-strong outline-none shadow-2xs resize-none"
+          className="w-full px-3 py-2 bg-surface border border-border-panel-divider rounded-md text-[11px] font-mono text-content-strong outline-none shadow-2xs resize-none"
         />
         <p className="text-[11px] text-content-subtle leading-relaxed">
           {t("taskBroadcast.templatBantuan")}
@@ -224,7 +224,7 @@ export const TaskBroadcastForm: React.FC = () => {
                 className={`px-2.5 py-1 rounded-md text-xs font-medium border transition cursor-pointer ${
                   aktif
                     ? "bg-primary border-primary text-primary-foreground"
-                    : "bg-surface border-border-subtle text-content-body hover:bg-surface-sunken"
+                    : "bg-surface border-border-panel-divider text-content-body hover:bg-surface-sunken"
                 }`}
               >
                 {t(d.labelKey)}
@@ -259,7 +259,7 @@ export const TaskBroadcastForm: React.FC = () => {
           </button>
         </div>
 
-        <div className="max-h-56 overflow-y-auto rounded-md border border-border-subtle divide-y divide-border-faint">
+        <div className="max-h-56 overflow-y-auto rounded-md border border-border-panel-divider divide-y divide-border-faint">
           {semuaPengguna.length === 0 && (
             <p className="px-3 py-4 text-xs text-content-subtle">
               {t("taskBroadcast.tidakAdaPengguna")}

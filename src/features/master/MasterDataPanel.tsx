@@ -1421,8 +1421,8 @@ export const MasterDataPanel = ({
                   className={cn(
                     "w-6 h-6 rounded-full border border-border-panel-divider transition-transform active:scale-95 duration-100 hover:scale-110",
                     newMasterColor.toLowerCase() === p.hex.toLowerCase()
-                      ? "ring-2 ring-offset-2 ring-primary scale-110"
-                      : "hover:border-border-strong"
+                      ? "ring-2 ring-offset-2 ring-offset-surface-sunken ring-primary scale-110"
+                      : "hover:border-primary"
                   )}
                   style={{ backgroundColor: p.hex }}
                   title={p.label}
@@ -1647,8 +1647,8 @@ export const MasterDataPanel = ({
                     className={cn(
                       "w-6 h-6 rounded-full border border-border-panel-divider transition-transform active:scale-95 duration-100 hover:scale-110",
                       (editingMaster.color || "").toLowerCase() === p.hex.toLowerCase()
-                        ? "ring-2 ring-offset-2 ring-primary scale-110"
-                        : "hover:border-border-strong"
+                        ? "ring-2 ring-offset-2 ring-offset-surface-sunken ring-primary scale-110"
+                        : "hover:border-primary"
                     )}
                     style={{ backgroundColor: p.hex }}
                     title={p.label}

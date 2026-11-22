@@ -1226,7 +1226,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 >
                   <ChevronLeft className="w-3.5 h-3.5" /> {t("wiki.previous")}
                 </button>
-                <span className="text-[11px] font-normal px-3 py-1 bg-surface border border-border-subtle rounded-md text-primary shadow-2xs">
+                <span className="text-[11px] font-normal px-3 py-1 bg-surface border border-border-panel-divider rounded-md text-primary shadow-2xs">
                   {t("rakit.pageOf", { kini: currentPage, total: totalPages })}
                 </span>
                 <button
@@ -1300,7 +1300,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                             "flex items-center gap-1.5 px-3 py-1.5 font-medium text-xs border rounded-md transition-all cursor-pointer whitespace-nowrap shadow-2xs",
                             isFullscreenPreview
                               ? "bg-surface-inverse-strong border-border-inverse text-content-inverse hover:bg-surface-inverse-strong"
-                              : "bg-surface border-border-subtle text-content-body hover:bg-surface-sunken"
+                              : "bg-surface border-border-panel-divider text-content-body hover:bg-surface-sunken"
                           )}
                           title={
                             isFullscreenPreview
@@ -1357,7 +1357,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   {/* LEFT PANE / MAIN VIEW (DOCUMENT VIEWER) */}
                   <div
                     className={cn(
-                      "surface-panel flex-1 bg-surface border border-border-subtle/80 rounded-lg flex flex-col min-h-0 overflow-hidden relative shadow-2xs",
+                      "surface-panel flex-1 bg-surface border border-border-panel-divider/80 rounded-lg flex flex-col min-h-0 overflow-hidden relative shadow-2xs",
                       mobileDetailTab !== "preview" && "hidden md:flex"
                     )}
                   >
@@ -1569,7 +1569,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                               "border-2 border-dashed rounded-md p-5 max-w-sm w-full flex flex-col items-center justify-center gap-3 text-center group transition-all bg-surface shadow-2xs",
                               canUpdate
                                 ? "cursor-pointer hover:border-primary hover:bg-primary/10"
-                                : "cursor-not-allowed opacity-70 border-border-subtle"
+                                : "cursor-not-allowed opacity-70 border-border-panel-divider"
                             )}
                           >
                             <div className="w-12 h-12 bg-primary/10 text-primary rounded-md flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform duration-200">
@@ -1615,7 +1615,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   {/* RIGHT PANE / SIDE WIDGET (CATATAN & KOMENTAR CHAT BUBBLE) */}
                   <div
                     className={cn(
-                      "w-full md:w-[350px] lg:w-[400px] surface-panel shrink-0 bg-surface border border-border-subtle/80 rounded-lg flex flex-col min-h-0 overflow-hidden shadow-2xs transition-all duration-300",
+                      "w-full md:w-[350px] lg:w-[400px] surface-panel shrink-0 bg-surface border border-border-panel-divider/80 rounded-lg flex flex-col min-h-0 overflow-hidden shadow-2xs transition-all duration-300",
                       isFullscreenPreview ? "hidden md:hidden" : "flex",
                       mobileDetailTab !== "notes" && "hidden md:flex"
                     )}
@@ -1678,7 +1678,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                     "px-3.5 py-2.5 rounded-md relative shadow-2xs group",
                                     isMine
                                       ? "bg-primary-surface text-content-inverse"
-                                      : "bg-surface text-content-strong border border-border-subtle"
+                                      : "bg-surface text-content-strong border border-border-panel-divider"
                                   )}
                                 >
                                   <p className="text-[13px] leading-relaxed whitespace-pre-wrap break-words min-w-[50px] pb-3.5">
@@ -1823,7 +1823,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     <label className="text-[11px] font-normal text-content-muted uppercase tracking-normal block">
                       {t("wiki.summaryLabel")}
                     </label>
-                    <span className="text-[11px] font-medium text-content-subtle bg-surface-sunken px-1.5 py-0.5 rounded border border-border-subtle">
+                    <span className="text-[11px] font-medium text-content-subtle bg-surface-sunken px-1.5 py-0.5 rounded border border-border-panel-divider">
                       {t("wiki.markdownSupport")}
                     </span>
                   </div>
@@ -1883,7 +1883,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       "border-2 border-dashed rounded-md p-4 flex flex-col items-center justify-center gap-2 cursor-pointer text-center group transition-all",
                       dragActive
                         ? "border-primary bg-primary/10"
-                        : "border-border-subtle bg-surface-sunken/50 hover:border-primary hover:bg-primary/10"
+                        : "border-border-panel-divider bg-surface-sunken/50 hover:border-primary hover:bg-primary/10"
                     )}
                   >
                     <Upload
@@ -1908,7 +1908,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       documents.find((d) => d.id === editId)?.fileName &&
                       !shouldRemoveFile ? (
                       <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 bg-surface-muted border border-border-subtle px-2.5 py-1 rounded-md justify-center w-max mx-auto">
+                        <div className="flex items-center gap-1.5 bg-surface-muted border border-border-panel-divider px-2.5 py-1 rounded-md justify-center w-max mx-auto">
                           <FileText className="w-3 h-3 text-content-muted" />
                           <p className="text-[11px] font-medium text-content-body max-w-[240px] whitespace-normal break-words text-center">
                             {documents.find((d) => d.id === editId)?.fileName}

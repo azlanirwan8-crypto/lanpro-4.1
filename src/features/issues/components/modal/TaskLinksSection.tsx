@@ -111,7 +111,7 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
                 return (
                   <div
                     key={link.id ? `${link.id}-${linkIdx}` : `link-${linkIdx}`}
-                    className="p-3 bg-surface rounded-xl border border-border-subtle shadow-soft space-y-2 group/link relative"
+                    className="p-3 bg-surface rounded-xl border border-border-panel-divider shadow-soft space-y-2 group/link relative"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="text-xs font-medium text-content-body truncate flex-1">

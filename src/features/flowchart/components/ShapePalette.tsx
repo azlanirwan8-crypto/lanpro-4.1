@@ -112,7 +112,7 @@ const ShapePaletteBati: React.FC<ShapePaletteProps> = ({
               purple: "bg-purple-300 border-purple-400",
               rose: "bg-rose-300 border-rose-400",
               sky: "bg-sky-300 border-sky-400",
-              slate: "bg-surface-marker border-border-subtle",
+              slate: "bg-surface-marker border-border-panel-divider",
             };
             return (
               <button
@@ -329,7 +329,7 @@ const ShapePaletteBati: React.FC<ShapePaletteProps> = ({
           />
           <div
             className={cn(
-              "z-50 flex flex-col overflow-hidden select-none bg-surface/95 backdrop-blur-lg border border-border-subtle/40 shadow-[0_12px_40px_rgba(0,0,0,0.12)]",
+              "z-50 flex flex-col overflow-hidden select-none bg-surface/95 backdrop-blur-lg border border-border-panel-divider/40 shadow-[0_12px_40px_rgba(0,0,0,0.12)]",
               // Mobile sheet
               "max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:top-auto max-md:w-full max-md:max-h-[70vh] max-md:rounded-t-2xl max-md:border-b-0 safe-area-pb",
               // Desktop flyout

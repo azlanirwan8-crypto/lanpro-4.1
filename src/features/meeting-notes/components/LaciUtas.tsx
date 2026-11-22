@@ -174,7 +174,7 @@ export const LaciUtas: React.FC<LaciUtasProps> = ({
                         "px-3 py-1.5 rounded-2xl",
                         isMine
                           ? "bg-primary-surface text-content-inverse rounded-br-sm"
-                          : "bg-surface text-content-body border border-border-subtle rounded-bl-sm"
+                          : "bg-surface text-content-body border border-border-panel-divider rounded-bl-sm"
                       )}
                     >
                       <p className="text-[13px] font-normal leading-normal whitespace-pre-wrap break-words min-w-[50px]">

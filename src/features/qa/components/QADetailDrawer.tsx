@@ -228,7 +228,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                 <h4 className="text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1">
                   {t("qa.testSteps")}
                 </h4>
-                <div className="bg-surface-sunken p-3 rounded-md border border-border-subtle/60 text-xs font-medium text-content-body whitespace-pre-line leading-relaxed">
+                <div className="bg-surface-sunken p-3 rounded-md border border-border-panel-divider/60 text-xs font-medium text-content-body whitespace-pre-line leading-relaxed">
                   {selectedTestCase.steps}
                 </div>
               </div>
@@ -295,7 +295,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                     {selectedTestCase.evidences.map((ev) => (
                       <div
                         key={ev.id}
-                        className="relative group border border-border-subtle rounded-md overflow-hidden"
+                        className="relative group border border-border-panel-divider rounded-md overflow-hidden"
                       >
                         {ev.type === "video" ? (
                           <video src={ev.url} controls className="w-full h-24 object-cover" />
@@ -326,7 +326,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                   {(selectedTestCase.commentsList || []).map((cm, cIdx) => (
                     <div
                       key={cm.id || cIdx}
-                      className="bg-surface-sunken p-2.5 rounded-md border border-border-subtle/60 space-y-1"
+                      className="bg-surface-sunken p-2.5 rounded-md border border-border-panel-divider/60 space-y-1"
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-medium text-content-strong">

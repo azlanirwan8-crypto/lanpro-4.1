@@ -222,7 +222,7 @@ export const PemilihJamak: React.FC<PemilihJamakProps> = ({
                 </span>
               ))}
               {terpilih.length > CHIP_TERPAKAI && (
-                <span className="shrink-0 px-1.5 py-0.5 rounded-md text-[10px] leading-tight font-normal bg-surface-sunken text-content-muted border border-border-subtle">
+                <span className="shrink-0 px-1.5 py-0.5 rounded-md text-[10px] leading-tight font-normal bg-surface-sunken text-content-muted border border-border-panel-divider">
                   {t("discussion.sisaJamak", { jumlah: terpilih.length - CHIP_TERPAKAI })}
                 </span>
               )}
@@ -245,7 +245,7 @@ export const PemilihJamak: React.FC<PemilihJamakProps> = ({
               bottom: posisi.atas,
               zIndex: 10000,
             }}
-            className="bg-surface border border-border-subtle rounded-md shadow-xl overflow-hidden"
+            className="bg-surface border border-border-panel-divider rounded-md shadow-xl overflow-hidden"
           >
             {cari && (
               <div className="relative shrink-0 border-b border-border-faint bg-surface-sunken/60">
@@ -290,7 +290,7 @@ export const PemilihJamak: React.FC<PemilihJamakProps> = ({
                           "w-4 h-4 shrink-0 mt-px rounded-md border flex items-center justify-center",
                           aktif
                             ? "border-primary bg-primary text-content-inverse"
-                            : "border-border-subtle bg-surface"
+                            : "border-border-panel-divider bg-surface"
                         )}
                       >
                         {aktif && <Check className="w-3 h-3" />}

@@ -25,7 +25,7 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({ oldValues, newValues }) 
 
   if (allKeys.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-8 text-content-subtle bg-surface-sunken rounded-xl border border-dashed border-border-subtle">
+      <div className="flex flex-col items-center justify-center py-8 text-content-subtle bg-surface-sunken rounded-xl border border-dashed border-border-panel-divider">
         <Minus className="w-6 h-6 mb-2 opacity-20" />
         <p className="text-sm italic">{t("diff.noChange")}</p>
       </div>
@@ -41,7 +41,7 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({ oldValues, newValues }) 
   };
 
   return (
-    <div className="surface-panel overflow-hidden rounded-xl border border-border-subtle bg-surface">
+    <div className="surface-panel overflow-hidden rounded-xl border border-border-panel-divider bg-surface">
       <div className="grid grid-cols-12 gap-0 bg-surface-sunken border-b border-border-divider text-[11px] font-normal text-content-muted uppercase tracking-normal p-3">
         <div className="col-span-4 px-2">{t("diff.fieldName")}</div>
         <div className="col-span-4 px-2 border-l border-border-divider">{t("diff.oldValue")}</div>

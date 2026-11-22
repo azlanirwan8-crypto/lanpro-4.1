@@ -253,7 +253,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
         title={t("audit.title")}
         actions={
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="flex flex-1 sm:flex-none bg-surface-muted rounded-md p-2 border border-border-subtle/80 items-center gap-3 sm:gap-4 text-xs min-w-0 shadow-2xs">
+            <div className="flex flex-1 sm:flex-none bg-surface-muted rounded-md p-2 border border-border-panel-divider/80 items-center gap-3 sm:gap-4 text-xs min-w-0 shadow-2xs">
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px] font-normal text-content-subtle uppercase tracking-normal">
                   {t("audit.totalLog")}
@@ -357,7 +357,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
           </div>
 
           <div className="flex items-center gap-2 w-full overflow-x-auto pb-0.5 custom-scrollbar mt-2.5">
-            <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80 shrink-0">
+            <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-panel-divider/80 shrink-0">
               {["All", "Tasks", "Sprints", "Wiki", "Milestones"].map((ent) => (
                 <button
                   key={ent}
@@ -369,7 +369,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
               ))}
             </div>
 
-            <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80 shrink-0">
+            <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-panel-divider/80 shrink-0">
               {["All", "CREATE", "UPDATE", "DELETE"].map((act) => (
                 <button
                   key={act}
@@ -569,7 +569,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                   </div>
                   <button
                     onClick={() => setSelectedLog(null)}
-                    className="p-3 bg-surface rounded-xl text-content-subtle hover:text-danger-text hover:bg-danger/10 transition-all border border-border-subtle"
+                    className="p-3 bg-surface rounded-xl text-content-subtle hover:text-danger-text hover:bg-danger/10 transition-all border border-border-panel-divider"
                   >
                     <X className="w-6 h-6" />
                   </button>

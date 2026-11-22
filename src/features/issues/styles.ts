@@ -3,13 +3,13 @@
  */
 export const styles = {
   container:
-    "flex flex-col bg-surface rounded-lg border border-border-subtle/80 shadow-xs font-sans relative flex-1 min-h-[500px] overflow-hidden",
+    "flex flex-col bg-surface rounded-lg border border-border-panel-divider/80 shadow-xs font-sans relative flex-1 min-h-[500px] overflow-hidden",
   // #363 — kontrol utama (search/filter/config) 1 baris di HP; pill aktif di baris bawah.
   toolbar:
     "flex flex-col gap-2 px-3 sm:px-4 py-3 border-b border-border-divider/80 bg-surface-sunken/50 shrink-0",
   searchWrapper: "relative group min-w-0 flex-1 sm:flex-none",
   searchInput:
-    "pl-9 pr-3 sm:pr-4 py-2 bg-surface border border-border-subtle rounded-md text-xs font-normal text-content-body w-full sm:w-64 min-w-0 placeholder:font-normal placeholder:text-content-subtle focus:ring-1 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-2xs",
+    "pl-9 pr-3 sm:pr-4 py-2 bg-surface border border-border-panel-divider rounded-md text-xs font-normal text-content-body w-full sm:w-64 min-w-0 placeholder:font-normal placeholder:text-content-subtle focus:ring-1 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-2xs",
   filterPill:
     "px-2.5 py-1 bg-primary/10 text-primary border border-primary/30 rounded-md text-[10px] font-normal tracking-tight shadow-2xs",
   filterPillAmber:

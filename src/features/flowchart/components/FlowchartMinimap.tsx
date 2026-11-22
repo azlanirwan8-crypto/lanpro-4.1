@@ -163,7 +163,7 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
             className={cn(
               "p-2 rounded-xl border mb-2 shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-all duration-300 relative overflow-hidden",
               isMiro
-                ? "bg-surface/80 border-border-subtle/40 backdrop-blur-md text-content-strong"
+                ? "bg-surface/80 border-border-panel-divider/40 backdrop-blur-md text-content-strong"
                 : "bg-overlay/80 backdrop-blur-md text-content-inverse-strong"
             )}
           >
@@ -185,7 +185,7 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
               }}
               className={cn(
                 "relative rounded-xl overflow-hidden cursor-crosshair border transition-colors duration-300",
-                isMiro ? "bg-surface-sunken/70 border-border-subtle/50" : "bg-overlay/50 "
+                isMiro ? "bg-surface-sunken/70 border-border-panel-divider/50" : "bg-overlay/50 "
               )}
             >
               {/* Grid Dots / Grid Mesh in Minimap */}
@@ -284,7 +284,7 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
         className={cn(
           "flex items-center gap-2 px-3 py-1.5 rounded-xl border font-normal text-[11px]  uppercase tracking-normal transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.04)] cursor-pointer active:scale-95",
           isMiro
-            ? "bg-surface/80 hover:bg-surface/95 border-border-subtle/40  hover:text-primary"
+            ? "bg-surface/80 hover:bg-surface/95 border-border-panel-divider/40  hover:text-primary"
             : "bg-overlay/80 border-border-inverse/60 hover:text-blue-400"
         )}
       >

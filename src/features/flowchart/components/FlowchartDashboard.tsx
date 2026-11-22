@@ -443,7 +443,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
             >
               <ChevronLeft className="w-3.5 h-3.5" /> {t("flowchart.previous")}
             </button>
-            <span className="px-3 py-1 bg-surface border border-border-subtle rounded-md text-primary shadow-2xs text-[11px] font-normal">
+            <span className="px-3 py-1 bg-surface border border-border-panel-divider rounded-md text-primary shadow-2xs text-[11px] font-normal">
               {t("rakit.pageOf", { kini: currentPage, total: totalPages })}
             </span>
             <button

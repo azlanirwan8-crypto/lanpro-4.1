@@ -54,7 +54,7 @@ export const IssueSavedFiltersMenu: React.FC<IssueSavedFiltersMenuProps> = ({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1.5 z-40 w-[min(18rem,calc(100vw-2rem))] bg-surface border border-border-subtle rounded-xl shadow-lg p-3 flex flex-col gap-2">
+        <div className="absolute right-0 top-full mt-1.5 z-40 w-[min(18rem,calc(100vw-2rem))] bg-surface border border-border-panel-divider rounded-xl shadow-lg p-3 flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-medium text-content-body">
               {t("filters.savedFilters")}
@@ -74,7 +74,7 @@ export const IssueSavedFiltersMenu: React.FC<IssueSavedFiltersMenuProps> = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t("filters.saveFilterName")}
-              className="flex-1 min-w-0 text-xs bg-surface-sunken border border-border-subtle rounded-md px-2 py-1.5 text-content-body"
+              className="flex-1 min-w-0 text-xs bg-surface-sunken border border-border-panel-divider rounded-md px-2 py-1.5 text-content-body"
               maxLength={40}
             />
             <button

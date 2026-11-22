@@ -201,7 +201,7 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
                     ikut hormat (blok di index.css mematikan kelas itu).
                   */}
                   {isInlineTypeOpen === "inline" && (
-                    <div className="absolute left-0 top-full mt-2 w-48 bg-surface border border-border-subtle rounded-lg shadow-xl z-[100] overflow-hidden animate-dropdown">
+                    <div className="absolute left-0 top-full mt-2 w-48 bg-surface border border-border-panel-divider rounded-lg shadow-xl z-[100] overflow-hidden animate-dropdown">
                       {mArr
                         .filter((m) => m.type === "issue_type")
                         .filter((m) => tipeLegalList.includes(m.label))

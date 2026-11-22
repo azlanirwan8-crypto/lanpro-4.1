@@ -190,7 +190,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
             )}
           </div>
 
-          <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle text-[11px] text-content-subtle space-y-1">
+          <div className="p-3 bg-surface-sunken rounded-lg border border-border-panel-divider text-[11px] text-content-subtle space-y-1">
             <p className="font-semibold text-content-body">{t("resetPwd.requirements")}</p>
             <ul className="list-disc pl-4 space-y-0.5 text-content-muted">
               <li>{t("resetPwd.minChars")}</li>

@@ -65,7 +65,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
   return (
     <div className="md:col-span-3 space-y-3 md:max-h-[calc(100dvh-140px)] md:sticky md:top-4 pr-1 custom-scrollbar">
       {/* Velzon Ultra-Compact Card Box */}
-      <div className="bg-surface border border-border-subtle/80 rounded-md p-3.5 shadow-xs space-y-3">
+      <div className="bg-surface border border-border-panel-divider/80 rounded-md p-3.5 shadow-xs space-y-3">
         {/* Header Title */}
         <div className="flex items-center justify-between border-b border-border-faint pb-2.5">
           <div className="flex items-center gap-2">
@@ -143,7 +143,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                   className={`group p-3 rounded-md border transition-all cursor-pointer relative ${
                     isActive
                       ? "bg-surface border-primary border-l-4 border-l-primary shadow-soft ring-1 ring-primary/20"
-                      : "bg-surface border-border-subtle/80 hover:border-primary/40 hover:shadow-2xs"
+                      : "bg-surface border-border-panel-divider/80 hover:border-primary/40 hover:shadow-2xs"
                   }`}
                 >
                   {/* Action Buttons Top Right (Visible only to users with edit/delete access) */}
@@ -209,7 +209,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                             setActiveSuitePicDropdownId(isDropdownOpen ? null : suite.id);
                           }
                         }}
-                        className={`flex items-center gap-1 px-2 py-0.5 bg-surface-sunken rounded-md border border-border-subtle/80 transition-all ${
+                        className={`flex items-center gap-1 px-2 py-0.5 bg-surface-sunken rounded-md border border-border-panel-divider/80 transition-all ${
                           canUpdate
                             ? "cursor-pointer hover:bg-primary/10 hover:border-primary/50"
                             : "cursor-default"
@@ -250,7 +250,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                               setActiveSuitePicDropdownId(null);
                             }}
                           />
-                          <div className="absolute right-0 bottom-full mb-1.5 w-56 bg-surface rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-dropdown">
+                          <div className="absolute right-0 bottom-full mb-1.5 w-56 bg-surface rounded-md shadow-2xl border border-border-panel-divider py-2 z-50 animate-dropdown">
                             <div className="px-3 py-1 text-[11px] font-normal uppercase tracking-normal text-primary border-b border-border-faint mb-1">
                               {t("qa.assignModulePicProjectTeam")}
                             </div>

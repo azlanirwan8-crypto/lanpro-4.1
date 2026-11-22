@@ -214,7 +214,7 @@ export const BackupPanel = (_props: {
         {/* Top Cards: Export & Restore — #370: 2 kolom di HP */}
         <div className="grid grid-cols-2 gap-3 sm:gap-4">
           {/* Export Box */}
-          <div className="surface-panel bg-surface border border-border-subtle/80 rounded-lg p-3 sm:p-5 flex flex-col justify-between shadow-2xs">
+          <div className="surface-panel bg-surface border border-border-panel-divider/80 rounded-lg p-3 sm:p-5 flex flex-col justify-between shadow-2xs">
             <div>
               <div className="flex items-center gap-2 sm:gap-3 mb-3">
                 <div className="w-8 h-8 sm:w-9 sm:h-9 bg-blue-500/10 text-blue-600 rounded-md flex items-center justify-center shrink-0">
@@ -243,7 +243,7 @@ export const BackupPanel = (_props: {
           </div>
 
           {/* Restore Box */}
-          <div className="surface-panel bg-surface border border-border-subtle/80 rounded-lg p-3 sm:p-5 flex flex-col justify-between shadow-2xs">
+          <div className="surface-panel bg-surface border border-border-panel-divider/80 rounded-lg p-3 sm:p-5 flex flex-col justify-between shadow-2xs">
             <div>
               <div className="flex items-center gap-2 sm:gap-3 mb-3">
                 <div className="w-8 h-8 sm:w-9 sm:h-9 bg-rose-500/10 text-rose-600 rounded-md flex items-center justify-center shrink-0">
@@ -281,7 +281,7 @@ export const BackupPanel = (_props: {
         </div>
 
         {/* Export History DataTable */}
-        <div className="surface-panel bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden">
+        <div className="surface-panel bg-surface border border-border-panel-divider/80 rounded-lg shadow-2xs overflow-hidden">
           <div className="px-4 py-3 bg-surface-sunken/80 border-b border-border-divider/80 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-content-muted" />

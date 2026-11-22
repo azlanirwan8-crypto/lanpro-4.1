@@ -14,7 +14,7 @@ export const Button = ({
     primary:
       "btn-primary text-content-inverse hover:bg-primary-surface-hover active:bg-primary-surface-active shadow-xs border-transparent",
     secondary:
-      "bg-surface text-content-body border-border-subtle hover:bg-surface-sunken shadow-2xs",
+      "bg-surface text-content-body border-border-panel-divider hover:bg-surface-sunken shadow-2xs",
     ghost:
       "bg-transparent text-content-muted hover:bg-surface-muted border-transparent shadow-none",
     danger: "bg-danger/10 text-danger-text border-danger/30 hover:bg-danger/15 shadow-2xs",

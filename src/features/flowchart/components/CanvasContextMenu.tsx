@@ -146,7 +146,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
         left: `${adjustedX}px`,
         top: `${adjustedY}px`,
       }}
-      className="fixed z-50 w-56 bg-surface/95 backdrop-blur-md border border-border-subtle/55 rounded-xl shadow-[0_16px_40px_rgba(0,0,0,0.15)] p-1.5 select-none text-content-strong"
+      className="fixed z-50 w-56 bg-surface/95 backdrop-blur-md border border-border-panel-divider/55 rounded-xl shadow-[0_16px_40px_rgba(0,0,0,0.15)] p-1.5 select-none text-content-strong"
       onContextMenu={(e) => e.preventDefault()}
     >
       {/* Title */}

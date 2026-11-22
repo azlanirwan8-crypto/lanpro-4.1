@@ -25,7 +25,7 @@ export const LIST_THEAD_ROW_CLASS =
 
 /** Wrapper scroll tabel desktop di dalam kartu konten. */
 export const LIST_TABLE_WRAP_CLASS =
-  "surface-panel hidden sm:block flex-1 overflow-x-auto overflow-y-auto m-4 md:m-6 bg-surface rounded-lg border border-border-subtle/80 shadow-2xs";
+  "surface-panel hidden sm:block flex-1 overflow-x-auto overflow-y-auto m-4 md:m-6 bg-surface rounded-lg border border-border-panel-divider/80 shadow-2xs";
 
 /** Strip toolbar Search + Tambah di atas isi kartu (#424). */
 const LIST_CARD_TOOLBAR_CLASS =
@@ -74,7 +74,7 @@ export const ListPageShell: React.FC<ListPageShellProps> = ({
         ) : (
           <div
             className={cn(
-              "surface-panel flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden",
+              "surface-panel flex-1 flex flex-col min-h-0 bg-surface border border-border-panel-divider/80 rounded-lg shadow-soft overflow-hidden",
               cardClassName
             )}
           >

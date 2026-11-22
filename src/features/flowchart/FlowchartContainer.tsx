@@ -4707,7 +4707,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           {/* VIEW-PORT UTAMA (DASHBOARD DENGAN EMBED VIEWER & TOGGLE KANVAS) */}
           <div className="flex-1 flex flex-col min-h-[600px] bg-transparent relative mb-8">
             {!selectedFlowId ? (
-              <div className="flex-1 flex flex-col items-center justify-center p-8 bg-surface border border-border-subtle rounded-lg shadow-soft">
+              <div className="flex-1 flex flex-col items-center justify-center p-8 bg-surface border border-border-panel-divider rounded-lg shadow-soft">
                 <div className="w-16 h-16 bg-surface border border-border-faint shadow-soft rounded-xl flex items-center justify-center mb-4 text-primary">
                   <FileText className="w-6 h-6 animate-pulse" />
                 </div>
@@ -4810,7 +4810,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                     ) : undefined
                   }
                   trailing={
-                    <div className="bg-surface-muted p-1 rounded-md flex items-center border border-border-subtle/60 shadow-inner">
+                    <div className="bg-surface-muted p-1 rounded-md flex items-center border border-border-panel-divider/60 shadow-inner">
                       <button
                         type="button"
                         onClick={() => setRightViewMode("detail")}
@@ -4852,7 +4852,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 />
 
                 {/* Main Viewport (Detail / Dokumen / Canvas) */}
-                <div className="surface-panel bg-surface border border-border-subtle rounded-lg shadow-soft flex-1 min-h-[600px] relative flex flex-col overflow-hidden">
+                <div className="surface-panel bg-surface border border-border-panel-divider rounded-lg shadow-soft flex-1 min-h-[600px] relative flex flex-col overflow-hidden">
                   {rightViewMode === "detail" ? (
                     <div className="flex-1 overflow-y-auto">
                       <FlowchartDetail
@@ -4903,7 +4903,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 return (
                                   <div
                                     key={doc.id}
-                                    className="p-4 rounded-xl border border-border-subtle bg-surface flex flex-col gap-4 shadow-soft hover:shadow hover:border-primary/30 transition-all group"
+                                    className="p-4 rounded-xl border border-border-panel-divider bg-surface flex flex-col gap-4 shadow-soft hover:shadow hover:border-primary/30 transition-all group"
                                   >
                                     <div className="flex items-start justify-between gap-3">
                                       <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
@@ -5006,7 +5006,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             </div>
                           ) : (
                             <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
-                              <div className="w-16 h-16 bg-surface-muted border border-border-subtle rounded-full flex items-center justify-center mb-4">
+                              <div className="w-16 h-16 bg-surface-muted border border-border-panel-divider rounded-full flex items-center justify-center mb-4">
                                 <FileText className="w-8 h-8 text-content-subtle opacity-50" />
                               </div>
                               <h3 className="text-sm font-medium text-content-body mb-2">
@@ -5152,7 +5152,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         {/* Canvas-level file drag-drop overlay */}
                         {canvasDragOver && (
                           <div className="absolute inset-0 z-50 pointer-events-none flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-primary/60 bg-primary/5 backdrop-blur-sm transition-all">
-                            <div className="bg-surface/90 backdrop-blur-md border border-border-subtle rounded-2xl px-6 py-5 shadow-xl flex flex-col items-center gap-2 select-none">
+                            <div className="bg-surface/90 backdrop-blur-md border border-border-panel-divider rounded-2xl px-6 py-5 shadow-xl flex flex-col items-center gap-2 select-none">
                               <Upload className="w-8 h-8 text-primary" aria-hidden="true" />
                               <p className="text-sm font-semibold text-content-strong">
                                 {t("flowchart.importReleaseHint")}
@@ -5850,7 +5850,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           <div className="w-px h-5 bg-surface-strong mx-1" />
 
                           {/* Zoom Controls */}
-                          <div className="flex items-center gap-0.5 bg-surface-sunken/50 rounded-xl p-0.5 border border-border-subtle/60">
+                          <div className="flex items-center gap-0.5 bg-surface-sunken/50 rounded-xl p-0.5 border border-border-panel-divider/60">
                             <button
                               onClick={() => geserZoomHalus(1 / 1.1)}
                               className="p-1.5 text-content-muted hover:bg-surface-strong hover:text-content-strong rounded-lg transition-all active:scale-95"
@@ -5993,7 +5993,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       {/* RIGHT EDIT ATTRIBUTES PANEL — #321: lebih sempit + lembar HP dengan handle */}
                       <div
                         className={cn(
-                          "absolute z-40 bg-surface/95 md:bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 py-3 px-3 space-y-3 shrink-0 overflow-y-auto text-xs shadow-[0_12px_40px_rgba(0,0,0,0.08)] flex flex-col transition-all duration-300",
+                          "absolute z-40 bg-surface/95 md:bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-panel-divider/40 py-3 px-3 space-y-3 shrink-0 overflow-y-auto text-xs shadow-[0_12px_40px_rgba(0,0,0,0.08)] flex flex-col transition-all duration-300",
                           // Desktop: panel kanan lebih sempit
                           "md:right-3 md:top-3 md:bottom-3 md:w-72 md:rounded-xl md:z-20",
                           isRightSidebarOpen
@@ -6021,7 +6021,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         </div>
                         {selectedNodeId ? (
                           <div className="space-y-3">
-                            <div className="flex justify-between items-center bg-surface-sunken p-2 rounded-lg border border-border-subtle">
+                            <div className="flex justify-between items-center bg-surface-sunken p-2 rounded-lg border border-border-panel-divider">
                               <div>
                                 <span className="text-[11px] font-medium text-content-muted">
                                   {t("flowchart.selectedComponent")}
@@ -6141,7 +6141,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                         "p-1 rounded font-medium text-[11px] text-center border capitalize transition-all",
                                         currentVal === st.val
                                           ? "bg-primary/10 text-primary border-primary/30"
-                                          : "bg-surface-sunken text-content-secondary border-border-subtle hover:bg-surface-muted"
+                                          : "bg-surface-sunken text-content-secondary border-border-panel-divider hover:bg-surface-muted"
                                       )}
                                     >
                                       {st.l}
@@ -6224,7 +6224,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           </div>
                         ) : selectedEdgeId ? (
                           <div className="space-y-3">
-                            <div className="bg-surface-sunken p-3 rounded-lg border border-border-subtle">
+                            <div className="bg-surface-sunken p-3 rounded-lg border border-border-panel-divider">
                               <span className="text-[11px] font-medium text-content-muted block">
                                 {t("flowchart.selectedRelation")}
                               </span>
@@ -6278,7 +6278,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                         : { connector: "straight" }
                                     );
                                   }}
-                                  className="w-full p-2 bg-surface-sunken hover:bg-surface border border-border-subtle text-content font-medium rounded text-xs flex items-center justify-center gap-2 transition-all"
+                                  className="w-full p-2 bg-surface-sunken hover:bg-surface border border-border-panel-divider text-content font-medium rounded text-xs flex items-center justify-center gap-2 transition-all"
                                 >
                                   <Spline className="w-3.5 h-3.5" /> {t("flowchart.straightenLine")}
                                 </button>
@@ -6293,7 +6293,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           </div>
                         ) : (
                           <div className="text-center py-16 text-content-muted space-y-3">
-                            <div className="w-10 h-10 bg-surface-sunken rounded-full flex items-center justify-center mx-auto text-content-subtle border border-border-subtle shadow-soft">
+                            <div className="w-10 h-10 bg-surface-sunken rounded-full flex items-center justify-center mx-auto text-content-subtle border border-border-panel-divider shadow-soft">
                               <MousePointer className="w-4 h-4 text-primary" />
                             </div>
                             <div className="text-[11px] font-medium text-content">

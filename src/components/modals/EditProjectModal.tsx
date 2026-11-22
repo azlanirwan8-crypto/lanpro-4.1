@@ -134,7 +134,7 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
                   description: e.target.value,
                 })
               }
-              className="w-full border border-border-subtle rounded-lg p-2 text-sm"
+              className="w-full border border-border-panel-divider rounded-lg p-2 text-sm"
               placeholder={t("editProject.descriptionPlaceholder")}
               rows={3}
             />
@@ -151,7 +151,7 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
                 type="project_status"
                 masterData={masterData || []}
                 className="w-full"
-                buttonClassName="w-full border border-border-subtle rounded-lg p-2 text-sm"
+                buttonClassName="w-full border border-border-panel-divider rounded-lg p-2 text-sm"
               />
             </div>
             <div>
@@ -165,7 +165,7 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
                 type="methodology"
                 masterData={masterData || []}
                 className="w-full"
-                buttonClassName="w-full border border-border-subtle rounded-lg p-2 text-sm"
+                buttonClassName="w-full border border-border-panel-divider rounded-lg p-2 text-sm"
               />
             </div>
             <div>

@@ -164,7 +164,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
       case "not_sent":
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-surface-muted text-content-subtle border border-border-subtle">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-surface-muted text-content-subtle border border-border-panel-divider">
             <Clock size={12} className="text-content-subtle" />
             Belum Dikirim
           </span>
@@ -232,7 +232,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
               return (
                 <div
                   key={item.id}
-                  className={`flex items-center justify-between p-2 px-3 bg-surface border border-border-subtle rounded-md transition-all duration-200 hover:shadow-xs ${
+                  className={`flex items-center justify-between p-2 px-3 bg-surface border border-border-panel-divider rounded-md transition-all duration-200 hover:shadow-xs ${
                     isWhatsApp ? "hover:border-success" : "hover:border-info"
                   }`}
                 >

@@ -164,7 +164,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             <button
               type="button"
               onClick={() => setIsConfigureColumnsOpen(true)}
-              className="p-2 bg-surface border border-border-subtle rounded-lg text-content-muted hover:text-primary hover:border-primary/30 transition-all shadow-soft"
+              className="p-2 bg-surface border border-border-panel-divider rounded-lg text-content-muted hover:text-primary hover:border-primary/30 transition-all shadow-soft"
               title={t("filters.configureColumns")}
             >
               <Settings2 className="w-4 h-4" />
@@ -242,7 +242,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
               </span>
             )}
             {listFilterSprint !== "All" && (
-              <span className="text-[11px] font-medium text-content-secondary bg-surface-muted px-2.5 py-1 rounded-full border border-border-subtle flex items-center gap-1 shadow-soft">
+              <span className="text-[11px] font-medium text-content-secondary bg-surface-muted px-2.5 py-1 rounded-full border border-border-panel-divider flex items-center gap-1 shadow-soft">
                 {t("filters.sprint2")}{" "}
                 {listFilterSprint === "Backlog"
                   ? "Backlog"
@@ -329,7 +329,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
               </span>
             )}
             {listFilterType !== "All" && (
-              <span className="text-[11px] font-medium text-content-secondary bg-surface-muted px-2.5 py-1 rounded-full border border-border-subtle flex items-center gap-1 shadow-soft">
+              <span className="text-[11px] font-medium text-content-secondary bg-surface-muted px-2.5 py-1 rounded-full border border-border-panel-divider flex items-center gap-1 shadow-soft">
                 {t("filters.issueType")} {listFilterType}
                 <button
                   type="button"
@@ -341,7 +341,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
               </span>
             )}
             {(listFilterStartDate || listFilterEndDate) && (
-              <span className="text-[10px] leading-none font-medium text-content-secondary bg-surface-muted px-2.5 py-1 rounded-full border border-border-subtle flex items-center gap-1 shadow-soft">
+              <span className="text-[10px] leading-none font-medium text-content-secondary bg-surface-muted px-2.5 py-1 rounded-full border border-border-panel-divider flex items-center gap-1 shadow-soft">
                 <Calendar className="w-3 h-3 text-content-muted shrink-0" />
                 Date (
                 {listFilterDateType === "dueDate"

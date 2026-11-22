@@ -194,7 +194,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
   return (
     <div className="space-y-4 relative">
       {/* Status Integrasi Email */}
-      <div className="p-3.5 rounded-lg border border-border-subtle/80 bg-surface-sunken/40 space-y-3">
+      <div className="p-3.5 rounded-lg border border-border-panel-divider/80 bg-surface-sunken/40 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Mail size={16} className="text-content-strong" />
@@ -221,7 +221,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
-          <div className="p-2.5 rounded bg-surface border border-border-subtle/60">
+          <div className="p-2.5 rounded bg-surface border border-border-panel-divider/60">
             <span className="text-content-muted block text-[11px]">
               {t("emailCfg.backendProvider")}
             </span>
@@ -229,7 +229,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
               {emailStatus?.provider || (provider === "smtp" ? "SMTP Server" : "Resend REST API")}
             </span>
           </div>
-          <div className="p-2.5 rounded bg-surface border border-border-subtle/60">
+          <div className="p-2.5 rounded bg-surface border border-border-panel-divider/60">
             <span className="text-content-muted block text-[11px]">
               {t("emailCfg.defaultSender")}
             </span>
@@ -241,7 +241,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
       </div>
 
       {/* Form Konfigurasi Koneksi Email (Item #264) */}
-      <div className="space-y-3.5 pt-1 border border-border-subtle/80 bg-surface rounded-lg p-3.5 shadow-2xs">
+      <div className="space-y-3.5 pt-1 border border-border-panel-divider/80 bg-surface rounded-lg p-3.5 shadow-2xs">
         <div className="flex items-center justify-between pb-2 border-b border-border-divider/60">
           <div className="flex items-center gap-2">
             <Server size={15} className="text-content-body" />
@@ -250,7 +250,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
             </span>
           </div>
           {/* Pemilihan Provider */}
-          <div className="flex rounded-md p-0.5 bg-surface-sunken border border-border-subtle">
+          <div className="flex rounded-md p-0.5 bg-surface-sunken border border-border-panel-divider">
             <button
               type="button"
               onClick={() => setProvider("smtp")}
@@ -445,7 +445,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
           `ambilAppUrl()` membaca baris database milik email. Field kembarannya
           di Pengaturan Operasional sudah dihapus di #302(a) karena tidak pernah
           dibaca siapa pun. */}
-      <div className="space-y-3.5 border border-border-subtle/80 bg-surface rounded-lg p-3.5 shadow-2xs">
+      <div className="space-y-3.5 border border-border-panel-divider/80 bg-surface rounded-lg p-3.5 shadow-2xs">
         <div className="flex items-center gap-2 pb-2 border-b border-border-divider/60">
           <Globe size={15} className="text-content-body" />
           <span className="text-xs font-semibold text-content-strong">Tautan di Dalam Email</span>

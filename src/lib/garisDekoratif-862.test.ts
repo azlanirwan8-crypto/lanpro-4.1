@@ -49,6 +49,7 @@ const berkas = berkasSumber(AKAR);
 const temuan: string[] = [];
 const pakaiPemisah: string[] = [];
 const pakaiKontrol: string[] = [];
+const garisNetralTerang: string[] = [];
 
 for (const b of berkas) {
   const relatif = path.relative(AKAR, b).split(path.sep).join("/");
@@ -71,7 +72,12 @@ for (const b of berkas) {
       }
       TERBALIK.lastIndex = 0;
       if (baris.includes("border-border-divider")) pakaiPemisah.push(relatif);
-      if (baris.includes("border-border-subtle")) pakaiKontrol.push(relatif);
+      if (!baris.includes("border-border-subtle")) return;
+      pakaiKontrol.push(relatif);
+      const komentar = /^\s*(?:\/\/|\/\*|\*)/.test(baris);
+      const indikator = /animate-spin|w-4 h-4 rounded(?:-full)? .*?(?:focus:ring|border-2)/.test(baris);
+      const kartuKanvas = relatif === "features/flowchart/lib/nodeTheme.ts";
+      if (!komentar && !indikator && !kartuKanvas) garisNetralTerang.push(`${relatif}:${i + 1}`);
     });
 }
 
@@ -114,6 +120,10 @@ describe("#862 token garis dekoratif", () => {
     const formulir = sumber.slice(awal, sumber.indexOf("\n", unggah));
     expect(formulir.match(/border-border-panel-divider/g)).toHaveLength(5);
     expect(formulir).not.toContain("border-border-subtle");
+  });
+
+  it("garis netral tidak kembali memakai token terang", () => {
+    expect(garisNetralTerang).toEqual([]);
   });
 
   it("pemindahan benar-benar terjadi — bukan pemindaian kosong", () => {

@@ -60,7 +60,7 @@ export const QATestCaseMobileCardView: React.FC<QATestCaseMobileCardViewProps> =
         return "bg-primary/15 text-primary border-primary/30";
       case "low":
       default:
-        return "bg-surface-sunken text-content-subtle border-border-subtle";
+        return "bg-surface-sunken text-content-subtle border-border-panel-divider";
     }
   };
 
@@ -93,7 +93,7 @@ export const QATestCaseMobileCardView: React.FC<QATestCaseMobileCardViewProps> =
       case "Pending":
       default:
         return {
-          bg: "bg-surface-sunken text-content-subtle border-border-subtle",
+          bg: "bg-surface-sunken text-content-subtle border-border-panel-divider",
           icon: Clock,
           label: "Pending",
         };
@@ -102,7 +102,7 @@ export const QATestCaseMobileCardView: React.FC<QATestCaseMobileCardViewProps> =
 
   if (cases.length === 0) {
     return (
-      <div className="p-8 text-center bg-surface border border-border-subtle/80 rounded-lg shadow-2xs">
+      <div className="p-8 text-center bg-surface border border-border-panel-divider/80 rounded-lg shadow-2xs">
         <p className="text-xs text-content-subtle">
           {t(filtered ? "qaTable.emptyFilter" : "qaGenerate.emptySuite")}
         </p>
@@ -138,7 +138,7 @@ export const QATestCaseMobileCardView: React.FC<QATestCaseMobileCardViewProps> =
             className={`p-4 bg-surface rounded-lg border shadow-2xs hover:shadow-xs transition-all cursor-pointer flex flex-col gap-3 ${
               isChecked
                 ? "border-primary/50 bg-primary/5 ring-1 ring-primary/20"
-                : "border-border-subtle/80 hover:border-primary/40"
+                : "border-border-panel-divider/80 hover:border-primary/40"
             }`}
           >
             {/* Header: Checkbox, Title & Action buttons */}

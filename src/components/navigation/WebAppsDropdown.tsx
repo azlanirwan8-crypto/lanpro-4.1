@@ -97,7 +97,7 @@ export const WebAppsDropdown: React.FC<WebAppsDropdownProps> = ({
         open={isOpen}
         onClose={() => setIsOpen(false)}
         triggerRef={containerRef}
-        className="z-[44] w-72 rounded-xl border border-border-subtle bg-surface shadow-soft-lg p-3 animate-in fade-in zoom-in-95 duration-150"
+        className="z-[44] w-72 rounded-xl border border-border-panel-divider bg-surface shadow-soft-lg p-3 animate-in fade-in zoom-in-95 duration-150"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-1 pb-2.5 mb-2 border-b border-border-divider">

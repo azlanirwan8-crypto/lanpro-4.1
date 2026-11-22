@@ -467,7 +467,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                 const progressValue = getProgressValue(task.status);
                 content = (
                   <div className="flex items-center gap-2 w-full max-w-[120px] select-none pr-1">
-                    <div className="flex-1 h-1.5 bg-surface-muted rounded-full overflow-hidden border border-border-subtle/40 relative">
+                    <div className="flex-1 h-1.5 bg-surface-muted rounded-full overflow-hidden border border-border-panel-divider/40 relative">
                       <div
                         className={cn(
                           "h-full rounded-full transition-all duration-500",
@@ -594,7 +594,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                         <span
                           key={`${L}-${lIdx}`}
                           title={L}
-                          className="text-[11px] font-normal rounded border border-border-subtle bg-surface-muted text-content-secondary px-1.5 py-0.5 whitespace-nowrap"
+                          className="text-[11px] font-normal rounded border border-border-panel-divider bg-surface-muted text-content-secondary px-1.5 py-0.5 whitespace-nowrap"
                         >
                           {L}
                         </span>
@@ -696,7 +696,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                       setActiveContextMenuTaskId(null);
                     }}
                   />
-                  <div className="absolute right-0 mt-1 w-36 bg-surface border border-border-subtle rounded-lg shadow-xl z-[101] overflow-hidden py-1">
+                  <div className="absolute right-0 mt-1 w-36 bg-surface border border-border-panel-divider rounded-lg shadow-xl z-[101] overflow-hidden py-1">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

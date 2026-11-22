@@ -93,7 +93,7 @@ export const LaporanAlur: React.FC<LaporanAlurProps> = ({
   return (
     <aside
       data-testid="laporan-alur"
-      className="absolute top-3 right-3 flex max-h-[min(70vh,32rem)] w-[min(21rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-xl border border-border-subtle/40 bg-surface/90 text-content-body shadow-lg backdrop-blur"
+      className="absolute top-3 right-3 flex max-h-[min(70vh,32rem)] w-[min(21rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-xl border border-border-panel-divider/40 bg-surface/90 text-content-body shadow-lg backdrop-blur"
       aria-label={t("alur.judul")}
     >
       <header className="flex items-center gap-2 border-b border-border-divider/40 px-3 py-2">

@@ -56,7 +56,7 @@ interface IssueAdvancedFiltersExpandedProps {
  * sesak: tidak ada kotak lain di aplikasi yang setinggi itu.
  */
 const PEMICU_PANEL =
-  "w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-md h-9 px-2.5 hover:border-border-subtle";
+  "w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-panel-divider rounded-md h-9 px-2.5 hover:border-border-panel-divider";
 
 export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpandedProps> = ({
   listFilterStatus,
@@ -108,7 +108,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
       animate={{ height: "auto", opacity: 1 }}
       exit={{ height: 0, opacity: 0 }}
       transition={{ duration: 0.2, ease: "easeInOut" }}
-      className="surface-panel mx-6 mb-4 bg-surface rounded-xl border border-border-subtle shadow-soft overflow-hidden relative"
+      className="surface-panel mx-6 mb-4 bg-surface rounded-xl border border-border-panel-divider shadow-soft overflow-hidden relative"
     >
       <div className="p-5 space-y-5">
         {/* Kelompok 1 — Status & kepemilikan (4 kolom, tanpa baris yatim) */}
@@ -374,7 +374,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
             className={`px-3 h-9 rounded-md text-xs font-medium border transition-all cursor-pointer select-none ${
               listFilterOverdue
                 ? "bg-danger/10 border-danger/30 text-danger-text"
-                : "bg-surface-sunken border-border-subtle text-content-secondary hover:border-border-subtle"
+                : "bg-surface-sunken border-border-panel-divider text-content-secondary hover:border-border-panel-divider"
             }`}
             aria-pressed={listFilterOverdue}
           >

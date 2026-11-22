@@ -321,7 +321,7 @@ export const FormDiskusi: React.FC<FormDiskusiProps> = ({
             {gambar.map((b) => (
               <div
                 key={b.id}
-                className="relative w-20 h-20 rounded-md border border-border-subtle overflow-hidden bg-surface-sunken"
+                className="relative w-20 h-20 rounded-md border border-border-panel-divider overflow-hidden bg-surface-sunken"
               >
                 <img
                   src={b.url || ""}
@@ -344,7 +344,7 @@ export const FormDiskusi: React.FC<FormDiskusiProps> = ({
                 href={b.url || undefined}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 max-w-full px-2 py-1 rounded-md text-[11px] font-normal bg-surface-sunken text-content-body border border-border-subtle"
+                className="inline-flex items-center gap-1.5 max-w-full px-2 py-1 rounded-md text-[11px] font-normal bg-surface-sunken text-content-body border border-border-panel-divider"
               >
                 <Link2 className="w-3 h-3 shrink-0 text-content-subtle" />
                 <span className="break-words">{b.name || b.originalName || b.fileRef}</span>

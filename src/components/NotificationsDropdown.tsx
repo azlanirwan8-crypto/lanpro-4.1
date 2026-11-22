@@ -101,7 +101,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
         onClose={() => setIsNotificationsOpen(false)}
         triggerRef={triggerRef}
         lembarBawahMobile
-        className="z-[44] w-80 sm:w-[380px] bg-surface rounded-xl shadow-soft-lg border border-border-subtle overflow-hidden origin-top-right max-md:rounded-t-2xl max-md:rounded-b-none max-md:origin-bottom max-md:h-[min(72vh,520px)] max-md:flex max-md:flex-col"
+        className="z-[44] w-80 sm:w-[380px] bg-surface rounded-xl shadow-soft-lg border border-border-panel-divider overflow-hidden origin-top-right max-md:rounded-t-2xl max-md:rounded-b-none max-md:origin-bottom max-md:h-[min(72vh,520px)] max-md:flex max-md:flex-col"
       >
         {/* Dropdown Header */}
         <div className="md:hidden flex justify-center pt-2 pb-0 shrink-0" aria-hidden>

@@ -848,7 +848,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
         <button
           type="button"
           onClick={() => setHierarchyOpen(true)}
-          className="md:hidden flex items-center gap-2 px-3 py-2 bg-surface border border-border-subtle/80 rounded-lg text-xs font-medium text-content-strong shadow-2xs cursor-pointer shrink-0"
+          className="md:hidden flex items-center gap-2 px-3 py-2 bg-surface border border-border-panel-divider/80 rounded-lg text-xs font-medium text-content-strong shadow-2xs cursor-pointer shrink-0"
         >
           <Menu className="w-4 h-4 text-primary shrink-0" />
           <span>{t("roadmap.itemHierarchy")}</span>
@@ -856,7 +856,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
 
         <div
           ref={timelineContainerRef}
-          className="surface-panel print-roadmap-container flex flex-1 w-full relative bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden select-none min-h-0"
+          className="surface-panel print-roadmap-container flex flex-1 w-full relative bg-surface rounded-lg border border-border-panel-divider/80 shadow-2xs overflow-hidden select-none min-h-0"
         >
           {hierarchyOpen && (
             <button
@@ -1344,7 +1344,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             {isUpdatingTask[task.id] && (
                               <span
                                 data-testid={`roadmap-menyimpan-${task.id}`}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 z-40 inline-flex items-center px-1.5 py-0.5 rounded border border-border-subtle bg-surface text-[10px] font-medium text-content-muted"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 z-40 inline-flex items-center px-1.5 py-0.5 rounded border border-border-panel-divider bg-surface text-[10px] font-medium text-content-muted"
                               >
                                 {t("roadmap.savingDates")}
                               </span>

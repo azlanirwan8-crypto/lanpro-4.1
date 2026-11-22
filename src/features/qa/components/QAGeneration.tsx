@@ -250,7 +250,7 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
                 </button>
               ))}
             </div>
-            <div className="divide-y divide-border-divider rounded-md border border-border-subtle">
+            <div className="divide-y divide-border-divider rounded-md border border-border-panel-divider">
               {loading ? (
                 <p role="status" className="p-4 text-sm">
                   {tr("loading")}
@@ -301,7 +301,7 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
             {drafts.map((row) => (
               <article
                 key={row.id}
-                className="space-y-2 rounded-md border border-border-subtle p-3 text-sm"
+                className="space-y-2 rounded-md border border-border-panel-divider p-3 text-sm"
               >
                 <label className="flex items-center gap-2 font-medium">
                   <input

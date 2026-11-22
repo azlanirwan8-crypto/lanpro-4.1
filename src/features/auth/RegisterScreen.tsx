@@ -234,7 +234,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
 
           {/* Password Strength Indicator Bar */}
           {password.length > 0 && (
-            <div className="mt-2 space-y-1.5 p-2.5 bg-surface-sunken border border-border-subtle/80 rounded-lg">
+            <div className="mt-2 space-y-1.5 p-2.5 bg-surface-sunken border border-border-panel-divider/80 rounded-lg">
               <div className="flex items-center justify-between text-[11px] font-medium">
                 <span className="text-content-secondary">{t("register.passwordStrength")}</span>
                 <span className={passStrength.color}>{t(passStrength.label)}</span>

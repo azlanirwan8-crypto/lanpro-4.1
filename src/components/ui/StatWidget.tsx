@@ -54,7 +54,7 @@ export const StatWidget: React.FC<StatWidgetProps> = ({
     return (
       <div
         className={cn(
-          "surface-panel bg-surface border border-border-subtle/80 p-2 rounded-md text-center",
+          "surface-panel bg-surface border border-border-panel-divider/80 p-2 rounded-md text-center",
           className
         )}
       >
@@ -68,7 +68,7 @@ export const StatWidget: React.FC<StatWidgetProps> = ({
     return (
       <div
         className={cn(
-          "surface-panel bg-surface p-3 sm:p-5 rounded-lg border border-border-subtle/80 shadow-2xs flex flex-col justify-between relative overflow-hidden",
+          "surface-panel bg-surface p-3 sm:p-5 rounded-lg border border-border-panel-divider/80 shadow-2xs flex flex-col justify-between relative overflow-hidden",
           className
         )}
       >
@@ -104,7 +104,7 @@ export const StatWidget: React.FC<StatWidgetProps> = ({
   return (
     <div
       className={cn(
-        "surface-panel bg-surface p-3 md:p-4 rounded-lg border border-border-subtle/80 shadow-2xs flex items-center justify-between gap-2 min-w-0",
+        "surface-panel bg-surface p-3 md:p-4 rounded-lg border border-border-panel-divider/80 shadow-2xs flex items-center justify-between gap-2 min-w-0",
         className
       )}
     >

@@ -52,7 +52,7 @@ export const Modal = ({ isOpen, onClose, title, children, maxWidth = "max-w-md" 
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
-        className={`bg-surface rounded-lg shadow-xl relative z-10 w-full ${maxWidth} max-h-[90vh] flex flex-col overflow-hidden border border-border-subtle`}
+        className={`bg-surface rounded-lg shadow-xl relative z-10 w-full ${maxWidth} max-h-[90vh] flex flex-col overflow-hidden border border-border-panel-divider`}
       >
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-divider bg-surface-sunken/50">
           <h3 className="font-medium text-sm text-content-strong tracking-tight">{title}</h3>

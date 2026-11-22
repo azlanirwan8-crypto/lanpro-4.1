@@ -148,7 +148,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                     className="p-1 hover:bg-surface-strong rounded text-content-secondary shrink-0"
                     title={t("comments.textFormat")}
                   >
-                    <span className="text-xs font-normal leading-none px-0.5 border border-border-subtle rounded font-serif">
+                    <span className="text-xs font-normal leading-none px-0.5 border border-border-panel-divider rounded font-serif">
                       Tt
                     </span>
                   </button>
@@ -188,7 +188,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
               </div>
 
               {mentionState.active && (
-                <div className="absolute z-50 w-72 bg-surface rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden transform bottom-[110%] left-0 animate-dropdown">
+                <div className="absolute z-50 w-72 bg-surface rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-border-panel-divider overflow-hidden transform bottom-[110%] left-0 animate-dropdown">
                   <div className="p-3 bg-surface-sunken border-b border-border-divider text-[11px] font-normal text-content-subtle uppercase tracking-normal">
                     {t("comments.suggestedPeople")}
                   </div>
@@ -262,7 +262,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                     />
                     <div className="flex-1 min-w-0">
                       {/* Comment Bubble */}
-                      <div className="inline-block max-w-full bg-surface-sunken/75 px-3.5 py-2.5 rounded-2xl border border-border-subtle/50">
+                      <div className="inline-block max-w-full bg-surface-sunken/75 px-3.5 py-2.5 rounded-2xl border border-border-panel-divider/50">
                         <div className="font-semibold text-xs text-content-strong leading-tight">
                           {rootDisplayName}
                         </div>
@@ -335,7 +335,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                                 />
                                 <div className="flex-1 min-w-0">
                                   {/* Reply Bubble */}
-                                  <div className="inline-block max-w-full bg-surface-sunken/60 px-3 py-2 rounded-2xl border border-border-subtle/40">
+                                  <div className="inline-block max-w-full bg-surface-sunken/60 px-3 py-2 rounded-2xl border border-border-panel-divider/40">
                                     <div className="font-semibold text-xs text-content-strong leading-tight">
                                       {replyDisplayName}
                                     </div>
@@ -432,7 +432,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
               );
             })}
             {rootComments.length === 0 && (
-              <div className="py-6 px-4 text-center space-y-1.5 bg-surface-sunken/50 rounded-lg border border-dashed border-border-subtle/80">
+              <div className="py-6 px-4 text-center space-y-1.5 bg-surface-sunken/50 rounded-lg border border-dashed border-border-panel-divider/80">
                 <MessageSquare className="w-6 h-6 mx-auto text-content-subtle" />
                 <p className="text-xs font-medium text-content-subtle">
                   {t("comments.noComments")}
@@ -452,7 +452,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
             return (
               <div
                 key={log.id ? `${log.id}-${i}` : `log-${i}`}
-                className="flex gap-3 p-2.5 hover:bg-surface-sunken rounded-lg transition-all border border-transparent hover:border-border-subtle/60 group"
+                className="flex gap-3 p-2.5 hover:bg-surface-sunken rounded-lg transition-all border border-transparent hover:border-border-panel-divider/60 group"
               >
                 <div className="relative">
                   <UserAvatar
@@ -469,7 +469,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                     <span className="text-xs font-medium text-content-strong">
                       {actor?.displayName}
                     </span>
-                    <span className="text-[11px] font-normal text-content-subtle bg-surface border border-border-subtle/60 px-1.5 py-0.5 rounded uppercase tracking-tight">
+                    <span className="text-[11px] font-normal text-content-subtle bg-surface border border-border-panel-divider/60 px-1.5 py-0.5 rounded uppercase tracking-tight">
                       {safeFormat(log.createdAt, "MMM d, HH:mm")}
                     </span>
                   </div>
@@ -512,7 +512,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
             );
           })}
           {filteredLogs.length === 0 && (
-            <div className="py-6 px-4 text-center space-y-1.5 bg-surface-sunken/50 rounded-lg border border-dashed border-border-subtle/80">
+            <div className="py-6 px-4 text-center space-y-1.5 bg-surface-sunken/50 rounded-lg border border-dashed border-border-panel-divider/80">
               <History className="w-6 h-6 mx-auto text-content-subtle" />
               <p className="text-xs font-medium text-content-subtle">{t("comments.noActivity")}</p>
             </div>

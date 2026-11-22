@@ -194,7 +194,7 @@ export const EdgeStyleBar: React.FC<EdgeStyleBarProps> = ({
       }}
       onMouseDown={(e) => e.stopPropagation()}
     >
-      <div className="pointer-events-auto absolute flex items-center gap-0.5 -translate-x-1/2 -translate-y-1/2 bg-surface/85 backdrop-blur-md border border-border-subtle/60 rounded-lg p-1 shadow-soft-lg select-none">
+      <div className="pointer-events-auto absolute flex items-center gap-0.5 -translate-x-1/2 -translate-y-1/2 bg-surface/85 backdrop-blur-md border border-border-panel-divider/60 rounded-lg p-1 shadow-soft-lg select-none">
         {BENTUK.map((opsi) => (
           <Tombol
             key={opsi.id}
@@ -361,7 +361,7 @@ export const EdgeStyleBar: React.FC<EdgeStyleBarProps> = ({
                     "h-6 w-6 rounded-full transition-all cursor-pointer",
                     aktif
                       ? "border-2 border-primary"
-                      : "border border-border-subtle hover:border-primary/60"
+                      : "border border-border-panel-divider hover:border-primary/60"
                   )}
                   style={{ backgroundColor: `var(${warna.token})` }}
                 />

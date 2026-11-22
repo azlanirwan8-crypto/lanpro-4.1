@@ -291,7 +291,7 @@ export const ChipTanggal = ({
         "inline-flex items-center gap-1",
         lewat
           ? "bg-danger/10 text-danger-text border-danger/30"
-          : "bg-surface-sunken text-content-muted border-border-subtle/60",
+          : "bg-surface-sunken text-content-muted border-border-panel-divider/60",
         className
       )}
     >
@@ -627,7 +627,7 @@ export const StyledDropdown = ({
                 />
               ) : (
                 <div
-                  className="w-2 h-2 rounded-full shrink-0 shadow-inner border border-border-subtle"
+                  className="w-2 h-2 rounded-full shrink-0 shadow-inner border border-border-panel-divider"
                   style={{ backgroundColor: hex }}
                 />
               )
@@ -818,7 +818,7 @@ export const StyledDropdown = ({
                           className="w-5 h-5 flex-shrink-0"
                         />
                       ) : type === "member" && (!opt.id || opt.id === "Unassigned") ? (
-                        <div className="w-5 h-5 rounded-full bg-surface-muted border border-border-subtle border-dashed flex items-center justify-center flex-shrink-0">
+                        <div className="w-5 h-5 rounded-full bg-surface-muted border border-border-panel-divider border-dashed flex items-center justify-center flex-shrink-0">
                           <span className="text-[10px] text-content-subtle font-normal">?</span>
                         </div>
                       ) : isStatus ? (

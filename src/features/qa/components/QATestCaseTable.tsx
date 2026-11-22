@@ -147,7 +147,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
 
   if (!activeSuite) {
     return (
-      <div className="md:col-span-9 bg-surface border border-border-subtle/80 p-10 rounded-md text-center shadow-xs">
+      <div className="md:col-span-9 bg-surface border border-border-panel-divider/80 p-10 rounded-md text-center shadow-xs">
         <div className="w-10 h-10 bg-primary-surface/10 text-primary rounded-md flex items-center justify-center mx-auto mb-2.5">
           <FileSpreadsheet className="w-5 h-5" />
         </div>
@@ -187,10 +187,10 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
   return (
     <div className="md:col-span-9 space-y-3.5 md:sticky md:top-4">
       {/* Velzon Header & Micro Stats Box */}
-      <div className="bg-surface border border-border-subtle/80 p-4 rounded-md shadow-xs space-y-3">
+      <div className="bg-surface border border-border-panel-divider/80 p-4 rounded-md shadow-xs space-y-3">
         {/* #426 — Lock indicator dipindah ke atas Add Task biar 1 konteks */}
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2 bg-surface-muted border border-border-subtle/60 px-3 py-2 rounded-lg shadow-2xs">
+          <div className="flex items-center gap-2 bg-surface-muted border border-border-panel-divider/60 px-3 py-2 rounded-lg shadow-2xs">
             {lockState.lockedBy ? (
               isLockedBySomeoneElse ? (
                 <>
@@ -323,7 +323,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               {totalCasesCount}
             </span>
           </div>
-          <div className="bg-surface-sunken p-2 rounded-md border border-border-subtle/60 text-center">
+          <div className="bg-surface-sunken p-2 rounded-md border border-border-panel-divider/60 text-center">
             <span className="text-[10px] text-content-muted font-normal block">
               {t("qaTable.passedRate")}
             </span>
@@ -351,7 +351,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               {blockedCasesCount}
             </span>
           </div>
-          <div className="bg-surface-sunken p-2 rounded-md border border-border-subtle/60 text-center">
+          <div className="bg-surface-sunken p-2 rounded-md border border-border-panel-divider/60 text-center">
             <span className="text-[10px] text-content-muted font-normal block">
               {t("qa.retestPend")}
             </span>
@@ -436,7 +436,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                     className="fixed inset-0 z-40"
                     onClick={() => setIsBulkPicDropdownOpen(false)}
                   />
-                  <div className="absolute right-0 top-full mt-1.5 w-60 bg-surface text-content-strong rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-dropdown">
+                  <div className="absolute right-0 top-full mt-1.5 w-60 bg-surface text-content-strong rounded-md shadow-2xl border border-border-panel-divider py-2 z-50 animate-dropdown">
                     <div className="px-3.5 py-1.5 text-[11px] font-normal uppercase tracking-normal text-primary border-b border-border-faint mb-1">
                       {t("rakit.assignPicToTasks", { count: selectedCaseIds.length })}
                     </div>
@@ -495,7 +495,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                     className="fixed inset-0 z-40"
                     onClick={() => setIsBulkStatusDropdownOpen(false)}
                   />
-                  <div className="absolute right-0 top-full mt-1.5 w-44 bg-surface text-content-strong rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-dropdown">
+                  <div className="absolute right-0 top-full mt-1.5 w-44 bg-surface text-content-strong rounded-md shadow-2xl border border-border-panel-divider py-2 z-50 animate-dropdown">
                     {["Passed", "Failed", "Blocked", "Retest", "Pending"].map((st) => (
                       <button
                         key={st}
@@ -529,7 +529,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
 
       {/* ULTRA-SLEEK 5-COLUMN ENTERPRISE QA TABLE MATRIX (Desktop sm+) */}
       {generationPanel}
-      <div className="surface-panel bg-surface border border-border-subtle/80 rounded-md shadow-xs overflow-hidden">
+      <div className="surface-panel bg-surface border border-border-panel-divider/80 rounded-md shadow-xs overflow-hidden">
         <div className="hidden sm:block overflow-x-auto">
           <ResponsiveTable className="w-full text-left border-collapse" scroll={false}>
             <thead>
@@ -657,7 +657,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                               } ${
                                 tc.assignedTo
                                   ? "bg-primary-surface/10 border-primary/40"
-                                  : "bg-surface-muted border-border-subtle/80 text-content-muted"
+                                  : "bg-surface-muted border-border-panel-divider/80 text-content-muted"
                               }`}
                               title={
                                 tc.assignedTo
@@ -686,7 +686,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                     setActiveCasePicDropdownId(null);
                                   }}
                                 />
-                                <div className="absolute right-0 top-full mt-1.5 w-56 bg-surface rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-dropdown">
+                                <div className="absolute right-0 top-full mt-1.5 w-56 bg-surface rounded-md shadow-2xl border border-border-panel-divider py-2 z-50 animate-dropdown">
                                   <div className="px-3.5 py-1.5 text-[11px] font-normal uppercase tracking-normal text-primary border-b border-border-faint mb-1">
                                     {t("qa.assignPicTask")}
                                   </div>

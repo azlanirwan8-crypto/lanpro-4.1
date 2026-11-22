@@ -64,10 +64,10 @@ const translateFieldName = (field: string): string => {
  */
 const renderStatusBadge = (status: string) => {
   const s = status ? status.trim().toLowerCase() : "";
-  let colorClass = "bg-surface-muted text-content-body border-border-subtle";
+  let colorClass = "bg-surface-muted text-content-body border-border-panel-divider";
 
   if (s === "to do" || s === "backlog" || s === "none" || s === "unassigned") {
-    colorClass = "bg-surface-muted text-content-secondary border-border-subtle/80";
+    colorClass = "bg-surface-muted text-content-secondary border-border-panel-divider/80";
   } else if (s === "in progress" || s === "dev" || s === "development" || s === "ready for dev") {
     colorClass = "bg-blue-500/10 text-blue-700 border-blue-500/30";
   } else if (s === "review" || s === "qa" || s === "testing" || s === "ready for qa") {
@@ -114,7 +114,7 @@ export const formatNotification = (
   let icon = <HelpCircle className="w-4 h-4" />;
   let iconBgClass = "bg-surface-muted text-content-muted";
   let badgeText = i18n.t("notif.nNotifCap");
-  let badgeClass = "bg-surface-sunken text-content-secondary border-border-subtle";
+  let badgeClass = "bg-surface-sunken text-content-secondary border-border-panel-divider";
   let formattedTitleStr = rawTitle;
   let activityType: ParsedNotification["activityType"] = "general";
 
@@ -207,9 +207,9 @@ export const formatNotification = (
 
     case "update":
       icon = <Edit3 className="w-4 h-4 text-content-secondary" />;
-      iconBgClass = "bg-surface-muted border border-border-subtle text-content-secondary";
+      iconBgClass = "bg-surface-muted border border-border-panel-divider text-content-secondary";
       badgeText = i18n.t("notif.nUpdateCap");
-      badgeClass = "bg-surface-muted text-content-body border-border-subtle";
+      badgeClass = "bg-surface-muted text-content-body border-border-panel-divider";
       formattedTitleStr = i18n.t("notif.nTaskUpdated");
       break;
 
@@ -233,7 +233,7 @@ export const formatNotification = (
       icon = <FileText className="w-4 h-4 text-content-muted" />;
       iconBgClass = "bg-surface-sunken border border-border-faint text-content-muted";
       badgeText = i18n.t("notif.nProjectCap");
-      badgeClass = "bg-surface-sunken text-content-secondary border-border-subtle";
+      badgeClass = "bg-surface-sunken text-content-secondary border-border-panel-divider";
       break;
   }
 

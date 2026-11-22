@@ -286,7 +286,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
               cn(PEMICU, "tracking-tight"),
               task.isBlocked
                 ? "bg-danger/10 border-danger/30 text-danger-text shadow-xs"
-                : "bg-surface border-border-subtle/80 text-content-muted hover:border-danger/30 hover:text-danger-text",
+                : "bg-surface border-border-panel-divider/80 text-content-muted hover:border-danger/30 hover:text-danger-text",
               blockMember && "pointer-events-none opacity-80"
             )}
           >
@@ -491,7 +491,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
 
         {/* #343 — entri jam kerja sederhana */}
         {isEditable && (
-          <div className="mt-3 space-y-2 rounded-md border border-border-subtle/80 bg-surface p-2.5">
+          <div className="mt-3 space-y-2 rounded-md border border-border-panel-divider/80 bg-surface p-2.5">
             <div className="text-[10px] font-normal uppercase tracking-normal text-content-subtle">
               {t("issueDetail.workLogTitle", "Catat jam kerja")}
             </div>

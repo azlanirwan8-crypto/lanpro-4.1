@@ -642,7 +642,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
           </div>
 
           {/* User List */}
-          <div className="surface-panel bg-surface rounded-xl shadow-soft border border-border-subtle/50 overflow-hidden flex-1 flex flex-col">
+          <div className="surface-panel bg-surface rounded-xl shadow-soft border border-border-panel-divider/50 overflow-hidden flex-1 flex flex-col">
             <div className="px-4 py-3 border-b border-border-divider/80 flex flex-wrap items-center justify-end gap-2 shrink-0">
               <div className="relative min-w-0 flex-1 lg:flex-none lg:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-subtle pointer-events-none" />
@@ -954,7 +954,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                 ? "bg-rose-500/10 text-rose-600 border-rose-500/30"
                                 : normalkanPeran(user.role) === "head"
                                   ? "bg-primary/10 text-primary border-primary/30"
-                                  : "bg-surface-sunken text-content-secondary border-border-subtle"
+                                  : "bg-surface-sunken text-content-secondary border-border-panel-divider"
                             )}
                           >
                             {user.role}
@@ -1181,7 +1181,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                             "inline-flex font-normal tracking-normal uppercase px-2 py-0.5 rounded-md border",
                             adalahAdmin
                               ? "bg-rose-500/10 text-rose-600 border-rose-500/30"
-                              : "bg-surface-sunken text-content-secondary border-border-subtle"
+                              : "bg-surface-sunken text-content-secondary border-border-panel-divider"
                           )}
                         >
                           {user.role}
@@ -1277,7 +1277,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       "w-7 h-7 rounded-lg text-[11px] font-normal transition-colors",
                       currentPage === i + 1
                         ? "bg-primary-surface text-content-inverse shadow-2xs"
-                        : "bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken"
+                        : "bg-surface border border-border-panel-divider text-content-secondary hover:bg-surface-sunken"
                     )}
                   >
                     {i + 1}

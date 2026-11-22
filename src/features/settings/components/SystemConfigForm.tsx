@@ -76,14 +76,14 @@ export const SystemConfigForm: React.FC = () => {
   return (
     /*
       #302: kartu ini SENGAJA berbentuk sama persis dengan kartu di
-      `EmailConfigForm` -- `border border-border-subtle/80 bg-surface
+      `EmailConfigForm` -- `border border-border-panel-divider/80 bg-surface
       rounded-lg p-3.5 shadow-2xs`, judul di baris atas dengan garis pemisah.
 
       Sebelumnya blok ini polos tanpa kartu sementara blok email bertingkat,
       sehingga separuh halaman terlihat berlapis dan separuhnya rata. Itu yang
       dilaporkan pemilik proyek sebagai "kurang rapi".
     */
-    <div className="space-y-3.5 text-left border border-border-subtle/80 bg-surface rounded-lg p-3.5 shadow-2xs">
+    <div className="space-y-3.5 text-left border border-border-panel-divider/80 bg-surface rounded-lg p-3.5 shadow-2xs">
       <div className="space-y-1 pb-2 border-b border-border-divider/60">
         <div className="flex items-center gap-2">
           <Shield size={15} className="text-content-body" />
@@ -108,7 +108,7 @@ export const SystemConfigForm: React.FC = () => {
               {t("settings.ssoAllowedDomains", "Domain Email SSO yang Diizinkan")}
             </label>
             {config.sources?.ssoAllowedDomains && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-sunken text-content-muted border border-border-subtle">
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-sunken text-content-muted border border-border-panel-divider">
                 {config.sources.ssoAllowedDomains === "database" ? "Database" : "Env Var"}
               </span>
             )}
@@ -152,7 +152,7 @@ export const SystemConfigForm: React.FC = () => {
               {t("settings.allowedOrigins", "Origin CORS Tambahan (ALLOWED_ORIGINS)")}
             </label>
             {config.sources?.allowedOrigins && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-sunken text-content-muted border border-border-subtle">
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-sunken text-content-muted border border-border-panel-divider">
                 {config.sources.allowedOrigins === "database" ? "Database" : "Env Var"}
               </span>
             )}
@@ -180,7 +180,7 @@ export const SystemConfigForm: React.FC = () => {
               {t("settings.slackWebhookUrl", "Slack Webhook URL (Notifikasi)")}
             </label>
             {config.sources?.slackWebhookUrl && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-sunken text-content-muted border border-border-subtle">
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-sunken text-content-muted border border-border-panel-divider">
                 {config.sources.slackWebhookUrl === "database" ? "Database" : "Env Var"}
               </span>
             )}

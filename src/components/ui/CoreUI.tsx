@@ -228,7 +228,7 @@ export const Card = ({
   [key: string]: any;
 }) => {
   const variants: Record<CardVariant, string> = {
-    default: "bg-surface border border-border-subtle text-content-strong shadow-soft",
+    default: "bg-surface border border-border-panel-divider text-content-strong shadow-soft",
     panel: "bg-surface border border-border-divider text-content-strong shadow-soft",
     primary: "bg-primary-surface border border-primary-surface text-content-inverse shadow-soft",
     success: "bg-success-surface border border-success-surface text-content-inverse shadow-soft",
@@ -296,7 +296,7 @@ export const Badge = ({
     warning: "bg-warning/15 text-warning-text border-warning/30",
     danger: "bg-danger/10 text-danger-text border-danger/20",
     info: "bg-info/10 text-info-text border-info/20",
-    neutral: "bg-surface-muted text-content-secondary border-border-subtle",
+    neutral: "bg-surface-muted text-content-secondary border-border-panel-divider",
   };
   return (
     <span

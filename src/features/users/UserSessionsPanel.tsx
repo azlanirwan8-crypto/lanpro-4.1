@@ -255,7 +255,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
         {/* Velzon Stat Widgets Grid — #360: 2 kolom di HP */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
           {/* Card 1: Sesi Aktif */}
-          <div className="surface-panel bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-emerald-500/30">
+          <div className="surface-panel bg-surface border border-border-panel-divider rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-emerald-500/30">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-[10px] font-normal uppercase tracking-normal text-content-subtle">
@@ -278,7 +278,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
           </div>
 
           {/* Card 2: Pengguna Online */}
-          <div className="surface-panel bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-primary/30">
+          <div className="surface-panel bg-surface border border-border-panel-divider rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-primary/30">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-[10px] font-normal uppercase tracking-normal text-content-subtle">
@@ -300,7 +300,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
           </div>
 
           {/* Card 3: Login Hari Ini */}
-          <div className="surface-panel bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-amber-500/30">
+          <div className="surface-panel bg-surface border border-border-panel-divider rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-amber-500/30">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-[10px] font-normal uppercase tracking-normal text-content-subtle">
@@ -322,7 +322,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
           </div>
 
           {/* Card 4: Total Riwayat Sesi */}
-          <div className="surface-panel bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-info/30">
+          <div className="surface-panel bg-surface border border-border-panel-divider rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-info/30">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-[10px] font-normal uppercase tracking-normal text-content-subtle">
@@ -515,7 +515,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                         {/* Perangkat & Browser */}
                         <td>
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-lg bg-surface-sunken border border-border-subtle flex items-center justify-center text-content-base shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-surface-sunken border border-border-panel-divider flex items-center justify-center text-content-base shrink-0">
                               {isMobile ? (
                                 <Smartphone className="w-4 h-4 text-info" />
                               ) : (
@@ -567,7 +567,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                             </div>
                           ) : (
                             <div>
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-surface-sunken text-content-muted border border-border-subtle">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-surface-sunken text-content-muted border border-border-panel-divider">
                                 <LogOut className="w-2.5 h-2.5 text-content-subtle" />
                                 {t("sessionMonitor.statusLoggedOut", "Sudah Keluar")}
                               </span>
@@ -685,7 +685,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                           {t("sessionMonitor.statusForceLogout", "Diputus Admin")}
                         </span>
                       ) : (
-                        <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-surface-sunken text-content-muted border border-border-subtle">
+                        <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-surface-sunken text-content-muted border border-border-panel-divider">
                           {t("sessionMonitor.statusLoggedOut", "Sudah Keluar")}
                         </span>
                       )}
@@ -770,7 +770,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                 <span>{t("sessionMonitor.prev", "Sebelumnya")}</span>
               </button>
 
-              <span className="px-3 py-1 bg-surface-sunken border border-border-subtle rounded-lg text-xs font-medium text-content-strong">
+              <span className="px-3 py-1 bg-surface-sunken border border-border-panel-divider rounded-lg text-xs font-medium text-content-strong">
                 {page}
               </span>
 
@@ -841,7 +841,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                     </span>
                   </div>
                 ) : userActivities.length === 0 ? (
-                  <div className="py-12 text-center text-content-subtle bg-surface border border-border-subtle rounded-xl p-6">
+                  <div className="py-12 text-center text-content-subtle bg-surface border border-border-panel-divider rounded-xl p-6">
                     <Clock className="w-8 h-8 mx-auto mb-2 text-content-subtle opacity-50" />
                     <p className="font-medium text-content-strong text-sm">
                       {t(
@@ -961,7 +961,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                           </div>
 
                           {/* Event Card */}
-                          <div className="bg-surface border border-border-subtle rounded-xl p-4 shadow-xs hover:border-primary/40 transition-all">
+                          <div className="bg-surface border border-border-panel-divider rounded-xl p-4 shadow-xs hover:border-primary/40 transition-all">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2 pb-2 border-b border-border-divider">
                               <div className="flex items-center gap-2">
                                 <span
@@ -970,7 +970,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                                   {act.action}
                                 </span>
                                 {act.entity && (
-                                  <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-surface-sunken text-content-strong border border-border-subtle">
+                                  <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-surface-sunken text-content-strong border border-border-panel-divider">
                                     {act.entity}
                                   </span>
                                 )}
@@ -993,7 +993,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
 
                             {/* Visual Diff Table Viewer (Ramah Manusia ala Jira) */}
                             {activeKeys.length > 0 ? (
-                              <div className="mt-3 overflow-x-auto border border-border-subtle rounded-lg bg-surface-sunken">
+                              <div className="mt-3 overflow-x-auto border border-border-panel-divider rounded-lg bg-surface-sunken">
                                 <table className="w-full text-left">
                                   <thead>
                                     <tr className="border-b border-border-divider text-[11px] font-normal uppercase tracking-normal text-content-subtle bg-surface/50">
@@ -1029,7 +1029,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                                 </table>
                               </div>
                             ) : act.changes?.details ? (
-                              <div className="mt-2 p-2.5 bg-surface-sunken border border-border-subtle rounded-lg text-xs text-content-strong font-mono">
+                              <div className="mt-2 p-2.5 bg-surface-sunken border border-border-panel-divider rounded-lg text-xs text-content-strong font-mono">
                                 {typeof act.changes.details === "object"
                                   ? JSON.stringify(act.changes.details, null, 2)
                                   : String(act.changes.details)}
@@ -1077,7 +1077,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
               <div className="p-4 border-t border-border-divider bg-surface flex justify-end">
                 <button
                   onClick={handleCloseModal}
-                  className="px-4 py-2 text-xs font-semibold text-content-strong bg-surface hover:bg-surface-hover border border-border-subtle rounded-lg transition-colors shadow-xs"
+                  className="px-4 py-2 text-xs font-semibold text-content-strong bg-surface hover:bg-surface-hover border border-border-panel-divider rounded-lg transition-colors shadow-xs"
                 >
                   {t("sessionMonitor.closeModal", "Tutup")}
                 </button>

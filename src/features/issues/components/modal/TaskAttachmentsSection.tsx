@@ -274,7 +274,7 @@ export const TaskAttachmentsSection: React.FC<TaskAttachmentsSectionProps> = ({
             "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-all select-none",
             isDraggingOver
               ? "border-primary bg-primary/10 ring-2 ring-primary/20"
-              : "border-border-subtle hover:border-primary/50 bg-surface-sunken/40 hover:bg-surface",
+              : "border-border-panel-divider hover:border-primary/50 bg-surface-sunken/40 hover:bg-surface",
             isUploading && "pointer-events-none opacity-60"
           )}
         >
@@ -343,13 +343,13 @@ export const TaskAttachmentsSection: React.FC<TaskAttachmentsSectionProps> = ({
           return (
             <div
               key={att.id ? `${att.id}-${attIdx}` : `att-${attIdx}`}
-              className="flex items-center justify-between gap-3 p-2.5 bg-surface-sunken/40 hover:bg-surface border border-border-subtle rounded-lg transition-all shadow-2xs group"
+              className="flex items-center justify-between gap-3 p-2.5 bg-surface-sunken/40 hover:bg-surface border border-border-panel-divider rounded-lg transition-all shadow-2xs group"
             >
               {/* Info Sisi Kiri */}
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 {/* Thumbnail atau Ikon Tipe File */}
                 <div
-                  className="w-8 h-8 rounded-md bg-surface flex items-center justify-center shrink-0 border border-border-subtle/80 overflow-hidden cursor-pointer"
+                  className="w-8 h-8 rounded-md bg-surface flex items-center justify-center shrink-0 border border-border-panel-divider/80 overflow-hidden cursor-pointer"
                   onClick={() => handleEyeClick(att)}
                 >
                   {isImg && !brokenImages[att.id || String(attIdx)] ? (
