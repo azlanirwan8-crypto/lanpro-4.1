@@ -97,7 +97,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
             { id: "curlyLeft", label: `Curly Left {` },
             { id: "curlyRight", label: `Curly Right }` },
           ]}
-          buttonClassName="bg-surface-sunken border border-border-subtle text-[11px] text-left font-medium text-content-body p-1 rounded-lg hover:bg-surface-muted max-w-[120px]"
+          buttonClassName="bg-surface-sunken border border-border-panel-divider text-[11px] text-left font-medium text-content-body p-1 rounded-lg hover:bg-surface-muted max-w-[120px]"
         />
       </span>
 
@@ -121,7 +121,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
                 handleUpdateActiveNode({ color: colName });
               }}
               className={cn(
-                "w-3.5 h-3.5 rounded-full border border-border-subtle transition-transform hover:scale-125 focus:outline-none",
+                "w-3.5 h-3.5 rounded-full border border-border-panel-divider transition-transform hover:scale-125 focus:outline-none",
                 colorClassMap[colName],
                 node.color === colName && "ring-2 ring-violet-500 scale-110"
               )}

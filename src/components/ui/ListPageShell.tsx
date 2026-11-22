@@ -9,7 +9,7 @@ import { cn } from "../../lib/utils";
 
 /** Search input di strip toolbar dalam kartu. */
 export const LIST_SEARCH_INPUT_CLASS =
-  "w-full min-w-0 pl-9 pr-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-content-strong shadow-2xs font-medium";
+  "w-full min-w-0 pl-9 pr-3.5 py-2 bg-surface border border-border-panel-divider rounded-md text-xs placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-content-strong shadow-2xs font-medium";
 
 /** Baris thead tabel list (bukan uppercase primary).
  *

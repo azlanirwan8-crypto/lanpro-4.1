@@ -183,9 +183,9 @@ const CHIP_KECIL = `${CHIP_DASAR} tracking-tight uppercase`;
 /* #817 — ukuran teks px absolut: `text-xs` adalah `0.75rem` dan akar `html`
  * 13 px membuatnya 9,75 px, bukan 12 px seperti niat skala dasar. */
 const KONTROL_NETRAL =
-  "px-2 py-1 bg-surface border border-border-subtle rounded-md text-[12px] font-normal text-content-body";
+  "px-2 py-1 bg-surface border border-border-panel-divider rounded-md text-[12px] font-normal text-content-body";
 const KONTROL_KECIL =
-  "px-2 py-0.5 bg-surface border border-border-subtle rounded-md text-[10px] font-normal uppercase tracking-tight text-content-body";
+  "px-2 py-0.5 bg-surface border border-border-panel-divider rounded-md text-[10px] font-normal uppercase tracking-tight text-content-body";
 const KONTROL_BENING =
   "px-1.5 py-0.5 bg-surface border border-transparent hover:border-border-panel-divider rounded text-[12px] font-normal";
 /* #814 — versi borderless-until-hover untuk baris tabel isu: bingkai hanya

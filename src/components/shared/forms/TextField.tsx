@@ -25,7 +25,7 @@ export const TextField: React.FC<TextFieldProps> = ({
       )}
       <input
         {...props}
-        className={`w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-normal text-content-body transition-all ${
+        className={`w-full text-xs p-2.5 bg-surface-sunken border border-border-panel-divider rounded-md focus:border-primary focus:outline-none font-normal text-content-body transition-all ${
           error ? "border-red-500/30 focus:border-red-400" : ""
         } ${className}`}
       />

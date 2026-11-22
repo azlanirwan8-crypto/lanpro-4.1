@@ -220,7 +220,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 )}
               >
                 <UncontrolledInput
-                  className="text-2xl font-medium text-content-strong bg-transparent hover:bg-surface-sunken focus:bg-surface border border-transparent hover:border-border-subtle/80 focus:border-primary rounded-lg px-3 py-1.5 w-full transition-all outline-none focus:ring-1 focus:ring-primary/20 placeholder:text-content-subtle tracking-tight"
+                  className="text-2xl font-medium text-content-strong bg-transparent hover:bg-surface-sunken focus:bg-surface border border-transparent hover:border-border-panel-divider/80 focus:border-primary rounded-lg px-3 py-1.5 w-full transition-all outline-none focus:ring-1 focus:ring-primary/20 placeholder:text-content-subtle tracking-tight"
                   placeholder={t("issueDetail.issueTitle")}
                   initialValue={task.title || (task as any).summary || (task as any).name || ""}
                   onSave={(val: string) => updateTaskField(task.id, "title", val)}

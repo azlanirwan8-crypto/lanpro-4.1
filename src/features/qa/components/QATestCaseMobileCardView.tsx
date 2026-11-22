@@ -150,7 +150,7 @@ export const QATestCaseMobileCardView: React.FC<QATestCaseMobileCardViewProps> =
                     checked={isChecked}
                     onChange={() => onToggleCheckCase(tc.id)}
                     onClick={(e) => e.stopPropagation()}
-                    className="mt-0.5 rounded border-border-subtle text-primary focus:ring-primary cursor-pointer shrink-0"
+                    className="mt-0.5 rounded border-border-panel-divider text-primary focus:ring-primary cursor-pointer shrink-0"
                   />
                 )}
                 <div className="flex-1 min-w-0">

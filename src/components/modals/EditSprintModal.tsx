@@ -95,7 +95,7 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
               type="sprint_status"
               masterData={[]}
               className="w-full"
-              buttonClassName="w-full px-4 py-2 border border-border-subtle rounded-lg text-sm bg-surface"
+              buttonClassName="w-full px-4 py-2 border border-border-panel-divider rounded-lg text-sm bg-surface"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">

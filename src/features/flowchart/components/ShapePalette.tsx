@@ -169,7 +169,7 @@ const ShapePaletteBati: React.FC<ShapePaletteProps> = ({
             placeholder={t("shapePalette.searchShape")}
             value={shapeSearchQuery}
             onChange={(e) => setShapeSearchQuery(e.target.value)}
-            className="w-full text-[11px] bg-surface-sunken border border-border-subtle rounded-lg p-1.5 pl-7 text-content placeholder-content-subtle focus:outline-none focus:ring-1 focus:ring-primary focus:bg-surface transition-all"
+            className="w-full text-[11px] bg-surface-sunken border border-border-panel-divider rounded-lg p-1.5 pl-7 text-content placeholder-content-subtle focus:outline-none focus:ring-1 focus:ring-primary focus:bg-surface transition-all"
           />
           {shapeSearchQuery && (
             <button

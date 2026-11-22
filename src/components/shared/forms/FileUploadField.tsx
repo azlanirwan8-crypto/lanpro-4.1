@@ -30,7 +30,7 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
-      <div className="border-2 border-dashed border-border-subtle hover:border-primary rounded-md p-8 text-center space-y-3 transition-colors bg-surface-sunken/50 cursor-pointer">
+      <div className="border-2 border-dashed border-border-panel-divider hover:border-primary rounded-md p-8 text-center space-y-3 transition-colors bg-surface-sunken/50 cursor-pointer">
         <Upload className="w-10 h-10 text-primary mx-auto" />
         <div>
           <p className="text-xs font-normal text-content-body">{t("ui.uploadFile")}</p>

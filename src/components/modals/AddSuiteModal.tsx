@@ -66,7 +66,7 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
             required
             value={suiteName}
             onChange={(e) => onNameChange(e.target.value)}
-            className="w-full text-xs p-2.5 bg-surface-sunken/80 border border-border-subtle rounded-md focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none font-normal text-content-body"
+            className="w-full text-xs p-2.5 bg-surface-sunken/80 border border-border-panel-divider rounded-md focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none font-normal text-content-body"
             placeholder={t("addSuite.docNamePlaceholder")}
           />
         </div>
@@ -82,7 +82,7 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
             type="qa_phase"
             masterData={[]}
             className="w-full"
-            buttonClassName="w-full text-xs p-2.5 bg-surface-sunken/80 border border-border-subtle rounded-md font-normal text-content-body"
+            buttonClassName="w-full text-xs p-2.5 bg-surface-sunken/80 border border-border-panel-divider rounded-md font-normal text-content-body"
           />
         </div>
       </form>

@@ -46,7 +46,7 @@ const Input = ({ value, onChange, placeholder, type = "text", className = "", ..
     value={value}
     onChange={onChange}
     placeholder={placeholder}
-    className={`w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle placeholder:font-normal focus:ring-4 focus:ring-primary/10 focus:border-primary focus:bg-surface outline-none transition-all ${className}`}
+    className={`w-full px-4 py-3 bg-surface-sunken border border-border-panel-divider rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle placeholder:font-normal focus:ring-4 focus:ring-primary/10 focus:border-primary focus:bg-surface outline-none transition-all ${className}`}
     {...props}
   />
 );
@@ -651,7 +651,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   placeholder={t("users.searchPlaceholder")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-content-strong shadow-2xs font-medium"
+                  className="w-full pl-9 pr-3.5 py-2 bg-surface border border-border-panel-divider rounded-md text-xs placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-content-strong shadow-2xs font-medium"
                 />
               </div>
               <button
@@ -722,7 +722,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       ]}
                       type="project_role"
                       masterData={masterData}
-                      buttonClassName="px-3.5 py-1.5 bg-surface border border-border-subtle text-xs font-medium rounded-lg shadow-2xs"
+                      buttonClassName="px-3.5 py-1.5 bg-surface border border-border-panel-divider text-xs font-medium rounded-lg shadow-2xs"
                     />
                   </div>
 
@@ -1254,7 +1254,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       { id: "50", label: "50" },
                       { id: "100", label: "100" },
                     ]}
-                    buttonClassName="bg-surface border border-border-subtle rounded-md px-2 py-1 text-[11px] text-left font-normal text-content-body"
+                    buttonClassName="bg-surface border border-border-panel-divider rounded-md px-2 py-1 text-[11px] text-left font-normal text-content-body"
                   />
                 </div>
               </div>
@@ -1461,7 +1461,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   type="department"
                   masterData={masterData}
                   className="w-full"
-                  buttonClassName="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium"
+                  buttonClassName="w-full px-4 py-2 bg-surface-sunken border border-border-panel-divider rounded-xl text-sm font-medium"
                 />
                 <ChevronDown className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-content-subtle" />
               </div>
@@ -1488,7 +1488,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   type="jabatan"
                   masterData={masterData}
                   className="w-full"
-                  buttonClassName="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium"
+                  buttonClassName="w-full px-4 py-2 bg-surface-sunken border border-border-panel-divider rounded-xl text-sm font-medium"
                 />
                 <ChevronDown className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-content-subtle" />
               </div>
@@ -1510,7 +1510,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   type="project_role"
                   masterData={masterData}
                   className="w-full"
-                  buttonClassName="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium"
+                  buttonClassName="w-full px-4 py-2 bg-surface-sunken border border-border-panel-divider rounded-xl text-sm font-medium"
                 />
                 <ChevronDown className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-content-subtle" />
               </div>

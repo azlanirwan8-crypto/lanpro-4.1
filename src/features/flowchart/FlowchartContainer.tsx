@@ -6072,7 +6072,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                   { id: "card", label: t("shapes.shCard") },
                                   { id: "text", label: t("shapes.shText") },
                                 ]}
-                                buttonClassName="w-full text-xs bg-surface-sunken border border-border-subtle rounded-lg p-2 text-left text-content font-medium"
+                                buttonClassName="w-full text-xs bg-surface-sunken border border-border-panel-divider rounded-lg p-2 text-left text-content font-medium"
                               />
                             </div>
 
@@ -6084,7 +6084,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               <textarea
                                 value={nodes.find((n) => n.id === selectedNodeId)?.label || ""}
                                 onChange={(e) => handleUpdateActiveNode({ label: e.target.value })}
-                                className="w-full h-16 text-xs bg-surface-sunken border border-border-subtle rounded p-2 text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary font-medium transition-all"
+                                className="w-full h-16 text-xs bg-surface-sunken border border-border-panel-divider rounded p-2 text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary font-medium transition-all"
                                 placeholder={t("flowchart.textLabelPlaceholder")}
                               />
                             </div>
@@ -6171,7 +6171,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                         width: parseInt(e.target.value) || 120,
                                       })
                                     }
-                                    className="w-full text-xs font-mono bg-surface-sunken border border-border-subtle rounded p-1 mt-0.5 text-center text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary transition-all font-medium"
+                                    className="w-full text-xs font-mono bg-surface-sunken border border-border-panel-divider rounded p-1 mt-0.5 text-center text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary transition-all font-medium"
                                   />
                                 </div>
                                 <div>
@@ -6190,7 +6190,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                         height: parseInt(e.target.value) || 120,
                                       })
                                     }
-                                    className="w-full text-xs font-mono bg-surface-sunken border border-border-subtle rounded p-1 mt-0.5 text-center text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary transition-all font-medium"
+                                    className="w-full text-xs font-mono bg-surface-sunken border border-border-panel-divider rounded p-1 mt-0.5 text-center text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary transition-all font-medium"
                                   />
                                 </div>
                               </div>
@@ -6218,7 +6218,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                     label: `[${task.key}] ${task.title} (${task.status})`,
                                   })),
                                 ]}
-                                buttonClassName="w-full text-xs bg-surface-sunken border border-border-subtle rounded p-1.5 text-left text-content font-medium"
+                                buttonClassName="w-full text-xs bg-surface-sunken border border-border-panel-divider rounded p-1.5 text-left text-content font-medium"
                               />
                             </div>
                           </div>
@@ -6249,7 +6249,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                   );
                                   setEdges(updated);
                                 }}
-                                className="w-full text-xs bg-surface-sunken border border-border-subtle rounded p-2 text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary font-medium transition-all"
+                                className="w-full text-xs bg-surface-sunken border border-border-panel-divider rounded p-2 text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary font-medium transition-all"
                                 placeholder={t("flowchart.lineLabelPlaceholder")}
                               />
                             </div>
@@ -6435,7 +6435,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       {/* Upload Document Modal */}
       {isUploadDocModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay/60 backdrop-blur-xs p-4">
-          <div className="bg-surface rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col border border-border-subtle">
+          <div className="bg-surface rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col border border-border-panel-divider">
             <div className="px-5 py-4 border-b border-border-divider flex items-center justify-between bg-surface">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-md bg-primary-surface/10 text-primary flex items-center justify-center">
@@ -6463,7 +6463,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                   value={uploadDocName}
                   onChange={(e) => setUploadDocName(e.target.value)}
                   placeholder={t("flowchart.documentNamePlaceholder")}
-                  className="w-full px-3 py-2 bg-surface-sunken border border-border-subtle rounded-md text-xs focus:bg-surface focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all placeholder:text-content-subtle text-content-strong font-medium"
+                  className="w-full px-3 py-2 bg-surface-sunken border border-border-panel-divider rounded-md text-xs focus:bg-surface focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all placeholder:text-content-subtle text-content-strong font-medium"
                 />
               </div>
 
@@ -6481,7 +6481,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                     value={uploadDocLink}
                     onChange={(e) => setUploadDocLink(e.target.value)}
                     placeholder={t("flowchart.docLinkPlaceholder")}
-                    className="w-full pl-9 pr-3 py-2 bg-surface-sunken border border-border-subtle rounded-md text-xs focus:bg-surface focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all placeholder:text-content-subtle text-content-strong font-medium"
+                    className="w-full pl-9 pr-3 py-2 bg-surface-sunken border border-border-panel-divider rounded-md text-xs focus:bg-surface focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all placeholder:text-content-subtle text-content-strong font-medium"
                   />
                 </div>
                 <p className="text-[10px] text-content-subtle leading-normal">

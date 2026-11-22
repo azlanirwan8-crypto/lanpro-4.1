@@ -137,7 +137,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
           <div className="flex gap-3">
             <UserAvatar user={user} uid={user?.uid || user?.id} className="w-8 h-8 shrink-0" />
             <div className="flex-1 relative">
-              <div className="border border-border-subtle rounded-xl bg-surface focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-xs overflow-hidden">
+              <div className="border border-border-panel-divider rounded-xl bg-surface focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-xs overflow-hidden">
                 <div className="flex items-center gap-1 p-2 border-b border-border-divider bg-surface-sunken/40 overflow-x-auto">
                   <button className="flex items-center gap-1.5 px-2 py-1 hover:bg-surface-strong rounded text-[11px] font-normal text-content-secondary transition-colors shrink-0">
                     <Sparkles className="w-3 h-3 text-primary" />
@@ -385,7 +385,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                                 className="w-6 h-6 shrink-0 mt-1"
                               />
                               <div className="flex-1 min-w-0 space-y-2">
-                                <div className="border border-border-subtle rounded-xl bg-surface focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-2xs overflow-hidden">
+                                <div className="border border-border-panel-divider rounded-xl bg-surface focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-2xs overflow-hidden">
                                   <Textarea
                                     value={replyTextMap[root.id] || ""}
                                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>

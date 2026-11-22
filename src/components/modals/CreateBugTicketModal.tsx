@@ -104,7 +104,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
             required
             value={titleInput}
             onChange={(e) => onTitleChange(e.target.value)}
-            className="w-full text-xs p-3 bg-surface-sunken border border-border-subtle rounded-md font-medium text-content-strong focus:border-primary focus:outline-none"
+            className="w-full text-xs p-3 bg-surface-sunken border border-border-panel-divider rounded-md font-medium text-content-strong focus:border-primary focus:outline-none"
           />
         </div>
 
@@ -131,7 +131,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
             ]}
             masterData={[]}
             className="w-full"
-            buttonClassName="w-full text-xs p-3 bg-surface-sunken border border-border-subtle rounded-md font-medium text-content-strong text-left"
+            buttonClassName="w-full text-xs p-3 bg-surface-sunken border border-border-panel-divider rounded-md font-medium text-content-strong text-left"
           />
         </div>
 
@@ -151,7 +151,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
               ]}
               masterData={[]}
               className="w-full"
-              buttonClassName="h-10 bg-surface-sunken rounded-md border border-border-subtle hover:border-border-subtle px-3 text-xs font-medium text-content-strong"
+              buttonClassName="h-10 bg-surface-sunken rounded-md border border-border-panel-divider hover:border-border-panel-divider px-3 text-xs font-medium text-content-strong"
             />
           </div>
 
@@ -178,7 +178,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
               ]}
               masterData={[]}
               className="w-full"
-              buttonClassName="h-10 bg-surface-sunken rounded-md border border-border-subtle hover:border-border-subtle px-3 text-xs font-medium text-content-strong"
+              buttonClassName="h-10 bg-surface-sunken rounded-md border border-border-panel-divider hover:border-border-panel-divider px-3 text-xs font-medium text-content-strong"
             />
           </div>
         </div>
@@ -191,7 +191,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
             rows={5}
             value={descriptionInput}
             onChange={(e) => onDescriptionChange(e.target.value)}
-            className="w-full text-xs p-3 bg-surface-sunken border border-border-subtle rounded-md font-mono text-content-body focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            className="w-full text-xs p-3 bg-surface-sunken border border-border-panel-divider rounded-md font-mono text-content-body focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
         </div>
       </form>

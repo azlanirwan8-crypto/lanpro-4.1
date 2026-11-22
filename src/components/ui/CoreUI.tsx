@@ -139,7 +139,7 @@ export const Input = ({
     value={value ?? ""}
     onChange={onChange}
     placeholder={placeholder}
-    className={`w-full px-4 py-2.5 min-h-11 bg-surface text-content border border-border-subtle rounded-lg placeholder:text-content-subtle focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all ${className}`}
+    className={`w-full px-4 py-2.5 min-h-11 bg-surface text-content border border-border-panel-divider rounded-lg placeholder:text-content-subtle focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all ${className}`}
     {...props}
   />
 );
@@ -150,7 +150,7 @@ export const Textarea = ({ value, onChange, placeholder, className = "", rows = 
     onChange={onChange}
     placeholder={placeholder}
     rows={rows}
-    className={`w-full px-4 py-2.5 bg-surface text-content border border-border-subtle rounded-lg placeholder:text-content-subtle focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none ${className}`}
+    className={`w-full px-4 py-2.5 bg-surface text-content border border-border-panel-divider rounded-lg placeholder:text-content-subtle focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none ${className}`}
   />
 );
 

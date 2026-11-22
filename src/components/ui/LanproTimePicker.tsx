@@ -140,7 +140,7 @@ export const LanproTimePicker: React.FC<LanproTimePickerProps> = ({
           if (!disabled) setIsOpen(!isOpen);
         }}
         className={cn(
-          "w-full flex items-center justify-between gap-2 px-3.5 py-2 bg-surface border border-border-subtle hover:border-border rounded-md text-xs font-normal text-content-strong outline-none transition-all shadow-2xs cursor-pointer focus:ring-1 focus:ring-primary/20",
+          "w-full flex items-center justify-between gap-2 px-3.5 py-2 bg-surface border border-border-panel-divider hover:border-border-divider rounded-md text-xs font-normal text-content-strong outline-none transition-all shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary",
           disabled && "bg-surface-sunken text-content-muted cursor-not-allowed opacity-60",
           buttonClassName
         )}
@@ -186,7 +186,7 @@ export const LanproTimePicker: React.FC<LanproTimePickerProps> = ({
                 width: dropdownPos.width,
                 zIndex: 10000,
               }}
-              className="bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-border-subtle p-3 text-content select-none animate-dropdown"
+              className="bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-border-panel-divider p-3 text-content select-none animate-dropdown"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-border-faint">

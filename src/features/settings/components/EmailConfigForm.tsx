@@ -189,7 +189,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
   };
 
   const inputStyle =
-    "w-full px-3 py-1.5 border border-border-subtle rounded-md text-xs font-medium outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all bg-surface text-content-strong shadow-2xs";
+    "w-full px-3 py-1.5 border border-border-panel-divider rounded-md text-xs font-medium outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all bg-surface text-content-strong shadow-2xs";
 
   return (
     <div className="space-y-4 relative">
@@ -379,7 +379,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
                 id="smtpSecureCheckbox"
                 checked={smtpSecure}
                 onChange={(e) => setSmtpSecure(e.target.checked)}
-                className="rounded border-border-subtle text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                className="rounded border-border-panel-divider text-emerald-600 focus:ring-emerald-500 cursor-pointer"
               />
               <label
                 htmlFor="smtpSecureCheckbox"
@@ -511,7 +511,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
       {/* Modal Uji Coba Kirim Email */}
       {isTestModalOpen && (
         <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-surface p-5 rounded-lg shadow-xl max-w-sm w-full space-y-3 border border-border-subtle">
+          <div className="bg-surface p-5 rounded-lg shadow-xl max-w-sm w-full space-y-3 border border-border-panel-divider">
             <div className="flex items-center gap-2">
               <ShieldCheck size={18} className="text-emerald-600" />
               <h3 className="font-semibold text-sm text-content-strong">

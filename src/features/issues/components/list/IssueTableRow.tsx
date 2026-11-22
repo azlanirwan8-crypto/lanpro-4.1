@@ -559,7 +559,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                         angka === null || Number.isFinite(angka) ? angka : null
                       );
                     }}
-                    className="bg-transparent border border-transparent hover:border-border-subtle focus:border-primary rounded px-2 py-1 text-xs font-normal text-content-body w-full outline-none transition-colors"
+                    className="bg-transparent border border-transparent hover:border-border-panel-divider focus:border-primary rounded px-2 py-1 text-xs font-normal text-content-body w-full outline-none transition-colors"
                     placeholder="-"
                   />
                 );

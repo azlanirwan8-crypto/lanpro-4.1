@@ -31,7 +31,7 @@ export const ListPerPageSelect: React.FC<{
         value={String(value)}
         onChange={(val) => onChange(Number(val))}
         options={PILIHAN_BARIS_PER_HALAMAN.map((n) => ({ id: String(n), label: String(n) }))}
-        buttonClassName="bg-surface border border-border-subtle rounded-md px-2 py-1 text-[11px] text-left font-normal text-content-body"
+        buttonClassName="bg-surface border border-border-panel-divider rounded-md px-2 py-1 text-[11px] text-left font-normal text-content-body"
       />
     </div>
   );

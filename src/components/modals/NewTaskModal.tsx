@@ -257,7 +257,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
                 options={issueTypeOptions}
                 masterData={masterData}
                 className="w-full"
-                buttonClassName="h-10 bg-surface rounded-lg border border-border-subtle hover:border-border-subtle px-3 text-sm font-medium"
+                buttonClassName="h-10 bg-surface rounded-lg border border-border-panel-divider hover:border-border-panel-divider px-3 text-sm font-medium"
               />
             </div>
             <div>
@@ -270,7 +270,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
                 options={sprintOptions}
                 masterData={masterData}
                 className="w-full"
-                buttonClassName="h-10 bg-surface rounded-lg border border-border-subtle hover:border-border-subtle px-3 text-sm font-medium"
+                buttonClassName="h-10 bg-surface rounded-lg border border-border-panel-divider hover:border-border-panel-divider px-3 text-sm font-medium"
               />
             </div>
           </div>
@@ -305,7 +305,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               options={parentTaskOptions}
               masterData={masterData}
               className="w-full"
-              buttonClassName="h-10 bg-surface rounded-lg border border-border-subtle hover:border-border-subtle px-3 text-sm font-medium"
+              buttonClassName="h-10 bg-surface rounded-lg border border-border-panel-divider hover:border-border-panel-divider px-3 text-sm font-medium"
             />
           </div>
         )}
@@ -358,7 +358,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             members={projectMembers}
             masterData={masterData}
             className="w-full"
-            buttonClassName="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-normal bg-surface"
+            buttonClassName="w-full px-4 py-2 border border-border-panel-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-normal bg-surface"
           />
         </div>
         <div>
@@ -411,7 +411,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               onChange={(val) => setNewTaskBusinessValue(val)}
               options={businessValueOptions}
               className="w-full"
-              buttonClassName="w-full px-3 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-normal bg-surface"
+              buttonClassName="w-full px-3 py-2 border border-border-panel-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-normal bg-surface"
             />
           </div>
           <div>
@@ -423,7 +423,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               onChange={(val) => setNewTaskProjectRisk(val)}
               options={riskOptions}
               className="w-full"
-              buttonClassName="w-full px-3 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-normal bg-surface"
+              buttonClassName="w-full px-3 py-2 border border-border-panel-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-normal bg-surface"
             />
           </div>
         </div>
@@ -461,7 +461,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             value={newTaskAcceptanceCriteria}
             onChange={(e: any) => setNewTaskAcceptanceCriteria(e.target.value)}
             placeholder={t("newTask.acceptancePlaceholder")}
-            className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+            className="w-full px-4 py-2 border border-border-panel-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
             rows={3}
           />
         </div>
@@ -473,7 +473,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             value={newTaskDescription}
             onChange={(e: any) => setNewTaskDescription(e.target.value)}
             placeholder={t("newTask.descriptionPlaceholder")}
-            className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            className="w-full px-4 py-2 border border-border-panel-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             rows={4}
           />
         </div>
@@ -500,7 +500,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               }
               setNewTaskAttachments(validFiles);
             }}
-            className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            className="w-full px-4 py-2 border border-border-panel-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
           />
         </div>
         <div className="grid grid-cols-3 gap-4">

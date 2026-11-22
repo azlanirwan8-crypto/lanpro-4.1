@@ -222,7 +222,7 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
         {busy && <p role="status">{tr(busy)}</p>}
         {drafts === null ? (
           <>
-            <label className="flex items-center gap-2 rounded-md border border-border-subtle px-3 py-2 focus-within:border-primary">
+            <label className="flex items-center gap-2 rounded-md border border-border-panel-divider px-3 py-2 focus-within:border-primary">
               <Search size={16} aria-hidden="true" className="text-content-subtle" />
               <input
                 autoFocus

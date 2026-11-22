@@ -76,7 +76,7 @@ const TINGGI = "h-11";
  * maksud penulisnya. Karena itu kelas isian dipecah: yang sama di semua lajur
  * ada di `dasarIsian`, yang menentukan LEBAR diputus di tempat pemakaiannya.
  */
-const dasarIsian = `px-3 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs placeholder:text-content-subtle`;
+const dasarIsian = `px-3 bg-surface border border-border-panel-divider focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs placeholder:text-content-subtle`;
 const isianKelas = `w-full min-w-0 ${TINGGI} ${dasarIsian}`;
 /* Tombol pemakai `min-h`, bukan `h`: isinya chip pilihan, dan dua nama panjang
  * boleh memakan dua baris. Yang dijamin sama adalah TINGGI MINIMUMNYA — saat
@@ -99,7 +99,7 @@ const lajurTetap = "shrink-0 w-[150px] sm:w-[170px] lg:w-[200px]";
 
 /** Kelas bersama untuk kontrol kecil di dalam sel baris cepat. */
 const kelasKecil =
-  "w-full min-w-0 h-9 px-2 bg-surface border border-border-subtle focus:border-primary rounded-md text-[11px] font-normal text-content-strong outline-none shadow-2xs placeholder:text-content-subtle";
+  "w-full min-w-0 h-9 px-2 bg-surface border border-border-panel-divider focus:border-primary rounded-md text-[11px] font-normal text-content-strong outline-none shadow-2xs placeholder:text-content-subtle";
 /** Pembuka tautan/berkas: sama tingginya dengan kontrol di sebelahnya. */
 const tombolSambung = `w-full min-w-0 ${TINGGI} px-3 inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-normal bg-primary/10 hover:bg-primary/15 text-primary border border-primary/20 transition-colors cursor-pointer`;
 const tombolKecil =

@@ -337,7 +337,7 @@ export const EdgeStyleBar: React.FC<EdgeStyleBarProps> = ({
       {bukaWarna && (
         <div
           data-testid="pemilih-warna-garis"
-          className="pointer-events-auto absolute left-1/2 top-5 -translate-x-1/2 w-[204px] max-w-[86vw] bg-surface/95 backdrop-blur-md border border-border-subtle/60 rounded-lg p-2 shadow-soft-lg select-none"
+          className="pointer-events-auto absolute left-1/2 top-5 -translate-x-1/2 w-[204px] max-w-[86vw] bg-surface/95 backdrop-blur-md border border-border-panel-divider/60 rounded-lg p-2 shadow-soft-lg select-none"
         >
           <div className="text-[10px] text-content-muted mb-1">{t("flowchart.lineColor")}</div>
           <div className="flex flex-wrap gap-1.5">
@@ -392,7 +392,7 @@ export const EdgeStyleBar: React.FC<EdgeStyleBarProps> = ({
       {bukaKepala && (
         <div
           data-testid="pemilih-mata-panah"
-          className="pointer-events-auto absolute left-1/2 top-5 -translate-x-1/2 w-[340px] max-w-[86vw] bg-surface/95 backdrop-blur-md border border-border-subtle/60 rounded-lg p-2 shadow-soft-lg select-none"
+          className="pointer-events-auto absolute left-1/2 top-5 -translate-x-1/2 w-[340px] max-w-[86vw] bg-surface/95 backdrop-blur-md border border-border-panel-divider/60 rounded-lg p-2 shadow-soft-lg select-none"
         >
           {(
             [

@@ -352,7 +352,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
               placeholder={t("audit.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 bg-surface-sunken border border-border-subtle rounded-md text-xs font-medium focus:bg-surface focus:ring-1 focus:ring-primary outline-none transition-all"
+              className="w-full pl-9 pr-3 py-1.5 bg-surface-sunken border border-border-panel-divider rounded-md text-xs font-medium focus:bg-surface focus:ring-1 focus:ring-primary outline-none transition-all"
             />
           </div>
 

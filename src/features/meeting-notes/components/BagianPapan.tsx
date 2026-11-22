@@ -62,7 +62,7 @@ export const KepalaPapan: React.FC<KepalaProps> = ({ tampilAI, onToggleAI, cari,
               placeholder={t("discussion.searchPlaceholder")}
               value={cari}
               onChange={(e) => onCari(e.target.value)}
-              className="w-full min-w-0 pl-9 pr-3 py-2 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs"
+              className="w-full min-w-0 pl-9 pr-3 py-2 bg-surface border border-border-panel-divider focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs"
             />
           </div>
         )}

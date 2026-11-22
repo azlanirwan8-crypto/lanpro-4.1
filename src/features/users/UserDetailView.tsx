@@ -2061,7 +2061,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           value={projectSearchQuery}
                           onChange={(e) => setProjectSearchQuery(e.target.value)}
                           placeholder={t("userDetail.searchProjectPlaceholder", "Cari project...")}
-                          className="w-full pl-8 pr-3 py-1.5 bg-surface-sunken border border-border-subtle rounded-md text-xs outline-none focus:border-primary text-content-strong transition"
+                          className="w-full pl-8 pr-3 py-1.5 bg-surface-sunken border border-border-panel-divider rounded-md text-xs outline-none focus:border-primary text-content-strong transition"
                         />
                       </div>
 
@@ -2529,7 +2529,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           value={editFullName}
                           onChange={(e) => setEditFullName(e.target.value)}
                           placeholder={t("userDetail.fullNamePlaceholder")}
-                          className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-primary text-content-strong transition shadow-2xs"
+                          className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-panel-divider/70 rounded-xl text-xs font-medium outline-none focus:border-primary text-content-strong transition shadow-2xs"
                         />
                       </div>
 
@@ -2543,7 +2543,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           value={editEmail}
                           onChange={(e) => setEditEmail(e.target.value)}
                           placeholder={t("userDetail.emailPlaceholder")}
-                          className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-primary text-content-strong transition shadow-2xs"
+                          className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-panel-divider/70 rounded-xl text-xs font-medium outline-none focus:border-primary text-content-strong transition shadow-2xs"
                         />
                       </div>
 
@@ -2557,7 +2557,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           value={editPhone}
                           onChange={(e) => setEditPhone(e.target.value)}
                           placeholder={t("userDetail.phonePlaceholder")}
-                          className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-primary text-content-strong transition shadow-2xs"
+                          className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-panel-divider/70 rounded-xl text-xs font-medium outline-none focus:border-primary text-content-strong transition shadow-2xs"
                         />
                       </div>
 
@@ -2590,7 +2590,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           type="department"
                           masterData={masterData}
                           className="w-full"
-                          buttonClassName="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium text-content-strong"
+                          buttonClassName="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-panel-divider/70 rounded-xl text-xs font-medium text-content-strong"
                         />
                       </div>
 
@@ -2625,7 +2625,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           type="jabatan"
                           masterData={masterData}
                           className="w-full"
-                          buttonClassName="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium text-content-strong"
+                          buttonClassName="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-panel-divider/70 rounded-xl text-xs font-medium text-content-strong"
                         />
                       </div>
 
@@ -2661,7 +2661,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                             type="project_role"
                             masterData={masterData}
                             className="w-full"
-                            buttonClassName="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium text-content-strong"
+                            buttonClassName="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-panel-divider/70 rounded-xl text-xs font-medium text-content-strong"
                           />
                         </div>
                       )}
@@ -2681,7 +2681,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               { id: "pending", label: t("userDetail.waitingApproval") },
                               { id: "rejected", label: t("userDetail.suspendedRejected") },
                             ]}
-                            buttonClassName="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs text-left font-medium text-content-strong shadow-2xs"
+                            buttonClassName="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-panel-divider/70 rounded-xl text-xs text-left font-medium text-content-strong shadow-2xs"
                           />
                         </div>
                       )}
@@ -2747,7 +2747,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               value={editOldPassword}
                               onChange={(e) => setEditOldPassword(e.target.value)}
                               placeholder={t("userDetail.oldPasswordPlaceholder")}
-                              className="w-full pl-4 pr-10 py-2.5 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-primary bg-surface-sunken/60 text-content-strong transition"
+                              className="w-full pl-4 pr-10 py-2.5 border border-border-panel-divider/70 rounded-xl text-xs font-medium outline-none focus:border-primary bg-surface-sunken/60 text-content-strong transition"
                             />
                             <button
                               type="button"
@@ -2784,7 +2784,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 value={editPassword}
                                 onChange={(e) => setEditPassword(e.target.value)}
                                 placeholder={t("userDetail.passwordPlaceholder")}
-                                className="w-full pl-4 pr-10 py-2.5 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-primary bg-surface-sunken/60 text-content-strong transition"
+                                className="w-full pl-4 pr-10 py-2.5 border border-border-panel-divider/70 rounded-xl text-xs font-medium outline-none focus:border-primary bg-surface-sunken/60 text-content-strong transition"
                               />
                               <button
                                 type="button"
@@ -3213,7 +3213,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               })
                               .map((p) => ({ id: p.id, label: p.name })),
                           ]}
-                          buttonClassName="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs text-left font-medium text-content-strong truncate"
+                          buttonClassName="w-full px-3 py-1.5 bg-surface border border-border-panel-divider rounded-md text-xs text-left font-medium text-content-strong truncate"
                         />
                       </div>
 
@@ -3234,7 +3234,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           type="project_role"
                           masterData={masterData}
                           className="w-full"
-                          buttonClassName="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong"
+                          buttonClassName="w-full px-3 py-1.5 bg-surface border border-border-panel-divider rounded-md text-xs font-medium text-content-strong"
                         />
                       </div>
 
@@ -3281,7 +3281,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                         setSelectedSubordinateIds([...selectedSubordinateIds, uId]);
                                       }
                                     }}
-                                    className="rounded border-border-subtle text-primary focus:ring-primary"
+                                    className="rounded border-border-panel-divider text-primary focus:ring-primary"
                                   />
                                   <span className="font-medium">
                                     {u.displayName || u.username || u.email}

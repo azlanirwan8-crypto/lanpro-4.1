@@ -85,7 +85,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
                 { id: "100", label: "100" },
                 { id: "9999", label: t("bulkActions.all") },
               ]}
-              buttonClassName="text-[11px] font-normal bg-surface border border-border-subtle rounded-lg px-2 py-0.5 text-left text-content-body shadow-soft"
+              buttonClassName="text-[11px] font-normal bg-surface border border-border-panel-divider rounded-lg px-2 py-0.5 text-left text-content-body shadow-soft"
             />
           </div>
         </div>

@@ -148,7 +148,7 @@ export const ConnectPanel = ({ hideHeader }: { hideHeader?: boolean } = {}) => {
                     name="host"
                     value={config.host}
                     onChange={handleChange}
-                    className="w-full bg-surface border border-border-subtle rounded-md px-3 py-2 text-xs text-content-body font-medium focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full bg-surface border border-border-panel-divider rounded-md px-3 py-2 text-xs text-content-body font-medium focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -159,7 +159,7 @@ export const ConnectPanel = ({ hideHeader }: { hideHeader?: boolean } = {}) => {
                     name="port"
                     value={config.port}
                     onChange={handleChange}
-                    className="w-full bg-surface border border-border-subtle rounded-md px-3 py-2 text-xs text-content-body font-medium focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full bg-surface border border-border-panel-divider rounded-md px-3 py-2 text-xs text-content-body font-medium focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -172,7 +172,7 @@ export const ConnectPanel = ({ hideHeader }: { hideHeader?: boolean } = {}) => {
                   name="database"
                   value={config.database}
                   onChange={handleChange}
-                  className="w-full bg-surface border border-border-subtle rounded-md px-3 py-2 text-xs text-content-body font-medium focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full bg-surface border border-border-panel-divider rounded-md px-3 py-2 text-xs text-content-body font-medium focus:outline-none focus:ring-1 focus:ring-primary"
                 />
                 <div className="bg-amber-500/10 rounded-md p-3 border border-amber-500/30 mt-2 flex gap-2.5 text-amber-800 text-xs">
                   <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
@@ -209,7 +209,7 @@ export const ConnectPanel = ({ hideHeader }: { hideHeader?: boolean } = {}) => {
                     name="user"
                     value={config.user}
                     onChange={handleChange}
-                    className="w-full bg-surface border border-border-subtle rounded-md px-3 py-2 text-xs text-content-body font-medium focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full bg-surface border border-border-panel-divider rounded-md px-3 py-2 text-xs text-content-body font-medium focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -221,7 +221,7 @@ export const ConnectPanel = ({ hideHeader }: { hideHeader?: boolean } = {}) => {
                     name="password"
                     value={config.password}
                     onChange={handleChange}
-                    className="w-full bg-surface border border-border-subtle rounded-md px-3 py-2 text-xs text-content-body font-medium focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full bg-surface border border-border-panel-divider rounded-md px-3 py-2 text-xs text-content-body font-medium focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>

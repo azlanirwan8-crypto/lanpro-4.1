@@ -27,7 +27,7 @@ export const TextAreaField: React.FC<TextAreaFieldProps> = ({
       <textarea
         rows={rows}
         {...props}
-        className={`w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-normal text-content-body resize-none transition-all ${
+        className={`w-full text-xs p-2.5 bg-surface-sunken border border-border-panel-divider rounded-md focus:border-primary focus:outline-none font-normal text-content-body resize-none transition-all ${
           error ? "border-red-500/30 focus:border-red-400" : ""
         } ${className}`}
       />

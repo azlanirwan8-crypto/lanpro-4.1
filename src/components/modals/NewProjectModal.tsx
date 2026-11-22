@@ -72,7 +72,7 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
           <textarea
             value={newProjectDescription}
             onChange={(e) => setNewProjectDescription(e.target.value)}
-            className="w-full border border-border-subtle rounded-lg p-2 text-sm bg-surface text-content-body focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+            className="w-full border border-border-panel-divider rounded-lg p-2 text-sm bg-surface text-content-body focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
             placeholder={t("newProject.descriptionPlaceholder")}
             rows={3}
           />

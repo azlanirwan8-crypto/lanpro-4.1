@@ -129,7 +129,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
                 "w-full px-3.5 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
                 error
                   ? "border-danger focus:ring-danger/20 focus:border-danger"
-                  : "border-border-subtle focus:ring-primary/20 focus:border-primary"
+                  : "border-border-panel-divider focus:ring-primary/20 focus:border-primary"
               )}
             />
             {error && (

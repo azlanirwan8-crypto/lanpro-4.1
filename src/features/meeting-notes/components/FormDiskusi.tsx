@@ -50,7 +50,7 @@ export const labelKelas =
  * kotak boleh MEMBESAR alih-alih luber.
  */
 const dasarIsian =
-  "w-full min-w-0 px-3.5 bg-surface border border-border-subtle rounded-md text-xs font-normal text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 shadow-2xs";
+  "w-full min-w-0 px-3.5 bg-surface border border-border-panel-divider rounded-md text-xs font-normal text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 shadow-2xs";
 const isianKelas = `${dasarIsian} h-11`;
 export const textareaKelas = `${dasarIsian} min-h-[80px] py-2 leading-relaxed`;
 const tombolKelas = `${dasarIsian} min-h-11 text-left font-medium`;

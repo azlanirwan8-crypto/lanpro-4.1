@@ -95,7 +95,7 @@ export const Modal = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.18, ease: "easeOut" }}
           className={cn(
-            "bg-surface rounded-t-2xl md:rounded-lg shadow-xl w-full overflow-hidden max-h-[92vh] md:max-h-[90vh] flex flex-col border border-border-divider md:mx-auto",
+            "bg-surface rounded-t-2xl md:rounded-lg shadow-xl w-full overflow-hidden max-h-[92vh] md:max-h-[90vh] flex flex-col border border-border-panel-divider md:mx-auto",
             maxWidth,
             className
           )}

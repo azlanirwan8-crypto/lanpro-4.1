@@ -242,7 +242,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
               checked={dueReminder}
               disabled={prefSaving}
               onChange={() => void toggleDueReminder()}
-              className="rounded border-border-subtle text-primary focus:ring-primary/30"
+              className="rounded border-border-panel-divider text-primary focus:ring-primary/30"
             />
           </label>
           <button

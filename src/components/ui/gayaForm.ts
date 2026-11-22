@@ -23,7 +23,7 @@ import { cn } from "../../lib/utils";
  * dua kelas properti sama diselesaikan oleh urutan stylesheet.
  */
 const ISIAN_DASAR =
-  "bg-surface border border-border-subtle rounded-md px-2.5 text-xs font-normal text-content-body placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 shadow-2xs";
+  "bg-surface border border-border-panel-divider rounded-md px-2.5 text-xs font-normal text-content-body placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 shadow-2xs";
 
 /** Kotak isian satu baris: teks, angka, dan pencarian. Setinggi baseline Velzon. */
 export const ISIAN = cn(ISIAN_DASAR, "h-9");
@@ -82,7 +82,7 @@ export const TOMBOL_TEKS =
   "text-[10px] font-medium text-primary hover:text-primary-hover transition-colors cursor-pointer inline-flex items-center gap-1";
 
 /** Kartu satu blok: latar putih di atas kolom yang sudah ditint, garis subtle, bayangan lembut. */
-export const KARTU_SECTION = "bg-surface border border-border-subtle rounded-xl shadow-soft";
+export const KARTU_SECTION = "bg-surface border border-border-panel-divider rounded-xl shadow-soft";
 
 /** Tombol bahaya penuh-baris (Delete Issue). `danger` token, bukan `red-500`. */
 export const TOMBOL_BAHAYA =

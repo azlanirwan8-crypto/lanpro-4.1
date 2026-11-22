@@ -1152,7 +1152,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                           value={editedTranscriptText}
                           onChange={(e) => setEditedTranscriptText(e.target.value)}
                           placeholder={t("aiMeeting.transcriptPlaceholder")}
-                          className="w-full min-h-[350px] p-4 border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary rounded-xl text-xs outline-none bg-surface font-mono leading-relaxed shadow-inner"
+                          className="w-full min-h-[350px] p-4 border border-border-panel-divider focus:border-primary focus:ring-1 focus:ring-primary rounded-xl text-xs outline-none bg-surface font-mono leading-relaxed shadow-inner"
                         />
 
                         <div className="flex items-center justify-end gap-3 pt-2">
@@ -1195,7 +1195,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder={t("aiMeeting.searchPlaceholder")}
-                                className="w-full pl-10 pr-10 py-2.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary text-xs rounded-xl placeholder:text-content-subtle focus:outline-none transition-all"
+                                className="w-full pl-10 pr-10 py-2.5 bg-surface border border-border-panel-divider focus:border-primary focus:ring-1 focus:ring-primary text-xs rounded-xl placeholder:text-content-subtle focus:outline-none transition-all"
                               />
                               {searchTerm && (
                                 <button
@@ -1502,7 +1502,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       value={meetingLink}
                       onChange={(e) => setMeetingLink(e.target.value)}
                       placeholder={t("aiMeeting.pasteLinkPlaceholder")}
-                      className="w-full p-3 border border-border-subtle rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary bg-surface placeholder:text-content-subtle"
+                      className="w-full p-3 border border-border-panel-divider rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary bg-surface placeholder:text-content-subtle"
                     />
                   </div>
 
@@ -1515,7 +1515,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       value={transcript}
                       onChange={(e) => setTranscript(e.target.value)}
                       placeholder={t("aiMeeting.pasteTranscriptPlaceholder")}
-                      className="w-full min-h-[92px] p-4 border border-border-subtle rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary bg-surface placeholder:text-content-subtle font-mono leading-relaxed shadow-inner"
+                      className="w-full min-h-[92px] p-4 border border-border-panel-divider rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary bg-surface placeholder:text-content-subtle font-mono leading-relaxed shadow-inner"
                     />
                   </div>
                 </div>
@@ -1969,7 +1969,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
       {/* Continuous Learning Loop Feedback Modal */}
       {showFeedbackModal && (
         <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-surface rounded-lg max-w-lg w-full overflow-hidden shadow-xl border border-border-subtle transform transition-all scale-100">
+          <div className="bg-surface rounded-lg max-w-lg w-full overflow-hidden shadow-xl border border-border-panel-divider transform transition-all scale-100">
             {/* Modal Header */}
             <div className="p-6 bg-gradient-to-r from-primary-surface to-primary-surface-active text-content-inverse flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -2016,7 +2016,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   value={feedbackText}
                   onChange={(e) => setFeedbackText(e.target.value)}
                   placeholder="Contoh: AI kurang detail menangkap argumen teknis bagian API Hashing. Tolong jelaskan lebih rinci arsitektur keamanan datanya di rapat berikutnya."
-                  className="w-full h-32 p-3.5 bg-surface-sunken border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary text-xs text-content-body rounded-xl placeholder:text-content-subtle focus:outline-none transition-all resize-none"
+                  className="w-full h-32 p-3.5 bg-surface-sunken border border-border-panel-divider focus:border-primary focus:ring-1 focus:ring-primary text-xs text-content-body rounded-xl placeholder:text-content-subtle focus:outline-none transition-all resize-none"
                   disabled={submittingFeedback}
                 />
               </div>

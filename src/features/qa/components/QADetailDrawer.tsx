@@ -347,7 +347,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                     value={drawerNewComment}
                     onChange={(e) => setDrawerNewComment(e.target.value)}
                     placeholder={t("qaDetail.commentPlaceholder")}
-                    className="flex-1 px-3 py-2 bg-surface-sunken border border-border-subtle rounded-md text-xs font-medium outline-none focus:border-primary"
+                    className="flex-1 px-3 py-2 bg-surface-sunken border border-border-panel-divider rounded-md text-xs font-medium outline-none focus:border-primary"
                   />
                   <button
                     type="submit"

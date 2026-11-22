@@ -362,7 +362,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                     "sessionMonitor.searchPlaceholder",
                     "Cari nama, email, IP, lokasi..."
                   )}
-                  className="w-full pl-9 pr-3 py-2 bg-surface-sunken border border-border-subtle rounded-lg text-sm text-content-strong placeholder:text-content-subtle focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
+                  className="w-full pl-9 pr-3 py-2 bg-surface-sunken border border-border-panel-divider rounded-lg text-sm text-content-strong placeholder:text-content-subtle focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
                 />
               </div>
               <div className="shrink-0 w-[40%] max-w-[10.5rem] sm:w-auto sm:max-w-none">
@@ -384,7 +384,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                       label: t("sessionMonitor.statusForceLogout", "Diputus Admin"),
                     },
                   ]}
-                  buttonClassName="w-full px-2.5 sm:px-3 py-2 bg-surface-sunken border border-border-subtle rounded-lg text-sm text-left font-medium text-content-strong"
+                  buttonClassName="w-full px-2.5 sm:px-3 py-2 bg-surface-sunken border border-border-panel-divider rounded-lg text-sm text-left font-medium text-content-strong"
                 />
               </div>
               {/* #426 — Refresh dipindah sejajar search + status */}
@@ -789,7 +789,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
         {/* Velzon Activity & Audit Log Viewer Modal */}
         {selectedUserForActivity && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/60 backdrop-blur-xs">
-            <div className="bg-surface border border-border-subtle rounded-2xl shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
+            <div className="bg-surface border border-border-panel-divider rounded-2xl shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
               {/* Modal Header */}
               <div className="p-5 border-b border-border-divider bg-surface flex items-center justify-between">
                 <div className="flex items-center gap-3">

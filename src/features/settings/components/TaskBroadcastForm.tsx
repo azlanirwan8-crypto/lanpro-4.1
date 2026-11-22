@@ -239,7 +239,7 @@ export const TaskBroadcastForm: React.FC = () => {
         <LanproTimePicker
           value={jam}
           onChange={setJam}
-          buttonClassName="w-40 px-3 py-1.5 border border-border-subtle rounded-md text-xs text-left font-medium bg-surface text-content-strong shadow-2xs"
+          buttonClassName="w-40 px-3 py-1.5 border border-border-panel-divider rounded-md text-xs text-left font-medium bg-surface text-content-strong shadow-2xs"
         />
         <p className="text-[11px] text-content-subtle">{t("taskBroadcast.jamWib")}</p>
       </div>

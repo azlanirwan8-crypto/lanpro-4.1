@@ -1021,7 +1021,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
       {/* POPUP MODAL: Add / Edit Meeting */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-overlay/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-surface p-5 sm:p-6 rounded-lg shadow-xl w-full max-w-lg border border-border-subtle text-left relative">
+          <div className="bg-surface p-5 sm:p-6 rounded-lg shadow-xl w-full max-w-lg border border-border-panel-divider text-left relative">
             <button
               onClick={() => {
                 setIsModalOpen(false);
@@ -1057,7 +1057,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 </label>
                 <input
                   disabled={!canModify}
-                  className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
+                  className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-panel-divider focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
                   placeholder={t("meetings.titlePlaceholder")}
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
@@ -1101,7 +1101,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   </div>
                   <input
                     disabled={!canModify}
-                    className="w-full pl-9 pr-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
+                    className="w-full pl-9 pr-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-panel-divider focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
                     placeholder={t("meetings.linkPlaceholder")}
                     value={newMeetingLink}
                     onChange={(e) => setNewMeetingLink(e.target.value)}
@@ -1115,7 +1115,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 </label>
                 <textarea
                   disabled={!canModify}
-                  className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none transition-all resize-none min-h-[80px] placeholder:text-content-subtle shadow-2xs"
+                  className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-panel-divider focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none transition-all resize-none min-h-[80px] placeholder:text-content-subtle shadow-2xs"
                   placeholder={t("meetings.agendaPlaceholder")}
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
@@ -1137,7 +1137,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   )}
                 </label>
 
-                <div className="border-2 border-dashed border-border-subtle hover:border-primary rounded-md p-3 text-center bg-surface-sunken/50 transition-all relative">
+                <div className="border-2 border-dashed border-border-panel-divider hover:border-primary rounded-md p-3 text-center bg-surface-sunken/50 transition-all relative">
                   <input
                     type="file"
                     disabled={!canModify}

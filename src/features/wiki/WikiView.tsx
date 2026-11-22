@@ -1705,7 +1705,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
 
                     {/* Input Bar for Comments */}
                     <div className="p-3 border-t border-border-divider bg-surface shrink-0">
-                      <div className="flex items-center gap-2 bg-surface-sunken rounded-md px-3 py-1 border border-border-subtle focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+                      <div className="flex items-center gap-2 bg-surface-sunken rounded-md px-3 py-1 border border-border-panel-divider focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all">
                         <input
                           type="text"
                           placeholder={t("wiki.notePlaceholder")}
@@ -1773,7 +1773,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="bg-surface rounded-xl shadow-xl border border-border-subtle max-w-2xl w-full flex flex-col relative overflow-hidden my-auto max-h-[90vh]"
+              className="bg-surface rounded-xl shadow-xl border border-border-panel-divider max-w-2xl w-full flex flex-col relative overflow-hidden my-auto max-h-[90vh]"
             >
               {/* Modal header decor */}
               <div className="bg-surface-sunken/80 px-5 py-3.5 border-b border-border-divider flex justify-between items-center select-none">
@@ -1813,7 +1813,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       if (!loading && editTitle.trim()) handleSave();
                     })}
                     placeholder={t("wiki.titlePlaceholder")}
-                    className="w-full bg-surface border border-border-subtle h-9 focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 rounded-md text-xs font-normal text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
+                    className="w-full bg-surface border border-border-panel-divider h-9 focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 rounded-md text-xs font-normal text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
                   />
                 </div>
 
@@ -1831,7 +1831,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
                     placeholder={t("wiki.summaryPlaceholder")}
-                    className="w-full bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 py-2 rounded-md text-xs font-normal text-content-body outline-none transition-all placeholder:text-content-subtle min-h-[100px] resize-y font-sans shadow-2xs"
+                    className="w-full bg-surface border border-border-panel-divider focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 py-2 rounded-md text-xs font-normal text-content-body outline-none transition-all placeholder:text-content-subtle min-h-[100px] resize-y font-sans shadow-2xs"
                   />
                 </div>
 
@@ -1848,7 +1848,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       options={documentTypes}
                       masterData={masterData}
                       className="w-full"
-                      buttonClassName="h-9 bg-surface rounded-md border border-border-subtle hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
+                      buttonClassName="h-9 bg-surface rounded-md border border-border-panel-divider hover:border-border-panel-divider shadow-2xs px-3 text-xs font-medium text-content-body"
                     />
                   </div>
 
@@ -1862,7 +1862,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       value={editLink}
                       onChange={(e) => setEditLink(e.target.value)}
                       placeholder={t("wiki.googleLinkPlaceholder")}
-                      className="w-full h-9 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 rounded-md text-xs font-normal text-content-body outline-none transition-all placeholder:text-content-subtle font-mono shadow-2xs"
+                      className="w-full h-9 bg-surface border border-border-panel-divider focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 rounded-md text-xs font-normal text-content-body outline-none transition-all placeholder:text-content-subtle font-mono shadow-2xs"
                     />
                   </div>
                 </div>

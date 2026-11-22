@@ -52,7 +52,7 @@ const Input = ({ value, onChange, placeholder, type = "text", className = "", ..
     value={value}
     onChange={onChange}
     placeholder={placeholder}
-    className={`w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle placeholder:font-normal focus:ring-4 focus:ring-primary/10 focus:border-primary focus:bg-surface outline-none transition-all ${className}`}
+    className={`w-full px-4 py-3 bg-surface-sunken border border-border-panel-divider rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle placeholder:font-normal focus:ring-4 focus:ring-primary/10 focus:border-primary focus:bg-surface outline-none transition-all ${className}`}
     {...props}
   />
 );
@@ -1300,7 +1300,7 @@ export const MasterDataPanel = ({
                     { id: "Standard", label: "Standard" },
                     { id: "Subtask", label: "Subtask" },
                   ]}
-                  buttonClassName="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm text-left font-normal text-content-strong"
+                  buttonClassName="w-full px-4 py-3 bg-surface border border-border-panel-divider rounded-xl text-sm text-left font-normal text-content-strong"
                 />
               </div>
             )}
@@ -1330,7 +1330,7 @@ export const MasterDataPanel = ({
                       { id: "In Progress", label: "In Progress" },
                       { id: "Done", label: "Done" },
                     ]}
-                    buttonClassName="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm text-left font-normal text-content-strong"
+                    buttonClassName="w-full px-4 py-3 bg-surface border border-border-panel-divider rounded-xl text-sm text-left font-normal text-content-strong"
                   />
                 </div>
                 <label className="flex items-center gap-2 ml-1 cursor-pointer">
@@ -1388,7 +1388,7 @@ export const MasterDataPanel = ({
                         setNewMasterColor("#" + val);
                       }
                     }}
-                    className="w-full h-12 px-3 bg-surface border border-border-subtle rounded-xl text-xs font-mono font-normal text-content-body outline-none focus:border-primary transition-all uppercase"
+                    className="w-full h-12 px-3 bg-surface border border-border-panel-divider rounded-xl text-xs font-mono font-normal text-content-body outline-none focus:border-primary transition-all uppercase"
                     placeholder="#3b82f6"
                   />
                 </div>
@@ -1444,7 +1444,7 @@ export const MasterDataPanel = ({
                 placeholder={t("master.searchIcon")}
                 value={iconSearch}
                 onChange={(e) => setIconSearch(e.target.value)}
-                className="w-full px-10 py-2.5 bg-surface border border-border-subtle rounded-xl text-xs font-normal text-content-body placeholder:text-content-subtle focus:outline-none focus:border-primary transition-all pl-10"
+                className="w-full px-10 py-2.5 bg-surface border border-border-panel-divider rounded-xl text-xs font-normal text-content-body placeholder:text-content-subtle focus:outline-none focus:border-primary transition-all pl-10"
               />
               <Search className="w-4 h-4 text-content-subtle absolute left-3.5 top-1/2 -translate-y-1/2" />
             </div>
@@ -1574,7 +1574,7 @@ export const MasterDataPanel = ({
                           setEditingMaster({ ...editingMaster, color: "#" + val });
                         }
                       }}
-                      className="w-full h-12 px-3 bg-surface border border-border-subtle rounded-xl text-xs font-mono font-medium text-content-body outline-none focus:border-primary transition-all uppercase"
+                      className="w-full h-12 px-3 bg-surface border border-border-panel-divider rounded-xl text-xs font-mono font-medium text-content-body outline-none focus:border-primary transition-all uppercase"
                       placeholder="#3b82f6"
                     />
                   </div>
@@ -1606,7 +1606,7 @@ export const MasterDataPanel = ({
                     { id: "Standard", label: "Standard" },
                     { id: "Subtask", label: "Subtask" },
                   ]}
-                  buttonClassName="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm text-left font-normal text-content-strong"
+                  buttonClassName="w-full px-4 py-3 bg-surface border border-border-panel-divider rounded-xl text-sm text-left font-normal text-content-strong"
                 />
               </div>
             )}
@@ -1684,7 +1684,7 @@ export const MasterDataPanel = ({
                   placeholder={t("master.searchIcon")}
                   value={editIconSearch}
                   onChange={(e) => setEditIconSearch(e.target.value)}
-                  className="w-full px-10 py-2.5 bg-surface border border-border-subtle rounded-xl text-xs font-normal text-content-body placeholder:text-content-subtle focus:outline-none focus:border-primary transition-all pl-10"
+                  className="w-full px-10 py-2.5 bg-surface border border-border-panel-divider rounded-xl text-xs font-normal text-content-body placeholder:text-content-subtle focus:outline-none focus:border-primary transition-all pl-10"
                 />
                 <Search className="w-4 h-4 text-content-subtle absolute left-3.5 top-1/2 -translate-y-1/2" />
               </div>
@@ -1758,7 +1758,7 @@ export const MasterDataPanel = ({
                 { id: "", label: t("master.selectProject") },
                 ...projects.map((p: any) => ({ id: p.id, label: p.name })),
               ]}
-              buttonClassName="w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm text-left font-normal text-content-strong"
+              buttonClassName="w-full px-4 py-3 bg-surface-sunken border border-border-panel-divider rounded-xl text-sm text-left font-normal text-content-strong"
             />
           </div>
 
@@ -1786,7 +1786,7 @@ export const MasterDataPanel = ({
               onChange={(e) => setNewModuleKeterangan(e.target.value)}
               placeholder={t("master.remarksPlaceholder")}
               rows={3}
-              className="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
+              className="w-full px-4 py-3 bg-surface border border-border-panel-divider rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
             />
           </div>
 
@@ -1828,7 +1828,7 @@ export const MasterDataPanel = ({
                 { id: "", label: t("master.pickProject") },
                 ...projects.map((p: any) => ({ id: p.id, label: p.name })),
               ]}
-              buttonClassName="w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm text-left font-normal text-content-strong"
+              buttonClassName="w-full px-4 py-3 bg-surface-sunken border border-border-panel-divider rounded-xl text-sm text-left font-normal text-content-strong"
             />
           </div>
 
@@ -1856,7 +1856,7 @@ export const MasterDataPanel = ({
               onChange={(e) => setEditingModuleKeterangan(e.target.value)}
               placeholder={t("master.remarksPlaceholder")}
               rows={3}
-              className="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
+              className="w-full px-4 py-3 bg-surface border border-border-panel-divider rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
             />
           </div>
 

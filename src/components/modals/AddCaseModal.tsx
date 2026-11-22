@@ -133,7 +133,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                   value={caseTitle}
                   onChange={(e) => onTitleChange(e.target.value)}
                   placeholder={t("testCase.caseTitlePlaceholder")}
-                  className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-normal text-content-body"
+                  className="w-full text-xs p-2.5 bg-surface-sunken border border-border-panel-divider rounded-md focus:border-primary focus:outline-none font-normal text-content-body"
                 />
               </div>
 
@@ -167,7 +167,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                   value={caseAssignedTo}
                   onChange={(e) => onAssignedToChange(e.target.value)}
                   placeholder="Contoh: dev@company.com"
-                  className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-normal text-content-body"
+                  className="w-full text-xs p-2.5 bg-surface-sunken border border-border-panel-divider rounded-md focus:border-primary focus:outline-none font-normal text-content-body"
                 />
               </div>
             </div>
@@ -183,7 +183,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                   value={caseSteps}
                   onChange={(e) => onStepsChange(e.target.value)}
                   placeholder={t("testCase.testStepsPlaceholder")}
-                  className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none resize-none font-normal text-content-body"
+                  className="w-full text-xs p-2.5 bg-surface-sunken border border-border-panel-divider rounded-md focus:border-primary focus:outline-none resize-none font-normal text-content-body"
                 />
               </div>
 
@@ -197,7 +197,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                   value={caseExpected}
                   onChange={(e) => onExpectedChange(e.target.value)}
                   placeholder={t("testCase.expectedPlaceholder")}
-                  className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-normal text-content-body"
+                  className="w-full text-xs p-2.5 bg-surface-sunken border border-border-panel-divider rounded-md focus:border-primary focus:outline-none font-normal text-content-body"
                 />
               </div>
             </div>
@@ -222,7 +222,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
             </button>
           </div>
 
-          <div className="border-2 border-dashed border-border-subtle hover:border-primary rounded-md p-8 text-center space-y-3 transition-colors bg-surface-sunken/50">
+          <div className="border-2 border-dashed border-border-panel-divider hover:border-primary rounded-md p-8 text-center space-y-3 transition-colors bg-surface-sunken/50">
             <Upload className="w-10 h-10 text-primary mx-auto" />
             <div>
               <p className="text-xs font-normal text-content-body">

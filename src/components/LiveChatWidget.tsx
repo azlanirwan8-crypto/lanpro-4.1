@@ -748,7 +748,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       placeholder={t("chat.searchChannel")}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-9 pr-3 py-1.5 bg-surface border border-border-subtle rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-orange-500/10 focus:border-orange-500 transition-all font-medium text-content-strong"
+                      className="w-full pl-9 pr-3 py-1.5 bg-surface border border-border-panel-divider rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-orange-500/10 focus:border-orange-500 transition-all font-medium text-content-strong"
                     />
                   </div>
                 </div>
@@ -1202,7 +1202,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     disabled={isUploading}
-                    className="flex-1 px-3 py-1.5 bg-surface-sunken border border-border-subtle rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-orange-500/10 focus:border-orange-500 transition-all font-medium text-content-strong disabled:opacity-50"
+                    className="flex-1 px-3 py-1.5 bg-surface-sunken border border-border-panel-divider rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-orange-500/10 focus:border-orange-500 transition-all font-medium text-content-strong disabled:opacity-50"
                   />
                   <button
                     type="submit"

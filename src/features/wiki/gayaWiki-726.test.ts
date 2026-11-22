@@ -160,7 +160,7 @@ describe("ritme dan chrome (#726)", () => {
     const s = isi(DAFTAR);
     expect(s).not.toMatch(/h-\[38px\]/);
     expect(s).toMatch(/buttonClassName="h-9 bg-surface rounded-md/);
-    expect(s).toMatch(/w-full h-9 bg-surface border border-border-subtle/);
+    expect(s).toMatch(/w-full h-9 bg-surface border border-border-panel-divider/);
   });
 
   it("tidak ada properti yang ditulis dua kali dengan varian sm: berbeda", () => {
@@ -174,7 +174,7 @@ describe("ritme dan chrome (#726)", () => {
 
   it("chrome modal ikut pola rumah: rounded-xl dan pemisah subtle", () => {
     const s = isi(DAFTAR);
-    expect(s).toContain("bg-surface rounded-xl shadow-xl border border-border-subtle max-w-2xl");
+    expect(s).toContain("bg-surface rounded-xl shadow-xl border border-border-panel-divider max-w-2xl");
     expect(s).not.toContain("border-b border-border-faint flex justify-between items-center");
     expect(s).not.toContain("border-t border-border-faint flex items-center justify-end");
   });

@@ -62,7 +62,7 @@ export const SystemConfigForm: React.FC = () => {
   };
 
   const inputStyle =
-    "w-full px-3 py-2 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-body outline-none transition-all placeholder:text-content-subtle shadow-2xs";
+    "w-full px-3 py-2 bg-surface border border-border-panel-divider focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-body outline-none transition-all placeholder:text-content-subtle shadow-2xs";
 
   if (isLoading) {
     return (

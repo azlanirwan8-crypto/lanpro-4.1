@@ -418,7 +418,7 @@ export const TeamManagementPanel = ({
                   options={roleFilterOptions}
                   masterData={masterData}
                   className="w-full"
-                  buttonClassName="h-8 bg-surface-sunken rounded-md border border-border-subtle hover:border-border-subtle px-2.5 text-xs font-medium text-content-body"
+                  buttonClassName="h-8 bg-surface-sunken rounded-md border border-border-panel-divider hover:border-border-panel-divider px-2.5 text-xs font-medium text-content-body"
                 />
               </div>
 
@@ -518,7 +518,7 @@ export const TeamManagementPanel = ({
                               options={memberRoleDropdownOptions}
                               masterData={masterData}
                               className="w-full"
-                              buttonClassName="h-7 bg-surface-sunken rounded border border-border-subtle hover:border-border-subtle px-1.5 md:px-2 text-[10px] md:text-xs font-medium text-content-body"
+                              buttonClassName="h-7 bg-surface-sunken rounded border border-border-panel-divider hover:border-border-panel-divider px-1.5 md:px-2 text-[10px] md:text-xs font-medium text-content-body"
                             />
                           </div>
                         ) : (
@@ -644,7 +644,7 @@ export const TeamManagementPanel = ({
                                   options={memberRoleDropdownOptions}
                                   masterData={masterData}
                                   className="w-full"
-                                  buttonClassName="h-7 bg-surface-sunken rounded border border-border-subtle hover:border-border-subtle px-2 text-xs font-medium text-content-body"
+                                  buttonClassName="h-7 bg-surface-sunken rounded border border-border-panel-divider hover:border-border-panel-divider px-2 text-xs font-medium text-content-body"
                                 />
                               </div>
                             ) : (
@@ -719,7 +719,7 @@ export const TeamManagementPanel = ({
             const modalCover = safeLocalStorage.getItem(`user_cover_${selectedUid}`);
             return (
               <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/40 backdrop-blur-xs">
-                <div className="bg-surface rounded-xl border border-border-subtle shadow-xl max-w-md w-full overflow-hidden text-left">
+                <div className="bg-surface rounded-xl border border-border-panel-divider shadow-xl max-w-md w-full overflow-hidden text-left">
                   {/* Modal Cover */}
                   <div
                     className="h-24 bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 p-4 flex justify-end relative bg-cover bg-center"

@@ -294,7 +294,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       placeholder={t("dbExplorer.queryPlaceholder")}
-                      className="w-full text-content-strong bg-surface border border-border-subtle rounded-md p-3 font-mono text-xs min-h-[90px] focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none resize-y"
+                      className="w-full text-content-strong bg-surface border border-border-panel-divider rounded-md p-3 font-mono text-xs min-h-[90px] focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none resize-y"
                     />
                     <button
                       onClick={() => handleRunQuery(query)}

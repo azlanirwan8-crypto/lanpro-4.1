@@ -379,7 +379,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                 placeholder={t("qaTable.searchScenario")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-7 pr-2.5 py-1 bg-surface-sunken border border-border-subtle/80 rounded-md text-xs font-normal text-content-body focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-colors w-full sm:w-48"
+                className="pl-7 pr-2.5 py-1 bg-surface-sunken border border-border-panel-divider/80 rounded-md text-xs font-normal text-content-body focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-colors w-full sm:w-48"
               />
             </div>
 
@@ -399,7 +399,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                 ]}
                 masterData={[]}
                 className="w-full"
-                buttonClassName="h-[30px] bg-surface-sunken rounded-md border border-border-subtle/80 hover:border-border-subtle px-2.5 text-xs font-medium text-content-body"
+                buttonClassName="h-[30px] bg-surface-sunken rounded-md border border-border-panel-divider/80 hover:border-border-panel-divider px-2.5 text-xs font-medium text-content-body"
               />
             </div>
           </div>
@@ -541,7 +541,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                       type="checkbox"
                       checked={isAllSelected}
                       onChange={() => handleToggleSelectAll(searchedCases)}
-                      className="rounded border-border-subtle text-primary focus:ring-primary cursor-pointer"
+                      className="rounded border-border-panel-divider text-primary focus:ring-primary cursor-pointer"
                     />
                   )}
                 </th>
@@ -591,7 +591,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => handleToggleSelectCase(tc.id)}
-                            className="rounded border-border-subtle text-primary focus:ring-primary cursor-pointer"
+                            className="rounded border-border-panel-divider text-primary focus:ring-primary cursor-pointer"
                           />
                         )}
                       </td>

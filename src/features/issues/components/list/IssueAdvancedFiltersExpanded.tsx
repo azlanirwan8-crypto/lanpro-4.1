@@ -348,7 +348,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               <LanproDatePicker
                 value={listFilterStartDate}
                 onChange={setListFilterStartDate}
-                buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-md px-2.5 h-9"
+                buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-panel-divider rounded-md px-2.5 h-9"
               />
             </div>
 
@@ -358,7 +358,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
                 value={listFilterEndDate}
                 onChange={setListFilterEndDate}
                 minDate={listFilterStartDate || undefined}
-                buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-md px-2.5 h-9"
+                buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-panel-divider rounded-md px-2.5 h-9"
               />
             </div>
           </div>

@@ -130,7 +130,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center p-4 z-[60]">
-      <div className="bg-surface rounded-lg shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] border border-border-subtle">
+      <div className="bg-surface rounded-lg shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] border border-border-panel-divider">
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-divider bg-surface-sunken/50 shrink-0">
           <h3 className="font-medium text-content-strong text-sm">
             {t("rakit.broadcastTemplateFor", { kanal: mode === "email" ? "Email" : "WhatsApp" })}
@@ -176,13 +176,13 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 onKeyDown={enterUntukSimpan(() => onSave(subject, body))}
-                className="w-full px-3 py-1.5 border border-border-subtle rounded-md shadow-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-mono text-xs bg-surface text-content-strong"
+                className="w-full px-3 py-1.5 border border-border-panel-divider rounded-md shadow-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-mono text-xs bg-surface text-content-strong"
                 placeholder={t("template.subjectPlaceholder")}
               />
             </div>
           )}
 
-          <div className="space-y-1 border border-border-subtle rounded-md overflow-hidden shadow-xs focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+          <div className="space-y-1 border border-border-panel-divider rounded-md overflow-hidden shadow-xs focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
             <div className="flex items-center gap-1 p-1.5 bg-surface-sunken border-b border-border-divider flex-wrap">
               <button
                 onClick={() => handleFormat("bold")}

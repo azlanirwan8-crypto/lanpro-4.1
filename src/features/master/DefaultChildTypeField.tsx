@@ -39,7 +39,7 @@ export const DefaultChildTypeField = ({
             .filter((d) => d.type === "issue_type" && d.id !== kecualiId)
             .map((d) => ({ id: d.code || d.label, label: d.label })),
         ]}
-        buttonClassName="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm text-left font-normal text-content-strong"
+        buttonClassName="w-full px-4 py-3 bg-surface border border-border-panel-divider rounded-xl text-sm text-left font-normal text-content-strong"
       />
     </div>
   );

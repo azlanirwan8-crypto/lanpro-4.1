@@ -104,7 +104,7 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({
             ]}
             masterData={[]}
             className="w-full"
-            buttonClassName="h-9 bg-surface-sunken rounded-md border border-border-subtle hover:border-border-subtle px-3 text-xs font-normal text-content-body"
+            buttonClassName="h-9 bg-surface-sunken rounded-md border border-border-panel-divider hover:border-border-panel-divider px-3 text-xs font-normal text-content-body"
           />
         </div>
         <div className="space-y-1">

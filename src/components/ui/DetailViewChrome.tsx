@@ -14,10 +14,10 @@ const btnBack =
   "inline-flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/15 border border-primary/20 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0 shadow-2xs";
 
 const btnIcon =
-  "p-1.5 text-content-muted hover:text-primary hover:bg-primary/10 rounded-md transition-all cursor-pointer border border-border-subtle bg-surface shadow-2xs";
+  "p-1.5 text-content-muted hover:text-primary hover:bg-primary/10 rounded-md transition-all cursor-pointer border border-border-panel-divider bg-surface shadow-2xs";
 
 const btnDanger =
-  "p-1.5 text-content-muted hover:text-danger-text hover:bg-danger/10 rounded-md transition-all cursor-pointer border border-border-subtle bg-surface shadow-2xs";
+  "p-1.5 text-content-muted hover:text-danger-text hover:bg-danger/10 rounded-md transition-all cursor-pointer border border-border-panel-divider bg-surface shadow-2xs";
 
 export type DetailViewChromeProps = {
   backLabel: string;

@@ -96,7 +96,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
               ]}
               masterData={[]}
               className="w-full"
-              buttonClassName="h-8 bg-surface-sunken/80 rounded-md border border-border-subtle hover:border-border-subtle px-2.5 text-xs font-normal text-content-body"
+              buttonClassName="h-8 bg-surface-sunken/80 rounded-md border border-border-panel-divider hover:border-border-panel-divider px-2.5 text-xs font-normal text-content-body"
             />
           </div>
 

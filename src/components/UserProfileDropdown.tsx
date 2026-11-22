@@ -115,7 +115,7 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
         open={isOpen}
         onClose={() => setIsOpen(false)}
         triggerRef={dropdownRef}
-        className="z-[44] w-auto min-w-52 max-w-[min(22rem,90vw)] bg-surface rounded-md shadow-soft-lg border border-border-subtle py-1 overflow-hidden origin-top-right"
+        className="z-[44] w-auto min-w-52 max-w-[min(22rem,90vw)] bg-surface rounded-md shadow-soft-lg border border-border-panel-divider py-1 overflow-hidden origin-top-right"
       >
         {/* Header Greeting ala Velzon (hanya Welcome nama lengkap, tanpa background/border tebal) */}
         <div className="px-4 pt-2.5 pb-1.5">

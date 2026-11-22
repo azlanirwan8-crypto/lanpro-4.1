@@ -259,7 +259,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
   };
 
   const inputStyle =
-    "w-full px-3 py-1.5 border border-border-subtle rounded-md text-xs font-medium outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all bg-surface text-content-strong shadow-2xs";
+    "w-full px-3 py-1.5 border border-border-panel-divider rounded-md text-xs font-medium outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all bg-surface text-content-strong shadow-2xs";
 
   return (
     <div className="space-y-4 relative">
@@ -275,7 +275,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
               { id: "flowkirim", label: "FlowKirim" },
               { id: "custom-http", label: t("whatsapp.customHttp") },
             ]}
-            buttonClassName="w-full px-3 py-1.5 border border-border-subtle rounded-md text-xs text-left font-medium bg-surface text-content-strong shadow-2xs"
+            buttonClassName="w-full px-3 py-1.5 border border-border-panel-divider rounded-md text-xs text-left font-medium bg-surface text-content-strong shadow-2xs"
           />
         </div>
 
@@ -359,7 +359,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
           <LanproTimePicker
             value={scheduleTime}
             onChange={(val) => setFormData({ ...formData, scheduleTime: val })}
-            buttonClassName="w-32 px-3 py-1.5 border border-border-subtle rounded-md text-xs text-left font-medium bg-surface text-content-strong shadow-2xs"
+            buttonClassName="w-32 px-3 py-1.5 border border-border-panel-divider rounded-md text-xs text-left font-medium bg-surface text-content-strong shadow-2xs"
           />
         </div>
       </div>
@@ -487,7 +487,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
 
       {isTestModalOpen && (
         <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-surface p-5 rounded-lg shadow-xl max-w-sm w-full space-y-3 border border-border-subtle">
+          <div className="bg-surface p-5 rounded-lg shadow-xl max-w-sm w-full space-y-3 border border-border-panel-divider">
             <h3 className="font-medium text-sm text-content-strong">
               {t("whatsapp.testConnection")}
             </h3>

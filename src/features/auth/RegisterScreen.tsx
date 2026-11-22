@@ -139,7 +139,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
               "w-full h-11 px-3.5 bg-surface border rounded-md focus:ring-2 transition-colors outline-none text-base font-normal text-content placeholder:text-content-muted",
               fieldErrors.name
                 ? "border-danger focus:ring-danger/20 focus:border-danger"
-                : "border-border-subtle focus:ring-primary/20 focus:border-primary"
+                : "border-border-panel-divider focus:ring-primary/20 focus:border-primary"
             )}
           />
           {fieldErrors.name && (
@@ -164,7 +164,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
               "w-full h-11 px-3.5 bg-surface border rounded-md focus:ring-2 transition-colors outline-none text-base font-normal text-content placeholder:text-content-muted",
               fieldErrors.email
                 ? "border-danger focus:ring-danger/20 focus:border-danger"
-                : "border-border-subtle focus:ring-primary/20 focus:border-primary"
+                : "border-border-panel-divider focus:ring-primary/20 focus:border-primary"
             )}
           />
           {fieldErrors.email && (
@@ -193,7 +193,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
               "w-full h-11 px-3.5 bg-surface border rounded-md focus:ring-2 transition-colors outline-none text-base font-normal text-content placeholder:text-content-muted",
               fieldErrors.username
                 ? "border-danger focus:ring-danger/20 focus:border-danger"
-                : "border-border-subtle focus:ring-primary/20 focus:border-primary"
+                : "border-border-panel-divider focus:ring-primary/20 focus:border-primary"
             )}
           />
           {fieldErrors.username && (
@@ -219,7 +219,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
                 "w-full h-11 pl-3.5 pr-10 bg-surface border rounded-md focus:ring-2 transition-colors outline-none text-base font-normal text-content placeholder:text-content-muted",
                 fieldErrors.password
                   ? "border-danger focus:ring-danger/20 focus:border-danger"
-                  : "border-border-subtle focus:ring-primary/20 focus:border-primary"
+                  : "border-border-panel-divider focus:ring-primary/20 focus:border-primary"
               )}
             />
             <button

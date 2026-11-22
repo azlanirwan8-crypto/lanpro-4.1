@@ -41,7 +41,7 @@ describe("#814 — pemicu dropdown polos di baris tabel isu", () => {
     const label = b.querySelector("span.capitalize")!;
 
     expect(token(b)).toContain("border-transparent");
-    expect(token(b)).not.toContain("border-border-subtle");
+    expect(token(b)).not.toContain("border-border-panel-divider");
     expect(b.className).toContain("hover:border-border-panel-divider");
     expect(b.className).toContain("text-[10px]");
     expect(label.className).toContain("uppercase");
@@ -57,7 +57,7 @@ describe("#814 — pemicu dropdown polos di baris tabel isu", () => {
     const b = tombol(container);
 
     expect(token(b)).toContain("border-transparent");
-    expect(token(b)).not.toContain("border-border-subtle");
+    expect(token(b)).not.toContain("border-border-panel-divider");
   });
 
   it("tanpa `polos` perilaku lama tetap: opsi berwarna berbingkai", () => {
@@ -68,7 +68,7 @@ describe("#814 — pemicu dropdown polos di baris tabel isu", () => {
     });
     const b = tombol(container);
 
-    expect(token(b)).toContain("border-border-subtle");
+    expect(token(b)).toContain("border-border-panel-divider");
     expect(token(b)).not.toContain("border-transparent");
   });
 
@@ -80,7 +80,7 @@ describe("#814 — pemicu dropdown polos di baris tabel isu", () => {
     });
     const b = tombol(container);
 
-    expect(token(b)).toContain("border-border-subtle");
+    expect(token(b)).toContain("border-border-panel-divider");
     expect(b.className).toContain("text-[10px]");
   });
 

@@ -65,7 +65,7 @@ export const WajibGantiKataSandiModal: React.FC<Props> = ({ onGanti, onKeluar })
       aria-modal="true"
       aria-labelledby="judul-wajib-ganti"
     >
-      <div className="bg-surface p-5 sm:p-6 rounded-lg shadow-xl w-full max-w-md border border-border-subtle text-left">
+      <div className="bg-surface p-5 sm:p-6 rounded-lg shadow-xl w-full max-w-md border border-border-panel-divider text-left">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-9 h-9 rounded-md bg-warning/10 border border-warning/30 flex items-center justify-center text-warning-text shrink-0">
             <KeyRound className="w-5 h-5" />

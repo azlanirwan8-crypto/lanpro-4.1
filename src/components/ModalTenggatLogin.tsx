@@ -98,7 +98,7 @@ export const ModalTenggatLogin: React.FC<Props> = ({ sudahLogin, abaikanPenjagaS
         role="dialog"
         aria-modal="true"
         aria-labelledby="tenggat-login-judul"
-        className="w-full max-w-md bg-surface rounded-lg shadow-soft-lg border border-border-subtle overflow-hidden"
+        className="w-full max-w-md bg-surface rounded-lg shadow-soft-lg border border-border-panel-divider overflow-hidden"
       >
         <div className="flex items-center gap-2 px-4 py-3 border-b border-border-faint">
           <CalendarClock className="w-4 h-4 shrink-0 text-content-subtle" />

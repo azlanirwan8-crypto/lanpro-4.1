@@ -61,7 +61,7 @@ interface FlowchartDocumentModalProps {
  *    berbeda dari kolom di sebelahnya tanpa ada yang menyentuhnya.
  */
 const KONTROL_DASAR =
-  "w-full text-left text-sm font-normal bg-surface border border-border-subtle rounded-lg px-3 text-content-strong placeholder:text-content-subtle focus:bg-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all";
+  "w-full text-left text-sm font-normal bg-surface border border-border-panel-divider rounded-lg px-3 text-content-strong placeholder:text-content-subtle focus:bg-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all";
 
 const KONTROL = `${KONTROL_DASAR} h-10`;
 
@@ -132,7 +132,7 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-      <div className="bg-surface border border-border-subtle w-full max-w-3xl rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[88vh] text-content-strong">
+      <div className="bg-surface border border-border-panel-divider w-full max-w-3xl rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[88vh] text-content-strong">
         <div className="px-6 py-4 bg-surface border-b border-border-divider flex justify-between items-center shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">

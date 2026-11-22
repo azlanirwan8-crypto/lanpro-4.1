@@ -67,7 +67,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
         options={daftar}
         disabled={disabled}
         buttonClassName={`w-full text-xs p-2.5 bg-surface-sunken border rounded-md text-left font-normal text-content-body ${
-          error ? "border-danger/30" : "border-border-subtle"
+          error ? "border-danger/30" : "border-border-panel-divider"
         } ${className}`}
       />
       {error && <p className="text-[11px] text-danger-text font-normal">{error}</p>}

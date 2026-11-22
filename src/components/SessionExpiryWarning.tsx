@@ -275,7 +275,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
               initial={{ scale: 0.95, opacity: 0, y: 15 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 15 }}
-              className="relative w-full max-w-md bg-surface rounded-lg border border-border-subtle shadow-xl overflow-hidden p-5 text-center"
+              className="relative w-full max-w-md bg-surface rounded-lg border border-border-panel-divider shadow-xl overflow-hidden p-5 text-center"
             >
               {/* Alert Icon & Ring */}
               <div className="mx-auto w-16 h-16 bg-rose-500/10 border border-rose-500/30 rounded-full flex items-center justify-center mb-4 text-rose-500 relative">

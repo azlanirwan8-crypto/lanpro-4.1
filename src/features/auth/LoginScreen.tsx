@@ -124,7 +124,7 @@ export const LoginScreen = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="surface-panel w-full max-w-md bg-surface rounded-2xl shadow-xl border border-border-subtle/80 p-8 sm:p-10 relative z-10 font-sans mx-auto"
+            className="surface-panel w-full max-w-md bg-surface rounded-2xl shadow-xl border border-border-panel-divider/80 p-8 sm:p-10 relative z-10 font-sans mx-auto"
           >
             {/* Velzon Card Header */}
             <div className="text-center space-y-1.5 mb-6">
@@ -154,7 +154,7 @@ export const LoginScreen = ({
                     "w-full h-11 px-3.5 bg-surface border rounded-md focus:ring-2 transition-colors outline-none text-base font-normal text-content placeholder:text-content-muted",
                     fieldErrors.username
                       ? "border-danger focus:ring-danger/20 focus:border-danger"
-                      : "border-border-subtle focus:ring-primary/20 focus:border-primary"
+                      : "border-border-panel-divider focus:ring-primary/20 focus:border-primary"
                   )}
                 />
                 {fieldErrors.username && (
@@ -194,7 +194,7 @@ export const LoginScreen = ({
                       "w-full h-11 pl-3.5 pr-11 bg-surface border rounded-md focus:ring-2 transition-colors outline-none text-base font-normal text-content placeholder:text-content-muted",
                       fieldErrors.password
                         ? "border-danger focus:ring-danger/20 focus:border-danger"
-                        : "border-border-subtle focus:ring-primary/20 focus:border-primary"
+                        : "border-border-panel-divider focus:ring-primary/20 focus:border-primary"
                     )}
                   />
                   <button

@@ -76,7 +76,7 @@ describe("ui bersih (#782)", () => {
     );
     const tombol = container.querySelector("button")!;
     expect(tombol.className).toContain("bg-surface");
-    expect(tombol.className).toContain("border-border-subtle");
+    expect(tombol.className).toContain("border-border-panel-divider");
     expect(tombol.className).not.toContain("label-chip");
     const titik = tombol.querySelector("[style*='background-color']");
     expect(titik).not.toBeNull();
