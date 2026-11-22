@@ -399,7 +399,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               setListFilterEndDate("");
               setListFilterOverdue(false);
             }}
-            className="px-3.5 h-9 bg-surface-muted hover:bg-surface-strong text-content-secondary rounded-md text-xs font-normal transition-all shrink-0 flex items-center justify-center gap-1.5 select-none cursor-pointer border border-border-subtle"
+            className="px-3.5 h-9 bg-surface-muted hover:bg-surface-strong text-content-secondary rounded-md text-xs font-normal transition-all shrink-0 flex items-center justify-center gap-1.5 select-none cursor-pointer border border-border-panel-divider"
             title={t("filters.clearAllFields")}
           >
             <X className="w-3.5 h-3.5" />

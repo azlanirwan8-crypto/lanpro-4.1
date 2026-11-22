@@ -277,7 +277,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                 fetchLogs();
               }}
               disabled={isRefreshing}
-              className="h-8 w-8 shrink-0 bg-surface hover:bg-surface-sunken border border-border-subtle/80 rounded-md text-content-secondary flex items-center justify-center shadow-2xs transition-all cursor-pointer disabled:opacity-50"
+              className="h-8 w-8 shrink-0 bg-surface hover:bg-surface-sunken border border-border-panel-divider/80 rounded-md text-content-secondary flex items-center justify-center shadow-2xs transition-all cursor-pointer disabled:opacity-50"
               title={t("audit.refreshLogs")}
             >
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
@@ -309,7 +309,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
               type="button"
               onClick={() => void loadNotifFailures()}
               disabled={notifFailLoading}
-              className="h-8 w-8 shrink-0 bg-surface hover:bg-surface-sunken border border-border-subtle/80 rounded-md text-content-secondary flex items-center justify-center cursor-pointer disabled:opacity-50"
+              className="h-8 w-8 shrink-0 bg-surface hover:bg-surface-sunken border border-border-panel-divider/80 rounded-md text-content-secondary flex items-center justify-center cursor-pointer disabled:opacity-50"
               title={t("audit.refreshLogs")}
             >
               <RefreshCw className={`w-3.5 h-3.5 ${notifFailLoading ? "animate-spin" : ""}`} />
@@ -439,7 +439,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                   >
                     {/* Log Unified Row Card */}
                     <div
-                      className="p-3.5 bg-surface border border-border-subtle/80 rounded-lg hover:border-primary/30 shadow-2xs transition-all cursor-pointer group flex items-start gap-3.5"
+                      className="p-3.5 bg-surface border border-border-panel-divider/80 rounded-lg hover:border-primary/30 shadow-2xs transition-all cursor-pointer group flex items-start gap-3.5"
                       onClick={() => setSelectedLog(log)}
                     >
                       {/* Action Type Icon Badge */}

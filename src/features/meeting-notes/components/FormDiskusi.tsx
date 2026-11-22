@@ -61,7 +61,7 @@ const tombolKelas = `${dasarIsian} min-h-11 text-left font-medium`;
  * font-medium`, primer di kanan), bukan teksnya — teksnya beda karena aksinya beda.
  */
 export const kakiBatalKelas =
-  "px-4 py-2 text-xs font-medium text-content-secondary hover:bg-surface-muted rounded-md border border-border-subtle bg-surface transition-all cursor-pointer shadow-2xs";
+  "px-4 py-2 text-xs font-medium text-content-secondary hover:bg-surface-muted rounded-md border border-border-panel-divider bg-surface transition-all cursor-pointer shadow-2xs";
 export const kakiSimpanKelas =
   "px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs disabled:opacity-50 cursor-pointer";
 

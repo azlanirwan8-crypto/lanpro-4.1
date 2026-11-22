@@ -678,7 +678,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                   scrollToDate(earliest, "smooth");
                   toast.success(t("toast.focusFirstTask"));
                 }}
-                className="flex items-center gap-1.5 px-2 md:px-2.5 py-1 bg-surface hover:bg-surface-muted text-content-body rounded-md text-xs font-medium shadow-2xs transition-all border border-border-subtle/80 cursor-pointer active:scale-95"
+                className="flex items-center gap-1.5 px-2 md:px-2.5 py-1 bg-surface hover:bg-surface-muted text-content-body rounded-md text-xs font-medium shadow-2xs transition-all border border-border-panel-divider/80 cursor-pointer active:scale-95"
                 title={t("roadmap.focusFirstTask")}
               >
                 <Target className="w-3.5 h-3.5 text-primary shrink-0" />
@@ -690,7 +690,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                   scrollToDate(new Date(), "smooth");
                   toast.success(t("toast.jumpToToday"));
                 }}
-                className="flex items-center gap-1.5 px-2 md:px-2.5 py-1 bg-surface hover:bg-surface-muted text-content-body rounded-md text-xs font-medium shadow-2xs transition-all border border-border-subtle/80 cursor-pointer active:scale-95"
+                className="flex items-center gap-1.5 px-2 md:px-2.5 py-1 bg-surface hover:bg-surface-muted text-content-body rounded-md text-xs font-medium shadow-2xs transition-all border border-border-panel-divider/80 cursor-pointer active:scale-95"
                 title={t("roadmap.jumpToday")}
               >
                 <Calendar className="w-3.5 h-3.5 text-success-text shrink-0" />
@@ -1297,7 +1297,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                                   setSelectedTaskForDetail(task);
                                   setIsTaskDetailModalOpen(true);
                                 }}
-                                className="absolute left-6 h-6 px-3 rounded-xl flex items-center bg-surface-sunken/60 border border-border-subtle border-dashed hover:border-primary hover:bg-surface group-hover/row:bg-surface text-[11px] font-medium text-content-subtle hover:text-primary hover:shadow-soft transition-all cursor-pointer gap-2"
+                                className="absolute left-6 h-6 px-3 rounded-xl flex items-center bg-surface-sunken/60 border border-border-panel-divider border-dashed hover:border-primary hover:bg-surface group-hover/row:bg-surface text-[11px] font-medium text-content-subtle hover:text-primary hover:shadow-soft transition-all cursor-pointer gap-2"
                                 aria-label={t("roadmap.notPlotted")}
                               >
                                 <span className="w-1.5 h-1.5 rounded-full bg-surface-marker group-hover/row:bg-primary/100 animate-pulse transition-colors" />

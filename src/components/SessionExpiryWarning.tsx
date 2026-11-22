@@ -338,7 +338,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
 
                 <button
                   onClick={() => onLogout(false)}
-                  className="w-full py-3.5 bg-surface-sunken hover:bg-surface-muted border border-border-subtle text-content-body rounded-xl text-sm font-medium active:scale-[0.99] transition-all"
+                  className="w-full py-3.5 bg-surface-sunken hover:bg-surface-muted border border-border-panel-divider text-content-body rounded-xl text-sm font-medium active:scale-[0.99] transition-all"
                 >
                   {t("session.logoutNow")}
                 </button>

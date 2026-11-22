@@ -1452,7 +1452,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 <div className="flex items-center gap-2">
                   <label
                     className={cn(
-                      "flex items-center gap-1.5 px-3.5 py-1.5 bg-surface-sunken/40 hover:bg-surface-sunken/60 text-content-inverse border border-border-subtle/30 rounded-full text-xs font-medium backdrop-blur-md transition cursor-pointer shadow-xs",
+                      "flex items-center gap-1.5 px-3.5 py-1.5 bg-surface-sunken/40 hover:bg-surface-sunken/60 text-content-inverse border border-border-panel-divider/30 rounded-full text-xs font-medium backdrop-blur-md transition cursor-pointer shadow-xs",
                       isUploadingCover && "opacity-60 pointer-events-none"
                     )}
                   >
@@ -2266,7 +2266,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                             onOpenTask?.(tItem as Task);
                                           }
                                         }}
-                                        className="flex items-center justify-between gap-3 p-2.5 bg-surface hover:bg-surface-muted/60 rounded-lg border border-border-subtle transition cursor-pointer"
+                                        className="flex items-center justify-between gap-3 p-2.5 bg-surface hover:bg-surface-muted/60 rounded-lg border border-border-panel-divider transition cursor-pointer"
                                       >
                                         <div className="flex items-center gap-2.5 min-w-0">
                                           <div className="w-4 h-4 rounded-full border-2 border-border-subtle shrink-0 flex items-center justify-center" />
@@ -2486,7 +2486,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     </div>
                     <button
                       type="button"
-                      className="w-8 h-8 rounded-full bg-surface border border-border-subtle flex items-center justify-center text-primary hover:bg-primary-surface hover:text-content-inverse transition shrink-0 cursor-pointer shadow-2xs"
+                      className="w-8 h-8 rounded-full bg-surface border border-border-panel-divider flex items-center justify-center text-primary hover:bg-primary-surface hover:text-content-inverse transition shrink-0 cursor-pointer shadow-2xs"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </button>
@@ -2692,7 +2692,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       <button
                         type="button"
                         onClick={exitEditMode}
-                        className="px-5 py-2.5 bg-surface-sunken/80 hover:bg-surface-muted text-content-body rounded-xl text-xs font-semibold border border-border-subtle transition cursor-pointer"
+                        className="px-5 py-2.5 bg-surface-sunken/80 hover:bg-surface-muted text-content-body rounded-xl text-xs font-semibold border border-border-panel-divider transition cursor-pointer"
                       >
                         {t("userDetail.cancel", "Cancel")}
                       </button>
@@ -2863,7 +2863,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         <button
                           type="button"
                           onClick={exitEditMode}
-                          className="px-5 py-2.5 bg-surface-sunken/80 hover:bg-surface-muted text-content-body rounded-xl text-xs font-semibold border border-border-subtle transition cursor-pointer"
+                          className="px-5 py-2.5 bg-surface-sunken/80 hover:bg-surface-muted text-content-body rounded-xl text-xs font-semibold border border-border-panel-divider transition cursor-pointer"
                         >
                           {t("userDetail.cancel", "Cancel")}
                         </button>

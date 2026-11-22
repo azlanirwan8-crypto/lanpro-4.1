@@ -185,7 +185,7 @@ export const PemilihJamak: React.FC<PemilihJamakProps> = ({
         onClick={() => setTerbuka((b) => !b)}
         aria-expanded={terbuka}
         className={cn(
-          "w-full min-w-0 flex items-center justify-between gap-1.5 text-left border border-border-subtle bg-surface text-content-body rounded-md shadow-2xs transition-colors cursor-pointer disabled:opacity-50 overflow-hidden",
+          "w-full min-w-0 flex items-center justify-between gap-1.5 text-left border border-border-panel-divider bg-surface text-content-body rounded-md shadow-2xs transition-colors cursor-pointer disabled:opacity-50 overflow-hidden",
           buttonClassName
         )}
       >

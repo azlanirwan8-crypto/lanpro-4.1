@@ -442,7 +442,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
           type="button"
           onClick={() => setIsTestModalOpen(true)}
           disabled={isTesting || isBroadcasting}
-          className="flex items-center justify-center gap-1.5 border border-border-subtle hover:bg-surface-sunken text-content-body px-3 py-2 sm:py-1.5 rounded-md text-xs font-medium disabled:opacity-50 transition cursor-pointer active:scale-95 shadow-2xs w-full sm:w-auto"
+          className="flex items-center justify-center gap-1.5 border border-border-panel-divider hover:bg-surface-sunken text-content-body px-3 py-2 sm:py-1.5 rounded-md text-xs font-medium disabled:opacity-50 transition cursor-pointer active:scale-95 shadow-2xs w-full sm:w-auto"
         >
           {isTesting ? (
             <Loader2 size={14} className="animate-spin shrink-0" />
@@ -456,7 +456,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
           type="button"
           onClick={handleBroadcastNow}
           disabled={isBroadcasting || isTesting}
-          className="flex items-center justify-center gap-1.5 border border-border-subtle hover:bg-surface-sunken text-content-body px-3 py-2 sm:py-1.5 rounded-md text-xs font-medium disabled:opacity-50 transition cursor-pointer active:scale-95 shadow-2xs w-full sm:w-auto"
+          className="flex items-center justify-center gap-1.5 border border-border-panel-divider hover:bg-surface-sunken text-content-body px-3 py-2 sm:py-1.5 rounded-md text-xs font-medium disabled:opacity-50 transition cursor-pointer active:scale-95 shadow-2xs w-full sm:w-auto"
         >
           {isBroadcasting ? (
             <Loader2 size={14} className="animate-spin shrink-0" />

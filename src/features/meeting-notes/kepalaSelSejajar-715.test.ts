@@ -123,15 +123,10 @@ describe("#715 — jumlah lebar kepala dan min-w wadah tidak boleh berbeda", () 
   });
 });
 
-describe("#715 — papan ikut keputusan garis #699 dan #678b", () => {
-  it("pemisah baris memakai garis setajam garis kontrol, bukan yang nyaris tak terlihat", () => {
-    // #699 mengukur `border-border-faint` hanya 1,096:1 terhadap putih, jadi
-    // baris papan ini mengalir satu sama lain. Daftar Isu sudah pindah lebih
-    // dulu; papan ini menyusul.
-    expect(baca(KEPALA)).toContain("border-b border-b-border-subtle");
-    // Pemisah KOLOM tetap faint (#678b): garis setajam kontrol di setiap kolom
-    // mengubah tabel menjadi kisi.
-    expect(baca(KEPALA)).toContain("border-r border-r-border-faint");
+describe("#862 garis papan diskusi", () => {
+  it("memakai token panel pada pemisah baris dan kolom", () => {
+    expect(baca(KEPALA)).toContain("border-b border-b-border-panel-divider");
+    expect(baca(KEPALA)).toContain("border-r border-r-border-panel-divider");
   });
 
   it("warna garis ditulis PER SISI, bukan dua warna untuk semua sisi", () => {
@@ -139,8 +134,8 @@ describe("#715 — papan ikut keputusan garis #699 dan #678b", () => {
     // bekerja: keduanya mengatur `border-color` untuk semua sisi dan pemenangnya
     // ditentukan urutan stylesheet, bukan maksud penulisnya.
     const sel = /export const SEL =\s*\n?\s*"([^"]+)"/.exec(baca(KEPALA))![1];
-    expect(sel).toContain("border-b-border-subtle");
-    expect(sel).toContain("border-r-border-faint");
+    expect(sel).toContain("border-b-border-panel-divider");
+    expect(sel).toContain("border-r-border-panel-divider");
     // Yang dilarang adalah bentuk SEMUA SISI: `border-border-<token>`. Perlu
     // awalan "border-" yang berdiri sendiri, karena kelas per-sisi yang ditulis
     // di atas juga memuat nama tokennya — dan itu justru yang kita mau.

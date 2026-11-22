@@ -228,7 +228,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                   </span>
                   <button
                     onClick={releaseLockManually}
-                    className="ml-1 px-2 py-1 bg-surface hover:bg-surface-sunken text-content-body text-[10px] font-normal uppercase tracking-normal rounded-md transition-all cursor-pointer border border-border-subtle"
+                    className="ml-1 px-2 py-1 bg-surface hover:bg-surface-sunken text-content-body text-[10px] font-normal uppercase tracking-normal rounded-md transition-all cursor-pointer border border-border-panel-divider"
                   >
                     {t("qaTop.unlockNow")}
                   </button>
@@ -841,7 +841,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                 type="button"
                 onClick={() => setCasesPage(Math.max(1, casesPage - 1))}
                 disabled={casesPage <= 1}
-                className="px-2 py-1 rounded border border-border-subtle disabled:opacity-40"
+                className="px-2 py-1 rounded border border-border-panel-divider disabled:opacity-40"
               >
                 ‹
               </button>
@@ -852,7 +852,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                 type="button"
                 onClick={() => setCasesPage(Math.min(totalPages, casesPage + 1))}
                 disabled={casesPage >= totalPages}
-                className="px-2 py-1 rounded border border-border-subtle disabled:opacity-40"
+                className="px-2 py-1 rounded border border-border-panel-divider disabled:opacity-40"
               >
                 ›
               </button>

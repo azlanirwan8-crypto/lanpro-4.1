@@ -1027,7 +1027,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           type="button"
                           data-testid="wiki-coba-lgi"
                           onClick={() => fetchDocuments({ force: true })}
-                          className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border-subtle bg-surface text-xs font-medium text-content-strong hover:bg-surface-sunken cursor-pointer"
+                          className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border-panel-divider bg-surface text-xs font-medium text-content-strong hover:bg-surface-sunken cursor-pointer"
                         >
                           {t("wiki.retry")}
                         </button>
@@ -1222,7 +1222,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-body hover:bg-surface-muted rounded-md text-[11px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
+                  className="px-3 py-1.5 bg-surface border border-border-panel-divider text-content-body hover:bg-surface-muted rounded-md text-[11px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" /> {t("wiki.previous")}
                 </button>
@@ -1232,7 +1232,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-body hover:bg-surface-muted rounded-md text-[11px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
+                  className="px-3 py-1.5 bg-surface border border-border-panel-divider text-content-body hover:bg-surface-muted rounded-md text-[11px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
                 >
                   {t("wiki.next")} <ChevronRight className="w-3.5 h-3.5" />
                 </button>
@@ -1380,7 +1380,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           target="_blank"
                           rel="noopener noreferrer"
                           title={t("wiki.linkBlockedHint")}
-                          className="inline-flex items-center gap-1.5 px-2 py-1 text-[10px] font-normal uppercase tracking-normal rounded-md border border-border-subtle text-content-muted hover:text-content-strong hover:bg-surface-sunken transition-colors whitespace-nowrap"
+                          className="inline-flex items-center gap-1.5 px-2 py-1 text-[10px] font-normal uppercase tracking-normal rounded-md border border-border-panel-divider text-content-muted hover:text-content-strong hover:bg-surface-sunken transition-colors whitespace-nowrap"
                         >
                           <ExternalLink className="w-3 h-3" />
                           {t("wiki.openNewTab")}
@@ -1429,7 +1429,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
 
                               <button
                                 onClick={() => handleDownload(activeDoc.id, activeDoc.fileName)}
-                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-surface hover:bg-surface-sunken text-content-body font-normal text-[11px] uppercase tracking-normal border border-border-subtle rounded-md shadow-2xs transition-all cursor-pointer whitespace-nowrap"
+                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-surface hover:bg-surface-sunken text-content-body font-normal text-[11px] uppercase tracking-normal border border-border-panel-divider rounded-md shadow-2xs transition-all cursor-pointer whitespace-nowrap"
                               >
                                 <Download className="w-3 h-3 text-primary" />
                                 {t("wiki.downloadPdf")}
@@ -1977,7 +1977,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
               <div className="px-5 py-3.5 bg-surface-sunken border-t border-border-divider flex items-center justify-end gap-2.5 shrink-0 select-none rounded-b-xl">
                 <button
                   onClick={() => setShowFormModal(false)}
-                  className="px-4 py-2 bg-surface hover:bg-surface-muted border border-border-subtle text-content-secondary hover:text-content rounded-md text-xs font-medium transition-all cursor-pointer shadow-2xs"
+                  className="px-4 py-2 bg-surface hover:bg-surface-muted border border-border-panel-divider text-content-secondary hover:text-content rounded-md text-xs font-medium transition-all cursor-pointer shadow-2xs"
                 >
                   {t("wiki.cancel")}
                 </button>

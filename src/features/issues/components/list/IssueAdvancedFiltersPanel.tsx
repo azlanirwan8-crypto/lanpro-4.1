@@ -144,7 +144,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             type="button"
             onClick={() => setIsFiltersPanelOpen((prev) => !prev)}
             className={cn(
-              "flex items-center justify-center gap-1.5 p-2 sm:px-3.5 sm:py-2 bg-surface border border-border-subtle/80 rounded-md text-content-body hover:text-primary hover:border-primary/40 transition-all text-xs font-medium shadow-xs select-none shrink-0 cursor-pointer",
+              "flex items-center justify-center gap-1.5 p-2 sm:px-3.5 sm:py-2 bg-surface border border-border-panel-divider/80 rounded-md text-content-body hover:text-primary hover:border-primary/40 transition-all text-xs font-medium shadow-xs select-none shrink-0 cursor-pointer",
               isFiltersPanelOpen &&
                 "bg-primary-surface/10 border-primary/30 text-primary hover:bg-primary-surface/15"
             )}

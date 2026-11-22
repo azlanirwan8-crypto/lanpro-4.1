@@ -15,7 +15,7 @@ type SuiteProps = { suite: QATestSuite; onSaved: () => Promise<void> };
 const categories = ["all", "document", "meeting", "flowchart", "issue"] as const;
 const keyOf = (source: QAGenerationSource) => source.kind + ":" + source.id;
 const secondary =
-  "rounded-md border border-border-subtle px-3 py-2 text-sm hover:bg-surface-muted disabled:opacity-50";
+  "rounded-md border border-border-panel-divider px-3 py-2 text-sm hover:bg-surface-muted disabled:opacity-50";
 const primary = "btn-primary rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50";
 
 export function QAGeneration({

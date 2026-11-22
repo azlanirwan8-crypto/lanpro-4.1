@@ -722,7 +722,7 @@ export function DashboardView(props: DashboardViewProps) {
               type="button"
               data-testid="dashboard-coba-lgi"
               onClick={() => props.fetchTasks?.()}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border-subtle bg-surface text-xs font-medium text-content-strong hover:bg-surface-muted cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border-panel-divider bg-surface text-xs font-medium text-content-strong hover:bg-surface-muted cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               {t("dashboard.retry")}

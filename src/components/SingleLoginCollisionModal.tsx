@@ -91,7 +91,7 @@ export const SingleLoginCollisionModal: React.FC<Props> = ({
             <button
               onClick={onClose}
               disabled={isLoading}
-              className="flex-1 px-4 py-2.5 bg-surface border border-border-subtle text-content-secondary rounded-xl font-medium text-sm hover:bg-surface-sunken transition-colors disabled:opacity-50"
+              className="flex-1 px-4 py-2.5 bg-surface border border-border-panel-divider text-content-secondary rounded-xl font-medium text-sm hover:bg-surface-sunken transition-colors disabled:opacity-50"
             >
               {t("collision.cancel")}
             </button>

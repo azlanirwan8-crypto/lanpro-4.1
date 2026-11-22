@@ -90,9 +90,9 @@ export const Button = ({
     "focus-visible:ring-2 focus-visible:ring-primary/25 active:scale-[0.98] cursor-pointer shadow-xs border";
 
   const sizes: any = {
-    sm: "px-3 py-1.5 h-8 text-xs",
-    md: "px-4 py-2 h-9 text-xs sm:text-[13px]",
-    lg: "px-5 py-2.5 h-11 text-sm",
+    sm: "px-3 py-1.5 min-h-8 text-xs",
+    md: "px-4 py-2 min-h-9 text-xs sm:text-[13px]",
+    lg: "px-5 py-2.5 min-h-11 text-sm",
   };
 
   const variants: any = {
@@ -107,7 +107,7 @@ export const Button = ({
     ghost:
       "bg-transparent text-content-secondary hover:bg-surface-sunken border-transparent shadow-none",
     outline:
-      "bg-surface text-content-strong hover:bg-surface-sunken border-border-subtle shadow-none",
+      "bg-surface text-content-strong hover:bg-surface-sunken border-border-panel-divider shadow-none",
   };
 
   return (
@@ -119,7 +119,7 @@ export const Button = ({
       type="button"
       {...props}
     >
-      <span>{children}</span>
+      <span className="inline-flex min-w-0 items-center justify-center gap-[inherit] [&>svg]:shrink-0">{children}</span>
     </button>
   );
 };

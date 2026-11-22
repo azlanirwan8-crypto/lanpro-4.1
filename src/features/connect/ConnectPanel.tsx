@@ -238,7 +238,7 @@ export const ConnectPanel = ({ hideHeader }: { hideHeader?: boolean } = {}) => {
                 <button
                   type="submit"
                   disabled={loading || saveLoading}
-                  className="bg-surface-muted hover:bg-surface-strong text-content-body border border-border-subtle font-medium py-2 px-4 rounded-md transition-all flex items-center justify-center text-xs cursor-pointer disabled:opacity-50"
+                  className="bg-surface-muted hover:bg-surface-strong text-content-body border border-border-panel-divider font-medium py-2 px-4 rounded-md transition-all flex items-center justify-center text-xs cursor-pointer disabled:opacity-50"
                 >
                   {loading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

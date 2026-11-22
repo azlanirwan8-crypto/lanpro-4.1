@@ -79,10 +79,10 @@ describe("#707 — kepala tabel melekat", () => {
     /* #715 — dua garis ini sekarang berwarna BERBEDA per sisi, mengikuti keputusan
      * #699 (pemisah baris harus terbaca: `border-border-faint` hanya 1,096:1
      * terhadap putih) dan #678b (pemisah kolom harus tipis, kalau tidak tabel
-     * jadi kisi). Bentuknya `border-b-border-subtle` dan `border-r-border-faint`;
+     * jadi kisi). Bentuknya `border-b-border-panel-divider` dan `border-r-border-panel-divider`;
      * `border-border-*` tidak bisa dipakai karena ia mengatur semua sisi
      * sekaligus dan pemenangnya ditentukan urutan stylesheet. */
-    expect(isi).toContain("border-b border-b-border-subtle border-r border-r-border-faint");
+    expect(isi).toContain("border-b border-b-border-panel-divider border-r border-r-border-panel-divider");
     // `border-separate` (syarat garis kepala ikut melekat) membuat border pada
     // baris tidak digambar — jadi `divide-y` di tbody menghasilkan nol garis.
     // Pemisah baris karenanya hidup di SEL, yang dipakai baris data.

@@ -398,7 +398,7 @@ export const TeamManagementPanel = ({
           </div>
 
           {/* Filter & View Mode Control Bar — #333: wrap rapat di HP */}
-          <div className="bg-surface p-2.5 md:p-3.5 rounded-lg border border-border-subtle/80 shadow-2xs flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-3">
+          <div className="bg-surface p-2.5 md:p-3.5 rounded-lg border border-border-panel-divider/80 shadow-2xs flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-3">
             <div className="relative flex-1 w-full min-w-0">
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-content-subtle" />
               <input
@@ -423,7 +423,7 @@ export const TeamManagementPanel = ({
               </div>
 
               {/* Grid vs List View Mode Buttons */}
-              <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80">
+              <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-panel-divider/80">
                 <button
                   onClick={() => setViewMode("grid")}
                   className={`min-h-11 min-w-11 inline-flex items-center justify-center rounded transition-all ${viewMode === "grid" ? "bg-primary-surface text-content-inverse shadow-2xs" : "text-content-muted hover:text-content-strong"}`}
@@ -442,7 +442,7 @@ export const TeamManagementPanel = ({
 
               <button
                 onClick={handleExportTeamCSV}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-surface-muted hover:bg-surface-strong text-content-body border border-border-subtle rounded-md text-xs font-medium shadow-2xs transition-all cursor-pointer shrink-0"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-surface-muted hover:bg-surface-strong text-content-body border border-border-panel-divider rounded-md text-xs font-medium shadow-2xs transition-all cursor-pointer shrink-0"
                 title={t("team.exportCsv")}
               >
                 <Download className="w-3.5 h-3.5" />
@@ -477,7 +477,7 @@ export const TeamManagementPanel = ({
                 return (
                   <div
                     key={person.uid || i}
-                    className="bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden flex flex-col hover:border-indigo-500/30 transition-all duration-200 group min-w-0"
+                    className="bg-surface rounded-lg border border-border-panel-divider/80 shadow-2xs overflow-hidden flex flex-col hover:border-indigo-500/30 transition-all duration-200 group min-w-0"
                   >
                     {/* Banner — lebih pendek di HP (#333) */}
                     <div
@@ -550,7 +550,7 @@ export const TeamManagementPanel = ({
                       <div className="flex items-center gap-1 md:gap-2">
                         <button
                           onClick={() => setSelectedProfileUser(person)}
-                          className="flex-1 py-1.5 md:py-2 bg-surface-muted hover:bg-indigo-500/10 hover:text-indigo-600 text-content-body text-[10px] md:text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer truncate px-1"
+                          className="flex-1 py-1.5 md:py-2 bg-surface-muted hover:bg-indigo-500/10 hover:text-indigo-600 text-content-body text-[10px] md:text-xs font-medium rounded-md transition-colors border border-border-panel-divider/70 shadow-2xs cursor-pointer truncate px-1"
                         >
                           {t("team.viewProfile")}
                         </button>
@@ -562,7 +562,7 @@ export const TeamManagementPanel = ({
                               onClick={() => setMemberToRemove(person)}
                               title={t("team.removeMember")}
                               aria-label={t("team.removeMember")}
-                              className="p-1.5 md:p-2 bg-surface-muted hover:bg-rose-500/10 hover:text-rose-600 text-content-muted text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer shrink-0"
+                              className="p-1.5 md:p-2 bg-surface-muted hover:bg-rose-500/10 hover:text-rose-600 text-content-muted text-xs font-medium rounded-md transition-colors border border-border-panel-divider/70 shadow-2xs cursor-pointer shrink-0"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -577,7 +577,7 @@ export const TeamManagementPanel = ({
 
           {/* List View Mode - Sleek Table / Cards */}
           {viewMode === "list" && (
-            <div className="surface-panel bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden">
+            <div className="surface-panel bg-surface rounded-lg border border-border-panel-divider/80 shadow-2xs overflow-hidden">
               <div className="overflow-x-auto">
                 <ResponsiveTable className="w-full text-left" scroll={false}>
                   <thead>
@@ -677,7 +677,7 @@ export const TeamManagementPanel = ({
                             <div className="flex items-center justify-end gap-2">
                               <button
                                 onClick={() => setSelectedProfileUser(person)}
-                                className="px-3 py-1 bg-surface-muted hover:bg-indigo-500/10 hover:text-indigo-600 text-content-body text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer"
+                                className="px-3 py-1 bg-surface-muted hover:bg-indigo-500/10 hover:text-indigo-600 text-content-body text-xs font-medium rounded-md transition-colors border border-border-panel-divider/70 shadow-2xs cursor-pointer"
                               >
                                 {t("teamPanel.viewProfile")}
                               </button>
@@ -689,7 +689,7 @@ export const TeamManagementPanel = ({
                                     onClick={() => setMemberToRemove(person)}
                                     title={t("team.removeMember")}
                                     aria-label={t("team.removeMember")}
-                                    className="p-1.5 bg-surface-muted hover:bg-rose-500/10 hover:text-rose-600 text-content-muted text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer"
+                                    className="p-1.5 bg-surface-muted hover:bg-rose-500/10 hover:text-rose-600 text-content-muted text-xs font-medium rounded-md transition-colors border border-border-panel-divider/70 shadow-2xs cursor-pointer"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
@@ -706,7 +706,7 @@ export const TeamManagementPanel = ({
           )}
 
           {filteredPeople.length === 0 && (
-            <div className="bg-surface rounded-lg border border-border-subtle/80 p-12 text-center text-content-subtle text-xs font-medium">
+            <div className="bg-surface rounded-lg border border-border-panel-divider/80 p-12 text-center text-content-subtle text-xs font-medium">
               {t("teamPanel.noMatch")}
             </div>
           )}
@@ -753,7 +753,7 @@ export const TeamManagementPanel = ({
                       {selectedProfileUser.email || "@" + selectedProfileUser.uid}
                     </p>
 
-                    <div className="mt-4 p-3 bg-surface-sunken rounded-lg border border-border-subtle/80 space-y-2">
+                    <div className="mt-4 p-3 bg-surface-sunken rounded-lg border border-border-panel-divider/80 space-y-2">
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-content-subtle font-medium">
                           {t("teamPanel.projectRole")}
@@ -788,7 +788,7 @@ export const TeamManagementPanel = ({
                         {getUserTasks(selectedProfileUser).map((t) => (
                           <div
                             key={t.id}
-                            className="p-2 bg-surface rounded border border-border-subtle/80 text-xs flex items-center justify-between"
+                            className="p-2 bg-surface rounded border border-border-panel-divider/80 text-xs flex items-center justify-between"
                           >
                             <div className="flex items-center gap-2 truncate">
                               <span className="font-mono text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-1 rounded">
@@ -814,7 +814,7 @@ export const TeamManagementPanel = ({
                     <div className="mt-6 flex justify-end">
                       <button
                         onClick={() => setSelectedProfileUser(null)}
-                        className="px-4 py-1.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium rounded-md transition-colors border border-border-subtle cursor-pointer"
+                        className="px-4 py-1.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium rounded-md transition-colors border border-border-panel-divider cursor-pointer"
                       >
                         {t("teamPanel.close")}
                       </button>

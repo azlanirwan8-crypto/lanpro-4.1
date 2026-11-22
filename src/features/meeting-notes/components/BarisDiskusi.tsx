@@ -210,7 +210,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
               "inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-md text-[10px] leading-none font-normal transition-all cursor-pointer border shadow-2xs active:scale-95",
               jumlahKomentar > 0
                 ? "bg-primary/10 hover:bg-primary/15 text-primary border-primary/20"
-                : "bg-surface-sunken hover:bg-surface-muted text-content-subtle border-border-subtle/60"
+                : "bg-surface-sunken hover:bg-surface-muted text-content-subtle border-border-panel-divider/60"
             )}
             title={t("discussion.openThread")}
           >
@@ -335,7 +335,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
             );
           })}
           {p.fitur ? (
-            <span className="px-2 py-0.5 rounded-md text-[10px] leading-snug font-normal bg-surface-sunken text-content-body border border-border-subtle break-words">
+            <span className="px-2 py-0.5 rounded-md text-[10px] leading-snug font-normal bg-surface-sunken text-content-body border border-border-panel-divider break-words">
               {(() => {
                 const meta = masterData.find(
                   (m) =>
@@ -459,7 +459,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
                 target="_blank"
                 rel="noopener noreferrer"
                 title={b.name || b.originalName || ""}
-                className="inline-flex items-center gap-1 max-w-full px-2 py-0.5 rounded-md text-[10px] leading-snug font-normal bg-surface-sunken text-content-body border border-border-subtle break-all"
+                className="inline-flex items-center gap-1 max-w-full px-2 py-0.5 rounded-md text-[10px] leading-snug font-normal bg-surface-sunken text-content-body border border-border-panel-divider break-all"
               >
                 <IkonGambar className="w-3 h-3 shrink-0 text-content-subtle" />
                 <span className="break-words">{b.name || b.originalName || b.fileRef}</span>
@@ -472,7 +472,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
                 target="_blank"
                 rel="noopener noreferrer"
                 title={b.name || b.originalName || ""}
-                className="block w-10 h-10 shrink-0 rounded-md border border-border-subtle overflow-hidden bg-surface-sunken"
+                className="block w-10 h-10 shrink-0 rounded-md border border-border-panel-divider overflow-hidden bg-surface-sunken"
               >
                 <img
                   src={b.url || ""}

@@ -455,7 +455,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
               type="button"
               data-testid="isu-coba-lgi"
               onClick={cobaMuatUlang}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border-subtle bg-surface text-xs font-medium text-content-strong hover:bg-surface-muted cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border-panel-divider bg-surface text-xs font-medium text-content-strong hover:bg-surface-muted cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               {t("issues.retry")}
@@ -582,7 +582,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                                     type="button"
                                     data-testid="isu-ke-halaman-pertama"
                                     onClick={() => effectiveSetListPage(1)}
-                                    className="px-3 py-1.5 rounded-md border border-border-subtle bg-surface text-[11px] font-medium text-content-strong hover:bg-surface-muted cursor-pointer"
+                                    className="px-3 py-1.5 rounded-md border border-border-panel-divider bg-surface text-[11px] font-medium text-content-strong hover:bg-surface-muted cursor-pointer"
                                   >
                                     {t("issues.backToFirstPage")}
                                   </button>

@@ -1010,7 +1010,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
           <button
             onClick={() => setShowFeedbackModal(true)}
-            className="px-3 py-1.5 bg-surface hover:bg-surface-muted border border-border-subtle text-content-body text-xs font-medium rounded-md transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs shrink-0"
+            className="px-3 py-1.5 bg-surface hover:bg-surface-muted border border-border-panel-divider text-content-body text-xs font-medium rounded-md transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs shrink-0"
             title={t("aiMeeting.giveFeedbackOnMinuteQuality")}
           >
             <Brain className="w-3.5 h-3.5 text-primary" />{" "}
@@ -1129,7 +1129,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             setEditedTranscriptText(transcript);
                             setIsEditingTranscript(true);
                           }}
-                          className="px-3 py-1.5 bg-surface-muted hover:bg-primary/10 hover:text-primary text-content-body text-xs font-medium rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-xs border border-border-subtle/60 hover:border-primary/20"
+                          className="px-3 py-1.5 bg-surface-muted hover:bg-primary/10 hover:text-primary text-content-body text-xs font-medium rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-xs border border-border-panel-divider/60 hover:border-primary/20"
                         >
                           <Pencil className="w-3.5 h-3.5" />
                           {t("aiMeeting.editReanalyse")}
@@ -1158,7 +1158,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         <div className="flex items-center justify-end gap-3 pt-2">
                           <button
                             onClick={() => setIsEditingTranscript(false)}
-                            className="px-4 py-2.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs rounded-xl border border-border-subtle/60 transition-all cursor-pointer"
+                            className="px-4 py-2.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs rounded-xl border border-border-panel-divider/60 transition-all cursor-pointer"
                           >
                             {t("aiMeeting.cancel")}
                           </button>
@@ -1439,7 +1439,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     ) : (
                       <div
                         onClick={() => fileInputRef.current?.click()}
-                        className="border-2 border-dashed border-border-subtle rounded-xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary hover:bg-primary/10 transition-all text-content-muted hover:text-primary h-full min-h-[160px]"
+                        className="border-2 border-dashed border-border-panel-divider rounded-xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary hover:bg-primary/10 transition-all text-content-muted hover:text-primary h-full min-h-[160px]"
                       >
                         <input
                           type="file"
@@ -1472,7 +1472,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
                     <div
                       onClick={() => manuscriptInputRef.current?.click()}
-                      className="border-2 border-dashed border-border-subtle rounded-xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary hover:bg-primary/10 transition-all text-content-muted hover:text-primary h-full min-h-[160px]"
+                      className="border-2 border-dashed border-border-panel-divider rounded-xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary hover:bg-primary/10 transition-all text-content-muted hover:text-primary h-full min-h-[160px]"
                     >
                       <input
                         type="file"
@@ -1748,7 +1748,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             <button
                               onClick={() => handleImportSingle(item, index)}
                               disabled={isImporting}
-                              className="px-3.5 py-2.5 bg-surface-sunken hover:bg-primary/10 border border-border-subtle hover:border-primary/20 text-content-body hover:text-primary disabled:opacity-50 text-xs font-medium rounded-xl transition-all flex items-center gap-1 cursor-pointer"
+                              className="px-3.5 py-2.5 bg-surface-sunken hover:bg-primary/10 border border-border-panel-divider hover:border-primary/20 text-content-body hover:text-primary disabled:opacity-50 text-xs font-medium rounded-xl transition-all flex items-center gap-1 cursor-pointer"
                             >
                               {isImporting ? (
                                 <>

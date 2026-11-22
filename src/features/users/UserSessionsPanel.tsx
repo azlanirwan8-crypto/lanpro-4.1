@@ -391,7 +391,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
               <button
                 onClick={() => fetchSessions()}
                 disabled={loading}
-                className="shrink-0 flex items-center gap-1.5 px-2.5 py-2 text-xs font-semibold text-content-strong bg-surface-sunken hover:bg-surface-strong border border-border-subtle rounded-lg transition-all shadow-xs disabled:opacity-50"
+                className="shrink-0 flex items-center gap-1.5 px-2.5 py-2 text-xs font-semibold text-content-strong bg-surface-sunken hover:bg-surface-strong border border-border-panel-divider rounded-lg transition-all shadow-xs disabled:opacity-50"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
                 <span className="hidden sm:inline">{t("sessionMonitor.refresh", "Segarkan")}</span>
@@ -764,7 +764,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1 || loading}
-                className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-content-strong bg-surface hover:bg-surface-hover border border-border-subtle rounded-lg disabled:opacity-40 transition-all shadow-xs"
+                className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-content-strong bg-surface hover:bg-surface-hover border border-border-panel-divider rounded-lg disabled:opacity-40 transition-all shadow-xs"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
                 <span>{t("sessionMonitor.prev", "Sebelumnya")}</span>
@@ -777,7 +777,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages || loading}
-                className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-content-strong bg-surface hover:bg-surface-hover border border-border-subtle rounded-lg disabled:opacity-40 transition-all shadow-xs"
+                className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-content-strong bg-surface hover:bg-surface-hover border border-border-panel-divider rounded-lg disabled:opacity-40 transition-all shadow-xs"
               >
                 <span>{t("sessionMonitor.next", "Berikutnya")}</span>
                 <ChevronRight className="w-3.5 h-3.5" />

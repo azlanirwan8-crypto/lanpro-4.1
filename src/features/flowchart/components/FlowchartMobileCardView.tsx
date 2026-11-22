@@ -82,7 +82,7 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
           <div
             key={flow.id || index}
             onClick={() => onSelectFlowchart(flow.id)}
-            className="p-4 bg-surface rounded-lg border border-border-subtle/80 shadow-2xs hover:border-primary/40 hover:shadow-xs transition-all cursor-pointer flex flex-col gap-3"
+            className="p-4 bg-surface rounded-lg border border-border-panel-divider/80 shadow-2xs hover:border-primary/40 hover:shadow-xs transition-all cursor-pointer flex flex-col gap-3"
           >
             {/* Header: Title & Action buttons */}
             <div className="flex items-start justify-between gap-2">

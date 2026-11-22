@@ -43,7 +43,7 @@ export const IssueSavedFiltersMenu: React.FC<IssueSavedFiltersMenuProps> = ({
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "p-2 bg-surface border border-border-subtle rounded-lg text-content-muted hover:text-primary hover:border-primary/30 transition-all shadow-soft cursor-pointer",
+          "p-2 bg-surface border border-border-panel-divider rounded-lg text-content-muted hover:text-primary hover:border-primary/30 transition-all shadow-soft cursor-pointer",
           open && "text-primary border-primary/40 bg-primary-surface/10"
         )}
         title={t("filters.savedFilters")}

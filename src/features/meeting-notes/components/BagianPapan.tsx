@@ -113,22 +113,11 @@ export const KepalaPapan: React.FC<KepalaProps> = ({ tampilAI, onToggleAI, cari,
  *
  * #714 menambahkan `border-r` sebagai pemisah antar kolom.
  *
- * #715 memindahkan papan ini ke keputusan #699 dan #678b yang sudah lama berlaku
- * untuk Daftar Isu, dan itu mengubah DUA garis sekaligus:
- *  - Garis pemisah BARIS naik dari `border-border-faint` ke `border-border-subtle`.
- *    #699 mengukur yang pertama hanya 1,096:1 terhadap putih — mata tidak
- *    membacanya sebagai pemisah, jadi baris-baris papan ini seperti mengalir ke
- *    satu sama lain. Itu sebagian dari "berantakan" yang dilaporkan.
- *  - Garis pemisah KOLOM tetap `border-border-faint` (#678b: "garis setajam garis
- *    kontrol di setiap kolom akan mengubah tabel menjadi kisi").
- * Karena dua sisi butuh warna berbeda, kelasnya ditulis PER SISI
- * (`border-b-border-subtle`, `border-r-border-faint`). Menulis
- * `border-border-subtle border-border-faint` tidak akan bekerja: keduanya
- * mengatur `border-color` untuk semua sisi, dan yang menang ditentukan urutan
- * stylesheet, bukan maksud penulisnya.
+ * #862 memakai token panel pada garis bawah dan kanan. Lebar sisi tetap
+ * terpisah agar kolom terakhir tidak menambah garis luar tabel.
  */
 export const SEL =
-  "border-b border-b-border-subtle border-r border-r-border-faint last:border-r-0 overflow-hidden";
+  "border-b border-b-border-panel-divider border-r border-r-border-panel-divider last:border-r-0 overflow-hidden";
 
 /**
  * #707 — kepala tabel desktop. `position: sticky` hanya bekerja terhadap
@@ -279,7 +268,7 @@ export const KepalaTabel: React.FC<KepalaTabelProps> = ({ sortir, onSortir }) =>
   const tombol =
     "group flex w-full items-center gap-1 uppercase cursor-pointer text-left text-content-subtle hover:text-content-body transition-colors";
   const th =
-    "sticky top-0 z-30 bg-surface-sunken text-content-subtle whitespace-nowrap border-b border-b-border-subtle border-r border-r-border-faint last:border-r-0";
+    "sticky top-0 z-30 bg-surface-sunken text-content-subtle whitespace-nowrap border-b border-b-border-panel-divider border-r border-r-border-panel-divider last:border-r-0";
   return (
     <thead>
       <tr className="text-content-subtle">
@@ -432,7 +421,7 @@ export const KakiPapan: React.FC<KakiProps> = ({
         <button
           onClick={() => onHalaman(Math.max(halaman - 1, 1))}
           disabled={halaman === 1}
-          className="px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs cursor-pointer text-xs font-normal"
+          className="px-3 py-1.5 bg-surface border border-border-panel-divider rounded-md text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs cursor-pointer text-xs font-normal"
         >
           <ChevronLeft className="w-3.5 h-3.5" /> {t("discussion.prev")}
         </button>
@@ -442,7 +431,7 @@ export const KakiPapan: React.FC<KakiProps> = ({
         <button
           onClick={() => onHalaman(Math.min(halaman + 1, totalPages))}
           disabled={halaman >= totalPages}
-          className="px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs cursor-pointer text-xs font-normal"
+          className="px-3 py-1.5 bg-surface border border-border-panel-divider rounded-md text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs cursor-pointer text-xs font-normal"
         >
           {t("discussion.nextPage")} <ChevronRight className="w-3.5 h-3.5" />
         </button>

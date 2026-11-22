@@ -158,7 +158,7 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                 <button
                   type="button"
                   onClick={() => onOpenThread(p)}
-                  className="inline-flex items-center gap-1 px-2 py-1 bg-surface-sunken hover:bg-primary-surface/10 text-content-body hover:text-primary rounded-md text-xs border border-border-subtle transition-all cursor-pointer shadow-2xs"
+                  className="inline-flex items-center gap-1 px-2 py-1 bg-surface-sunken hover:bg-primary-surface/10 text-content-body hover:text-primary rounded-md text-xs border border-border-panel-divider transition-all cursor-pointer shadow-2xs"
                   title={t("discussion.openThread")}
                 >
                   <MessageSquare className="w-3.5 h-3.5 text-primary" />

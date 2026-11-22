@@ -481,7 +481,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
         <button
           type="button"
           onClick={() => setIsTemplateModalOpen(true)}
-          className="flex items-center justify-center gap-1.5 border border-border-subtle hover:bg-surface-sunken text-content-body px-3 py-1.5 rounded-md text-xs font-medium transition sm:mr-auto shadow-2xs cursor-pointer active:scale-95 w-full sm:w-auto"
+          className="flex items-center justify-center gap-1.5 border border-border-panel-divider hover:bg-surface-sunken text-content-body px-3 py-1.5 rounded-md text-xs font-medium transition sm:mr-auto shadow-2xs cursor-pointer active:scale-95 w-full sm:w-auto"
         >
           <FileEdit size={14} />
           {t("emailCfg.advancedEditor")}
@@ -491,7 +491,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
           type="button"
           onClick={() => setIsTestModalOpen(true)}
           disabled={isTesting || isSaving}
-          className="flex items-center justify-center gap-1.5 border border-border-subtle hover:bg-surface-sunken text-content-body px-3 py-1.5 rounded-md text-xs font-medium disabled:opacity-50 transition cursor-pointer active:scale-95 shadow-2xs w-full sm:w-auto"
+          className="flex items-center justify-center gap-1.5 border border-border-panel-divider hover:bg-surface-sunken text-content-body px-3 py-1.5 rounded-md text-xs font-medium disabled:opacity-50 transition cursor-pointer active:scale-95 shadow-2xs w-full sm:w-auto"
         >
           {isTesting ? <Loader2 size={14} className="animate-spin" /> : <TestTube size={14} />}
           Uji Coba Kirim Email

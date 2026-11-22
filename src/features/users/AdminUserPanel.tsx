@@ -587,7 +587,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
         <div className="flex flex-col space-y-4 md:space-y-6 min-h-full">
           {/* Statistics Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
-            <div className="bg-surface p-3.5 rounded-lg border border-border-subtle/60 shadow-2xs flex items-center gap-3 transition-all hover:shadow-xs">
+            <div className="bg-surface p-3.5 rounded-lg border border-border-panel-divider/60 shadow-2xs flex items-center gap-3 transition-all hover:shadow-xs">
               <div className="w-9 h-9 bg-blue-500/10 text-blue-600 rounded-lg flex items-center justify-center border border-blue-500/30 shrink-0">
                 <Users className="w-4.5 h-4.5" />
               </div>
@@ -600,7 +600,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 </div>
               </div>
             </div>
-            <div className="bg-surface p-3.5 rounded-lg border border-border-subtle/60 shadow-2xs flex items-center gap-3 transition-all hover:shadow-xs">
+            <div className="bg-surface p-3.5 rounded-lg border border-border-panel-divider/60 shadow-2xs flex items-center gap-3 transition-all hover:shadow-xs">
               <div className="w-9 h-9 bg-emerald-500/10 text-emerald-600 rounded-lg flex items-center justify-center border border-emerald-500/30 shrink-0">
                 <CheckCircle className="w-4.5 h-4.5" />
               </div>
@@ -613,7 +613,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 </div>
               </div>
             </div>
-            <div className="bg-surface p-3.5 rounded-lg border border-border-subtle/60 shadow-2xs flex items-center gap-3 transition-all hover:shadow-xs">
+            <div className="bg-surface p-3.5 rounded-lg border border-border-panel-divider/60 shadow-2xs flex items-center gap-3 transition-all hover:shadow-xs">
               <div className="w-9 h-9 bg-amber-500/10 text-amber-500 rounded-lg flex items-center justify-center border border-amber-500/30 shrink-0">
                 <Clock className="w-4.5 h-4.5" />
               </div>
@@ -626,7 +626,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 </div>
               </div>
             </div>
-            <div className="bg-surface p-3.5 rounded-lg border border-border-subtle/60 shadow-2xs flex items-center gap-3 transition-all hover:shadow-xs">
+            <div className="bg-surface p-3.5 rounded-lg border border-border-panel-divider/60 shadow-2xs flex items-center gap-3 transition-all hover:shadow-xs">
               <div className="w-9 h-9 bg-rose-500/10 text-rose-600 rounded-lg flex items-center justify-center border border-rose-500/30 shrink-0">
                 <Shield className="w-4.5 h-4.5" />
               </div>
@@ -658,7 +658,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 type="button"
                 onClick={handleExportCSV}
                 title={t("users.exportCsv")}
-                className="btn-animation waves-effect waves-light bg-surface border border-border-subtle text-content-strong hover:bg-surface-sunken h-9 px-2.5 sm:px-3.5 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
+                className="btn-animation waves-effect waves-light bg-surface border border-border-panel-divider text-content-strong hover:bg-surface-sunken h-9 px-2.5 sm:px-3.5 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
               >
                 <Download className="w-3.5 h-3.5 text-content-muted shrink-0" />
                 <span className="hidden sm:inline">{t("users.exportCsv")}</span>

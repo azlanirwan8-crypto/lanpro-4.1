@@ -118,7 +118,7 @@ export const WebAppsDropdown: React.FC<WebAppsDropdownProps> = ({
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsOpen(false)}
-              className="group flex items-center gap-3 p-2 rounded-lg hover:bg-surface-sunken transition-all text-content-body hover:text-content-strong text-left border border-transparent hover:border-border-subtle"
+              className="group flex items-center gap-3 p-2 rounded-lg hover:bg-surface-sunken transition-all text-content-body hover:text-content-strong text-left border border-transparent hover:border-border-panel-divider"
               role="menuitem"
             >
               <div className="shrink-0">{app.icon}</div>

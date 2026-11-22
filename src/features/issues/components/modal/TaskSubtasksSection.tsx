@@ -46,19 +46,19 @@ export const TaskSubtasksSection: React.FC<TaskSubtasksSectionProps> = ({
           {t("subtasks.list")}
         </h3>
       </div>
-      <div className="space-y-3 p-4 bg-surface-sunken/40 rounded-lg border border-dashed border-border-subtle">
+      <div className="space-y-3 p-4 bg-surface-sunken/40 rounded-lg border border-dashed border-border-panel-divider">
         {baris.map(({ task: st, kedalaman }, stIdx) => (
           <div
             key={st.id ? `${st.id}-${stIdx}` : `sub-${stIdx}`}
             style={{ marginLeft: `${(kedalaman - 1) * 20}px` }}
             className={cn(
-              "flex items-center gap-4 p-3 bg-surface hover:bg-primary/10 rounded-xl group border border-border-subtle transition-all shadow-soft",
+              "flex items-center gap-4 p-3 bg-surface hover:bg-primary/10 rounded-xl group border border-border-panel-divider transition-all shadow-soft",
               isUpdatingTask?.[st.id] ? "opacity-50 pointer-events-none" : "hover:border-primary/30"
             )}
           >
             <input
               type="checkbox"
-              className="w-5 h-5 rounded-lg border-border-subtle text-primary focus:ring-primary transition-all cursor-pointer shadow-soft"
+              className="w-5 h-5 rounded-lg border-border-panel-divider text-primary focus:ring-primary transition-all cursor-pointer shadow-soft"
               checked={st.status === "Done"}
               onChange={() =>
                 updateTaskField(st.id, "status", st.status === "Done" ? "To Do" : "Done")

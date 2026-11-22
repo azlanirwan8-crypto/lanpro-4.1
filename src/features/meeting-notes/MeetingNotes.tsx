@@ -869,7 +869,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-body hover:bg-surface-muted rounded-md text-[11px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
+                  className="px-3 py-1.5 bg-surface border border-border-panel-divider text-content-body hover:bg-surface-muted rounded-md text-[11px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" /> {t("meetingExtra.previous")}
                 </button>
@@ -879,7 +879,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-body hover:bg-surface-muted rounded-md text-[11px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
+                  className="px-3 py-1.5 bg-surface border border-border-panel-divider text-content-body hover:bg-surface-muted rounded-md text-[11px] font-normal disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs flex items-center gap-1"
                 >
                   {t("meetingExtra.next")} <ChevronRight className="w-3.5 h-3.5" />
                 </button>

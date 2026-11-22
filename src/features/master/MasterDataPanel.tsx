@@ -75,7 +75,7 @@ const Button = ({
     variantStyle = "bg-surface-muted text-content-body hover:bg-surface-strong active:scale-95";
   if (variant === "outline")
     variantStyle =
-      "border-2 border-border-subtle text-content-body hover:border-border-subtle hover:bg-surface-sunken active:scale-95";
+      "border-2 border-border-panel-divider text-content-body hover:border-border-panel-divider hover:bg-surface-sunken active:scale-95";
   if (variant === "danger")
     variantStyle =
       "bg-danger-surface text-content-inverse hover:brightness-110 active:scale-95 shadow-md";
@@ -607,7 +607,7 @@ export const MasterDataPanel = ({
         {/* Sidebar for Master Data Types — laci di bawah md */}
         <div
           className={cn(
-            "w-[260px] shrink-0 flex flex-col h-full surface-panel bg-surface border border-border-subtle/80 rounded-lg overflow-hidden shadow-2xs",
+            "w-[260px] shrink-0 flex flex-col h-full surface-panel bg-surface border border-border-panel-divider/80 rounded-lg overflow-hidden shadow-2xs",
             "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:rounded-none max-md:border-y-0 max-md:border-l-0",
             "max-md:transition-transform max-md:duration-200",
             sidebarOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full"
@@ -690,7 +690,7 @@ export const MasterDataPanel = ({
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="md:hidden mb-3 flex items-center gap-2 px-3 py-2.5 bg-surface border border-border-subtle/80 rounded-lg text-xs font-medium text-content-strong shadow-2xs cursor-pointer"
+            className="md:hidden mb-3 flex items-center gap-2 px-3 py-2.5 bg-surface border border-border-panel-divider/80 rounded-lg text-xs font-medium text-content-strong shadow-2xs cursor-pointer"
           >
             <Menu className="w-4 h-4 text-primary shrink-0" />
             <span className="truncate">
@@ -700,7 +700,7 @@ export const MasterDataPanel = ({
           </button>
 
           {selectedType === "modul_aplikasi" ? (
-            <div className="surface-panel bg-surface rounded-lg border border-border-subtle/80 shadow-2xs flex-1 overflow-hidden flex flex-col min-h-0">
+            <div className="surface-panel bg-surface rounded-lg border border-border-panel-divider/80 shadow-2xs flex-1 overflow-hidden flex flex-col min-h-0">
               {hasPermission(
                 userRole as PeranEfektif,
                 "configuration",
@@ -750,7 +750,7 @@ export const MasterDataPanel = ({
                       return (
                         <div
                           key={mod.id}
-                          className="flex items-center justify-between p-3 bg-surface border border-border-subtle/80 rounded-lg shadow-2xs hover:border-primary/30 transition-all group"
+                          className="flex items-center justify-between p-3 bg-surface border border-border-panel-divider/80 rounded-lg shadow-2xs hover:border-primary/30 transition-all group"
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0 font-medium text-xs">
@@ -790,7 +790,7 @@ export const MasterDataPanel = ({
                                   setEditingModuleKeterangan(mod.keterangan || "");
                                   setIsEditModuleModalOpen(true);
                                 }}
-                                className="w-7 h-7 bg-surface-sunken hover:bg-primary/10 text-content-muted hover:text-primary border border-border-subtle/60 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
+                                className="w-7 h-7 bg-surface-sunken hover:bg-primary/10 text-content-muted hover:text-primary border border-border-panel-divider/60 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
                                 title={t("master.editModule")}
                               >
                                 <Edit className="w-3.5 h-3.5 shrink-0" />
@@ -821,7 +821,7 @@ export const MasterDataPanel = ({
             <div className="flex-1 flex flex-col min-h-0">
               {/* TOP SEGMENTED CONTROL / TAB FILTER */}
               {selectedType === "project_role" && (
-                <div className="bg-surface p-3 rounded-lg border border-border-subtle/80 mb-3 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shrink-0">
+                <div className="bg-surface p-3 rounded-lg border border-border-panel-divider/80 mb-3 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shrink-0">
                   <div>
                     <span className="text-xs font-medium text-content-body block">
                       {t("master.scopeFilter")}
@@ -830,7 +830,7 @@ export const MasterDataPanel = ({
                       {t("master.scopeFilterHint")}
                     </span>
                   </div>
-                  <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80 shrink-0 self-start sm:self-auto overflow-x-auto max-w-full">
+                  <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-panel-divider/80 shrink-0 self-start sm:self-auto overflow-x-auto max-w-full">
                     <button
                       type="button"
                       onClick={() => setRoleTabFilter("ALL")}
@@ -915,7 +915,7 @@ export const MasterDataPanel = ({
                 </div>
               )}
 
-              <div className="surface-panel bg-surface rounded-lg border border-border-subtle/80 shadow-2xs flex-1 overflow-hidden flex flex-col min-h-0">
+              <div className="surface-panel bg-surface rounded-lg border border-border-panel-divider/80 shadow-2xs flex-1 overflow-hidden flex flex-col min-h-0">
                 {hasPermission(
                   userRole as PeranEfektif,
                   "configuration",
@@ -1030,7 +1030,7 @@ export const MasterDataPanel = ({
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
                                       className={cn(
-                                        "flex justify-between items-center p-3 bg-surface border border-border-subtle/80 rounded-lg transition-all group hover:border-primary/30 shadow-2xs",
+                                        "flex justify-between items-center p-3 bg-surface border border-border-panel-divider/80 rounded-lg transition-all group hover:border-primary/30 shadow-2xs",
                                         snapshot.isDragging
                                           ? "shadow-soft-lg border-primary bg-primary/10 cursor-grabbing z-50"
                                           : ""
@@ -1053,7 +1053,7 @@ export const MasterDataPanel = ({
                                           </div>
                                         ) : (
                                           <div
-                                            className="w-4 h-4 rounded-full shrink-0 shadow-2xs border border-border-subtle"
+                                            className="w-4 h-4 rounded-full shrink-0 shadow-2xs border border-border-panel-divider"
                                             style={{ backgroundColor: item.color || "#ccc" }}
                                           />
                                         )}
@@ -1138,7 +1138,7 @@ export const MasterDataPanel = ({
                                                 setEditingMaster(item);
                                                 setIsEditMasterModalOpen(true);
                                               }}
-                                              className="w-7 h-7 bg-surface-sunken hover:bg-primary/10 text-content-muted hover:text-primary border border-border-subtle/60 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
+                                              className="w-7 h-7 bg-surface-sunken hover:bg-primary/10 text-content-muted hover:text-primary border border-border-panel-divider/60 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
                                               title={t("master.editMasterData")}
                                             >
                                               <Edit className="w-3.5 h-3.5 shrink-0" />
@@ -1218,14 +1218,14 @@ export const MasterDataPanel = ({
               <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal ml-1">
                 {t("master.roleTypeScope")}
               </label>
-              <div className="grid grid-cols-2 gap-2 p-1.5 bg-surface-muted rounded-xl border border-border-subtle">
+              <div className="grid grid-cols-2 gap-2 p-1.5 bg-surface-muted rounded-xl border border-border-panel-divider">
                 <button
                   type="button"
                   onClick={() => setNewMasterRoleType("PROJECT")}
                   className={cn(
                     "py-2.5 px-3 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-2 cursor-pointer",
                     newMasterRoleType === "PROJECT"
-                      ? "bg-surface text-primary shadow-soft border border-border-subtle/60"
+                      ? "bg-surface text-primary shadow-soft border border-border-panel-divider/60"
                       : "text-content-secondary hover:text-content"
                   )}
                 >
@@ -1237,7 +1237,7 @@ export const MasterDataPanel = ({
                   className={cn(
                     "py-2.5 px-3 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-2 cursor-pointer",
                     newMasterRoleType === "SYSTEM"
-                      ? "bg-surface text-primary shadow-soft border border-border-subtle/60"
+                      ? "bg-surface text-primary shadow-soft border border-border-panel-divider/60"
                       : "text-content-secondary hover:text-content"
                   )}
                 >
@@ -1268,7 +1268,7 @@ export const MasterDataPanel = ({
                     ? "cth: Business Analyst, Project Lead, QA Specialist, Senior Developer"
                     : "misal: Critical, Done, Staging"
                 }
-                className="!bg-surface border-border-subtle"
+                className="!bg-surface border-border-panel-divider"
               />
             </div>
 
@@ -1282,7 +1282,7 @@ export const MasterDataPanel = ({
                   value={newMasterShortCode}
                   onChange={(e: any) => setNewMasterShortCode(e.target.value)}
                   placeholder={t("master.shortCodePlaceholder")}
-                  className="!bg-surface border-border-subtle"
+                  className="!bg-surface border-border-panel-divider"
                 />
               </div>
             )}
@@ -1338,7 +1338,7 @@ export const MasterDataPanel = ({
                     type="checkbox"
                     checked={newMasterIsTerminal}
                     onChange={(e) => setNewMasterIsTerminal(e.target.checked)}
-                    className="rounded border-border-subtle"
+                    className="rounded border-border-panel-divider"
                   />
                   <span className="text-sm text-content-body">{t("master.isTerminal")}</span>
                 </label>
@@ -1354,7 +1354,7 @@ export const MasterDataPanel = ({
                   value={newMasterBaseUrl}
                   onChange={(e: any) => setNewMasterBaseUrl(e.target.value)}
                   placeholder={t("master.endpointPlaceholder")}
-                  className="!bg-surface border-border-subtle"
+                  className="!bg-surface border-border-panel-divider"
                 />
               </div>
             )}
@@ -1364,7 +1364,7 @@ export const MasterDataPanel = ({
                 {t("master.colorAccent")}
               </label>
               <div className="flex gap-2">
-                <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-border-subtle shadow-soft shrink-0 bg-surface flex items-center justify-center">
+                <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-border-panel-divider shadow-soft shrink-0 bg-surface flex items-center justify-center">
                   <input
                     type="color"
                     value={newMasterColor}
@@ -1400,7 +1400,7 @@ export const MasterDataPanel = ({
             <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
               {t("master.colorPalette")}
             </label>
-            <div className="flex flex-wrap gap-2 p-2.5 bg-surface-sunken border border-border-subtle rounded-xl">
+            <div className="flex flex-wrap gap-2 p-2.5 bg-surface-sunken border border-border-panel-divider rounded-xl">
               {[
                 { hex: "#ef4444", label: t("master.colorRed") },
                 { hex: "#f97316", label: t("master.colorOrange") },
@@ -1419,7 +1419,7 @@ export const MasterDataPanel = ({
                   type="button"
                   onClick={() => setNewMasterColor(p.hex)}
                   className={cn(
-                    "w-6 h-6 rounded-full border border-border-subtle transition-transform active:scale-95 duration-100 hover:scale-110",
+                    "w-6 h-6 rounded-full border border-border-panel-divider transition-transform active:scale-95 duration-100 hover:scale-110",
                     newMasterColor.toLowerCase() === p.hex.toLowerCase()
                       ? "ring-2 ring-offset-2 ring-primary scale-110"
                       : "hover:border-border-strong"
@@ -1449,7 +1449,7 @@ export const MasterDataPanel = ({
               <Search className="w-4 h-4 text-content-subtle absolute left-3.5 top-1/2 -translate-y-1/2" />
             </div>
 
-            <div className="grid grid-cols-8 md:grid-cols-10 gap-1.5 p-2.5 border border-border-subtle rounded-xl bg-surface-sunken max-h-52 overflow-y-auto custom-scrollbar">
+            <div className="grid grid-cols-8 md:grid-cols-10 gap-1.5 p-2.5 border border-border-panel-divider rounded-xl bg-surface-sunken max-h-52 overflow-y-auto custom-scrollbar">
               {filteredNewIcons.length > 0 ? (
                 filteredNewIcons.map((i) => (
                   <button
@@ -1540,7 +1540,7 @@ export const MasterDataPanel = ({
                   onKeyDown={enterUntukSimpan(() => {
                     if (!isSaving && editingMaster.label.trim()) handleUpdateMasterData();
                   })}
-                  className="!bg-surface border-border-subtle"
+                  className="!bg-surface border-border-panel-divider"
                 />
               </div>
               <div>
@@ -1548,7 +1548,7 @@ export const MasterDataPanel = ({
                   {t("master.colorAccent")}
                 </label>
                 <div className="flex gap-2">
-                  <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-border-subtle shadow-soft shrink-0 bg-surface flex items-center justify-center">
+                  <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-border-panel-divider shadow-soft shrink-0 bg-surface flex items-center justify-center">
                     <input
                       type="color"
                       value={editingMaster.color || "#000000"}
@@ -1626,7 +1626,7 @@ export const MasterDataPanel = ({
               <label className="block text-[11px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                 {t("master.colorPalette")}
               </label>
-              <div className="flex flex-wrap gap-2 p-2.5 bg-surface-sunken border border-border-subtle rounded-xl">
+              <div className="flex flex-wrap gap-2 p-2.5 bg-surface-sunken border border-border-panel-divider rounded-xl">
                 {[
                   { hex: "#ef4444", label: t("master.colorRed") },
                   { hex: "#f97316", label: t("master.colorOrange") },
@@ -1645,7 +1645,7 @@ export const MasterDataPanel = ({
                     type="button"
                     onClick={() => setEditingMaster({ ...editingMaster, color: p.hex })}
                     className={cn(
-                      "w-6 h-6 rounded-full border border-border-subtle transition-transform active:scale-95 duration-100 hover:scale-110",
+                      "w-6 h-6 rounded-full border border-border-panel-divider transition-transform active:scale-95 duration-100 hover:scale-110",
                       (editingMaster.color || "").toLowerCase() === p.hex.toLowerCase()
                         ? "ring-2 ring-offset-2 ring-primary scale-110"
                         : "hover:border-border-strong"
@@ -1665,7 +1665,7 @@ export const MasterDataPanel = ({
                   onChange={(e) =>
                     setEditingMaster({ ...editingMaster, isTerminal: e.target.checked })
                   }
-                  className="rounded border-border-subtle"
+                  className="rounded border-border-panel-divider"
                 />
                 <span className="text-sm text-content-body">{t("master.isTerminal")}</span>
               </label>
@@ -1689,7 +1689,7 @@ export const MasterDataPanel = ({
                 <Search className="w-4 h-4 text-content-subtle absolute left-3.5 top-1/2 -translate-y-1/2" />
               </div>
 
-              <div className="grid grid-cols-8 md:grid-cols-10 gap-1.5 p-2.5 border border-border-subtle rounded-xl bg-surface-sunken max-h-52 overflow-y-auto custom-scrollbar">
+              <div className="grid grid-cols-8 md:grid-cols-10 gap-1.5 p-2.5 border border-border-panel-divider rounded-xl bg-surface-sunken max-h-52 overflow-y-auto custom-scrollbar">
                 {filteredEditIcons.length > 0 ? (
                   filteredEditIcons.map((i) => (
                     <button
@@ -1773,7 +1773,7 @@ export const MasterDataPanel = ({
                 if (!isSaving && newModuleNamaModul.trim()) handleCreateModule();
               })}
               placeholder={t("master.moduleNamePlaceholder")}
-              className="!bg-surface border-border-subtle"
+              className="!bg-surface border-border-panel-divider"
             />
           </div>
 
@@ -1843,7 +1843,7 @@ export const MasterDataPanel = ({
                 if (!isSaving && editingModuleNamaModul.trim()) handleUpdateModule();
               })}
               placeholder={t("master.moduleNamePlaceholder")}
-              className="!bg-surface border-border-subtle"
+              className="!bg-surface border-border-panel-divider"
             />
           </div>
 

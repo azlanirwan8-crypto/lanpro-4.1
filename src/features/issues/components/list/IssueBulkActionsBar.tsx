@@ -94,7 +94,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
           <button
             onClick={() => setListPage((p) => Math.max(1, p - 1))}
             disabled={listPage === 1}
-            className="px-2.5 py-1 text-[11px] font-normal text-content-secondary bg-surface border border-border-subtle rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-sunken transition-all active:scale-95 cursor-pointer shadow-soft"
+            className="px-2.5 py-1 text-[11px] font-normal text-content-secondary bg-surface border border-border-panel-divider rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-sunken transition-all active:scale-95 cursor-pointer shadow-soft"
           >
             {t("bulkActions.prev")}
           </button>
@@ -117,7 +117,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
           <button
             onClick={() => setListPage((p) => Math.min(totalPages, p + 1))}
             disabled={listPage >= totalPages}
-            className="px-2.5 py-1 text-[11px] font-normal text-content-secondary bg-surface border border-border-subtle rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-sunken transition-all active:scale-95 cursor-pointer shadow-soft"
+            className="px-2.5 py-1 text-[11px] font-normal text-content-secondary bg-surface border border-border-panel-divider rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-sunken transition-all active:scale-95 cursor-pointer shadow-soft"
           >
             {t("bulkActions.next")}
           </button>

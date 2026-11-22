@@ -682,7 +682,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                   e.stopPropagation();
                   setActiveContextMenuTaskId(activeContextMenuTaskId === task.id ? null : task.id);
                 }}
-                className="p-1 bg-surface-muted hover:bg-primary-surface text-content-secondary hover:text-content-inverse border border-border-subtle rounded-lg transition-all cursor-pointer shadow-xs font-medium"
+                className="p-1 bg-surface-muted hover:bg-primary-surface text-content-secondary hover:text-content-inverse border border-border-panel-divider rounded-lg transition-all cursor-pointer shadow-xs font-medium"
                 title={t("issueRow.actionMenu")}
               >
                 <MoreVertical className="w-3.5 h-3.5 shrink-0" />

@@ -81,7 +81,7 @@ const isianKelas = `w-full min-w-0 ${TINGGI} ${dasarIsian}`;
 /* Tombol pemakai `min-h`, bukan `h`: isinya chip pilihan, dan dua nama panjang
  * boleh memakan dua baris. Yang dijamin sama adalah TINGGI MINIMUMNYA — saat
  * kosong, yang dilihat pengguna. */
-const tombolKelas = `w-full min-w-0 min-h-11 px-3 bg-surface border border-border-subtle text-xs text-left text-content-body rounded-md font-medium shadow-2xs`;
+const tombolKelas = `w-full min-w-0 min-h-11 px-3 bg-surface border border-border-panel-divider text-xs text-left text-content-body rounded-md font-medium shadow-2xs`;
 /** Lajur yang tumbuh: judul, catatan, follow-up.
  *
  * #806 — `h-11` di sini diganti `min-h-11` dan `resize-y` ditambahkan. Dengan
@@ -271,7 +271,7 @@ export const BarisCepat: React.FC<BarisCepatProps> = (props) => {
 
   return (
     <div className="hidden sm:block p-2 bg-surface border-t border-border-divider shrink-0">
-      <div className="rounded-xl border border-border-subtle bg-surface-sunken p-1.5">
+      <div className="rounded-xl border border-border-panel-divider bg-surface-sunken p-1.5">
         <div className="flex flex-wrap items-center gap-1.5">
           <textarea
             id="quick-add-concern-desktop"
@@ -347,7 +347,7 @@ export const BarisCepat: React.FC<BarisCepatProps> = (props) => {
             className={`shrink-0 ${TINGGI} px-3 inline-flex items-center gap-1.5 rounded-md text-xs font-normal border transition-colors cursor-pointer ${
               jumlahLampiran > 0
                 ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/15"
-                : "bg-surface text-content-muted border-border-subtle hover:bg-surface-muted"
+                : "bg-surface text-content-muted border-border-panel-divider hover:bg-surface-muted"
             }`}
             title={t("discussion.lampiran")}
           >

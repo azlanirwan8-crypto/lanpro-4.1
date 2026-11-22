@@ -5432,7 +5432,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             if (next) setIsShapeDropdownOpen(false);
                           }}
                           className={cn(
-                            "absolute z-30 p-2 bg-surface/70 backdrop-blur hover:bg-surface/85 border border-border-subtle/40 text-content-body hover:text-primary shadow-soft-lg rounded-xl transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 text-xs font-medium duration-300",
+                            "absolute z-30 p-2 bg-surface/70 backdrop-blur hover:bg-surface/85 border border-border-panel-divider/40 text-content-body hover:text-primary shadow-soft-lg rounded-xl transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 text-xs font-medium duration-300",
                             isRightSidebarOpen
                               ? "right-3 bottom-[min(58vh,30rem)] md:bottom-4 md:right-[304px]"
                               : "right-3 bottom-4"
@@ -5463,7 +5463,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         <div
                           data-testid="dock-kanvas"
                           className={cn(
-                            "absolute left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 min-h-11 overflow-x-auto bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1 px-2 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] select-none max-w-[90%] md:max-w-full transition-all duration-300",
+                            "absolute left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 min-h-11 overflow-x-auto bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-panel-divider/40 p-1 px-2 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] select-none max-w-[90%] md:max-w-full transition-all duration-300",
                             isRightSidebarOpen || isShapeDropdownOpen
                               ? "max-md:opacity-0 max-md:pointer-events-none max-md:translate-y-4 bottom-4"
                               : "bottom-4 opacity-100"

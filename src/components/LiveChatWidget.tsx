@@ -625,7 +625,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             download={name}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2.5 p-2 bg-overlay/5 hover:bg-overlay/10 text-content-strong rounded-xl transition-all border border-border-subtle/20 max-w-full"
+            className="flex items-center gap-2.5 p-2 bg-overlay/5 hover:bg-overlay/10 text-content-strong rounded-xl transition-all border border-border-panel-divider/20 max-w-full"
           >
             <span className="p-2 bg-amber-500 text-content-inverse rounded-lg shrink-0">
               <FileText className="w-4 h-4" />
@@ -1112,7 +1112,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                               "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?auto=format&fit=crop&w=600&q=85"
                             )
                           }
-                          className="flex items-center gap-2 p-2 bg-surface border border-border-subtle rounded-xl text-left hover:border-orange-500 hover:bg-orange-500/10 transition-all group"
+                          className="flex items-center gap-2 p-2 bg-surface border border-border-panel-divider rounded-xl text-left hover:border-orange-500 hover:bg-orange-500/10 transition-all group"
                         >
                           <span className="p-1.5 bg-orange-500/15 text-orange-600 rounded-lg group-hover:bg-orange-600 group-hover:text-content-inverse transition-all shrink-0">
                             <Image className="w-3.5 h-3.5" />
@@ -1137,7 +1137,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                               "data:text/plain;base64,U0RMQyBEYXRhYmFzZSBBcmNoaXRlY3R1cmUgQmx1ZXByaW50OiAxLiBVc2VycyAyLiBUYXNrcyAzLiBTcHJpbnRzIDQuIEF1ZGl0TG9ncyA1LiBNZXNzYWdlcy4gR2VtaW5pIEFJIEFzc2lzdGFudCBjb25maWd1cmVkLg=="
                             )
                           }
-                          className="flex items-center gap-2 p-2 bg-surface border border-border-subtle rounded-xl text-left hover:border-orange-500 hover:bg-orange-500/10 transition-all group"
+                          className="flex items-center gap-2 p-2 bg-surface border border-border-panel-divider rounded-xl text-left hover:border-orange-500 hover:bg-orange-500/10 transition-all group"
                         >
                           <span className="p-1.5 bg-amber-500/15 text-amber-600 rounded-lg group-hover:bg-amber-600 group-hover:text-content-inverse transition-all shrink-0">
                             <FileText className="w-3.5 h-3.5" />
