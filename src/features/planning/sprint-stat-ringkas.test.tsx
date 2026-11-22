@@ -176,7 +176,7 @@ describe("panel beban per anggota", () => {
     const isi = barisAnggota("Budi").querySelector<HTMLElement>("[style*='width']");
     const track = isi?.parentElement;
     expect(track?.className).toContain("bg-surface-sunken");
-    expect(track?.className).toContain("border-border-subtle");
+    expect(track?.className).toContain("border-border-divider");
     expect(lebarBar("Budi")).toBe("0%");
   });
 

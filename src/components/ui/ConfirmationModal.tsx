@@ -139,7 +139,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 40 }}
               transition={{ type: "spring", duration: 0.3 }}
-              className="relative bg-surface rounded-t-2xl md:rounded-md shadow-2xl w-full max-w-sm border border-border-subtle/80 z-10 p-6 sm:p-8 text-center flex flex-col items-center pb-[max(1.5rem,env(safe-area-inset-bottom))] md:pb-8"
+              className="relative bg-surface rounded-t-2xl md:rounded-md shadow-2xl w-full max-w-sm border border-border-divider/80 z-10 p-6 sm:p-8 text-center flex flex-col items-center pb-[max(1.5rem,env(safe-area-inset-bottom))] md:pb-8"
             >
               <div className="md:hidden w-10 h-1 rounded-full bg-surface-marker mb-3" aria-hidden />
               {/* Top Right Close X Button */}

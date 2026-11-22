@@ -132,12 +132,12 @@ export const RingkasanSprint: React.FC<RingkasanSprintProps> = ({
   return (
     /* Grid menyamakan tinggi kedua sisi (items-stretch default), jadi panel
      * anggota selalu sepasang tinggi dengan baris 1–2 di kiri. */
-    <div className="grid grid-cols-1 lg:grid-cols-[18rem_minmax(0,1fr)] gap-2 p-2 bg-surface-sunken/50 rounded-xl border border-border-subtle/70 mt-1">
+    <div className="grid grid-cols-1 lg:grid-cols-[18rem_minmax(0,1fr)] gap-2 p-2 bg-surface-sunken/50 rounded-xl border border-border-divider/70 mt-1">
       <div className="grid grid-cols-2 gap-2">
         {kartu.map((k) => (
           <div
             key={k.kunci}
-            className="group bg-surface border border-border-subtle/80 rounded-lg px-2.5 py-2 flex items-center gap-2.5 min-w-0 transition-all duration-200 hover:-translate-y-px hover:shadow-xs hover:border-border-subtle"
+            className="group bg-surface border border-border-divider/80 rounded-lg px-2.5 py-2 flex items-center gap-2.5 min-w-0 transition-all duration-200 hover:-translate-y-px hover:shadow-xs hover:border-border-divider"
           >
             <div
               className={cn(
@@ -159,7 +159,7 @@ export const RingkasanSprint: React.FC<RingkasanSprintProps> = ({
         ))}
       </div>
 
-      <div className="bg-surface border border-border-subtle/80 rounded-lg px-2.5 py-2 flex flex-col min-w-0">
+      <div className="bg-surface border border-border-divider/80 rounded-lg px-2.5 py-2 flex flex-col min-w-0">
         {beban.length === 0 ? (
           <div className="flex-1 flex items-center justify-center text-[11px] font-normal text-content-muted text-center px-2">
             {t("planning.perMemberEmpty", "Belum ada tugas yang ditugaskan")}
@@ -174,13 +174,13 @@ export const RingkasanSprint: React.FC<RingkasanSprintProps> = ({
               <div
                 key={b.uid || "tanpa-penanggung"}
                 data-testid="kartu-beban"
-                className="bg-surface-sunken/60 border border-border-subtle/70 rounded-lg px-3 py-2.5 flex flex-col gap-2 transition-all duration-200 hover:-translate-y-px hover:shadow-xs hover:border-border-subtle hover:bg-surface-sunken"
+                className="bg-surface-sunken/60 border border-border-divider/70 rounded-lg px-3 py-2.5 flex flex-col gap-2 transition-all duration-200 hover:-translate-y-px hover:shadow-xs hover:border-border-divider hover:bg-surface-sunken"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   {b.uid ? (
                     <UserAvatar uid={b.uid} members={projectMembers} size="md" />
                   ) : (
-                    <span className="w-8 h-8 rounded-full bg-surface border border-border-subtle flex items-center justify-center shrink-0">
+                    <span className="w-8 h-8 rounded-full bg-surface border border-border-divider flex items-center justify-center shrink-0">
                       <Users className="w-4 h-4 text-content-muted" />
                     </span>
                   )}
@@ -195,7 +195,7 @@ export const RingkasanSprint: React.FC<RingkasanSprintProps> = ({
                   {/* Track wajib terlihat walau isinya 0%: `bg-surface` di atas
                       kartu `bg-surface-sunken/60` nyaris sewarna, dan bar 0%
                       karenanya terbaca sebagai "bar hilang". */}
-                  <div className="h-1.5 rounded-full bg-surface-sunken border border-border-subtle overflow-hidden">
+                  <div className="h-1.5 rounded-full bg-surface-sunken border border-border-divider overflow-hidden">
                     <div
                       className={cn(
                         "h-full rounded-full transition-[width] duration-700 ease-out",

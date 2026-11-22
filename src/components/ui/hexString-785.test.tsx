@@ -96,7 +96,7 @@ describe("heksa-string digantikan satu sumber rona (#785)", () => {
     const baris = isi.split("\n").find((l) => l.includes("label-edge"));
     expect(baris).toBeTruthy();
     expect(baris).toContain("border-l-4");
-    expect(baris).toContain("border-border-subtle");
+    expect(baris).toContain("border-border-divider");
     expect(baris).not.toContain("brightness");
   });
 

@@ -323,7 +323,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
               <span className="text-xs font-normal text-content-secondary leading-none">
                 {t("planning.standaloneBacklog")}
               </span>
-              <div className="ml-auto text-[10px] font-normal text-content-secondary bg-surface-muted px-1.5 py-1 rounded-md border border-border-subtle/60">
+              <div className="ml-auto text-[10px] font-normal text-content-secondary bg-surface-muted px-1.5 py-1 rounded-md border border-border-divider/60">
                 {items.length}
               </div>
             </div>,
