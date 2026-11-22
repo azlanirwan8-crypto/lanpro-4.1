@@ -287,17 +287,23 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                   </div>
                 </div>
 
-                {/* Ringkasan sprint: 2 baris metrik + beban per anggota. */}
-                <RingkasanSprint
-                  sprintTasks={sprintTasks}
-                  masterData={masterData}
-                  projectMembers={projectMembers}
-                  totalTasks={totalTasks}
-                  doneTasks={doneTasks}
-                  totalPoints={totalPoints}
-                  donePoints={donePoints}
-                  completionPercentage={completionPercentage}
-                />
+                {isExpanded ? (
+                  <RingkasanSprint
+                    sprintTasks={sprintTasks}
+                    masterData={masterData}
+                    projectMembers={projectMembers}
+                    totalTasks={totalTasks}
+                    doneTasks={doneTasks}
+                    totalPoints={totalPoints}
+                    donePoints={donePoints}
+                    completionPercentage={completionPercentage}
+                  />
+                ) : (
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-content-secondary">
+                    {sprint.goal && <span className="md:hidden">{sprint.goal}</span>}
+                    <span>{t("planning.progress")} · {completionPercentage}%</span>
+                  </div>
+                )}
               </div>
 
               <AnimatePresence>

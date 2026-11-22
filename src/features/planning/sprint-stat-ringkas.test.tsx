@@ -1,3 +1,4 @@
+import { DragDropContext } from "@hello-pangea/dnd";
 /** @jest-environment jsdom */
 /**
  * Ringkasan sprint dua baris + panel beban per anggota.
@@ -56,8 +57,6 @@ const sprint = {
   id: "s1",
   projectId: "p1",
   name: "Sprint Satu",
-  // `planned`, bukan `active`: sprint aktif otomatis terbuka, dan `Droppable`
-  // di dalamnya butuh `DragDropContext` yang tidak dipasang di test ini.
   status: "planned",
   startDate: new Date("2026-10-01"),
   endDate: new Date("2026-10-14"),
@@ -75,23 +74,25 @@ const tasks: Task[] = [
   tugas("d", { assigneeId: undefined }),
 ];
 
-const pasang = (daftarTugas: Task[] = tasks, daftarMaster: MasterData[] = masterData) =>
+const pasang = (daftarTugas: Task[] = tasks, daftarMaster: MasterData[] = masterData, terbuka = true) =>
   render(
-    <SprintSection
-      sprints={[sprint]}
-      tasks={daftarTugas}
-      masterData={daftarMaster}
-      projectMembers={projectMembers}
-      expandedSprintId={null}
-      setExpandedSprintId={() => {}}
-      renderDraggableTask={(task: Task) => <div key={task.id}>{task.title}</div>}
-      handleStartSprint={() => {}}
-      handleCompleteSprint={() => {}}
-      handleDeleteSprint={() => {}}
-      canEditPlanning={false}
-      setEditingSprint={() => {}}
-      setIsEditSprintModalOpen={() => {}}
-    />
+    <DragDropContext onDragEnd={() => {}}>
+      <SprintSection
+        sprints={[sprint]}
+        tasks={daftarTugas}
+        masterData={daftarMaster}
+        projectMembers={projectMembers}
+        expandedSprintId={terbuka ? sprint.id : ""}
+        setExpandedSprintId={() => {}}
+        renderDraggableTask={(task: Task) => <div key={task.id}>{task.title}</div>}
+        handleStartSprint={() => {}}
+        handleCompleteSprint={() => {}}
+        handleDeleteSprint={() => {}}
+        canEditPlanning={false}
+        setEditingSprint={() => {}}
+        setIsEditSprintModalOpen={() => {}}
+      />
+    </DragDropContext>
   );
 
 /** Angka besar di atas sebuah label kartu ringkasan. */
@@ -216,4 +217,10 @@ describe("panel beban per anggota", () => {
     expect(screen.getByText("Belum ada tugas yang ditugaskan")).toBeInTheDocument();
     expect(screen.queryByText("Siti Aminah")).toBeNull();
   });
+});
+
+it("menyembunyikan beban anggota ketika sprint dilipat", () => {
+  pasang(tasks, masterData, false);
+  expect(screen.queryByTestId("kartu-beban")).toBeNull();
+  expect(screen.getByText(/25%/)).toBeInTheDocument();
 });
