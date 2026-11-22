@@ -280,7 +280,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             meetings.map((meeting: any) => (
               <div
                 key={meeting.id}
-                className="group p-3 rounded-xl border border-border-subtle/70 hover:border-info-border/60 transition-all cursor-pointer bg-surface shadow-2xs"
+                className="group p-3 rounded-xl border border-border-panel-divider/70 hover:border-info/40 transition-all cursor-pointer bg-surface shadow-2xs"
                 onClick={() => setCurrentView("meetingNotes")}
               >
                 <div className="text-xs font-medium text-content-strong line-clamp-1 mb-1 leading-normal">
@@ -317,7 +317,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             documents.map((doc: any) => (
               <div
                 key={doc.id}
-                className="group p-3 rounded-xl border border-border-subtle hover:border-success-border/60 hover:shadow-2xs transition-all cursor-pointer bg-surface"
+                className="group p-3 rounded-xl border border-border-panel-divider hover:border-success/40 hover:shadow-2xs transition-all cursor-pointer bg-surface"
                 onClick={() => setCurrentView("wiki")}
               >
                 <div className="text-xs font-medium text-content-strong leading-snug line-clamp-1 mb-1">

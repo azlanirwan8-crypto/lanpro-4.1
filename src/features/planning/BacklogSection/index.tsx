@@ -225,7 +225,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
               placeholder={t("planning.searchBacklog")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-7 pr-2 h-7 bg-surface-sunken/70 border border-border-subtle/80 rounded-md text-[11px] font-normal outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 focus:bg-surface transition-all shadow-2xs"
+              className="w-full pl-7 pr-2 h-7 bg-surface-sunken/70 border border-border-panel-divider/80 rounded-md text-[11px] font-normal outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 focus:bg-surface transition-all shadow-2xs"
             />
           </div>
           <div className="w-[42%] max-w-[9.5rem] shrink-0 flex items-center gap-1.5 min-w-0">
@@ -243,7 +243,8 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
                 type="priority"
                 masterData={masterData}
                 className="w-full"
-                buttonClassName="h-7 w-full bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-2 text-[11px] font-normal"
+                polos
+                buttonClassName="h-7 w-full shadow-2xs px-2 text-[11px] font-normal focus-visible:outline-2 focus-visible:outline-primary"
               />
             </div>
           </div>
@@ -323,7 +324,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
               <span className="text-xs font-normal text-content-secondary leading-none">
                 {t("planning.standaloneBacklog")}
               </span>
-              <div className="ml-auto text-[10px] font-normal text-content-secondary bg-surface-muted px-1.5 py-1 rounded-md border border-border-divider/60">
+              <div className="ml-auto text-[10px] font-normal text-content-secondary bg-surface-muted px-1.5 py-1 rounded-md border border-border-panel-divider/60">
                 {items.length}
               </div>
             </div>,

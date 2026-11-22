@@ -89,7 +89,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
 
   return (
     <div className="p-2 bg-surface border-t border-border-divider shrink-0 shadow-[0_-2px_4px_-1px_rgba(0,0,0,0.03)] z-20">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 border border-border-subtle rounded-xl bg-surface-sunken shadow-soft p-1.5 sm:p-1">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 border border-border-panel-divider rounded-xl bg-surface-sunken shadow-soft p-1.5 sm:p-1">
         <div className="flex items-center gap-2 w-full sm:w-auto flex-1 min-w-0">
           <div className="relative pl-1 shrink-0">
             <button
@@ -124,7 +124,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
                  benar-benar bisa menutupi lembar bawah notifikasi (z-[44]);
                  angkanya diturunkan supaya tidak menjanjikan jangkauan yang
                  tidak ia punya. */
-              <div className="absolute left-0 bottom-full mb-2 w-48 bg-surface border border-border-subtle rounded-lg shadow-xl z-40 overflow-hidden animate-dropdown">
+              <div className="absolute left-0 bottom-full mb-2 w-48 bg-surface border border-border-panel-divider rounded-lg shadow-xl z-40 overflow-hidden animate-dropdown">
                 {mArr
                   .filter((m) => m.type === "issue_type")
                   .filter((m) => legal.split("|").includes(m.label))
@@ -216,6 +216,8 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
                   color: p.color,
                 }))}
               type="priority"
+              polos
+              buttonClassName="focus-visible:outline-2 focus-visible:outline-primary"
               masterData={mArr}
               className="w-full"
             />

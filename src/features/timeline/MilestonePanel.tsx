@@ -137,7 +137,7 @@ export const MilestonePanel: React.FC<MilestonePanelProps> = ({
 
   return (
     <section
-      className="shrink-0 rounded-md border border-border-subtle/80 bg-surface px-3 py-2 md:px-5 md:py-3 shadow-2xs"
+      className="shrink-0 rounded-md border border-border-panel-divider/80 bg-surface px-3 py-2 md:px-5 md:py-3 shadow-2xs"
       data-testid="milestone-panel"
     >
       <button
@@ -187,13 +187,13 @@ export const MilestonePanel: React.FC<MilestonePanelProps> = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t("roadmap.milestoneNamePlaceholder")}
-              className="flex-1 min-w-0 rounded-md border border-border-subtle bg-surface-muted px-3 py-2 text-sm text-content placeholder:text-content-subtle focus:outline-none focus:ring-1 focus:ring-primary"
+              className="flex-1 min-w-0 rounded-md border border-border-panel-divider bg-surface-muted px-3 py-2 text-sm text-content placeholder:text-content-subtle focus-visible:outline-2 focus-visible:outline-primary"
             />
             <input
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="rounded-md border border-border-subtle bg-surface-muted px-3 py-2 text-sm text-content focus:outline-none focus:ring-1 focus:ring-primary sm:w-auto w-full"
+              className="rounded-md border border-border-panel-divider bg-surface-muted px-3 py-2 text-sm text-content focus-visible:outline-2 focus-visible:outline-primary sm:w-auto w-full"
             />
             <button
               type="submit"
@@ -218,7 +218,7 @@ export const MilestonePanel: React.FC<MilestonePanelProps> = ({
                 <li
                   key={m.id}
                   className={cn(
-                    "flex flex-wrap items-center gap-2 rounded-md border border-border-subtle bg-surface-muted px-3 py-2",
+                    "flex flex-wrap items-center gap-2 rounded-md border border-border-panel-divider bg-surface-muted px-3 py-2",
                     m.status === "done" && "opacity-70"
                   )}
                 >
@@ -227,13 +227,13 @@ export const MilestonePanel: React.FC<MilestonePanelProps> = ({
                       <input
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
-                        className="flex-1 min-w-[120px] rounded border border-border-subtle bg-surface px-2 py-1 text-sm text-content"
+                        className="flex-1 min-w-[120px] rounded border border-border-panel-divider bg-surface px-2 py-1 text-sm text-content"
                       />
                       <input
                         type="date"
                         value={editDue}
                         onChange={(e) => setEditDue(e.target.value)}
-                        className="rounded border border-border-subtle bg-surface px-2 py-1 text-sm text-content"
+                        className="rounded border border-border-panel-divider bg-surface px-2 py-1 text-sm text-content"
                       />
                       <button
                         type="button"

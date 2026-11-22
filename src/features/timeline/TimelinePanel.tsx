@@ -670,7 +670,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
         actions={
           <div className="flex items-center gap-2 md:gap-3 flex-wrap w-full md:w-auto">
             <TugasScopeToggle value={lingkup} onChange={setLingkup} />
-            <div className="flex items-center gap-1 md:gap-1.5 bg-surface-sunken/80 p-1 rounded-md border border-border-subtle/80">
+            <div className="flex items-center gap-1 md:gap-1.5 bg-surface-sunken/80 p-1 rounded-md border border-border-panel-divider/80">
               <button
                 type="button"
                 onClick={() => {
@@ -698,7 +698,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               </button>
             </div>
 
-            <div className="flex bg-surface rounded-md border border-border-subtle/80 p-1 shadow-2xs items-center gap-0.5">
+            <div className="flex bg-surface rounded-md border border-border-panel-divider/80 p-1 shadow-2xs items-center gap-0.5">
               <button
                 type="button"
                 onClick={() => setPixelsPerDay((prev) => Math.max(4, prev - 4))}
@@ -784,7 +784,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               {isExportMenuOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 mt-2 w-48 bg-surface rounded-md shadow-md border border-border-subtle/80 py-1.5 z-50"
+                  className="absolute right-0 mt-2 w-48 bg-surface rounded-md shadow-md border border-border-panel-divider/80 py-1.5 z-50"
                 >
                   <button
                     type="button"
@@ -833,7 +833,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
             yang tugasnya belum bertanggal, dan "My Tasks" yang kosong tampil
             identik — kanvas kosong tanpa penjelasan. */}
         {tasks.length === 0 || !punyaTanggal ? (
-          <div className="shrink-0 rounded-lg border border-dashed border-border-subtle/80 bg-surface-muted/40 px-4 py-5 text-center">
+          <div className="shrink-0 rounded-lg border border-dashed border-border-panel-divider/80 bg-surface-muted/40 px-4 py-5 text-center">
             <p className="text-xs font-medium text-content-body">
               {tasks.length === 0
                 ? lingkup === "mine"
@@ -1226,7 +1226,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                       timelineDays.map((d: any, i: number) => (
                         <div
                           key={"grid-" + d.toISOString()}
-                          className={`shrink-0 border-r ${d.getDay() === 0 || d.getDay() === 6 ? "bg-surface-muted/40 border-border-subtle/50" : "border-border-faint/50"}`}
+                          className={`shrink-0 border-r ${d.getDay() === 0 || d.getDay() === 6 ? "bg-surface-muted/40 border-border-panel-divider/50" : "border-border-faint/50"}`}
                           style={{ width: `${pixelsPerDay}px` }}
                         />
                       ))}

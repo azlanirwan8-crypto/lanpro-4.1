@@ -123,7 +123,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
           isCompact ? "p-2 gap-1.5" : "p-3 gap-2",
           task.isBlocked
             ? "border-l-danger border-danger/30 bg-danger/5 hover:border-danger shadow-xs"
-            : "border-border-subtle/80",
+            : "border-border-panel-divider/80",
           hasUnfinishedSubtasks && "border-danger/30 bg-danger/5",
           isDragging &&
             "z-[9999] cursor-grabbing opacity-90 shadow-xl ring-2 ring-primary !transition-none pointer-events-none",

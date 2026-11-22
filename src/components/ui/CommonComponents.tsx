@@ -187,12 +187,12 @@ const KONTROL_NETRAL =
 const KONTROL_KECIL =
   "px-2 py-0.5 bg-surface border border-border-subtle rounded-md text-[10px] font-normal uppercase tracking-tight text-content-body";
 const KONTROL_BENING =
-  "px-1.5 py-0.5 bg-surface border border-transparent hover:border-border-subtle rounded text-[12px] font-normal";
+  "px-1.5 py-0.5 bg-surface border border-transparent hover:border-border-panel-divider rounded text-[12px] font-normal";
 /* #814 — versi borderless-until-hover untuk baris tabel isu: bingkai hanya
  * muncul saat hover, ritmenya sama dengan `KONTROL_BENING`; yang berbeda hanya
  * huruf kapital 10 px milik status/prioritas (#782). */
 const KONTROL_KECIL_BENING =
-  "px-1.5 py-0.5 bg-surface border border-transparent hover:border-border-subtle rounded text-[10px] font-normal uppercase tracking-tight text-content-body";
+  "px-1.5 py-0.5 bg-surface border border-transparent hover:border-border-panel-divider rounded text-[10px] font-normal uppercase tracking-tight text-content-body";
 const CHIP_BIASA = "px-1.5 py-0.5 border rounded font-normal text-xs tracking-tight";
 
 /** Warna chip selalu milik baris MasterData - satu komponen supaya panel tidak bisa menulis chip-nya sendiri lagi (#590). */
@@ -694,7 +694,7 @@ export const StyledDropdown = ({
               maxWidth: "min(28rem, 92vw)",
               zIndex: 10000,
             }}
-            className="bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden ring-1 ring-border-faint flex flex-col max-h-[300px] animate-dropdown"
+            className="bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-border-panel-divider overflow-hidden ring-1 ring-border-faint flex flex-col max-h-[300px] animate-dropdown"
           >
             {/*
                 `min-h-0` wajib (#294). Induknya `flex flex-col max-h-[300px]`

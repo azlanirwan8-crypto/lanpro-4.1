@@ -60,7 +60,7 @@ export function Tabs<T extends string>({
       <div
         role="tablist"
         className={cn(
-          "flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80 shrink-0 shadow-2xs",
+          "flex bg-surface-muted p-0.5 rounded-md border border-border-panel-divider/80 shrink-0 shadow-2xs",
           className
         )}
       >

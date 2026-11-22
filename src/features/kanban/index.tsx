@@ -210,7 +210,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                     isCompact ? "w-[200px] sm:w-[240px]" : "w-[220px] sm:w-[270px]"
                   )}
                 >
-                  <div className="flex items-center justify-between bg-surface-sunken/80 border border-border-subtle/80 px-2.5 py-1.5 rounded-md shadow-2xs transition-all">
+                  <div className="flex items-center justify-between bg-surface-sunken/80 border border-border-panel-divider/80 px-2.5 py-1.5 rounded-md shadow-2xs transition-all">
                     <div className="flex items-center gap-1.5 min-w-0">
                       {status.icon ? (
                         <RenderIcon
@@ -228,7 +228,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                         {status.label}
                       </span>
                     </div>
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-normal bg-surface text-content-secondary border border-border-subtle/60 shadow-2xs shrink-0">
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-normal bg-surface text-content-secondary border border-border-panel-divider/60 shadow-2xs shrink-0">
                       {taskCount}
                     </span>
                   </div>
@@ -252,7 +252,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                     {/* Epic Card Content */}
                     <div
                       className={cn(
-                        "bg-surface rounded-lg shadow-2xs border border-border-subtle/80 border-l-4 border-l-primary transition-all duration-200 hover:border-primary/30",
+                        "bg-surface rounded-lg shadow-2xs border border-border-panel-divider/80 border-l-4 border-l-primary transition-all duration-200 hover:border-primary/30",
                         isCompact ? "p-2" : "p-2.5"
                       )}
                     >
@@ -312,7 +312,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                   <div className="sticky left-0 z-50 bg-surface border-r border-border-divider/80 px-3.5 py-3 relative">
                     <div
                       className={cn(
-                        "bg-surface-sunken/70 rounded-lg border border-dashed border-border-subtle h-fit p-3",
+                        "bg-surface-sunken/70 rounded-lg border border-dashed border-border-panel-divider h-fit p-3",
                         isCompact ? "p-2.5" : "p-3"
                       )}
                     >
@@ -373,7 +373,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                     <div className="sticky left-0 z-50 bg-surface border-r border-border-divider/80 px-3.5 py-3 relative">
                       <div
                         className={cn(
-                          "bg-surface rounded-lg shadow-2xs border border-border-subtle/80 border-l-4 p-3 transition-all",
+                          "bg-surface rounded-lg shadow-2xs border border-border-panel-divider/80 border-l-4 p-3 transition-all",
                           isUnassigned
                             ? "border-l-slate-400 bg-surface-sunken/50"
                             : "border-l-primary",

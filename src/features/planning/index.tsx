@@ -137,7 +137,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                   : gayaLabel(variant === "card" ? hexPrioritas : hexStatus)
               }
               className={cn(
-                "transition-all duration-200 ease-out select-none border border-border-subtle/80 border-l-4",
+                "transition-all duration-200 ease-out select-none border border-border-panel-divider/80 border-l-4",
                 !task.isBlocked && "label-edge label-wash",
                 variant === "card"
                   ? "group p-3 rounded-lg shadow-2xs cursor-pointer hover:shadow-xs hover:brightness-[0.985]"
@@ -224,7 +224,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
       />
       <DragDropContext onDragEnd={handleDragEndPlanning}>
         <div className="flex flex-col md:flex-row flex-1 gap-5 w-full h-full min-h-0 px-2 sm:px-4 md:px-5 pt-3 md:pt-4 pb-20 sm:pb-4 md:pb-5">
-          <div className="w-full md:w-[320px] lg:w-[360px] xl:w-[380px] h-[220px] sm:h-[280px] md:h-full surface-panel shrink-0 flex flex-col bg-surface border border-border-subtle/80 rounded-lg overflow-hidden shadow-2xs">
+          <div className="w-full md:w-[320px] lg:w-[360px] xl:w-[380px] h-[220px] sm:h-[280px] md:h-full surface-panel shrink-0 flex flex-col bg-surface border border-border-panel-divider/80 rounded-lg overflow-hidden shadow-2xs">
             <Droppable droppableId="backlog">
               {(provided: any) => (
                 <div

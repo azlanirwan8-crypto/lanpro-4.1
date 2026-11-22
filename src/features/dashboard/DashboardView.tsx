@@ -681,7 +681,8 @@ export function DashboardView(props: DashboardViewProps) {
                 options={sprintFilterOptions}
                 masterData={[]}
                 className="w-full min-w-0"
-                buttonClassName="h-7 w-full min-w-0 bg-surface-muted rounded-md border border-border-subtle hover:border-border-subtle shadow-2xs px-2 text-[11px] font-medium text-content-body"
+                polos
+                buttonClassName="h-7 w-full min-w-0 shadow-2xs px-2 text-[11px] font-medium text-content-body focus-visible:outline-2 focus-visible:outline-primary"
               />
             </div>
 
@@ -707,7 +708,7 @@ export function DashboardView(props: DashboardViewProps) {
           <div
             role="alert"
             data-testid="dashboard-galat-muat"
-            className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 mb-6 rounded-md border border-border-subtle bg-surface-sunken"
+            className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 mb-6 rounded-md border border-border-panel-divider bg-surface-sunken"
           >
             <div>
               <p className="text-xs font-medium text-content-strong">
@@ -1315,7 +1316,7 @@ export function DashboardView(props: DashboardViewProps) {
                           );
                         } else {
                           capacityBadge = (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-surface-muted text-content-secondary border border-border-subtle">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-surface-muted text-content-secondary border border-border-panel-divider">
                               <Minus className="w-3 h-3" /> {t("dashboard.available")}
                             </span>
                           );

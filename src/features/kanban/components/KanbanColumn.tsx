@@ -71,7 +71,7 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
                 "px-2 py-0.5 rounded-md text-[10px] font-normal border",
                 overWip
                   ? "bg-warning/15 text-warning-text border-warning/40"
-                  : "bg-surface-muted text-content-secondary border-border-subtle/60"
+                  : "bg-surface-muted text-content-secondary border-border-panel-divider/60"
               )}
               title={
                 wipLimit > 0

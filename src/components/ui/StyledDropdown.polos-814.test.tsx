@@ -42,7 +42,7 @@ describe("#814 — pemicu dropdown polos di baris tabel isu", () => {
 
     expect(token(b)).toContain("border-transparent");
     expect(token(b)).not.toContain("border-border-subtle");
-    expect(b.className).toContain("hover:border-border-subtle");
+    expect(b.className).toContain("hover:border-border-panel-divider");
     expect(b.className).toContain("text-[10px]");
     expect(label.className).toContain("uppercase");
   });

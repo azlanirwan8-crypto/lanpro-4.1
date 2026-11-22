@@ -129,8 +129,8 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                     ? "border-red-400 ring-2 ring-red-50"
                     : "border-primary ring-2 ring-primary/10"
                   : sprint.status === "planned"
-                    ? "border-border-divider/90 hover:border-primary/40"
-                    : "border-border-divider/60 bg-surface-sunken/40 opacity-95",
+                    ? "border-border-panel-divider/90 hover:border-primary/40"
+                    : "border-border-panel-divider/60 bg-surface-sunken/40 opacity-95",
                 isExpanded && sprint.status !== "active" ? "border-primary/30" : ""
               )}
             >
@@ -160,7 +160,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                 : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                               : sprint.status === "planned"
                                 ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
-                                : "bg-surface-sunken text-content-muted border-border-divider"
+                                : "bg-surface-sunken text-content-muted border-border-panel-divider"
                           )}
                         >
                           {sprint.status === "active"
@@ -247,7 +247,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                 activeSprintMenuId === sprint.id ? null : sprint.id
                               );
                             }}
-                            className="btn-animation waves-effect waves-light p-2 text-content-subtle hover:text-content-strong hover:bg-surface border border-border-subtle rounded-lg transition-colors cursor-pointer"
+                            className="btn-animation waves-effect waves-light p-2 text-content-subtle hover:text-content-strong hover:bg-surface border border-border-panel-divider rounded-lg transition-colors cursor-pointer"
                             title={t("planning.sprintOptions", "Opsi Sprint")}
                           >
                             <MoreVertical className="w-4 h-4" />
@@ -255,7 +255,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
 
                           {activeSprintMenuId === sprint.id && (
                             <div
-                              className="absolute right-0 mt-1.5 w-36 bg-surface border border-border-divider rounded-xl shadow-lg z-50 overflow-hidden py-1"
+                              className="absolute right-0 mt-1.5 w-36 bg-surface border border-border-panel-divider rounded-xl shadow-lg z-50 overflow-hidden py-1"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <button
@@ -453,10 +453,10 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                 "min-h-[80px] transition-all duration-200 rounded-md p-2.5 border border-dashed",
                                 snapshot.isDraggingOver
                                   ? "bg-primary-surface/10 border-primary shadow-2xs"
-                                  : "border-border-divider/80 bg-surface",
+                                  : "border-border-panel-divider/80 bg-surface",
                                 sprintTasks.length === 0 &&
                                   !snapshot.isDraggingOver &&
-                                  "border-border-divider"
+                                  "border-border-panel-divider"
                               )}
                             >
                               {sprintTasks.length === 0 && !snapshot.isDraggingOver ? (
@@ -483,7 +483,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                     return [
                                       <div
                                         key={`sprint-header-${epic.id}`}
-                                        className="label-edge flex items-center justify-between px-3 py-1.5 border border-l-4 border-border-divider rounded-md mb-2 mt-2 first:mt-0 cursor-pointer hover:bg-surface-muted/60 transition-colors"
+                                        className="label-edge flex items-center justify-between px-3 py-1.5 border border-l-4 border-border-panel-divider rounded-md mb-2 mt-2 first:mt-0 cursor-pointer hover:bg-surface-muted/60 transition-colors"
                                         style={gayaLabel(hexEpic)}
                                         onClick={() => toggleExpand(sprint.id, `epic-${epic.id}`)}
                                       >
@@ -543,7 +543,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                     return [
                                       <div
                                         key="sprint-header-standalone"
-                                        className="flex items-center justify-between px-3 py-1.5 bg-surface-muted/70 border border-border-divider/60 rounded-md mb-2 mt-2 first:mt-0 cursor-pointer hover:bg-surface-muted transition-colors"
+                                        className="flex items-center justify-between px-3 py-1.5 bg-surface-muted/70 border border-border-panel-divider/60 rounded-md mb-2 mt-2 first:mt-0 cursor-pointer hover:bg-surface-muted transition-colors"
                                         onClick={() => toggleExpand(sprint.id, "standalone")}
                                       >
                                         <div className="flex items-center gap-2">
@@ -561,7 +561,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                             {t("planning.standaloneTasks")}
                                           </span>
                                         </div>
-                                        <div className="text-[10px] font-normal text-content-secondary bg-surface border border-border-divider/60 px-1.5 py-1 rounded-md">
+                                        <div className="text-[10px] font-normal text-content-secondary bg-surface border border-border-panel-divider/60 px-1.5 py-1 rounded-md">
                                           {items.length}
                                         </div>
                                       </div>,
