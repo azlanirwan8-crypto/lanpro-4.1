@@ -3065,7 +3065,7 @@ function AppContainer() {
 
       // Real-time Floating Toast Alert
       toast.custom(
-        (t: any) => (
+        (toastInstance: any) => (
           <div className="max-w-md w-full bg-surface-inverse-strong border border-emerald-500/60 shadow-2xl rounded-xl pointer-events-auto flex p-4 items-center justify-between gap-3 text-content-inverse ring-1 ring-emerald-500/30">
             <div className="flex items-center gap-3 min-w-0">
               <div className="p-2.5 bg-emerald-500/20 text-emerald-400 rounded-xl shrink-0">
@@ -3083,7 +3083,7 @@ function AppContainer() {
             </div>
             <button
               onClick={() => {
-                toast.dismiss(t);
+                toast.dismiss(toastInstance.id);
                 setCurrentView("qa");
                 setQaInitialStatusFilter("Retest");
                 window.dispatchEvent(
