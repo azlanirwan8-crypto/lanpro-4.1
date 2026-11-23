@@ -68,7 +68,12 @@ it("shows generated drafts before saving only actionable choices to the active s
     }
     if (url.endsWith("/save-drafts")) {
       const body = options?.body as { drafts: Array<{ id: string }> };
-      expect(body.drafts).toEqual([expect.objectContaining({ title: draft.title })]);
+      expect(body.drafts).toEqual([
+        expect.objectContaining({
+          title: draft.title,
+          expected: "Reviewer memeriksa pesan validasi",
+        }),
+      ]);
       return { data: [{ id: body.drafts[0].id, status: "saved" }] };
     }
     throw new Error("Unexpected request");
@@ -83,6 +88,12 @@ it("shows generated drafts before saving only actionable choices to the active s
   expect(await screen.findByText("Negatif · Kirim tanpa email")).toBeInTheDocument();
   expect(screen.getByRole("checkbox", { name: /Perlu konfirmasi/ })).toBeDisabled();
   expect(onSaved).not.toHaveBeenCalled();
+  expect(screen.getByRole("button", { name: "Simpan 0 ke UAT" })).toBeDisabled();
+  fireEvent.click(screen.getAllByText("Langkah dan rujukan")[0]);
+  fireEvent.change(screen.getByRole("textbox", { name: "Hasil yang diharapkan" }), {
+    target: { value: "Reviewer memeriksa pesan validasi" },
+  });
+  fireEvent.click(screen.getByRole("checkbox", { name: /Negatif/ }));
   fireEvent.click(screen.getByRole("button", { name: "Simpan 1 ke UAT" }));
   await waitFor(() => expect(onSaved).toHaveBeenCalledTimes(1));
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -90,4 +101,41 @@ it("shows generated drafts before saving only actionable choices to the active s
     "/api/projects/p1/qa-test-suites/s1/save-drafts",
     expect.any(Object)
   );
+});
+
+it("reopens a pending threshold question and requires a decision and explicit selection", async () => {
+  const register = createRef<(() => void) | null>();
+  const question = {
+    ...draft,
+    id: "f9a15762-b9ec-4612-8c99-52fcc541992b",
+    kind: "clarify",
+    title: "Tepat Rp10 juta",
+    expected: "Apakah perlu supervisor?",
+    sources: [{ ...source, quote: "Di atas Rp10 juta" }],
+  };
+  const onSaved = jest.fn().mockResolvedValue(undefined);
+  jest.mocked(apiRequest).mockImplementation(async (url, options) => {
+    if (url.endsWith("/selected-sources")) return { data: [source], missing: 0, questions: [question] };
+    if (url.includes("/generation-sources?")) return { data: [source] };
+    if (url.endsWith("/save-drafts")) {
+      expect(options?.body).toEqual({ drafts: [expect.objectContaining({
+        id: question.id, kind: "positive", expected: "Persetujuan diperlukan tepat Rp10 juta",
+      })] });
+      return { data: [{ id: question.id, status: "saved" }] };
+    }
+    throw new Error("Unexpected request");
+  });
+  render(<QAGeneration suite={suite} register={register} onSaved={onSaved} />);
+  act(() => register.current?.());
+  fireEvent.click(await screen.findByRole("button", { name: /Pertanyaan terbuka/ }));
+  await waitFor(() => expect(screen.getByText("Di atas Rp10 juta")).toBeVisible());
+  expect(screen.getByRole("checkbox")).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "Catat keputusan" }));
+  fireEvent.click(screen.getByRole("checkbox"));
+  expect(screen.getByRole("button", { name: "Simpan 1 ke UAT" })).toBeDisabled();
+  fireEvent.change(screen.getByRole("textbox", { name: "Hasil yang diharapkan" }), {
+    target: { value: "Persetujuan diperlukan tepat Rp10 juta" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Simpan 1 ke UAT" }));
+  await waitFor(() => expect(onSaved).toHaveBeenCalledTimes(1));
 });

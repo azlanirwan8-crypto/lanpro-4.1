@@ -2,6 +2,7 @@ import express from "express";
 import request from "supertest";
 import { generateContentWithFallback } from "../services/ai.service";
 import {
+  storeQAQuestions,
   loadQAGenerationSuite,
   loadQASources,
   saveQAGeneratedCases,
@@ -22,6 +23,7 @@ jest.mock("../repositories/qa-source.repository", () => ({
   saveQAGeneratedCases: jest.fn(),
   normalizedQATitle: (title: string) => title.trim().toLowerCase(),
   setQASourceRefs: jest.fn(),
+  storeQAQuestions: jest.fn(),
 }));
 
 const app = express();
@@ -37,6 +39,8 @@ const draft = {
   testData: "",
   steps: ["Kirim tanpa email"],
   expected: "Validasi tampil",
+  rule: "Email wajib",
+  quotes: ["Email wajib"],
   refs: [0],
 };
 const geminiKey = process.env.GEMINI_API_KEY;
@@ -80,6 +84,38 @@ it("keeps only grounded, unique drafts and resolves source labels on the server"
     title: draft.title,
     sources: [{ ...source, label: "BRD" }],
   });
+});
+
+it("keeps a conflicting threshold open with both verified excerpts", async () => {
+  const meeting = { id: "m1", kind: "meeting" as const };
+  const quotes = ["Di atas Rp10 juta perlu supervisor", "Mulai Rp10 juta perlu supervisor"];
+  jest.mocked(loadQASources).mockResolvedValue([
+    { ...source, title: "BRD", description: quotes[0] },
+    { ...meeting, title: "UAT", summary: quotes[1] },
+  ]);
+  const conflict = {
+    ...draft,
+    kind: "clarify",
+    title: "Tepat Rp10 juta",
+    expected: "Apakah perlu supervisor?",
+    refs: [0, 1],
+    quotes,
+  };
+  jest.mocked(generateContentWithFallback).mockResolvedValue({
+    text: JSON.stringify([
+      conflict,
+      { ...conflict, kind: "positive", title: "Rp10.000.001", expected: "Perlu supervisor" },
+      { ...draft, title: "Kutipan palsu", quotes: ["always approved"] },
+    ]),
+  });
+  const res = await request(app)
+    .post("/p1/s1/generate")
+    .send({ sources: [source, meeting] })
+    .expect(200);
+  expect(res.body.data).toHaveLength(2);
+  expect(res.body.data[1].kind).toBe("positive");
+  expect(res.body.data[0].sources.map((s: { quote: string }) => s.quote)).toEqual(quotes);
+  expect(storeQAQuestions).toHaveBeenCalledWith("p1", "s1", [res.body.data[0]]);
 });
 
 it("rejects clarification drafts and saves selected executable drafts to the URL suite", async () => {

@@ -58,6 +58,39 @@ export async function setQASourceRefs(projectId: string, suiteId: string, refs: 
   }
 }
 
+export async function readQAQuestions(projectId: string, suiteId: string) {
+  const connection = await db.getConnection();
+  try {
+    const [rows] = await connection.query(
+      'SELECT "generationQuestions" FROM QATestSuites WHERE projectId = ? AND id = ?',
+      [projectId, suiteId]
+    );
+    return Object.values(
+      (rows as Array<{ generationQuestions: Record<string, unknown> }>)[0]?.generationQuestions ||
+        {}
+    );
+  } finally {
+    connection.release();
+  }
+}
+
+export async function storeQAQuestions(
+  projectId: string,
+  suiteId: string,
+  questions: Array<{ id: string }>
+) {
+  const connection = await db.getConnection();
+  try {
+    const entries = Object.fromEntries(questions.map((question) => [question.id, question]));
+    await connection.query(
+      'UPDATE QATestSuites SET "generationQuestions" = "generationQuestions" || CAST(? AS jsonb) WHERE projectId = ? AND id = ?',
+      [JSON.stringify(entries), projectId, suiteId]
+    );
+  } finally {
+    connection.release();
+  }
+}
+
 type SourceRow = {
   id: string;
   title: string;
@@ -144,10 +177,12 @@ export async function saveQAGeneratedCases(
   try {
     await connection.query("BEGIN");
     const [suites] = await connection.query(
-      "SELECT phase FROM QATestSuites WHERE projectId = ? AND id = ? FOR UPDATE",
+      'SELECT phase, "generationQuestions" FROM QATestSuites WHERE projectId = ? AND id = ? FOR UPDATE',
       [projectId, suiteId]
     );
-    const suite = (suites as Array<{ phase: string }>)[0];
+    const suite = (
+      suites as Array<{ phase: string; generationQuestions?: Record<string, unknown> }>
+    )[0];
     if (!suite) {
       await connection.query("ROLLBACK");
       return null;
@@ -185,12 +220,24 @@ export async function saveQAGeneratedCases(
           suiteId,
           suiteId,
           rowNum,
-          JSON.stringify(draft.details),
+          JSON.stringify({
+            ...draft.details,
+            clarification: suite.generationQuestions?.[draft.id],
+          }),
         ]
       );
       titles.add(title);
       ids.add(draft.id);
       results.push({ id: draft.id, status: "saved" });
+    }
+    const remaining = { ...suite.generationQuestions };
+    const resolved = results.filter((row) => row.status === "saved" && remaining[row.id]);
+    if (resolved.length) {
+      for (const row of resolved) delete remaining[row.id];
+      await connection.query(
+        'UPDATE QATestSuites SET "generationQuestions" = ? WHERE projectId = ? AND id = ?',
+        [JSON.stringify(remaining), projectId, suiteId]
+      );
     }
     await connection.query("COMMIT");
     return results;

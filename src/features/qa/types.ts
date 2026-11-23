@@ -18,7 +18,9 @@ export type QAGenerationDraft = {
   testData: string;
   steps: string[];
   expected: string;
-  sources: QAGenerationSource[];
+  id?: string;
+  rule?: string;
+  sources: Array<QAGenerationSource & { quote?: string }>;
 };
 
 export interface QAEvidence {
@@ -57,7 +59,8 @@ export interface QATestCase {
     kind: "positive" | "negative";
     preconditions: string;
     testData: string;
-    sources: Array<{ id: string; kind: string; label: string }>;
+    rule?: string;
+    sources: Array<{ id: string; kind: string; label: string; quote?: string }>;
   } | null;
 }
 

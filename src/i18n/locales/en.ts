@@ -2653,6 +2653,10 @@ export const en = {
     min8Chars: "Min 8 characters",
   },
   qaGenerate: {
+    openQuestions: "Open questions ({{count}})",
+    resolve: "Record decision",
+    caseKind: "Scenario type",
+    stepLines: "Steps (one per line)",
     title: "Generate test cases with AI",
     sources: "Choose sources",
     review: "Review drafts",

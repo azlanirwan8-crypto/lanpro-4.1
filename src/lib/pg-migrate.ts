@@ -657,6 +657,10 @@ export async function runMigrations(pool: Pool): Promise<void> {
       `ALTER TABLE "QATestSuites" ADD COLUMN IF NOT EXISTS "generationSources" JSONB NOT NULL DEFAULT '[]';`
     );
 
+    await client.query(
+      `ALTER TABLE "QATestSuites" ADD COLUMN IF NOT EXISTS "generationQuestions" JSONB NOT NULL DEFAULT '{}';`
+    );
+
     // ── QATestCases ──────────────────────────────────────────────────────────
     await client.query(`
       CREATE TABLE IF NOT EXISTS "QATestCases" (

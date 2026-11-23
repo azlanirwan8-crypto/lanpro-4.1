@@ -57,6 +57,7 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<(typeof categories)[number]>("all");
   const [drafts, setDrafts] = useState<Array<QAGenerationDraft & { id: string }> | null>(null);
+  const [questions, setQuestions] = useState<Array<QAGenerationDraft & { id: string }>>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [ready, setReady] = useState(false);
@@ -83,6 +84,7 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
       .then((result) => {
         if (!active) return;
         setSources(result.data);
+        setQuestions(result.questions || []);
         setReady(true);
         if (result.missing) setError(tr("missing"));
       })
@@ -129,9 +131,10 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
       if (drafts === null) {
         const generated = await generateSuiteDrafts(suite, sources);
         if (!mounted.current) return;
-        const rows = generated.map((draft) => ({ ...draft, id: crypto.randomUUID() }));
+        const rows = generated.map((draft) => ({ ...draft, id: draft.id || crypto.randomUUID() }));
         setDrafts(rows);
-        setSelected(rows.filter((row) => row.kind !== "clarify").map((row) => row.id));
+        setQuestions((previous) => [...previous, ...rows.filter((row) => row.kind === "clarify")]);
+        setSelected([]);
       } else {
         const saved = await saveSuiteDrafts(
           suite,
@@ -158,7 +161,15 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
     ...options.filter((row) => !chosen.has(keyOf(row))),
   ].filter((row) => category === "all" || category === row.kind);
   const blocked = review
-    ? !selected.length || drafts.some((row) => selected.includes(row.id) && !row.title.trim())
+    ? !selected.length ||
+      drafts.some(
+        (row) =>
+          selected.includes(row.id) &&
+          (!row.title.trim() ||
+            !row.expected.trim() ||
+            row.steps.length > 12 ||
+            row.steps.some((step) => !step.trim() || step.length > 500))
+      )
     : !ready || !sources.length;
 
   return (
@@ -203,6 +214,18 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
             2 · {tr("review")}
           </span>
         </h4>
+        {!review && questions.length > 0 && (
+          <button
+            className={secondary}
+            disabled={!!busy}
+            onClick={() => {
+              setDrafts(questions);
+              setSelected([]);
+            }}
+          >
+            {tr("openQuestions", { count: questions.length })}
+          </button>
+        )}
         {error && (
           <div role="alert" className="text-sm text-danger-text">
             {error}{" "}
@@ -316,50 +339,98 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
                   />
                   {tr(row.kind)} · {row.title}
                 </label>
-                <details>
-                  <summary className="cursor-pointer text-primary">{tr("details")}</summary>
-                  <div className="mt-2 space-y-2">
-                    {row.kind !== "clarify" && (
-                      <label className="block">
-                        {tr("name")}
-                        <input
-                          className={secondary + " block w-full"}
-                          value={row.title}
-                          maxLength={255}
-                          disabled={!!busy}
-                          onChange={(event) =>
-                            setDrafts(
-                              drafts.map((item) =>
-                                item.id === row.id ? { ...item, title: event.target.value } : item
+                <p className="font-medium">{row.rule}</p>
+                {row.sources.map((source, i) => (
+                  <blockquote key={i} className="border-l-2 border-border-panel-divider pl-3">
+                    <cite>{source.label}</cite>
+                    <p>{source.quote}</p>
+                  </blockquote>
+                ))}
+                <p>
+                  {row.kind === "clarify" ? tr("clarify") : tr("expected")} · {row.expected}
+                </p>
+                {row.kind === "clarify" ? (
+                  <button
+                    type="button"
+                    className={secondary}
+                    disabled={!!busy}
+                    onClick={() => {
+                      setDrafts(
+                        drafts.map((item) =>
+                          item.id === row.id ? { ...item, kind: "positive", expected: "" } : item
+                        )
+                      );
+                    }}
+                  >
+                    {tr("resolve")}
+                  </button>
+                ) : (
+                  <details open={questions.some((question) => question.id === row.id) || undefined}>
+                    <summary className="cursor-pointer text-primary">{tr("details")}</summary>
+                    <label className="block">
+                      {tr("caseKind")}
+                      <select
+                        value={row.kind}
+                        disabled={!!busy}
+                        onChange={(event) => {
+                          const kind = event.target.value === "negative" ? "negative" : "positive";
+                          setDrafts(
+                            drafts.map((item) => (item.id === row.id ? { ...item, kind } : item))
+                          );
+                        }}
+                      >
+                        <option value="positive">{tr("positive")}</option>
+                        <option value="negative">{tr("negative")}</option>
+                      </select>
+                    </label>
+                    {(["title", "preconditions", "testData", "steps", "expected"] as const).map(
+                      (field) => (
+                        <label key={field} className="block mt-2">
+                          {tr(
+                            (
+                              {
+                                title: "name",
+                                preconditions: "pre",
+                                testData: "data",
+                                steps: "stepLines",
+                                expected: "expected",
+                              } as const
+                            )[field]
+                          )}
+                          <textarea
+                            className={secondary + " block w-full bg-surface"}
+                            disabled={!!busy}
+                            maxLength={
+                              {
+                                title: 255,
+                                preconditions: 1000,
+                                testData: 1000,
+                                steps: 6011,
+                                expected: 1500,
+                              }[field]
+                            }
+                            value={field === "steps" ? row.steps.join("\n") : row[field]}
+                            onChange={(event) =>
+                              setDrafts(
+                                drafts.map((item) =>
+                                  item.id === row.id
+                                    ? {
+                                        ...item,
+                                        [field]:
+                                          field === "steps"
+                                            ? event.target.value.split("\n")
+                                            : event.target.value,
+                                      }
+                                    : item
+                                )
                               )
-                            )
-                          }
-                        />
-                      </label>
+                            }
+                          />
+                        </label>
+                      )
                     )}
-                    {row.preconditions && (
-                      <p>
-                        {tr("pre")} · {row.preconditions}
-                      </p>
-                    )}
-                    {row.testData && (
-                      <p>
-                        {tr("data")} · {row.testData}
-                      </p>
-                    )}
-                    <ol className="list-decimal pl-5">
-                      {row.steps.map((step, i) => (
-                        <li key={i}>{step}</li>
-                      ))}
-                    </ol>
-                    <p>
-                      {tr("expected")} · {row.expected}
-                    </p>
-                    <p>
-                      {tr("refs")} · {row.sources.map((source) => source.label).join(", ")}
-                    </p>
-                  </div>
-                </details>
+                  </details>
+                )}
               </article>
             ))}
           </>

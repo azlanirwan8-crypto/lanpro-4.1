@@ -250,6 +250,9 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                       ? t("qaGenerate.positive")
                       : t("qaGenerate.negative")}
                   </h4>
+                  {selectedTestCase.generationDetails.rule && (
+                    <p>{selectedTestCase.generationDetails.rule}</p>
+                  )}
                   {selectedTestCase.generationDetails.preconditions && (
                     <p>
                       {t("qaGenerate.pre")} · {selectedTestCase.generationDetails.preconditions}
@@ -265,6 +268,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                     {selectedTestCase.generationDetails.sources.map((source) => (
                       <li key={`${source.kind}:${source.id}`}>
                         {source.label} · {source.kind}
+                        {source.quote && <blockquote>{source.quote}</blockquote>}
                       </li>
                     ))}
                   </ul>

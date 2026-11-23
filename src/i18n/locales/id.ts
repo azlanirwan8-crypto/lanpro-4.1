@@ -2677,6 +2677,10 @@ export const id = {
     min8Chars: "Min 8 Karakter",
   },
   qaGenerate: {
+    openQuestions: "Pertanyaan terbuka ({{count}})",
+    resolve: "Catat keputusan",
+    caseKind: "Jenis skenario",
+    stepLines: "Langkah (satu per baris)",
     title: "Buat test case dengan AI",
     sources: "Pilih sumber",
     review: "Tinjau draf",

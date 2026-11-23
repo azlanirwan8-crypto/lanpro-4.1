@@ -41,7 +41,11 @@ export async function searchGenerationSources(
 
 export function fetchGenerationSources(
   suite: QATestSuite
-): Promise<{ data: QAGenerationSource[]; missing: number }> {
+): Promise<{
+  data: QAGenerationSource[];
+  missing: number;
+  questions?: Array<QAGenerationDraft & { id: string }>;
+}> {
   return apiRequest(`${suiteGenerationPath(suite)}/selected-sources`);
 }
 

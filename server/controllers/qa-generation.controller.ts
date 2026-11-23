@@ -1,8 +1,11 @@
+import { randomUUID } from "node:crypto";
 import type { RequestHandler } from "express";
 import { GoogleGenAI, Type } from "@google/genai";
 import { z } from "zod";
 import {
   getQASourceRefs,
+  readQAQuestions,
+  storeQAQuestions,
   listQASources,
   loadQAGenerationSuite,
   loadQASources,
@@ -14,7 +17,13 @@ import {
 import { generateContentWithFallback } from "../services/ai.service";
 
 const sourceRefs = z
-  .array(z.object({ kind: z.enum(qaSourceKinds), id: z.string().min(1).max(50) }))
+  .array(
+    z.object({
+      kind: z.enum(qaSourceKinds),
+      id: z.string().min(1).max(50),
+      quote: z.string().trim().min(1).max(500).optional(),
+    })
+  )
   .min(1)
   .max(12)
   .refine((refs) => new Set(refs.map(({ kind, id }) => `${kind}:${id}`)).size === refs.length);
@@ -30,6 +39,8 @@ const drafts = z
       testData: z.string().trim().max(1000),
       steps: z.array(text(500)).min(1).max(12),
       expected: text(1500),
+      rule: text(1000),
+      quotes: z.array(text(500)).min(1).max(12),
       refs: z.array(z.number().int().nonnegative()).min(1).max(12),
     })
   )
@@ -42,6 +53,8 @@ const draftShape = {
   testData: { type: Type.STRING },
   steps: { type: Type.ARRAY, items: { type: Type.STRING } },
   expected: { type: Type.STRING },
+  rule: { type: Type.STRING },
+  quotes: { type: Type.ARRAY, items: { type: Type.STRING } },
   refs: { type: Type.ARRAY, items: { type: Type.INTEGER } },
 };
 
@@ -95,7 +108,12 @@ export const getQASuiteSources: RequestHandler = async (req, res, next) => {
     }
     const rows = await loadQASources(projectId, refs, false);
     const data = rows.map(({ id, kind, title }) => ({ id, kind, label: title }));
-    res.json({ status: "success", data, missing: refs.length - data.length });
+    res.json({
+      status: "success",
+      data,
+      questions: await readQAQuestions(projectId, suiteId),
+      missing: refs.length - data.length,
+    });
   } catch (error) {
     next(error);
   }
@@ -156,7 +174,7 @@ export const generateQASuiteDrafts: RequestHandler = async (req, res, next) => {
           "Gabungkan aturan dokumen, alur diagram, keputusan rapat, dan acceptance criteria atau bug.",
           "Buat skenario positif dan negatif yang didukung sumber. Pertimbangkan nilai batas, perubahan status, dan regresi bila relevan.",
           "Untuk konflik atau aturan belum pasti gunakan kind clarify dan jelaskan pertanyaannya pada expected. Jangan mengarang aturan.",
-          "Isi refs dengan nomor ref yang diberikan. Hindari duplikat dengan existing.",
+          "Isi rule dengan aturan bisnis. Untuk tiap refs, isi quotes pada posisi yang sama dengan kutipan persis dari content. Untuk konflik sertakan kutipan kedua pihak dan uji batas yang disepakati secara terpisah. Isi refs dengan nomor ref yang diberikan. Hindari duplikat dengan existing.",
         ].join(" "),
         temperature: 0.2,
         responseMimeType: "application/json",
@@ -168,20 +186,29 @@ export const generateQASuiteDrafts: RequestHandler = async (req, res, next) => {
     });
     const parsed = drafts.parse(JSON.parse(response.text || "[]"));
     const titles = new Set(suite.cases.map(({ judul }) => normalizedQATitle(judul)));
-    const data = parsed.flatMap(({ refs, ...draft }) => {
+    const data = parsed.flatMap(({ refs, quotes, ...draft }) => {
       const title = normalizedQATitle(draft.title);
-      if (titles.has(title) || refs.some((ref) => ref >= evidence.length)) return [];
+      if (
+        titles.has(title) ||
+        new Set(refs).size !== refs.length ||
+        quotes.length !== refs.length ||
+        refs.some((ref, i) => !evidence[ref]?.content.includes(quotes[i]))
+      )
+        return [];
       titles.add(title);
       return [
         {
           ...draft,
-          sources: [...new Set(refs)].map((ref) => {
+          id: randomUUID(),
+          sources: refs.map((ref, i) => {
             const { id, kind, label } = evidence[ref];
-            return { id, kind, label };
+            return { id, kind, label, quote: quotes[i] };
           }),
         },
       ];
     });
+    const questions = data.filter((row) => row.kind === "clarify");
+    if (questions.length) await storeQAQuestions(projectId, suiteId, questions);
     res.json({ status: "success", data });
   } catch {
     next(Object.assign(new Error("Pembuatan draf QA gagal. Coba lagi."), { statusCode: 502 }));
@@ -191,8 +218,9 @@ export const generateQASuiteDrafts: RequestHandler = async (req, res, next) => {
 export const qaSaveDraftRequest = z.object({
   drafts: z
     .array(
-      drafts.element.omit({ refs: true }).extend({
+      drafts.element.omit({ refs: true, quotes: true, rule: true }).extend({
         id: z.uuid(),
+        rule: text(1000).optional(),
         kind: z.enum(["positive", "negative"]),
         sources: sourceRefs,
       })
@@ -217,9 +245,32 @@ export const saveQASuiteDrafts: RequestHandler = async (req, res, next) => {
         .json({ status: "error", message: "Maksimal 12 sumber per penyimpanan draf." });
       return;
     }
-    const rows = await loadQASources(projectId, refs, false);
+    const rows = await loadQASources(projectId, refs);
     if (rows.length !== refs.length) {
       res.status(422).json({ status: "error", message: "Sebagian rujukan tidak lagi tersedia." });
+      return;
+    }
+    const contents = new Map(
+      rows.map((row) => [
+        key(row),
+        [row.description, flowContent(row.canvas), row.summary, row.criteria]
+          .filter(Boolean)
+          .join("\n"),
+      ])
+    );
+    if (
+      selected.some((draft) =>
+        draft.sources.some(
+          (source) => source.quote && !contents.get(key(source))?.includes(source.quote)
+        )
+      )
+    ) {
+      res
+        .status(422)
+        .json({
+          status: "error",
+          message: "Kutipan berubah. Periksa kembali sumber sebelum menyimpan.",
+        });
       return;
     }
     const labels = new Map(rows.map((row) => [key(row), row.title]));
@@ -232,6 +283,7 @@ export const saveQASuiteDrafts: RequestHandler = async (req, res, next) => {
         steps: draft.steps.join("\n"),
         expected: draft.expected,
         details: {
+          rule: draft.rule,
           kind: draft.kind,
           preconditions: draft.preconditions,
           testData: draft.testData,
