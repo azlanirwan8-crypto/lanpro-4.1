@@ -1919,6 +1919,7 @@ export const en = {
     fullscreenPreview: "Full-screen preview",
   },
   discussion: {
+    pointDetails: "Discussion details",
     heading: "Discussion points & action items",
     aiAssistant: "AI Meeting Assistant",
     heading2: "Discussion Points & Decisions",

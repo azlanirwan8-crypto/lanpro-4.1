@@ -18,6 +18,7 @@ import { localeTanggal } from "../../../lib/localeTanggal";
 import { gayaLabel } from "../../../lib/warnaLabel";
 import { getUserAvatarHex } from "../../../components/ui/UserAvatar";
 import { SEL } from "./BagianPapan";
+import { Modal } from "../../../components/ui/Modal";
 import { Paragraf } from "./Paragraf";
 
 /**
@@ -119,6 +120,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
   onDelete,
   onToggleStatus,
 }) => {
+  const [detailOpen, setDetailOpen] = React.useState(false);
   const { t, i18n } = useTranslation();
   const isCompleted = p.status === "completed";
   const tag = Array.isArray(p.tags) ? p.tags : [];
@@ -235,6 +237,27 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
         <div className="font-normal text-content-strong leading-snug whitespace-pre-wrap break-words text-justify max-h-16 overflow-y-auto">
           <Paragraf teks={p.concern} />
         </div>
+        <button type="button" className="mt-1 text-left text-xs text-primary hover:underline" onClick={() => setDetailOpen(true)}>
+          {t("discussion.pointDetails")} · {namaPenerima.map(({ nama }) => nama).join(", ") || assigneeName || "—"} · {p.targetDate || "—"}
+        </button>
+        {detailOpen && (
+          <Modal isOpen onClose={() => setDetailOpen(false)} title={t("discussion.pointDetails")}>
+            <dl className="space-y-3">
+              {[
+                [t("discussion.concernTopic"), p.concern],
+                [t("discussion.notesLabel"), p.keterangan || p.comment],
+                [t("discussion.followUp"), p.tindakanLanjut || p.next_action],
+                [t("discussion.thPic"), namaPenerima.map(({ nama }) => nama).join(", ") || assigneeName],
+                [t("discussion.thTargetDate"), p.targetDate],
+              ].map(([label, value]) => (
+                <div key={label}>
+                  <dt className="text-xs text-content-subtle">{label}</dt>
+                  <dd className="whitespace-pre-wrap break-words text-content-body">{value || "—"}</dd>
+                </div>
+              ))}
+            </dl>
+          </Modal>
+        )}
       </td>
 
       {/* Notes / Keterangan — #645: TIDAK boleh dipotong. */}

@@ -1932,6 +1932,7 @@ export const id = {
     fullscreenPreview: "Pratinjau Layar Penuh",
   },
   discussion: {
+    pointDetails: "Rincian pembahasan",
     heading: "Poin diskusi & tindak lanjut",
     aiAssistant: "Asisten Rapat AI",
     heading2: "Poin Diskusi & Keputusan",
