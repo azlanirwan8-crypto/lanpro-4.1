@@ -60,11 +60,16 @@ it("opens with unfiltered sources, keeps choices across filters and returns focu
 it("shows generated drafts before saving only actionable choices to the active suite", async () => {
   const register = createRef<(() => void) | null>();
   const onSaved = jest.fn().mockResolvedValue(undefined);
+  let attempts = 0;
   jest.mocked(apiRequest).mockImplementation(async (url, options) => {
     if (url.endsWith("/selected-sources")) return { data: [source], missing: 0 };
     if (url.endsWith("/generation-sources?search=")) return { data: [source] };
     if (url.endsWith("/generate-drafts")) {
-      return { data: [draft, { ...draft, kind: "clarify", title: "Periksa aturan duplikasi" }] };
+      if (++attempts === 1) throw new Error("Generator unavailable");
+      return {
+        skipped: 1,
+        data: [draft, { ...draft, kind: "clarify", title: "Periksa aturan duplikasi" }],
+      };
     }
     if (url.endsWith("/save-drafts")) {
       const body = options?.body as { drafts: Array<{ id: string }> };
@@ -85,6 +90,10 @@ it("shows generated drafts before saving only actionable choices to the active s
   expect(await screen.findByRole("checkbox", { name: /BRD Onboarding/ })).toBeChecked();
   expect(screen.getByRole("searchbox")).toHaveValue("");
   fireEvent.click(screen.getByRole("button", { name: "Buat draf" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("Generator unavailable");
+  fireEvent.click(screen.getByRole("button", { name: "Coba lagi" }));
+  expect(await screen.findByText("1 draf dilewati saat validasi.")).toBeInTheDocument();
+  expect(attempts).toBe(2);
   expect(await screen.findByText("Negatif · Kirim tanpa email")).toBeInTheDocument();
   expect(screen.getByRole("checkbox", { name: /Perlu konfirmasi/ })).toBeDisabled();
   expect(onSaved).not.toHaveBeenCalled();
@@ -115,12 +124,19 @@ it("reopens a pending threshold question and requires a decision and explicit se
   };
   const onSaved = jest.fn().mockResolvedValue(undefined);
   jest.mocked(apiRequest).mockImplementation(async (url, options) => {
-    if (url.endsWith("/selected-sources")) return { data: [source], missing: 0, questions: [question] };
+    if (url.endsWith("/selected-sources"))
+      return { data: [source], missing: 0, questions: [question] };
     if (url.includes("/generation-sources?")) return { data: [source] };
     if (url.endsWith("/save-drafts")) {
-      expect(options?.body).toEqual({ drafts: [expect.objectContaining({
-        id: question.id, kind: "positive", expected: "Persetujuan diperlukan tepat Rp10 juta",
-      })] });
+      expect(options?.body).toEqual({
+        drafts: [
+          expect.objectContaining({
+            id: question.id,
+            kind: "positive",
+            expected: "Persetujuan diperlukan tepat Rp10 juta",
+          }),
+        ],
+      });
       return { data: [{ id: question.id, status: "saved" }] };
     }
     throw new Error("Unexpected request");

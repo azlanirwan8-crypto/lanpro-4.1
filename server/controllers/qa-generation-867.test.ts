@@ -1,3 +1,4 @@
+import { errorHandler } from "../middleware/errorHandler";
 import express from "express";
 import request from "supertest";
 import { generateContentWithFallback } from "../services/ai.service";
@@ -30,6 +31,8 @@ const app = express();
 app.use(express.json());
 app.post("/:projectId/:suiteId/generate", validasiBody(qaGenerationRequest), generateQASuiteDrafts);
 app.post("/:projectId/:suiteId/save", validasiBody(qaSaveDraftRequest), saveQASuiteDrafts);
+
+app.use(errorHandler);
 
 const source = { id: "doc-1", kind: "document" as const };
 const draft = {
@@ -72,13 +75,19 @@ it("rejects unavailable project references before invoking Gemini", async () => 
 
 it("keeps only grounded, unique drafts and resolves source labels on the server", async () => {
   jest.mocked(generateContentWithFallback).mockResolvedValue({
-    text: JSON.stringify([draft, draft, { ...draft, title: "Invalid", refs: [10] }]),
+    text: JSON.stringify([
+      draft,
+      draft,
+      { title: "incomplete" },
+      { ...draft, title: "Invalid", refs: [10] },
+    ]),
   });
   const res = await request(app)
     .post("/p1/s1/generate")
     .send({ sources: [source] });
   expect(res.status).toBe(200);
   expect(loadQAGenerationSuite).toHaveBeenCalledWith("p1", "s1");
+  expect(res.body.skipped).toBe(2);
   expect(res.body.data).toHaveLength(1);
   expect(res.body.data[0]).toMatchObject({
     title: draft.title,
@@ -97,6 +106,7 @@ it("keeps a conflicting threshold open with both verified excerpts", async () =>
     ...draft,
     kind: "clarify",
     title: "Tepat Rp10 juta",
+    steps: [],
     expected: "Apakah perlu supervisor?",
     refs: [0, 1],
     quotes,
@@ -104,7 +114,13 @@ it("keeps a conflicting threshold open with both verified excerpts", async () =>
   jest.mocked(generateContentWithFallback).mockResolvedValue({
     text: JSON.stringify([
       conflict,
-      { ...conflict, kind: "positive", title: "Rp10.000.001", expected: "Perlu supervisor" },
+      {
+        ...conflict,
+        kind: "positive",
+        steps: ["Kirim Rp10.000.001"],
+        title: "Rp10.000.001",
+        expected: "Perlu supervisor",
+      },
       { ...draft, title: "Kutipan palsu", quotes: ["always approved"] },
     ]),
   });
@@ -116,6 +132,34 @@ it("keeps a conflicting threshold open with both verified excerpts", async () =>
   expect(res.body.data[1].kind).toBe("positive");
   expect(res.body.data[0].sources.map((s: { quote: string }) => s.quote)).toEqual(quotes);
   expect(storeQAQuestions).toHaveBeenCalledWith("p1", "s1", [res.body.data[0]]);
+});
+
+it.each<[string, string, number, string]>([
+  ["invalid JSON", "{}", 502, "qaDraft.format"],
+  ["unusable draft", "[{}]", 422, "qaDraft.invalid"],
+])("reports %s separately", async (_label, text, status, code) => {
+  jest.mocked(generateContentWithFallback).mockResolvedValue({ text });
+  const res = await request(app)
+    .post("/p1/s1/generate")
+    .send({ sources: [source] });
+  expect(res.status).toBe(status);
+  expect(res.body.code).toBe(code);
+});
+
+it("distinguishes provider failures from clarification storage failures", async () => {
+  jest.mocked(generateContentWithFallback).mockRejectedValueOnce(new Error("provider unavailable"));
+  const generate = () =>
+    request(app)
+      .post("/p1/s1/generate")
+      .send({ sources: [source] });
+  const provider = await generate().expect(502);
+  expect(provider.body.code).toBe("qaDraft.provider");
+  jest.mocked(generateContentWithFallback).mockResolvedValueOnce({
+    text: JSON.stringify([{ ...draft, kind: "clarify", steps: [] }]),
+  });
+  jest.mocked(storeQAQuestions).mockRejectedValueOnce(new Error("database unavailable"));
+  const storage = await generate().expect(500);
+  expect(storage.body.code).toBe("qaDraft.questions");
 });
 
 it("rejects clarification drafts and saves selected executable drafts to the URL suite", async () => {

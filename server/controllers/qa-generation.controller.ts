@@ -120,6 +120,9 @@ export const getQASuiteSources: RequestHandler = async (req, res, next) => {
 };
 
 export const generateQASuiteDrafts: RequestHandler = async (req, res, next) => {
+  let code = "qaDraft.source";
+  let failure = "Gagal membaca suite atau menyimpan pilihan sumber QA.";
+  let statusCode = 500;
   try {
     const { projectId, suiteId } = req.params;
     const { sources } = qaGenerationRequest.parse(req.body);
@@ -160,6 +163,9 @@ export const generateQASuiteDrafts: RequestHandler = async (req, res, next) => {
       return;
     }
     const existing = suite.cases.slice(0, 60);
+    code = "qaDraft.provider";
+    failure = "Gemini gagal merespons permintaan draf QA. Periksa ketersediaan layanan atau kuota.";
+    statusCode = 502;
     const response = await generateContentWithFallback(new GoogleGenAI({ apiKey }), {
       model: "gemini-flash-latest",
       contents: JSON.stringify({
@@ -184,17 +190,41 @@ export const generateQASuiteDrafts: RequestHandler = async (req, res, next) => {
         },
       },
     });
-    const parsed = drafts.parse(JSON.parse(response.text || "[]"));
+    code = "qaDraft.format";
+    failure =
+      "Respons Gemini tidak berisi daftar draf JSON yang dapat dibaca. Ulangi pembuatan draf.";
+    const parsed: unknown = JSON.parse(response.text || "");
+    if (!Array.isArray(parsed)) throw new Error("Invalid draft list");
+    const questionSchema = drafts.element.extend({
+      kind: z.literal("clarify"),
+      steps: z.array(text(500)).max(12).default([]),
+    });
+    let skipped = Math.max(0, parsed.length - 20);
     const titles = new Set(suite.cases.map(({ judul }) => normalizedQATitle(judul)));
-    const data = parsed.flatMap(({ refs, quotes, ...draft }) => {
+    const data = parsed.slice(0, 20).flatMap((candidate: unknown) => {
+      const row = (
+        typeof candidate === "object" &&
+        candidate !== null &&
+        "kind" in candidate &&
+        candidate.kind === "clarify"
+          ? questionSchema
+          : drafts.element
+      ).safeParse(candidate);
+      if (!row.success) {
+        skipped++;
+        return [];
+      }
+      const { refs, quotes, ...draft } = row.data;
       const title = normalizedQATitle(draft.title);
+      if (titles.has(title)) return [];
       if (
-        titles.has(title) ||
         new Set(refs).size !== refs.length ||
         quotes.length !== refs.length ||
         refs.some((ref, i) => !evidence[ref]?.content.includes(quotes[i]))
-      )
+      ) {
+        skipped++;
         return [];
+      }
       titles.add(title);
       return [
         {
@@ -207,11 +237,25 @@ export const generateQASuiteDrafts: RequestHandler = async (req, res, next) => {
         },
       ];
     });
+    if (!data.length && skipped) {
+      res
+        .status(422)
+        .json({
+          status: "error",
+          code: "qaDraft.invalid",
+          message:
+            "Tidak ada draf baru yang lolos pemeriksaan format dan kutipan sumber. Periksa teks sumber atau ulangi generasi.",
+        });
+      return;
+    }
+    code = "qaDraft.questions";
+    failure = "Draf sudah dibuat, tetapi pertanyaan klarifikasi gagal disimpan di database.";
+    statusCode = 500;
     const questions = data.filter((row) => row.kind === "clarify");
     if (questions.length) await storeQAQuestions(projectId, suiteId, questions);
-    res.json({ status: "success", data });
+    res.json({ status: "success", data, skipped });
   } catch {
-    next(Object.assign(new Error("Pembuatan draf QA gagal. Coba lagi."), { statusCode: 502 }));
+    next(Object.assign(new Error(failure), { statusCode, code }));
   }
 };
 
@@ -265,12 +309,10 @@ export const saveQASuiteDrafts: RequestHandler = async (req, res, next) => {
         )
       )
     ) {
-      res
-        .status(422)
-        .json({
-          status: "error",
-          message: "Kutipan berubah. Periksa kembali sumber sebelum menyimpan.",
-        });
+      res.status(422).json({
+        status: "error",
+        message: "Kutipan berubah. Periksa kembali sumber sebelum menyimpan.",
+      });
       return;
     }
     const labels = new Map(rows.map((row) => [key(row), row.title]));

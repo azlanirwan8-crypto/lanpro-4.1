@@ -60,6 +60,8 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
   const [questions, setQuestions] = useState<Array<QAGenerationDraft & { id: string }>>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [error, setError] = useState("");
+  const [submissionError, setSubmissionError] = useState("");
+  const [skipped, setSkipped] = useState(0);
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(true);
   const [retry, setRetry] = useState(0);
@@ -127,11 +129,16 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
     pending.current = true;
     setBusy(review ? "saving" : "generating");
     setError("");
+    setSubmissionError("");
     try {
       if (drafts === null) {
         const generated = await generateSuiteDrafts(suite, sources);
         if (!mounted.current) return;
-        const rows = generated.map((draft) => ({ ...draft, id: draft.id || crypto.randomUUID() }));
+        setSkipped(generated.skipped);
+        const rows = generated.drafts.map((draft) => ({
+          ...draft,
+          id: draft.id || crypto.randomUUID(),
+        }));
         setDrafts(rows);
         setQuestions((previous) => [...previous, ...rows.filter((row) => row.kind === "clarify")]);
         setSelected([]);
@@ -147,7 +154,8 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
         if (mounted.current) onClose();
       }
     } catch (cause) {
-      if (mounted.current) setError(cause instanceof Error ? cause.message : tr("failed"));
+      if (mounted.current)
+        setSubmissionError(cause instanceof Error ? cause.message : tr("failed"));
     } finally {
       pending.current = false;
       if (mounted.current) setBusy(null);
@@ -167,6 +175,7 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
           selected.includes(row.id) &&
           (!row.title.trim() ||
             !row.expected.trim() ||
+            !row.steps.length ||
             row.steps.length > 12 ||
             row.steps.some((step) => !step.trim() || step.length > 500))
       )
@@ -190,7 +199,12 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
             type="button"
             className={secondary}
             disabled={!!busy}
-            onClick={() => (review ? setDrafts(null) : onClose())}
+            onClick={() => {
+              setSubmissionError("");
+              setSkipped(0);
+              if (review) setDrafts(null);
+              else onClose();
+            }}
           >
             {tr(review ? "back" : "cancel")}
           </button>
@@ -219,6 +233,8 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
             className={secondary}
             disabled={!!busy}
             onClick={() => {
+              setSubmissionError("");
+              setSkipped(0);
               setDrafts(questions);
               setSelected([]);
             }}
@@ -226,6 +242,20 @@ function GenerationDialog({ suite, onSaved, onClose }: SuiteProps & { onClose: (
             {tr("openQuestions", { count: questions.length })}
           </button>
         )}
+        {submissionError && (
+          <div role="alert" className="text-sm text-danger-text">
+            {submissionError}{" "}
+            <button
+              type="button"
+              className="underline"
+              disabled={!!busy || blocked}
+              onClick={submit}
+            >
+              {tr("retry")}
+            </button>
+          </div>
+        )}
+        {review && skipped > 0 && <p role="status">{tr("skippedDrafts", { count: skipped })}</p>}
         {error && (
           <div role="alert" className="text-sm text-danger-text">
             {error}{" "}

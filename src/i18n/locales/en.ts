@@ -5,6 +5,11 @@
  */
 export const en = {
   serverErr: {
+    "qaDraft.invalid": "No new drafts passed format and source checks. Review the source text or retry generation.",
+    "qaDraft.questions": "Drafts were generated, but clarification questions could not be saved.",
+    "qaDraft.format": "Gemini returned an unreadable draft list. Retry generation.",
+    "qaDraft.provider": "Gemini could not generate drafts. Check service availability and quota.",
+    "qaDraft.source": "Could not load the suite or save the selected QA sources.",
     "srv.gagal_mengambil_konfigurasi_sistem": "Failed to fetch operational system configuration",
     "srv.gagal_menyimpan_konfigurasi_sistem": "Failed to save operational system configuration",
     "srv.gagal_mengambil_konfigurasi_whatsapp": "Failed to fetch WhatsApp connection configuration",
@@ -2653,6 +2658,7 @@ export const en = {
     min8Chars: "Min 8 characters",
   },
   qaGenerate: {
+    skippedDrafts: "{{count}} drafts skipped during validation.",
     openQuestions: "Open questions ({{count}})",
     resolve: "Record decision",
     caseKind: "Scenario type",

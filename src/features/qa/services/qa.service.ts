@@ -52,13 +52,13 @@ export function fetchGenerationSources(
 export async function generateSuiteDrafts(
   suite: QATestSuite,
   sources: QAGenerationSource[]
-): Promise<QAGenerationDraft[]> {
+): Promise<{ drafts: QAGenerationDraft[]; skipped: number }> {
   const result = await apiRequest(
     `${suiteGenerationPath(suite)}/generate-drafts`,
     { method: "POST", body: { sources: sources.map(({ kind, id }) => ({ kind, id })) } },
     0
   );
-  return result.data;
+  return { drafts: result.data, skipped: result.skipped ?? 0 };
 }
 
 export async function saveSuiteDrafts(

@@ -6,6 +6,11 @@
  */
 export const id = {
   serverErr: {
+    "qaDraft.invalid": "Tidak ada draf baru yang lolos pemeriksaan format dan kutipan sumber. Periksa teks sumber atau ulangi generasi.",
+    "qaDraft.questions": "Draf sudah dibuat, tetapi pertanyaan klarifikasi gagal disimpan di database.",
+    "qaDraft.format": "Respons Gemini tidak berisi daftar draf JSON yang dapat dibaca. Ulangi pembuatan draf.",
+    "qaDraft.provider": "Gemini gagal merespons permintaan draf QA. Periksa ketersediaan layanan atau kuota.",
+    "qaDraft.source": "Gagal membaca suite atau menyimpan pilihan sumber QA.",
     "srv.gagal_mengambil_konfigurasi_sistem": "Gagal mengambil konfigurasi sistem operasional",
     "srv.gagal_menyimpan_konfigurasi_sistem": "Gagal menyimpan konfigurasi sistem operasional",
     "srv.gagal_mengambil_konfigurasi_whatsapp": "Gagal mengambil konfigurasi koneksi WhatsApp",
@@ -2677,6 +2682,7 @@ export const id = {
     min8Chars: "Min 8 Karakter",
   },
   qaGenerate: {
+    skippedDrafts: "{{count}} draf dilewati saat validasi.",
     openQuestions: "Pertanyaan terbuka ({{count}})",
     resolve: "Catat keputusan",
     caseKind: "Jenis skenario",
