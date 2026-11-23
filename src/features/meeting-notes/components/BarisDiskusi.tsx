@@ -21,6 +21,8 @@ import { SEL } from "./BagianPapan";
 import { Modal } from "../../../components/ui/Modal";
 import { Paragraf } from "./Paragraf";
 
+const formatPic = (people: { nama: string }[]) => people.map(({ nama }) => nama).join(", ");
+
 /**
  * #703/#704 — satu baris data tabel titik diskusi, dikeluarkan dari
  * `DiscussionPointsTable.tsx` (§4: induknya 1.255 baris) bersamaan dengan dua
@@ -120,6 +122,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
   onDelete,
   onToggleStatus,
 }) => {
+  const picSummary = formatPic(namaPenerima) || assigneeName;
   const [detailOpen, setDetailOpen] = React.useState(false);
   const { t, i18n } = useTranslation();
   const isCompleted = p.status === "completed";
@@ -237,8 +240,13 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
         <div className="font-normal text-content-strong leading-snug whitespace-pre-wrap break-words text-justify max-h-16 overflow-y-auto">
           <Paragraf teks={p.concern} />
         </div>
+        {(p.tindakanLanjut || p.next_action) && (
+          <div className="mt-1 line-clamp-2 text-content-body">
+            {t("discussion.followUp")} · {p.tindakanLanjut || p.next_action}
+          </div>
+        )}
         <button type="button" className="mt-1 text-left text-xs text-primary hover:underline" onClick={() => setDetailOpen(true)}>
-          {t("discussion.pointDetails")} · {namaPenerima.map(({ nama }) => nama).join(", ") || assigneeName || "—"} · {p.targetDate || "—"}
+          {t("discussion.pointDetails")} · {picSummary || "—"} · {p.targetDate || "—"}
         </button>
         {detailOpen && (
           <Modal isOpen onClose={() => setDetailOpen(false)} title={t("discussion.pointDetails")}>
@@ -247,7 +255,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
                 [t("discussion.concernTopic"), p.concern],
                 [t("discussion.notesLabel"), p.keterangan || p.comment],
                 [t("discussion.followUp"), p.tindakanLanjut || p.next_action],
-                [t("discussion.thPic"), namaPenerima.map(({ nama }) => nama).join(", ") || assigneeName],
+                [t("discussion.thPic"), picSummary],
                 [t("discussion.thTargetDate"), p.targetDate],
               ].map(([label, value]) => (
                 <div key={label}>
