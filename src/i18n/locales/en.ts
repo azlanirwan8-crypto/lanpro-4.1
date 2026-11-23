@@ -3368,6 +3368,7 @@ export const en = {
     whatsappPreview: "WhatsApp Preview",
   },
   addSuite: {
+    saveFailed: "Could not save the document.",
     createDocument: "Create Document",
     title: "Add Script Document",
     subtitle: "Create a new test scenario module",

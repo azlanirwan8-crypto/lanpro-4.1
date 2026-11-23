@@ -3395,6 +3395,7 @@ export const id = {
     whatsappPreview: "Pratinjau WhatsApp",
   },
   addSuite: {
+    saveFailed: "Dokumen gagal disimpan.",
     createDocument: "Buat Dokumen",
     title: "Tambah Dokumen Skrip",
     subtitle: "Buat modul skenario pengujian baru",

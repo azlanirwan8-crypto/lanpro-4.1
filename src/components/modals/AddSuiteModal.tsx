@@ -35,27 +35,51 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
   onSubmit,
 }) => {
   const { t } = useTranslation();
+  const [saving, setSaving] = React.useState(false);
+  const submitting = React.useRef(false);
+  const close = () => {
+    if (!submitting.current) onClose();
+  };
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (submitting.current || !suiteName.trim()) return;
+    submitting.current = true;
+    setSaving(true);
+    try {
+      await onSubmit(event);
+    } finally {
+      submitting.current = false;
+      setSaving(false);
+    }
+  };
   const opsiFase = useMasterOptionItems("qa_phase", CADANGAN_FASE);
 
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={close}
       title={t("addSuite.title")}
       maxWidth="max-w-md"
       footer={
         <>
-          <Button type="button" variant="secondary" onClick={onClose}>
+          <Button type="button" variant="secondary" disabled={saving} onClick={close}>
             {t("addSuite.cancel")}
           </Button>
-          <Button type="submit" form="add-suite-form" className="gap-1.5">
-            <Plus className="w-4 h-4" /> {t("addSuite.createDocument")}
+          <Button
+            type="submit"
+            form="add-suite-form"
+            disabled={saving || !suiteName.trim()}
+            aria-busy={saving}
+            className="gap-1.5"
+          >
+            <Plus className="w-4 h-4" />{" "}
+            {saving ? t("common.saving") : t("addSuite.createDocument")}
           </Button>
         </>
       }
     >
       <p className="text-xs text-content-subtle font-normal -mt-1 mb-4">{t("addSuite.subtitle")}</p>
-      <form id="add-suite-form" onSubmit={onSubmit} className="space-y-4">
+      <form id="add-suite-form" onSubmit={submit} className="space-y-4">
         <div className="space-y-1.5">
           <label className="text-xs text-content-body font-normal block">
             {t("addSuite.docName")}
@@ -63,6 +87,7 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
           <input
             autoFocus
             type="text"
+            disabled={saving}
             required
             value={suiteName}
             onChange={(e) => onNameChange(e.target.value)}
@@ -75,15 +100,17 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
           <label className="text-xs text-content-body font-normal block">
             {t("addSuite.testPhase")}
           </label>
-          <StyledDropdown
-            value={phase}
-            onChange={(val) => onPhaseChange(val as any)}
-            options={opsiFase}
-            type="qa_phase"
-            masterData={[]}
-            className="w-full"
-            buttonClassName="w-full text-xs p-2.5 bg-surface-sunken/80 border border-border-panel-divider rounded-md font-normal text-content-body"
-          />
+          <fieldset disabled={saving}>
+            <StyledDropdown
+              value={phase}
+              onChange={(val) => onPhaseChange(val as any)}
+              options={opsiFase}
+              type="qa_phase"
+              masterData={[]}
+              className="w-full"
+              buttonClassName="w-full text-xs p-2.5 bg-surface-sunken/80 border border-border-panel-divider rounded-md font-normal text-content-body"
+            />
+          </fieldset>
         </div>
       </form>
     </Modal>

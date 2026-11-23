@@ -2140,7 +2140,7 @@ Tindak lanjut permintaan pemilik proyek 12 Nov 2026: "review di menu flowchart s
 | 871 | 🟡 | Kecil | `BELUM` — Penyelarasan halaman Daftar disetujui pemilik. | Selaraskan form Daftar dengan #870: field polos, tombol Sign Up success, dan Google/Microsoft sejajar. | Gunakan token tema dan nama aksesibel sesuai mode, pertahankan alur daftar dan validasi. | Lint, build, dan lima audit lulus. Suite lengkap: 3.546 lulus, satu dilewati, dua gagal saat paralel; dua suite terkait (Flowchart dan QA) lulus saat diulang terpisah. Tab Edge bersih: form Masuk dan Daftar terverifikasi pada 320/1280 px dalam tema terang/gelap dengan daftar penyedia uji, tanpa overflow. | Verifikasi PostgreSQL dan SSO online masih terbuka, sesuai keputusan #870. | F3 | Tidak |
 | 872 | 🟡 | Sedang | BELUM | Meeting Notes: ringkasan keputusan, PIC dan tenggat | Buka rincian di tempat, pertahankan filter dan posisi gulir. | Disetujui pemilik. | Verifikasi di tab bersih. | F3 | Tidak Rincian dibuka di tabel yang sama. |
 | 873 | 🟡 | Sedang | BELUM | Team: cakupan Assigned dan Done | Telusuri sumber tasks, tampilkan cakupan pada kartu dan tabel, kecilkan header. | Disetujui pemilik. | Verifikasi di tab bersih. | F3 | Tidak Kartu dan tabel menampilkan cakupan proyek. |
-| 874 | 🟡 | Sedang | BELUM | Dialog CRUD: footer sempit dan penyimpanan | Uji label panjang, keyboard, indikator saving dan pencegahan submit ganda. | Disetujui pemilik. | Verifikasi di tab bersih. | F3 | Tidak |
+| 874 | 🟡 | Sedang | BELUM | Dialog CRUD: footer sempit dan penyimpanan | Uji label panjang, keyboard, indikator saving dan pencegahan submit ganda. | Disetujui pemilik. | Verifikasi di tab bersih. | F3 | Tidak Footer sempit dan status simpan dokumen QA diterapkan. |
 
 ### 1.2 SUDAH SELESAI — 691 item
 

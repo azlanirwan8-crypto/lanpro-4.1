@@ -37,6 +37,7 @@ export const Modal = ({
   hideHeader = false,
   dialogLabel,
 }: ModalProps) => {
+  const accessibleName = dialogLabel || (typeof title === "string" ? title : undefined);
   React.useEffect(() => {
     // #599 — modal yang tertutup tidak punya apa pun untuk dipasang ATAU dibongkar.
     // Sebelumnya pembersihnya tetap jalan tiap commit (dep `onClose` hampir selalu
@@ -71,11 +72,11 @@ export const Modal = ({
         }}
       >
         <motion.div
-          role={dialogLabel ? "dialog" : undefined}
-          aria-modal={dialogLabel ? true : undefined}
-          aria-label={dialogLabel}
+          role={accessibleName ? "dialog" : undefined}
+          aria-modal={accessibleName ? true : undefined}
+          aria-label={accessibleName}
           onKeyDown={(event) => {
-            if (!dialogLabel || event.key !== "Tab") return;
+            if (!accessibleName || event.key !== "Tab") return;
             const controls = Array.from(
               event.currentTarget.querySelectorAll<HTMLElement>(
                 "a[href],button:not(:disabled),input:not(:disabled),select:not(:disabled),summary,textarea:not(:disabled),[tabindex='0']"
@@ -127,7 +128,7 @@ export const Modal = ({
             {children}
           </div>
           {footer != null && (
-            <div className="px-5 py-3.5 border-t border-border-divider bg-surface-sunken/40 flex flex-wrap items-center justify-end gap-2 shrink-0 pb-[max(0.875rem,env(safe-area-inset-bottom))] md:pb-3.5">
+            <div className="px-5 py-3.5 border-t border-border-divider bg-surface-sunken/40 flex flex-wrap items-center justify-end gap-2 [&>button]:max-w-full max-[380px]:[&>button]:w-full shrink-0 pb-[max(0.875rem,env(safe-area-inset-bottom))] md:pb-3.5">
               {footer}
             </div>
           )}

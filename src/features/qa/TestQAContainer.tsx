@@ -421,17 +421,16 @@ export function TestQAPanel({
       cases: [],
     };
 
-    const updatedSuites = [...suites, newSuite];
-    saveSuitesToStorage(updatedSuites);
-    setSelectedSuiteId(newSuite.id);
-    setIsAddSuiteOpen(false);
-    setNewSuiteNameOnly("");
-
     try {
-      await createSuite(selectedProject.id, newSuite);
+      const response = await createSuite(selectedProject.id, newSuite);
+      if (!response.ok) throw new Error(t("addSuite.saveFailed"));
+      saveSuitesToStorage([...suites, newSuite]);
+      setSelectedSuiteId(newSuite.id);
+      setIsAddSuiteOpen(false);
+      setNewSuiteNameOnly("");
       toast.success(t("toast.scriptDocAdded"));
     } catch (err) {
-      console.warn("Failed to add suite:", err);
+      toast.error(err instanceof Error ? err.message : t("addSuite.saveFailed"));
     }
   };
 
