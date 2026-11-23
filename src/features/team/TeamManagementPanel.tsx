@@ -481,14 +481,14 @@ export const TeamManagementPanel = ({
                   >
                     {/* Banner — lebih pendek di HP (#333) */}
                     <div
-                      className="h-10 md:h-16 bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 relative p-1.5 md:p-2.5 flex items-start justify-end bg-cover bg-center transition-all"
+                      className="h-8 md:h-10 bg-surface-sunken relative p-1.5 md:p-2.5 flex items-start justify-end bg-cover bg-center transition-all"
                       style={personCover ? { backgroundImage: `url(${personCover})` } : undefined}
                     >
                       {personCover && <div className="absolute inset-0 bg-overlay/20" />}
                       <Star className="w-3.5 h-3.5 md:w-4 md:h-4 text-content-inverse/50 hover:text-amber-300 cursor-pointer transition-colors relative z-10" />
                     </div>
 
-                    <div className="relative -mt-5 md:-mt-8 mx-auto z-10">
+                    <div className="relative -mt-4 md:-mt-5 mx-auto z-10">
                       <UserAvatar
                         user={person}
                         className="w-12 h-12 md:w-16 md:h-16 ring-2 ring-surface"
@@ -502,7 +502,7 @@ export const TeamManagementPanel = ({
 
                     <div className="p-2 md:p-4 pt-1.5 md:pt-2 text-center flex-1 flex flex-col justify-between gap-1">
                       <div className="min-w-0">
-                        <h3 className="font-medium text-content-strong text-xs md:text-sm leading-snug truncate group-hover:text-indigo-600 transition-colors">
+                        <h3 className="font-medium text-content-strong text-xs md:text-sm leading-snug truncate group-hover:text-primary transition-colors">
                           {name}
                         </h3>
                         {bolehUbahPeran && !isOwner ? (
@@ -534,7 +534,7 @@ export const TeamManagementPanel = ({
                             {userAssignedTasks.length}
                           </span>
                           <span className="text-[10px] md:text-[10px] text-content-subtle font-normal uppercase tracking-normal truncate block">
-                            {t("teamPanel.assigned")}
+                            {t("teamPanel.projectAssigned")}
                           </span>
                         </div>
                         <div className="bg-surface-sunken p-1 md:p-2 rounded-md border border-border-faint">
@@ -542,7 +542,7 @@ export const TeamManagementPanel = ({
                             {completedTasks.length}
                           </span>
                           <span className="text-[10px] md:text-[10px] text-content-subtle font-normal uppercase tracking-normal truncate block">
-                            {t("teamPanel.done")}
+                            {t("teamPanel.projectDone")}
                           </span>
                         </div>
                       </div>
@@ -584,8 +584,8 @@ export const TeamManagementPanel = ({
                     <tr className={LIST_THEAD_ROW_CLASS}>
                       <th>{t("team.member")}</th>
                       <th>{t("team.role")}</th>
-                      <th className="text-center">{t("team.assignedTasks")}</th>
-                      <th className="text-center">{t("team.completed")}</th>
+                      <th className="text-center">{t("teamPanel.projectAssigned")}</th>
+                      <th className="text-center">{t("teamPanel.projectDone")}</th>
                       <th className="text-center">{t("team.status")}</th>
                       <th className="text-right">{t("team.action")}</th>
                     </tr>

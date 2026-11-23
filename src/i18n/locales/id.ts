@@ -2911,6 +2911,8 @@ export const id = {
     shapeDatabase: "Basis Data",
   },
   teamPanel: {
+    projectAssigned: "Ditugaskan di proyek",
+    projectDone: "Selesai di proyek",
     allRoles: "Semua Role",
     assigned: "Ditugaskan",
     done: "Selesai",

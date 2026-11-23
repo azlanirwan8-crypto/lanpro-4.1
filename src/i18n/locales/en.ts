@@ -2886,6 +2886,8 @@ export const en = {
     shapeDatabase: "Database",
   },
   teamPanel: {
+    projectAssigned: "Assigned in project",
+    projectDone: "Done in project",
     allRoles: "All Roles",
     assigned: "Assigned",
     done: "Done",
