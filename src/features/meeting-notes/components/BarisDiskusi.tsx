@@ -122,6 +122,7 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
   onDelete,
   onToggleStatus,
 }) => {
+  const followUp = p.tindakanLanjut || p.next_action;
   const picSummary = formatPic(namaPenerima) || assigneeName;
   const [detailOpen, setDetailOpen] = React.useState(false);
   const { t, i18n } = useTranslation();
@@ -240,9 +241,9 @@ export const BarisDiskusi: React.FC<BarisDiskusiProps> = ({
         <div className="font-normal text-content-strong leading-snug whitespace-pre-wrap break-words text-justify max-h-16 overflow-y-auto">
           <Paragraf teks={p.concern} />
         </div>
-        {(p.tindakanLanjut || p.next_action) && (
-          <div className="mt-1 line-clamp-2 text-content-body">
-            {t("discussion.followUp")} · {p.tindakanLanjut || p.next_action}
+        {followUp && (
+          <div className="mt-1 max-h-16 overflow-y-auto whitespace-pre-wrap break-words text-content-body">
+            {t("discussion.followUp")} · {followUp}
           </div>
         )}
         <button type="button" className="mt-1 text-left text-xs text-primary hover:underline" onClick={() => setDetailOpen(true)}>
