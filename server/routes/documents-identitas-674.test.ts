@@ -107,4 +107,27 @@ describe("identitas dokumen hanya dari token (#674)", () => {
     expect(res.status).toBe(200);
     expect(documentRepository.update).toHaveBeenCalled();
   });
+
+  it("#876 menolak penulis yang kehilangan revisi antara pembacaan dan UPDATE", async () => {
+    const versiAwal = "2026-11-27T12:00:00.010Z";
+    const versiBaru = "2026-11-27T12:00:00.011Z";
+    const flow = { id: "d-1", createdBy: PEMBUAT, type: "flowchart", updatedAt: versiAwal };
+    jest
+      .spyOn(documentRepository, "findById")
+      .mockResolvedValueOnce(flow as any)
+      .mockResolvedValueOnce({ ...flow, updatedAt: versiBaru } as any);
+    jest.spyOn(documentRepository, "update").mockResolvedValue(undefined);
+
+    const res = await request(buatApp({ id: PEMBUAT, uid: PEMBUAT, role: "user" }))
+      .put("/api/projects/proj-1/documents/d-1")
+      .send({ title: "Edit terlambat", versiDibaca: versiAwal });
+
+    expect(documentRepository.update).toHaveBeenCalledWith(
+      "d-1",
+      expect.objectContaining({ title: "Edit terlambat" }),
+      new Date(versiAwal)
+    );
+    expect(res.status).toBe(409);
+    expect(res.body.data.updatedAt).toBe(versiBaru);
+  });
 });

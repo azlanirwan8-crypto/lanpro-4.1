@@ -177,7 +177,11 @@ export class DocumentRepository {
    * dan tanpa stempel sama sekali kolom `updatedAt` diam di nilai pembuatan baris
    * (tidak ada trigger di skema) — itu #613.
    */
-  async update(id: string, updates: Partial<DocumentEntity>): Promise<string | null> {
+  async update(
+    id: string,
+    updates: Partial<DocumentEntity>,
+    versiHarapan?: Date
+  ): Promise<string | null | undefined> {
     const connection = await db.getConnection();
     try {
       const sqlUpdates: string[] = [];
@@ -222,10 +226,20 @@ export class DocumentRepository {
 
       if (sqlUpdates.length > 0) {
         values.push(id);
+        // #876 — versi disimpan hingga milidetik pada klien. Penguncian baris
+        // oleh UPDATE dan predikat versi mencegah dua penulis lolos bersamaan.
+        const syaratVersi = versiHarapan
+          ? ` AND date_trunc('milliseconds', "updatedAt") = ?::timestamp`
+          : "";
+        const stempel = versiHarapan
+          ? `GREATEST(date_trunc('milliseconds', LOCALTIMESTAMP), date_trunc('milliseconds', "updatedAt") + INTERVAL '1 millisecond')`
+          : "NOW()";
+        if (versiHarapan) values.push(versiHarapan);
         const [rows]: any = await connection.query(
-          `UPDATE Documents SET ${sqlUpdates.join(", ")}, "updatedAt" = NOW() WHERE id = ? RETURNING "updatedAt"`,
+          `UPDATE Documents SET ${sqlUpdates.join(", ")}, "updatedAt" = ${stempel} WHERE id = ?${syaratVersi} RETURNING "updatedAt"`,
           values
         );
+        if (versiHarapan && !rows?.length) return undefined;
         return rows?.[0]?.updatedAt ?? null;
       }
       return null;

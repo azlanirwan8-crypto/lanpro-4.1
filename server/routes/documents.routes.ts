@@ -230,19 +230,23 @@ router.put(
         versiDibaca,
       } = req.body;
 
-      // #568 — dua tab yang membuka papan yang sama dulu ditulis last-write-wins.
-      // Yang mengirim stempel kini dapat jawaban 409 dan diminta memuat ulang,
-      // bukan menghapus kerja tab lain tanpa suara.
-      if (tabrakanVersi(versiDibaca, item.updatedAt)) {
-        return res.status(409).json({
+      const tolakVersi = (updatedAt: typeof item.updatedAt) =>
+        res.status(409).json({
           status: "error",
           code: "srv.dokumen_berubah",
           message: "Dokumen ini sudah diubah di tempat lain. Muat ulang sebelum menyimpan.",
-          data: { updatedAt: item.updatedAt ?? null },
+          data: { updatedAt: updatedAt ?? null },
         });
+      if (tabrakanVersi(versiDibaca, item.updatedAt)) {
+        return tolakVersi(item.updatedAt);
       }
+      const versiHarapan =
+        item.type === "flowchart" && item.updatedAt && typeof versiDibaca === "string" &&
+        Number.isFinite(Date.parse(versiDibaca))
+          ? new Date(versiDibaca)
+          : undefined;
 
-      const updatedAt = await documentRepository.update(id, {
+      const perubahan = {
         title: title !== undefined ? sanitizeUserText(title) : title,
         description:
           description !== undefined
@@ -257,7 +261,14 @@ router.put(
         fileType,
         canvasData,
         category,
-      });
+      };
+      const updatedAt = versiHarapan
+        ? await documentRepository.update(id, perubahan, versiHarapan)
+        : await documentRepository.update(id, perubahan);
+      if (versiHarapan && updatedAt === undefined) {
+        const terbaru = await documentRepository.findById(id);
+        return tolakVersi(terbaru?.updatedAt);
+      }
 
       res.json({
         status: "success",
