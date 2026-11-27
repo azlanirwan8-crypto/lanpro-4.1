@@ -15,7 +15,7 @@
  * ini tidak ikut merah hanya karena posisi pixel bergeser.
  */
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import type { Project, Task } from "../../types";
 
 jest.mock("./services/flowchart.service", () => ({
@@ -29,6 +29,10 @@ jest.mock("html-to-image", () => ({
   toPng: jest.fn().mockResolvedValue("data:image/png;base64,x"),
   toSvg: jest.fn().mockResolvedValue("data:image/svg+xml,x"),
 }));
+jest.mock("../../lib/sweetalert", () => ({
+  confirmDeleteAlert: jest.fn(async () => false),
+  showSuccessAlert: jest.fn(),
+}));
 jest.mock("../../lib/screenContext", () => ({
   setScreenSnapshot: jest.fn(),
   clearScreenSnapshot: jest.fn(),
@@ -39,6 +43,7 @@ jest.setTimeout(30_000);
 
 import { FlowchartView } from "./FlowchartContainer";
 import { fetchFlowcharts } from "./services/flowchart.service";
+import { confirmDeleteAlert } from "../../lib/sweetalert";
 
 const project = { id: "p1", name: "Proyek Uji" } as Project;
 
@@ -101,12 +106,14 @@ describe("#839 kendali papan dikumpulkan di dock bawah", () => {
     expect(tombol[0].getAttribute("title")).toMatch(/Full screen|Layar Penuh/i);
   });
 
-  it("snap kisi dan tiga pola papan duduk di dock, dan tetap 44 px", async () => {
+  it("snap dan pola papan dapat dipilih dari satu menu", async () => {
     await bukaPapan();
-    const snap = screen.getByTitle(/Snap to Grid/i);
-    expect(dock().contains(snap)).toBe(true);
-    expect(snap.className).toMatch(/min-h-11/);
-    expect(snap.className).toMatch(/min-w-11/);
+    const pemicu = screen.getByTestId("dock-menu-papan");
+    expect(dock()).toContainElement(pemicu);
+    expect(pemicu).toHaveClass("min-h-11", "min-w-11");
+    fireEvent.click(pemicu);
+    const snap = screen.getByRole("button", { name: /Snap to Grid/i });
+    expect(snap).toHaveAttribute("aria-pressed", "true");
 
     for (const pola of [
       /Plain board|Papan polos/,
@@ -114,10 +121,12 @@ describe("#839 kendali papan dikumpulkan di dock bawah", () => {
       /Grid board|Papan berkisi/,
     ]) {
       const tombol = screen.getByTitle(pola);
-      expect(dock().contains(tombol)).toBe(true);
-      expect(tombol.className).toMatch(/min-h-11/);
-      expect(tombol.className).toMatch(/min-w-11/);
+      expect(tombol).toBeVisible();
+      expect(tombol).toHaveClass("min-h-11");
     }
+    fireEvent.keyDown(snap, { key: "Escape" });
+    expect(pemicu).toHaveFocus();
+    expect(pemicu).toHaveAttribute("aria-expanded", "false");
   });
 
   it("satu pintu ke panel properti: sakelar kedua hilang, flap kanan tetap ada", async () => {
@@ -130,8 +139,22 @@ describe("#839 kendali papan dikumpulkan di dock bawah", () => {
   it("ekspor tidak lagi punya kembarannya di bilah atas", async () => {
     await bukaPapan();
     expect(bilahAtas().querySelectorAll("button")).toHaveLength(1);
-    // Dock tetap punya ketiganya — dipindah, bukan dibuang.
-    expect(screen.getByTitle(/JPG/i)).toBeInTheDocument();
-    expect(screen.getByTitle(/draw\.io file|Berkas draw\.io/i)).toBeInTheDocument();
+    expect(screen.getByTitle(/JPG/i)).not.toBeVisible();
+    fireEvent.click(screen.getByTestId("dock-menu-ekspor"));
+    const menu = within(screen.getByRole("group", { name: /^(Export|Ekspor)$/i }));
+    for (const format of [/JPG/i, /PNG/i, /SVG/i, /JSON/i, /draw\.io file|Berkas draw\.io/i]) {
+      expect(menu.getByRole("button", { name: format })).toBeVisible();
+    }
+  });
+
+  it("aksi kosongkan papan tersembunyi sampai Lainnya dibuka dan tetap meminta konfirmasi", async () => {
+    (confirmDeleteAlert as jest.Mock).mockResolvedValue(false);
+    await bukaPapan();
+    const bersihkan = /clear all canvas|bersihkan semua bentuk/i;
+    expect(screen.queryByRole("button", { name: bersihkan })).toBeNull();
+    fireEvent.click(screen.getByTestId("dock-menu-lainnya"));
+    fireEvent.click(screen.getByRole("button", { name: bersihkan }));
+    expect(confirmDeleteAlert).toHaveBeenCalledTimes(1);
+    expect(screen.getByDisplayValue("A")).toBeInTheDocument();
   });
 });

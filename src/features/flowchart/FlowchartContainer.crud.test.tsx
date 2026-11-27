@@ -162,7 +162,7 @@ describe("FlowchartView — simpan metadata tanpa merusak papan (#587)", () => {
     // Bukan textarea pertama di layar: tiap bentuk di papan membawa textarea
     // labelnya sendiri.
     const kotakMasalah = screen.getByPlaceholderText(
-      /Apa yang sedang dialami/i
+      /Apa masalah utama/i
     ) as HTMLTextAreaElement;
     expect(kotakMasalah.value).toBe("Merchant mengecek transaksi manual");
     fireEvent.change(kotakMasalah, { target: { value: "" } });

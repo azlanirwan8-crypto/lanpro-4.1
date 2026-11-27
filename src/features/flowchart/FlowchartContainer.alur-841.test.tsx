@@ -180,6 +180,7 @@ describe("#841 token berjalan sepanjang garis", () => {
 
   it("satu klik Langkah menempuh tepat satu garis lalu berhenti sendiri", async () => {
     const container = await bukaPapan("Papan Alur");
+    tekan("dock-menu-lainnya");
     tekan("tombol-alur-langkah");
 
     expect(token(container, "e1")).not.toBeNull();

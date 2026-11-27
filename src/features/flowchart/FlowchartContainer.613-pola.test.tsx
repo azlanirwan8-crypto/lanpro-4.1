@@ -103,7 +103,8 @@ describe("#613 — pola papan", () => {
     (fetchFlowcharts as jest.Mock).mockResolvedValue([papan({})]);
     const { container } = await bukaEditor();
 
-    fireEvent.click(screen.getByLabelText("Papan polos"));
+    fireEvent.click(screen.getByTestId("dock-menu-papan"));
+    fireEvent.click(screen.getByRole("button", { name: "Papan polos" }));
 
     await waitFor(() => expect(container.querySelector(".papan-titik")).toBeNull());
 
@@ -140,17 +141,17 @@ describe("#613 — pola papan", () => {
     (fetchFlowcharts as jest.Mock).mockResolvedValue([papan({})]);
     await bukaEditor();
 
-    const polos = screen.getByLabelText("Papan polos");
-    const titik = screen.getByLabelText("Papan bertitik");
-    const kisi = screen.getByLabelText("Papan berkisi");
-
-    expect(titik).toHaveAttribute("aria-pressed", "true");
-    fireEvent.click(kisi);
+    const pemicu = screen.getByTestId("dock-menu-papan");
+    fireEvent.click(pemicu);
+    const pola = (name: string) => screen.getByRole("button", { name });
+    expect(pola("Papan bertitik")).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(pola("Papan berkisi"));
     await act(async () => {
       await new Promise((r) => setTimeout(r, 100));
     });
-    expect(kisi).toHaveAttribute("aria-pressed", "true");
-    expect(titik).toHaveAttribute("aria-pressed", "false");
-    expect(polos).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(pemicu);
+    expect(pola("Papan berkisi")).toHaveAttribute("aria-pressed", "true");
+    expect(pola("Papan bertitik")).toHaveAttribute("aria-pressed", "false");
+    expect(pola("Papan polos")).toHaveAttribute("aria-pressed", "false");
   });
 });

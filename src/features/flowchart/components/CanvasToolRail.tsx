@@ -4,7 +4,7 @@
  */
 import { useTranslation } from "react-i18next";
 import React, { useCallback } from "react";
-import { ArrowRight, Hand, HelpCircle, MousePointer, StickyNote, Type } from "lucide-react";
+import { ArrowRight, Hand, MousePointer, StickyNote, Type } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "../../../lib/utils";
 import { ShapePalette } from "./ShapePalette";
@@ -78,7 +78,8 @@ const CanvasToolRailBati: React.FC<CanvasToolRailProps> = ({
             ? "bg-primary-surface text-content-inverse shadow-md"
             : "hover:bg-surface-muted text-content-body"
         )}
-        title={t("flowchart.toolHand")}
+        aria-label={t("flowchart.toolHand")}
+        title={t("flowchart.dockPanHint")}
       >
         <Hand className="w-4 h-4" />
       </button>
@@ -136,20 +137,6 @@ const CanvasToolRailBati: React.FC<CanvasToolRailProps> = ({
         <Type className="w-4 h-4" />
       </button>
 
-      <div className="w-5 h-px bg-surface-strong" />
-
-      <button
-        type="button"
-        className="p-2 text-content-subtle hover:text-primary transition-colors rounded-lg w-9 h-9 flex items-center justify-center"
-        title={t("flowchart.helpNav")}
-        onClick={() =>
-          toast.info(
-            "Gunakan menu ini untuk menambahkan komponen ke visual whiteboard. Anda dapat mengubah isi teks dengan mengetik langsung diatas bentuk."
-          )
-        }
-      >
-        <HelpCircle className="w-4 h-4" />
-      </button>
     </div>
   );
 };
