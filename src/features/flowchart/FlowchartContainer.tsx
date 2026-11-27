@@ -4803,7 +4803,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                     </>
                   }
                   description={
-                    currentFlowMetadata?.description ? (
+                    currentFlowMetadata?.description?.trim() &&
+                    (rightViewMode !== "detail" ||
+                      currentFlowMetadata.description.trim() !==
+                        currentFlowMetadata.konteks?.masalah?.trim()) ? (
                       <p className="text-xs text-content-muted font-medium max-w-3xl leading-relaxed mt-2">
                         {currentFlowMetadata.description}
                       </p>
@@ -4852,7 +4855,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 />
 
                 {/* Main Viewport (Detail / Dokumen / Canvas) */}
-                <div className="surface-panel bg-surface border border-border-panel-divider rounded-lg shadow-soft flex-1 min-h-[600px] relative flex flex-col overflow-hidden">
+                <div
+                  className={cn(
+                    "surface-panel bg-surface border border-border-panel-divider rounded-lg shadow-soft relative flex flex-col overflow-hidden",
+                    rightViewMode === "canvas" ? "flex-1 min-h-[600px]" : "shrink-0"
+                  )}
+                >
                   {rightViewMode === "detail" ? (
                     <div className="flex-1 overflow-y-auto">
                       <FlowchartDetail
@@ -4889,7 +4897,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-3">
                           {currentFlowMetadata?.documents &&
                           currentFlowMetadata.documents.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-start gap-4">
                               {currentFlowMetadata.documents.map((doc) => {
                                 // Nilai ini datang dari `canvasData` yang ditulis
                                 // klien, jadi keamanannya diputuskan tepat sebelum
@@ -5005,9 +5013,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               })}
                             </div>
                           ) : (
-                            <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
-                              <div className="w-16 h-16 bg-surface-muted border border-border-panel-divider rounded-full flex items-center justify-center mb-4">
-                                <FileText className="w-8 h-8 text-content-subtle opacity-50" />
+                            <div className="flex flex-col items-center justify-center py-4 px-4 text-center">
+                              <div className="w-10 h-10 bg-surface-muted border border-border-panel-divider rounded-lg flex items-center justify-center mb-2">
+                                <FileText className="w-5 h-5 text-content-subtle" />
                               </div>
                               <h3 className="text-sm font-medium text-content-body mb-2">
                                 {t("flowchart.noDocuments")}

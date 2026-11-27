@@ -144,7 +144,6 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
                   ? t("flowchart.addFlowchartData")
                   : t("flowchart.editDocDetail")}
               </h3>
-              <span className="text-xs text-content-subtle">{t("flowchart.modalSubtitle")}</span>
             </div>
           </div>
           <button
@@ -186,6 +185,7 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
                   masterData={[]}
                   className="w-full"
                   buttonClassName={KONTROL}
+                  tampilanForm
                 />
               </div>
             </div>
@@ -194,6 +194,7 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
               <label className={LABEL}>
                 <Workflow className="w-4 h-4 text-primary" />
                 {t("flowchart.linkedIssueLabel")}
+                <span className="text-content-subtle">({t("flowchart.optional")})</span>
               </label>
               <StyledDropdown
                 value={flowEpicId}
@@ -210,6 +211,7 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
                 ]}
                 className="w-full"
                 buttonClassName={KONTROL}
+                tampilanForm
               />
               <p className="text-[11px] text-content-subtle leading-normal">
                 {opsiTautanIsu.length > 0
@@ -222,6 +224,7 @@ export const FlowchartDocumentModal: React.FC<FlowchartDocumentModalProps> = ({
               <h4 className="text-xs font-medium uppercase tracking-wide text-content-subtle">
                 {t("flowchart.detailDokumen")}
               </h4>
+              <p className="text-xs text-content-subtle">{t("flowchart.modalSubtitle")}</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {blok.map(({ isi, judul, petunjuk, Ikon }) => (
                   <div key={isi} className="space-y-1.5">

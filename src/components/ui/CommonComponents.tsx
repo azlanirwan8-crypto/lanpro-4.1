@@ -344,6 +344,7 @@ export const StyledDropdown = ({
   customButton,
   cari,
   polos,
+  tampilanForm,
 }: {
   value: string;
   onChange: (val: string) => void;
@@ -368,6 +369,8 @@ export const StyledDropdown = ({
    * uppercase, sisanya 12 px); yang dicabut hanya bingkainya.
    */
   polos?: boolean;
+  /** Form menyediakan sendiri kelas kontrol melalui buttonClassName. */
+  tampilanForm?: boolean;
 }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -605,7 +608,7 @@ export const StyledDropdown = ({
           title={selected?.label || value || undefined}
           className={cn(
             "flex items-center gap-1.5 group/dd transition-all cursor-pointer w-full justify-between focus:ring-1 focus:ring-primary/20",
-            kulit,
+            !tampilanForm && kulit,
             disabled && "opacity-50 cursor-not-allowed",
             buttonClassName
           )}

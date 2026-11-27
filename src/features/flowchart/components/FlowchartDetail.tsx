@@ -73,7 +73,7 @@ export const FlowchartDetail: React.FC<FlowchartDetailProps> = ({ konteks, kateg
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 items-start gap-4">
         {blok.map(({ isi, judul, Ikon }) => {
           const teks = (konteks?.[isi] || "").trim();
           return (

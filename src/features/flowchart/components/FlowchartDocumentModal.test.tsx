@@ -40,7 +40,7 @@ describe("FlowchartDocumentModal — empat blok detail (#583)", () => {
   it("menanyakan empat blok slide, bukan tautan eksternal atau deskripsi arsitektur", () => {
     render(<FlowchartDocumentModal {...props()} />);
 
-    for (const judul of ["Problem Statement", "Pain Point", "How", "Benefit"]) {
+    for (const judul of ["Problem Statement", "Pain Point", "Usulan Proses", "Benefit"]) {
       expect(screen.getByText(judul)).toBeTruthy();
     }
     expect(screen.queryByText(/Tautan Eksternal|External Link/i)).toBeNull();
@@ -95,9 +95,9 @@ describe("#718 — tautannya ke ISU, bukan hanya ke epic", () => {
     render(<FlowchartDocumentModal {...props({ setFlowKonteks })} />);
 
     const kotak = [
-      [/Apa yang sedang dialami/i, "masalah"],
-      [/paling membebani/i, "titikNyeri"],
-      [/Bagaimana alur ini/i, "cara"],
+      [/Apa masalah utama/i, "masalah"],
+      [/Langkah mana yang bermasalah/i, "titikNyeri"],
+      [/Bagaimana alur yang diusulkan/i, "cara"],
       [/Yang lebih baik/i, "manfaat"],
     ] as const;
 
@@ -113,11 +113,7 @@ describe("#718 — tautannya ke ISU, bukan hanya ke epic", () => {
     }
   });
 
-  // #587 — pemilik proyek: "terlalu kecil ui modal nya... document category nya
-  // juga tidak sama besar desainnya". `cn()` hanya merangkai kelas (tanpa
-  // tailwind-merge) dan pemicu StyledDropdown selalu membawa px-1.5 py-0.5
-  // bawaannya, jadi yang bisa dikunci hanyalah tingginya.
-  it("semua kontrol satu-baris memakai tinggi yang sama, termasuk kedua dropdown", () => {
+  it("#717: kontrol satu-baris memakai tinggi dan garis tepi form yang sama", () => {
     const { container } = render(<FlowchartDocumentModal {...props()} />);
 
     const pemicu = Array.from(container.querySelectorAll("button")).filter((b) =>
@@ -129,6 +125,8 @@ describe("#718 — tautannya ke ISU, bukan hanya ke epic", () => {
     for (const kendali of [nama, ...pemicu]) {
       expect(kendali.className).toContain("h-10");
       expect(kendali.className).toContain("text-sm");
+      expect(kendali.classList.contains("border-border-panel-divider")).toBe(true);
+      expect(kendali.classList.contains("border-transparent")).toBe(false);
     }
   });
 
