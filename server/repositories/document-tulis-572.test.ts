@@ -69,11 +69,8 @@ describe("document.repository.update — kolom yang tidak dikirim tidak boleh di
 });
 
 /**
- * #568 menutup kunci ini. Perbandingan versi TIDAK hidup di `WHERE` repository
- * (satu jalur tulis untuk semua klien, tanpa migrasi kolom versi): rute yang
- * menolak penulis basi lewat 409, dan repository hanya wajib (a) menstempel
- * baris dengan waktu baru dan (b) MEMULANGKAN stempel itu — tanpa (b) tab yang
- * sama akan menabrak dirinya sendiri pada kiriman berikutnya.
+ * Jalur kompatibilitas tanpa versi tetap mengembalikan stempel baru (#568).
+ * Flowchart yang mengirim versi juga menegakkan versi pada UPDATE (#876).
  */
 describe("document.repository.update — stempel baru ditulis dan dipulangkan (#568)", () => {
   it("baris diberi stempel waktu dan stempelnya ikut kembali", async () => {
@@ -89,5 +86,14 @@ describe("document.repository.update — stempel baru ditulis dan dipulangkan (#
   it("pembaruan kosong tidak mengarang stempel", async () => {
     expect(await repo.update("d-1", {})).toBeNull();
     expect(kueriPalsu).not.toHaveBeenCalled();
+  });
+
+  it("#876 memeriksa revisi di UPDATE dan membedakan versi yang sudah kalah", async () => {
+    const versi = new Date("2026-11-27T12:00:00.010Z");
+    kueriPalsu.mockResolvedValue([[]]);
+    await expect(repo.update("d-1", { canvasData: "{}" }, versi)).resolves.toBeUndefined();
+    expect(kueri()).toContain(`WHERE id = ? AND date_trunc('milliseconds', "updatedAt") = ?::timestamp`);
+    expect(kueri()).toContain(`"updatedAt") + INTERVAL '1 millisecond'`);
+    expect(parameter()).toEqual(["{}", "d-1", versi]);
   });
 });
