@@ -74,6 +74,42 @@ describe("#685 DrawioEmbed", () => {
     });
   });
 
+  it("memakai renderer draw.io untuk pratinjau dan menolak simpan dari pratinjau", () => {
+    const onSimpan = jest.fn();
+    const { rerender } = render(<DrawioEmbed {...props({ pratinjau: true, onSimpan })} />);
+    expect(iframe().getAttribute("src")).toContain("chrome=0");
+    const post = jest.spyOn(iframe().contentWindow as Window, "postMessage");
+
+    kirimDariEditor({ event: "init" });
+    expect(JSON.parse(String(post.mock.calls[0][0]))).toMatchObject({
+      action: "load",
+      xml: XML,
+      autosave: 0,
+    });
+    const xmlBaru = XML.replace("Page-1", "Updated");
+    rerender(<DrawioEmbed {...props({ pratinjau: true, onSimpan, xml: xmlBaru })} />);
+    expect(JSON.parse(String(post.mock.calls[1][0]))).toMatchObject({ xml: xmlBaru, autosave: 0 });
+
+    jest.useFakeTimers();
+    kirimDariEditor({ event: "autosave", xml: XML });
+    act(() => jest.advanceTimersByTime(1000));
+    expect(onSimpan).not.toHaveBeenCalled();
+  });
+
+  it("meminta draw.io menghasilkan SVG dengan sumber dan font", () => {
+    render(<DrawioEmbed {...props()} />);
+    const post = jest.spyOn(iframe().contentWindow as Window, "postMessage");
+    kirimDariEditor({ event: "init" });
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("flowchart.downloadSvg") }));
+    expect(JSON.parse(String(post.mock.calls[1][0]))).toEqual({
+      action: "export",
+      format: "xmlsvg",
+      asText: true,
+      embedFonts: true,
+    });
+  });
+
   it("menolak pesan dari origin lain", () => {
     const onSimpan = jest.fn().mockResolvedValue(undefined);
     render(<DrawioEmbed {...props({ onSimpan })} />);

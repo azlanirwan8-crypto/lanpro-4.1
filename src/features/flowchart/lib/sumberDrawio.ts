@@ -37,6 +37,9 @@ import { bentukDariGayaDrawio } from "./petaBentukDrawio";
 
 export const FORMAT_SUMBER = "drawio-xml-v1" as const;
 
+export const SUMBER_DRAWIO_KOSONG =
+  '<mxfile><diagram id="page-1" name="Page-1"><mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/></root></mxGraphModel></diagram></mxfile>';
+
 /**
  * Batas byte sumber yang boleh ikut ke payload papan.
  *

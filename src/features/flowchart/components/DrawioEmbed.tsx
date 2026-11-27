@@ -18,7 +18,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle, Check, Loader2, RefreshCw, Save } from "lucide-react";
+import { AlertTriangle, Check, FileDown, Loader2, RefreshCw, Save, SquarePen } from "lucide-react";
 import { Modal } from "../../../components/ui/Modal";
 import { cn } from "../../../lib/utils";
 
@@ -26,12 +26,13 @@ type StatusEditor = "memuat" | "siap" | "menyimpan" | "tersimpan" | "gagal" | "g
 
 interface DrawioEmbedProps {
   isOpen: boolean;
+  pratinjau?: boolean;
   /** XML sumber saat editor dibuka. Perubahan sesudahnya tidak memuat ulang editor. */
   xml: string;
   judul: string;
   /** Menyimpan XML hasil editor. Melempar galat bila penyimpanan gagal. */
-  onSimpan: (xml: string) => Promise<void>;
-  onTutup: () => void;
+  onSimpan?: (xml: string) => Promise<void>;
+  onTutup?: () => void;
 }
 
 const JEDA_AUTOSAVE_MS = 600;
@@ -40,6 +41,7 @@ const GAGAL_MUAT: StatusEditor = "gagal-muat";
 
 export const DrawioEmbed: React.FC<DrawioEmbedProps> = ({
   isOpen,
+  pratinjau = false,
   xml,
   judul,
   onSimpan,
@@ -52,6 +54,7 @@ export const DrawioEmbed: React.FC<DrawioEmbedProps> = ({
   const [kunciMuat, setKunciMuat] = useState(0);
 
   const xmlTerkirimRef = useRef<string | null>(null);
+  const xmlPratinjauRef = useRef<string | null>(null);
   const xmlTertundaRef = useRef<string | null>(null);
   const prosesRef = useRef<Promise<boolean> | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -64,8 +67,8 @@ export const DrawioEmbed: React.FC<DrawioEmbedProps> = ({
   const bahasa = i18n.language?.startsWith("en") ? "en" : "id";
   const src = useMemo(
     () =>
-      `/drawio/index.html?embed=1&proto=json&spin=1&libraries=1&noSaveBtn=1&noExitBtn=1&noHelp=1&autosave=1&lang=${bahasa}&r=${kunciMuat}`,
-    [bahasa, kunciMuat]
+      `/drawio/index.html?embed=1&proto=json&spin=1&libraries=1&noSaveBtn=1&noExitBtn=1&noHelp=1&lang=${bahasa}&r=${kunciMuat}&${pratinjau ? "chrome=0" : "autosave=1"}`,
+    [bahasa, kunciMuat, pratinjau]
   );
 
   const kirimPesan = useCallback((pesan: Record<string, unknown>) => {
@@ -80,6 +83,8 @@ export const DrawioEmbed: React.FC<DrawioEmbedProps> = ({
    */
   const simpan = useCallback(
     (xmlBaru: string): Promise<boolean> => {
+      const kirimKeServer = onSimpanRef.current;
+      if (!kirimKeServer) return Promise.resolve(false);
       if (prosesRef.current) {
         xmlTertundaRef.current = xmlBaru;
         return prosesRef.current;
@@ -95,7 +100,7 @@ export const DrawioEmbed: React.FC<DrawioEmbedProps> = ({
             const kirim = xmlTertundaRef.current;
             xmlTertundaRef.current = null;
             if (kirim === xmlTerkirimRef.current) continue;
-            await onSimpanRef.current(kirim);
+            await kirimKeServer(kirim);
             xmlTerkirimRef.current = kirim;
           }
           setStatus("tersimpan");
@@ -141,7 +146,7 @@ export const DrawioEmbed: React.FC<DrawioEmbedProps> = ({
       if (!berhasil) return;
     }
     kirimPesan({ action: "exit" });
-    onTutup();
+    onTutup?.();
   }, [kirimPesan, onTutup, simpan]);
 
   useEffect(() => {
@@ -150,6 +155,7 @@ export const DrawioEmbed: React.FC<DrawioEmbedProps> = ({
     setGalat(null);
     setKunciMuat(0);
     xmlTerkirimRef.current = null;
+    xmlPratinjauRef.current = null;
     xmlTertundaRef.current = null;
   }, [isOpen]);
 
@@ -177,14 +183,37 @@ export const DrawioEmbed: React.FC<DrawioEmbedProps> = ({
         return;
       }
       if (!mentah || typeof mentah !== "object") return;
-      const pesan = mentah as { event?: unknown; xml?: unknown };
+      const pesan = mentah as {
+        event?: unknown;
+        xml?: unknown;
+        format?: unknown;
+        data?: unknown;
+        message?: { format?: unknown; asText?: unknown };
+      };
 
       if (pesan.event === "init") {
+        if (pratinjau) xmlPratinjauRef.current = xml;
         setStatus("siap");
-        kirimPesan({ action: "load", xml, autosave: 1, title: judul });
+        kirimPesan({ action: "load", xml, autosave: pratinjau ? 0 : 1, title: judul });
         return;
       }
-      if (pesan.event === "autosave" || pesan.event === "save") {
+      if (
+        !pratinjau &&
+        pesan.event === "export" &&
+        pesan.format === "svg" &&
+        pesan.message?.format === "xmlsvg" &&
+        pesan.message.asText === true &&
+        typeof pesan.data === "string"
+      ) {
+        const uri = URL.createObjectURL(new Blob([pesan.data], { type: "image/svg+xml" }));
+        const unduhan = document.createElement("a");
+        unduhan.href = uri;
+        unduhan.download = `${judul.replace(/[\\/:*?"<>|]/g, "_")}.svg`;
+        unduhan.click();
+        setTimeout(() => URL.revokeObjectURL(uri), 1000);
+        return;
+      }
+      if (!pratinjau && (pesan.event === "autosave" || pesan.event === "save")) {
         if (typeof pesan.xml !== "string" || pesan.xml.length === 0) return;
         if (timerRef.current) clearTimeout(timerRef.current);
         const xmlBaru = pesan.xml;
@@ -200,7 +229,15 @@ export const DrawioEmbed: React.FC<DrawioEmbedProps> = ({
 
     window.addEventListener("message", terima);
     return () => window.removeEventListener("message", terima);
-  }, [isOpen, xml, judul, kirimPesan, simpan]);
+  }, [isOpen, xml, judul, kirimPesan, simpan, pratinjau]);
+
+  useEffect(() => {
+    if (!isOpen || !pratinjau || xmlPratinjauRef.current === null || xmlPratinjauRef.current === xml) {
+      return;
+    }
+    xmlPratinjauRef.current = xml;
+    kirimPesan({ action: "load", xml, autosave: 0, title: judul });
+  }, [isOpen, pratinjau, xml, judul, kirimPesan]);
 
   useEffect(
     () => () => {
@@ -224,6 +261,73 @@ export const DrawioEmbed: React.FC<DrawioEmbedProps> = ({
     : status === "tersimpan"
       ? "text-success-text"
       : "text-content-subtle";
+
+  const panel = (
+    <div className="relative w-full h-full bg-surface">
+      <iframe
+        ref={iframeRef}
+        key={kunciMuat}
+        src={src}
+        title={t("flowchart.drawioJudulEditor")}
+        className="w-full h-full border-0"
+        data-testid="drawio-embed-iframe"
+        referrerPolicy="no-referrer"
+      />
+
+      {status === "gagal-muat" && (
+        <div className="absolute inset-0 flex items-center justify-center p-6 bg-surface/95">
+          <div className="max-w-md text-center space-y-3">
+            <AlertTriangle className="w-8 h-8 mx-auto text-danger-text" />
+            <h4 className="text-sm font-medium text-content-strong">
+              {t("flowchart.drawioGagalMuat")}
+            </h4>
+            <p className="text-xs text-content-muted leading-relaxed">
+              {t("flowchart.drawioGagalMuatHint")}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setGalat(null);
+                setStatus("memuat");
+                setKunciMuat((n) => n + 1);
+              }}
+              className="inline-flex items-center gap-1.5 min-h-11 px-3 rounded-md bg-primary/10 text-primary text-xs font-medium hover:bg-primary/15 transition-colors cursor-pointer"
+            >
+              <RefreshCw className="w-4 h-4" />
+              {t("flowchart.drawioCobaLagi")}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {status === "gagal" && (
+        <div className="absolute left-3 right-3 bottom-3 rounded-lg border border-danger/30 bg-danger-surface px-3 py-2 flex items-start gap-2 shadow-lg">
+          <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0 text-danger-text" />
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium text-danger-text">
+              {t("flowchart.drawioGagalMenyimpan")}
+            </p>
+            {galat && (
+              <p className="text-[11px] text-content-muted break-words mt-0.5">{galat}</p>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const isi = xmlTertundaRef.current ?? xmlTerkirimRef.current;
+              if (isi) void simpan(isi);
+            }}
+            className="inline-flex items-center gap-1 min-h-11 px-2 rounded-md text-xs font-medium text-danger-text hover:bg-danger/10 transition-colors cursor-pointer shrink-0"
+          >
+            <Save className="w-3.5 h-3.5" />
+            {t("flowchart.drawioSimpanUlang")}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
+  if (pratinjau) return isOpen ? panel : null;
 
   return (
     <Modal
@@ -252,71 +356,69 @@ export const DrawioEmbed: React.FC<DrawioEmbedProps> = ({
             ) : null}
             {labelStatus[status]}
           </span>
+          {status !== "memuat" && status !== "gagal-muat" && (
+            <button
+              type="button"
+              title={t("flowchart.downloadSvg")}
+              aria-label={t("flowchart.downloadSvg")}
+              onClick={() =>
+                kirimPesan({
+                  action: "export",
+                  format: "xmlsvg",
+                  asText: true,
+                  embedFonts: true,
+                })
+              }
+              className="inline-flex items-center justify-center rounded-md p-1.5 text-content-muted hover:bg-surface-muted hover:text-primary"
+            >
+              <FileDown className="w-4 h-4" />
+            </button>
+          )}
         </span>
       }
     >
-      <div className="relative w-full h-full bg-surface">
-        <iframe
-          ref={iframeRef}
-          key={kunciMuat}
-          src={src}
-          title={t("flowchart.drawioJudulEditor")}
-          className="w-full h-full border-0"
-          data-testid="drawio-embed-iframe"
-          referrerPolicy="no-referrer"
-        />
+      {panel}
+    </Modal>
+  );
+};
 
-        {status === "gagal-muat" && (
-          <div className="absolute inset-0 flex items-center justify-center p-6 bg-surface/95">
-            <div className="max-w-md text-center space-y-3">
-              <AlertTriangle className="w-8 h-8 mx-auto text-danger-text" />
-              <h4 className="text-sm font-medium text-content-strong">
-                {t("flowchart.drawioGagalMuat")}
-              </h4>
-              <p className="text-xs text-content-muted leading-relaxed">
-                {t("flowchart.drawioGagalMuatHint")}
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setGalat(null);
-                  setStatus("memuat");
-                  setKunciMuat((n) => n + 1);
-                }}
-                className="inline-flex items-center gap-1.5 min-h-11 px-3 rounded-md bg-primary/10 text-primary text-xs font-medium hover:bg-primary/15 transition-colors cursor-pointer"
-              >
-                <RefreshCw className="w-4 h-4" />
-                {t("flowchart.drawioCobaLagi")}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {status === "gagal" && (
-          <div className="absolute left-3 right-3 bottom-3 rounded-lg border border-danger/30 bg-danger-surface px-3 py-2 flex items-start gap-2 shadow-lg">
-            <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0 text-danger-text" />
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium text-danger-text">
-                {t("flowchart.drawioGagalMenyimpan")}
-              </p>
-              {galat && (
-                <p className="text-[11px] text-content-muted break-words mt-0.5">{galat}</p>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                const isi = xmlTertundaRef.current ?? xmlTerkirimRef.current;
-                if (isi) void simpan(isi);
-              }}
-              className="inline-flex items-center gap-1 min-h-11 px-2 rounded-md text-xs font-medium text-danger-text hover:bg-danger/10 transition-colors cursor-pointer shrink-0"
-            >
-              <Save className="w-3.5 h-3.5" />
-              {t("flowchart.drawioSimpanUlang")}
-            </button>
-          </div>
+export const DrawioPreviewPanel = ({
+  xml,
+  judul,
+  editorTerbuka,
+  onEdit,
+  onExport,
+}: {
+  xml: string;
+  judul: string;
+  editorTerbuka: boolean;
+  onEdit?: () => void;
+  onExport: () => void;
+}) => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex flex-1 flex-col min-h-[600px]">
+      <div className="flex flex-wrap items-center justify-end gap-2 border-b border-border-divider px-4 py-2">
+        <button
+          type="button"
+          onClick={onExport}
+          className="inline-flex items-center gap-2 rounded-md bg-surface-muted px-3 py-2 text-xs font-medium text-content-body hover:bg-surface-strong"
+        >
+          <FileDown className="w-4 h-4" /> {t("flowchart.exportDrawio")}
+        </button>
+        {onEdit && (
+          <button
+            type="button"
+            onClick={onEdit}
+            className="inline-flex items-center gap-2 rounded-md bg-primary-surface px-3 py-2 text-xs font-medium text-content-inverse hover:bg-primary-surface-hover"
+          >
+            <SquarePen className="w-4 h-4" /> {t("flowchart.drawioBukaEditor")}
+          </button>
         )}
       </div>
-    </Modal>
+      <div className="relative flex-1 min-h-0">
+        <DrawioEmbed isOpen={!editorTerbuka} pratinjau xml={xml} judul={judul} />
+      </div>
+    </div>
   );
 };

@@ -63,7 +63,7 @@ import { FlowchartDashboard } from "./components/FlowchartDashboard";
 import { CanvasToolRail } from "./components/CanvasToolRail";
 import { FlowchartDocumentModal } from "./components/FlowchartDocumentModal";
 import { ImportDiagramModal } from "./components/ImportDiagramModal";
-import { DrawioEmbed } from "./components/DrawioEmbed";
+import { DrawioEmbed, DrawioPreviewPanel } from "./components/DrawioEmbed";
 import { CanvasToolbar } from "./components/CanvasToolbar";
 import { FlowchartNode } from "./components/FlowchartNode";
 import { FlowchartEdges, pecahanPort } from "./components/FlowchartEdges";
@@ -98,7 +98,13 @@ import type { ParsedDiagram } from "./lib/importers";
 // #685 — berkas `.drawio` adalah sumber kanonik: dibaca utuh, disimpan utuh,
 // dan setiap yang TIDAK bertahan dalam konversi native dinyatakan lebih dulu.
 import { putuskanImporDiagram } from "./lib/putuskanImpor";
-import { adalahDrawio, BATAS_BYTE_SUMBER, FORMAT_SUMBER, panjangByte } from "./lib/sumberDrawio";
+import {
+  adalahDrawio,
+  BATAS_BYTE_SUMBER,
+  FORMAT_SUMBER,
+  panjangByte,
+  SUMBER_DRAWIO_KOSONG,
+} from "./lib/sumberDrawio";
 import type { BatasKonversi } from "./lib/sumberDrawio";
 // #659 - papan bisa ditulis MENJADI berkas draw.io, bukan dibaca saja.
 import { eksporDrawIo } from "./lib/eksporDrawio";
@@ -785,6 +791,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         : (currentFlowMetadata?.sumberDrawio ?? null),
     [sumberImpor, selectedFlowId, currentFlowMetadata]
   );
+  const editorDrawioUtama = currentFlowMetadata?.editorDrawioUtama === true;
   /** Laporan apa yang TIDAK bertahan dalam konversi — ditampilkan sebelum diterapkan. */
   const [batasImpor, setBatasImpor] = useState<BatasKonversi | null>(null);
   /**
@@ -961,13 +968,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
   // Auto-save debounced effect to preserve work
   useEffect(() => {
+    if (editorDrawioUtama) return;
     const timer = setTimeout(() => {
       if (selectedFlowId) {
         handleSaveWorkspace(true);
       }
     }, 1500);
     return () => clearTimeout(timer);
-  }, [nodes, edges, canvasTheme, selectedFlowId]);
+  }, [nodes, edges, canvasTheme, selectedFlowId, editorDrawioUtama]);
 
   // "Mata" untuk LanPro AI Assistant: publish snapshot kanvas yang sedang
   // dibuka supaya chat AI bisa menjawab pertanyaan terkait flow user
@@ -1615,6 +1623,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
    * klik-kanan "Tempel di sini" yang tidak memicu peristiwa ini.
    */
   const tempelDariPeristiwa = (e: ClipboardEvent): boolean => {
+    if (editorDrawioUtama) return false;
     const aktif = document.activeElement;
     if (
       aktif &&
@@ -1702,6 +1711,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (editorDrawioUtama) return;
       // Ignore keyboard shortcuts when the user is typing in a textarea or input field
       const activeEl = document.activeElement;
       if (
@@ -2113,7 +2123,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       // #534 — papan yang isinya jauh dari titik asal dulu "direset" menjadi
       // layar kosong. Yang benar adalah menunjukkannya, bukan memindahkan angka.
       pasKeLayar(batasSeluruhBentuk(loadedNodes));
-      setRightViewMode("embed");
+      setRightViewMode(found.editorDrawioUtama ? "canvas" : "embed");
     }
   };
 
@@ -2349,6 +2359,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         // kirim-saat-keluar). Pelajaran #570/#583/#613: kunci yang tidak ikut
         // terkirim akan dihapus oleh jalur tulis berikutnya.
         sumberDrawio: sumberAktif ?? undefined,
+        editorDrawioUtama: alur?.editorDrawioUtama,
       });
       if (stempel) {
         versiPapan.current.set(selectedFlowId, stempel);
@@ -2410,6 +2421,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           batas: (BATAS_BYTE_SUMBER / 1024 / 1024).toFixed(0),
         })
       );
+    }
+    if (!sumberMuatDisimpan({ ...currentFlowMetadata, nodes, edges, sumberDrawio: xmlSumber })) {
+      throw new Error(t("flowchart.drawioPayloadTerlaluBesar"));
     }
     try {
       await kirimKanvasKeServer({ senyap: true, sumberPaksa: xmlSumber });
@@ -2481,7 +2495,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const tutupEditorDrawio = () => {
     setEditorDrawioTerbuka(false);
     const akhir = sumberTersimpanDrawio.current;
-    if (akhir && akhir !== sumberSaatBukaDrawio.current) {
+    if (!editorDrawioUtama && akhir && akhir !== sumberSaatBukaDrawio.current) {
       void segarkanModelDariSumber(akhir);
     }
   };
@@ -2536,7 +2550,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     tandaiTersimpan: tandaiTersimpanOtomatis,
   } = useFlowchartAutosave({
     isi: isiPapan,
-    boleh: isWorkspaceEditable && papanPunyaBarisServer(),
+    boleh: isWorkspaceEditable && !editorDrawioTerbuka && papanPunyaBarisServer(),
     papan: selectedFlowId,
     diseret: draggingNodeId !== null || resizingNodeId !== null || marqueeBox !== null,
     kirim: () => kirimKanvasKeServer({ senyap: true }),
@@ -2710,20 +2724,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         epicTaskId: flowEpicId,
         description: deskripsi,
         konteks: flowKonteks,
-        nodes: [
-          {
-            id: "node_start",
-            type: "oval",
-            x: 150,
-            y: 150,
-            label: "Mulai",
-            color: "emerald",
-            width: 140,
-            height: 70,
-            fontSize: 12,
-          },
-        ],
+        nodes: [],
         edges: [],
+        sumberDrawio: SUMBER_DRAWIO_KOSONG,
+        formatSumber: FORMAT_SUMBER,
+        editorDrawioUtama: true,
         theme: "miro",
         createdAt: new Date().toLocaleDateString("id-ID"),
         // Item #268 — baris optimistik ini dibuat SEBELUM server menjawab, dan
@@ -2817,6 +2822,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             // #588 — PUT yang tidak membawa daftar lampiran akan menghapusnya
             // dari payload begitu pengguna menyunting deskripsi.
             documents: foundFlow?.documents,
+            sumberDrawio: papanTerbuka
+              ? (sumberDrawioAktif ?? undefined)
+              : foundFlow?.sumberDrawio,
+            editorDrawioUtama: foundFlow?.editorDrawioUtama,
           });
           if (stempelEdit) versiPapan.current.set(editingFlowId, stempelEdit);
           // PUT di atas ikut mendorong kanvas yang ada di state, jadi salinan
@@ -5028,6 +5037,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         </div>
                       </div>
                     </div>
+                  ) : editorDrawioUtama && sumberDrawioAktif ? (
+                    <DrawioPreviewPanel
+                      key={selectedFlowId}
+                      xml={sumberDrawioAktif}
+                      judul={currentFlowMetadata?.name ?? flowName}
+                      editorTerbuka={editorDrawioTerbuka}
+                      onEdit={isWorkspaceEditable && papanPunyaBarisServer() ? bukaEditorDrawio : undefined}
+                      onExport={handleExportDrawIo}
+                    />
                   ) : (
                     /* 2. HIGH-FIDELITY MIRO CANVAS WORKSPACE (DIAGRAM ALUR) */
                     <div
@@ -5741,27 +5759,17 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           >
                             <FileDown className="w-3.5 h-3.5 text-primary" />
                           </button>
-                          {/*
-                            #839 — pembuka editor `.drawio` ikut ke dock. Syarat
-                            tampilnya TIDAK berubah dari bilah atas (#685): papan
-                            yang tidak punya sumber .drawio tidak punya apa pun
-                            untuk dibuka, jadi tombolnya tetap tidak ada di sana.
-                          */}
-                          {isWorkspaceEditable &&
-                            Boolean(sumberDrawioAktif) &&
-                            Boolean(selectedProject?.id) &&
-                            Boolean(selectedFlowId) &&
-                            !selectedFlowId?.startsWith("flow_") && (
-                              <button
-                                type="button"
-                                onClick={bukaEditorDrawio}
-                                aria-label={t("flowchart.drawioBukaEditor")}
-                                title={t("flowchart.drawioBukaEditor")}
-                                className="p-2 text-content-muted hover:bg-surface-muted hover:text-primary rounded-xl transition-all flex items-center justify-center active:scale-95"
-                              >
-                                <SquarePen className="w-3.5 h-3.5 text-primary" />
-                              </button>
-                            )}
+                          {isWorkspaceEditable && sumberDrawioAktif && papanPunyaBarisServer() && (
+                            <button
+                              type="button"
+                              onClick={bukaEditorDrawio}
+                              aria-label={t("flowchart.drawioBukaEditor")}
+                              title={t("flowchart.drawioBukaEditor")}
+                              className="p-2 text-content-muted hover:bg-surface-muted hover:text-primary rounded-xl transition-all"
+                            >
+                              <SquarePen className="w-3.5 h-3.5 text-primary" />
+                            </button>
+                          )}
                           {/*
                 Impor diagram dari Draw.io, Miro, atau JSON.
                 Seluruh alurnya (modal, handler, dan parser Draw.io/Miro

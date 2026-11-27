@@ -334,6 +334,8 @@ export interface FlowchartData {
   sumberDrawio?: string;
   /** Discriminator format sumber, eksplisit — jangan ditebak dari isi teksnya. */
   formatSumber?: string;
+  /** XML draw.io mengendalikan tampilan dan penyuntingan diagram ini. */
+  editorDrawioUtama?: boolean;
   /**
    * #568 — stempel `updatedAt` baris ini saat papan terakhir dibaca. Kalau
    * basis data sudah bergeser, kiriman berikutnya ditolak 409 dan pengguna

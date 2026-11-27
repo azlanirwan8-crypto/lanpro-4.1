@@ -13,7 +13,7 @@ jest.mock("../../../lib/api", () => ({
 }));
 
 import { apiRequest } from "../../../lib/api";
-import { fetchFlowcharts, susunPayload } from "./flowchart.service";
+import { createFlowchart, fetchFlowcharts, susunPayload, updateFlowchart } from "./flowchart.service";
 
 const SUMBER =
   '<mxfile host="app.diagrams.net" version="24.0.0"><diagram id="p" name="Alur">' +
@@ -59,6 +59,40 @@ describe("#685 payload papan menyimpan sumber .drawio", () => {
     // Ekspor-ulang sumber = byte yang sama; inilah yang tidak bisa dipenuhi
     // `eksporDrawio()` karena ia MENULIS mxfile baru dari model native.
     expect(hasil.sumberDrawio).not.toContain('host="LanPro"');
+    expect(hasil.editorDrawioUtama).toBeUndefined();
+  });
+
+  it("simpan dan muat diagram utama mempertahankan XML sumber dan mode editor", async () => {
+    const api = apiRequest as jest.Mock;
+    const sumber = SUMBER.replace(
+      'value="Mulai"',
+      'value="Mulai" style="fontFamily=Georgia;fontSize=24;fontStyle=3;"'
+    );
+    const diagram = {
+      name: "Alur",
+      description: "",
+      theme: "miro" as const,
+      nodes: [],
+      edges: [],
+      sumberDrawio: sumber,
+      editorDrawioUtama: true,
+    };
+    api.mockResolvedValueOnce({ status: "success", data: { id: "f1" } });
+    await expect(createFlowchart("proj-1", diagram)).resolves.toBe("f1");
+
+    const canvasData = api.mock.calls[0][1].body.canvasData;
+    api.mockResolvedValueOnce({ data: [{ id: "f1", type: "flowchart", title: "Alur", canvasData }] });
+    await expect(fetchFlowcharts("proj-1")).resolves.toEqual([
+      expect.objectContaining({ sumberDrawio: sumber, editorDrawioUtama: true }),
+    ]);
+  });
+
+  it("menolak pembaruan diagram utama jika sumber tidak ikut tersimpan", async () => {
+    const api = apiRequest as jest.Mock;
+    await expect(
+      updateFlowchart("proj-1", "f1", { ...papan, name: "Alur", editorDrawioUtama: true })
+    ).rejects.toThrow();
+    expect(api).not.toHaveBeenCalled();
   });
 
   it("payload lama tetap terbaca dan TIDAK ditambahi sumber saat ditulis balik", () => {

@@ -80,6 +80,7 @@ interface IsiKanvas {
    */
   sumberDrawio?: string;
   formatSumber?: string;
+  editorDrawioUtama?: boolean;
   /**
    * #567 — `false` berarti "kosong karena memang kosong". `true` berarti kolomnya
    * ada tapi tidak bisa dibaca, dan papan seperti itu TIDAK BOLEH ditulis balik:
@@ -128,6 +129,12 @@ function parseFlowPayload(payloadMentah?: string): IsiKanvas {
     formatSumber:
       payload.formatSumber === FORMAT_SUMBER && typeof payload.sumberDrawio === "string"
         ? FORMAT_SUMBER
+        : undefined,
+    editorDrawioUtama:
+      payload.formatSumber === FORMAT_SUMBER &&
+      typeof payload.sumberDrawio === "string" &&
+      payload.editorDrawioUtama === true
+        ? true
         : undefined,
     documents: Array.isArray(payload.documents)
       ? payload.documents.filter(
@@ -197,6 +204,7 @@ function toFlowchartData(doc: DocumentRow): FlowchartData {
     muatGagal,
     sumberDrawio,
     formatSumber,
+    editorDrawioUtama,
   } = parseFlowPayload(doc.canvasData || payloadLama);
   return {
     id: doc.id,
@@ -220,6 +228,7 @@ function toFlowchartData(doc: DocumentRow): FlowchartData {
     // #685 — sumber ikut sampai ke UI supaya ekspor-ulang bisa byte-identik.
     sumberDrawio,
     formatSumber,
+    editorDrawioUtama,
     createdAt: doc.createdAt
       ? new Date(doc.createdAt).toLocaleDateString("id-ID")
       : new Date().toLocaleDateString("id-ID"),
@@ -258,6 +267,7 @@ export function susunPayload(flow: {
   documents?: FlowchartDocument[];
   polaPapan?: PolaPapan;
   sumberDrawio?: string;
+  editorDrawioUtama?: boolean;
 }): { payload: string; sumberIkutTersimpan: boolean } {
   const lampiran = sandiLampiran(flow.documents);
 
@@ -278,6 +288,7 @@ export function susunPayload(flow: {
       // terkirim akan hilang saat jalur lain menimpa barisnya (#570).
       ...(flow.polaPapan ? { pola: flow.polaPapan } : {}),
       ...(sumber ? { sumberDrawio: sumber, formatSumber: FORMAT_SUMBER } : {}),
+      ...(sumber && flow.editorDrawioUtama ? { editorDrawioUtama: true } : {}),
     });
 
   const tanpaSumber = bangun(undefined);
@@ -342,6 +353,7 @@ export async function createFlowchart(
     | "documents"
     | "polaPapan"
     | "sumberDrawio"
+    | "editorDrawioUtama"
   >
 ): Promise<string | null> {
   const res: any = await apiRequest(`/api/projects/${projectId}/documents`, {
@@ -379,15 +391,20 @@ export async function updateFlowchart(
     polaPapan?: PolaPapan;
     /** #685 — byte asli `.drawio`; boleh tidak ada untuk papan native. */
     sumberDrawio?: string;
+    editorDrawioUtama?: boolean;
   }
 ): Promise<string | null> {
+  const { payload, sumberIkutTersimpan } = susunPayload(data);
+  if (data.editorDrawioUtama && !sumberIkutTersimpan) {
+    throw new Error("The draw.io source could not fit in the diagram payload.");
+  }
   const res: any = await apiRequest(`/api/projects/${projectId}/documents/${flowId}`, {
     method: "PUT",
     body: {
       versiDibaca: data.versiDibaca ?? null,
       title: data.name,
       description: data.description ?? null,
-      canvasData: encodeFlowPayload(data),
+      canvasData: payload,
       category: data.category ?? null,
       link: data.externalUrl || null,
     },

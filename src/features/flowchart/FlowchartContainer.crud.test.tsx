@@ -50,6 +50,7 @@ jest.mock("sonner", () => ({
 
 import { FlowchartView } from "./FlowchartContainer";
 import { fetchFlowcharts, updateFlowchart } from "./services/flowchart.service";
+import { SUMBER_DRAWIO_KOSONG } from "./lib/sumberDrawio";
 
 const project = { id: "p1", name: "Proyek Uji" } as Project;
 const KUNCI_DAFTAR = "lanpro_flowcharts_p1";
@@ -85,8 +86,10 @@ const alur = () => ({
 /** Salinan papan di perangkat — tempat ketiga bug itu meninggalkan jejaknya. */
 const bacaDaftar = () => JSON.parse(window.localStorage.getItem(KUNCI_DAFTAR) || "[]");
 
-async function bukaPapan() {
-  (fetchFlowcharts as jest.Mock).mockResolvedValue([alur()]);
+async function bukaPapan(sumberDrawio?: string) {
+  (fetchFlowcharts as jest.Mock).mockResolvedValue([
+    sumberDrawio ? { ...alur(), sumberDrawio, editorDrawioUtama: true } : alur(),
+  ]);
   const hasil = render(
     <FlowchartView
       selectedProject={project}
@@ -98,8 +101,12 @@ async function bukaPapan() {
     />
   );
   fireEvent.click((await screen.findAllByText("Alur CRUD"))[0]);
-  fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
-  await screen.findByTitle(/Snap to Grid|Snapping/i);
+  if (sumberDrawio) {
+    await screen.findByTestId("drawio-embed-iframe");
+  } else {
+    fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
+    await screen.findByTitle(/Snap to Grid|Snapping/i);
+  }
   return hasil.container;
 }
 
@@ -155,6 +162,25 @@ describe("FlowchartView — simpan metadata tanpa merusak papan (#587)", () => {
     expect(bacaDaftar()[0].createdByName).toBe("Administrator");
   });
 
+  it("#685 PUT metadata tidak menghapus sumber diagram draw.io", async () => {
+    await bukaPapan(SUMBER_DRAWIO_KOSONG);
+    fireEvent.click(screen.getByTitle("Ubah metadata dokumen"));
+    fireEvent.change(screen.getByDisplayValue("Alur CRUD"), { target: { value: "Judul Baru" } });
+    fireEvent.click(screen.getByText("Simpan Perubahan"));
+
+    await waitFor(() =>
+      expect(updateFlowchart).toHaveBeenCalledWith(
+        "p1",
+        "fw77",
+        expect.objectContaining({
+          name: "Judul Baru",
+          sumberDrawio: SUMBER_DRAWIO_KOSONG,
+          editorDrawioUtama: true,
+        })
+      )
+    );
+  });
+
   it("Problem Statement yang dikosongkan mengosongkan subjudul, bukan memunculkan teks lama", async () => {
     await bukaPapan();
 
@@ -162,7 +188,7 @@ describe("FlowchartView — simpan metadata tanpa merusak papan (#587)", () => {
     // Bukan textarea pertama di layar: tiap bentuk di papan membawa textarea
     // labelnya sendiri.
     const kotakMasalah = screen.getByPlaceholderText(
-      /Apa yang sedang dialami/i
+      /Apa masalah utama/i
     ) as HTMLTextAreaElement;
     expect(kotakMasalah.value).toBe("Merchant mengecek transaksi manual");
     fireEvent.change(kotakMasalah, { target: { value: "" } });

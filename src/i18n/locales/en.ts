@@ -1762,6 +1762,7 @@ export const en = {
     // #685 — pinned draw.io editor bridge.
     drawioBukaEditor: "Edit in draw.io",
     drawioJudulEditor: "draw.io editor",
+    drawioPayloadTerlaluBesar: "The diagram and its data exceed the storage limit.",
     drawioMemuat: "Loading draw.io editor…",
     drawioSiap: "Connected",
     drawioMenyimpan: "Saving…",

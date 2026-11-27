@@ -1773,6 +1773,7 @@ export const id = {
     // #685 — jembatan editor draw.io patok.
     drawioBukaEditor: "Edit di draw.io",
     drawioJudulEditor: "Editor draw.io",
+    drawioPayloadTerlaluBesar: "Diagram dan data terkait melebihi batas penyimpanan.",
     drawioMemuat: "Memuat editor draw.io…",
     drawioSiap: "Tersambung",
     drawioMenyimpan: "Menyimpan…",

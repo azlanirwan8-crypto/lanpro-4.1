@@ -67,6 +67,7 @@ import {
   deleteFlowchart,
 } from "./services/flowchart.service";
 import { findSmartRoute } from "./lib/routing";
+import { SUMBER_DRAWIO_KOSONG } from "./lib/sumberDrawio";
 
 const project = { id: "p1", name: "Proyek Uji" } as Project;
 
@@ -130,6 +131,32 @@ describe("FlowchartView", () => {
     );
     // #424 — subtitle PageHeader dihapus; penanda daftar = toolbar Search+Tambah.
     expect(screen.getByPlaceholderText(/Cari diagram alur berdasarkan judul/i)).toBeInTheDocument();
+  });
+
+  it("#685 membuka diagram bersumber kanonik langsung dengan renderer draw.io", async () => {
+    (fetchFlowcharts as jest.Mock).mockResolvedValue([
+      {
+        id: "fw-drawio",
+        name: "Diagram draw.io uji",
+        createdBy: "u1",
+        nodes: [],
+        edges: [],
+        sumberDrawio: SUMBER_DRAWIO_KOSONG,
+        editorDrawioUtama: true,
+      },
+    ]);
+    renderView();
+
+    fireEvent.click((await screen.findAllByText("Diagram draw.io uji"))[0]);
+    expect(screen.getByTestId("drawio-embed-iframe")).toHaveAttribute(
+      "src",
+      expect.stringContaining("chrome=0")
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Edit di draw.io" }));
+    expect(screen.getByTestId("drawio-embed-iframe")).toHaveAttribute(
+      "src",
+      expect.stringContaining("autosave=1")
+    );
   });
 
   // Tampilan kanvas adalah bagian yang dibelah pada Fase 5, jadi justru ia yang
