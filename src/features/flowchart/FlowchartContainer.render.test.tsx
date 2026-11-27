@@ -408,7 +408,7 @@ describe("FlowchartView", () => {
 
     const kanvas = container.querySelector(".kanvas-papan") as Element;
     expect(kanvas).toBeTruthy();
-    const persen = () => screen.getByTitle(/Setel Ulang Zoom/i).textContent;
+    const persen = () => screen.getByTestId("dock-menu-zoom").textContent;
     const sebelum = persen();
     expect(sebelum).toBe("90%");
 
@@ -476,8 +476,11 @@ describe("FlowchartView", () => {
     // membuat tombol icon-only masih bisa dipakai pembaca layar.
     // Tombol snap menampilkan keadaan berjalan; bawaan papan Snap Grid NYALA
     // (`useFlowchartCanvas.ts:25`), jadi kedua keadaan diterima di sini.
-    const snap = screen.getByRole("button", { name: /^snap grid$|^free move$/i });
-    expect(snap.textContent).toBe("");
+    fireEvent.click(screen.getByTestId("dock-menu-papan"));
+    expect(screen.getByRole("button", { name: /Snap to Grid/i })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
 
     // #547 — papan tidak punya tombol tema lagi; temanya ikut tema aplikasi.
     expect(

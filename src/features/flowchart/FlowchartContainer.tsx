@@ -14,7 +14,6 @@ import {
   Plus,
   Trash2,
   Spline,
-  Save,
   Sparkles,
   Eye,
   Workflow,
@@ -28,7 +27,7 @@ import {
   Edit3,
   X,
   FileText,
-  HelpCircle,
+  Ellipsis,
   User,
   Undo,
   Redo,
@@ -38,19 +37,13 @@ import {
   Gauge,
   ListChecks,
   Download,
-  RefreshCw,
   Upload,
-  Image as ImageIcon,
-  FileCode,
   Link as LinkIcon,
   Copy,
   ChevronLeft,
   ChevronRight,
   FileDown,
   LayoutGrid,
-  Square,
-  Dot,
-  Grid3x3,
   SquarePen,
 } from "lucide-react";
 import { Task, Project } from "../../types";
@@ -60,6 +53,7 @@ import { ConfirmationModal } from "../../components/ui/ConfirmationModal";
 import { DetailViewChrome } from "../../components/ui/DetailViewChrome";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import { FlowchartDashboard } from "./components/FlowchartDashboard";
+import { CanvasDockMenu } from "./components/CanvasDockMenu";
 import { CanvasToolRail } from "./components/CanvasToolRail";
 import { FlowchartDocumentModal } from "./components/FlowchartDocumentModal";
 import { ImportDiagramModal } from "./components/ImportDiagramModal";
@@ -5488,8 +5482,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             supaya tidak ada tombol yang hilang diam-diam. */}
                         <div
                           data-testid="dock-kanvas"
+                          onKeyDown={(event) => {
+                            if (event.target instanceof HTMLElement && event.target.closest("button")) {
+                              event.stopPropagation();
+                            }
+                          }}
                           className={cn(
-                            "absolute left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 min-h-11 overflow-x-auto bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-panel-divider/40 p-1 px-2 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] select-none max-w-[90%] md:max-w-full transition-all duration-300",
+                            "absolute left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 min-h-11 whitespace-nowrap overflow-x-auto bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-panel-divider/40 p-1 px-2 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] select-none max-w-[90%] md:max-w-full transition-all duration-300",
                             isRightSidebarOpen || isShapeDropdownOpen
                               ? "max-md:opacity-0 max-md:pointer-events-none max-md:translate-y-4 bottom-4"
                               : "bottom-4 opacity-100"
@@ -5525,91 +5524,40 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             <Redo className="w-3.5 h-3.5" />
                           </button>
 
-                          {/*
-                            #839 — snap kisi dan pola papan pindah dari bilah atas
-                            ke sini. Kelas `min-h-11 min-w-11` BAWAAN mereka (#535)
-                            ikut dipindah, jadi kepindahan ini tidak menurunkan
-                            target sentuh yang sudah dikunci test.
-                          */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const nextSnap = !isSnapToGrid;
-                              setIsSnapToGrid(nextSnap);
-                              toast.success(
-                                t("toast.snapToGrid", {
-                                  keadaan: t(nextSnap ? "common.aktif" : "common.mati"),
-                                })
-                              );
-                            }}
-                            className={cn(
-                              "min-h-11 min-w-11 p-2 rounded-lg transition-all flex items-center justify-center cursor-pointer border shrink-0",
-                              isSnapToGrid
-                                ? "bg-primary/10 text-primary hover:bg-primary/15 border-primary/30"
-                                : "text-content-subtle hover:bg-surface-muted border-transparent"
-                            )}
-                            aria-pressed={isSnapToGrid}
-                            title={t("flowchart.snapGridJudul", {
-                              keadaan: t(isSnapToGrid ? "common.aktif" : "common.mati"),
-                            })}
-                            aria-label={
-                              isSnapToGrid ? t("flowchart.snapGrid") : t("flowchart.freeMove")
-                            }
-                          >
-                            <LayoutGrid
-                              className={cn(
-                                "w-4 h-4",
-                                isSnapToGrid ? "text-primary" : "text-content-subtle"
-                              )}
-                            />
-                          </button>
-
-                          {/* #613 — tiga pola latar, keadaan aktif terlihat tanpa klik */}
-                          <div className="flex items-center gap-0.5 shrink-0">
-                            {(
-                              [
-                                ["polos", Square, "flowchart.polaPolos"],
-                                ["titik", Dot, "flowchart.polaTitik"],
-                                ["kisi", Grid3x3, "flowchart.polaKisi"],
-                              ] as const
-                            ).map(([nilai, Ikon, kunci]) => (
-                              <button
-                                key={nilai}
-                                type="button"
-                                aria-pressed={polaPapan === nilai}
-                                aria-label={t(kunci)}
-                                title={t(kunci)}
-                                onClick={() => {
-                                  if (polaPapan === nilai) return;
-                                  setPolaPapan(nilai);
-                                  toast.success(t("flowchart.polaDiubah", { pola: t(kunci) }));
-                                }}
-                                className={cn(
-                                  "min-h-11 min-w-11 p-2 rounded-lg transition-all flex items-center justify-center cursor-pointer border",
-                                  polaPapan === nilai
-                                    ? "bg-primary/10 text-primary hover:bg-primary/15 border-primary/30"
-                                    : "text-content-subtle hover:bg-surface-muted border-transparent"
-                                )}
-                              >
-                                <Ikon
-                                  className={cn(
-                                    polaPapan === nilai
-                                      ? "w-4 h-4 text-primary"
-                                      : "w-4 h-4 text-content-subtle",
-                                    nilai === "titik" && "fill-current",
-                                    nilai === "kisi" && "[&_path]:stroke-[1.2]"
-                                  )}
-                                />
-                              </button>
-                            ))}
-                          </div>
-
-                          <div className="w-px h-5 bg-surface-strong mx-1" />
+                          <CanvasDockMenu
+                            label={t("flowchart.dockBoard")}
+                            caption={t("flowchart.dockBoard")}
+                            icon={<LayoutGrid className={cn("w-4 h-4", isSnapToGrid && "text-primary")} />}
+                            testId="dock-menu-papan"
+                            groups={[
+                              {
+                                actions: [{
+                                  label: t("flowchart.snapGridJudul", {
+                                    keadaan: t(isSnapToGrid ? "common.aktif" : "common.mati"),
+                                  }),
+                                  pressed: isSnapToGrid,
+                                  action: () => setIsSnapToGrid(!isSnapToGrid),
+                                }],
+                              },
+                              {
+                                label: t("flowchart.dockBackground"),
+                                actions: ([
+                                  ["polos", "flowchart.polaPolos"],
+                                  ["titik", "flowchart.polaTitik"],
+                                  ["kisi", "flowchart.polaKisi"],
+                                ] as const).map(([nilai, kunci]) => ({
+                                  label: t(kunci),
+                                  pressed: polaPapan === nilai,
+                                  action: () => setPolaPapan(nilai),
+                                })),
+                              },
+                            ]}
+                          />
 
                           {/* Auto-Align Layout Engine */}
                           <button
                             onClick={handleAutoAlignNodes}
-                            className="p-1 px-2 text-content-body hover:bg-surface-muted rounded-xl transition-all flex items-center gap-1 active:scale-95 text-[11px] font-medium"
+                            className="p-1 px-2 text-content-body hover:bg-surface-muted rounded-xl transition-all flex items-center gap-1 active:scale-95 text-[11px] font-medium whitespace-nowrap"
                             title={t("flowchart.autoAlignHint")}
                           >
                             <Sparkles className="w-3.5 h-3.5 text-primary fill-primary/20" />
@@ -5648,18 +5596,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             </span>
                           </button>
 
-                          {/*
-                            Keempat kendali selalu menempati slotnya sendiri.
-                            Dulu jeda/kecepatan baru muncul setelah perjalanan
-                            ada, yang membuat tombol Langkah melompat satu slot
-                            tiap kali Simulasi ditekan — dan menghapus satu-satunya
-                            jalan untuk berjalan selangkah demi selangkah tanpa
-                            menontonnya. Jeda satu-satunya yang boleh mati, dan
-                            hanya ketika memang tidak ada yang bisa dijeda.
-                          */}
+                          {alurBerjalan && <>
                           <button
                             onClick={handleAlurJeda}
-                            disabled={alur === null || alur.status === "selesai"}
                             data-testid="tombol-alur-jeda"
                             className="min-h-11 min-w-11 rounded-xl transition-all flex items-center justify-center active:scale-95 text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:hover:bg-transparent"
                             title={alur?.status === "jeda" ? t("alur.lanjut") : t("alur.jeda")}
@@ -5689,6 +5628,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             <Gauge className="w-3.5 h-3.5" />
                             <span>{kecepatanAlur}×</span>
                           </button>
+                          </>}
 
                           <button
                             onClick={() => setLaporanBuka((sekarang) => !sekarang)}
@@ -5715,102 +5655,70 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                           <div className="w-px h-5 bg-surface-strong mx-1" />
 
-                          {/* Export JPG Image */}
-                          <button
-                            onClick={handleExportJPG}
-                            className="p-2 text-content-muted hover:bg-surface-muted hover:text-success-text rounded-xl transition-all flex items-center justify-center active:scale-95"
-                            title={t("flowchart.downloadJpg")}
-                          >
-                            <ImageIcon className="w-3.5 h-3.5 text-success" />
-                          </button>
-
-                          {/* #618 — PNG dan SVG memakai jalur potret yang sama */}
-                          <button
-                            data-testid="ekspor-png"
-                            onClick={handleExportPNG}
-                            className="p-2 text-content-muted hover:bg-surface-muted hover:text-success-text rounded-xl transition-all flex items-center justify-center active:scale-95"
-                            title={t("flowchart.downloadPng")}
-                          >
-                            <ImageIcon className="w-3.5 h-3.5 text-success opacity-70" />
-                          </button>
-                          <button
-                            data-testid="ekspor-svg"
-                            onClick={handleExportSVG}
-                            className="p-2 text-content-muted hover:bg-surface-muted hover:text-success-text rounded-xl transition-all flex items-center justify-center active:scale-95"
-                            title={t("flowchart.downloadSvg")}
-                          >
-                            <FileCode className="w-3.5 h-3.5 text-success opacity-70" />
-                          </button>
-
-                          {/* Download JSON backup */}
-                          <button
-                            onClick={handleExportJSON}
-                            className="p-2 text-content-muted hover:bg-surface-muted hover:text-info-text rounded-xl transition-all flex items-center justify-center active:scale-95"
-                            title={t("flowchart.exportJson")}
-                          >
-                            <Download className="w-3.5 h-3.5 text-info-text" />
-                          </button>
-
-                          {/* #659 - berkas .drawio, keluaran yang bisa dibuka draw.io */}
-                          <button
-                            onClick={handleExportDrawIo}
-                            className="p-2 text-content-muted hover:bg-surface-muted hover:text-primary rounded-xl transition-all flex items-center justify-center active:scale-95"
-                            title={t("flowchart.exportDrawio")}
-                          >
-                            <FileDown className="w-3.5 h-3.5 text-primary" />
-                          </button>
                           {isWorkspaceEditable && sumberDrawioAktif && papanPunyaBarisServer() && (
                             <button
                               type="button"
                               onClick={bukaEditorDrawio}
                               aria-label={t("flowchart.drawioBukaEditor")}
                               title={t("flowchart.drawioBukaEditor")}
-                              className="p-2 text-content-muted hover:bg-surface-muted hover:text-primary rounded-xl transition-all"
+                              className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-content-body hover:bg-surface-muted"
                             >
-                              <SquarePen className="w-3.5 h-3.5 text-primary" />
+                              <SquarePen className="w-4 h-4" />
                             </button>
                           )}
-                          {/*
-                Impor diagram dari Draw.io, Miro, atau JSON.
-                Seluruh alurnya (modal, handler, dan parser Draw.io/Miro
-                sepanjang ~700 baris) sudah ada sejak lama tetapi tidak pernah
-                dapat dijangkau: openImportModal tidak pernah dipanggil dari
-                mana pun, sehingga isImportModalOpen selalu false. Tombol ini
-                yang menyambungkannya.
-              */}
-                          <button
-                            onClick={openImportModal}
-                            className="p-2 text-content-muted hover:bg-surface-muted hover:text-success-text rounded-xl transition-all flex items-center justify-center active:scale-95"
-                            title={t("flowchart.importDiagram")}
-                          >
-                            <Upload className="w-3.5 h-3.5 text-success" />
-                          </button>
+                          {isWorkspaceEditable && (
+                            <button
+                              type="button"
+                              onClick={openImportModal}
+                              className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-2 text-xs font-medium text-content-body hover:bg-surface-muted"
+                              aria-label={t("flowchart.importDiagram")}
+                              title={t("flowchart.importDiagram")}
+                            >
+                              <Upload className="w-4 h-4" />
+                              <span className="hidden sm:inline">{t("flowchart.dockImport")}</span>
+                            </button>
+                          )}
+                          <CanvasDockMenu
+                            label={t("flowchart.export")}
+                            caption={t("flowchart.export")}
+                            icon={<FileDown className="w-4 h-4" />}
+                            testId="dock-menu-ekspor"
+                            groups={[{
+                              actions: [
+                                { label: t("flowchart.exportDrawio"), action: handleExportDrawIo },
+                                { label: t("flowchart.downloadPng"), action: handleExportPNG, testId: "ekspor-png" },
+                                { label: t("flowchart.downloadSvg"), action: handleExportSVG, testId: "ekspor-svg" },
+                                { label: t("flowchart.downloadJpg"), action: handleExportJPG },
+                                { label: t("flowchart.exportJson"), action: handleExportJSON },
+                              ],
+                            }]}
+                          />
 
                           {/* Simpan Alur DB */}
                           {isWorkspaceEditable ? (
-                            <>
-                              <button
-                                onClick={() => handleSaveWorkspace()}
-                                className="btn-primary p-2 font-medium rounded-lg flex items-center gap-1.5 transition-all shadow-soft active:scale-95"
-                                title={t("flowchart.saveFlowchart")}
-                              >
-                                <Save className="w-3.5 h-3.5" />
-                              </button>
-                              {/* #538 — autosave bekerja tanpa ditekan, jadi hasilnya
-                                  perlu satu tulisan kecil di sebelahnya. */}
+                            <div className="flex shrink-0 items-center gap-1 whitespace-nowrap px-1">
                               {statusSimpan !== "diam" && (
                                 <span
-                                  className={`hidden lg:inline text-[10px] leading-none font-medium tabular-nums ${
-                                    statusSimpan === "gagal"
-                                      ? "text-warning-text"
-                                      : "text-content-subtle"
-                                  }`}
-                                  title={t("flowchart.autosaveHint")}
+                                  role="status"
+                                  className={cn(
+                                    "text-xs font-medium",
+                                    statusSimpan === "gagal" ? "text-danger-text" : "text-content-subtle"
+                                  )}
+                                  title={labelStatusSimpan}
                                 >
-                                  {labelStatusSimpan}
+                                  {statusSimpan === "tersimpan" ? t("flowchart.dockSaved") : labelStatusSimpan}
                                 </span>
                               )}
-                            </>
+                              {statusSimpan === "gagal" && (
+                                <button
+                                  type="button"
+                                  onClick={() => void handleSaveWorkspace()}
+                                  className="min-h-11 rounded-lg px-2 text-xs font-medium text-danger-text hover:bg-danger/10"
+                                >
+                                  {t("flowchart.dockRetry")}
+                                </button>
+                              )}
+                            </div>
                           ) : (
                             <div
                               className="px-2.5 py-1.5 bg-warning/10 text-warning-text border border-warning/30 rounded-xl flex items-center gap-1 text-[10px] leading-none font-medium shadow-2xs"
@@ -5854,16 +5762,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                           <div className="w-px h-5 bg-surface-strong mx-1" />
 
-                          {/* Clear Canvas */}
-                          <button
-                            onClick={handleClearWhiteboard}
-                            className="p-2 text-content-subtle hover:bg-danger/10 hover:text-danger-text rounded-xl transition-all flex items-center justify-center active:scale-95"
-                            title={t("flowchart.clearCanvas")}
-                          >
-                            <RefreshCw className="w-3.5 h-3.5 text-danger" />
-                          </button>
-
-                          <div className="w-px h-5 bg-surface-strong mx-1" />
 
                           {/* Zoom Controls */}
                           <div className="flex items-center gap-0.5 bg-surface-sunken/50 rounded-xl p-0.5 border border-border-panel-divider/60">
@@ -5874,13 +5772,20 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             >
                               <ZoomOut className="w-3.5 h-3.5" />
                             </button>
-                            <button
-                              onClick={skalaSeratus}
-                              className="px-2 text-[11px] font-medium text-content-secondary hover:text-primary w-11 text-center font-mono cursor-pointer transition-colors"
-                              title={t("flowchart.zoomReset")}
-                            >
-                              {Math.round(zoomLevel * 100)}%
-                            </button>
+                            <CanvasDockMenu
+                              label={t("flowchart.dockZoom")}
+                              caption={`${Math.round(zoomLevel * 100)}%`}
+                              testId="dock-menu-zoom"
+                              groups={[{
+                                actions: [25, 50, 75, 100, 150, 200].map((level) => ({
+                                  label: `${level}%`,
+                                  pressed: Math.round(zoomLevel * 100) === level,
+                                  action: level === 100
+                                    ? skalaSeratus
+                                    : () => geserZoomHalus(level / 100 / zoomLevel),
+                                })),
+                              }]}
+                            />
                             <button
                               onClick={() => geserZoomHalus(1.1)}
                               className="p-1.5 text-content-muted hover:bg-surface-strong hover:text-content-strong rounded-lg transition-all active:scale-95"
@@ -5901,19 +5806,32 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                           <div className="w-px h-5 bg-surface-strong mx-1" />
 
-                          {/* Keyboard assistance trigger */}
-                          <button
-                            onClick={() => setIsKeyboardHelpOpen(!isKeyboardHelpOpen)}
-                            className={cn(
-                              "p-2 rounded-xl transition-all flex items-center justify-center",
-                              isKeyboardHelpOpen
-                                ? "bg-warning/10 text-warning-text border "
-                                : "text-content-muted hover:bg-surface-muted"
-                            )}
-                            title={t("flowchart.helpNav")}
-                          >
-                            <HelpCircle className="w-3.5 h-3.5" />
-                          </button>
+                          <CanvasDockMenu
+                            label={t("flowchart.dockMore")}
+                            icon={<Ellipsis className="w-4 h-4" />}
+                            testId="dock-menu-lainnya"
+                            groups={[{
+                              actions: [
+                                ...(!alurBerjalan ? [{
+                                  label: t("alur.langkah"),
+                                  action: handleAlurLangkah,
+                                  testId: "tombol-alur-langkah",
+                                }] : []),
+                                {
+                                  label: t("flowchart.helpNav"),
+                                  action: () => setIsKeyboardHelpOpen(!isKeyboardHelpOpen),
+                                },
+                                ...(isWorkspaceEditable ? [
+                                  { label: t("flowchart.saveFlowchart"), action: handleSaveWorkspace },
+                                  {
+                                    label: t("flowchart.clearCanvas"),
+                                    action: handleClearWhiteboard,
+                                    danger: true,
+                                  },
+                                ] : []),
+                              ],
+                            }]}
+                          />
                         </div>
 
                         {/* KEYBOARD SHORTCUTS NAVIGATIONAL HELP PANELS */}
@@ -5997,11 +5915,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               </div>
                             </div>
                             <div className="h-px bg-surface-inverse my-1" />
-                            <p className="text-[11px] text-content-subtle italic font-mono leading-relaxed">
-                              Tips: Aktifkan mode &ldquo;Arrow&rdquo; dari toolbar sebelah kiri,
-                              klik pada komponen awal, lalu klik pada komponen kedua untuk
-                              menyambung koneksi anak panah alur secara instan.
-                            </p>
+                            <p className="text-xs text-content-inverse">{t("flowchart.dockPanHint")}</p>
                           </div>
                         )}
                       </div>
