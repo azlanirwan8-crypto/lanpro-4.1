@@ -413,6 +413,7 @@ export const en = {
     flowchartDesc: "Create process diagrams and work flowcharts",
   },
   rakit: {
+    ssoDivider: "Sign in with",
     ssoSignIn: "Sign in with {{penyedia}}",
     ssoSignUp: "Sign up with {{penyedia}}",
     auditDidAction: "Performed action",

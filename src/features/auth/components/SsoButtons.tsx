@@ -93,34 +93,35 @@ export const SsoButtons = ({ mode }: SsoButtonsProps) => {
   }, []);
 
   if (memuat || providers.length === 0) return null;
+  const isLogin = mode === "login";
 
   return (
     <div className="mt-5">
       {/* Pemisah dengan label, supaya jelas ini alternatif dari form di atasnya */}
       <div className="flex items-center gap-3 mb-4">
         <span className="h-px flex-1 border-t border-border-divider" />
-        <span className="text-xs text-content-muted">{t("ui.or")}</span>
+        <span className="text-xs text-content-muted">
+          {isLogin ? t("rakit.ssoDivider") : t("ui.or")}
+        </span>
         <span className="h-px flex-1 border-t border-border-divider" />
       </div>
 
-      <div className="flex flex-col gap-2.5">
+      <div className={isLogin ? "flex gap-2.5" : "flex flex-col gap-2.5"}>
         {providers.map((p) => (
           <a
             key={p}
             href={urlMulaiSso(p, mode)}
-            className="inline-flex items-center justify-center gap-2.5 min-h-11 w-full rounded-lg
-                       border border-border-subtle bg-surface px-4
+            aria-label={isLogin ? t("rakit.ssoSignIn", { penyedia: NAMA[p] }) : undefined}
+            className={`inline-flex items-center justify-center min-h-11 rounded-lg
+                       border border-border-subtle bg-surface
                        text-sm font-medium text-content-body
                        transition-colors duration-150
                        hover:bg-surface-muted focus:outline-none
-                       focus:ring-2 focus:ring-primary/40"
+                       focus:ring-2 focus:ring-primary/40
+                       ${isLogin ? "min-w-0 flex-1 gap-1.5 px-1.5 whitespace-nowrap" : "w-full gap-2.5 px-4"}`}
           >
             {p === "google" ? <LogoGoogle /> : <LogoMicrosoft />}
-            <span>
-              {mode === "login"
-                ? t("rakit.ssoSignIn", { penyedia: NAMA[p] })
-                : t("rakit.ssoSignUp", { penyedia: NAMA[p] })}
-            </span>
+            <span>{isLogin ? NAMA[p] : t("rakit.ssoSignUp", { penyedia: NAMA[p] })}</span>
           </a>
         ))}
       </div>

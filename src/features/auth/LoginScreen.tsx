@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
-import { ArrowRight, Eye, EyeOff, AlertCircle, User, Lock } from "lucide-react";
+import { Eye, EyeOff, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { safeLocalStorage } from "../../lib/safeStorage";
-import { cn } from "../../components/ui/CoreUI";
+import { Button, cn } from "../../components/ui/CoreUI";
 import { LoginSkeletonState } from "./components/LoginSkeletonState";
 import { SsoButtons } from "./components/SsoButtons";
 import { ForgotPasswordModal } from "./components/ForgotPasswordModal";
@@ -124,7 +124,7 @@ export const LoginScreen = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="w-full max-w-md bg-surface rounded-2xl shadow-xl border border-border-subtle/80 p-8 sm:p-10 relative z-10 font-sans mx-auto"
+            className="w-full max-w-md bg-surface rounded-lg shadow-xl border border-border-subtle/80 p-8 sm:p-10 relative z-10 font-sans mx-auto"
           >
             {/* Velzon Card Header */}
             <div className="text-center space-y-1.5 mb-6">
@@ -143,23 +143,20 @@ export const LoginScreen = ({
                 >
                   {t("common.username")} <span className="text-danger-text">*</span>
                 </label>
-                <div className="relative flex items-center">
-                  <User className="w-4 h-4 text-content-subtle absolute left-3.5 pointer-events-none" />
-                  <input
-                    id="lanpro-login-username"
-                    type="text"
-                    autoComplete="username"
-                    placeholder={t("login.usernamePlaceholder")}
-                    value={username}
-                    onChange={(e) => handleUsernameChange(e.target.value)}
-                    className={cn(
-                      "w-full h-11 pl-11 pr-4 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all duration-200 outline-none text-base font-normal leading-normal text-content placeholder:text-content-subtle placeholder:leading-normal hover:border-border-subtle",
-                      fieldErrors.username
-                        ? "border-danger focus:ring-danger/20 focus:border-danger"
-                        : "border-border-subtle focus:ring-primary/20 focus:border-primary"
-                    )}
-                  />
-                </div>
+                <input
+                  id="lanpro-login-username"
+                  type="text"
+                  autoComplete="username"
+                  placeholder={t("login.usernamePlaceholder")}
+                  value={username}
+                  onChange={(e) => handleUsernameChange(e.target.value)}
+                  className={cn(
+                    "w-full h-11 px-3.5 bg-surface border rounded-md focus:ring-2 transition-colors outline-none text-base font-normal text-content placeholder:text-content-muted",
+                    fieldErrors.username
+                      ? "border-danger focus:ring-danger/20 focus:border-danger"
+                      : "border-border-subtle focus:ring-primary/20 focus:border-primary"
+                  )}
+                />
                 {fieldErrors.username && (
                   <p className="text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" />
@@ -170,14 +167,22 @@ export const LoginScreen = ({
 
               {/* PASSWORD FIELD */}
               <div className="space-y-1.5">
-                <label
-                  htmlFor="lanpro-login-password"
-                  className="text-xs font-medium text-content-body tracking-normal block"
-                >
-                  {t("login.password")} <span className="text-danger-text">*</span>
-                </label>
+                <div className="flex flex-wrap items-center justify-between gap-x-2">
+                  <label
+                    htmlFor="lanpro-login-password"
+                    className="text-xs font-medium text-content-body tracking-normal block"
+                  >
+                    {t("login.password")} <span className="text-danger-text">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(true)}
+                    className="text-xs font-medium text-primary hover:text-primary-hover hover:underline cursor-pointer transition-colors py-2.5 -my-2.5"
+                  >
+                    {t("login.forgotPassword")}
+                  </button>
+                </div>
                 <div className="relative flex items-center">
-                  <Lock className="w-4 h-4 text-content-subtle absolute left-3.5 pointer-events-none" />
                   <input
                     id="lanpro-login-password"
                     type={showPassword ? "text" : "password"}
@@ -186,7 +191,7 @@ export const LoginScreen = ({
                     value={password}
                     onChange={(e) => handlePasswordChange(e.target.value)}
                     className={cn(
-                      "w-full h-11 pl-11 pr-11 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all duration-200 outline-none text-base font-normal leading-normal text-content placeholder:text-content-subtle placeholder:leading-normal hover:border-border-subtle",
+                      "w-full h-11 pl-3.5 pr-11 bg-surface border rounded-md focus:ring-2 transition-colors outline-none text-base font-normal text-content placeholder:text-content-muted",
                       fieldErrors.password
                         ? "border-danger focus:ring-danger/20 focus:border-danger"
                         : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -210,7 +215,7 @@ export const LoginScreen = ({
                 )}
               </div>
 
-              {/* REMEMBER ME & FORGOT PASSWORD */}
+              {/* REMEMBER ME */}
               <div className="flex items-center justify-between pt-1">
                 <label className="flex items-center gap-2 cursor-pointer select-none py-2.5 -my-2.5">
                   <input
@@ -223,24 +228,18 @@ export const LoginScreen = ({
                     {t("login.rememberMe")}
                   </span>
                 </label>
-                <button
-                  type="button"
-                  onClick={() => setShowForgotPassword(true)}
-                  className="text-xs font-medium text-primary hover:text-primary-hover hover:underline cursor-pointer transition-colors py-2.5 -my-2.5"
-                >
-                  {t("login.forgotPassword")}
-                </button>
               </div>
 
               {/* SIGN IN BUTTON */}
-              <button
+              <Button
                 type="submit"
+                variant="success"
+                size="lg"
                 disabled={loading || !username.trim() || !password.trim()}
-                className="w-full bg-primary-surface text-content-inverse py-3 rounded-lg font-normal uppercase tracking-normal text-xs hover:bg-primary-surface-hover transition-all shadow-md shadow-primary/20 active:scale-[0.99] mt-3 flex items-center justify-center gap-2.5 group cursor-pointer disabled:bg-primary-surface/60 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full mt-3"
               >
-                <span>{t("login.signIn")}</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
+                {t("login.signIn")}
+              </Button>
             </form>
 
             {/* Alternatif masuk. Tidak menampilkan apa pun bila SSO belum dikonfigurasi. */}

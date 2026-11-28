@@ -423,6 +423,7 @@ export const id = {
     flowchartDesc: "Pembuatan diagram proses dan flowchart kerja",
   },
   rakit: {
+    ssoDivider: "Masuk dengan",
     ssoSignIn: "Masuk dengan {{penyedia}}",
     ssoSignUp: "Daftar dengan {{penyedia}}",
     auditDidAction: "Melakukan aksi",
