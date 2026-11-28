@@ -170,7 +170,8 @@ describe("pas ke layar (#534 #618)", () => {
     const sesudahPas = await tungguSkala(container, 520 / 360);
     expect(sesudahPas.skala).not.toBe(1);
 
-    fireEvent.click(screen.getByTitle(/zoom \(100%\)/i));
+    fireEvent.click(screen.getByRole("button", { name: "Zoom" }));
+    fireEvent.click(screen.getByRole("button", { name: "100%" }));
     const persen = await tungguSkala(container, 1);
     expect(persen.skala).toBe(1);
   });

@@ -25,6 +25,7 @@ import {
 } from "../lib/analisaAlur";
 
 interface LaporanAlurProps {
+  steps?: import("../lib/imagePrototype").PrototypeStep[];
   hasil: HasilAnalisa;
   skenario: SkenarioAlur | null;
   nodes: SimpulAlur[];
@@ -80,6 +81,7 @@ const Keping = ({
 
 export const LaporanAlur: React.FC<LaporanAlurProps> = ({
   hasil,
+  steps,
   skenario,
   nodes,
   edges,
@@ -127,6 +129,19 @@ export const LaporanAlur: React.FC<LaporanAlurProps> = ({
       </header>
 
       <div className="flex-1 overflow-y-auto px-3 py-2">
+        {steps && (
+          <section className="mb-3 space-y-1 border-b border-border-divider pb-2">
+            <h4 className="text-sm font-medium">{t("flowchart.prototype.results")}</h4>
+            {!steps.length && <p className="text-xs">{t("flowchart.prototype.noResults")}</p>}
+            {steps.map((s, i) => (
+              <p key={i} className="text-xs">
+                <strong>{s.status}</strong> · {s.screen} → {s.action}
+                <br />
+                Harapan: {s.expected} · Aktual: {s.actual}
+              </p>
+            ))}
+          </section>
+        )}
         {hasil.temuan.length === 0 ? (
           <p className="text-[12px] text-content-muted">{t("alur.bersih")}</p>
         ) : (

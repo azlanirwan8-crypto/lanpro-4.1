@@ -5,7 +5,8 @@
  */
 export const en = {
   serverErr: {
-    "qaDraft.invalid": "No new drafts passed format and source checks. Review the source text or retry generation.",
+    "qaDraft.invalid":
+      "No new drafts passed format and source checks. Review the source text or retry generation.",
     "qaDraft.questions": "Drafts were generated, but clarification questions could not be saved.",
     "qaDraft.format": "Gemini returned an unreadable draft list. Retry generation.",
     "qaDraft.provider": "Gemini could not generate drafts. Check service availability and quota.",
@@ -1536,6 +1537,22 @@ export const en = {
     dariKe: "{{dari}} → {{ke}}",
   },
   flowchart: {
+    prototype: {
+      editor: "Screen image editor",
+      player: "Prototype simulation",
+      image: "Screen image",
+      replaceImage: "Replace image",
+      selectImage: "Choose PNG / JPG",
+      selectBranch: "Choose a branch",
+      simulatedUpload: "Simulated upload",
+      selectScreen: "Choose a screen",
+      noImage: "This step has no image.",
+      end: "End of flow.",
+      processing: "Processing image…",
+      results: "Prototype results",
+      noResults: "No screen transitions have been tested.",
+      boardImageLimit: "The board has reached its image limit. Use a smaller image.",
+    },
     importReadOk: "File read successfully!",
     importDropHere: "Drop the file here…",
     importClickOrDrop: "Click or drag a file here",

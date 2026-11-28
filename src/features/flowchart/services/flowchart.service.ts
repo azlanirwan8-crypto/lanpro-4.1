@@ -22,6 +22,22 @@ import type { KonteksFlowchart, FlowchartData, FlowchartDocument, PolaPapan } fr
 import { POLA_PAPAN } from "../types";
 import { adaKonteks } from "../types";
 import { FORMAT_SUMBER, panjangByte } from "../lib/sumberDrawio";
+import type { ScreenControl } from "../lib/imagePrototype";
+
+export async function detectPrototypeControls(
+  projectId: string,
+  image: string
+): Promise<Omit<ScreenControl, "id">[]> {
+  const result = await apiRequest(
+    `/api/projects/${encodeURIComponent(projectId)}/flowchart/prototype-controls`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jpeg: image.split(",")[1] }),
+    }
+  );
+  return result.controls;
+}
 
 /**
  * #685 — anggaran payload papan.

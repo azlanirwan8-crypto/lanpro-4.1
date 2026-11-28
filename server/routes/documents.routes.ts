@@ -18,7 +18,15 @@ import { sanitizeUserText } from "../lib/sanitizeText";
 import { cekSematGoogle } from "../lib/sematGoogle";
 import { urlSematBolehDiuji } from "../../src/features/wiki/embedUrl";
 
+import { detectControls, imageBody } from "../controllers/prototype-image.controller";
+
 const router = Router();
+router.post(
+  "/api/projects/:projectId/flowchart/prototype-controls",
+  jagaProyek("flowchart", "U"),
+  validasiBody(imageBody),
+  detectControls
+);
 
 router.get(
   "/api/projects/:projectId/documents",
@@ -241,7 +249,9 @@ router.put(
         return tolakVersi(item.updatedAt);
       }
       const versiHarapan =
-        item.type === "flowchart" && item.updatedAt && typeof versiDibaca === "string" &&
+        item.type === "flowchart" &&
+        item.updatedAt &&
+        typeof versiDibaca === "string" &&
         Number.isFinite(Date.parse(versiDibaca))
           ? new Date(versiDibaca)
           : undefined;

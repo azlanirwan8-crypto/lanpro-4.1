@@ -6,10 +6,14 @@
  */
 export const id = {
   serverErr: {
-    "qaDraft.invalid": "Tidak ada draf baru yang lolos pemeriksaan format dan kutipan sumber. Periksa teks sumber atau ulangi generasi.",
-    "qaDraft.questions": "Draf sudah dibuat, tetapi pertanyaan klarifikasi gagal disimpan di database.",
-    "qaDraft.format": "Respons Gemini tidak berisi daftar draf JSON yang dapat dibaca. Ulangi pembuatan draf.",
-    "qaDraft.provider": "Gemini gagal merespons permintaan draf QA. Periksa ketersediaan layanan atau kuota.",
+    "qaDraft.invalid":
+      "Tidak ada draf baru yang lolos pemeriksaan format dan kutipan sumber. Periksa teks sumber atau ulangi generasi.",
+    "qaDraft.questions":
+      "Draf sudah dibuat, tetapi pertanyaan klarifikasi gagal disimpan di database.",
+    "qaDraft.format":
+      "Respons Gemini tidak berisi daftar draf JSON yang dapat dibaca. Ulangi pembuatan draf.",
+    "qaDraft.provider":
+      "Gemini gagal merespons permintaan draf QA. Periksa ketersediaan layanan atau kuota.",
     "qaDraft.source": "Gagal membaca suite atau menyimpan pilihan sumber QA.",
     "srv.gagal_mengambil_konfigurasi_sistem": "Gagal mengambil konfigurasi sistem operasional",
     "srv.gagal_menyimpan_konfigurasi_sistem": "Gagal menyimpan konfigurasi sistem operasional",
@@ -1547,6 +1551,22 @@ export const id = {
     dariKe: "{{dari}} → {{ke}}",
   },
   flowchart: {
+    prototype: {
+      editor: "Editor gambar layar",
+      player: "Simulasi prototipe",
+      image: "Gambar layar",
+      replaceImage: "Ganti gambar",
+      selectImage: "Pilih PNG / JPG",
+      selectBranch: "Pilih cabang",
+      simulatedUpload: "Unggah simulasi",
+      selectScreen: "Pilih layar",
+      noImage: "Langkah ini tidak memiliki gambar.",
+      end: "Akhir alur.",
+      processing: "Memproses gambar…",
+      results: "Hasil prototipe",
+      noResults: "Belum ada perpindahan layar yang diuji.",
+      boardImageLimit: "Kapasitas gambar papan penuh. Gunakan gambar lebih kecil.",
+    },
     importReadOk: "File berhasil dibaca!",
     importDropHere: "Lepaskan file di sini…",
     importClickOrDrop: "Klik atau seret file ke sini",

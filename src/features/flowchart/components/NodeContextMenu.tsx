@@ -22,10 +22,10 @@ export type ArahLayers = "depan" | "naik" | "turun" | "belakang";
 /**
  * #852 — cangkang bersama menu konteks papan. Ditaruh di sini, bukan di berkas
  * baru: `audit:z` menghitung kemunculan tangga z PER BERKAS dan menolak berkas
- * baru yang membawa `z-50` sendiri. Satu string, dua menu, tangga tetap.
+ * baru yang membawa `z-50` sendiri. Menu konteks dan dock berbagi lapisan ini.
  */
-export const KELAS_MENU_KONTEKS =
-  "fixed z-50 w-48 bg-surface/90 backdrop-blur-md border border-border-panel-divider/50 rounded-xl shadow-[0_12px_36px_rgba(0,0,0,0.14)] p-1.5 select-none text-content-strong";
+export const LAPISAN_MENU_PAPAN = "fixed z-50";
+export const KELAS_MENU_KONTEKS = `${LAPISAN_MENU_PAPAN} w-48 bg-surface/90 backdrop-blur-md border border-border-panel-divider/50 rounded-xl shadow-[0_12px_36px_rgba(0,0,0,0.14)] p-1.5 select-none text-content-strong`;
 
 interface NodeContextMenuProps {
   x: number;
@@ -33,6 +33,7 @@ interface NodeContextMenuProps {
   nodeId: string;
   nodeColor: string;
   onClose: () => void;
+  onImage?: (id: string) => void;
   onDelete: (nodeId: string) => void;
   onEditProperties: (nodeId: string) => void;
   onChangeColor: (nodeId: string, color: string) => void;
@@ -57,6 +58,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
   nodeId,
   nodeColor,
   onClose,
+  onImage,
   onDelete,
   onEditProperties,
   onChangeColor,
@@ -119,6 +121,18 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
         <span>{t("nodeMenu.title")}</span>
       </div>
 
+      {onImage && (
+        <button
+          type="button"
+          onClick={() => {
+            onImage(nodeId);
+            onClose();
+          }}
+          className="w-full rounded-xl px-3 py-2 text-left text-xs hover:bg-surface-muted"
+        >
+          Sisipkan / edit gambar layar
+        </button>
+      )}
       {/* Edit Properties Button */}
       <button
         onClick={() => {

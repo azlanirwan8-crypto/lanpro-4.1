@@ -64,6 +64,8 @@ import { FlowchartEdges, pecahanPort } from "./components/FlowchartEdges";
 import { titikTepiTerdekat } from "./lib/portCabang";
 import { FlowchartMinimap } from "./components/FlowchartMinimap";
 import { LaporanAlur } from "./components/LaporanAlur";
+import { ScreenPrototype } from "./components/ScreenPrototype";
+import type { PrototypeStep } from "./lib/imagePrototype";
 import { NodeContextMenu } from "./components/NodeContextMenu";
 import { EdgeContextMenu } from "./components/EdgeContextMenu";
 import { CanvasContextMenu } from "./components/CanvasContextMenu";
@@ -1141,6 +1143,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
    */
   const [alur, setAlur] = useState<PerjalananPapan | null>(null);
   const [kecepatanAlur, setKecepatanAlur] = useState(1);
+  const [screenSession, setScreenSession] = useState<{
+    board: string;
+    start: string;
+    edit: boolean;
+  } | null>(null);
+  const [prototypeReport, setPrototypeReport] = useState<{
+    board: string;
+    steps: PrototypeStep[];
+  } | null>(null);
   const [laporanBuka, setLaporanBuka] = useState(false);
 
   // Struktur papan berubah tiap suntingan, jadi laporannya ikut dihitung ulang:
@@ -1170,6 +1181,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   const handleSimulateFlow = () => {
+    const firstScreen = nodes.find((node) => node.prototypeImage);
+    if (selectedFlowId && firstScreen) {
+      const start = skenarioAlur(nodes, edges)?.simpulIds[0] || firstScreen.id;
+      setPrototypeReport({ board: selectedFlowId, steps: [] });
+      setScreenSession({ board: selectedFlowId, start, edit: false });
+      return;
+    }
     if (nodes.length === 0) {
       toast.error(t("toast.canvasEmptySim"));
       return;
@@ -2816,9 +2834,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             // #588 — PUT yang tidak membawa daftar lampiran akan menghapusnya
             // dari payload begitu pengguna menyunting deskripsi.
             documents: foundFlow?.documents,
-            sumberDrawio: papanTerbuka
-              ? (sumberDrawioAktif ?? undefined)
-              : foundFlow?.sumberDrawio,
+            sumberDrawio: papanTerbuka ? (sumberDrawioAktif ?? undefined) : foundFlow?.sumberDrawio,
             editorDrawioUtama: foundFlow?.editorDrawioUtama,
           });
           if (stempelEdit) versiPapan.current.set(editingFlowId, stempelEdit);
@@ -5037,7 +5053,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       xml={sumberDrawioAktif}
                       judul={currentFlowMetadata?.name ?? flowName}
                       editorTerbuka={editorDrawioTerbuka}
-                      onEdit={isWorkspaceEditable && papanPunyaBarisServer() ? bukaEditorDrawio : undefined}
+                      onEdit={
+                        isWorkspaceEditable && papanPunyaBarisServer()
+                          ? bukaEditorDrawio
+                          : undefined
+                      }
                       onExport={handleExportDrawIo}
                     />
                   ) : (
@@ -5415,6 +5435,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         */}
                         {laporanBuka && (
                           <LaporanAlur
+                            steps={
+                              prototypeReport?.board === selectedFlowId
+                                ? prototypeReport?.steps
+                                : undefined
+                            }
                             hasil={hasilAlur}
                             skenario={alur ? alur.skenario : null}
                             nodes={nodes}
@@ -5483,7 +5508,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         <div
                           data-testid="dock-kanvas"
                           onKeyDown={(event) => {
-                            if (event.target instanceof HTMLElement && event.target.closest("button")) {
+                            if (
+                              event.target instanceof HTMLElement &&
+                              event.target.closest("button")
+                            ) {
                               event.stopPropagation();
                             }
                           }}
@@ -5527,25 +5555,33 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           <CanvasDockMenu
                             label={t("flowchart.dockBoard")}
                             caption={t("flowchart.dockBoard")}
-                            icon={<LayoutGrid className={cn("w-4 h-4", isSnapToGrid && "text-primary")} />}
+                            icon={
+                              <LayoutGrid
+                                className={cn("w-4 h-4", isSnapToGrid && "text-primary")}
+                              />
+                            }
                             testId="dock-menu-papan"
                             groups={[
                               {
-                                actions: [{
-                                  label: t("flowchart.snapGridJudul", {
-                                    keadaan: t(isSnapToGrid ? "common.aktif" : "common.mati"),
-                                  }),
-                                  pressed: isSnapToGrid,
-                                  action: () => setIsSnapToGrid(!isSnapToGrid),
-                                }],
+                                actions: [
+                                  {
+                                    label: t("flowchart.snapGridJudul", {
+                                      keadaan: t(isSnapToGrid ? "common.aktif" : "common.mati"),
+                                    }),
+                                    pressed: isSnapToGrid,
+                                    action: () => setIsSnapToGrid(!isSnapToGrid),
+                                  },
+                                ],
                               },
                               {
                                 label: t("flowchart.dockBackground"),
-                                actions: ([
-                                  ["polos", "flowchart.polaPolos"],
-                                  ["titik", "flowchart.polaTitik"],
-                                  ["kisi", "flowchart.polaKisi"],
-                                ] as const).map(([nilai, kunci]) => ({
+                                actions: (
+                                  [
+                                    ["polos", "flowchart.polaPolos"],
+                                    ["titik", "flowchart.polaTitik"],
+                                    ["kisi", "flowchart.polaKisi"],
+                                  ] as const
+                                ).map(([nilai, kunci]) => ({
                                   label: t(kunci),
                                   pressed: polaPapan === nilai,
                                   action: () => setPolaPapan(nilai),
@@ -5596,39 +5632,41 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             </span>
                           </button>
 
-                          {alurBerjalan && <>
-                          <button
-                            onClick={handleAlurJeda}
-                            data-testid="tombol-alur-jeda"
-                            className="min-h-11 min-w-11 rounded-xl transition-all flex items-center justify-center active:scale-95 text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:hover:bg-transparent"
-                            title={alur?.status === "jeda" ? t("alur.lanjut") : t("alur.jeda")}
-                          >
-                            {alur?.status === "jeda" ? (
-                              <Play className="w-3.5 h-3.5" />
-                            ) : (
-                              <Pause className="w-3.5 h-3.5" />
-                            )}
-                          </button>
+                          {alurBerjalan && (
+                            <>
+                              <button
+                                onClick={handleAlurJeda}
+                                data-testid="tombol-alur-jeda"
+                                className="min-h-11 min-w-11 rounded-xl transition-all flex items-center justify-center active:scale-95 text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:hover:bg-transparent"
+                                title={alur?.status === "jeda" ? t("alur.lanjut") : t("alur.jeda")}
+                              >
+                                {alur?.status === "jeda" ? (
+                                  <Play className="w-3.5 h-3.5" />
+                                ) : (
+                                  <Pause className="w-3.5 h-3.5" />
+                                )}
+                              </button>
 
-                          <button
-                            onClick={handleAlurLangkah}
-                            data-testid="tombol-alur-langkah"
-                            className="min-h-11 min-w-11 rounded-xl transition-all flex items-center justify-center active:scale-95 text-content-body hover:bg-surface-muted"
-                            title={t("alur.langkah")}
-                          >
-                            <SkipForward className="w-3.5 h-3.5" />
-                          </button>
+                              <button
+                                onClick={handleAlurLangkah}
+                                data-testid="tombol-alur-langkah"
+                                className="min-h-11 min-w-11 rounded-xl transition-all flex items-center justify-center active:scale-95 text-content-body hover:bg-surface-muted"
+                                title={t("alur.langkah")}
+                              >
+                                <SkipForward className="w-3.5 h-3.5" />
+                              </button>
 
-                          <button
-                            onClick={handleAlurKecepatan}
-                            data-testid="tombol-alur-kecepatan"
-                            className="min-h-11 px-2 rounded-xl transition-all flex items-center gap-1 active:scale-95 text-[11px] font-medium text-content-body hover:bg-surface-muted"
-                            title={t("alur.kecepatan", { x: kecepatanAlur })}
-                          >
-                            <Gauge className="w-3.5 h-3.5" />
-                            <span>{kecepatanAlur}×</span>
-                          </button>
-                          </>}
+                              <button
+                                onClick={handleAlurKecepatan}
+                                data-testid="tombol-alur-kecepatan"
+                                className="min-h-11 px-2 rounded-xl transition-all flex items-center gap-1 active:scale-95 text-[11px] font-medium text-content-body hover:bg-surface-muted"
+                                title={t("alur.kecepatan", { x: kecepatanAlur })}
+                              >
+                                <Gauge className="w-3.5 h-3.5" />
+                                <span>{kecepatanAlur}×</span>
+                              </button>
+                            </>
+                          )}
 
                           <button
                             onClick={() => setLaporanBuka((sekarang) => !sekarang)}
@@ -5683,15 +5721,28 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             caption={t("flowchart.export")}
                             icon={<FileDown className="w-4 h-4" />}
                             testId="dock-menu-ekspor"
-                            groups={[{
-                              actions: [
-                                { label: t("flowchart.exportDrawio"), action: handleExportDrawIo },
-                                { label: t("flowchart.downloadPng"), action: handleExportPNG, testId: "ekspor-png" },
-                                { label: t("flowchart.downloadSvg"), action: handleExportSVG, testId: "ekspor-svg" },
-                                { label: t("flowchart.downloadJpg"), action: handleExportJPG },
-                                { label: t("flowchart.exportJson"), action: handleExportJSON },
-                              ],
-                            }]}
+                            groups={[
+                              {
+                                actions: [
+                                  {
+                                    label: t("flowchart.exportDrawio"),
+                                    action: handleExportDrawIo,
+                                  },
+                                  {
+                                    label: t("flowchart.downloadPng"),
+                                    action: handleExportPNG,
+                                    testId: "ekspor-png",
+                                  },
+                                  {
+                                    label: t("flowchart.downloadSvg"),
+                                    action: handleExportSVG,
+                                    testId: "ekspor-svg",
+                                  },
+                                  { label: t("flowchart.downloadJpg"), action: handleExportJPG },
+                                  { label: t("flowchart.exportJson"), action: handleExportJSON },
+                                ],
+                              },
+                            ]}
                           />
 
                           {/* Simpan Alur DB */}
@@ -5702,11 +5753,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                   role="status"
                                   className={cn(
                                     "text-xs font-medium",
-                                    statusSimpan === "gagal" ? "text-danger-text" : "text-content-subtle"
+                                    statusSimpan === "gagal"
+                                      ? "text-danger-text"
+                                      : "text-content-subtle"
                                   )}
                                   title={labelStatusSimpan}
                                 >
-                                  {statusSimpan === "tersimpan" ? t("flowchart.dockSaved") : labelStatusSimpan}
+                                  {statusSimpan === "tersimpan"
+                                    ? t("flowchart.dockSaved")
+                                    : labelStatusSimpan}
                                 </span>
                               )}
                               {statusSimpan === "gagal" && (
@@ -5762,7 +5817,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                           <div className="w-px h-5 bg-surface-strong mx-1" />
 
-
                           {/* Zoom Controls */}
                           <div className="flex items-center gap-0.5 bg-surface-sunken/50 rounded-xl p-0.5 border border-border-panel-divider/60">
                             <button
@@ -5776,15 +5830,18 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               label={t("flowchart.dockZoom")}
                               caption={`${Math.round(zoomLevel * 100)}%`}
                               testId="dock-menu-zoom"
-                              groups={[{
-                                actions: [25, 50, 75, 100, 150, 200].map((level) => ({
-                                  label: `${level}%`,
-                                  pressed: Math.round(zoomLevel * 100) === level,
-                                  action: level === 100
-                                    ? skalaSeratus
-                                    : () => geserZoomHalus(level / 100 / zoomLevel),
-                                })),
-                              }]}
+                              groups={[
+                                {
+                                  actions: [25, 50, 75, 100, 150, 200].map((level) => ({
+                                    label: `${level}%`,
+                                    pressed: Math.round(zoomLevel * 100) === level,
+                                    action:
+                                      level === 100
+                                        ? skalaSeratus
+                                        : () => geserZoomHalus(level / 100 / zoomLevel),
+                                  })),
+                                },
+                              ]}
                             />
                             <button
                               onClick={() => geserZoomHalus(1.1)}
@@ -5810,27 +5867,38 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             label={t("flowchart.dockMore")}
                             icon={<Ellipsis className="w-4 h-4" />}
                             testId="dock-menu-lainnya"
-                            groups={[{
-                              actions: [
-                                ...(!alurBerjalan ? [{
-                                  label: t("alur.langkah"),
-                                  action: handleAlurLangkah,
-                                  testId: "tombol-alur-langkah",
-                                }] : []),
-                                {
-                                  label: t("flowchart.helpNav"),
-                                  action: () => setIsKeyboardHelpOpen(!isKeyboardHelpOpen),
-                                },
-                                ...(isWorkspaceEditable ? [
-                                  { label: t("flowchart.saveFlowchart"), action: handleSaveWorkspace },
+                            groups={[
+                              {
+                                actions: [
+                                  ...(!alurBerjalan
+                                    ? [
+                                        {
+                                          label: t("alur.langkah"),
+                                          action: handleAlurLangkah,
+                                          testId: "tombol-alur-langkah",
+                                        },
+                                      ]
+                                    : []),
                                   {
-                                    label: t("flowchart.clearCanvas"),
-                                    action: handleClearWhiteboard,
-                                    danger: true,
+                                    label: t("flowchart.helpNav"),
+                                    action: () => setIsKeyboardHelpOpen(!isKeyboardHelpOpen),
                                   },
-                                ] : []),
-                              ],
-                            }]}
+                                  ...(isWorkspaceEditable
+                                    ? [
+                                        {
+                                          label: t("flowchart.saveFlowchart"),
+                                          action: handleSaveWorkspace,
+                                        },
+                                        {
+                                          label: t("flowchart.clearCanvas"),
+                                          action: handleClearWhiteboard,
+                                          danger: true,
+                                        },
+                                      ]
+                                    : []),
+                                ],
+                              },
+                            ]}
                           />
                         </div>
 
@@ -5915,7 +5983,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               </div>
                             </div>
                             <div className="h-px bg-surface-inverse my-1" />
-                            <p className="text-xs text-content-inverse">{t("flowchart.dockPanHint")}</p>
+                            <p className="text-xs text-content-inverse">
+                              {t("flowchart.dockPanHint")}
+                            </p>
                           </div>
                         )}
                       </div>
@@ -6271,6 +6341,42 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         onTutup={tutupEditorDrawio}
       />
 
+      {screenSession &&
+        selectedFlowId === screenSession.board &&
+        selectedProject &&
+        rightViewMode === "canvas" &&
+        (!screenSession.edit || isWorkspaceEditable) && (
+          <ScreenPrototype
+            key={JSON.stringify([screenSession.board, screenSession.start, screenSession.edit])}
+            project={selectedProject.id}
+            nodes={nodes}
+            edges={edges}
+            start={screenSession.start}
+            edit={screenSession.edit}
+            onReport={(steps) => setPrototypeReport({ board: screenSession.board, steps })}
+            onClose={() => {
+              if (!screenSession.edit) setLaporanBuka(true);
+              setScreenSession(null);
+            }}
+            onSave={(image) => {
+              if (!isWorkspaceEditable) return;
+              const next = nodes.map((node) =>
+                node.id === screenSession.start ? { ...node, prototypeImage: image } : node
+              );
+              if (
+                image &&
+                new Blob([JSON.stringify({ nodes: next, edges, source: sumberDrawioAktif })]).size >
+                  2_900_000
+              ) {
+                toast.error(t("flowchart.prototype.boardImageLimit"));
+                return;
+              }
+              setNodes(next);
+              recordHistory(next, edges);
+              setScreenSession(null);
+            }}
+          />
+        )}
       <FlowchartDocumentModal
         open={isModalOpen}
         modalMode={modalMode}
@@ -6302,6 +6408,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             nodeId={nodeContextMenu.nodeId}
             nodeColor={nodes.find((n) => n.id === nodeContextMenu.nodeId)?.color || "indigo"}
             onClose={() => setNodeContextMenu(null)}
+            onImage={
+              isWorkspaceEditable && selectedFlowId
+                ? (start) => setScreenSession({ board: selectedFlowId, start, edit: true })
+                : undefined
+            }
             onDelete={handleContextMenuDeleteNode}
             onEditProperties={handleContextMenuEditProperties}
             onChangeColor={handleContextMenuChangeColor}

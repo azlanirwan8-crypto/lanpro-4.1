@@ -107,9 +107,9 @@ describe("FlowchartView — autosave papan (#538)", () => {
     );
 
     // Pengguna harus bisa melihat papan-nya sudah aman — tanpa menekan apa pun.
-    expect(await screen.findByTitle(/beberapa detik|a few seconds/i)).toHaveTextContent(
-      /tersimpan otomatis|auto-saved/i
-    );
+    expect(
+      await screen.findByText(/^(tersimpan|saved)$/i, { selector: "[role=status]" })
+    ).toBeVisible();
 
     // Dan hanya sekali: setelah mendarat, autosave tidak mengulang tulisan yang sama.
     await act(async () => {

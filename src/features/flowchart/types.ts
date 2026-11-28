@@ -107,6 +107,7 @@ export const POLA_PAPAN: PolaPapan[] = ["polos", "titik", "kisi"];
 export const POLA_BAWAAN: PolaPapan = "titik";
 
 export interface FlowNode {
+  prototypeImage?: import("./lib/imagePrototype").PrototypeImage;
   id: string;
   type: FlowNodeType;
   x: number;

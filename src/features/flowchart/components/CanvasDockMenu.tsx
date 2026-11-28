@@ -1,6 +1,8 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { Check } from "lucide-react";
 import { cn } from "../../../lib/utils";
+import { LAPISAN_MENU_PAPAN } from "./NodeContextMenu";
 
 interface DockAction {
   label: string;
@@ -87,7 +89,7 @@ export function CanvasDockMenu({
           {name}
           {pressed && (
             <span aria-hidden className="float-right pl-2">
-              ✓
+              <Check className="size-4" />
             </span>
           )}
         </button>
@@ -131,7 +133,10 @@ export function CanvasDockMenu({
             role="group"
             aria-label={label}
             style={position}
-            className="fixed z-50 max-h-[55vh] w-56 max-w-[calc(100vw_-_16px)] overflow-y-auto rounded-lg border border-border-panel-divider bg-surface p-1 shadow-lg"
+            className={cn(
+              LAPISAN_MENU_PAPAN,
+              "max-h-[55vh] w-56 max-w-[calc(100vw_-_16px)] overflow-y-auto rounded-lg border border-border-panel-divider bg-surface p-1 shadow-lg"
+            )}
             onMouseDown={(event) => event.stopPropagation()}
             onClick={(event) => event.stopPropagation()}
             onBlur={(event) => {
