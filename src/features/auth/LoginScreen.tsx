@@ -124,7 +124,7 @@ export const LoginScreen = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="surface-panel w-full max-w-md bg-surface rounded-2xl shadow-xl border border-border-panel-divider/80 p-8 sm:p-10 relative z-10 font-sans mx-auto"
+            className="surface-panel w-full max-w-md bg-surface rounded-lg shadow-xl border border-border-panel-divider/80 p-8 sm:p-10 relative z-10 font-sans mx-auto"
           >
             {/* Velzon Card Header */}
             <div className="text-center space-y-1.5 mb-6">
