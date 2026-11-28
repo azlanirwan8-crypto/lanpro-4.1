@@ -114,12 +114,12 @@ export function ScreenPrototype({
     <dialog
       ref={dialog}
       onCancel={onClose}
-      aria-label={edit ? t("flowchart.prototype.editor") : t("flowchart.prototype.player")}
+      aria-label={edit ? t("flowchartPrototype.editor") : t("flowchartPrototype.player")}
       className="m-auto max-h-[92vh] w-[min(58rem,94vw)] overflow-auto rounded-xl border border-border-divider bg-surface p-4 text-content-body shadow-lg"
     >
       <header className="mb-3 flex items-center justify-between gap-3">
         <h2 className="font-semibold">
-          {edit ? t("flowchart.prototype.image") : t("flowchart.prototype.player")} · {name(screen)}
+          {edit ? t("flowchartPrototype.image") : t("flowchartPrototype.player")} · {name(screen)}
         </h2>
         <button className={button} onClick={onClose}>
           Tutup
@@ -128,7 +128,7 @@ export function ScreenPrototype({
       {edit && (
         <fieldset disabled={busy} className="mb-3 flex flex-wrap items-center gap-2">
           <label className={button}>
-            {draft ? t("flowchart.prototype.replaceImage") : t("flowchart.prototype.selectImage")}
+            {draft ? t("flowchartPrototype.replaceImage") : t("flowchartPrototype.selectImage")}
             <input
               className="sr-only"
               type="file"
@@ -158,7 +158,7 @@ export function ScreenPrototype({
         <label className="mb-2 block">
           Cabang yang diharapkan{" "}
           <select className={field} value={expected} onChange={(e) => expectEdge(e.target.value)}>
-            <option value="">{t("flowchart.prototype.selectBranch")}</option>
+            <option value="">{t("flowchartPrototype.selectBranch")}</option>
             {outgoing.map((e) => (
               <option key={e.id} value={e.id}>
                 {e.label || name(e.toNodeId)}
@@ -278,7 +278,7 @@ export function ScreenPrototype({
             >
               <option value="button">Tombol</option>
               <option value="text">Teks</option>
-              <option value="file">{t("flowchart.prototype.simulatedUpload")}</option>
+              <option value="file">{t("flowchartPrototype.simulatedUpload")}</option>
             </select>
           </label>
           {control.kind === "button" && (
@@ -289,7 +289,7 @@ export function ScreenPrototype({
                 value={control.target || ""}
                 onChange={(e) => update({ target: e.target.value })}
               >
-                <option value="">{t("flowchart.prototype.selectScreen")}</option>
+                <option value="">{t("flowchartPrototype.selectScreen")}</option>
                 {nodes.map((n) => (
                   <option key={n.id} value={n.id}>
                     {name(n.id)}
@@ -333,7 +333,7 @@ export function ScreenPrototype({
       )}
       {!edit && !image && (
         <div className="space-y-2">
-          <p>{outgoing.length ? t("flowchart.prototype.noImage") : t("flowchart.prototype.end")}</p>
+          <p>{outgoing.length ? t("flowchartPrototype.noImage") : t("flowchartPrototype.end")}</p>
           {outgoing.map((e) => (
             <button
               key={e.id}
@@ -350,7 +350,7 @@ export function ScreenPrototype({
         </div>
       )}
       {error && <p role="alert">{error}</p>}
-      {busy && <p role="status">{t("flowchart.prototype.processing")}</p>}
+      {busy && <p role="status">{t("flowchartPrototype.processing")}</p>}
       <footer className="mt-3 flex justify-end">
         {edit ? (
           <button

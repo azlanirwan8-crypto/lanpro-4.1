@@ -5435,6 +5435,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         */}
                         {laporanBuka && (
                           <LaporanAlur
+                            analysisProjectId={
+                              isWorkspaceEditable ? selectedProject?.id : undefined
+                            }
                             steps={
                               prototypeReport?.board === selectedFlowId
                                 ? prototypeReport?.steps
@@ -6368,7 +6371,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 new Blob([JSON.stringify({ nodes: next, edges, source: sumberDrawioAktif })]).size >
                   2_900_000
               ) {
-                toast.error(t("flowchart.prototype.boardImageLimit"));
+                toast.error(t("flowchartPrototype.boardImageLimit"));
                 return;
               }
               setNodes(next);

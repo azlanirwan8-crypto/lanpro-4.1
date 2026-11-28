@@ -22,7 +22,21 @@ import type { KonteksFlowchart, FlowchartData, FlowchartDocument, PolaPapan } fr
 import { POLA_PAPAN } from "../types";
 import { adaKonteks } from "../types";
 import { FORMAT_SUMBER, panjangByte } from "../lib/sumberDrawio";
-import type { ScreenControl } from "../lib/imagePrototype";
+import type { PrototypeStep, ScreenControl } from "../lib/imagePrototype";
+
+export async function requestPrototypeAnalysis(
+  projectId: string,
+  language: "id" | "en",
+  steps: Array<PrototypeStep & { number: number }>,
+  signal: AbortSignal
+): Promise<Array<{ step: number; explanation: string; correction: string; retest: string }>> {
+  const result = await apiRequest(
+    `/api/projects/${encodeURIComponent(projectId)}/flowchart/prototype-analysis`,
+    { method: "POST", body: JSON.stringify({ language, steps }), signal },
+    0
+  );
+  return result.advice;
+}
 
 export async function detectPrototypeControls(
   projectId: string,

@@ -19,6 +19,10 @@ import { cekSematGoogle } from "../lib/sematGoogle";
 import { urlSematBolehDiuji } from "../../src/features/wiki/embedUrl";
 
 import { detectControls, imageBody } from "../controllers/prototype-image.controller";
+import {
+  analyzePrototype,
+  prototypeAnalysisBody,
+} from "../controllers/prototype-analysis.controller";
 
 const router = Router();
 router.post(
@@ -26,6 +30,12 @@ router.post(
   jagaProyek("flowchart", "U"),
   validasiBody(imageBody),
   detectControls
+);
+router.post(
+  "/api/projects/:projectId/flowchart/prototype-analysis",
+  jagaProyek("flowchart", "U"),
+  validasiBody(prototypeAnalysisBody),
+  analyzePrototype
 );
 
 router.get(
