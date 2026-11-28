@@ -1,17 +1,28 @@
 import { useTranslation } from "react-i18next";
-import { Modal } from "../../../components/ui/Modal";
+import { Button } from "../../../components/ui/CoreUI";
 import type { DiscussionPoint } from "../../../types/meeting";
 
-export function ReferencedPointDialog({
+export function ReferencedPointDetail({
   point,
-  onClose,
+  onShowAll,
 }: {
   point: DiscussionPoint;
-  onClose: () => void;
+  onShowAll: () => void;
 }) {
   const { t } = useTranslation();
   return (
-    <Modal isOpen title={t("discussion.pointDetails")} onClose={onClose}>
+    <section
+      aria-labelledby="referenced-point-title"
+      className="space-y-4 rounded-lg border border-border-panel-divider bg-surface p-4"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 id="referenced-point-title" className="text-sm font-semibold text-content-strong">
+          {t("discussion.pointDetails")}
+        </h2>
+        <Button type="button" variant="outline" size="sm" onClick={onShowAll}>
+          {t("issueReferences.showAllMeetingPoints")}
+        </Button>
+      </div>
       <dl className="space-y-3">
         {[
           [t("discussion.concernTopic"), point.concern],
@@ -25,6 +36,6 @@ export function ReferencedPointDialog({
           </div>
         ))}
       </dl>
-    </Modal>
+    </section>
   );
 }

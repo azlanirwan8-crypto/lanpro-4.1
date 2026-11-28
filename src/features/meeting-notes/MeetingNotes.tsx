@@ -43,7 +43,7 @@ import {
   fetchReferencedPoint,
   resolveUserId,
 } from "./services/meeting.service";
-import { ReferencedPointDialog } from "./components/ReferencedPointDialog";
+import { ReferencedPointDetail } from "./components/ReferencedPointDetail";
 import { useAppStore } from "../../store/useAppStore";
 import { hasPermission } from "../../lib/permissions";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
@@ -623,12 +623,10 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
   const activeMeeting =
     meetings.find((m) => m.id === activeMeetingId) ??
     (linkedMeeting?.id === activeMeetingId ? linkedMeeting : undefined);
+  const focusedPoint = linkedPoint?.meetingId === activeMeetingId ? linkedPoint : null;
 
   return (
     <>
-      {linkedPoint && linkedPoint.meetingId === activeMeetingId && (
-        <ReferencedPointDialog point={linkedPoint} onClose={() => setLinkedPoint(null)} />
-      )}
       {activeMeetingId === null ? (
         <ListPageShell
           header={<PageHeader title={t("meetings.title")} />}
@@ -939,16 +937,19 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   {/* #425 — DetailViewChrome: Back+Edit+Delete kiri, judul Velzon 15px */}
                   <DetailViewChrome
                     backLabel={t("meetings.backToList")}
-                    onBack={() => setActiveMeetingId(null)}
+                    onBack={() => {
+                      setLinkedPoint(null);
+                      setActiveMeetingId(null);
+                    }}
                     title={activeMeeting.title}
-                    canEdit={isUserAdmin || isMeetingAuthor(activeMeeting)}
-                    canDelete={canDeleteMeeting(activeMeeting)}
+                    canEdit={!focusedPoint && (isUserAdmin || isMeetingAuthor(activeMeeting))}
+                    canDelete={!focusedPoint && canDeleteMeeting(activeMeeting)}
                     onEdit={() => startEdit(activeMeeting)}
                     onDelete={() => handleDeleteMeeting(activeMeeting.id!)}
                     editTitle={t("meetings.edit")}
                     deleteTitle={t("meetings.delete")}
                     description={
-                      activeMeeting.description ? (
+                      !focusedPoint && activeMeeting.description ? (
                         <div className="mt-3 p-4 border border-primary/30 bg-primary/10 rounded-lg border-l-4 border-l-primary flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                           <div className="flex-1 min-w-0">
                             <span className="text-xs font-medium text-primary block mb-1">
@@ -984,7 +985,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                       ) : undefined
                     }
                     trailing={
-                      activeMeeting.meetingLink ? (
+                      !focusedPoint && activeMeeting.meetingLink ? (
                         <a
                           href={
                             activeMeeting.meetingLink.startsWith("http")
@@ -1003,28 +1004,37 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   />
 
                   {/* Discussion Points Table — lazy (#460): FFmpeg/AI tidak masuk chunk daftar */}
-                  <div className="flex-1 flex flex-col min-h-0">
-                    <Suspense
-                      fallback={
-                        <div className="flex-1 flex flex-col items-center justify-center p-8">
-                          <div className="h-8 w-8 animate-spin rounded-full border-2 border-border-subtle border-t-primary" />
-                          <p className="mt-3 text-sm text-content-muted">{t("appShell.loading")}</p>
-                        </div>
-                      }
-                    >
-                      <DiscussionPointsTable
-                        projectId={projectId}
-                        meetingId={activeMeeting.id!}
-                        userRole={userRole}
-                        currentUser={currentUser}
-                        permissions={permissions}
-                        projectMembers={projectMembers}
-                        masterData={masterData}
-                        setSelectedTaskForDetail={setSelectedTaskForDetail}
-                        setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
-                      />
-                    </Suspense>
-                  </div>
+                  {focusedPoint ? (
+                    <ReferencedPointDetail
+                      point={focusedPoint}
+                      onShowAll={() => setLinkedPoint(null)}
+                    />
+                  ) : (
+                    <div className="flex-1 flex flex-col min-h-0">
+                      <Suspense
+                        fallback={
+                          <div className="flex-1 flex flex-col items-center justify-center p-8">
+                            <div className="h-8 w-8 animate-spin rounded-full border-2 border-border-subtle border-t-primary" />
+                            <p className="mt-3 text-sm text-content-muted">
+                              {t("appShell.loading")}
+                            </p>
+                          </div>
+                        }
+                      >
+                        <DiscussionPointsTable
+                          projectId={projectId}
+                          meetingId={activeMeeting.id!}
+                          userRole={userRole}
+                          currentUser={currentUser}
+                          permissions={permissions}
+                          projectMembers={projectMembers}
+                          masterData={masterData}
+                          setSelectedTaskForDetail={setSelectedTaskForDetail}
+                          setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
+                        />
+                      </Suspense>
+                    </div>
+                  )}
                 </div>
               ) : (
                 /* #460 — jangan `null`: putih tanpa chrome saat ID basi / masih memuat */

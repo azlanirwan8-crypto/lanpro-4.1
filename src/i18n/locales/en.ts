@@ -2199,6 +2199,7 @@ export const en = {
     noMatches: "No matching references.",
     untitled: "Untitled point",
     openFailed: "This reference could not be opened.",
+    showAllMeetingPoints: "View all meeting points",
   },
   issueDetail: {
     discardChangesMessage:

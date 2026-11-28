@@ -2224,6 +2224,7 @@ export const id = {
     noMatches: "Tidak ada referensi yang cocok.",
     untitled: "Poin tanpa judul",
     openFailed: "Referensi ini gagal dibuka.",
+    showAllMeetingPoints: "Lihat semua poin rapat",
   },
   issueDetail: {
     discardChangesMessage:
