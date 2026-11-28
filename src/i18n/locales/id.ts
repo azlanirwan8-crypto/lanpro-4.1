@@ -2210,6 +2210,21 @@ export const id = {
     errorTitle: "Terjadi Kesalahan",
     errorTitle2: "Terjadi Kesalahan",
   },
+  issueReferences: {
+    title: "Ditag di",
+    meeting: "Meeting Point",
+    flowchart: "Flowchart",
+    loading: "Memuat referensi…",
+    empty: "Belum ada referensi terkait yang bisa ditampilkan.",
+    unavailable: "Sebagian referensi gagal dimuat.",
+    retry: "Coba lagi",
+    all: "Lihat semua {{count}}",
+    back: "Kembali ke referensi",
+    search: "Cari {{source}}",
+    noMatches: "Tidak ada referensi yang cocok.",
+    untitled: "Poin tanpa judul",
+    openFailed: "Referensi ini gagal dibuka.",
+  },
   issueDetail: {
     discardChangesMessage:
       "Terdapat perubahan formulir yang belum disimpan. Yakin ingin keluar dan membuang perubahan?",

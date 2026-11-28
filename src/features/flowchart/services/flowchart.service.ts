@@ -365,6 +365,19 @@ export async function fetchFlowcharts(projectId: string): Promise<FlowchartData[
   return res.data.filter((doc: DocumentRow) => doc.type === JENIS_PAPAN).map(toFlowchartData);
 }
 
+export async function fetchReferencedFlowchart(
+  projectId: string,
+  id: string,
+  signal: AbortSignal
+): Promise<FlowchartData> {
+  const result = await apiRequest(
+    `/api/projects/${encodeURIComponent(projectId)}/flowcharts/${encodeURIComponent(id)}/reference`,
+    { signal },
+    0
+  );
+  return toFlowchartData(result.data);
+}
+
 /** Membuat flowchart baru di backend. Mengembalikan id server bila sukses. */
 export async function createFlowchart(
   projectId: string,

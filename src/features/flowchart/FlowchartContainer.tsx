@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useAppStore } from "../../store/useAppStore";
 import { useMasterOptionItems } from "../../hooks/useMasterOptions";
 import { LabelChip, StyledDropdown } from "../../components/ui/CommonComponents";
 import { safeLocalStorage, safeSessionStorage } from "../../lib/safeStorage";
@@ -129,6 +130,7 @@ import {
 // panggil, sekaligus memperjelas mana yang menembak backend.
 import {
   fetchFlowcharts,
+  fetchReferencedFlowchart,
   createFlowchart as createFlowchartApi,
   updateFlowchart as updateFlowchartApi,
   deleteFlowchart as deleteFlowchartApi,
@@ -202,6 +204,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   currentUserProfile,
 }) => {
   const { t } = useTranslation();
+  const issueReference = useAppStore((store) => store.issueReferenceTarget);
+  const clearIssueReference = useAppStore((store) => store.clearIssueReference);
+  const referencedBoard = useRef<{ projectId: string; board: FlowchartData } | null>(null);
   // Item #144 — sumber yang SAMA dengan modal Dokumentasi. Sebelumnya modal
   // ini punya daftar kerasnya sendiri (PRD/Panduan/Laporan), jadi dua dropdown
   // "Kategori Dokumen" pada tabel Documents yang sama menawarkan pilihan
@@ -2081,6 +2086,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               .filter((f) => !(f.id in tertunda))
               .map((f) => gabungSatuPapan(f, cadangan.get(f.id))),
           ];
+          const opened = referencedBoard.current;
+          if (
+            opened?.projectId === projId &&
+            !gabungan.some((board) => board.id === opened.board.id)
+          ) {
+            gabungan.unshift(opened.board);
+          }
           if (gabungan.length > 0) {
             setFlowcharts(gabungan);
             safeLocalStorage.setItem(listKey, JSON.stringify(gabungan));
@@ -2138,6 +2150,32 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       setRightViewMode(found.editorDrawioUtama ? "canvas" : "embed");
     }
   };
+
+  useEffect(() => {
+    if (issueReference?.kind !== "flowchart" || issueReference.projectId !== selectedProject?.id)
+      return;
+    const request = new AbortController();
+    fetchReferencedFlowchart(issueReference.projectId, issueReference.id, request.signal)
+      .then((board) => {
+        if (request.signal.aborted) return;
+        referencedBoard.current = { projectId: issueReference.projectId, board };
+        setFlowcharts((current) => [board, ...current.filter((item) => item.id !== board.id)]);
+        handleSelectFlowchart(board.id, [board]);
+        const node = board.nodes?.find((item) => item.id === issueReference.nodeId);
+        if (node && !board.editorDrawioUtama) {
+          setRightViewMode("canvas");
+          setSelectedNodeId(node.id);
+          pasKeLayar(batasSeluruhBentuk([node]));
+        }
+      })
+      .catch(() => {
+        if (!request.signal.aborted) toast.error(t("issueReferences.openFailed"));
+      })
+      .finally(() => {
+        if (!request.signal.aborted) clearIssueReference(issueReference);
+      });
+    return () => request.abort();
+  }, [issueReference, selectedProject?.id, clearIssueReference]);
 
   // Open creation flow modal
   const openCreateModal = () => {

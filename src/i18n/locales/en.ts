@@ -2185,6 +2185,21 @@ export const en = {
     errorTitle: "An Error Occurred",
     errorTitle2: "Something went wrong",
   },
+  issueReferences: {
+    title: "Tagged in",
+    meeting: "Meeting Point",
+    flowchart: "Flowchart",
+    loading: "Loading references…",
+    empty: "No linked references to show.",
+    unavailable: "Some references could not be loaded.",
+    retry: "Try again",
+    all: "View all {{count}}",
+    back: "Back to references",
+    search: "Search {{source}}",
+    noMatches: "No matching references.",
+    untitled: "Untitled point",
+    openFailed: "This reference could not be opened.",
+  },
   issueDetail: {
     discardChangesMessage:
       "There are unsaved form changes. Are you sure you want to leave and discard them?",

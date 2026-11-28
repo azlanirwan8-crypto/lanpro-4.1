@@ -8,14 +8,27 @@
  * konsisten dengan service fitur lain.
  */
 
-import { apiRequest } from '../../../lib/api';
-import type { UserProfile } from '../../../types';
+import { apiRequest } from "../../../lib/api";
+import type { DiscussionPoint, Meeting } from "../../../types/meeting";
+import type { UserProfile } from "../../../types";
 
 /** Bentuk respons standar backend. */
 export interface MeetingApiResponse {
   status: string;
   data?: any;
   message?: string;
+}
+
+export async function fetchReferencedPoint(
+  meetingId: string,
+  pointId: string,
+  signal: AbortSignal
+) {
+  const [meeting, point] = await Promise.all([
+    apiRequest(`/api/v1/meetings/${encodeURIComponent(meetingId)}`, { signal }, 0),
+    apiRequest(`/api/discussion-points/${encodeURIComponent(pointId)}/reference`, { signal }, 0),
+  ]);
+  return { meeting: meeting.data as Meeting, point: point.data as DiscussionPoint };
 }
 
 /**
@@ -25,7 +38,7 @@ export interface MeetingApiResponse {
  * perilaku fallback-nya dipertahankan persis seperti sebelumnya.
  */
 export function resolveUserId(currentUser: UserProfile | null): string {
-  return (currentUser as any)?.id || (currentUser as any)?.uid || 'guest';
+  return (currentUser as any)?.id || (currentUser as any)?.uid || "guest";
 }
 
 /**
@@ -38,10 +51,10 @@ export async function analyzeTranscript(
   projectId: string,
   meetingId: string,
   transcript: string,
-  meetingLink?: string,
+  meetingLink?: string
 ): Promise<MeetingApiResponse> {
   return apiRequest(`/api/projects/${projectId}/meetings/${meetingId}/analyze-transcript`, {
-    method: 'POST',
+    method: "POST",
     body: { transcript, meetingLink },
   });
 }
@@ -54,10 +67,10 @@ export async function analyzeTranscript(
  */
 export async function createTaskFromMeeting(
   projectId: string,
-  payload: unknown,
+  payload: unknown
 ): Promise<MeetingApiResponse> {
   return apiRequest(`/api/projects/${projectId}/tasks`, {
-    method: 'POST',
+    method: "POST",
     body: payload,
   });
 }
@@ -70,9 +83,9 @@ export async function createTaskFromMeeting(
 export async function downloadMeetingFile(
   projectId: string,
   meetingId: string,
-  userId: string,
+  userId: string
 ): Promise<MeetingApiResponse> {
   return apiRequest(`/api/projects/${projectId}/meetings/${meetingId}/download`, {
-    headers: { 'x-user-id': userId },
+    headers: { "x-user-id": userId },
   });
 }

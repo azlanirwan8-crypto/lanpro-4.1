@@ -29,6 +29,7 @@ import { TaskLinksSection } from "./components/modal/TaskLinksSection";
 import { TaskSubtasksSection } from "./components/modal/TaskSubtasksSection";
 import { TaskCommentsSection } from "./components/modal/TaskCommentsSection";
 import { TaskDetailSidebar } from "./components/modal/TaskDetailSidebar";
+import { IssueReferences } from "./components/IssueReferences";
 import { JUDUL_SECTION, KARTU_SECTION } from "../../components/ui/gayaForm";
 import { kunciJenisIsu } from "../../lib/jenisIsu";
 import {
@@ -314,6 +315,14 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   )}
                 </div>
               </div>
+
+              {task.projectId && (
+                <IssueReferences
+                  key={`${task.projectId}:${task.id}`}
+                  projectId={task.projectId}
+                  taskId={task.id}
+                />
+              )}
 
               {/* Acceptance Criteria Card */}
               <div className={cn(KARTU_SECTION, "p-4 md:p-5 space-y-3")}>

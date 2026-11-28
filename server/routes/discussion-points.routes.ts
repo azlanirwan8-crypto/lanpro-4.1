@@ -20,7 +20,14 @@ import {
   daftarDiskusiQuerySchema,
 } from "../schemas/discussion-points.schema";
 
+import { readReferencePoint } from "../controllers/issue-references.controller";
+
 const router = Router();
+router.get(
+  "/api/discussion-points/:pointId/reference",
+  jagaProyek("meetingNotes", "R", "discussionPoint"),
+  readReferencePoint
+);
 
 /**
  * Penulis sebuah titik diskusi atau komentar, diambil dari TOKEN — item #248 & #251.

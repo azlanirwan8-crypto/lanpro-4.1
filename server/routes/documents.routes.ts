@@ -19,12 +19,19 @@ import { cekSematGoogle } from "../lib/sematGoogle";
 import { urlSematBolehDiuji } from "../../src/features/wiki/embedUrl";
 
 import { detectControls, imageBody } from "../controllers/prototype-image.controller";
+import { readReferenceFlowchart } from "../controllers/issue-references.controller";
 import {
   analyzePrototype,
   prototypeAnalysisBody,
 } from "../controllers/prototype-analysis.controller";
 
 const router = Router();
+router.get(
+  "/api/projects/:projectId/flowcharts/:id/reference",
+  jagaProyek("flowchart", "R"),
+  jagaProyek("wiki", "R"),
+  readReferenceFlowchart
+);
 router.post(
   "/api/projects/:projectId/flowchart/prototype-controls",
   jagaProyek("flowchart", "U"),

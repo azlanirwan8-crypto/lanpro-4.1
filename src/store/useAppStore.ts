@@ -2,6 +2,7 @@ import { safeLocalStorage } from "../lib/safeStorage";
 import { create } from "zustand";
 import { Project, Task, Sprint, ActivityLog, MasterData, UserProfile } from "../types";
 import { CacheManager } from "../lib/cache";
+import type { IssueReferenceTarget } from "../types/issueReference";
 
 /**
  * Peran — DEFINISINYA ADA DI SATU TEMPAT: `src/types/roles.ts`.
@@ -52,6 +53,9 @@ export type AppView =
 interface AppState {
   currentView: AppView;
   setCurrentView: (view: SetStateAction<AppView>) => void;
+  issueReferenceTarget: IssueReferenceTarget | null;
+  openIssueReference: (target: IssueReferenceTarget) => void;
+  clearIssueReference: (target: IssueReferenceTarget) => void;
 
   projects: Project[];
   setProjects: (projects: SetStateAction<Project[]>) => void;
@@ -101,7 +105,20 @@ const preloadedLogs = preloadedSelectedProj
 export const useAppStore = create<AppState>((set) => ({
   currentView: "dashboard",
   setCurrentView: (view) =>
-    set((state) => ({ currentView: typeof view === "function" ? view(state.currentView) : view })),
+    set((state) => ({
+      currentView: typeof view === "function" ? view(state.currentView) : view,
+      issueReferenceTarget: null,
+    })),
+  issueReferenceTarget: null,
+  openIssueReference: (target) =>
+    set({
+      issueReferenceTarget: target,
+      currentView: target.kind === "meeting" ? "meetingNotes" : "flowchart",
+    }),
+  clearIssueReference: (target) =>
+    set((state) =>
+      state.issueReferenceTarget === target ? { issueReferenceTarget: null } : state
+    ),
 
   projects: preloadedProjects,
   setProjects: (projects) =>

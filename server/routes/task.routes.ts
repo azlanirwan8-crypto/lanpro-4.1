@@ -15,6 +15,10 @@ import xss from "xss";
 import { generateContentWithFallback } from "../services/ai.service";
 import { checkUserPermissionBackend, isTaskParticipant } from "../services/task.service";
 import { jagaProyek } from "../middleware/jagaProyek";
+import {
+  flowchartIssueReferences,
+  meetingIssueReferences,
+} from "../controllers/issue-references.controller";
 import { identitasWajib } from "../middleware/identitas";
 import { validasiBody, validasiQuery } from "../middleware/validate";
 import { paginationQuerySchema, taskListQuerySchema } from "../schemas/pagination.schema";
@@ -41,6 +45,19 @@ import { masterDataRepository } from "../repositories/master-data.repository";
 import { normalkanPeran } from "../../src/types/roles";
 
 const router = express.Router();
+router.get(
+  "/api/projects/:projectId/tasks/:taskId/references/meeting-points",
+  jagaProyek("list", "R"),
+  jagaProyek("meetingNotes", "R"),
+  meetingIssueReferences
+);
+router.get(
+  "/api/projects/:projectId/tasks/:taskId/references/flowcharts",
+  jagaProyek("list", "R"),
+  jagaProyek("flowchart", "R"),
+  jagaProyek("wiki", "R"),
+  flowchartIssueReferences
+);
 
 const identitasTaskPemanggil = (jwtUser: any, user: any): string[] =>
   Array.from(

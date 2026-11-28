@@ -38,7 +38,13 @@ import { UserAvatar } from "../../components/ui/UserAvatar";
 import { NamaBerkas } from "../../components/ui/NamaBerkas";
 import { ThSortir } from "../../components/ui/KepalaSortir";
 import { useSetelanSortir, paramSortir } from "../../hooks/useSetelanSortir";
-import { downloadMeetingFile, resolveUserId } from "./services/meeting.service";
+import {
+  downloadMeetingFile,
+  fetchReferencedPoint,
+  resolveUserId,
+} from "./services/meeting.service";
+import { ReferencedPointDialog } from "./components/ReferencedPointDialog";
+import { useAppStore } from "../../store/useAppStore";
 import { hasPermission } from "../../lib/permissions";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { LanproDatePicker } from "../../components/ui/LanproDatePicker";
@@ -121,6 +127,12 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMeeting, setEditingMeeting] = useState<Meeting | null>(null);
   const [activeMeetingId, setActiveMeetingId] = useState<string | null>(null);
+  const [linkedMeeting, setLinkedMeeting] = useState<Meeting | null>(null);
+  const [linkedPoint, setLinkedPoint] = useState<
+    Awaited<ReturnType<typeof fetchReferencedPoint>>["point"] | null
+  >(null);
+  const referenceTarget = useAppStore((store) => store.issueReferenceTarget);
+  const clearReference = useAppStore((store) => store.clearIssueReference);
   const [workspaceTab, setWorkspaceTab] = useState<"manual" | "ai">("manual");
 
   const isMeetingAuthor = (meeting: Meeting | null) => {
@@ -241,7 +253,32 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
   useEffect(() => {
     setActiveMeetingId(null);
+    setLinkedMeeting(null);
+    setLinkedPoint(null);
   }, [projectId]);
+
+  useEffect(() => {
+    if (referenceTarget?.kind !== "meeting" || referenceTarget.projectId !== projectId) return;
+    const request = new AbortController();
+    fetchReferencedPoint(referenceTarget.meetingId, referenceTarget.id, request.signal)
+      .then(({ meeting, point }) => {
+        if (request.signal.aborted) return;
+        if (meeting.projectId !== projectId || point.meetingId !== meeting.id) {
+          throw new Error("Mismatched meeting reference");
+        }
+        setLinkedMeeting(meeting);
+        setActiveMeetingId(referenceTarget.meetingId);
+        setMobileViewMode("detail");
+        setLinkedPoint(point);
+      })
+      .catch(() => {
+        if (!request.signal.aborted) toast.error(t("issueReferences.openFailed"));
+      })
+      .finally(() => {
+        if (!request.signal.aborted) clearReference(referenceTarget);
+      });
+    return () => request.abort();
+  }, [referenceTarget, projectId, clearReference, t]);
 
   useEffect(() => {
     fetchMeetings();
@@ -262,10 +299,10 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
   // sebelumnya merender `null` → area utama putih tanpa PageHeader.
   useEffect(() => {
     if (loading || activeMeetingId === null) return;
-    if (!meetings.some((m) => m.id === activeMeetingId)) {
+    if (linkedMeeting?.id !== activeMeetingId && !meetings.some((m) => m.id === activeMeetingId)) {
       setActiveMeetingId(null);
     }
-  }, [loading, activeMeetingId, meetings]);
+  }, [loading, activeMeetingId, meetings, linkedMeeting]);
 
   const fetchUsers = async () => {
     try {
@@ -583,10 +620,15 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
     setMobileViewMode("detail");
   };
 
-  const activeMeeting = meetings.find((m) => m.id === activeMeetingId);
+  const activeMeeting =
+    meetings.find((m) => m.id === activeMeetingId) ??
+    (linkedMeeting?.id === activeMeetingId ? linkedMeeting : undefined);
 
   return (
     <>
+      {linkedPoint && linkedPoint.meetingId === activeMeetingId && (
+        <ReferencedPointDialog point={linkedPoint} onClose={() => setLinkedPoint(null)} />
+      )}
       {activeMeetingId === null ? (
         <ListPageShell
           header={<PageHeader title={t("meetings.title")} />}
